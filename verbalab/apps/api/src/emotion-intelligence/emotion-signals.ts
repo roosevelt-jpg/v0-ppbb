@@ -144,7 +144,7 @@ export function analyzeSpeechEmotion(
     signals,
     audioAdjusted,
     note: audioAdjusted
-      ? 'Text cue emotion with soft audio energy/ZCR proxies (VL-154) — not a trained speech emotion recognition model.'
-      : 'Text cue emotion buckets (VL-154) — not acoustic SER. Provide audio for soft energy proxies.',
+      ? 'Text cue emotion with soft audio energy/ZCR proxies — not a trained speech emotion recognition model.'
+      : 'Text cue emotion buckets — not acoustic SER. Provide audio for soft energy proxies.',
   };
 }

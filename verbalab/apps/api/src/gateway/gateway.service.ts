@@ -19,6 +19,17 @@ import { OpenAiEmbeddingsAdapter } from './openai-embeddings.adapter';
 import type { FineTuneTranslateAdapter } from '../finetunes/finetune-translate.adapter';
 import type { ReadyFineTuneRoute } from '../finetunes/finetune.types';
 import { ApiException } from '../common/errors/api-exception';
+import {
+  allowVendorFallback,
+  createVerbalabChat,
+  createVerbalabDetect,
+  createVerbalabEmbed,
+  createVerbalabMt,
+  createVerbalabOcr,
+  createVerbalabStt,
+  createVerbalabTts,
+  ownAiStackSummary,
+} from './verbalab-own-ai';
 
 type FineTuneRouting = {
   resolve: (source: string, target: string) => ReadyFineTuneRoute | null;
@@ -46,20 +57,37 @@ export class GatewayService {
   private skipFineTuneForTests = false;
 
   constructor() {
-    const googleKey =
-      process.env.GOOGLE_VISION_API_KEY || process.env.GOOGLE_TRANSLATE_API_KEY || '';
-    const translateKey = process.env.GOOGLE_TRANSLATE_API_KEY ?? '';
-    const openaiKey = process.env.OPENAI_API_KEY ?? '';
-    this.provider = new GoogleTranslateAdapter(translateKey);
-    this.sttProvider = new OpenAiWhisperAdapter(openaiKey);
-    this.ttsProvider = new OpenAiTtsAdapter(openaiKey);
+    // Primary path: VerbaLab-owned models (ElevenLabs-of-Africa posture).
+    this.provider = createVerbalabMt();
+    this.sttProvider = createVerbalabStt();
+    this.ttsProvider = createVerbalabTts();
     this.ownTtsProvider = createOwnTtsAdapter();
-    this.ocrProvider = new GoogleVisionOcrAdapter(googleKey);
-    this.detectPrimary = new GoogleDetectAdapter(translateKey);
+    this.ocrProvider = createVerbalabOcr();
+    this.detectPrimary = createVerbalabDetect();
     this.detectFallback = new FrancDetectAdapter();
-    this.chatProvider = new OpenAiChatAdapter(openaiKey);
-    this.chatFallback = createOpenRouterChatAdapter(process.env.OPENROUTER_API_KEY ?? '');
-    this.embeddingProvider = new OpenAiEmbeddingsAdapter(openaiKey);
+    this.chatProvider = createVerbalabChat();
+    this.chatFallback = null;
+    this.embeddingProvider = createVerbalabEmbed();
+
+    // Optional legacy vendor fallback — off by default.
+    if (allowVendorFallback()) {
+      const googleKey =
+        process.env.GOOGLE_VISION_API_KEY || process.env.GOOGLE_TRANSLATE_API_KEY || '';
+      const translateKey = process.env.GOOGLE_TRANSLATE_API_KEY ?? '';
+      const openaiKey = process.env.OPENAI_API_KEY ?? '';
+      if (translateKey) this.provider = new GoogleTranslateAdapter(translateKey);
+      if (openaiKey) {
+        this.sttProvider = new OpenAiWhisperAdapter(openaiKey);
+        this.ttsProvider = new OpenAiTtsAdapter(openaiKey);
+        this.chatProvider = new OpenAiChatAdapter(openaiKey);
+        this.embeddingProvider = new OpenAiEmbeddingsAdapter(openaiKey);
+      }
+      if (googleKey) this.ocrProvider = new GoogleVisionOcrAdapter(googleKey);
+      if (translateKey) this.detectPrimary = new GoogleDetectAdapter(translateKey);
+      this.chatFallback = createOpenRouterChatAdapter(process.env.OPENROUTER_API_KEY ?? '');
+    }
+
+    this.logger.log(JSON.stringify({ event: 'gateway.own_ai', ...ownAiStackSummary() }));
   }
 
   /** Wired by FineTunesService onModuleInit — pair-routed fine-tune adapter. */
@@ -281,13 +309,21 @@ export class GatewayService {
   }
 
   listVoices(): TtsVoice[] {
-    return [...this.ttsProvider.listVoices(), ...this.ownTtsProvider.listVoices()];
+    // Own African catalog first — VerbaLab Voice FM is the product default.
+    const own = this.ownTtsProvider.listVoices();
+    const primary = this.ttsProvider.listVoices();
+    const seen = new Set(own.map((v) => v.id));
+    return [...own, ...primary.filter((v) => !seen.has(v.id))];
   }
 
   async synthesize(input: TtsInput): Promise<TtsOutput> {
-    const result = isOwnTtsVoice(input.voice)
-      ? await this.ownTtsProvider.synthesize(input)
-      : await this.ttsProvider.synthesize(input);
+    // Prefer VerbaLab own TTS for own:* voices; otherwise primary (also VerbaLab by default).
+    const result =
+      isOwnTtsVoice(input.voice) && this.ownTtsProvider.name !== this.ttsProvider.name
+        ? await this.ownTtsProvider.synthesize(input)
+        : isOwnTtsVoice(input.voice)
+          ? await this.ttsProvider.synthesize(input)
+          : await this.ttsProvider.synthesize(input);
     this.logger.log(
       JSON.stringify({
         event: 'gateway.synthesize',

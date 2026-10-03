@@ -17,15 +17,32 @@ export function PlaygroundClient() {
   const [languages, setLanguages] = useState<Language[]>([]);
   const [source, setSource] = useState('en');
   const [target, setTarget] = useState('sw');
-  const [text, setText] = useState('Hello, world');
+  const [text, setText] = useState('');
   const [response, setResponse] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prefillNote, setPrefillNote] = useState<string | null>(null);
 
   useEffect(() => {
     void apiFetch<{ data: Language[] }>('/v1/languages')
       .then((res) => setLanguages(res.data))
       .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    void apiFetch<{
+      prefill: { text?: string; source?: string; target?: string; note?: string };
+    }>('/v1/cms/prefills/playground')
+      .then((res) => {
+        if (res.prefill.text) setText(res.prefill.text);
+        if (res.prefill.source) setSource(res.prefill.source);
+        if (res.prefill.target) setTarget(res.prefill.target);
+        setPrefillNote(res.prefill.note ?? 'CMS prefill loaded for review.');
+      })
+      .catch(() => {
+        setText('Good morning. We are ready to ship samples from Lagos to Ibadan this week.');
+        setPrefillNote('Fallback playground sample (CMS unavailable).');
+      });
   }, []);
 
   const curl =
@@ -86,6 +103,9 @@ export function PlaygroundClient() {
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
         Explore translate, detect, and languages. No Clerk session required for API-key calls.
       </p>
+      {prefillNote ? (
+        <p style={{ color: 'var(--muted)', margin: '0.45rem 0 0', fontSize: '0.85rem' }}>{prefillNote}</p>
+      ) : null}
 
       <div style={{ display: 'flex', gap: '0.4rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
         {(['translate', 'detect', 'languages'] as Mode[]).map((m) => (

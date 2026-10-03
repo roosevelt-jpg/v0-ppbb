@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Scenario = {
@@ -43,7 +44,7 @@ export function CreatorEconomyClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, royalty] = await Promise.all([
       apiFetch<Engine>('/v1/creator-economy/engine', { token }),
@@ -76,7 +77,7 @@ export function CreatorEconomyClient() {
         Creator Economy
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Royalty math and Connect payouts over VL-092 — Stripe-only, never a card vault.
+        Royalty math and Connect payouts over — Stripe-only, never a card vault.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

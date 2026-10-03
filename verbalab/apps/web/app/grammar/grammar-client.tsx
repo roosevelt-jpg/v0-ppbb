@@ -3,6 +3,7 @@
 import { CSSProperties, FormEvent, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Issue = {
@@ -39,7 +40,7 @@ export function GrammarClient() {
     setBusy(true);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body: { text: string; language?: string } = { text };
       if (language.trim()) body.language = language.trim();

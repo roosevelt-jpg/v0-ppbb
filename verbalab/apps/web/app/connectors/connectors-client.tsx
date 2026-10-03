@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type SlackStatus = {
@@ -34,7 +35,7 @@ export function ConnectorsClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [st, rows] = await Promise.all([
       apiFetch<SlackStatus>('/v1/connectors/slack/status', { token }),
@@ -54,7 +55,7 @@ export function ConnectorsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/connectors/slack/installations', {
         method: 'POST',

@@ -13,7 +13,7 @@ export function speechEngineCatalog() {
   return {
     product: 'VerbaLab Speech',
     note:
-      'Recognition engine over OpenAI Whisper (batch + segment SSE). Not Deepgram/AssemblyAI parity. True low-latency vendor WebSocket streaming remains buy/VL-122 depth.',
+      'Recognition engine over OpenAI Whisper (batch + segment SSE). Not Deepgram/AssemblyAI parity. True low-latency vendor WebSocket streaming remains buy/depth.',
     capabilities: [
       {
         id: 'batch-stt',
@@ -25,16 +25,18 @@ export function speechEngineCatalog() {
       {
         id: 'streaming-stt',
         name: 'Streaming Speech-to-Text',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/speech/stream',
-        notes: 'SSE segment stream after Whisper verbose_json. Not live microphone WebSocket.',
+        notes:
+          'Shipped SSE segment stream after Whisper verbose_json. Live microphone WebSocket deferred.',
       },
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/speech/stream',
-        notes: 'SSE realtime delivery of segments. Bidirectional realtime sessions deferred.',
+        notes:
+          'Shipped SSE realtime delivery of segments. Bidirectional realtime sessions deferred.',
       },
       {
         id: 'multilingual',
@@ -109,9 +111,9 @@ export function speechEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech/engine/analytics',
-        notes: 'STT usage summary for the org. Dedicated Speech Analytics: /v1/speech-analytics (VL-159).',
+        notes: 'STT usage summary for the org. Dedicated Speech Analytics: /v1/speech-analytics.',
       },
     ] satisfies SpeechCapability[],
     engines: [

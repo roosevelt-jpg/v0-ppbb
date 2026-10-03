@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -37,7 +38,7 @@ export function KnowledgeMemoryClient() {
   const [created, setCreated] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/knowledge-memory/engine', { token }),
@@ -55,7 +56,7 @@ export function KnowledgeMemoryClient() {
   const create = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ id: string; version: number; scope: string }>(
         '/v1/knowledge-memory/memories',

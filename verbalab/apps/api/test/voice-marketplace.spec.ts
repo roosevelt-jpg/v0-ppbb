@@ -88,18 +88,35 @@ describe('Voice Marketplace (VL-177)', () => {
     expect(packs.body.packs.some((p: { id: string }) => p.id === 'sw')).toBe(true);
   });
 
-  it('rejects celebrity claims and free-plan publish', async () => {
+  it('allows free-plan free SKUs; rejects free-plan paid publish and celebrity claims', async () => {
     const free = await seedOrg(prisma, 'vmfree');
+    const freeListing = await marketplace.publish({
+      organizationId: free.id,
+      workspaceId: free.workspaces[0]!.id,
+      userId: free.memberships[0]!.userId,
+      role: 'owner',
+      title: 'Free Nova',
+      sourceVoiceId: 'nova',
+      priceCents: 0,
+      rightsAttested: true,
+    });
+    expect(freeListing.priceCents).toBe(0);
+
     await expect(
       marketplace.publish({
         organizationId: free.id,
         workspaceId: free.workspaces[0]!.id,
         userId: free.memberships[0]!.userId,
         role: 'owner',
-        title: 'X',
+        title: 'Paid Nova',
         sourceVoiceId: 'nova',
+        priceCents: 500,
+        rightsAttested: true,
       }),
     ).rejects.toMatchObject({ code: 'plan_required' });
+
+    const catalog = await marketplace.listPublished(free.id);
+    expect(catalog.listings.some((l) => l.id === freeListing.id)).toBe(true);
 
     const pro = await seedOrg(prisma, 'vmceleb');
     await billing.applyEntitlementForTests({ organizationId: pro.id, plan: 'pro' });

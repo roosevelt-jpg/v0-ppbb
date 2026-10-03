@@ -55,8 +55,146 @@ function usage(): never {
   verbalab agent-marketplace-engine
   verbalab workflow-marketplace-engine
   verbalab connector-marketplace-engine
+  verbalab partner-connectors-engine
+  verbalab partner-platforms [--kind video|llm|agent|creative|custom]
+  verbalab partner-tools
+  verbalab partner-invoke --tool <name> [--args <json>] [--platform <id>]
+  verbalab partner-mcp-tools
+  verbalab partner-mcp-manifest
   verbalab voice-language-marketplace-engine
   verbalab creator-economy-engine
+  verbalab african-intelligence-cloud-products
+  verbalab african-language-registry-engine
+  verbalab cultural-intelligence-engine
+  verbalab african-knowledge-graph-engine
+  verbalab government-intelligence-engine
+  verbalab healthcare-intelligence-engine
+  verbalab financial-intelligence-engine
+  verbalab education-intelligence-engine
+  verbalab agricultural-intelligence-engine
+  verbalab tourism-heritage-intelligence-engine
+  verbalab research-cloud-products
+  verbalab mlops-llmops-cloud-products
+  verbalab dataset-pipeline-engine
+  verbalab training-pipeline-engine
+  verbalab continuous-evaluation-engine
+  verbalab promptops-platform-engine
+  verbalab ragops-platform-engine
+  verbalab agentops-platform-engine
+  verbalab ai-drift-detection-engine
+  verbalab continuous-learning-engine
+  verbalab ai-operations-dashboard-engine
+  verbalab trust-cloud-products
+  verbalab ai-safety-platform-engine
+  verbalab ai-governance-platform-engine
+  verbalab explainability-platform-engine
+  verbalab privacy-platform-engine
+  verbalab compliance-platform-engine
+  verbalab risk-intelligence-engine
+  verbalab identity-federation-engine
+  verbalab trust-analytics-engine
+  verbalab platform-engineering-cloud-products
+  verbalab internal-developer-portal-engine
+  verbalab service-catalog-engine
+  verbalab golden-path-platform-engine
+  verbalab gitops-platform-engine
+  verbalab release-engineering-engine
+  verbalab reliability-engineering-engine
+  verbalab finops-platform-engine
+  verbalab supply-chain-security-engine
+  verbalab developer-experience-platform-engine
+  verbalab platform-engineering-analytics-engine
+  verbalab control-plane-cloud-products
+  verbalab organization-control-engine
+  verbalab global-configuration-platform-engine
+  verbalab global-policy-engine-engine
+  verbalab global-deployment-controller-engine
+  verbalab global-routing-controller-engine
+  verbalab secrets-certificate-platform-engine
+  verbalab global-scheduler-engine
+  verbalab control-plane-analytics-engine
+  verbalab data-plane-cloud-products
+  verbalab translation-runtime-engine
+  verbalab speech-runtime-engine
+  verbalab voice-runtime-engine
+  verbalab vision-runtime-engine
+  verbalab knowledge-runtime-engine
+  verbalab embedding-runtime-engine
+  verbalab data-plane-streaming-engine
+  verbalab gpu-runtime-engine
+  verbalab vaios-products
+  verbalab ai-scheduler-engine
+  verbalab runtime-manager-engine
+  verbalab resource-manager-engine
+  verbalab workflow-operating-system-engine
+  verbalab agent-operating-system-engine
+  verbalab ai-memory-operating-system-engine
+  verbalab knowledge-operating-system-engine
+  verbalab plugin-operating-system-engine
+  verbalab library-reference-products
+  verbalab library-reference-index
+  verbalab library-reference-risks
+  verbalab library-reference-vision
+  verbalab digital-civilization-products
+  verbalab national-ai-platform-engine
+  verbalab smart-city-platform-engine
+  verbalab enterprise-nation-platform-engine
+  verbalab global-language-preservation-engine
+  verbalab universal-translation-grid-engine
+  verbalab global-knowledge-network-engine
+  verbalab global-ai-federation-engine
+  verbalab civilization-intelligence-dashboard-engine
+  verbalab digital-civilization-guards
+  verbalab ai-economy-products
+  verbalab ai-commerce-platform-engine
+  verbalab ai-licensing-platform-engine
+  verbalab revenue-sharing-platform-engine
+  verbalab ai-talent-platform-engine
+  verbalab research-funding-platform-engine
+  verbalab global-community-platform-engine
+  verbalab ai-investment-platform-engine
+  verbalab economic-intelligence-engine
+  verbalab ai-economy-guards
+  verbalab global-ai-standards-products
+  verbalab global-ai-standards-iso-process
+  verbalab ai-certification-platform-engine
+  verbalab ai-certification-platform-scheme
+  verbalab ai-compliance-framework-engine
+  verbalab reference-architectures-engine
+  verbalab best-practices-library-engine
+  verbalab enterprise-assessment-platform-engine
+  verbalab standards-repository-engine
+  verbalab global-partner-program-engine
+  verbalab standards-analytics-engine
+  verbalab global-ai-standards-verify
+  verbalab corporate-operating-system-products
+  verbalab corporate-governance-platform-engine
+  verbalab strategic-planning-platform-engine
+  verbalab enterprise-portfolio-management-engine
+  verbalab business-architecture-engine
+  verbalab enterprise-architecture-repository-engine
+  verbalab corporate-knowledge-system-engine
+  verbalab executive-intelligence-platform-engine
+  verbalab corporate-risk-platform-engine
+  verbalab corporate-operating-system-constitution
+  verbalab enterprise-engineering-system-products
+  verbalab engineering-governance-engine
+  verbalab architecture-governance-engine
+  verbalab repository-standards-engine
+  verbalab engineering-quality-platform-engine
+  verbalab ai-engineering-standards-engine
+  verbalab api-engineering-standards-engine
+  verbalab database-engineering-standards-engine
+  verbalab infrastructure-engineering-standards-engine
+  verbalab ai-engineering-standards-checks
+  verbalab experiment-platform-engine
+  verbalab synthetic-data-platform-engine
+  verbalab benchmark-platform-engine
+  verbalab evaluation-platform-engine
+  verbalab ai-publication-platform-engine
+  verbalab patent-innovation-platform-engine
+  verbalab open-science-platform-engine
+  verbalab research-analytics-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -509,6 +647,53 @@ async function main() {
     return;
   }
 
+  if (command === 'partner-connectors-engine') {
+    console.log(JSON.stringify(await vl.partnerConnectorsEngine(), null, 2));
+    return;
+  }
+  if (command === 'partner-platforms') {
+    console.log(JSON.stringify(await vl.partnerConnectorsPlatforms(argValue(rest, '--kind')), null, 2));
+    return;
+  }
+  if (command === 'partner-tools') {
+    console.log(JSON.stringify(await vl.partnerConnectorsTools(), null, 2));
+    return;
+  }
+  if (command === 'partner-invoke') {
+    const tool = argValue(rest, '--tool');
+    if (!tool) usage();
+    const raw = argValue(rest, '--args') ?? '{}';
+    let args: Record<string, unknown> = {};
+    try {
+      args = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      console.error('Invalid --args JSON');
+      process.exit(1);
+    }
+    console.log(
+      JSON.stringify(
+        await vl.partnerInvoke({
+          tool,
+          arguments: args,
+          platformId: argValue(rest, '--platform') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  if (command === 'partner-mcp-tools') {
+    console.log(
+      JSON.stringify(await vl.partnerMcp({ jsonrpc: '2.0', id: 1, method: 'tools/list' }), null, 2),
+    );
+    return;
+  }
+  if (command === 'partner-mcp-manifest') {
+    console.log(JSON.stringify(await vl.partnerMcpManifest(), null, 2));
+    return;
+  }
+
   if (command === 'voice-language-marketplace-engine') {
     console.log(JSON.stringify(await vl.voiceLanguageMarketplaceEngine(), null, 2));
     return;
@@ -516,6 +701,668 @@ async function main() {
 
   if (command === 'creator-economy-engine') {
     console.log(JSON.stringify(await vl.creatorEconomyEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'african-intelligence-cloud-products') {
+    console.log(JSON.stringify(await vl.africanIntelligenceCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'african-language-registry-engine') {
+    console.log(JSON.stringify(await vl.africanLanguageRegistryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'cultural-intelligence-engine') {
+    console.log(JSON.stringify(await vl.culturalIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'african-knowledge-graph-engine') {
+    console.log(JSON.stringify(await vl.africanKnowledgeGraphEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'government-intelligence-engine') {
+    console.log(JSON.stringify(await vl.governmentIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'healthcare-intelligence-engine') {
+    console.log(JSON.stringify(await vl.healthcareIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'financial-intelligence-engine') {
+    console.log(JSON.stringify(await vl.financialIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'education-intelligence-engine') {
+    console.log(JSON.stringify(await vl.educationIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agricultural-intelligence-engine') {
+    console.log(JSON.stringify(await vl.agriculturalIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'tourism-heritage-intelligence-engine') {
+    console.log(JSON.stringify(await vl.tourismHeritageIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-cloud-products') {
+    console.log(JSON.stringify(await vl.researchCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'mlops-llmops-cloud-products') {
+    console.log(JSON.stringify(await vl.mlopsLlmopsCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'dataset-pipeline-engine') {
+    console.log(JSON.stringify(await vl.datasetPipelineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'training-pipeline-engine') {
+    console.log(JSON.stringify(await vl.trainingPipelineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'continuous-evaluation-engine') {
+    console.log(JSON.stringify(await vl.continuousEvaluationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'promptops-platform-engine') {
+    console.log(JSON.stringify(await vl.promptopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ragops-platform-engine') {
+    console.log(JSON.stringify(await vl.ragopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agentops-platform-engine') {
+    console.log(JSON.stringify(await vl.agentopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-drift-detection-engine') {
+    console.log(JSON.stringify(await vl.aiDriftDetectionEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'continuous-learning-engine') {
+    console.log(JSON.stringify(await vl.continuousLearningEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-operations-dashboard-engine') {
+    console.log(JSON.stringify(await vl.aiOperationsDashboardEngine(), null, 2));
+    return;
+  }
+  if (command === 'trust-cloud-products') {
+    console.log(JSON.stringify(await vl.trustCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-safety-platform-engine') {
+    console.log(JSON.stringify(await vl.aiSafetyPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-governance-platform-engine') {
+    console.log(JSON.stringify(await vl.aiGovernancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'explainability-platform-engine') {
+    console.log(JSON.stringify(await vl.explainabilityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'privacy-platform-engine') {
+    console.log(JSON.stringify(await vl.privacyPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'compliance-platform-engine') {
+    console.log(JSON.stringify(await vl.compliancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'risk-intelligence-engine') {
+    console.log(JSON.stringify(await vl.riskIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'identity-federation-engine') {
+    console.log(JSON.stringify(await vl.identityFederationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'trust-analytics-engine') {
+    console.log(JSON.stringify(await vl.trustAnalyticsEngine(), null, 2));
+    return;
+  }
+  if (command === 'platform-engineering-cloud-products') {
+    console.log(JSON.stringify(await vl.platformEngineeringCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'internal-developer-portal-engine') {
+    console.log(JSON.stringify(await vl.internalDeveloperPortalEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'service-catalog-engine') {
+    console.log(JSON.stringify(await vl.serviceCatalogEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'golden-path-platform-engine') {
+    console.log(JSON.stringify(await vl.goldenPathPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'gitops-platform-engine') {
+    console.log(JSON.stringify(await vl.gitopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'release-engineering-engine') {
+    console.log(JSON.stringify(await vl.releaseEngineeringEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reliability-engineering-engine') {
+    console.log(JSON.stringify(await vl.reliabilityEngineeringEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'finops-platform-engine') {
+    console.log(JSON.stringify(await vl.finopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'supply-chain-security-engine') {
+    console.log(JSON.stringify(await vl.supplyChainSecurityEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'developer-experience-platform-engine') {
+    console.log(JSON.stringify(await vl.developerExperiencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'platform-engineering-analytics-engine') {
+    console.log(JSON.stringify(await vl.platformEngineeringAnalyticsEngine(), null, 2));
+    return;
+  }
+  if (command === 'control-plane-cloud-products') {
+    console.log(JSON.stringify(await vl.controlPlaneCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'organization-control-engine') {
+    console.log(JSON.stringify(await vl.organizationControlEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-configuration-platform-engine') {
+    console.log(JSON.stringify(await vl.globalConfigurationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-policy-engine-engine') {
+    console.log(JSON.stringify(await vl.globalPolicyEngineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-deployment-controller-engine') {
+    console.log(JSON.stringify(await vl.globalDeploymentControllerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-routing-controller-engine') {
+    console.log(JSON.stringify(await vl.globalRoutingControllerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'secrets-certificate-platform-engine') {
+    console.log(JSON.stringify(await vl.secretsCertificatePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-scheduler-engine') {
+    console.log(JSON.stringify(await vl.globalSchedulerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'control-plane-analytics-engine') {
+    console.log(JSON.stringify(await vl.controlPlaneAnalyticsEngine(), null, 2));
+    return;
+  }
+  if (command === 'data-plane-cloud-products') {
+    console.log(JSON.stringify(await vl.dataPlaneCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'translation-runtime-engine') {
+    console.log(JSON.stringify(await vl.translationRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'speech-runtime-engine') {
+    console.log(JSON.stringify(await vl.speechRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-runtime-engine') {
+    console.log(JSON.stringify(await vl.voiceRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'vision-runtime-engine') {
+    console.log(JSON.stringify(await vl.visionRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-runtime-engine') {
+    console.log(JSON.stringify(await vl.knowledgeRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'embedding-runtime-engine') {
+    console.log(JSON.stringify(await vl.embeddingRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'data-plane-streaming-engine') {
+    console.log(JSON.stringify(await vl.dataPlaneStreamingEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'gpu-runtime-engine') {
+    console.log(JSON.stringify(await vl.gpuRuntimeEngine(), null, 2));
+    return;
+  }
+  if (command === 'vaios-products') {
+    console.log(JSON.stringify(await vl.vaiosProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-scheduler-engine') {
+    console.log(JSON.stringify(await vl.aiSchedulerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'runtime-manager-engine') {
+    console.log(JSON.stringify(await vl.runtimeManagerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'resource-manager-engine') {
+    console.log(JSON.stringify(await vl.resourceManagerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'workflow-operating-system-engine') {
+    console.log(JSON.stringify(await vl.workflowOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agent-operating-system-engine') {
+    console.log(JSON.stringify(await vl.agentOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-memory-operating-system-engine') {
+    console.log(JSON.stringify(await vl.aiMemoryOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-operating-system-engine') {
+    console.log(JSON.stringify(await vl.knowledgeOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'plugin-operating-system-engine') {
+    console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
+    return;
+  }
+  if (command === 'library-reference-products') {
+    console.log(JSON.stringify(await vl.libraryReferenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-index') {
+    const volume = args[1] ? Number(args[1]) : undefined;
+    console.log(JSON.stringify(await vl.libraryReferenceIndex(Number.isFinite(volume) ? volume : undefined), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-risks') {
+    console.log(JSON.stringify(await vl.libraryReferenceRisks(), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-vision') {
+    console.log(JSON.stringify(await vl.libraryReferenceVision(), null, 2));
+    return;
+  }
+
+  if (command === 'digital-civilization-products') {
+    console.log(JSON.stringify(await vl.digitalCivilizationProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'national-ai-platform-engine') {
+    console.log(JSON.stringify(await vl.nationalAiPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'smart-city-platform-engine') {
+    console.log(JSON.stringify(await vl.smartCityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-nation-platform-engine') {
+    console.log(JSON.stringify(await vl.enterpriseNationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-language-preservation-engine') {
+    console.log(JSON.stringify(await vl.globalLanguagePreservationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'universal-translation-grid-engine') {
+    console.log(JSON.stringify(await vl.universalTranslationGridEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-knowledge-network-engine') {
+    console.log(JSON.stringify(await vl.globalKnowledgeNetworkEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-federation-engine') {
+    console.log(JSON.stringify(await vl.globalAiFederationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'civilization-intelligence-dashboard-engine') {
+    console.log(JSON.stringify(await vl.civilizationIntelligenceDashboardEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'digital-civilization-guards') {
+    console.log(JSON.stringify(await vl.digitalCivilizationGuards(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-economy-products') {
+    console.log(JSON.stringify(await vl.aiEconomyProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-commerce-platform-engine') {
+    console.log(JSON.stringify(await vl.aiCommercePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-licensing-platform-engine') {
+    console.log(JSON.stringify(await vl.aiLicensingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'revenue-sharing-platform-engine') {
+    console.log(JSON.stringify(await vl.revenueSharingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-talent-platform-engine') {
+    console.log(JSON.stringify(await vl.aiTalentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-funding-platform-engine') {
+    console.log(JSON.stringify(await vl.researchFundingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-community-platform-engine') {
+    console.log(JSON.stringify(await vl.globalCommunityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-investment-platform-engine') {
+    console.log(JSON.stringify(await vl.aiInvestmentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'economic-intelligence-engine') {
+    console.log(JSON.stringify(await vl.economicIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-economy-guards') {
+    console.log(JSON.stringify(await vl.aiEconomyGuards(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-standards-products') {
+    console.log(JSON.stringify(await vl.globalAiStandardsProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-standards-iso-process') {
+    console.log(JSON.stringify(await vl.globalAiStandardsIsoProcess(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-certification-platform-engine') {
+    console.log(JSON.stringify(await vl.aiCertificationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-certification-platform-scheme') {
+    console.log(JSON.stringify(await vl.aiCertificationPlatformScheme(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-compliance-framework-engine') {
+    console.log(JSON.stringify(await vl.aiComplianceFrameworkEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reference-architectures-engine') {
+    console.log(JSON.stringify(await vl.referenceArchitecturesEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'best-practices-library-engine') {
+    console.log(JSON.stringify(await vl.bestPracticesLibraryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-assessment-platform-engine') {
+    console.log(JSON.stringify(await vl.enterpriseAssessmentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'standards-repository-engine') {
+    console.log(JSON.stringify(await vl.standardsRepositoryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-partner-program-engine') {
+    console.log(JSON.stringify(await vl.globalPartnerProgramEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'standards-analytics-engine') {
+    console.log(JSON.stringify(await vl.standardsAnalyticsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-standards-verify') {
+    const code = args[1] || 'VGAS-DEMO-ENGINEER-001';
+    console.log(JSON.stringify(await vl.globalAiStandardsVerify(code), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-operating-system-products') {
+    console.log(JSON.stringify(await vl.corporateOperatingSystemProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-governance-platform-engine') {
+    console.log(JSON.stringify(await vl.corporateGovernancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'strategic-planning-platform-engine') {
+    console.log(JSON.stringify(await vl.strategicPlanningPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-portfolio-management-engine') {
+    console.log(JSON.stringify(await vl.enterprisePortfolioManagementEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'business-architecture-engine') {
+    console.log(JSON.stringify(await vl.businessArchitectureEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-architecture-repository-engine') {
+    console.log(JSON.stringify(await vl.enterpriseArchitectureRepositoryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-knowledge-system-engine') {
+    console.log(JSON.stringify(await vl.corporateKnowledgeSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'executive-intelligence-platform-engine') {
+    console.log(JSON.stringify(await vl.executiveIntelligencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-risk-platform-engine') {
+    console.log(JSON.stringify(await vl.corporateRiskPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-operating-system-constitution') {
+    console.log(JSON.stringify(await vl.corporateOperatingSystemConstitution(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-engineering-system-products') {
+    console.log(JSON.stringify(await vl.enterpriseEngineeringSystemProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'engineering-governance-engine') {
+    console.log(JSON.stringify(await vl.engineeringGovernanceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'architecture-governance-engine') {
+    console.log(JSON.stringify(await vl.architectureGovernanceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'repository-standards-engine') {
+    console.log(JSON.stringify(await vl.repositoryStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'engineering-quality-platform-engine') {
+    console.log(JSON.stringify(await vl.engineeringQualityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.aiEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'api-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.apiEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'database-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.databaseEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'infrastructure-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.infrastructureEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-engineering-standards-checks') {
+    console.log(JSON.stringify(await vl.aiEngineeringStandardsChecks(), null, 2));
+    return;
+  }
+
+
+
+
+
+
+
+  if (command === 'experiment-platform-engine') {
+    console.log(JSON.stringify(await vl.experimentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'synthetic-data-platform-engine') {
+    console.log(JSON.stringify(await vl.syntheticDataPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'benchmark-platform-engine') {
+    console.log(JSON.stringify(await vl.benchmarkPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'evaluation-platform-engine') {
+    console.log(JSON.stringify(await vl.evaluationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-publication-platform-engine') {
+    console.log(JSON.stringify(await vl.aiPublicationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'patent-innovation-platform-engine') {
+    console.log(JSON.stringify(await vl.patentInnovationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'open-science-platform-engine') {
+    console.log(JSON.stringify(await vl.openSciencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-analytics-engine') {
+    console.log(JSON.stringify(await vl.researchAnalyticsEngine(), null, 2));
     return;
   }
 

@@ -2,7 +2,6 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiException } from '../common/errors/api-exception';
 import { AuditService } from '../audit/audit.service';
-import { BillingService } from '../billing/billing.service';
 import { upsertGlossarySnapshot } from '../glossary/glossary-snapshot-install';
 import {
   VERTICAL_GLOSSARY_PACKS,
@@ -15,7 +14,6 @@ export class VerticalGlossariesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-    private readonly billing: BillingService,
   ) {}
 
   private assertOwnerOrAdmin(role: string) {
@@ -65,17 +63,13 @@ export class VerticalGlossariesService {
     if (!pack) {
       throw new ApiException('not_found', 'Vertical glossary pack not found', HttpStatus.NOT_FOUND);
     }
-    const org = await this.prisma.organization.findUniqueOrThrow({
-      where: { id: organizationId },
-      select: { plan: true },
-    });
     const install = await this.prisma.verticalGlossaryInstall.findUnique({
       where: {
         packId_workspaceId: { packId, workspaceId },
       },
     });
-    const includeFull = org.plan === 'pro' || Boolean(install);
-    return this.serializePack(pack, Boolean(install), includeFull);
+    // Starter packs expose full term lists on Free for Africa-first e2e wiring.
+    return this.serializePack(pack, Boolean(install), true);
   }
 
   async listInstalls(organizationId: string, workspaceId: string) {
@@ -105,7 +99,8 @@ export class VerticalGlossariesService {
     ip?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
-    await this.billing.assertPro(input.organizationId);
+    // Starter packs are free-tier installable for Africa-first e2e wiring (same pattern as marketplace free SKUs).
+    // Paid/enterprise termbases may reintroduce Pro gates later.
 
     const pack = findVerticalPack(input.packId);
     if (!pack) {

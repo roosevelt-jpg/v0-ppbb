@@ -20,7 +20,7 @@ export function languageAnalyticsCatalog() {
         name: 'Translation usage',
         status: 'shipped',
         api: 'GET /v1/analytics/translation',
-        notes: 'From translation_requests (VL-085/146).',
+        notes: 'From translation_requests (/146).',
       },
       {
         id: 'language_usage',

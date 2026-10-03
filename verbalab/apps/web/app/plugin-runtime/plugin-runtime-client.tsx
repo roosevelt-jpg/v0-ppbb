@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -44,7 +45,7 @@ export function PluginRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/plugin-runtime/engine', { token }),
@@ -62,7 +63,7 @@ export function PluginRuntimeClient() {
   const registerAndInvoke = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ plugin: Plugin }>('/v1/plugin-runtime/plugins', {
         token,
@@ -109,7 +110,7 @@ export function PluginRuntimeClient() {
   return (
     <AppShell>
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel · VL-221</p>
+        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel</p>
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Plugin Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
           Sandbox plugin registry with hard permission allowlists. Extends{' '}

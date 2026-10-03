@@ -62,7 +62,7 @@ export function gatewayProviderCatalog(): GatewayProviderRow[] {
       status: 'optional',
       features: ['chat'],
       envKey: 'OPENROUTER_API_KEY',
-      notes: 'Optional OpenAI-compatible chat fallback (VL-129).',
+      notes: 'Optional OpenAI-compatible chat fallback.',
     },
     {
       id: 'own_tts',
@@ -70,7 +70,7 @@ export function gatewayProviderCatalog(): GatewayProviderRow[] {
       status: 'optional',
       features: ['tts'],
       envKey: 'OWN_TTS_URL',
-      notes: 'own:* voices (VL-121).',
+      notes: 'own:* voices.',
     },
     {
       id: 'elevenlabs',
@@ -78,7 +78,7 @@ export function gatewayProviderCatalog(): GatewayProviderRow[] {
       status: 'optional',
       features: ['tts'],
       envKey: 'ELEVENLABS_API_KEY',
-      notes: 'Voice clones (VL-064).',
+      notes: 'Voice clones.',
     },
     {
       id: 'claude',

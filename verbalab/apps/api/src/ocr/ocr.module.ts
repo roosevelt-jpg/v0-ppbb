@@ -20,5 +20,6 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
   ],
   controllers: [OcrController],
   providers: [OcrService, TranslateAuthGuard],
+  exports: [OcrService],
 })
 export class OcrModule {}

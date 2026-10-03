@@ -34,7 +34,7 @@ export function promptMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Prompt Marketplace',
     note:
-      'Prompt Marketplace (VL-253). Publish/license prompt packs over content-marketplace prompt kind + Prompt Fabric (VL-243). Install copies managed prompt versions into buyer workspaces — not a prompt mesh OS or auto-prompt research lab.',
+      'Prompt Marketplace. Publish/license prompt packs over content-marketplace prompt kind + Prompt Fabric. Install copies managed prompt versions into buyer workspaces — not a prompt mesh OS or auto-prompt research lab.',
     capabilities: [
       {
         id: 'prompt-packs',
@@ -98,7 +98,7 @@ export function promptMarketplaceEngineCatalog() {
         status: 'partial',
         api: 'GET /v1/prompt-marketplace/sales',
         notes:
-          '15% platform fee on paid installs. Creator Economy (VL-258) deepens payout math — hand-check before live creators.',
+          '15% platform fee on paid installs. Creator Economy deepens payout math — hand-check before live creators.',
       },
     ] satisfies PromptMarketplaceCapability[],
     categories: PROMPT_MARKETPLACE_CATEGORIES.map((id) => ({ id })),

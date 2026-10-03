@@ -1,3 +1,6 @@
+import { getDevBearer } from '@/lib/dev-auth';
+import { hidePhaseIdsInCopyFields } from '@/lib/ui-copy';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export const WORKSPACE_STORAGE_KEY = 'verbalab_workspace_id';
@@ -17,7 +20,8 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit & { token?: string; workspaceId?: string | null } = {},
 ): Promise<T> {
-  const { token, workspaceId, headers, ...rest } = options;
+  const { token: tokenOption, workspaceId, headers, ...rest } = options;
+  const token = tokenOption || getDevBearer() || undefined;
   const ws =
     workspaceId === null
       ? undefined
@@ -41,7 +45,8 @@ export async function apiFetch<T>(
     throw new Error(body.error?.message ?? `Request failed (${response.status})`);
   }
 
-  return body as T;
+  // Never surface internal VL-### phase IDs in console-bound note/notes copy.
+  return hidePhaseIdsInCopyFields(body) as T;
 }
 
 export { API_URL };

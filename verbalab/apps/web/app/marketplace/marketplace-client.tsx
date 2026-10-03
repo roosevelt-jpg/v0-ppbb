@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Listing = {
@@ -85,7 +86,7 @@ export function MarketplaceClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const kindQuery = filterKind === 'all' ? '' : `&kind=${filterKind}`;
     const [published, myListings, myInstalls, mySales, connectStatus] = await Promise.all([
@@ -118,7 +119,7 @@ export function MarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const dollars = Number(priceDollars);
       const priceCents = Number.isFinite(dollars) ? Math.round(dollars * 100) : 0;
@@ -149,7 +150,7 @@ export function MarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const result = await apiFetch<{
         requiresPayment?: boolean;
@@ -181,7 +182,7 @@ export function MarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/marketplace/listings/${id}`, { method: 'DELETE', token });
       setMessage('Listing unpublished.');
@@ -198,7 +199,7 @@ export function MarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const result = await apiFetch<{ url: string }>('/v1/marketplace/connect/onboard', {
         method: 'POST',

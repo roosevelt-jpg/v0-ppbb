@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Review = {
@@ -33,7 +34,7 @@ export function ReviewsClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         await load(token);
       } catch (err) {
@@ -45,7 +46,7 @@ export function ReviewsClient() {
   async function decide(id: string, action: 'accept' | 'reject') {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/reviews/${id}/${action}`, {
         method: 'POST',

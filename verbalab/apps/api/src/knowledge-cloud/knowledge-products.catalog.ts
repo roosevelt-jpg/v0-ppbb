@@ -19,105 +19,105 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
       api: 'GET /v1/knowledge-cloud/products',
       console: '/knowledge-cloud',
       notes:
-        'Knowledge Cloud parent hub (VL-193). Enterprise knowledge products over VL-062 RAG + Intelligence — not a Confluence/SharePoint OS or Neo4j knowledge-graph platform.',
+        'Knowledge Cloud parent hub. Enterprise knowledge products over RAG + Intelligence — not a Confluence/SharePoint OS or Neo4j knowledge-graph platform.',
     },
     {
       id: 'enterprise-knowledge-base',
       name: 'Enterprise Knowledge Base',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-base/engine',
       console: '/knowledge-base',
       notes:
-        'Org/workspace-scoped ingest over VL-062 (VL-194). Collections/tags/MD/HTML. Not Confluence OS; media/approval deferred.',
+        'Shipped org/workspace ingest over: collections/tags/MD/HTML + light approval. Not Confluence OS; deep media CMS deferred.',
     },
     {
       id: 'enterprise-search',
       name: 'Enterprise Search',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/enterprise-search/engine',
       console: '/enterprise-search',
       notes:
-        'Keyword + semantic + light hybrid RRF (VL-195). Extends VL-062/Vector Cloud. Not Elastic/BM25 OS; image/voice deferred.',
+        'Shipped keyword + semantic + hybrid RRF. Extends /Vector Cloud. Not Elastic/BM25 OS; image/voice search deferred.',
     },
     {
       id: 'ontology-platform',
       name: 'Ontology Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ontology/engine',
       console: '/ontology',
       notes:
-        'Concepts/hierarchies/synonyms over VL-184 KG (VL-196). Not OWL/Protege OS; vertical packs are domain tags.',
+        'Shipped concepts/hierarchies/synonyms over KG. Not OWL/Protege OS; certified vertical packs deferred.',
     },
     {
       id: 'taxonomy-platform',
       name: 'Taxonomy Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/taxonomy/engine',
       console: '/taxonomy',
       notes:
-        'Categories/tags/trees + doc assign (VL-197). Not enterprise taxonomy OS; ML auto-class deferred.',
+        'Shipped categories/tags/trees + doc assign + heuristic classify. Not enterprise taxonomy OS; ML auto-class OS deferred.',
     },
     {
       id: 'enterprise-rag',
       name: 'Enterprise RAG Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/enterprise-rag/engine',
       console: '/enterprise-rag',
       notes:
-        'Retrieve/chunk/cite/grounded query over VL-062 + hybrid search (VL-198). Not LangChain OS; hand-verify retrieval on real docs.',
+        'Shipped retrieve/chunk/cite/grounded query over + hybrid search. Not LangChain OS; hand-verify still recommended.',
     },
     {
       id: 'knowledge-memory',
       name: 'Knowledge Memory',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-memory/engine',
       console: '/knowledge-memory',
       notes:
-        'Knowledge-layer memory over VL-183 (VL-199). Org/workspace/user/conversation/AI + evolve/versions. Not Mem0 OS; distinct from Memory Cloud hub.',
+        'Shipped knowledge-layer memory over: org/workspace/user/conversation/AI + evolve/versions. Not Mem0 OS.',
     },
     {
       id: 'knowledge-intelligence',
       name: 'Knowledge Intelligence',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-intelligence/engine',
       console: '/knowledge-intelligence',
       notes:
-        'Discovery/link/recommend/validate/duplicates/confidence (VL-200). Heuristic over Knowledge Cloud; not BI/Palantir OS.',
+        'Shipped discovery/link/recommend/validate/duplicates/confidence heuristics. Not BI/Palantir OS.',
     },
     {
       id: 'enterprise-knowledge-apis',
       name: 'Enterprise Knowledge APIs',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-apis/engine',
       console: '/knowledge-apis',
       notes:
-        'Public API pack (VL-201): REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE. Not gRPC/Kafka/SDK-generator OS.',
+        'Shipped public API pack: REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE. Not gRPC/Kafka/SDK-generator OS.',
     },
     {
       id: 'knowledge-analytics',
       name: 'Knowledge Analytics',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-analytics/engine',
       console: '/knowledge-analytics',
       notes:
-        'Growth/usage/quality/search/gaps/confidence/relationships (VL-202). ≠ Language/Speech/Voice/Intelligence analytics; not BI OS.',
+        'Shipped growth/usage/quality/search/gaps/confidence/relationships analytics. Not BI OS.',
     },
     {
       id: 'knowledge-graph-bridge',
       name: 'Knowledge Graph (Intelligence)',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/knowledge-graph/engine',
       console: '/knowledge-graph',
       notes:
-        'Bounded ER from VL-184 — linked here, not regenerated. Prefer RAG; Neo4j OS deferred.',
+        'Shipped bounded ER bridge from — linked, not regenerated. Prefer RAG; Neo4j OS deferred.',
     },
     {
       id: 'document-intelligence',
       name: 'Document Intelligence',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/knowledge/documents',
       console: '/knowledge',
-      notes: 'Upload/chunk/embed via VL-062. Deep doc-AI (OCR/layout/tables) deferred with KB phases.',
+      notes: 'Shipped upload/chunk/embed via + Own AI OCR caption path. Layout/table doc-AI OS deferred.',
     },
   ];
 }

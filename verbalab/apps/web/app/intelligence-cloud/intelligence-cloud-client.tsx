@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { hidePhaseIds } from '@/lib/ui-copy';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Product = {
@@ -45,7 +47,7 @@ export function IntelligenceCloudClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/intelligence-cloud/overview', { token }));
   }, [getToken]);
@@ -83,7 +85,7 @@ export function IntelligenceCloudClient() {
             {data.usage.embeddings.requests} req · Docs {data.workspace.knowledgeDocuments} · Chunks{' '}
             {data.workspace.knowledgeChunks}
           </p>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{data.note}</p>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(data.note)}</p>
 
           <section>
             <h2 style={label}>Links</h2>
@@ -121,11 +123,17 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.aiOrchestration ?? '/ai-orchestration'} style={secondary}>
                 Orchestration
               </Link>
+              <Link href={data.links.agentIntelligence ?? '/agent-intelligence'} style={secondary}>
+                Agent Intelligence
+              </Link>
               <Link
                 href={data.links.intelligenceAnalytics ?? '/intelligence-analytics'}
                 style={secondary}
               >
                 Intel Analytics
+              </Link>
+              <Link href={data.links.aiObservability ?? '/ai-observability'} style={secondary}>
+                AI Observability
               </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG

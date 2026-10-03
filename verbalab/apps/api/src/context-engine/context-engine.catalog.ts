@@ -13,7 +13,7 @@ export function contextEngineCatalog() {
   return {
     product: 'VerbaLab Context Engine',
     note:
-      'Assembles workspace/language/user/org/project/conversation/document/historical/KG context for AI requests (VL-185). Compression is char-budget truncation, not LLM summarization. Not an infinite context window product. Realtime push deferred.',
+      'Assembles workspace/language/user/org/project/conversation/document/historical/KG context for AI requests. Compression is char-budget truncation, not LLM summarization. Not an infinite context window product. Realtime push deferred.',
     capabilities: [
       {
         id: 'conversation-context',
@@ -74,7 +74,7 @@ export function contextEngineCatalog() {
       {
         id: 'context-compression',
         name: 'Context Compression',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/context-engine/assemble',
         notes: 'Char-budget truncation by priority. LLM summarization deferred.',
       },

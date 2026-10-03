@@ -13,7 +13,7 @@ export function promptIntelligenceCatalog() {
   return {
     product: 'VerbaLab Prompt Intelligence',
     note:
-      'Hub over versioned chat/rag/voice_faq prompts (VL-086 / VL-188). Registry, preview/test, heuristic evaluate + security scan, marketplace listings, and audit analytics. Not an auto-prompt research lab or red-team harness OS.',
+      'Hub over versioned chat/rag/voice_faq prompts (/ ). Registry, preview/test, heuristic evaluate + security scan, marketplace listings, and audit analytics. Not an auto-prompt research lab or red-team harness OS.',
     capabilities: [
       {
         id: 'prompt-registry',
@@ -32,28 +32,28 @@ export function promptIntelligenceCatalog() {
       {
         id: 'prompt-testing',
         name: 'Prompt Testing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-intelligence/preview',
         notes: 'Resolve/preview body without calling an LLM evaluator.',
       },
       {
         id: 'prompt-evaluation',
         name: 'Prompt Evaluation',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-intelligence/evaluate',
         notes: 'Heuristic checks (length, emptiness, risky patterns) — not LLM-as-judge lab.',
       },
       {
         id: 'prompt-marketplace',
         name: 'Prompt Marketplace',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/marketplace?kind=prompt',
-        notes: 'Existing marketplace prompt listings (VL-091). Hub surfaces link + counts.',
+        notes: 'Existing marketplace prompt listings. Hub surfaces link + counts.',
       },
       {
         id: 'prompt-security',
         name: 'Prompt Security',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-intelligence/security-scan',
         notes: 'Pattern scan for injection/secret-looking strings. Not a red-team harness.',
       },
@@ -69,12 +69,12 @@ export function promptIntelligenceCatalog() {
         name: 'Prompt Optimization',
         status: 'deferred',
         api: null,
-        notes: 'Auto-prompt research / evolutionary optimizers deferred (VL-188 out of scope).',
+        notes: 'Auto-prompt research / evolutionary optimizers deferred (out of scope).',
       },
       {
         id: 'prompt-approval',
         name: 'Prompt Approval',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompts/{key}/activate',
         notes: 'Admin activate = approval proxy. Separate approval workflow deferred.',
       },

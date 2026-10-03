@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Listing = {
@@ -41,7 +42,7 @@ export function VoiceLanguageMarketplaceClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/voice-language-marketplace/engine', { token }),
@@ -70,7 +71,7 @@ export function VoiceLanguageMarketplaceClient() {
         Voice & Language Marketplace
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        License voice and language pack SKUs over VL-177 + Volume 1 — not ElevenLabs or a voice CDN.
+        License voice and language pack SKUs over + Volume 1 — not ElevenLabs or a voice CDN.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

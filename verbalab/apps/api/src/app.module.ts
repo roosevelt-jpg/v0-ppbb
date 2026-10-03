@@ -29,6 +29,7 @@ import { GovernanceModule } from './governance/governance.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './admin/admin.module';
 import { ConnectorsModule } from './connectors/connectors.module';
+import { PartnerConnectorsModule } from './partner-connectors/partner-connectors.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { VoiceModule } from './voice/voice.module';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -43,6 +44,7 @@ import { ModelsModule } from './models/models.module';
 import { TrainingModule } from './training/training.module';
 import { VoiceClonesModule } from './voice-clones/voice-clones.module';
 import { RegionsModule } from './regions/regions.module';
+import { MarketingCmsModule } from './marketing-cms/marketing-cms.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { CloudFoundationModule } from './cloud-foundation/cloud-foundation.module';
 import { DeveloperCloudModule } from './developer-cloud/developer-cloud.module';
@@ -68,6 +70,36 @@ import { ModelTrainingPlatformModule } from './model-training-platform/model-tra
 import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model-evaluation-platform.module';
 import { ModelRegistryModule } from './model-registry/model-registry.module';
 import { AtlasModule } from './atlas/atlas.module';
+import { ModelKeysModule } from './model-keys/model-keys.module';
+import { ModelRuntimeModule } from './model-runtime/model-runtime.module';
+import { AiInternetAuditModule } from './ai-internet-audit/ai-internet-audit.module';
+import { CredentialsReadinessModule } from './credentials-readiness/credentials-readiness.module';
+import { VerbalabGlobalOsModule } from './verbalab-global-os/verbalab-global-os.module';
+import { AiMarketplaceFederationModule } from './ai-marketplace-federation/ai-marketplace-federation.module';
+import { AiSovereigntyExchangeModule } from './ai-sovereignty-exchange/ai-sovereignty-exchange.module';
+import { AiGovernanceFederationModule } from './ai-governance-federation/ai-governance-federation.module';
+import { AiGlobalRoutingModule } from './ai-global-routing/ai-global-routing.module';
+import { AiCertificateAuthorityModule } from './ai-certificate-authority/ai-certificate-authority.module';
+import { AiPaymentNetworkModule } from './ai-payment-network/ai-payment-network.module';
+import { AiTrustNetworkModule } from './ai-trust-network/ai-trust-network.module';
+import { A2aProtocolModule } from './a2a-protocol/a2a-protocol.module';
+import { AiFederationMeshModule } from './ai-federation-mesh/ai-federation-mesh.module';
+import { AiDiscoveryModule } from './ai-discovery/ai-discovery.module';
+import { AiIdentityWalletModule } from './ai-identity-wallet/ai-identity-wallet.module';
+import { AiDnsModule } from './ai-dns/ai-dns.module';
+import { AiInternetStoreModule } from './ai-internet-store/ai-internet-store.module';
+import { AiInternetModule } from './ai-internet/ai-internet.module';
+import { VideoVoiceModule } from './video-voice/video-voice.module';
+import { SpeechDepthModule } from './speech-depth/speech-depth.module';
+import { TranslateFmModule } from './translate-fm/translate-fm.module';
+import { FusionModule } from './fusion/fusion.module';
+import { EdgeModule } from './edge/edge.module';
+import { ReasonFmModule } from './reason-fm/reason-fm.module';
+import { VectorFmModule } from './vector-fm/vector-fm.module';
+import { VisionFmModule } from './vision-fm/vision-fm.module';
+import { VoiceFmModule } from './voice-fm/voice-fm.module';
+import { EchoModule } from './echo/echo.module';
+import { BaobabModule } from './baobab/baobab.module';
 import { AiFabricModule } from './ai-fabric/ai-fabric.module';
 import { EventFabricModule } from './event-fabric/event-fabric.module';
 import { ContextFabricModule } from './context-fabric/context-fabric.module';
@@ -87,6 +119,128 @@ import { WorkflowMarketplaceModule } from './workflow-marketplace/workflow-marke
 import { ConnectorMarketplaceModule } from './connector-marketplace/connector-marketplace.module';
 import { VoiceLanguageMarketplaceModule } from './voice-language-marketplace/voice-language-marketplace.module';
 import { CreatorEconomyModule } from './creator-economy/creator-economy.module';
+import { TourismHeritageIntelligenceModule } from './tourism-heritage-intelligence/tourism-heritage-intelligence.module';
+import { ResearchAnalyticsModule } from './research-analytics/research-analytics.module';
+import { AiOperationsDashboardModule } from './ai-operations-dashboard/ai-operations-dashboard.module';
+import { ContinuousLearningModule } from './continuous-learning/continuous-learning.module';
+import { AiDriftDetectionModule } from './ai-drift-detection/ai-drift-detection.module';
+import { AgentopsPlatformModule } from './agentops-platform/agentops-platform.module';
+import { RagopsPlatformModule } from './ragops-platform/ragops-platform.module';
+import { PromptopsPlatformModule } from './promptops-platform/promptops-platform.module';
+import { ContinuousEvaluationModule } from './continuous-evaluation/continuous-evaluation.module';
+import { TrainingPipelineModule } from './training-pipeline/training-pipeline.module';
+import { DatasetPipelineModule } from './dataset-pipeline/dataset-pipeline.module';
+import { MlopsLlmopsCloudModule } from './mlops-llmops-cloud/mlops-llmops-cloud.module';
+import { TrustCloudModule } from './trust-cloud/trust-cloud.module';
+import { AiSafetyPlatformModule } from './ai-safety-platform/ai-safety-platform.module';
+import { AiGovernancePlatformModule } from './ai-governance-platform/ai-governance-platform.module';
+import { ExplainabilityPlatformModule } from './explainability-platform/explainability-platform.module';
+import { PrivacyPlatformModule } from './privacy-platform/privacy-platform.module';
+import { CompliancePlatformModule } from './compliance-platform/compliance-platform.module';
+import { RiskIntelligenceModule } from './risk-intelligence/risk-intelligence.module';
+import { IdentityFederationModule } from './identity-federation/identity-federation.module';
+import { TrustAnalyticsModule } from './trust-analytics/trust-analytics.module';
+import { PlatformEngineeringCloudModule } from './platform-engineering-cloud/platform-engineering-cloud.module';
+import { InternalDeveloperPortalModule } from './internal-developer-portal/internal-developer-portal.module';
+import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
+import { GoldenPathPlatformModule } from './golden-path-platform/golden-path-platform.module';
+import { GitopsPlatformModule } from './gitops-platform/gitops-platform.module';
+import { ReleaseEngineeringModule } from './release-engineering/release-engineering.module';
+import { ReliabilityEngineeringModule } from './reliability-engineering/reliability-engineering.module';
+import { FinopsPlatformModule } from './finops-platform/finops-platform.module';
+import { SupplyChainSecurityModule } from './supply-chain-security/supply-chain-security.module';
+import { DeveloperExperiencePlatformModule } from './developer-experience-platform/developer-experience-platform.module';
+import { PlatformEngineeringAnalyticsModule } from './platform-engineering-analytics/platform-engineering-analytics.module';
+import { ControlPlaneCloudModule } from './control-plane-cloud/control-plane-cloud.module';
+import { OrganizationControlModule } from './organization-control/organization-control.module';
+import { GlobalConfigurationPlatformModule } from './global-configuration-platform/global-configuration-platform.module';
+import { GlobalPolicyEngineModule } from './global-policy-engine/global-policy-engine.module';
+import { GlobalDeploymentControllerModule } from './global-deployment-controller/global-deployment-controller.module';
+import { GlobalRoutingControllerModule } from './global-routing-controller/global-routing-controller.module';
+import { SecretsCertificatePlatformModule } from './secrets-certificate-platform/secrets-certificate-platform.module';
+import { GlobalSchedulerModule } from './global-scheduler/global-scheduler.module';
+import { ControlPlaneAnalyticsModule } from './control-plane-analytics/control-plane-analytics.module';
+import { DataPlaneCloudModule } from './data-plane-cloud/data-plane-cloud.module';
+import { TranslationRuntimeModule } from './translation-runtime/translation-runtime.module';
+import { SpeechRuntimeModule } from './speech-runtime/speech-runtime.module';
+import { VoiceRuntimeModule } from './voice-runtime/voice-runtime.module';
+import { VisionRuntimeModule } from './vision-runtime/vision-runtime.module';
+import { KnowledgeRuntimeModule } from './knowledge-runtime/knowledge-runtime.module';
+import { EmbeddingRuntimeModule } from './embedding-runtime/embedding-runtime.module';
+import { DataPlaneStreamingModule } from './data-plane-streaming/data-plane-streaming.module';
+import { GpuRuntimeModule } from './gpu-runtime/gpu-runtime.module';
+import { VaiosModule } from './vaios/vaios.module';
+import { AiSchedulerModule } from './ai-scheduler/ai-scheduler.module';
+import { RuntimeManagerModule } from './runtime-manager/runtime-manager.module';
+import { ResourceManagerModule } from './resource-manager/resource-manager.module';
+import { WorkflowOperatingSystemModule } from './workflow-operating-system/workflow-operating-system.module';
+import { AgentOperatingSystemModule } from './agent-operating-system/agent-operating-system.module';
+import { AiMemoryOperatingSystemModule } from './ai-memory-operating-system/ai-memory-operating-system.module';
+import { KnowledgeOperatingSystemModule } from './knowledge-operating-system/knowledge-operating-system.module';
+import { PluginOperatingSystemModule } from './plugin-operating-system/plugin-operating-system.module';
+import { EnterpriseEngineeringSystemModule } from './enterprise-engineering-system/enterprise-engineering-system.module';
+import { EngineeringGovernanceModule } from './engineering-governance/engineering-governance.module';
+import { ArchitectureGovernanceModule } from './architecture-governance/architecture-governance.module';
+import { RepositoryStandardsModule } from './repository-standards/repository-standards.module';
+import { EngineeringQualityPlatformModule } from './engineering-quality-platform/engineering-quality-platform.module';
+import { AiEngineeringStandardsModule } from './ai-engineering-standards/ai-engineering-standards.module';
+import { ApiEngineeringStandardsModule } from './api-engineering-standards/api-engineering-standards.module';
+import { DatabaseEngineeringStandardsModule } from './database-engineering-standards/database-engineering-standards.module';
+import { InfrastructureEngineeringStandardsModule } from './infrastructure-engineering-standards/infrastructure-engineering-standards.module';
+import { CorporateOperatingSystemModule } from './corporate-operating-system/corporate-operating-system.module';
+import { CorporateGovernancePlatformModule } from './corporate-governance-platform/corporate-governance-platform.module';
+import { StrategicPlanningPlatformModule } from './strategic-planning-platform/strategic-planning-platform.module';
+import { EnterprisePortfolioManagementModule } from './enterprise-portfolio-management/enterprise-portfolio-management.module';
+import { BusinessArchitectureModule } from './business-architecture/business-architecture.module';
+import { EnterpriseArchitectureRepositoryModule } from './enterprise-architecture-repository/enterprise-architecture-repository.module';
+import { CorporateKnowledgeSystemModule } from './corporate-knowledge-system/corporate-knowledge-system.module';
+import { ExecutiveIntelligencePlatformModule } from './executive-intelligence-platform/executive-intelligence-platform.module';
+import { CorporateRiskPlatformModule } from './corporate-risk-platform/corporate-risk-platform.module';
+import { GlobalAiStandardsModule } from './global-ai-standards/global-ai-standards.module';
+import { AiEconomyModule } from './ai-economy/ai-economy.module';
+import { AiCommercePlatformModule } from './ai-commerce-platform/ai-commerce-platform.module';
+import { AiLicensingPlatformModule } from './ai-licensing-platform/ai-licensing-platform.module';
+import { RevenueSharingPlatformModule } from './revenue-sharing-platform/revenue-sharing-platform.module';
+import { AiTalentPlatformModule } from './ai-talent-platform/ai-talent-platform.module';
+import { ResearchFundingPlatformModule } from './research-funding-platform/research-funding-platform.module';
+import { GlobalCommunityPlatformModule } from './global-community-platform/global-community-platform.module';
+import { AiInvestmentPlatformModule } from './ai-investment-platform/ai-investment-platform.module';
+import { EconomicIntelligenceModule } from './economic-intelligence/economic-intelligence.module';
+import { DigitalCivilizationModule } from './digital-civilization/digital-civilization.module';
+import { LibraryReferenceModule } from './library-reference/library-reference.module';
+import { NationalAiPlatformModule } from './national-ai-platform/national-ai-platform.module';
+import { SmartCityPlatformModule } from './smart-city-platform/smart-city-platform.module';
+import { EnterpriseNationPlatformModule } from './enterprise-nation-platform/enterprise-nation-platform.module';
+import { GlobalLanguagePreservationModule } from './global-language-preservation/global-language-preservation.module';
+import { UniversalTranslationGridModule } from './universal-translation-grid/universal-translation-grid.module';
+import { GlobalKnowledgeNetworkModule } from './global-knowledge-network/global-knowledge-network.module';
+import { GlobalAiFederationModule } from './global-ai-federation/global-ai-federation.module';
+import { CivilizationIntelligenceDashboardModule } from './civilization-intelligence-dashboard/civilization-intelligence-dashboard.module';
+import { AiCertificationPlatformModule } from './ai-certification-platform/ai-certification-platform.module';
+import { AiComplianceFrameworkModule } from './ai-compliance-framework/ai-compliance-framework.module';
+import { ReferenceArchitecturesModule } from './reference-architectures/reference-architectures.module';
+import { BestPracticesLibraryModule } from './best-practices-library/best-practices-library.module';
+import { EnterpriseAssessmentPlatformModule } from './enterprise-assessment-platform/enterprise-assessment-platform.module';
+import { StandardsRepositoryModule } from './standards-repository/standards-repository.module';
+import { GlobalPartnerProgramModule } from './global-partner-program/global-partner-program.module';
+import { StandardsAnalyticsModule } from './standards-analytics/standards-analytics.module';
+import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
+import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
+import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
+import { EvaluationPlatformModule } from './evaluation-platform/evaluation-platform.module';
+import { BenchmarkPlatformModule } from './benchmark-platform/benchmark-platform.module';
+import { SyntheticDataPlatformModule } from './synthetic-data-platform/synthetic-data-platform.module';
+import { ExperimentPlatformModule } from './experiment-platform/experiment-platform.module';
+import { ResearchCloudModule } from './research-cloud/research-cloud.module';
+import { AgriculturalIntelligenceModule } from './agricultural-intelligence/agricultural-intelligence.module';
+import { EducationIntelligenceModule } from './education-intelligence/education-intelligence.module';
+import { FinancialIntelligenceModule } from './financial-intelligence/financial-intelligence.module';
+import { HealthcareIntelligenceModule } from './healthcare-intelligence/healthcare-intelligence.module';
+import { GovernmentIntelligenceModule } from './government-intelligence/government-intelligence.module';
+import { AfricanKnowledgeGraphModule } from './african-knowledge-graph/african-knowledge-graph.module';
+import { CulturalIntelligenceModule } from './cultural-intelligence/cultural-intelligence.module';
+import { AfricanLanguageRegistryModule } from './african-language-registry/african-language-registry.module';
+import { AfricanIntelligenceCloudModule } from './african-intelligence-cloud/african-intelligence-cloud.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -115,6 +269,8 @@ import { PromptIntelligenceModule } from './prompt-intelligence/prompt-intellige
 import { DecisionEngineModule } from './decision-engine/decision-engine.module';
 import { AiOrchestrationModule } from './ai-orchestration/ai-orchestration.module';
 import { IntelligenceAnalyticsModule } from './intelligence-analytics/intelligence-analytics.module';
+import { AgentIntelligenceModule } from './agent-intelligence/agent-intelligence.module';
+import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -173,6 +329,36 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelEvaluationPlatformModule,
     ModelRegistryModule,
     AtlasModule,
+    ModelKeysModule,
+    ModelRuntimeModule,
+    AiInternetAuditModule,
+    CredentialsReadinessModule,
+    VerbalabGlobalOsModule,
+    AiMarketplaceFederationModule,
+    AiSovereigntyExchangeModule,
+    AiGovernanceFederationModule,
+    AiGlobalRoutingModule,
+    AiCertificateAuthorityModule,
+    AiPaymentNetworkModule,
+    AiTrustNetworkModule,
+    A2aProtocolModule,
+    AiFederationMeshModule,
+    AiDiscoveryModule,
+    AiIdentityWalletModule,
+    AiDnsModule,
+    AiInternetStoreModule,
+    AiInternetModule,
+    VideoVoiceModule,
+    SpeechDepthModule,
+    TranslateFmModule,
+    FusionModule,
+    EdgeModule,
+    ReasonFmModule,
+    VectorFmModule,
+    VisionFmModule,
+    VoiceFmModule,
+    EchoModule,
+    BaobabModule,
     AiFabricModule,
     EventFabricModule,
     ContextFabricModule,
@@ -192,6 +378,128 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ConnectorMarketplaceModule,
     VoiceLanguageMarketplaceModule,
     CreatorEconomyModule,
+    TourismHeritageIntelligenceModule,
+    ResearchAnalyticsModule,
+    AiOperationsDashboardModule,
+    ContinuousLearningModule,
+    AiDriftDetectionModule,
+    AgentopsPlatformModule,
+    RagopsPlatformModule,
+    PromptopsPlatformModule,
+    ContinuousEvaluationModule,
+    TrainingPipelineModule,
+    DatasetPipelineModule,
+    MlopsLlmopsCloudModule,
+    TrustCloudModule,
+    AiSafetyPlatformModule,
+    AiGovernancePlatformModule,
+    ExplainabilityPlatformModule,
+    PrivacyPlatformModule,
+    CompliancePlatformModule,
+    RiskIntelligenceModule,
+    IdentityFederationModule,
+    TrustAnalyticsModule,
+    PlatformEngineeringCloudModule,
+    InternalDeveloperPortalModule,
+    ServiceCatalogModule,
+    GoldenPathPlatformModule,
+    GitopsPlatformModule,
+    ReleaseEngineeringModule,
+    ReliabilityEngineeringModule,
+    FinopsPlatformModule,
+    SupplyChainSecurityModule,
+    DeveloperExperiencePlatformModule,
+    PlatformEngineeringAnalyticsModule,
+    ControlPlaneCloudModule,
+    OrganizationControlModule,
+    GlobalConfigurationPlatformModule,
+    GlobalPolicyEngineModule,
+    GlobalDeploymentControllerModule,
+    GlobalRoutingControllerModule,
+    SecretsCertificatePlatformModule,
+    GlobalSchedulerModule,
+    ControlPlaneAnalyticsModule,
+    DataPlaneCloudModule,
+    TranslationRuntimeModule,
+    SpeechRuntimeModule,
+    VoiceRuntimeModule,
+    VisionRuntimeModule,
+    KnowledgeRuntimeModule,
+    EmbeddingRuntimeModule,
+    DataPlaneStreamingModule,
+    GpuRuntimeModule,
+    VaiosModule,
+    AiSchedulerModule,
+    RuntimeManagerModule,
+    ResourceManagerModule,
+    WorkflowOperatingSystemModule,
+    AgentOperatingSystemModule,
+    AiMemoryOperatingSystemModule,
+    KnowledgeOperatingSystemModule,
+    PluginOperatingSystemModule,
+    EnterpriseEngineeringSystemModule,
+    EngineeringGovernanceModule,
+    ArchitectureGovernanceModule,
+    RepositoryStandardsModule,
+    EngineeringQualityPlatformModule,
+    AiEngineeringStandardsModule,
+    ApiEngineeringStandardsModule,
+    DatabaseEngineeringStandardsModule,
+    InfrastructureEngineeringStandardsModule,
+    CorporateOperatingSystemModule,
+    CorporateGovernancePlatformModule,
+    StrategicPlanningPlatformModule,
+    EnterprisePortfolioManagementModule,
+    BusinessArchitectureModule,
+    EnterpriseArchitectureRepositoryModule,
+    CorporateKnowledgeSystemModule,
+    ExecutiveIntelligencePlatformModule,
+    CorporateRiskPlatformModule,
+    GlobalAiStandardsModule,
+    AiEconomyModule,
+    AiCommercePlatformModule,
+    AiLicensingPlatformModule,
+    RevenueSharingPlatformModule,
+    AiTalentPlatformModule,
+    ResearchFundingPlatformModule,
+    GlobalCommunityPlatformModule,
+    AiInvestmentPlatformModule,
+    EconomicIntelligenceModule,
+    DigitalCivilizationModule,
+    LibraryReferenceModule,
+    NationalAiPlatformModule,
+    SmartCityPlatformModule,
+    EnterpriseNationPlatformModule,
+    GlobalLanguagePreservationModule,
+    UniversalTranslationGridModule,
+    GlobalKnowledgeNetworkModule,
+    GlobalAiFederationModule,
+    CivilizationIntelligenceDashboardModule,
+    AiCertificationPlatformModule,
+    AiComplianceFrameworkModule,
+    ReferenceArchitecturesModule,
+    BestPracticesLibraryModule,
+    EnterpriseAssessmentPlatformModule,
+    StandardsRepositoryModule,
+    GlobalPartnerProgramModule,
+    StandardsAnalyticsModule,
+    OpenSciencePlatformModule,
+    PatentInnovationPlatformModule,
+    AiPublicationPlatformModule,
+    EvaluationPlatformModule,
+    BenchmarkPlatformModule,
+    SyntheticDataPlatformModule,
+    ExperimentPlatformModule,
+    ResearchCloudModule,
+    AgriculturalIntelligenceModule,
+    EducationIntelligenceModule,
+    FinancialIntelligenceModule,
+    HealthcareIntelligenceModule,
+    GovernmentIntelligenceModule,
+    AfricanKnowledgeGraphModule,
+    CulturalIntelligenceModule,
+    AfricanLanguageRegistryModule,
+    AfricanIntelligenceCloudModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -220,6 +528,8 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     DecisionEngineModule,
     AiOrchestrationModule,
     IntelligenceAnalyticsModule,
+    AgentIntelligenceModule,
+    AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
@@ -269,6 +579,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     GovernanceModule,
     AdminModule,
     ConnectorsModule,
+    PartnerConnectorsModule,
     WorkflowsModule,
     VoiceModule,
     AnalyticsModule,
@@ -281,6 +592,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     TrainingModule,
     VoiceClonesModule,
     RegionsModule,
+    MarketingCmsModule,
   ],
 })
 export class AppModule implements NestModule {

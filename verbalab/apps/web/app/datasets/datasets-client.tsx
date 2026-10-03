@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type DatasetAsset = {
@@ -48,7 +49,7 @@ export function DatasetsClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setRows(await apiFetch<DatasetAsset[]>('/v1/datasets', { token }));
   }, [getToken]);
@@ -70,7 +71,7 @@ export function DatasetsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       if (!file) throw new Error('Choose a file');
       const form = new FormData();
@@ -106,7 +107,7 @@ export function DatasetsClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/datasets/${id}`, { method: 'DELETE', token });
       setMessage('Dataset archived and files unlinked.');
@@ -119,7 +120,7 @@ export function DatasetsClient() {
   }
 
   async function download(id: string, version: number, filename: string) {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const res = await fetch(`${API_URL}/v1/datasets/${id}/versions/${version}/content`, {
       headers: { Authorization: `Bearer ${token}` },

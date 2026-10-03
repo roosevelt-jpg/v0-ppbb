@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Product = {
@@ -47,7 +48,7 @@ export function KnowledgeCloudClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/knowledge-cloud/overview', { token }));
   }, [getToken]);
@@ -71,7 +72,7 @@ export function KnowledgeCloudClient() {
         Knowledge Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Enterprise knowledge hub over VL-062 RAG and Intelligence Cloud. Extends existing
+        Enterprise knowledge hub over RAG and Intelligence Cloud. Extends existing
         knowledge surfaces — does not invent a SharePoint/ontology OS.
       </p>
 
@@ -100,6 +101,24 @@ export function KnowledgeCloudClient() {
               </Link>
               <Link href={data.links.taxonomy ?? '/taxonomy'} style={secondary}>
                 Taxonomy
+              </Link>
+              <Link href={data.links.enterpriseRag ?? '/enterprise-rag'} style={secondary}>
+                Enterprise RAG
+              </Link>
+              <Link href={data.links.knowledgeMemory ?? '/knowledge-memory'} style={secondary}>
+                Knowledge Memory
+              </Link>
+              <Link
+                href={data.links.knowledgeIntelligence ?? '/knowledge-intelligence'}
+                style={secondary}
+              >
+                Knowledge Intelligence
+              </Link>
+              <Link href={data.links.knowledgeApis ?? '/knowledge-apis'} style={secondary}>
+                Knowledge APIs
+              </Link>
+              <Link href={data.links.knowledgeAnalytics ?? '/knowledge-analytics'} style={secondary}>
+                Knowledge Analytics
               </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
@@ -137,7 +156,7 @@ export function KnowledgeCloudClient() {
           <section>
             <h2 style={label}>Architecture honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
-              Extends VL-062 {data.architecture.extendsVl062 ? 'yes' : 'no'} · Regenerates VL-062{' '}
+              Extends {data.architecture.extendsVl062 ? 'yes' : 'no'} · Regenerates {' '}
               {data.architecture.regeneratesVl062 ? 'yes' : 'no'} · Enterprise knowledge OS{' '}
               {data.architecture.enterpriseKnowledgeOs ? 'yes' : 'no'} · Ontology OS{' '}
               {data.architecture.ontologyOs ? 'yes' : 'no'} · pgvector{' '}

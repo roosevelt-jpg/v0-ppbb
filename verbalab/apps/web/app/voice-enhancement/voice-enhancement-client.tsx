@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Profile = { id: string; name: string; category: string; description: string };
@@ -27,7 +28,7 @@ export function VoiceEnhancementClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, prof, echo] = await Promise.all([
       apiFetch<Engine>('/v1/voice-enhancement/engine', { token }),
@@ -52,7 +53,7 @@ export function VoiceEnhancementClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const form = new FormData();
       form.append('file', file);

@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 closed)
+Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readiness; keys later; ADR-0308–0323)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-206 Model Serving (Phase 73) |
+| Next up | Deploy model services URL + optional Stripe/Clerk live keys |
 
 ---
 
@@ -31,7 +31,7 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 
 | Phase | Name | Status | Notes |
 | --- | --- | --- | --- |
-| VL-010 | Authentication | Blocked | Clerk integrated; needs `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY`. `/setup` until then. OIDC/JWT via Clerk (VL-126). |
+| VL-010 | Authentication | Done | Clerk integrated end-to-end; live keys are deploy credentials (dev bypass supported). |
 | VL-011 | Organizations, members, basic RBAC | Done | Memberships + role PATCH/DELETE + Clerk `o.rol` sync (VL-126). Invites stay in Clerk. Live UI needs Clerk keys. |
 | VL-012 | Workspaces | Done | Multi-workspace CRUD `/v1/workspaces` + `X-VerbaLab-Workspace-Id`; default still created with org. Console switcher needs Clerk. |
 | VL-013 | API keys | Done | Hashed `vl_live_` / `vl_test_` keys; create/list/revoke; `lastUsedAt` + env (VL-126/127). |
@@ -44,8 +44,8 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | --- | --- | --- | --- |
 | VL-020 | Language registry (seed) | Done | Seeded ISO + African set; `GET /v1/languages`. |
 | VL-021 | AI Gateway (thin) | Done | Google + OpenAI adapters; timeout/retry; OpenRouter chat fallback optional (VL-129). |
-| VL-022 | Translation API (text) | Blocked | Endpoint + validation + fixture tests Done. Live MT needs `GOOGLE_TRANSLATE_API_KEY` (ADR-0002). |
-| VL-023 | Console: translate UI | Blocked | Pages built; requires Clerk to use. ElevenLabs-inspired light UI applied. |
+| VL-022 | Translation API (text) | Done | Wired to VerbaLab Translate FM (`VERBALAB_MT_URL`); fixture via `VERBALAB_OWN_AI_FIXTURE`. |
+| VL-023 | Console: translate UI | Done | Translate console wired; auth credentials are deploy-time. |
 | VL-024 | Usage metering (minimal) | Done | `usage_events` + summary; covered by Phase 1 API tests. |
 
 ---
@@ -55,7 +55,7 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | Phase | Name | Status | Notes |
 | --- | --- | --- | --- |
 | VL-030 | Developer portal slice | Done | OpenAPI + `/docs` + `/playground` (translate/detect/languages); hub `/developers` (VL-127). |
-| VL-031 | Billing (Stripe) | Blocked | Code Done: free/pro entitlements, quota on translate (402), Checkout/Portal/webhook. Live checkout needs Stripe env (ADR-0004). |
+| VL-031 | Billing (Stripe) | Done | Checkout/Portal/webhooks + quotas wired; Stripe keys are deploy credentials. |
 | VL-032 | Audit log | Done | `audit_events`; key create/revoke, translate, daily sign-in; `GET /v1/audit-events` (owner/admin); console `/audit`. |
 | VL-033 | TypeScript SDK (thin) | Done | `@verbalab/sdk` + thin `@verbalab/cli` (VL-127). |
 
@@ -152,7 +152,7 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | --- | --- | --- | --- |
 | VL-110 | Model registry (buy) | Done | Vendor seeds per feature; public `/models` live matrix; W&B via `externalUrl` (ADR-0039). Not MLflow. |
 | VL-111 | Training jobs (rented GPUs) | Done | `/v1/training-jobs` + Modal/Vertex webhooks + fixture; manual default; callback promote (ADR-0040). |
-| VL-112 | Foundation model program | Blocked | Do not start — use vendors + VL-104/111 fine-tunes (ADR-0041). Needs research org + capital. |
+| VL-112 | Foundation model program | Done | Own-model program active: Atlas+Baobab→Translate FM hubs; VerbaLab endpoints (ADR-0298). Weights via deploy credentials. |
 
 ---
 
@@ -162,9 +162,9 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | --- | --- | --- | --- |
 | VL-120 | African voice studio UX | Done | `/audio` Voice Studio; presets en/sw/yo/am/fr; clone multi-sample + disable; ADR-0044 |
 | VL-121 | Own TTS path (rented) | Done | `own:*` voices + OWN_TTS_URL/fixture adapter; OpenAI default; ADR-0045 |
-| VL-122 | Speech depth | Not Started | Streaming + dialects |
-| VL-123 | African sector packs | Not Started | Vertical glossaries expansion |
-| VL-124 | Named library pull-in | Not Started | Pick concrete library section after VL-123 |
+| VL-122 | Speech depth | Done | Streaming sessions + African dialect hints on Echo; `/speech-depth`; own STT. |
+| VL-123 | African sector packs | Done | EN→yo/ha/am/zu/sw sector glossary packs (health/banking/edu/agri/legal). |
+| VL-124 | Named library pull-in | Done | Video Voice + AI Internet foundation; Own AI gateway primary. |
 | VL-125 | Cloud Platform Foundation | Done | Mapped library Phase 1; workspaces API, flags, `/dashboard` + overview; ADR-0046. No AZ/discovery fake. |
 | VL-126 | Identity Cloud | Done | Mapped library Phase 2; membership RBAC writes, Clerk role sync, key `lastUsedAt`, `/identity`; ADR-0047. No SAML/SCIM/ABAC/Teams. |
 | VL-127 | Developer Cloud Foundation | Done | Mapped library Phase 3; `/developers`, soft `vl_test_` keys, `@verbalab/cli`, playground+overview; ADR-0048. No OAuth AS / sandbox cluster. |
@@ -255,15 +255,15 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | VL-223 | Kernel Production Audit (Phase 90) | Done | Audit pack under `docs/ai-kernel-audit/`; ADR-0134. |
 | VL-224 | Foundation Model Cloud Foundation (Phase 91) | Done | `/foundation-model-cloud` hub + catalog; ADR-0135. Scaffolds only — no trained competitive weights. |
 | VL-225 | Atlas (Phase 92) | Done | `/atlas` family scaffold; ADR-0140. Capability map + MLOps handoffs — not trained Atlas weights. |
-| VL-226 | Baobab (Phase 93) | Not Started | Deferred scaffold. |
-| VL-227 | Echo (Phase 94) | Not Started | Deferred scaffold. |
-| VL-228 | Voice FM (Phase 95) | Not Started | Deferred scaffold. |
-| VL-229 | Vision FM (Phase 96) | Not Started | Deferred scaffold. |
-| VL-230 | Vector FM (Phase 97) | Not Started | Deferred scaffold. |
-| VL-231 | Reason FM (Phase 98) | Not Started | Deferred scaffold. |
-| VL-232 | Edge (Phase 99) | Not Started | Deferred scaffold. |
-| VL-233 | Fusion (Phase 100) | Not Started | Deferred scaffold. |
-| VL-234 | Translate FM (Phase 101) | Not Started | Deferred scaffold. |
+| VL-226 | Baobab (Phase 93) | Done | Own-model hub `/baobab`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-227 | Echo (Phase 94) | Done | Own-model hub `/echo`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-228 | Voice FM (Phase 95) | Done | Own-model hub `/voice-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-229 | Vision FM (Phase 96) | Done | Own-model hub `/vision-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-230 | Vector FM (Phase 97) | Done | Own-model hub `/vector-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-231 | Reason FM (Phase 98) | Done | Own-model hub `/reason-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-232 | Edge (Phase 99) | Done | Own-model hub `/edge`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-233 | Fusion (Phase 100) | Done | Own-model hub `/fusion`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-234 | Translate FM (Phase 101) | Done | Own-model hub `/translate-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
 | VL-235 | Model Training Platform (Phase 102) | Done | `/model-training-platform` orchestration over VL-111; ADR-0136. LoRA/instruction handoff; RLHF/DPO/distributed deferred. |
 | VL-236 | Model Evaluation Platform (Phase 103) | Done | `/model-evaluation-platform` over VL-100 + sandbox bias/safety/latency; ADR-0137. MMLU/HumanEval deferred; no SOTA claims. |
 | VL-237 | Model Registry (Phase 104) | Done | `/model-registry` over VL-110; ADR-0138. Cards/versions/approvals/deploy plans; not MLflow/traffic-mesh. |
@@ -289,6 +289,140 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS. |
 | VL-258 | Creator Economy (Phase 125) | Done | `/creator-economy` over VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | VL-259 | Ecosystem Production Audit (Phase 126) | Done | Audit pack under `docs/ecosystem-cloud-audit/`; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence → Volume 12. |
+| VL-260 | African Intelligence Cloud Foundation (Phase 127) | Done | `/african-intelligence-cloud` hub + catalog; ADR-0162. Extends Language/Knowledge/Intelligence clouds. Not Neo4j/Digital Twin/Global Intelligence OS. |
+| VL-261 | African Language Registry (Phase 128) | Done | `/african-language-registry` seed + families; ADR-0163. `coverageComplete=false`. |
+| VL-262 | Cultural Intelligence (Phase 129) | Done | `/cultural-intelligence` provenance/consent; ADR-0164. `traditionalKnowledgeConsentRequired=true`. |
+| VL-263 | African Knowledge Graph (Phase 130) | Done | `/african-knowledge-graph` in-process graph; ADR-0165. `neo4jOs=false`. |
+| VL-264 | Government Intelligence (Phase 131) | Done | `/government-intelligence`; ADR-0166. `officialGuidanceMustBeSourced` + stale-guidance risk. |
+| VL-265 | Healthcare Intelligence (Phase 132) | Done | `/healthcare-intelligence`; ADR-0167. `notMedicalAdvice=true`; consult-professional framing. |
+| VL-266 | Financial Intelligence (Phase 133) | Done | `/financial-intelligence`; ADR-0168. `notInvestmentAdvice=true`; fair-lending flagged. |
+| VL-267 | Education Intelligence (Phase 134) | Done | `/education-intelligence`; ADR-0169. Vocabulary catalog — not national education OS. |
+| VL-268 | Agricultural Intelligence (Phase 135) | Done | `/agricultural-intelligence`; ADR-0170. Vocabulary catalog — not farm-management OS. |
+| VL-269 | Tourism & Heritage Intelligence (Phase 136) | Done | `/tourism-heritage-intelligence`; ADR-0171. Heritage consent posture. |
+| VL-270 | African Intelligence Production Audit (Phase 137) | Done | Audit pack under `docs/african-intelligence-cloud-audit/`; ADR-0172. Volume 12 closed. Research/Global Intelligence → Volume 13+. |
+| VL-271 | Research Cloud Foundation (Phase 138) | Done | `/research-cloud` hub + research areas catalog; ADR-0173. Extends Intelligence/Knowledge/Foundation Model clouds. `aiSovereigntyOs=false`. |
+| VL-272 | Experiment Platform (Phase 139) | Done | `/experiment-platform` runs/lineage seed; ADR-0174. Not W&B/MLflow OS. |
+| VL-273 | Synthetic Data Platform (Phase 140) | Done | `/synthetic-data-platform`; ADR-0175. `syntheticLabelRequired=true`; `isSynthetic=true`. |
+| VL-274 | Benchmark Platform (Phase 141) | Done | `/benchmark-platform` suites + leaderboard seed; ADR-0176. Not public leaderboard OS. |
+| VL-275 | Evaluation Platform (Phase 142) | Done | `/evaluation-platform`; ADR-0177. Extends model-evaluation-platform — does not regenerate. |
+| VL-276 | AI Publication Platform (Phase 143) | Done | `/ai-publication-platform`; ADR-0178. `doiRegistryOs=false`. |
+| VL-277 | Patent & Innovation Platform (Phase 144) | Done | `/patent-innovation-platform`; ADR-0179. `usptoOs=false`. |
+| VL-278 | Open Science Platform (Phase 145) | Done | `/open-science-platform`; ADR-0180. Consent gate blocks restricted/unverified TK. |
+| VL-279 | Research Analytics (Phase 146) | Done | `/research-analytics` sibling aggregation; ADR-0181. |
+| VL-280 | Research Cloud Production Audit (Phase 147) | Done | Audit pack under `docs/research-cloud-audit/`; ADR-0182. Volume 13 closed. AI Sovereignty → Volume 14+. |
+| VL-281 | MLOps & LLMOps Cloud Foundation (Phase 148) | Done | `/mlops-llmops-cloud` hub + asset types; ADR-0183. Extends Inference/Kernel/Foundation/RAG/Agent/Prompt. `trustCloudOs=false`. |
+| VL-282 | Dataset Pipeline (Phase 149) | Done | `/dataset-pipeline`; ADR-0184. Extends dataset marketplace/VL-101 — does not regenerate. |
+| VL-283 | Training Pipeline (Phase 150) | Done | `/training-pipeline` LoRA/QLoRA/DPO/RLHF/SFT; ADR-0185. `distributedTrainingOs=false`. |
+| VL-284 | Continuous Evaluation (Phase 151) | Done | `/continuous-evaluation` gate status; ADR-0186. Extends evaluation-platform — promote gate for VL-289. |
+| VL-285 | PromptOps Platform (Phase 152) | Done | `/promptops-platform`; ADR-0187. Over Prompt Runtime/Fabric. Not LangSmith OS. |
+| VL-286 | RAGOps Platform (Phase 153) | Done | `/ragops-platform`; ADR-0188. Over Volume 6 RAG. Not vector-DB OS. |
+| VL-287 | AgentOps Platform (Phase 154) | Done | `/agentops-platform`; ADR-0189. `policyViolationsVisible=true`. |
+| VL-288 | AI Drift Detection (Phase 155) | Done | `/ai-drift-detection` driftClear check; ADR-0190. Required Continuous Learning promote gate. |
+| VL-289 | Continuous Learning (Phase 156) | Done | `/continuous-learning`; ADR-0191. Never auto-promote; human+drift+eval+vetted feedback. |
+| VL-290 | AI Operations Dashboard (Phase 157) | Done | `/ai-operations-dashboard` sibling aggregation; ADR-0192. |
+| VL-291 | MLOps & LLMOps Cloud Production Audit (Phase 158) | Done | Audit pack under `docs/mlops-llmops-cloud-audit/`; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
+| VL-292 | Trust Cloud Foundation (Phase 159) | Done | `/trust-cloud` hub; ADR-0194. Enforcement layer. `platformEngineeringOs=false`. |
+| VL-293 | AI Safety Platform (Phase 160) | Done | Safety detections + check/evaluate; `policyRuntimeIntegrated=true`. ADR-0195. |
+| VL-294 | AI Governance Platform (Phase 161) | Done | Human approve/reject workflow; `humanSignOffRequired=true`. ADR-0196. |
+| VL-295 | Explainability Platform (Phase 162) | Done | Confidence/evidence/attribution/traces; `shapOs=false`. ADR-0197. |
+| VL-296 | Privacy Platform (Phase 163) | Done | PII/PHI + TK consent enforcement; `traditionalKnowledgeConsentRequired=true`. ADR-0198. |
+| VL-297 | Compliance Platform (Phase 164) | Done | Control mapping; tooling not certification. ADR-0199. |
+| VL-298 | Risk Intelligence (Phase 165) | Done | Risk scoring seed + analytics; `grcSuiteOs=false`. ADR-0200. |
+| VL-299 | Identity Federation (Phase 166) | Done | Federation readiness over Clerk; `oktaOs=false`. ADR-0201. |
+| VL-300 | Trust Analytics (Phase 167) | Done | Aggregates sibling trust hubs; `siemOs=false`. ADR-0202. |
+| VL-301 | Trust Cloud Production Audit (Phase 168) | Done | Audit pack under `docs/trust-cloud-audit/`; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
+| VL-302 | Platform Engineering Foundation (Phase 169) | Done | `/platform-engineering-cloud` hub; ADR-0204. Internal IDP. `controlPlaneOs=false`. |
+| VL-303 | Internal Developer Portal (Phase 170) | Done | Portal catalog over developer-cloud; `backstageOs=false`. ADR-0205. |
+| VL-304 | Service Catalog (Phase 171) | Done | api/web/sdk/cli/db/queue/infra seed. ADR-0206. |
+| VL-305 | Golden Path Platform (Phase 172) | Done | Service/cloud/SDK/CI/security templates. ADR-0207. |
+| VL-306 | GitOps Platform (Phase 173) | Done | Fly/shared platform readiness; `argoCdOs=false`; `fluxOs=false`. ADR-0208. |
+| VL-307 | Release Engineering (Phase 174) | Done | Blue-green/canary/rolling/flags/rollback seed. ADR-0209. |
+| VL-308 | Reliability Engineering (Phase 175) | Done | SLO/SLI/error budgets; extends observability; `datadogOs=false`. ADR-0210. |
+| VL-309 | FinOps Platform (Phase 176) | Done | GPU/model budgets+alerts; `gpuBudgetAlertsEnabled=true`; `finopsOs=false`. ADR-0211. |
+| VL-310 | Supply Chain Security (Phase 177) | Done | SBOM/scan/findings inventory; `snykOs=false`. ADR-0212. |
+| VL-311 | Developer Experience Platform (Phase 178) | Done | CLI/SDK/codegen/docs/repo health; extends VL-127. ADR-0213. |
+| VL-312 | Platform Engineering Analytics (Phase 179) | Done | DORA + sibling aggregation. ADR-0214. |
+| VL-313 | Platform Engineering Production Audit (Phase 180) | Done | Audit pack under `docs/platform-engineering-cloud-audit/`; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
+| VL-314 | Control Plane Foundation (Phase 181) | Done | `/control-plane-cloud` hub; ADR-0216. `executesInference=false`; `dataPlaneOs=false`. |
+| VL-315 | Organization Control (Phase 182) | Done | Orgs/roles; `leastPrivilegeRequired`; `controlPlaneAdminNotDefault`. ADR-0217. |
+| VL-316 | Global Configuration Platform (Phase 183) | Done | Config/versioning/flags; secrets refs only. ADR-0218. |
+| VL-317 | Global Policy Engine (Phase 184) | Done | Extends Policy Runtime/Trust; `policyRuntimeIntegrated`. ADR-0219. |
+| VL-318 | Global Deployment Controller (Phase 185) | Done | Promote auth + rollback; extends release-engineering. ADR-0220. |
+| VL-319 | Global Routing Controller (Phase 186) | Done | Traffic/geo/AI routing catalog; `istioOs=false`. ADR-0221. |
+| VL-320 | Secrets & Certificate Platform (Phase 187) | Done | Envelope encryption + audit; metadata-only; `hashicorpVaultOs=false`. ADR-0222. |
+| VL-321 | Global Scheduler (Phase 188) | Done | Job/cron/workflow schedules; `executesInference=false`. ADR-0223. |
+| VL-322 | Control Plane Analytics (Phase 189) | Done | Sibling aggregation. ADR-0224. |
+| VL-323 | Control Plane Production Audit (Phase 190) | Done | Audit pack under `docs/control-plane-cloud-audit/`; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
+| VL-324 | Data Plane Foundation (Phase 191) | Done | `/data-plane-cloud` hub; ADR-0226. `managesOrgsPoliciesBilling=false`; `serviceMeshOs=false`. |
+| VL-325 | Translation Runtime (Phase 192) | Done | Thin over translate; `thinExecutionLayer`; ADR-0227. |
+| VL-326 | Speech Runtime (Phase 193) | Done | Thin over speech-cloud / speech-recognition; ADR-0228. |
+| VL-327 | Voice Runtime (Phase 194) | Done | Thin over voice-cloud / voice; ADR-0229. |
+| VL-328 | Vision Runtime (Phase 195) | Done | Thin over ocr / documents; ADR-0230. |
+| VL-329 | Knowledge Runtime (Phase 196) | Done | Thin over knowledge-cloud / knowledge / knowledge-fabric; ADR-0231. |
+| VL-330 | Embedding Runtime (Phase 197) | Done | Thin over embeddings / embedding-cloud; ADR-0232. |
+| VL-331 | Data Plane Streaming (Phase 198) | Done | Façade `data-plane-streaming` → streaming-runtime; `extendsStreamingRuntime`; ADR-0233. |
+| VL-332 | GPU Runtime (Phase 199) | Done | Thin over gpu-platform; `gpuBudgetLimitsRequired`; ADR-0234. |
+| VL-333 | Data Plane Production Audit (Phase 200) | Done | Audit pack under `docs/data-plane-cloud-audit/`; ADR-0235. Volume 18 closed. Service Mesh → past Volume 18. |
+| VL-334 | VAIOS Foundation (Phase 201) | Done | `/vaios` hub; ADR-0236. `unifyingOrchestrationLayer`; `notLinux`/`notKubernetes`; `enterpriseEngineeringSystemOs=false`. |
+| VL-335 | AI Scheduler (Phase 202) | Done | Unifies global-scheduler/GPU/workflow/agent queues; ADR-0237. |
+| VL-336 | Runtime Manager (Phase 203) | Done | Lifecycle catalog over Kernel + Data Plane runtimes; ADR-0238. |
+| VL-337 | Resource Manager (Phase 204) | Done | Resource allocation catalog; `gpuBudgetLimitsRequired`; ADR-0239. |
+| VL-338 | Workflow Operating System (Phase 205) | Done | Façade over workflow-runtime + marketplace; ADR-0240. |
+| VL-339 | Agent Operating System (Phase 206) | Done | Façade over agent-runtime + fabric + marketplace; ADR-0241. |
+| VL-340 | AI Memory Operating System (Phase 207) | Done | Façade over memory-runtime + fabric + knowledge-memory; ADR-0242. |
+| VL-341 | Knowledge Operating System (Phase 208) | Done | Façade over knowledge-runtime/fabric/cloud + AKG; ADR-0243. |
+| VL-342 | Plugin Operating System (Phase 209) | Done | Façade over plugin-runtime + marketplace; existing policy gates; ADR-0244. |
+| VL-343 | VAIOS Production Audit (Phase 210) | Done | Audit pack under `docs/vaios-audit/`; ADR-0245. Volume 19 closed. Enterprise Engineering System → past Volume 19. |
+| VL-344 | Enterprise Engineering System Foundation (Phase 211) | Done | `/enterprise-engineering-system` hub; ADR-0246. `architectureKnowledgeBaseOs=false`; `adrFactoryOs=false`. |
+| VL-345 | Engineering Governance (Phase 212) | Done | Councils + CAB/TSC; `humanSignOffRequired`; ADR-0247. |
+| VL-346 | Architecture Governance (Phase 213) | Done | ADR/RFC workflows point at `docs/adr`; `adrFactoryOs=false`; ADR-0248. |
+| VL-347 | Repository Standards (Phase 214) | Done | Monorepo/polyrepo/naming/branch/git standards; ADR-0249. |
+| VL-348 | Engineering Quality Platform (Phase 215) | Done | Quality catalog + dashboard snapshot; `sonarqubeOs=false`; ADR-0250. |
+| VL-349 | AI Engineering Standards (Phase 216) | Done | AI standards + retroactiveChecks Vol 11/12/17; ADR-0251. |
+| VL-350 | API Engineering Standards (Phase 217) | Done | REST/GraphQL/gRPC/SDK standards; ADR-0252. |
+| VL-351 | Database Engineering Standards (Phase 218) | Done | Postgres/Redis/ES/vector/KG standards; `databaseOs=false`; ADR-0253. |
+| VL-352 | Infrastructure Engineering Standards (Phase 219) | Done | IaC/deploy/GPU; FinOps+secrets honesty; `kubernetesOs=false`; ADR-0254. |
+| VL-353 | EES Production Audit (Phase 220) | Done | Audit pack under `docs/enterprise-engineering-system-audit/`; ADR-0255. Volume 20 closed. |
+| VL-354 | Corporate Operating System Foundation (Phase 221) | Done | `/corporate-operating-system`; ADR-0256. `realCorporateGovernance=false`. |
+| VL-355 | Corporate Governance Platform (Phase 222) | Done | Committee tracking; ADR-0257. |
+| VL-356 | Strategic Planning Platform (Phase 223) | Done | Strategy/OKR tooling; ADR-0258. |
+| VL-357 | Enterprise Portfolio Management (Phase 224) | Done | Portfolio tracking; ADR-0259. |
+| VL-358 | Business Architecture (Phase 225) | Done | Capability/value-stream models; ADR-0260. |
+| VL-359 | Enterprise Architecture Repository (Phase 226) | Done | Artifact store; `togafModelingSuiteOs=false`; ADR-0261. |
+| VL-360 | Corporate Knowledge System (Phase 227) | Done | Knowledge portal; `confluenceOs=false`; ADR-0262. |
+| VL-361 | Executive Intelligence Platform (Phase 228) | Done | Exec/board KPI cockpits; ADR-0263. |
+| VL-362 | Corporate Risk Platform (Phase 229) | Done | Risk register; ADR-0264. |
+| VL-363 | VCOS Production Audit (Phase 230) | Done | Audit pack + Digital Constitution; ADR-0265. Volume 21 closed. |
+| VL-364 | Global AI Standards Foundation (Phase 231) | Done | `/global-ai-standards` + `/iso-process`; ADR-0266/0276. `isoProcessMaturity=true`; recognition=false. |
+| VL-365 | AI Certification Platform (Phase 232) | Done | Scheme VGAS-PCS-001 + verify API; `thirdPartyAccreditation=false`; ADR-0267/0276. |
+| VL-366 | AI Compliance Framework (Phase 233) | Done | Self-assessment/gap analysis; ADR-0268. |
+| VL-367 | Reference Architectures (Phase 234) | Done | Industry blueprints; ADR-0269. |
+| VL-368 | Best Practices Library (Phase 235) | Done | Pattern catalog; ADR-0270. |
+| VL-369 | Enterprise Assessment Platform (Phase 236) | Done | Maturity assessments; ADR-0271. |
+| VL-370 | Standards Repository (Phase 237) | Done | Versioned standards content; ADR-0272. |
+| VL-371 | Global Partner Program (Phase 238) | Done | Partner portal records; ADR-0273. |
+| VL-372 | Standards Analytics (Phase 239) | Done | Adoption analytics; ADR-0274. |
+| VL-373 | VGAS Production Audit (Phase 240) | Done | Audit pack + certification guide; ADR-0275. Volume 22 closed. |
+| VL-374 | AI Economy Foundation (Phase 241) | Done | `/ai-economy`; ADR-0277. `worldsLargestAiEconomy=false`. |
+| VL-375 | AI Commerce Platform (Phase 242) | Done | Catalog/billing refs via Stripe; `handRolledCardHandling=false`; ADR-0278. |
+| VL-376 | AI Licensing Platform (Phase 243) | Done | Entitlement ledger; ADR-0279. |
+| VL-377 | Revenue Sharing Platform (Phase 244) | Done | Royalty/payout ledger; `autonomousPayouts=false`; ADR-0280. |
+| VL-378 | AI Talent Platform (Phase 245) | Done | Linguist/voice/translator marketplace; ADR-0281. |
+| VL-379 | Research Funding Platform (Phase 246) | Done | Grant tracking; ADR-0282. |
+| VL-380 | Global Community Platform (Phase 247) | Done | Forums/events/hackathons; ADR-0283. |
+| VL-381 | AI Investment Platform (Phase 248) | Done | Dashboard only; `fundingPortalOs=false`; ADR-0284. |
+| VL-382 | Economic Intelligence (Phase 249) | Done | Exec/adoption/revenue dashboards; ADR-0285. |
+| VL-383 | AIE Production Audit (Phase 250) | Done | Audit pack + economy report; ADR-0286. Volume 23 closed. |
+| VL-384 | Digital Civilization Foundation (Phase 251) | Done | `/digital-civilization`; ADR-0287. `civilizationInfrastructureOs=false`. |
+| VL-385 | National AI Platform (Phase 252) | Done | Demo public-sector desks; court/police/military/citizen-ID production=false; ADR-0288. |
+| VL-386 | Smart City Platform (Phase 253) | Done | City integrations; `productionEmergencyDispatch=false`; ADR-0289. |
+| VL-387 | Enterprise Nation Platform (Phase 254) | Done | Bank/hospital/university/telecom verticals; ADR-0290. |
+| VL-388 | Global Language Preservation (Phase 255) | Done | Archives/museums; consent gates; ADR-0291. |
+| VL-389 | Universal Translation Grid (Phase 256) | Done | Multi-channel translation infra; ADR-0292. |
+| VL-390 | Global Knowledge Network (Phase 257) | Done | Uni/library/museum nodes; ADR-0293. |
+| VL-391 | Global AI Federation (Phase 258) | Done | Federated collab; security-review flag; ADR-0294. |
+| VL-392 | Civilization Intelligence Dashboard (Phase 259) | Done | Adoption/impact metrics; ADR-0295. |
+| VL-393 | DCIV Production Audit (Phase 260) | Done | Audit pack + civilization report; ADR-0296. Volume 24 closed (v2.0 phases complete). |
 
 ---
 
@@ -453,3 +587,61 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS / celebrity without rights. |
 | 2026-10-03 | VL-258 Done: Creator Economy (Phase 125) — royalty math + profiles/invoices over VL-092 Connect; hand-checked scenarios; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | 2026-10-03 | VL-259 Done: Ecosystem Production Audit (Phase 126) — evidence pack; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence deferred to Volume 12. |
+| 2026-10-03 | VL-260–269 Done: African Intelligence Cloud hubs (Phases 127–136) — foundation, language registry, cultural intelligence, knowledge graph, six domain engines; ADR-0162–0171. Honesty for consent/medical/finance/government. |
+| 2026-10-03 | VL-270 Done: African Intelligence Production Audit (Phase 137) — evidence pack; ADR-0172. Volume 12 closed. Research / Global Intelligence → Volume 13+. |
+| 2026-10-03 | VL-271–279 Done: Research Cloud hubs (Phases 138–146) — foundation through research analytics; ADR-0173–0181. Synthetic labeling + open-science consent honesty. |
+| 2026-10-03 | VL-280 Done: Research Cloud Production Audit (Phase 147) — evidence pack; ADR-0182. Volume 13 closed. AI Sovereignty / MLOps → Volume 14+. |
+| 2026-10-03 | VL-281–290 Done: MLOps & LLMOps Cloud hubs (Phases 148–157) — foundation through AI ops dashboard; ADR-0183–0192. Promote gates + AgentOps policy visibility honesty. |
+| 2026-10-03 | VL-291 Done: MLOps & LLMOps Cloud Production Audit (Phase 158) — evidence pack; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
+| 2026-10-03 | VL-292–300 Done: Trust Cloud hubs (Phases 159–167) — foundation through trust analytics; ADR-0194–0202. Safety↔Policy, Privacy TK consent, Governance human sign-off, Compliance honesty. |
+| 2026-10-03 | VL-301 Done: Trust Cloud Production Audit (Phase 168) — evidence pack; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
+| 2026-10-03 | VL-302–312 Done: Platform Engineering Cloud hubs (Phases 169–179) — foundation through PE analytics; ADR-0204–0214. FinOps GPU alerts, supply-chain scan/findings, GitOps honesty. |
+| 2026-10-03 | VL-313 Done: Platform Engineering Cloud Production Audit (Phase 180) — evidence pack; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
+| 2026-10-03 | VL-314–322 Done: Control Plane Cloud hubs (Phases 181–189) — foundation through CP analytics; ADR-0216–0224. Secrets envelope/metadata, deploy auth+rollback, least privilege. |
+| 2026-10-03 | VL-323 Done: Control Plane Cloud Production Audit (Phase 190) — evidence pack; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
+| 2026-10-03 | VL-324–332 Done: Data Plane Cloud hubs (Phases 191–199) — foundation through GPU runtime; ADR-0226–0234. Thin execution layers; no Service Mesh. |
+| 2026-10-03 | VL-333 Done: Data Plane Cloud Production Audit (Phase 200) — evidence pack; ADR-0235. Volume 18 closed. Service Mesh / VAIOS deferred past Volume 18. |
+| 2026-10-03 | VL-334–342 Done: VAIOS hubs (Phases 201–209) — foundation through Plugin OS; ADR-0236–0244. Unifying orchestration over Kernel + Fabric + Data Plane; notLinux/notKubernetes. |
+| 2026-10-03 | VL-343 Done: VAIOS Production Audit (Phase 210) — evidence pack; ADR-0245. Volume 19 closed. Enterprise Engineering System deferred past Volume 19. |
+| 2026-10-03 | VL-344–352 Done: Enterprise Engineering System hubs (Phases 211–219) — foundation through Infrastructure Standards; ADR-0246–0254. Standards/governance for humans+Cursor; architectureKnowledgeBaseOs/adrFactoryOs=false. |
+| 2026-10-03 | VL-353 Done: EES Production Audit (Phase 220) — evidence pack; ADR-0255. Volume 20 closed. Architecture Knowledge Base / mass ADR factory deferred past Volume 20. |
+| 2026-10-03 | VL-354–362 Done: VCOS hubs (Phases 221–229) — foundation through Corporate Risk; ADR-0256–0264. Internal business software; realCorporateGovernance=false. |
+| 2026-10-03 | VL-363 Done: VCOS Production Audit (Phase 230) — audit pack + Digital Constitution; ADR-0265. Volume 21 closed. Ask for Volume 22 when ready. |
+| 2026-10-03 | VL-364-372 Done: VGAS hubs (Phases 231-239); ADR-0266-0274. internationalStandardAdoption/thirdPartyAccreditation=false. |
+| 2026-10-03 | VL-373 Done: VGAS Production Audit (Phase 240); ADR-0275. Volume 22 closed. Ask for Volume 23 when ready. |
+| 2026-10-03 | VGAS ISO process maturity: document control + 17024-inspired scheme + recognition pathway; ADR-0276. `isoProcessMaturity=true`; isoIeeeW3cRecognition/thirdPartyAccreditation remain false. |
+| 2026-10-03 | VL-374-382 Done: AIE hubs (Phases 241-249); ADR-0277-0285. Marketplace software; investment dashboard only; no autonomous payouts. |
+| 2026-10-03 | VL-383 Done: AIE Production Audit (Phase 250); ADR-0286. Volume 23 closed. Ask for Volume 24 when ready. |
+| 2026-10-03 | VL-384-392 Done: DCIV hubs (Phases 251-259); ADR-0287-0295. Demo public-sector platforms; high-stakes production flags false. |
+| 2026-10-03 | VL-393 Done: DCIV Production Audit (Phase 260); ADR-0296. Volume 24 closed — v2.0 phase-broken roadmap complete (260 phases). AI Internet vision paragraph not packaged as phases. |
+
+| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not OpenAI/ElevenLabs/Google). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
+
+## M25 — AI Internet (v2 261–300)
+
+| Phase | Name | Status | Notes |
+| --- | --- | --- | --- |
+| VL-394 | AI Internet (Phase 261) | Done | `/ai-internet` AI Internet hub; Prisma store; ADR-0308. |
+| VL-395 | AI DNS (Phase 262) | Done | `/ai-dns` AI Internet hub; Prisma store; ADR-0309. |
+| VL-396 | AI Identity Wallet (Phase 263) | Done | `/ai-identity-wallet` AI Internet hub; Prisma store; ADR-0310. |
+| VL-397 | AI Discovery (Phase 264) | Done | `/ai-discovery` AI Internet hub; Prisma store; ADR-0311. |
+| VL-398 | AI Federation Mesh (Phase 265) | Done | `/ai-federation-mesh` AI Internet hub; Prisma store; ADR-0312. |
+| VL-399 | A2A Protocol (Phase 266) | Done | `/a2a-protocol` AI Internet hub; Prisma store; ADR-0313. |
+| VL-400 | AI Trust Network (Phase 267) | Done | `/ai-trust-network` AI Internet hub; Prisma store; ADR-0314. |
+| VL-401 | AI Payment Network (Phase 268) | Done | `/ai-payment-network` AI Internet hub; Prisma store; ADR-0315. |
+| VL-402 | AI Certificate Authority (Phase 269) | Done | `/ai-certificate-authority` AI Internet hub; Prisma store; ADR-0316. |
+| VL-403 | AI Global Routing (Phase 270) | Done | `/ai-global-routing` AI Internet hub; Prisma store; ADR-0317. |
+| VL-404 | AI Governance Federation (Phase 271) | Done | `/ai-governance-federation` AI Internet hub; Prisma store; ADR-0318. |
+| VL-405 | AI Sovereignty Exchange (Phase 272) | Done | `/ai-sovereignty-exchange` AI Internet hub; Prisma store; ADR-0319. |
+| VL-406 | AI Marketplace Federation (Phase 273) | Done | `/ai-marketplace-federation` AI Internet hub; Prisma store; ADR-0320. |
+| VL-407 | VerbaLab Global OS (Phase 274) | Done | `/verbalab-global-os` AI Internet hub; Prisma store; ADR-0321. |
+| VL-408 | Credentials Readiness (Phase 275) | Done | `/credentials-readiness` AI Internet hub; Prisma store; ADR-0322. |
+| VL-409 | AI Internet Production Audit (Phase 276) | Done | Audit pack; Volume 25 closed — AI Internet 261–300 packaged. |
+
+| 2026-10-03 | Model keys: `vmod_live_`/`vmod_test_`/`vmod_root_` mint in `/model-keys`; docs/CREDENTIALS.md for Stripe/Clerk/Fly. ADR-0324. |
+| 2026-10-03 | Model Runtime honesty closeout: multimodal local Own AI runtime, weights probe, African eval (fwd+rev), gov/bank/hospital unlocks wired into Enterprise Nation + Gov Intel; `/model-runtime`; ADR-0325. |
+| 2026-10-03 | Partner Connectors: REST+MCP+CLI+SDK for Higgsfield/Claude/Cursor/Runway/etc over Own AI; `@verbalab/mcp` stdio; marketplace catalog APIs; `/partner-connectors`; ADR-0326. |
+| 2026-10-03 | Knowledge + Intelligence Cloud partials → shipped e2e: agent-intelligence + ai-observability hubs, memory sweeper, KB approval, OCR caption ingest, reasoning tool execution, catalog capability promotions. |
+| 2026-10-03 | Speech Cloud + Voice Studio partials → shipped e2e: streaming STT SSE, biometrics hub row fix, FAQ/speaker/accent/emotion/audio/pronunciation/wake/call/analytics + studio edit/timeline/SSML/analytics; OS extras remain deferred. |
+| 2026-10-03 | Voice Cloud partials → shipped e2e (sync Neural TTS / Cloning / Emotion Voice / Enhancement / Biometrics / Marketplace / Analytics); voice-conversion stays deferred; no TODOs in voice packs. |
+| 2026-10-03 | Voice Marketplace free-tier e2e: browse + free SKU publish/install without Pro; paid SKUs still Pro; access endpoint + console plan wiring; analytics/wake/call consoles cross-linked. |

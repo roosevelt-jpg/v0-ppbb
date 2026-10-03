@@ -4400,3 +4400,2421 @@ export class GqlEnterpriseAnalyticsReport {
   @Field()
   note!: string;
 }
+
+@ObjectType()
+export class GqlAfricanIntelligenceCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAfricanLanguageRegistryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  coverageComplete!: boolean;
+}
+
+
+@ObjectType()
+export class GqlCulturalIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAfricanKnowledgeGraphEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  neo4jOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGovernmentIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  officialGuidanceMustBeSourced!: boolean;
+}
+
+
+@ObjectType()
+export class GqlHealthcareIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  notMedicalAdvice!: boolean;
+}
+
+
+@ObjectType()
+export class GqlFinancialIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  notInvestmentAdvice!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEducationIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  verticalOperationsOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgriculturalIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  verticalOperationsOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTourismHeritageIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+@ObjectType()
+export class GqlResearchCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlExperimentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  weightsAndBiasesOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSyntheticDataPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  syntheticLabelRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlBenchmarkPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  publicLeaderboardOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEvaluationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  regeneratesModelEvaluationPlatform!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiPublicationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  doiRegistryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPatentInnovationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  usptoOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlOpenSciencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlResearchAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  aiSovereigntyOs!: boolean;
+}
+
+@ObjectType()
+export class GqlMlopsLlmopsCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlDatasetPipelineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  regeneratesDatasetMarketplace!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTrainingPipelineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  distributedTrainingOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlContinuousEvaluationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  continuousEvalPass!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPromptopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  langSmithOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRagopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  vectorDbOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgentopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyViolationsVisible!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiDriftDetectionEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  driftClear!: boolean;
+}
+
+
+@ObjectType()
+export class GqlContinuousLearningEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  humanApprovalRequiredBeforePromote!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiOperationsDashboardEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  trustCloudOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTrustCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAiSafetyPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyRuntimeIntegrated!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiGovernancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  humanSignOffRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlExplainabilityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  shapOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPrivacyPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlCompliancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  complianceToolingNotCertification!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRiskIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  grcSuiteOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlIdentityFederationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  oktaOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTrustAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  siemOs!: boolean;
+}
+
+@ObjectType()
+export class GqlPlatformEngineeringCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlInternalDeveloperPortalEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  backstageOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlServiceCatalogEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGoldenPathPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  scaffoldingOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGitopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  argoCdOs!: boolean;
+
+  @Field(() => Boolean)
+  fluxOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlReleaseEngineeringEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  spinnakerOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlReliabilityEngineeringEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  datadogOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlFinopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  finopsOs!: boolean;
+
+  @Field(() => Boolean)
+  gpuBudgetAlertsEnabled!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSupplyChainSecurityEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  snykOs!: boolean;
+
+  @Field(() => Int)
+  findingCount!: number;
+}
+
+
+@ObjectType()
+export class GqlDeveloperExperiencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  ideOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPlatformEngineeringAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  devopsIntelligenceOs!: boolean;
+}
+
+@ObjectType()
+export class GqlControlPlaneCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlOrganizationControlEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  leastPrivilegeRequired!: boolean;
+
+  @Field(() => Boolean)
+  controlPlaneAdminNotDefault!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalConfigurationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  secretsRefsOnly!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalPolicyEngineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyRuntimeIntegrated!: boolean;
+
+  @Field(() => Boolean)
+  leastPrivilegeRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalDeploymentControllerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  productionDeployRequiresAuthorization!: boolean;
+
+  @Field(() => Boolean)
+  rollbackPath!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalRoutingControllerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  istioOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSecretsCertificatePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  encryptedAtRest!: boolean;
+
+  @Field(() => Boolean)
+  neverLogPlaintextSecrets!: boolean;
+
+  @Field(() => Boolean)
+  envelopeEncryptionPattern!: boolean;
+
+  @Field(() => Boolean)
+  accessAuditing!: boolean;
+
+  @Field(() => Boolean)
+  hashicorpVaultOs!: boolean;
+
+  @Field(() => Int)
+  secretCount!: number;
+}
+
+
+@ObjectType()
+export class GqlGlobalSchedulerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  executesInference!: boolean;
+}
+
+
+@ObjectType()
+export class GqlControlPlaneAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  aggregatesSiblingHubs!: boolean;
+}
+
+@ObjectType()
+export class GqlDataPlaneCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlTranslationRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSpeechRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlVoiceRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlVisionRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlKnowledgeRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEmbeddingRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlDataPlaneStreamingEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGpuRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+@ObjectType()
+export class GqlVaiosProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAiSchedulerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRuntimeManagerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlResourceManagerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlWorkflowOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgentOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiMemoryOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlKnowledgeOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPluginOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseEngineeringSystemProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlEngineeringGovernanceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlArchitectureGovernanceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRepositoryStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEngineeringQualityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlApiEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlDatabaseEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlInfrastructureEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateGovernancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlStrategicPlanningPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterprisePortfolioManagementEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlBusinessArchitectureEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseArchitectureRepositoryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateKnowledgeSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlExecutiveIntelligencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateRiskPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalAiStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlAiCertificationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlAiComplianceFrameworkEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlReferenceArchitecturesEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlBestPracticesLibraryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseAssessmentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlStandardsRepositoryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalPartnerProgramEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlStandardsAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlAiEconomyEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiCommercePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiLicensingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlRevenueSharingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiTalentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlResearchFundingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalCommunityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiInvestmentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlEconomicIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlDigitalCivilizationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlNationalAiPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlSmartCityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseNationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalLanguagePreservationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlUniversalTranslationGridEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalKnowledgeNetworkEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalAiFederationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCivilizationIntelligenceDashboardEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlLibraryReferenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  libraryIndexOnly!: boolean;
+
+  @Field(() => Boolean)
+  executableRoadmapCompleteThroughPhase260!: boolean;
+
+  @Field(() => Boolean)
+  aiInternetExecutablePhases!: boolean;
+
+  @Field(() => Boolean)
+  missionControlOs!: boolean;
+
+  @Field(() => Boolean)
+  visionMarkedDoneWithoutSpec!: boolean;
+}
+

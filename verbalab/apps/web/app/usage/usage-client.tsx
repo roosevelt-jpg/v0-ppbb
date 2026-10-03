@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Summary = {
@@ -26,7 +27,7 @@ export function UsageClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         const data = await apiFetch<Summary>('/v1/usage/summary', { token });
         setSummary(data);

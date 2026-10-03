@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type BillingSummary = {
@@ -33,7 +34,7 @@ export function BillingClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [billing, memberRows] = await Promise.all([
       apiFetch<BillingSummary>('/v1/billing/summary', { token }),
@@ -52,7 +53,7 @@ export function BillingClient() {
     setError(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ url: string | null }>('/v1/billing/checkout', {
         method: 'POST',
@@ -70,7 +71,7 @@ export function BillingClient() {
     setError(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ url: string }>('/v1/billing/portal', {
         method: 'POST',

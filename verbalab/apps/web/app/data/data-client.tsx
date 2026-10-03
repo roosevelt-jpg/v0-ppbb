@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type DataSettings = {
@@ -40,7 +41,7 @@ export function DataClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [data, res, regions] = await Promise.all([
       apiFetch<DataSettings>('/v1/organization/data-settings', { token }),
@@ -64,7 +65,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<Residency>('/v1/organization/residency', {
         method: 'PATCH',
@@ -90,7 +91,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<DataSettings>('/v1/organization/data-settings', {
         method: 'PATCH',
@@ -112,7 +113,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<Record<string, unknown>>('/v1/organization/export', {
         method: 'POST',
@@ -138,7 +139,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/organization', {
         method: 'DELETE',

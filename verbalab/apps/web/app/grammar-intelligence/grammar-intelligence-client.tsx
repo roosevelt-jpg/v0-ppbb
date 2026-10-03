@@ -4,6 +4,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Overview = {
@@ -40,7 +41,7 @@ export function GrammarIntelligenceClient() {
 
   async function runSuggest() {
     setError(null);
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setResult(
       await apiFetch<SuggestResult>('/v1/grammar/suggest', {
@@ -53,7 +54,7 @@ export function GrammarIntelligenceClient() {
 
   async function runSpell() {
     setError(null);
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const res = await apiFetch<{ corrected: string; issueCount: number }>('/v1/grammar/spell', {
       method: 'POST',

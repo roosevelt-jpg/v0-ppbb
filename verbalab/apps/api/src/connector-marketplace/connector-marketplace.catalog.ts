@@ -20,6 +20,9 @@ export const CONNECTOR_MARKETPLACE_CATEGORIES = [
   'email',
   'telephony',
   'payments',
+  'video',
+  'llm',
+  'agent',
 ] as const;
 
 export type ConnectorMarketplaceCategory = (typeof CONNECTOR_MARKETPLACE_CATEGORIES)[number];
@@ -131,6 +134,94 @@ export const CONNECTOR_CATALOG: ConnectorCatalogEntry[] = [
     api: null,
     notes: 'Metadata entitlement. Live card vault forbidden; Stripe stays elsewhere.',
   },
+  {
+    key: 'partner.higgsfield',
+    name: 'Higgsfield Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/higgsfield',
+    notes: 'Video platform partner API via Partner Connectors + MCP (ADR-0326).',
+  },
+  {
+    key: 'partner.claude',
+    name: 'Claude MCP Partner Connector',
+    category: 'llm',
+    status: 'shipped',
+    api: '/v1/partner-connectors/mcp',
+    notes: 'Claude/Cursor-ready MCP tool server over Own AI.',
+  },
+  {
+    key: 'partner.cursor',
+    name: 'Cursor MCP Partner Connector',
+    category: 'agent',
+    status: 'shipped',
+    api: '/v1/partner-connectors/mcp/manifest',
+    notes: 'Cursor MCP manifest + stdio bridge (@verbalab/mcp).',
+  },
+  {
+    key: 'partner.runway',
+    name: 'Runway Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/runway',
+    notes: 'Video partner invoke + webhooks.',
+  },
+  {
+    key: 'partner.pika',
+    name: 'Pika Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/pika',
+    notes: 'Short-form video partner connector.',
+  },
+  {
+    key: 'partner.luma',
+    name: 'Luma Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/luma',
+    notes: 'Cinematic video partner connector.',
+  },
+  {
+    key: 'partner.kling',
+    name: 'Kling Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/kling',
+    notes: 'Video partner connector.',
+  },
+  {
+    key: 'partner.heygen',
+    name: 'HeyGen Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/heygen',
+    notes: 'Avatar/video voice partner connector.',
+  },
+  {
+    key: 'partner.synthesia',
+    name: 'Synthesia Partner Connector',
+    category: 'video',
+    status: 'shipped',
+    api: '/v1/partner-connectors/platforms/synthesia',
+    notes: 'Enterprise video partner connector.',
+  },
+  {
+    key: 'partner.chatgpt',
+    name: 'ChatGPT Agents Partner Connector',
+    category: 'llm',
+    status: 'shipped',
+    api: '/v1/partner-connectors/tools',
+    notes: 'Tool-calling surface for OpenAI-style agents.',
+  },
+  {
+    key: 'partner.custom',
+    name: 'Custom Partner Connector',
+    category: 'cloud',
+    status: 'shipped',
+    api: '/v1/partner-connectors/invoke',
+    notes: 'Generic REST/MCP/CLI partner invoke.',
+  },
 ];
 
 export function findConnectorCatalogEntry(key: string): ConnectorCatalogEntry | undefined {
@@ -147,7 +238,7 @@ export function connectorMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Connector Marketplace',
     note:
-      'Connector Marketplace (VL-256). Publish/license connector SKUs over the built-in connector catalog + existing Slack connector. Install grants workspace entitlements — not live arbitrary outbound, Zapier, or iPaaS OS. Monetization records MarketplaceSale receipts; Stripe Connect via VL-092.',
+      'Connector Marketplace. Publish/license connector SKUs over the built-in connector catalog + existing Slack connector. Install grants workspace entitlements — not live arbitrary outbound, Zapier, or iPaaS OS. Monetization records MarketplaceSale receipts; Stripe Connect via',
     capabilities: [
       {
         id: 'crm-connectors',

@@ -13,7 +13,7 @@ export function voiceStudioEngineCatalog() {
   return {
     product: 'VerbaLab Voice Studio',
     note:
-      'Professional Voice Studio hub over Neural TTS, clones, and VL-120 African studio UX. Linear timeline + SSML lite + pronunciation lexicon + voice comparison — not a nonlinear DAW / Premiere / Descript parity product.',
+      'Professional Voice Studio hub over Neural TTS, clones, and African studio UX. Linear timeline + SSML lite + pronunciation lexicon + voice comparison — not a nonlinear DAW / Premiere / Descript parity product.',
     capabilities: [
       {
         id: 'voice-library',
@@ -25,16 +25,17 @@ export function voiceStudioEngineCatalog() {
       {
         id: 'voice-editing',
         name: 'Voice Editing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-studio/profiles',
-        notes: 'Saved voice profiles (voice/language/notes). Waveform/timbre editing deferred.',
+        notes:
+          'Shipped saved voice profiles (voice/language/notes). Waveform/timbre editing deferred.',
       },
       {
         id: 'pronunciation-editor',
         name: 'Pronunciation Editor',
         status: 'shipped',
         api: 'GET|POST /v1/voice-studio/pronunciation',
-        notes: 'Workspace grapheme→alias lexicon before TTS. Distinct from VL-156 assess/coach.',
+        notes: 'Workspace grapheme→alias lexicon before TTS. Distinct from assess/coach.',
       },
       {
         id: 'voice-profiles',
@@ -60,16 +61,18 @@ export function voiceStudioEngineCatalog() {
       {
         id: 'timeline-editing',
         name: 'Timeline Editing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-studio/timeline/render',
-        notes: 'Ordered speak/pause segments only. Not nonlinear NLE / multi-track DAW.',
+        notes:
+          'Shipped ordered speak/pause linear timeline. Nonlinear NLE / multi-track DAW deferred.',
       },
       {
         id: 'ssml-editor',
         name: 'SSML Editor',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-studio/ssml/compile',
-        notes: 'SSML lite (break/prosody/phoneme/say-as) → plain plan. Vendors do not get SSML markup.',
+        notes:
+          'Shipped SSML lite (break/prosody/phoneme/say-as) → plain plan. Vendor SSML passthrough deferred.',
       },
       {
         id: 'voice-comparison',
@@ -109,9 +112,10 @@ export function voiceStudioEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/voice-studio/engine/analytics',
-        notes: 'Studio action counts. Full Voice Analytics = Phase 35.',
+        notes:
+          'Shipped studio action counts + shared TTS metering. Full Voice Analytics hub = Phase 35.',
       },
     ] satisfies StudioCapability[],
     honesty: {

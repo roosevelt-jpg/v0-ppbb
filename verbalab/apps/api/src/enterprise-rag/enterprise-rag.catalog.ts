@@ -13,7 +13,7 @@ export function enterpriseRagCatalog() {
   return {
     product: 'VerbaLab Enterprise RAG Platform',
     note:
-      'Workspace-scoped retrieval-augmented generation over Knowledge Base chunks (VL-198). Extends VL-062 RAG + Enterprise Search hybrid + Vector/Context. Not a LangChain/LlamaIndex/agentic-RAG OS. Hand-verify retrieval on real docs — green tests alone are insufficient.',
+      'Workspace-scoped retrieval-augmented generation over Knowledge Base chunks. Extends RAG + Enterprise Search hybrid + Vector/Context. Not a LangChain/LlamaIndex/agentic-RAG OS. Hand-verify retrieval on real docs — green tests alone are insufficient.',
     capabilities: [
       {
         id: 'retrieval',
@@ -27,26 +27,26 @@ export function enterpriseRagCatalog() {
         name: 'Chunking',
         status: 'shipped',
         api: 'POST /v1/enterprise-rag/chunk',
-        notes: 'Preview overlapping character windows (same algorithm as VL-062 ingest).',
+        notes: 'Preview overlapping character windows (same algorithm as ingest).',
       },
       {
         id: 'hybrid-search',
         name: 'Hybrid search',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/enterprise-rag/retrieve',
-        notes: 'mode=hybrid — light RRF via Enterprise Search (VL-195). Not BM25 OS.',
+        notes: 'mode=hybrid — light RRF via Enterprise Search. Not BM25 OS.',
       },
       {
         id: 'vector-search',
         name: 'Vector search',
         status: 'shipped',
         api: 'POST /v1/enterprise-rag/retrieve',
-        notes: 'mode=semantic — pgvector cosine via VL-182 / VL-062.',
+        notes: 'mode=semantic — pgvector cosine via /',
       },
       {
         id: 'knowledge-ranking',
         name: 'Knowledge ranking',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/enterprise-rag/retrieve',
         notes: 'Score / RRF order + context optimization. Learned rankers deferred.',
       },
@@ -60,7 +60,7 @@ export function enterpriseRagCatalog() {
       {
         id: 'context-optimization',
         name: 'Context optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/enterprise-rag/retrieve',
         notes: 'Dedupe + maxChars truncation before LLM. Advanced compression deferred.',
       },

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -43,7 +44,7 @@ export function VoiceAnalyticsClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, over, mon] = await Promise.all([
       apiFetch<Engine>('/v1/voice-analytics/engine', { token }),
@@ -64,7 +65,7 @@ export function VoiceAnalyticsClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch('/v1/voice-analytics/report', { token });
       setReport(JSON.stringify(body, null, 2));
@@ -91,7 +92,9 @@ export function VoiceAnalyticsClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Track voice usage, voices, marketplace revenue, and quality proxies. Not a BI cloud. Speech
         Analytics stays at <Link href="/speech-analytics">/speech-analytics</Link>.{' '}
-        <Link href="/voice-cloud">Voice Cloud</Link>.
+        <Link href="/voice-cloud">Voice Cloud</Link>
+        {' · '}
+        <Link href="/voice-marketplace">Voice Marketplace</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

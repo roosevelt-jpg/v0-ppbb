@@ -11,6 +11,8 @@ import {
   FixtureVoiceCloneAdapter,
   type VoiceCloneSample,
 } from './elevenlabs-voice-clone.adapter';
+import { createVerbalabVoiceCloneAdapter } from './verbalab-voice-clone.adapter';
+import { allowVendorFallback } from '../gateway/verbalab-own-ai';
 
 export const VOICE_CLONE_PREFIX = 'clone:';
 
@@ -46,7 +48,15 @@ export class VoiceClonesService {
 
   private provider() {
     if (this.fixtureOverride) return this.fixtureOverride;
-    if (process.env.VOICE_CLONE_FIXTURE === '1') return new FixtureVoiceCloneAdapter();
+    if (process.env.VOICE_CLONE_FIXTURE === '1' || process.env.VERBALAB_OWN_AI_FIXTURE === '1') {
+      return new FixtureVoiceCloneAdapter();
+    }
+    // Primary: VerbaLab-owned Voice FM clone endpoint (video dubbing / African voices).
+    const own = createVerbalabVoiceCloneAdapter();
+    if (own.isConfigured() || !allowVendorFallback()) {
+      return own;
+    }
+    // Legacy vendor only when explicitly allowed.
     return new ElevenLabsVoiceCloneAdapter(process.env.ELEVENLABS_API_KEY ?? '');
   }
 

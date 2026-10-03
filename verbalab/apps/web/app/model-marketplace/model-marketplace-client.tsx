@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Listing = {
@@ -39,7 +40,7 @@ export function ModelMarketplaceClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/model-marketplace/engine', { token }),
@@ -113,7 +114,7 @@ export function ModelMarketplaceClient() {
             <h2 style={label}>Listings</h2>
             {listings.length === 0 ? (
               <p style={{ margin: 0, color: 'var(--muted)' }}>
-                No published model listings yet. Publish a VL-110 / Model Registry card slug here.
+                No published model listings yet. Publish a / Model Registry card slug here.
               </p>
             ) : (
               <ul style={{ margin: 0, paddingLeft: '1.1rem', lineHeight: 1.7 }}>

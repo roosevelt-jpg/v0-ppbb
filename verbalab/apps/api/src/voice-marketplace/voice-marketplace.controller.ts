@@ -35,6 +35,12 @@ export class VoiceMarketplaceController {
     return this.marketplace.engine();
   }
 
+  @Get('access')
+  @UseGuards(TranslateAuthGuard)
+  access(@Req() req: AuthedReq) {
+    return this.marketplace.access(req.translateAuth.organizationId);
+  }
+
   @Get('language-packs')
   languagePacks() {
     return this.marketplace.languagePacks();

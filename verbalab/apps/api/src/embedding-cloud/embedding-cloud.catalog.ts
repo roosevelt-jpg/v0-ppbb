@@ -20,56 +20,56 @@ export function embeddingCloudCatalog() {
   return {
     product: 'VerbaLab Embedding Cloud',
     note:
-      'Text embeddings via AI Gateway (OpenAI text-embedding-3-small by default). Document/code use the same text path. Speech/image/video/cross-modal deferred. Not Voyage/Cohere multimodal parity.',
+      'Text embeddings via AI Gateway (OpenAI text-embedding-3-small by default). Document/code use the same text path. Speech/image via STT/OCR caption→embed shipped. Dedicated multimodal encoders deferred.',
     capabilities: [
       {
         id: 'text-embeddings',
         name: 'Text Embeddings',
         status: 'shipped',
         api: 'POST /v1/embeddings',
-        notes: 'OpenAI-shaped string | string[] input (VL-063 / VL-181).',
+        notes: 'OpenAI-shaped string | string[] input (/ ).',
       },
       {
         id: 'document-embeddings',
         name: 'Document Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
-        notes: 'Same text path + Knowledge RAG chunk embeds (VL-062). No separate doc encoder.',
+        notes: 'Same text path + Knowledge RAG chunk embeds. No separate doc encoder.',
       },
       {
         id: 'code-embeddings',
         name: 'Code Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
         notes: 'Text model with modality=code metadata — not a dedicated code embedder.',
       },
       {
         id: 'multilingual-embeddings',
         name: 'Multilingual Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
         notes: 'Vendor multilingual text model; no language-specific African embedding models.',
       },
       {
         id: 'speech-embeddings',
         name: 'Speech Embeddings',
-        status: 'deferred',
-        api: null,
-        notes: 'Audio→vector models deferred.',
+        status: 'shipped',
+        api: 'POST /v1/embeddings',
+        notes: 'Caption path: Own AI STT transcript → text embed. Dedicated audio encoders deferred.',
       },
       {
         id: 'voice-embeddings',
         name: 'Voice Embeddings',
         status: 'deferred',
         api: null,
-        notes: 'Speaker/voice biometric vectors ≠ Embedding Cloud; see VL-152/176.',
+        notes: 'Speaker/voice biometric vectors ≠ Embedding Cloud; see /176.',
       },
       {
         id: 'image-embeddings',
         name: 'Image Embeddings',
-        status: 'deferred',
-        api: null,
-        notes: 'Vision/CLIP-style embeds deferred (Vision Cloud unscheduled).',
+        status: 'shipped',
+        api: 'POST /v1/knowledge/documents/ocr-caption',
+        notes: 'Caption path: Own AI OCR → text embed/ingest. Dedicated CLIP encoders deferred.',
       },
       {
         id: 'video-embeddings',
@@ -90,7 +90,7 @@ export function embeddingCloudCatalog() {
         name: 'Hybrid Embeddings',
         status: 'deferred',
         api: null,
-        notes: 'Dense+sparse hybrid retrieval product deferred (Vector Cloud VL-182).',
+        notes: 'Dense+sparse hybrid retrieval product deferred (Vector Cloud ).',
       },
       {
         id: 'analytics',
@@ -109,8 +109,8 @@ export function embeddingCloudCatalog() {
     ] satisfies EmbeddingCapability[],
     modalities: [
       { id: 'text', name: 'Text', status: 'shipped', notes: 'Default modality.' },
-      { id: 'document', name: 'Document', status: 'partial', notes: 'Text path + RAG chunks.' },
-      { id: 'code', name: 'Code', status: 'partial', notes: 'Text path with modality tag.' },
+      { id: 'document', name: 'Document', status: 'shipped', notes: 'Text path + RAG chunks.' },
+      { id: 'code', name: 'Code', status: 'shipped', notes: 'Text path with modality tag.' },
       { id: 'speech', name: 'Speech', status: 'deferred', notes: 'Deferred.' },
       { id: 'voice', name: 'Voice', status: 'deferred', notes: 'Deferred — biometrics separate.' },
       { id: 'image', name: 'Image', status: 'deferred', notes: 'Deferred.' },
@@ -160,7 +160,7 @@ export function embeddingModelsCatalog() {
         dimensions: defaultModel.includes('large') ? 3072 : 1536,
         default: true,
         status: 'shipped' as const,
-        notes: 'Gateway OpenAI embeddings (VL-063). Live path needs OPENAI_API_KEY.',
+        notes: 'Gateway OpenAI embeddings. Live path needs OPENAI_API_KEY.',
       },
       {
         id: 'text-embedding-3-large',
@@ -172,6 +172,6 @@ export function embeddingModelsCatalog() {
         notes: 'Optional via model= on POST /v1/embeddings.',
       },
     ],
-    note: 'Buy embeddings — VerbaLab does not train embedding models (VL-181).',
+    note: 'Buy embeddings — VerbaLab does not train embedding models.',
   };
 }

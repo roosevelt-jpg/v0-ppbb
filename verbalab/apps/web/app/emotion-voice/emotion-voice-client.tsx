@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Profile = {
@@ -32,7 +33,7 @@ export function EmotionVoiceClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, prof] = await Promise.all([
       apiFetch<Engine>('/v1/emotion-voice/engine', { token }),
@@ -51,7 +52,7 @@ export function EmotionVoiceClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await fetch(`${API_URL}/v1/emotion-voice/synthesize`, {
         method: 'POST',

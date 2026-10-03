@@ -17,7 +17,7 @@ export function pluginMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Plugin Marketplace',
     note:
-      'Plugin Marketplace (VL-250). Publish/install/version/review sandboxed plugins. Execution always goes through Plugin Runtime invoke + PluginPolicyGate (hard allowlist) and Policy Fabric hard gate — never live arbitrary code. Extends VL-221 / VL-090 listings kind=plugin. Not a browser/VS Code extension store OS.',
+      'Plugin Marketplace. Publish/install/version/review sandboxed plugins. Execution always goes through Plugin Runtime invoke + PluginPolicyGate (hard allowlist) and Policy Fabric hard gate — never live arbitrary code. Extends / listings kind=plugin. Not a browser/VS Code extension store OS.',
     capabilities: [
       {
         id: 'plugin-publishing',
@@ -91,7 +91,7 @@ export function pluginMarketplaceEngineCatalog() {
         status: 'partial',
         api: 'POST /v1/plugin-marketplace/listings/:id/install',
         notes:
-          'Paid listings record MarketplaceSale receipts. Stripe Connect path shared with VL-092 when configured — not a payment-processor OS.',
+          'Paid listings record MarketplaceSale receipts. Stripe Connect path shared with when configured — not a payment-processor OS.',
       },
     ] satisfies PluginMarketplaceCapability[],
     architecture: {

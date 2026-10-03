@@ -35,6 +35,128 @@ import { WorkflowMarketplaceApplicationModule } from '../workflow-marketplace/ap
 import { ConnectorMarketplaceApplicationModule } from '../connector-marketplace/application/connector-marketplace-application.module';
 import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-marketplace/application/voice-language-marketplace-application.module';
 import { CreatorEconomyApplicationModule } from '../creator-economy/application/creator-economy-application.module';
+import { TourismHeritageIntelligenceApplicationModule } from '../tourism-heritage-intelligence/application/tourism-heritage-intelligence-application.module';
+import { ResearchAnalyticsApplicationModule } from '../research-analytics/application/research-analytics-application.module';
+import { AiOperationsDashboardApplicationModule } from '../ai-operations-dashboard/application/ai-operations-dashboard-application.module';
+import { ContinuousLearningApplicationModule } from '../continuous-learning/application/continuous-learning-application.module';
+import { AiDriftDetectionApplicationModule } from '../ai-drift-detection/application/ai-drift-detection-application.module';
+import { AgentopsPlatformApplicationModule } from '../agentops-platform/application/agentops-platform-application.module';
+import { RagopsPlatformApplicationModule } from '../ragops-platform/application/ragops-platform-application.module';
+import { PromptopsPlatformApplicationModule } from '../promptops-platform/application/promptops-platform-application.module';
+import { ContinuousEvaluationApplicationModule } from '../continuous-evaluation/application/continuous-evaluation-application.module';
+import { TrainingPipelineApplicationModule } from '../training-pipeline/application/training-pipeline-application.module';
+import { DatasetPipelineApplicationModule } from '../dataset-pipeline/application/dataset-pipeline-application.module';
+import { MlopsLlmopsCloudApplicationModule } from '../mlops-llmops-cloud/application/mlops-llmops-cloud-application.module';
+import { TrustCloudApplicationModule } from '../trust-cloud/application/trust-cloud-application.module';
+import { AiSafetyPlatformApplicationModule } from '../ai-safety-platform/application/ai-safety-platform-application.module';
+import { AiGovernancePlatformApplicationModule } from '../ai-governance-platform/application/ai-governance-platform-application.module';
+import { ExplainabilityPlatformApplicationModule } from '../explainability-platform/application/explainability-platform-application.module';
+import { PrivacyPlatformApplicationModule } from '../privacy-platform/application/privacy-platform-application.module';
+import { CompliancePlatformApplicationModule } from '../compliance-platform/application/compliance-platform-application.module';
+import { RiskIntelligenceApplicationModule } from '../risk-intelligence/application/risk-intelligence-application.module';
+import { IdentityFederationApplicationModule } from '../identity-federation/application/identity-federation-application.module';
+import { TrustAnalyticsApplicationModule } from '../trust-analytics/application/trust-analytics-application.module';
+import { PlatformEngineeringCloudApplicationModule } from '../platform-engineering-cloud/application/platform-engineering-cloud-application.module';
+import { InternalDeveloperPortalApplicationModule } from '../internal-developer-portal/application/internal-developer-portal-application.module';
+import { ServiceCatalogApplicationModule } from '../service-catalog/application/service-catalog-application.module';
+import { GoldenPathPlatformApplicationModule } from '../golden-path-platform/application/golden-path-platform-application.module';
+import { GitopsPlatformApplicationModule } from '../gitops-platform/application/gitops-platform-application.module';
+import { ReleaseEngineeringApplicationModule } from '../release-engineering/application/release-engineering-application.module';
+import { ReliabilityEngineeringApplicationModule } from '../reliability-engineering/application/reliability-engineering-application.module';
+import { FinopsPlatformApplicationModule } from '../finops-platform/application/finops-platform-application.module';
+import { SupplyChainSecurityApplicationModule } from '../supply-chain-security/application/supply-chain-security-application.module';
+import { DeveloperExperiencePlatformApplicationModule } from '../developer-experience-platform/application/developer-experience-platform-application.module';
+import { PlatformEngineeringAnalyticsApplicationModule } from '../platform-engineering-analytics/application/platform-engineering-analytics-application.module';
+import { ControlPlaneCloudApplicationModule } from '../control-plane-cloud/application/control-plane-cloud-application.module';
+import { OrganizationControlApplicationModule } from '../organization-control/application/organization-control-application.module';
+import { GlobalConfigurationPlatformApplicationModule } from '../global-configuration-platform/application/global-configuration-platform-application.module';
+import { GlobalPolicyEngineApplicationModule } from '../global-policy-engine/application/global-policy-engine-application.module';
+import { GlobalDeploymentControllerApplicationModule } from '../global-deployment-controller/application/global-deployment-controller-application.module';
+import { GlobalRoutingControllerApplicationModule } from '../global-routing-controller/application/global-routing-controller-application.module';
+import { SecretsCertificatePlatformApplicationModule } from '../secrets-certificate-platform/application/secrets-certificate-platform-application.module';
+import { GlobalSchedulerApplicationModule } from '../global-scheduler/application/global-scheduler-application.module';
+import { ControlPlaneAnalyticsApplicationModule } from '../control-plane-analytics/application/control-plane-analytics-application.module';
+import { DataPlaneCloudApplicationModule } from '../data-plane-cloud/application/data-plane-cloud-application.module';
+import { TranslationRuntimeApplicationModule } from '../translation-runtime/application/translation-runtime-application.module';
+import { SpeechRuntimeApplicationModule } from '../speech-runtime/application/speech-runtime-application.module';
+import { VoiceRuntimeApplicationModule } from '../voice-runtime/application/voice-runtime-application.module';
+import { VisionRuntimeApplicationModule } from '../vision-runtime/application/vision-runtime-application.module';
+import { KnowledgeRuntimeApplicationModule } from '../knowledge-runtime/application/knowledge-runtime-application.module';
+import { EmbeddingRuntimeApplicationModule } from '../embedding-runtime/application/embedding-runtime-application.module';
+import { DataPlaneStreamingApplicationModule } from '../data-plane-streaming/application/data-plane-streaming-application.module';
+import { GpuRuntimeApplicationModule } from '../gpu-runtime/application/gpu-runtime-application.module';
+import { VaiosApplicationModule } from '../vaios/application/vaios-application.module';
+import { AiSchedulerApplicationModule } from '../ai-scheduler/application/ai-scheduler-application.module';
+import { RuntimeManagerApplicationModule } from '../runtime-manager/application/runtime-manager-application.module';
+import { ResourceManagerApplicationModule } from '../resource-manager/application/resource-manager-application.module';
+import { WorkflowOperatingSystemApplicationModule } from '../workflow-operating-system/application/workflow-operating-system-application.module';
+import { AgentOperatingSystemApplicationModule } from '../agent-operating-system/application/agent-operating-system-application.module';
+import { AiMemoryOperatingSystemApplicationModule } from '../ai-memory-operating-system/application/ai-memory-operating-system-application.module';
+import { KnowledgeOperatingSystemApplicationModule } from '../knowledge-operating-system/application/knowledge-operating-system-application.module';
+import { PluginOperatingSystemApplicationModule } from '../plugin-operating-system/application/plugin-operating-system-application.module';
+import { EnterpriseEngineeringSystemApplicationModule } from '../enterprise-engineering-system/application/enterprise-engineering-system-application.module';
+import { EngineeringGovernanceApplicationModule } from '../engineering-governance/application/engineering-governance-application.module';
+import { ArchitectureGovernanceApplicationModule } from '../architecture-governance/application/architecture-governance-application.module';
+import { RepositoryStandardsApplicationModule } from '../repository-standards/application/repository-standards-application.module';
+import { EngineeringQualityPlatformApplicationModule } from '../engineering-quality-platform/application/engineering-quality-platform-application.module';
+import { AiEngineeringStandardsApplicationModule } from '../ai-engineering-standards/application/ai-engineering-standards-application.module';
+import { ApiEngineeringStandardsApplicationModule } from '../api-engineering-standards/application/api-engineering-standards-application.module';
+import { DatabaseEngineeringStandardsApplicationModule } from '../database-engineering-standards/application/database-engineering-standards-application.module';
+import { InfrastructureEngineeringStandardsApplicationModule } from '../infrastructure-engineering-standards/application/infrastructure-engineering-standards-application.module';
+import { CorporateOperatingSystemApplicationModule } from '../corporate-operating-system/application/corporate-operating-system-application.module';
+import { CorporateGovernancePlatformApplicationModule } from '../corporate-governance-platform/application/corporate-governance-platform-application.module';
+import { StrategicPlanningPlatformApplicationModule } from '../strategic-planning-platform/application/strategic-planning-platform-application.module';
+import { EnterprisePortfolioManagementApplicationModule } from '../enterprise-portfolio-management/application/enterprise-portfolio-management-application.module';
+import { BusinessArchitectureApplicationModule } from '../business-architecture/application/business-architecture-application.module';
+import { EnterpriseArchitectureRepositoryApplicationModule } from '../enterprise-architecture-repository/application/enterprise-architecture-repository-application.module';
+import { CorporateKnowledgeSystemApplicationModule } from '../corporate-knowledge-system/application/corporate-knowledge-system-application.module';
+import { ExecutiveIntelligencePlatformApplicationModule } from '../executive-intelligence-platform/application/executive-intelligence-platform-application.module';
+import { CorporateRiskPlatformApplicationModule } from '../corporate-risk-platform/application/corporate-risk-platform-application.module';
+import { GlobalAiStandardsApplicationModule } from '../global-ai-standards/application/global-ai-standards-application.module';
+import { AiEconomyApplicationModule } from '../ai-economy/application/ai-economy-application.module';
+import { AiCommercePlatformApplicationModule } from '../ai-commerce-platform/application/ai-commerce-platform-application.module';
+import { AiLicensingPlatformApplicationModule } from '../ai-licensing-platform/application/ai-licensing-platform-application.module';
+import { RevenueSharingPlatformApplicationModule } from '../revenue-sharing-platform/application/revenue-sharing-platform-application.module';
+import { AiTalentPlatformApplicationModule } from '../ai-talent-platform/application/ai-talent-platform-application.module';
+import { ResearchFundingPlatformApplicationModule } from '../research-funding-platform/application/research-funding-platform-application.module';
+import { GlobalCommunityPlatformApplicationModule } from '../global-community-platform/application/global-community-platform-application.module';
+import { AiInvestmentPlatformApplicationModule } from '../ai-investment-platform/application/ai-investment-platform-application.module';
+import { EconomicIntelligenceApplicationModule } from '../economic-intelligence/application/economic-intelligence-application.module';
+import { DigitalCivilizationApplicationModule } from '../digital-civilization/application/digital-civilization-application.module';
+import { LibraryReferenceApplicationModule } from '../library-reference/application/library-reference-application.module';
+import { NationalAiPlatformApplicationModule } from '../national-ai-platform/application/national-ai-platform-application.module';
+import { SmartCityPlatformApplicationModule } from '../smart-city-platform/application/smart-city-platform-application.module';
+import { EnterpriseNationPlatformApplicationModule } from '../enterprise-nation-platform/application/enterprise-nation-platform-application.module';
+import { GlobalLanguagePreservationApplicationModule } from '../global-language-preservation/application/global-language-preservation-application.module';
+import { UniversalTranslationGridApplicationModule } from '../universal-translation-grid/application/universal-translation-grid-application.module';
+import { GlobalKnowledgeNetworkApplicationModule } from '../global-knowledge-network/application/global-knowledge-network-application.module';
+import { GlobalAiFederationApplicationModule } from '../global-ai-federation/application/global-ai-federation-application.module';
+import { CivilizationIntelligenceDashboardApplicationModule } from '../civilization-intelligence-dashboard/application/civilization-intelligence-dashboard-application.module';
+import { AiCertificationPlatformApplicationModule } from '../ai-certification-platform/application/ai-certification-platform-application.module';
+import { AiComplianceFrameworkApplicationModule } from '../ai-compliance-framework/application/ai-compliance-framework-application.module';
+import { ReferenceArchitecturesApplicationModule } from '../reference-architectures/application/reference-architectures-application.module';
+import { BestPracticesLibraryApplicationModule } from '../best-practices-library/application/best-practices-library-application.module';
+import { EnterpriseAssessmentPlatformApplicationModule } from '../enterprise-assessment-platform/application/enterprise-assessment-platform-application.module';
+import { StandardsRepositoryApplicationModule } from '../standards-repository/application/standards-repository-application.module';
+import { GlobalPartnerProgramApplicationModule } from '../global-partner-program/application/global-partner-program-application.module';
+import { StandardsAnalyticsApplicationModule } from '../standards-analytics/application/standards-analytics-application.module';
+import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
+import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
+import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
+import { EvaluationPlatformApplicationModule } from '../evaluation-platform/application/evaluation-platform-application.module';
+import { BenchmarkPlatformApplicationModule } from '../benchmark-platform/application/benchmark-platform-application.module';
+import { SyntheticDataPlatformApplicationModule } from '../synthetic-data-platform/application/synthetic-data-platform-application.module';
+import { ExperimentPlatformApplicationModule } from '../experiment-platform/application/experiment-platform-application.module';
+import { ResearchCloudApplicationModule } from '../research-cloud/application/research-cloud-application.module';
+import { AgriculturalIntelligenceApplicationModule } from '../agricultural-intelligence/application/agricultural-intelligence-application.module';
+import { EducationIntelligenceApplicationModule } from '../education-intelligence/application/education-intelligence-application.module';
+import { FinancialIntelligenceApplicationModule } from '../financial-intelligence/application/financial-intelligence-application.module';
+import { HealthcareIntelligenceApplicationModule } from '../healthcare-intelligence/application/healthcare-intelligence-application.module';
+import { GovernmentIntelligenceApplicationModule } from '../government-intelligence/application/government-intelligence-application.module';
+import { AfricanKnowledgeGraphApplicationModule } from '../african-knowledge-graph/application/african-knowledge-graph-application.module';
+import { CulturalIntelligenceApplicationModule } from '../cultural-intelligence/application/cultural-intelligence-application.module';
+import { AfricanLanguageRegistryApplicationModule } from '../african-language-registry/application/african-language-registry-application.module';
+import { AfricanIntelligenceCloudApplicationModule } from '../african-intelligence-cloud/application/african-intelligence-cloud-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -123,6 +245,128 @@ import { WorkflowMarketplaceGraphqlResolver } from './workflow-marketplace.resol
 import { ConnectorMarketplaceGraphqlResolver } from './connector-marketplace.resolver';
 import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-marketplace.resolver';
 import { CreatorEconomyGraphqlResolver } from './creator-economy.resolver';
+import { TourismHeritageIntelligenceGraphqlResolver } from './tourism-heritage-intelligence.resolver';
+import { ResearchAnalyticsGraphqlResolver } from './research-analytics.resolver';
+import { AiOperationsDashboardGraphqlResolver } from './ai-operations-dashboard.resolver';
+import { ContinuousLearningGraphqlResolver } from './continuous-learning.resolver';
+import { AiDriftDetectionGraphqlResolver } from './ai-drift-detection.resolver';
+import { AgentopsPlatformGraphqlResolver } from './agentops-platform.resolver';
+import { RagopsPlatformGraphqlResolver } from './ragops-platform.resolver';
+import { PromptopsPlatformGraphqlResolver } from './promptops-platform.resolver';
+import { ContinuousEvaluationGraphqlResolver } from './continuous-evaluation.resolver';
+import { TrainingPipelineGraphqlResolver } from './training-pipeline.resolver';
+import { DatasetPipelineGraphqlResolver } from './dataset-pipeline.resolver';
+import { MlopsLlmopsCloudGraphqlResolver } from './mlops-llmops-cloud.resolver';
+import { TrustCloudGraphqlResolver } from './trust-cloud.resolver';
+import { AiSafetyPlatformGraphqlResolver } from './ai-safety-platform.resolver';
+import { AiGovernancePlatformGraphqlResolver } from './ai-governance-platform.resolver';
+import { ExplainabilityPlatformGraphqlResolver } from './explainability-platform.resolver';
+import { PrivacyPlatformGraphqlResolver } from './privacy-platform.resolver';
+import { CompliancePlatformGraphqlResolver } from './compliance-platform.resolver';
+import { RiskIntelligenceGraphqlResolver } from './risk-intelligence.resolver';
+import { IdentityFederationGraphqlResolver } from './identity-federation.resolver';
+import { TrustAnalyticsGraphqlResolver } from './trust-analytics.resolver';
+import { PlatformEngineeringCloudGraphqlResolver } from './platform-engineering-cloud.resolver';
+import { InternalDeveloperPortalGraphqlResolver } from './internal-developer-portal.resolver';
+import { ServiceCatalogGraphqlResolver } from './service-catalog.resolver';
+import { GoldenPathPlatformGraphqlResolver } from './golden-path-platform.resolver';
+import { GitopsPlatformGraphqlResolver } from './gitops-platform.resolver';
+import { ReleaseEngineeringGraphqlResolver } from './release-engineering.resolver';
+import { ReliabilityEngineeringGraphqlResolver } from './reliability-engineering.resolver';
+import { FinopsPlatformGraphqlResolver } from './finops-platform.resolver';
+import { SupplyChainSecurityGraphqlResolver } from './supply-chain-security.resolver';
+import { DeveloperExperiencePlatformGraphqlResolver } from './developer-experience-platform.resolver';
+import { PlatformEngineeringAnalyticsGraphqlResolver } from './platform-engineering-analytics.resolver';
+import { ControlPlaneCloudGraphqlResolver } from './control-plane-cloud.resolver';
+import { OrganizationControlGraphqlResolver } from './organization-control.resolver';
+import { GlobalConfigurationPlatformGraphqlResolver } from './global-configuration-platform.resolver';
+import { GlobalPolicyEngineGraphqlResolver } from './global-policy-engine.resolver';
+import { GlobalDeploymentControllerGraphqlResolver } from './global-deployment-controller.resolver';
+import { GlobalRoutingControllerGraphqlResolver } from './global-routing-controller.resolver';
+import { SecretsCertificatePlatformGraphqlResolver } from './secrets-certificate-platform.resolver';
+import { GlobalSchedulerGraphqlResolver } from './global-scheduler.resolver';
+import { ControlPlaneAnalyticsGraphqlResolver } from './control-plane-analytics.resolver';
+import { DataPlaneCloudGraphqlResolver } from './data-plane-cloud.resolver';
+import { TranslationRuntimeGraphqlResolver } from './translation-runtime.resolver';
+import { SpeechRuntimeGraphqlResolver } from './speech-runtime.resolver';
+import { VoiceRuntimeGraphqlResolver } from './voice-runtime.resolver';
+import { VisionRuntimeGraphqlResolver } from './vision-runtime.resolver';
+import { KnowledgeRuntimeGraphqlResolver } from './knowledge-runtime.resolver';
+import { EmbeddingRuntimeGraphqlResolver } from './embedding-runtime.resolver';
+import { DataPlaneStreamingGraphqlResolver } from './data-plane-streaming.resolver';
+import { GpuRuntimeGraphqlResolver } from './gpu-runtime.resolver';
+import { VaiosGraphqlResolver } from './vaios.resolver';
+import { AiSchedulerGraphqlResolver } from './ai-scheduler.resolver';
+import { RuntimeManagerGraphqlResolver } from './runtime-manager.resolver';
+import { ResourceManagerGraphqlResolver } from './resource-manager.resolver';
+import { WorkflowOperatingSystemGraphqlResolver } from './workflow-operating-system.resolver';
+import { AgentOperatingSystemGraphqlResolver } from './agent-operating-system.resolver';
+import { AiMemoryOperatingSystemGraphqlResolver } from './ai-memory-operating-system.resolver';
+import { KnowledgeOperatingSystemGraphqlResolver } from './knowledge-operating-system.resolver';
+import { PluginOperatingSystemGraphqlResolver } from './plugin-operating-system.resolver';
+import { EnterpriseEngineeringSystemGraphqlResolver } from './enterprise-engineering-system.resolver';
+import { EngineeringGovernanceGraphqlResolver } from './engineering-governance.resolver';
+import { ArchitectureGovernanceGraphqlResolver } from './architecture-governance.resolver';
+import { RepositoryStandardsGraphqlResolver } from './repository-standards.resolver';
+import { EngineeringQualityPlatformGraphqlResolver } from './engineering-quality-platform.resolver';
+import { AiEngineeringStandardsGraphqlResolver } from './ai-engineering-standards.resolver';
+import { ApiEngineeringStandardsGraphqlResolver } from './api-engineering-standards.resolver';
+import { DatabaseEngineeringStandardsGraphqlResolver } from './database-engineering-standards.resolver';
+import { InfrastructureEngineeringStandardsGraphqlResolver } from './infrastructure-engineering-standards.resolver';
+import { CorporateOperatingSystemGraphqlResolver } from './corporate-operating-system.resolver';
+import { CorporateGovernancePlatformGraphqlResolver } from './corporate-governance-platform.resolver';
+import { StrategicPlanningPlatformGraphqlResolver } from './strategic-planning-platform.resolver';
+import { EnterprisePortfolioManagementGraphqlResolver } from './enterprise-portfolio-management.resolver';
+import { BusinessArchitectureGraphqlResolver } from './business-architecture.resolver';
+import { EnterpriseArchitectureRepositoryGraphqlResolver } from './enterprise-architecture-repository.resolver';
+import { CorporateKnowledgeSystemGraphqlResolver } from './corporate-knowledge-system.resolver';
+import { ExecutiveIntelligencePlatformGraphqlResolver } from './executive-intelligence-platform.resolver';
+import { CorporateRiskPlatformGraphqlResolver } from './corporate-risk-platform.resolver';
+import { GlobalAiStandardsGraphqlResolver } from './global-ai-standards.resolver';
+import { AiEconomyGraphqlResolver } from './ai-economy.resolver';
+import { AiCommercePlatformGraphqlResolver } from './ai-commerce-platform.resolver';
+import { AiLicensingPlatformGraphqlResolver } from './ai-licensing-platform.resolver';
+import { RevenueSharingPlatformGraphqlResolver } from './revenue-sharing-platform.resolver';
+import { AiTalentPlatformGraphqlResolver } from './ai-talent-platform.resolver';
+import { ResearchFundingPlatformGraphqlResolver } from './research-funding-platform.resolver';
+import { GlobalCommunityPlatformGraphqlResolver } from './global-community-platform.resolver';
+import { AiInvestmentPlatformGraphqlResolver } from './ai-investment-platform.resolver';
+import { EconomicIntelligenceGraphqlResolver } from './economic-intelligence.resolver';
+import { DigitalCivilizationGraphqlResolver } from './digital-civilization.resolver';
+import { LibraryReferenceGraphqlResolver } from './library-reference.resolver';
+import { NationalAiPlatformGraphqlResolver } from './national-ai-platform.resolver';
+import { SmartCityPlatformGraphqlResolver } from './smart-city-platform.resolver';
+import { EnterpriseNationPlatformGraphqlResolver } from './enterprise-nation-platform.resolver';
+import { GlobalLanguagePreservationGraphqlResolver } from './global-language-preservation.resolver';
+import { UniversalTranslationGridGraphqlResolver } from './universal-translation-grid.resolver';
+import { GlobalKnowledgeNetworkGraphqlResolver } from './global-knowledge-network.resolver';
+import { GlobalAiFederationGraphqlResolver } from './global-ai-federation.resolver';
+import { CivilizationIntelligenceDashboardGraphqlResolver } from './civilization-intelligence-dashboard.resolver';
+import { AiCertificationPlatformGraphqlResolver } from './ai-certification-platform.resolver';
+import { AiComplianceFrameworkGraphqlResolver } from './ai-compliance-framework.resolver';
+import { ReferenceArchitecturesGraphqlResolver } from './reference-architectures.resolver';
+import { BestPracticesLibraryGraphqlResolver } from './best-practices-library.resolver';
+import { EnterpriseAssessmentPlatformGraphqlResolver } from './enterprise-assessment-platform.resolver';
+import { StandardsRepositoryGraphqlResolver } from './standards-repository.resolver';
+import { GlobalPartnerProgramGraphqlResolver } from './global-partner-program.resolver';
+import { StandardsAnalyticsGraphqlResolver } from './standards-analytics.resolver';
+import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
+import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
+import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
+import { EvaluationPlatformGraphqlResolver } from './evaluation-platform.resolver';
+import { BenchmarkPlatformGraphqlResolver } from './benchmark-platform.resolver';
+import { SyntheticDataPlatformGraphqlResolver } from './synthetic-data-platform.resolver';
+import { ExperimentPlatformGraphqlResolver } from './experiment-platform.resolver';
+import { ResearchCloudGraphqlResolver } from './research-cloud.resolver';
+import { AgriculturalIntelligenceGraphqlResolver } from './agricultural-intelligence.resolver';
+import { EducationIntelligenceGraphqlResolver } from './education-intelligence.resolver';
+import { FinancialIntelligenceGraphqlResolver } from './financial-intelligence.resolver';
+import { HealthcareIntelligenceGraphqlResolver } from './healthcare-intelligence.resolver';
+import { GovernmentIntelligenceGraphqlResolver } from './government-intelligence.resolver';
+import { AfricanKnowledgeGraphGraphqlResolver } from './african-knowledge-graph.resolver';
+import { CulturalIntelligenceGraphqlResolver } from './cultural-intelligence.resolver';
+import { AfricanLanguageRegistryGraphqlResolver } from './african-language-registry.resolver';
+import { AfricanIntelligenceCloudGraphqlResolver } from './african-intelligence-cloud.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -231,6 +475,128 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ConnectorMarketplaceApplicationModule,
     VoiceLanguageMarketplaceApplicationModule,
     CreatorEconomyApplicationModule,
+    TourismHeritageIntelligenceApplicationModule,
+    ResearchAnalyticsApplicationModule,
+    AiOperationsDashboardApplicationModule,
+    ContinuousLearningApplicationModule,
+    AiDriftDetectionApplicationModule,
+    AgentopsPlatformApplicationModule,
+    RagopsPlatformApplicationModule,
+    PromptopsPlatformApplicationModule,
+    ContinuousEvaluationApplicationModule,
+    TrainingPipelineApplicationModule,
+    DatasetPipelineApplicationModule,
+    MlopsLlmopsCloudApplicationModule,
+    TrustCloudApplicationModule,
+    AiSafetyPlatformApplicationModule,
+    AiGovernancePlatformApplicationModule,
+    ExplainabilityPlatformApplicationModule,
+    PrivacyPlatformApplicationModule,
+    CompliancePlatformApplicationModule,
+    RiskIntelligenceApplicationModule,
+    IdentityFederationApplicationModule,
+    TrustAnalyticsApplicationModule,
+    PlatformEngineeringCloudApplicationModule,
+    InternalDeveloperPortalApplicationModule,
+    ServiceCatalogApplicationModule,
+    GoldenPathPlatformApplicationModule,
+    GitopsPlatformApplicationModule,
+    ReleaseEngineeringApplicationModule,
+    ReliabilityEngineeringApplicationModule,
+    FinopsPlatformApplicationModule,
+    SupplyChainSecurityApplicationModule,
+    DeveloperExperiencePlatformApplicationModule,
+    PlatformEngineeringAnalyticsApplicationModule,
+    ControlPlaneCloudApplicationModule,
+    OrganizationControlApplicationModule,
+    GlobalConfigurationPlatformApplicationModule,
+    GlobalPolicyEngineApplicationModule,
+    GlobalDeploymentControllerApplicationModule,
+    GlobalRoutingControllerApplicationModule,
+    SecretsCertificatePlatformApplicationModule,
+    GlobalSchedulerApplicationModule,
+    ControlPlaneAnalyticsApplicationModule,
+    DataPlaneCloudApplicationModule,
+    TranslationRuntimeApplicationModule,
+    SpeechRuntimeApplicationModule,
+    VoiceRuntimeApplicationModule,
+    VisionRuntimeApplicationModule,
+    KnowledgeRuntimeApplicationModule,
+    EmbeddingRuntimeApplicationModule,
+    DataPlaneStreamingApplicationModule,
+    GpuRuntimeApplicationModule,
+    VaiosApplicationModule,
+    AiSchedulerApplicationModule,
+    RuntimeManagerApplicationModule,
+    ResourceManagerApplicationModule,
+    WorkflowOperatingSystemApplicationModule,
+    AgentOperatingSystemApplicationModule,
+    AiMemoryOperatingSystemApplicationModule,
+    KnowledgeOperatingSystemApplicationModule,
+    PluginOperatingSystemApplicationModule,
+    EnterpriseEngineeringSystemApplicationModule,
+    EngineeringGovernanceApplicationModule,
+    ArchitectureGovernanceApplicationModule,
+    RepositoryStandardsApplicationModule,
+    EngineeringQualityPlatformApplicationModule,
+    AiEngineeringStandardsApplicationModule,
+    ApiEngineeringStandardsApplicationModule,
+    DatabaseEngineeringStandardsApplicationModule,
+    InfrastructureEngineeringStandardsApplicationModule,
+    CorporateOperatingSystemApplicationModule,
+    CorporateGovernancePlatformApplicationModule,
+    StrategicPlanningPlatformApplicationModule,
+    EnterprisePortfolioManagementApplicationModule,
+    BusinessArchitectureApplicationModule,
+    EnterpriseArchitectureRepositoryApplicationModule,
+    CorporateKnowledgeSystemApplicationModule,
+    ExecutiveIntelligencePlatformApplicationModule,
+    CorporateRiskPlatformApplicationModule,
+    GlobalAiStandardsApplicationModule,
+    AiEconomyApplicationModule,
+    AiCommercePlatformApplicationModule,
+    AiLicensingPlatformApplicationModule,
+    RevenueSharingPlatformApplicationModule,
+    AiTalentPlatformApplicationModule,
+    ResearchFundingPlatformApplicationModule,
+    GlobalCommunityPlatformApplicationModule,
+    AiInvestmentPlatformApplicationModule,
+    EconomicIntelligenceApplicationModule,
+    DigitalCivilizationApplicationModule,
+    LibraryReferenceApplicationModule,
+    NationalAiPlatformApplicationModule,
+    SmartCityPlatformApplicationModule,
+    EnterpriseNationPlatformApplicationModule,
+    GlobalLanguagePreservationApplicationModule,
+    UniversalTranslationGridApplicationModule,
+    GlobalKnowledgeNetworkApplicationModule,
+    GlobalAiFederationApplicationModule,
+    CivilizationIntelligenceDashboardApplicationModule,
+    AiCertificationPlatformApplicationModule,
+    AiComplianceFrameworkApplicationModule,
+    ReferenceArchitecturesApplicationModule,
+    BestPracticesLibraryApplicationModule,
+    EnterpriseAssessmentPlatformApplicationModule,
+    StandardsRepositoryApplicationModule,
+    GlobalPartnerProgramApplicationModule,
+    StandardsAnalyticsApplicationModule,
+    OpenSciencePlatformApplicationModule,
+    PatentInnovationPlatformApplicationModule,
+    AiPublicationPlatformApplicationModule,
+    EvaluationPlatformApplicationModule,
+    BenchmarkPlatformApplicationModule,
+    SyntheticDataPlatformApplicationModule,
+    ExperimentPlatformApplicationModule,
+    ResearchCloudApplicationModule,
+    AgriculturalIntelligenceApplicationModule,
+    EducationIntelligenceApplicationModule,
+    FinancialIntelligenceApplicationModule,
+    HealthcareIntelligenceApplicationModule,
+    GovernmentIntelligenceApplicationModule,
+    AfricanKnowledgeGraphApplicationModule,
+    CulturalIntelligenceApplicationModule,
+    AfricanLanguageRegistryApplicationModule,
+    AfricanIntelligenceCloudApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -327,6 +693,128 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ConnectorMarketplaceGraphqlResolver,
     VoiceLanguageMarketplaceGraphqlResolver,
     CreatorEconomyGraphqlResolver,
+    TourismHeritageIntelligenceGraphqlResolver,
+    ResearchAnalyticsGraphqlResolver,
+    AiOperationsDashboardGraphqlResolver,
+    ContinuousLearningGraphqlResolver,
+    AiDriftDetectionGraphqlResolver,
+    AgentopsPlatformGraphqlResolver,
+    RagopsPlatformGraphqlResolver,
+    PromptopsPlatformGraphqlResolver,
+    ContinuousEvaluationGraphqlResolver,
+    TrainingPipelineGraphqlResolver,
+    DatasetPipelineGraphqlResolver,
+    MlopsLlmopsCloudGraphqlResolver,
+    TrustCloudGraphqlResolver,
+    AiSafetyPlatformGraphqlResolver,
+    AiGovernancePlatformGraphqlResolver,
+    ExplainabilityPlatformGraphqlResolver,
+    PrivacyPlatformGraphqlResolver,
+    CompliancePlatformGraphqlResolver,
+    RiskIntelligenceGraphqlResolver,
+    IdentityFederationGraphqlResolver,
+    TrustAnalyticsGraphqlResolver,
+    PlatformEngineeringCloudGraphqlResolver,
+    InternalDeveloperPortalGraphqlResolver,
+    ServiceCatalogGraphqlResolver,
+    GoldenPathPlatformGraphqlResolver,
+    GitopsPlatformGraphqlResolver,
+    ReleaseEngineeringGraphqlResolver,
+    ReliabilityEngineeringGraphqlResolver,
+    FinopsPlatformGraphqlResolver,
+    SupplyChainSecurityGraphqlResolver,
+    DeveloperExperiencePlatformGraphqlResolver,
+    PlatformEngineeringAnalyticsGraphqlResolver,
+    ControlPlaneCloudGraphqlResolver,
+    OrganizationControlGraphqlResolver,
+    GlobalConfigurationPlatformGraphqlResolver,
+    GlobalPolicyEngineGraphqlResolver,
+    GlobalDeploymentControllerGraphqlResolver,
+    GlobalRoutingControllerGraphqlResolver,
+    SecretsCertificatePlatformGraphqlResolver,
+    GlobalSchedulerGraphqlResolver,
+    ControlPlaneAnalyticsGraphqlResolver,
+    DataPlaneCloudGraphqlResolver,
+    TranslationRuntimeGraphqlResolver,
+    SpeechRuntimeGraphqlResolver,
+    VoiceRuntimeGraphqlResolver,
+    VisionRuntimeGraphqlResolver,
+    KnowledgeRuntimeGraphqlResolver,
+    EmbeddingRuntimeGraphqlResolver,
+    DataPlaneStreamingGraphqlResolver,
+    GpuRuntimeGraphqlResolver,
+    VaiosGraphqlResolver,
+    AiSchedulerGraphqlResolver,
+    RuntimeManagerGraphqlResolver,
+    ResourceManagerGraphqlResolver,
+    WorkflowOperatingSystemGraphqlResolver,
+    AgentOperatingSystemGraphqlResolver,
+    AiMemoryOperatingSystemGraphqlResolver,
+    KnowledgeOperatingSystemGraphqlResolver,
+    PluginOperatingSystemGraphqlResolver,
+    EnterpriseEngineeringSystemGraphqlResolver,
+    EngineeringGovernanceGraphqlResolver,
+    ArchitectureGovernanceGraphqlResolver,
+    RepositoryStandardsGraphqlResolver,
+    EngineeringQualityPlatformGraphqlResolver,
+    AiEngineeringStandardsGraphqlResolver,
+    ApiEngineeringStandardsGraphqlResolver,
+    DatabaseEngineeringStandardsGraphqlResolver,
+    InfrastructureEngineeringStandardsGraphqlResolver,
+    CorporateOperatingSystemGraphqlResolver,
+    CorporateGovernancePlatformGraphqlResolver,
+    StrategicPlanningPlatformGraphqlResolver,
+    EnterprisePortfolioManagementGraphqlResolver,
+    BusinessArchitectureGraphqlResolver,
+    EnterpriseArchitectureRepositoryGraphqlResolver,
+    CorporateKnowledgeSystemGraphqlResolver,
+    ExecutiveIntelligencePlatformGraphqlResolver,
+    CorporateRiskPlatformGraphqlResolver,
+    GlobalAiStandardsGraphqlResolver,
+    AiEconomyGraphqlResolver,
+    AiCommercePlatformGraphqlResolver,
+    AiLicensingPlatformGraphqlResolver,
+    RevenueSharingPlatformGraphqlResolver,
+    AiTalentPlatformGraphqlResolver,
+    ResearchFundingPlatformGraphqlResolver,
+    GlobalCommunityPlatformGraphqlResolver,
+    AiInvestmentPlatformGraphqlResolver,
+    EconomicIntelligenceGraphqlResolver,
+    DigitalCivilizationGraphqlResolver,
+    LibraryReferenceGraphqlResolver,
+    NationalAiPlatformGraphqlResolver,
+    SmartCityPlatformGraphqlResolver,
+    EnterpriseNationPlatformGraphqlResolver,
+    GlobalLanguagePreservationGraphqlResolver,
+    UniversalTranslationGridGraphqlResolver,
+    GlobalKnowledgeNetworkGraphqlResolver,
+    GlobalAiFederationGraphqlResolver,
+    CivilizationIntelligenceDashboardGraphqlResolver,
+    AiCertificationPlatformGraphqlResolver,
+    AiComplianceFrameworkGraphqlResolver,
+    ReferenceArchitecturesGraphqlResolver,
+    BestPracticesLibraryGraphqlResolver,
+    EnterpriseAssessmentPlatformGraphqlResolver,
+    StandardsRepositoryGraphqlResolver,
+    GlobalPartnerProgramGraphqlResolver,
+    StandardsAnalyticsGraphqlResolver,
+    OpenSciencePlatformGraphqlResolver,
+    PatentInnovationPlatformGraphqlResolver,
+    AiPublicationPlatformGraphqlResolver,
+    EvaluationPlatformGraphqlResolver,
+    BenchmarkPlatformGraphqlResolver,
+    SyntheticDataPlatformGraphqlResolver,
+    ExperimentPlatformGraphqlResolver,
+    ResearchCloudGraphqlResolver,
+    AgriculturalIntelligenceGraphqlResolver,
+    EducationIntelligenceGraphqlResolver,
+    FinancialIntelligenceGraphqlResolver,
+    HealthcareIntelligenceGraphqlResolver,
+    GovernmentIntelligenceGraphqlResolver,
+    AfricanKnowledgeGraphGraphqlResolver,
+    CulturalIntelligenceGraphqlResolver,
+    AfricanLanguageRegistryGraphqlResolver,
+    AfricanIntelligenceCloudGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

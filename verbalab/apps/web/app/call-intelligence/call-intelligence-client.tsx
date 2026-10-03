@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -40,7 +41,7 @@ export function CallIntelligenceClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list, rep] = await Promise.all([
       apiFetch<Engine>('/v1/call-intelligence/engine', { token }),
@@ -62,7 +63,7 @@ export function CallIntelligenceClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch('/v1/call-intelligence/calls', {
         token,
@@ -94,7 +95,11 @@ export function CallIntelligenceClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Ingest contact-center calls, transcribe, and score summaries, topics, sentiment, compliance,
         coaching, and QA. Not Gong. Voice FAQ stays at <Link href="/voice">/voice</Link>.{' '}
-        <Link href="/speech">Speech Cloud</Link>.
+        <Link href="/speech">Speech Cloud</Link>
+        {' · '}
+        <Link href="/wake-word">Wake Word</Link>
+        {' · '}
+        <Link href="/speech-analytics">Speech Analytics</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

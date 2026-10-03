@@ -500,7 +500,7 @@ export class KnowledgeService {
         score: hit.score,
         content: hit.content,
       })),
-      note: 'Nearest-neighbor cosine search over knowledge_chunks (VL-182 / VL-062). Not hybrid BM25.',
+      note: 'Nearest-neighbor cosine search over knowledge_chunks (/ ). Not hybrid BM25.',
     };
   }
 

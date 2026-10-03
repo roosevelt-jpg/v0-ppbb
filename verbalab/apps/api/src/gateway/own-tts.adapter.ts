@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { TtsInput, TtsOutput, TtsProvider, TtsVoice } from './tts-provider';
 
-/** Catalog of African-focused voices served by a rented open-weight TTS endpoint (VL-121). */
+/** Catalog of African-focused voices served by VerbaLab Voice FM (owned TTS; VL-121/228). */
 export const OWN_TTS_VOICES: TtsVoice[] = [
   {
     id: 'own:sw-aisha',
@@ -32,6 +32,76 @@ export const OWN_TTS_VOICES: TtsVoice[] = [
     languages: ['en'],
     provider: 'own_tts',
   },
+  {
+    id: 'own:ha-amina',
+    name: 'Amina (Hausa)',
+    gender: 'female',
+    languages: ['ha', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:zu-thandi',
+    name: 'Thandi (Zulu)',
+    gender: 'female',
+    languages: ['zu', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ig-chidi',
+    name: 'Chidi (Igbo)',
+    gender: 'male',
+    languages: ['ig', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:rw-keza',
+    name: 'Keza (Kinyarwanda)',
+    gender: 'female',
+    languages: ['rw', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:xh-luvuyo',
+    name: 'Luvuyo (Xhosa)',
+    gender: 'male',
+    languages: ['xh', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:so-hodan',
+    name: 'Hodan (Somali)',
+    gender: 'female',
+    languages: ['so', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:fr-aida',
+    name: 'Aïda (FR-West Africa)',
+    gender: 'female',
+    languages: ['fr', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ar-nour',
+    name: 'Nour (Arabic-Africa)',
+    gender: 'female',
+    languages: ['ar', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ti-senait',
+    name: 'Senait (Tigrinya)',
+    gender: 'female',
+    languages: ['ti', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:om-lema',
+    name: 'Lema (Oromo)',
+    gender: 'female',
+    languages: ['om', 'en'],
+    provider: 'own_tts',
+  },
 ];
 
 const MIME: Record<string, string> = {
@@ -47,7 +117,13 @@ export function isOwnTtsVoice(voice: string): boolean {
 }
 
 export function ownTtsConfigured(): boolean {
-  return Boolean(process.env.OWN_TTS_URL?.trim()) || process.env.OWN_TTS_FIXTURE === '1';
+  return (
+    Boolean(process.env.OWN_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_MODEL_BASE_URL?.trim()) ||
+    process.env.OWN_TTS_FIXTURE === '1' ||
+    process.env.VERBALAB_OWN_AI_FIXTURE === '1'
+  );
 }
 
 /** Minimal RIFF/WAV for fixture playback without claiming a real GPU run. */
@@ -104,7 +180,7 @@ export class FixtureOwnTtsAdapter implements TtsProvider {
 }
 
 /**
- * HTTP client for a rented GPU TTS endpoint (Modal/vLLM/XTTS/etc.).
+ * HTTP client for VerbaLab-owned Voice FM TTS endpoint.
  * Contract: POST JSON { text, voice, language?, format? } → audio bytes or { audioBase64, mimeType? }.
  */
 export class HttpOwnTtsAdapter implements TtsProvider {
@@ -231,12 +307,20 @@ export class UnconfiguredOwnTtsAdapter implements TtsProvider {
 }
 
 export function createOwnTtsAdapter(): TtsProvider {
-  if (process.env.OWN_TTS_FIXTURE === '1') {
+  if (process.env.OWN_TTS_FIXTURE === '1' || process.env.VERBALAB_OWN_AI_FIXTURE === '1') {
     return new FixtureOwnTtsAdapter();
   }
-  const url = process.env.OWN_TTS_URL?.trim() ?? '';
+  const url =
+    process.env.OWN_TTS_URL?.trim() ||
+    process.env.VERBALAB_TTS_URL?.trim() ||
+    (process.env.VERBALAB_MODEL_BASE_URL?.trim()
+      ? `${process.env.VERBALAB_MODEL_BASE_URL.replace(/\/$/, '')}/audio/speech`
+      : '');
   if (url) {
-    return new HttpOwnTtsAdapter(url, process.env.OWN_TTS_API_KEY?.trim() || undefined);
+    return new HttpOwnTtsAdapter(
+      url,
+      process.env.OWN_TTS_API_KEY?.trim() || process.env.VERBALAB_MODEL_API_KEY?.trim() || undefined,
+    );
   }
   return new UnconfiguredOwnTtsAdapter();
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type MemberRow = {
@@ -36,7 +37,7 @@ export function IdentityClient() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const overview = await apiFetch<Overview>('/v1/identity/overview', { token });
     setData(overview);
@@ -51,7 +52,7 @@ export function IdentityClient() {
     setError(null);
     setBusyId(membershipId);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/organization/members/${membershipId}`, {
         method: 'PATCH',
@@ -71,7 +72,7 @@ export function IdentityClient() {
     setError(null);
     setBusyId(membershipId);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/organization/members/${membershipId}`, {
         method: 'DELETE',
