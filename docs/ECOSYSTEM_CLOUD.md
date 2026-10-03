@@ -1,6 +1,6 @@
 # VerbaLab Ecosystem Cloud
 
-**Status:** Foundation + marketplaces + Creator Economy shipped (VL-249–258). Remaining: Production Audit VL-259.  
+**Status:** Volume closed (VL-249–259 / library Phases 116–126) — audit pack under [`docs/ecosystem-cloud-audit/`](./ecosystem-cloud-audit/)  
 **Rule:** Ecosystem Cloud is the **marketplace + monetization hub** over existing VL-090+ content marketplace and voice marketplace — **not** a payment-processor OS, card vault, or regenerate of Volumes 1–10. Roadmap: [`docs/roadmap/volume11-ecosystem-cloud/`](./roadmap/volume11-ecosystem-cloud/).
 
 Volume 11 README: this is a **real-money** volume (payments, licensing, royalty payouts). Use an established processor (Stripe, etc.); never store raw card data. Plugin/Agent marketplaces must enforce Volume 8 sandboxes + Policy hard-gate before third-party code runs. Creator Economy payout math must be hand-checked before live creators.
@@ -23,7 +23,7 @@ Volume 11 README: this is a **real-money** volume (payments, licensing, royalty 
 | Creator Economy | **Shipped** — VL-258 — [`CREATOR_ECONOMY.md`](./CREATOR_ECONOMY.md); tax/dispute remain documented gaps |
 | Content Marketplace (prior) | **Shipped** — VL-090–092 `/marketplace` |
 | Voice Marketplace (prior) | **Shipped** — VL-177 `/voice-marketplace` |
-| Production Audit | **Deferred** — VL-259 |
+| Production Audit | **Shipped** — VL-259 — [`docs/ecosystem-cloud-audit/`](./ecosystem-cloud-audit/) |
 | DDD / CQRS / Hexagonal | Bounded catalog CQRS slice — `hexagonalRewrite: false` |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
 
