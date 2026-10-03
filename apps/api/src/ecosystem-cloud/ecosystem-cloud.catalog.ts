@@ -110,11 +110,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'voice-language-marketplace',
       name: 'Voice & Language Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/voice-language-marketplace/engine',
+      console: '/voice-language-marketplace',
       notes:
-        'VL-257 / Phase 124. Extends voice marketplace + Volume 1 language packs — does not regenerate Voice Cloud.',
+        'VL-257 / Phase 124. Entitlement SKUs over VL-177 voice marketplace + Volume 1 packs; FabricPolicyGate + Stripe honesty. Not ElevenLabs / voice CDN OS.',
     },
     {
       id: 'creator-economy',
@@ -246,6 +246,11 @@ export function ecosystemRoutingTable() {
       surface: 'connector-marketplace',
       path: '/connector-marketplace',
       api: '/v1/connector-marketplace/engine',
+    },
+    {
+      surface: 'voice-language-marketplace',
+      path: '/voice-language-marketplace',
+      api: '/v1/voice-language-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },

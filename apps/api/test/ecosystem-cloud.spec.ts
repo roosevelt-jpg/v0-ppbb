@@ -159,6 +159,13 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(connector.status).toBe('shipped');
     expect(connector.console).toBe('/connector-marketplace');
     expect(connector.notes).toMatch(/iPaaS|Zapier|Stripe|Slack/i);
+
+    const voiceLang = res.body.products.find(
+      (p: { id: string }) => p.id === 'voice-language-marketplace',
+    );
+    expect(voiceLang.status).toBe('shipped');
+    expect(voiceLang.console).toBe('/voice-language-marketplace');
+    expect(voiceLang.notes).toMatch(/ElevenLabs|voice CDN|VL-177|Stripe/i);
   });
 
   it('exposes routing table and org overview', async () => {
@@ -185,6 +192,7 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(overview.deferred.agentMarketplace).toBe(false);
     expect(overview.deferred.workflowMarketplace).toBe(false);
     expect(overview.deferred.connectorMarketplace).toBe(false);
+    expect(overview.deferred.voiceLanguageMarketplace).toBe(false);
     expect(overview.deferred.creatorEconomyExpansion).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to10).toBe(false);
     expect(overview.deferred.paymentProcessorOs).toBe(false);
