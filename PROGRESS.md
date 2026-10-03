@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-184 Done — Knowledge Graph Cloud)
+Last updated: 2026-10-03 (VL-185 Done — Context Engine)
 
 ---
 
@@ -214,6 +214,7 @@ Last updated: 2026-10-03 (VL-184 Done — Knowledge Graph Cloud)
 | VL-182 | Vector Cloud (Phase 49) | Done | `/v1/vector-cloud/*` engine/search/collections; ADR-0093. Hub over VL-062 pgvector; hybrid/sharding deferred. |
 | VL-183 | Memory Cloud (Phase 50) | Done | `/v1/memory-cloud/*` CRUD/search + GDPR export/erase; ADR-0094. Retention sweeper deferred. |
 | VL-184 | Knowledge Graph Cloud (Phase 51) | Done | `/v1/knowledge-graph/*` entities/edges/neighborhood; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |
+| VL-185 | Context Engine (Phase 52) | Done | `/v1/context-engine/*` assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; infinite window deferred. |
 
 ---
 
@@ -312,3 +313,4 @@ Last updated: 2026-10-03 (VL-184 Done — Knowledge Graph Cloud)
 | 2026-10-03 | VL-182 Done: Vector Cloud (Phase 49) — hub over VL-062 pgvector search; ADR-0093. Hybrid/sharding/Pinecone OS deferred. |
 | 2026-10-03 | VL-183 Done: Memory Cloud (Phase 50) — persistent memories + GDPR export/erase; ADR-0094. Not infinite personalization OS. |
 | 2026-10-03 | VL-184 Done: Knowledge Graph Cloud (Phase 51) — bounded Postgres ER layer; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |
+| 2026-10-03 | VL-185 Done: Context Engine (Phase 52) — assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; not infinite context. |

@@ -514,6 +514,45 @@ export class GqlKnowledgeGraphEngine {
 }
 
 @ObjectType()
+export class GqlContextEngineCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlContextEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlContextEngineCapability])
+  capabilities!: GqlContextEngineCapability[];
+
+  @Field()
+  infiniteContextWindow!: boolean;
+
+  @Field()
+  llmSummarization!: boolean;
+
+  @Field()
+  realtimePush!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

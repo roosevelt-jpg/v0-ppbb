@@ -60,10 +60,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'context-engine',
       name: 'Context Engine',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Context assembly for AI requests — VL-185.',
+      status: 'partial',
+      api: 'GET /v1/context-engine/engine',
+      console: '/context-engine',
+      notes:
+        'Assembles retrieval + memory + prompt (VL-185). Char-budget compression; infinite window/realtime deferred.',
     },
     {
       id: 'reasoning',

@@ -23,6 +23,8 @@ function usage(): never {
   verbalab memory-cloud-engine
   verbalab memory-cloud-export [--subject <userId>]
   verbalab knowledge-graph-engine
+  verbalab context-engine
+  verbalab context-assemble [--query <text>] [--max-chars <n>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -152,6 +154,26 @@ async function main() {
 
   if (command === 'knowledge-graph-engine') {
     console.log(JSON.stringify(await vl.knowledgeGraphEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'context-engine') {
+    console.log(JSON.stringify(await vl.contextEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'context-assemble') {
+    const maxRaw = argValue(rest, '--max-chars');
+    console.log(
+      JSON.stringify(
+        await vl.contextAssemble({
+          query: argValue(rest, '--query'),
+          maxChars: maxRaw ? Number(maxRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

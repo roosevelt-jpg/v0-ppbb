@@ -14,7 +14,7 @@
 | Vector Cloud | **Partial** — **VL-182** `/vector-cloud` over VL-062 pgvector; hybrid/Pinecone OS deferred |
 | Memory Cloud | **Partial** — **VL-183** `/memory-cloud` + GDPR export/erase; semantic NN + sweeper deferred |
 | Knowledge Graph Cloud | **Partial** — **VL-184** `/knowledge-graph` bounded ER; Neo4j/ontology/verticals deferred; prefer RAG |
-| Context Engine | **Deferred** — VL-185 |
+| Context Engine | **Partial** — **VL-185** `/context-engine` assemble; char-budget compression; infinite/realtime deferred |
 | Reasoning Cloud | **Deferred** — VL-186 via LLM prompts, not a custom reasoner |
 | Recommendation Engine | **Deferred** — VL-187 |
 | Prompt Intelligence | **Partial** — platform prompt versioning; hub VL-188 |

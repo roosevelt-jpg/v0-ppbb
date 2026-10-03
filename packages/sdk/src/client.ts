@@ -1229,6 +1229,53 @@ export class VerbaLab {
     });
   }
 
+  async contextEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      infiniteContextWindow: boolean;
+      llmSummarization: boolean;
+      realtimePush: boolean;
+      orchestratesExisting: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/context-engine/engine', { method: 'GET' });
+  }
+
+  async contextAssemble(body?: {
+    query?: string;
+    conversationId?: string;
+    projectKey?: string;
+    subjectUserId?: string;
+    promptKey?: 'chat' | 'rag';
+    maxChars?: number;
+    documentK?: number;
+    memoryLimit?: number;
+  }): Promise<{
+    assembledAt: string;
+    included: string[];
+    promptContext: string;
+    compression: {
+      maxChars: number;
+      beforeChars: number;
+      afterChars: number;
+      truncated: boolean;
+    };
+    note: string;
+  }> {
+    return this.requestJson('/v1/context-engine/assemble', {
+      method: 'POST',
+      body: body ?? {},
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

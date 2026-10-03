@@ -103,6 +103,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.knowledgeGraph ?? '/knowledge-graph'} style={secondary}>
                 Knowledge Graph
               </Link>
+              <Link href={data.links.contextEngine ?? '/context-engine'} style={secondary}>
+                Context Engine
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

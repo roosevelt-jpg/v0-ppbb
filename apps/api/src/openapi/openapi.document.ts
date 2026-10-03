@@ -2878,6 +2878,44 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/context-engine/engine': {
+      get: {
+        summary: 'Context Engine catalog',
+        operationId: 'getContextEngine',
+        responses: { '200': { description: 'Capabilities and infinite-context honesty notes' } },
+      },
+    },
+    '/v1/context-engine/sources': {
+      get: {
+        summary: 'Context sources catalog',
+        operationId: 'listContextEngineSources',
+        responses: { '200': { description: 'Assemblable context sources' } },
+      },
+    },
+    '/v1/context-engine/assemble': {
+      post: {
+        summary: 'Assemble AI request context',
+        operationId: 'assembleContextEngine',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Compressed multi-source promptContext' } },
+      },
+    },
+    '/v1/context-engine/analytics': {
+      get: {
+        summary: 'Context Engine analytics',
+        operationId: 'getContextEngineAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Assemble audit aggregates' } },
+      },
+    },
+    '/v1/context-engine/monitoring': {
+      get: {
+        summary: 'Context Engine monitoring snapshot',
+        operationId: 'getContextEngineMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',
