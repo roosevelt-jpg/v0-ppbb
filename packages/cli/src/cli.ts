@@ -52,6 +52,7 @@ function usage(): never {
   verbalab model-marketplace-engine
   verbalab dataset-marketplace-engine
   verbalab prompt-marketplace-engine
+  verbalab agent-marketplace-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -486,6 +487,11 @@ async function main() {
 
   if (command === 'prompt-marketplace-engine') {
     console.log(JSON.stringify(await vl.promptMarketplaceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agent-marketplace-engine') {
+    console.log(JSON.stringify(await vl.agentMarketplaceEngine(), null, 2));
     return;
   }
 

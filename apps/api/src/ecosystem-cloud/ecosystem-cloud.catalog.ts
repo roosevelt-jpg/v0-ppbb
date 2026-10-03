@@ -83,11 +83,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'agent-marketplace',
       name: 'Agent Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/agent-marketplace/engine',
+      console: '/agent-marketplace',
       notes:
-        'VL-254 / Phase 121. Must enforce Agent Runtime sandbox + Policy Fabric hard-gate before third-party agents execute.',
+        'VL-254 / Phase 121. Agent Runtime sandbox + AgentPolicyGate + FabricPolicyGate; Stripe honesty. Not LangGraph/AutoGPT OS.',
     },
     {
       id: 'workflow-marketplace',
@@ -229,6 +229,11 @@ export function ecosystemRoutingTable() {
       surface: 'prompt-marketplace',
       path: '/prompt-marketplace',
       api: '/v1/prompt-marketplace/engine',
+    },
+    {
+      surface: 'agent-marketplace',
+      path: '/agent-marketplace',
+      api: '/v1/agent-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },

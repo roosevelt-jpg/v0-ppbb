@@ -3551,6 +3551,97 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/agent-marketplace/engine': {
+      get: {
+        summary: 'Agent Marketplace engine catalog',
+        operationId: 'getAgentMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Agent marketplace capabilities, Stripe honesty, sandbox + Policy hard-gate denials',
+          },
+        },
+      },
+    },
+    '/v1/agent-marketplace/products': {
+      get: {
+        summary: 'Agent Marketplace products (alias of engine)',
+        operationId: 'listAgentMarketplaceProducts',
+        responses: { '200': { description: 'Agent marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/listings': {
+      get: {
+        summary: 'List agent marketplace listings',
+        operationId: 'listAgentMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine agent listings' } },
+      },
+      post: {
+        summary: 'Publish an Agent Runtime agent as a marketplace listing',
+        operationId: 'publishAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install an agent listing into Agent Runtime (sandboxed)',
+        operationId: 'installAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandboxed agent installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace agent (Policy-gated sandbox)',
+        operationId: 'runAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result (may be denied)' },
+          '403': { description: 'Not installed or policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List agent listing reviews',
+        operationId: 'listAgentMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert an agent listing review',
+        operationId: 'reviewAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/agent-marketplace/sales': {
+      get: {
+        summary: 'Agent marketplace publisher sales',
+        operationId: 'listAgentMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/analytics': {
+      get: {
+        summary: 'Agent marketplace analytics',
+        operationId: 'getAgentMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/agent-marketplace/monitoring': {
+      get: {
+        summary: 'Agent marketplace monitoring',
+        operationId: 'getAgentMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
