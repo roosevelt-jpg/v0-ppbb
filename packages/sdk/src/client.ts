@@ -1215,6 +1215,27 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-biometrics/encryption', { method: 'GET' });
   }
 
+  async voiceMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: { celebrityWithoutRights: boolean; crossTenantCloneSynthesis: boolean };
+  }> {
+    return this.requestJson('/v1/voice-marketplace/engine', { method: 'GET' });
+  }
+
+  async voiceMarketplaceLanguagePacks(): Promise<{
+    packs: Array<{ id: string; title: string; language: string; voices: string[] }>;
+  }> {
+    return this.requestJson('/v1/voice-marketplace/language-packs', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

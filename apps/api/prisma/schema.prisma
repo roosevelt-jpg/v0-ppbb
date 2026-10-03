@@ -76,6 +76,11 @@ model Organization {
   voiceStudioProjects         VoiceStudioProject[]
   voiceStudioLexemes          VoiceStudioLexeme[]
   voiceStudioProfiles         VoiceStudioProfile[]
+  voiceListingsPublished      VoiceListing[] @relation("VoiceListingPublisher")
+  voiceListingInstalls        VoiceListingInstall[] @relation("VoiceListingInstaller")
+  voiceListingReviews         VoiceListingReview[]
+  voiceListingSalesAsPublisher VoiceListingSale[] @relation("VoiceListingSalePublisher")
+  voiceListingSalesAsBuyer     VoiceListingSale[] @relation("VoiceListingSaleBuyer")
 
   @@map("organizations")
 }
@@ -147,6 +152,8 @@ model Workspace {
   voiceStudioProjects VoiceStudioProject[]
   voiceStudioLexemes  VoiceStudioLexeme[]
   voiceStudioProfiles VoiceStudioProfile[]
+  voiceListingsPublished VoiceListing[] @relation("VoiceListingPublisherWorkspace")
+  voiceListingInstalls   VoiceListingInstall[] @relation("VoiceListingInstallerWorkspace")
 
   @@index([organizationId])
   @@map("workspaces")
@@ -881,6 +888,110 @@ model FineTuneJob {
   @@index([sourceLang, targetLang])
   @@index([callbackToken])
   @@map("fine_tune_jobs")
+}
+
+/**
+ * Voice Marketplace listing (VL-177) — distinct from localization Marketplace (VL-090).
+ * Celebrity SKUs without rights chain are forbidden.
+ */
+model VoiceListing {
+  id                   String    @id @default(cuid())
+  publisherOrgId       String    @map("publisher_org_id")
+  publisherWorkspaceId String    @map("publisher_workspace_id")
+  /// voice | pack | language_pack | enterprise
+  kind                 String    @default("voice")
+  /// clone | own | stock | pack
+  sourceType           String    @map("source_type")
+  sourceVoiceId        String    @map("source_voice_id")
+  voiceCloneId         String?   @map("voice_clone_id")
+  title                String
+  description          String    @default("")
+  language             String?
+  gender               String?
+  /// personal | commercial | broadcast | enterprise | subscription
+  licenseType          String    @default("personal") @map("license_type")
+  licenseNotes         String    @default("") @map("license_notes")
+  rightsAttested       Boolean   @default(false) @map("rights_attested")
+  celebrityClaim       Boolean   @default(false) @map("celebrity_claim")
+  priceCents           Int       @default(0) @map("price_cents")
+  currency             String    @default("usd")
+  /// null | monthly | yearly
+  subscriptionInterval String?   @map("subscription_interval")
+  status               String    @default("published")
+  ratingSum            Int       @default(0) @map("rating_sum")
+  ratingCount          Int       @default(0) @map("rating_count")
+  /// Frozen metadata / pack member ids at publish
+  snapshot             Json      @default("{}")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  publisherOrg       Organization         @relation("VoiceListingPublisher", fields: [publisherOrgId], references: [id], onDelete: Cascade)
+  publisherWorkspace Workspace            @relation("VoiceListingPublisherWorkspace", fields: [publisherWorkspaceId], references: [id], onDelete: Cascade)
+  installs           VoiceListingInstall[]
+  reviews            VoiceListingReview[]
+  sales              VoiceListingSale[]
+
+  @@index([status, kind, createdAt])
+  @@index([publisherOrgId])
+  @@map("voice_listings")
+}
+
+model VoiceListingInstall {
+  id                   String   @id @default(cuid())
+  listingId            String   @map("listing_id")
+  installerOrgId       String   @map("installer_org_id")
+  installerWorkspaceId String   @map("installer_workspace_id")
+  licenseType          String   @map("license_type")
+  installedAt          DateTime @default(now()) @map("installed_at")
+
+  listing            VoiceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  installerOrg       Organization @relation("VoiceListingInstaller", fields: [installerOrgId], references: [id], onDelete: Cascade)
+  installerWorkspace Workspace    @relation("VoiceListingInstallerWorkspace", fields: [installerWorkspaceId], references: [id], onDelete: Cascade)
+  sale               VoiceListingSale?
+
+  @@unique([listingId, installerWorkspaceId])
+  @@index([installerOrgId])
+  @@map("voice_listing_installs")
+}
+
+model VoiceListingReview {
+  id             String   @id @default(cuid())
+  listingId      String   @map("listing_id")
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  rating         Int
+  body           String   @default("")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  listing      VoiceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, organizationId])
+  @@index([listingId])
+  @@map("voice_listing_reviews")
+}
+
+model VoiceListingSale {
+  id                  String   @id @default(cuid())
+  listingId           String   @map("listing_id")
+  buyerOrgId          String   @map("buyer_org_id")
+  publisherOrgId      String   @map("publisher_org_id")
+  installId           String?  @unique @map("install_id")
+  amountCents         Int      @map("amount_cents")
+  applicationFeeCents Int      @default(0) @map("application_fee_cents")
+  currency            String   @default("usd")
+  status              String   @default("recorded")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  listing      VoiceListing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerOrg     Organization        @relation("VoiceListingSaleBuyer", fields: [buyerOrgId], references: [id], onDelete: Cascade)
+  publisherOrg Organization        @relation("VoiceListingSalePublisher", fields: [publisherOrgId], references: [id], onDelete: Cascade)
+  install      VoiceListingInstall? @relation(fields: [installId], references: [id], onDelete: SetNull)
+
+  @@index([publisherOrgId, createdAt])
+  @@index([buyerOrgId])
+  @@map("voice_listing_sales")
 }
 
 /**

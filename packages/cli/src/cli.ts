@@ -27,6 +27,8 @@ function usage(): never {
   verbalab voice-enhancement-profiles
   verbalab voice-biometrics-engine
   verbalab voice-biometrics-encryption
+  verbalab voice-marketplace-engine
+  verbalab voice-marketplace-language-packs
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -151,6 +153,16 @@ async function main() {
 
   if (command === 'voice-biometrics-encryption') {
     console.log(JSON.stringify(await vl.voiceBiometricsEncryption(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-marketplace-engine') {
+    console.log(JSON.stringify(await vl.voiceMarketplaceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-marketplace-language-packs') {
+    console.log(JSON.stringify(await vl.voiceMarketplaceLanguagePacks(), null, 2));
     return;
   }
 

@@ -20,7 +20,7 @@
 | Voice Restoration / Audio Mastering | **Partial** — restore + broadcast soft-limit profiles; LUFS/ML deferred |
 | Voice Biometrics / Authentication | **Partial** — **VL-176** `/voice-biometrics` over VL-152; heuristic anti-spoof/liveness; not NIST/PAD |
 | Voice Profiles | **Partial** — speaker profiles (VL-152) |
-| Voice Marketplace | **Deferred** — Phase 34 (existing Marketplace ≠ voice SKUs) |
+| Voice Marketplace | **Partial** — **VL-177** `/voice-marketplace` (≠ localization `/marketplace`) |
 | Voice Analytics | **Deferred** — Phase 35 |
 | Production Audit | Phase 36 (VL-179) |
 | GraphQL / CQRS | Bounded Voice Cloud slice (products query + catalog port) |

@@ -52,6 +52,7 @@ const links = [
   { href: '/translate/formats', label: 'Formats' },
   { href: '/locales', label: 'Locales' },
   { href: '/glossary', label: 'Glossary' },
+  { href: '/voice-marketplace', label: 'Voice market' },
   { href: '/marketplace', label: 'Marketplace' },
   { href: '/tm', label: 'TM' },
   { href: '/reviews', label: 'Reviews' },

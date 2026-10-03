@@ -640,6 +640,42 @@ export class GqlVoiceBiometricsEngine {
 }
 
 @ObjectType()
+export class GqlVoiceMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceMarketplaceCapability])
+  capabilities!: GqlVoiceMarketplaceCapability[];
+
+  @Field()
+  celebrityWithoutRights!: boolean;
+
+  @Field()
+  crossTenantCloneSynthesis!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

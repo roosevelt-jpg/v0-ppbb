@@ -151,6 +151,9 @@ export function VoiceCloudClient() {
             <Link href={data.links.speech ?? '/speech'} style={secondary}>
               Speech Cloud
             </Link>
+            <Link href={data.links.voiceMarketplace ?? '/voice-marketplace'} style={secondary}>
+              Voice market
+            </Link>
             <Link href={data.links.usage} style={secondary}>
               Usage
             </Link>
@@ -176,8 +179,8 @@ export function VoiceCloudClient() {
               {data.architecture.kubernetes ? 'yes (EKS af-south-1)' : 'no'}
             </p>
             <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-              Deferred: streaming TTS productization, professional cloning, emotion synthesis,
-              voice conversion, restoration/mastering, NIST biometrics/anti-spoof, voice marketplace.
+              Deferred: true streaming TTS, celebrity voice SKUs, cross-tenant clone synthesis,
+              NIST-certified biometrics/PAD, LUFS mastering, spectral ML denoise.
             </p>
           </section>
         </div>

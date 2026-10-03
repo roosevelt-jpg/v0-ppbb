@@ -3020,6 +3020,63 @@ export const openApiDocument = {
         responses: { '200': { description: 'Heuristic risk' } },
       },
     },
+    '/v1/voice-marketplace/engine': {
+      get: {
+        summary: 'Voice Marketplace engine catalog',
+        operationId: 'getVoiceMarketplaceEngine',
+        responses: { '200': { description: 'Capabilities and honesty notes' } },
+      },
+    },
+    '/v1/voice-marketplace/language-packs': {
+      get: {
+        summary: 'Curated language voice packs',
+        operationId: 'listVoiceMarketplaceLanguagePacks',
+        responses: { '200': { description: 'own:* language packs' } },
+      },
+    },
+    '/v1/voice-marketplace/listings': {
+      get: {
+        summary: 'List voice marketplace listings',
+        operationId: 'listVoiceMarketplaceListings',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Published or mine listings' } },
+      },
+      post: {
+        summary: 'Publish a voice SKU / pack',
+        operationId: 'publishVoiceMarketplaceListing',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created listing' } },
+      },
+    },
+    '/v1/voice-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install / license a voice listing',
+        operationId: 'installVoiceMarketplaceListing',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'License entitlement' } },
+      },
+    },
+    '/v1/voice-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List reviews for a voice listing',
+        operationId: 'listVoiceMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Rate / review a voice listing',
+        operationId: 'reviewVoiceMarketplaceListing',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Review' } },
+      },
+    },
+    '/v1/voice-marketplace/analytics': {
+      get: {
+        summary: 'Publisher analytics for voice marketplace',
+        operationId: 'voiceMarketplaceAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

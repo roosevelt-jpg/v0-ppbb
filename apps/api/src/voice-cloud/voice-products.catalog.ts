@@ -135,10 +135,11 @@ export function voiceProductCatalog(): VoiceProductRow[] {
     {
       id: 'voice-marketplace',
       name: 'Voice Marketplace',
-      status: 'deferred',
-      api: null,
-      console: '/marketplace',
-      notes: 'Buy/sell/license custom voices (Phase 34). Existing Marketplace is localization assets, not voice SKUs.',
+      status: 'partial',
+      api: 'GET /v1/voice-marketplace/engine',
+      console: '/voice-marketplace',
+      notes:
+        'Voice SKU publish/license/ratings (VL-177). Distinct from localization /marketplace. Celebrity without rights forbidden; cross-tenant clone synthesis deferred.',
     },
     {
       id: 'voice-faq',
