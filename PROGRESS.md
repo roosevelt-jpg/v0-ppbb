@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-313 Done — Platform Engineering Cloud Production Audit; Volume 16 closed)
+Last updated: 2026-10-03 (VL-323 Done — Control Plane Cloud Production Audit; Volume 17 closed)
 
 ---
 
@@ -343,6 +343,16 @@ Last updated: 2026-10-03 (VL-313 Done — Platform Engineering Cloud Production 
 | VL-311 | Developer Experience Platform (Phase 178) | Done | CLI/SDK/codegen/docs/repo health; extends VL-127. ADR-0213. |
 | VL-312 | Platform Engineering Analytics (Phase 179) | Done | DORA + sibling aggregation. ADR-0214. |
 | VL-313 | Platform Engineering Production Audit (Phase 180) | Done | Audit pack under `docs/platform-engineering-cloud-audit/`; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
+| VL-314 | Control Plane Foundation (Phase 181) | Done | `/control-plane-cloud` hub; ADR-0216. `executesInference=false`; `dataPlaneOs=false`. |
+| VL-315 | Organization Control (Phase 182) | Done | Orgs/roles; `leastPrivilegeRequired`; `controlPlaneAdminNotDefault`. ADR-0217. |
+| VL-316 | Global Configuration Platform (Phase 183) | Done | Config/versioning/flags; secrets refs only. ADR-0218. |
+| VL-317 | Global Policy Engine (Phase 184) | Done | Extends Policy Runtime/Trust; `policyRuntimeIntegrated`. ADR-0219. |
+| VL-318 | Global Deployment Controller (Phase 185) | Done | Promote auth + rollback; extends release-engineering. ADR-0220. |
+| VL-319 | Global Routing Controller (Phase 186) | Done | Traffic/geo/AI routing catalog; `istioOs=false`. ADR-0221. |
+| VL-320 | Secrets & Certificate Platform (Phase 187) | Done | Envelope encryption + audit; metadata-only; `hashicorpVaultOs=false`. ADR-0222. |
+| VL-321 | Global Scheduler (Phase 188) | Done | Job/cron/workflow schedules; `executesInference=false`. ADR-0223. |
+| VL-322 | Control Plane Analytics (Phase 189) | Done | Sibling aggregation. ADR-0224. |
+| VL-323 | Control Plane Production Audit (Phase 190) | Done | Audit pack under `docs/control-plane-cloud-audit/`; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
 
 ---
 
@@ -517,3 +527,5 @@ Last updated: 2026-10-03 (VL-313 Done — Platform Engineering Cloud Production 
 | 2026-10-03 | VL-301 Done: Trust Cloud Production Audit (Phase 168) — evidence pack; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
 | 2026-10-03 | VL-302–312 Done: Platform Engineering Cloud hubs (Phases 169–179) — foundation through PE analytics; ADR-0204–0214. FinOps GPU alerts, supply-chain scan/findings, GitOps honesty. |
 | 2026-10-03 | VL-313 Done: Platform Engineering Cloud Production Audit (Phase 180) — evidence pack; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
+| 2026-10-03 | VL-314–322 Done: Control Plane Cloud hubs (Phases 181–189) — foundation through CP analytics; ADR-0216–0224. Secrets envelope/metadata, deploy auth+rollback, least privilege. |
+| 2026-10-03 | VL-323 Done: Control Plane Cloud Production Audit (Phase 190) — evidence pack; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |

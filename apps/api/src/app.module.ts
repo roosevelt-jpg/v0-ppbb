@@ -119,6 +119,15 @@ import { FinopsPlatformModule } from './finops-platform/finops-platform.module';
 import { SupplyChainSecurityModule } from './supply-chain-security/supply-chain-security.module';
 import { DeveloperExperiencePlatformModule } from './developer-experience-platform/developer-experience-platform.module';
 import { PlatformEngineeringAnalyticsModule } from './platform-engineering-analytics/platform-engineering-analytics.module';
+import { ControlPlaneCloudModule } from './control-plane-cloud/control-plane-cloud.module';
+import { OrganizationControlModule } from './organization-control/organization-control.module';
+import { GlobalConfigurationPlatformModule } from './global-configuration-platform/global-configuration-platform.module';
+import { GlobalPolicyEngineModule } from './global-policy-engine/global-policy-engine.module';
+import { GlobalDeploymentControllerModule } from './global-deployment-controller/global-deployment-controller.module';
+import { GlobalRoutingControllerModule } from './global-routing-controller/global-routing-controller.module';
+import { SecretsCertificatePlatformModule } from './secrets-certificate-platform/secrets-certificate-platform.module';
+import { GlobalSchedulerModule } from './global-scheduler/global-scheduler.module';
+import { ControlPlaneAnalyticsModule } from './control-plane-analytics/control-plane-analytics.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -273,6 +282,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SupplyChainSecurityModule,
     DeveloperExperiencePlatformModule,
     PlatformEngineeringAnalyticsModule,
+    ControlPlaneCloudModule,
+    OrganizationControlModule,
+    GlobalConfigurationPlatformModule,
+    GlobalPolicyEngineModule,
+    GlobalDeploymentControllerModule,
+    GlobalRoutingControllerModule,
+    SecretsCertificatePlatformModule,
+    GlobalSchedulerModule,
+    ControlPlaneAnalyticsModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

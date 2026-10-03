@@ -5087,3 +5087,152 @@ export class GqlPlatformEngineeringAnalyticsEngine {
   @Field(() => Boolean)
   devopsIntelligenceOs!: boolean;
 }
+
+@ObjectType()
+export class GqlControlPlaneCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlOrganizationControlEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  leastPrivilegeRequired!: boolean;
+
+  @Field(() => Boolean)
+  controlPlaneAdminNotDefault!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalConfigurationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  secretsRefsOnly!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalPolicyEngineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyRuntimeIntegrated!: boolean;
+
+  @Field(() => Boolean)
+  leastPrivilegeRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalDeploymentControllerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  productionDeployRequiresAuthorization!: boolean;
+
+  @Field(() => Boolean)
+  rollbackPath!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGlobalRoutingControllerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  istioOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSecretsCertificatePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  encryptedAtRest!: boolean;
+
+  @Field(() => Boolean)
+  neverLogPlaintextSecrets!: boolean;
+
+  @Field(() => Boolean)
+  envelopeEncryptionPattern!: boolean;
+
+  @Field(() => Boolean)
+  accessAuditing!: boolean;
+
+  @Field(() => Boolean)
+  hashicorpVaultOs!: boolean;
+
+  @Field(() => Int)
+  secretCount!: number;
+}
+
+
+@ObjectType()
+export class GqlGlobalSchedulerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  executesInference!: boolean;
+}
+
+
+@ObjectType()
+export class GqlControlPlaneAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  aggregatesSiblingHubs!: boolean;
+}

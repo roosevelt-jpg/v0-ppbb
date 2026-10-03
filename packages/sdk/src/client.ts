@@ -4921,6 +4921,106 @@ export class VerbaLab {
     return this.parseJsonResponse<T>(response);
   }
 
+
+  async controlPlaneCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/control-plane-cloud/products', { method: 'GET' });
+  }
+
+  async organizationControlEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/organization-control/engine', { method: 'GET' });
+  }
+
+  async globalConfigurationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-configuration-platform/engine', { method: 'GET' });
+  }
+
+  async globalPolicyEngineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-policy-engine/engine', { method: 'GET' });
+  }
+
+  async globalDeploymentControllerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-deployment-controller/engine', { method: 'GET' });
+  }
+
+  async globalRoutingControllerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-routing-controller/engine', { method: 'GET' });
+  }
+
+  async secretsCertificatePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/secrets-certificate-platform/engine', { method: 'GET' });
+  }
+
+  async globalSchedulerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-scheduler/engine', { method: 'GET' });
+  }
+
+  async controlPlaneAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/control-plane-analytics/engine', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

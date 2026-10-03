@@ -10734,6 +10734,357 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/control-plane-cloud/products': {
+      get: {
+        summary: 'Control Plane products',
+        operationId: 'listControlPlaneCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/engine': {
+      get: {
+        summary: 'Control Plane engine alias',
+        operationId: 'getControlPlaneCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/routing': {
+      get: {
+        summary: 'Control Plane routing',
+        operationId: 'getControlPlaneCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/overview': {
+      get: {
+        summary: 'Control Plane overview',
+        operationId: 'getControlPlaneCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/monitoring': {
+      get: {
+        summary: 'Control Plane monitoring',
+        operationId: 'getControlPlaneCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/engine': {
+      get: {
+        summary: 'Organization Control engine',
+        operationId: 'getOrganizationControlEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/products': {
+      get: {
+        summary: 'Organization Control products',
+        operationId: 'listOrganizationControlProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/monitoring': {
+      get: {
+        summary: 'Organization Control monitoring',
+        operationId: 'getOrganizationControlMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/organizations': {
+      get: {
+        summary: 'Organization Control organizations',
+        operationId: 'listOrganizationControlOrganizations',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/roles': {
+      get: {
+        summary: 'Organization Control roles',
+        operationId: 'listOrganizationControlRoles',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/query': {
+      get: {
+        summary: 'Query Organization Control',
+        operationId: 'queryOrganizationControl',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/engine': {
+      get: {
+        summary: 'Global Configuration Platform engine',
+        operationId: 'getGlobalConfigurationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/products': {
+      get: {
+        summary: 'Global Configuration Platform products',
+        operationId: 'listGlobalConfigurationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/monitoring': {
+      get: {
+        summary: 'Global Configuration Platform monitoring',
+        operationId: 'getGlobalConfigurationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/configurations': {
+      get: {
+        summary: 'List Global Configuration Platform rows',
+        operationId: 'listGlobalConfigurationPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/query': {
+      get: {
+        summary: 'Query Global Configuration Platform',
+        operationId: 'queryGlobalConfigurationPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/engine': {
+      get: {
+        summary: 'Global Policy Engine engine',
+        operationId: 'getGlobalPolicyEngineEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/products': {
+      get: {
+        summary: 'Global Policy Engine products',
+        operationId: 'listGlobalPolicyEngineProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/monitoring': {
+      get: {
+        summary: 'Global Policy Engine monitoring',
+        operationId: 'getGlobalPolicyEngineMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/policies': {
+      get: {
+        summary: 'List Global Policy Engine rows',
+        operationId: 'listGlobalPolicyEngineRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/query': {
+      get: {
+        summary: 'Query Global Policy Engine',
+        operationId: 'queryGlobalPolicyEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/engine': {
+      get: {
+        summary: 'Global Deployment Controller engine',
+        operationId: 'getGlobalDeploymentControllerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/products': {
+      get: {
+        summary: 'Global Deployment Controller products',
+        operationId: 'listGlobalDeploymentControllerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/monitoring': {
+      get: {
+        summary: 'Global Deployment Controller monitoring',
+        operationId: 'getGlobalDeploymentControllerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/deployments': {
+      get: {
+        summary: 'Global Deployment Controller deployments',
+        operationId: 'listGlobalDeploymentControllerDeployments',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/rollback': {
+      get: {
+        summary: 'Global Deployment Controller rollback',
+        operationId: 'listGlobalDeploymentControllerRollbacks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/query': {
+      get: {
+        summary: 'Query Global Deployment Controller',
+        operationId: 'queryGlobalDeploymentController',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/promote': {
+      post: {
+        summary: 'Promote deployment (production requires authorization)',
+        operationId: 'promoteGlobalDeploymentController',
+        responses: { '200': { description: 'OK' }, '201': { description: 'Created' } },
+      },
+    },
+    '/v1/global-routing-controller/engine': {
+      get: {
+        summary: 'Global Routing Controller engine',
+        operationId: 'getGlobalRoutingControllerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/products': {
+      get: {
+        summary: 'Global Routing Controller products',
+        operationId: 'listGlobalRoutingControllerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/monitoring': {
+      get: {
+        summary: 'Global Routing Controller monitoring',
+        operationId: 'getGlobalRoutingControllerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/routes': {
+      get: {
+        summary: 'List Global Routing Controller rows',
+        operationId: 'listGlobalRoutingControllerRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/query': {
+      get: {
+        summary: 'Query Global Routing Controller',
+        operationId: 'queryGlobalRoutingController',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/engine': {
+      get: {
+        summary: 'Secrets & Certificate Platform engine',
+        operationId: 'getSecretsCertificatePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/products': {
+      get: {
+        summary: 'Secrets & Certificate Platform products',
+        operationId: 'listSecretsCertificatePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/monitoring': {
+      get: {
+        summary: 'Secrets & Certificate Platform monitoring',
+        operationId: 'getSecretsCertificatePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/secrets': {
+      get: {
+        summary: 'Secrets & Certificate Platform secrets metadata',
+        operationId: 'listSecretsCertificatePlatformSecrets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/metadata': {
+      get: {
+        summary: 'Secrets & Certificate Platform metadata',
+        operationId: 'listSecretsCertificatePlatformMetadata',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/audit': {
+      get: {
+        summary: 'Secrets & Certificate Platform audit',
+        operationId: 'listSecretsCertificatePlatformAudit',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/query': {
+      get: {
+        summary: 'Query Secrets & Certificate Platform',
+        operationId: 'querySecretsCertificatePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/engine': {
+      get: {
+        summary: 'Global Scheduler engine',
+        operationId: 'getGlobalSchedulerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/products': {
+      get: {
+        summary: 'Global Scheduler products',
+        operationId: 'listGlobalSchedulerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/monitoring': {
+      get: {
+        summary: 'Global Scheduler monitoring',
+        operationId: 'getGlobalSchedulerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/schedules': {
+      get: {
+        summary: 'List Global Scheduler rows',
+        operationId: 'listGlobalSchedulerRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/query': {
+      get: {
+        summary: 'Query Global Scheduler',
+        operationId: 'queryGlobalScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/engine': {
+      get: {
+        summary: 'Control Plane Analytics engine',
+        operationId: 'getControlPlaneAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/products': {
+      get: {
+        summary: 'Control Plane Analytics products',
+        operationId: 'listControlPlaneAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/monitoring': {
+      get: {
+        summary: 'Control Plane Analytics monitoring',
+        operationId: 'getControlPlaneAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/snapshot': {
+      get: {
+        summary: 'List Control Plane Analytics rows',
+        operationId: 'listControlPlaneAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/query': {
+      get: {
+        summary: 'Query Control Plane Analytics',
+        operationId: 'queryControlPlaneAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

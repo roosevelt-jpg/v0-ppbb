@@ -67,6 +67,15 @@ import { FinopsPlatformApplicationModule } from '../finops-platform/application/
 import { SupplyChainSecurityApplicationModule } from '../supply-chain-security/application/supply-chain-security-application.module';
 import { DeveloperExperiencePlatformApplicationModule } from '../developer-experience-platform/application/developer-experience-platform-application.module';
 import { PlatformEngineeringAnalyticsApplicationModule } from '../platform-engineering-analytics/application/platform-engineering-analytics-application.module';
+import { ControlPlaneCloudApplicationModule } from '../control-plane-cloud/application/control-plane-cloud-application.module';
+import { OrganizationControlApplicationModule } from '../organization-control/application/organization-control-application.module';
+import { GlobalConfigurationPlatformApplicationModule } from '../global-configuration-platform/application/global-configuration-platform-application.module';
+import { GlobalPolicyEngineApplicationModule } from '../global-policy-engine/application/global-policy-engine-application.module';
+import { GlobalDeploymentControllerApplicationModule } from '../global-deployment-controller/application/global-deployment-controller-application.module';
+import { GlobalRoutingControllerApplicationModule } from '../global-routing-controller/application/global-routing-controller-application.module';
+import { SecretsCertificatePlatformApplicationModule } from '../secrets-certificate-platform/application/secrets-certificate-platform-application.module';
+import { GlobalSchedulerApplicationModule } from '../global-scheduler/application/global-scheduler-application.module';
+import { ControlPlaneAnalyticsApplicationModule } from '../control-plane-analytics/application/control-plane-analytics-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -204,6 +213,15 @@ import { FinopsPlatformGraphqlResolver } from './finops-platform.resolver';
 import { SupplyChainSecurityGraphqlResolver } from './supply-chain-security.resolver';
 import { DeveloperExperiencePlatformGraphqlResolver } from './developer-experience-platform.resolver';
 import { PlatformEngineeringAnalyticsGraphqlResolver } from './platform-engineering-analytics.resolver';
+import { ControlPlaneCloudGraphqlResolver } from './control-plane-cloud.resolver';
+import { OrganizationControlGraphqlResolver } from './organization-control.resolver';
+import { GlobalConfigurationPlatformGraphqlResolver } from './global-configuration-platform.resolver';
+import { GlobalPolicyEngineGraphqlResolver } from './global-policy-engine.resolver';
+import { GlobalDeploymentControllerGraphqlResolver } from './global-deployment-controller.resolver';
+import { GlobalRoutingControllerGraphqlResolver } from './global-routing-controller.resolver';
+import { SecretsCertificatePlatformGraphqlResolver } from './secrets-certificate-platform.resolver';
+import { GlobalSchedulerGraphqlResolver } from './global-scheduler.resolver';
+import { ControlPlaneAnalyticsGraphqlResolver } from './control-plane-analytics.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -361,6 +379,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SupplyChainSecurityApplicationModule,
     DeveloperExperiencePlatformApplicationModule,
     PlatformEngineeringAnalyticsApplicationModule,
+    ControlPlaneCloudApplicationModule,
+    OrganizationControlApplicationModule,
+    GlobalConfigurationPlatformApplicationModule,
+    GlobalPolicyEngineApplicationModule,
+    GlobalDeploymentControllerApplicationModule,
+    GlobalRoutingControllerApplicationModule,
+    SecretsCertificatePlatformApplicationModule,
+    GlobalSchedulerApplicationModule,
+    ControlPlaneAnalyticsApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -506,6 +533,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SupplyChainSecurityGraphqlResolver,
     DeveloperExperiencePlatformGraphqlResolver,
     PlatformEngineeringAnalyticsGraphqlResolver,
+    ControlPlaneCloudGraphqlResolver,
+    OrganizationControlGraphqlResolver,
+    GlobalConfigurationPlatformGraphqlResolver,
+    GlobalPolicyEngineGraphqlResolver,
+    GlobalDeploymentControllerGraphqlResolver,
+    GlobalRoutingControllerGraphqlResolver,
+    SecretsCertificatePlatformGraphqlResolver,
+    GlobalSchedulerGraphqlResolver,
+    ControlPlaneAnalyticsGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

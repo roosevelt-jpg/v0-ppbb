@@ -98,6 +98,15 @@ function usage(): never {
   verbalab supply-chain-security-engine
   verbalab developer-experience-platform-engine
   verbalab platform-engineering-analytics-engine
+  verbalab control-plane-cloud-products
+  verbalab organization-control-engine
+  verbalab global-configuration-platform-engine
+  verbalab global-policy-engine-engine
+  verbalab global-deployment-controller-engine
+  verbalab global-routing-controller-engine
+  verbalab secrets-certificate-platform-engine
+  verbalab global-scheduler-engine
+  verbalab control-plane-analytics-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -770,6 +779,51 @@ async function main() {
     console.log(JSON.stringify(await vl.platformEngineeringAnalyticsEngine(), null, 2));
     return;
   }
+  if (command === 'control-plane-cloud-products') {
+    console.log(JSON.stringify(await vl.controlPlaneCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'organization-control-engine') {
+    console.log(JSON.stringify(await vl.organizationControlEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-configuration-platform-engine') {
+    console.log(JSON.stringify(await vl.globalConfigurationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-policy-engine-engine') {
+    console.log(JSON.stringify(await vl.globalPolicyEngineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-deployment-controller-engine') {
+    console.log(JSON.stringify(await vl.globalDeploymentControllerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-routing-controller-engine') {
+    console.log(JSON.stringify(await vl.globalRoutingControllerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'secrets-certificate-platform-engine') {
+    console.log(JSON.stringify(await vl.secretsCertificatePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-scheduler-engine') {
+    console.log(JSON.stringify(await vl.globalSchedulerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'control-plane-analytics-engine') {
+    console.log(JSON.stringify(await vl.controlPlaneAnalyticsEngine(), null, 2));
+    return;
+  }
+
 
 
 
