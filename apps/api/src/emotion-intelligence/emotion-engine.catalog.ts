@@ -36,7 +36,7 @@ export function emotionEngineCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/emotion/stream',
         notes: 'SSE progress events. Not live continuous SER WebSocket.',
       },

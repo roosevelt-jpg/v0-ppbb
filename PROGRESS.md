@@ -642,3 +642,4 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | 2026-10-03 | Model Runtime honesty closeout: multimodal local Own AI runtime, weights probe, African eval (fwd+rev), gov/bank/hospital unlocks wired into Enterprise Nation + Gov Intel; `/model-runtime`; ADR-0325. |
 | 2026-10-03 | Partner Connectors: REST+MCP+CLI+SDK for Higgsfield/Claude/Cursor/Runway/etc over Own AI; `@verbalab/mcp` stdio; marketplace catalog APIs; `/partner-connectors`; ADR-0326. |
 | 2026-10-03 | Knowledge + Intelligence Cloud partials → shipped e2e: agent-intelligence + ai-observability hubs, memory sweeper, KB approval, OCR caption ingest, reasoning tool execution, catalog capability promotions. |
+| 2026-10-03 | Speech Cloud + Voice Studio partials → shipped e2e: streaming STT SSE, biometrics hub row fix, FAQ/speaker/accent/emotion/audio/pronunciation/wake/call/analytics + studio edit/timeline/SSML/analytics; OS extras remain deferred. |
