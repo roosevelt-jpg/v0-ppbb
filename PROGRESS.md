@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-202 Done — Knowledge Analytics)
+Last updated: 2026-10-03 (VL-203 Done — Knowledge Cloud Production Audit)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-203 Knowledge Cloud Production Audit (Phase 70) |
+| Next up | Volume 7 Inference Cloud (new ROADMAP phases) |
 
 ---
 
@@ -232,6 +232,7 @@ Last updated: 2026-10-03 (VL-202 Done — Knowledge Analytics)
 | VL-200 | Knowledge Intelligence (Phase 67) | Done | `/v1/knowledge-intelligence/*` discover/link/recommend/validate/duplicates/confidence; ADR-0111. Not BI/Palantir OS; ≠ VL-191. |
 | VL-201 | Enterprise Knowledge APIs (Phase 68) | Done | `/v1/knowledge-apis/*` REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
 | VL-202 | Knowledge Analytics (Phase 69) | Done | `/v1/knowledge-analytics/*` growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS; ≠ sibling analytics. |
+| VL-203 | Knowledge Cloud Production Audit (Phase 70) | Done | Audit gate + reports under `docs/knowledge-cloud-audit/`; ADR-0114. Rejects enterprise knowledge OS / Inference Cloud here. |
 
 ---
 
@@ -348,3 +349,4 @@ Last updated: 2026-10-03 (VL-202 Done — Knowledge Analytics)
 | 2026-10-03 | VL-200 Done: Knowledge Intelligence (Phase 67) — discover/link/recommend/validate/duplicates/confidence; ADR-0111. Not BI/Palantir OS. |
 | 2026-10-03 | VL-201 Done: Enterprise Knowledge APIs (Phase 68) — REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
 | 2026-10-03 | VL-202 Done: Knowledge Analytics (Phase 69) — growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS. |
+| 2026-10-03 | VL-203 Done: Knowledge Cloud Production Audit (Phase 70) — checklist/tests/reports; ADR-0114. Volume closed. |

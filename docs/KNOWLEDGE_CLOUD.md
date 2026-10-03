@@ -1,7 +1,7 @@
 # VerbaLab Knowledge Cloud
 
-**Status:** Foundation through Knowledge Analytics partial (VL-193–202 / library Phases 60–69); Volume 6 continues through VL-203  
-**Rule:** Enterprise knowledge layer over VL-062 RAG and Intelligence Cloud (embeddings, vectors, knowledge graph, context). Extend existing Knowledge / Vector / Graph modules. Do **not** regenerate Intelligence Cloud or invent a Confluence/SharePoint/ontology OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume6-knowledge-cloud/`](./roadmap/volume6-knowledge-cloud/).
+**Status:** Volume complete through Production Audit (VL-193–203 / library Phases 60–70)  
+**Rule:** Enterprise knowledge layer over VL-062 RAG and Intelligence Cloud (embeddings, vectors, knowledge graph, context). Extend existing Knowledge / Vector / Graph modules. Do **not** regenerate Intelligence Cloud or invent a Confluence/SharePoint/ontology OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume6-knowledge-cloud/`](./roadmap/volume6-knowledge-cloud/). Evidence: [`docs/knowledge-cloud-audit/`](./knowledge-cloud-audit/).
 
 ---
 
@@ -19,7 +19,7 @@
 | Knowledge Intelligence | **Partial** — **VL-200** `/knowledge-intelligence` heuristic insight; not BI/Palantir OS |
 | Enterprise Knowledge APIs | **Partial** — **VL-201** `/knowledge-apis` pack over REST/GraphQL/OpenAPI/SDK/CLI; gRPC/Kafka deferred |
 | Knowledge Analytics | **Partial** — **VL-202** `/knowledge-analytics` growth/usage/quality; not BI OS |
-| Production Audit | Phase 70 / VL-203 |
+| Production Audit | **Done** — **VL-203** evidence pack under `docs/knowledge-cloud-audit/` |
 | Knowledge Graph | Linked VL-184 — not regenerated as this cloud |
 | GraphQL / CQRS | Bounded Knowledge Cloud catalog slice |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
