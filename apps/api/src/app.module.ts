@@ -86,6 +86,7 @@ import { AgentMarketplaceModule } from './agent-marketplace/agent-marketplace.mo
 import { WorkflowMarketplaceModule } from './workflow-marketplace/workflow-marketplace.module';
 import { ConnectorMarketplaceModule } from './connector-marketplace/connector-marketplace.module';
 import { VoiceLanguageMarketplaceModule } from './voice-language-marketplace/voice-language-marketplace.module';
+import { CreatorEconomyModule } from './creator-economy/creator-economy.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -190,6 +191,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     WorkflowMarketplaceModule,
     ConnectorMarketplaceModule,
     VoiceLanguageMarketplaceModule,
+    CreatorEconomyModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
