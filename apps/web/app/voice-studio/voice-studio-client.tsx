@@ -349,32 +349,9 @@ export function VoiceStudioClient() {
   );
 }
 
-const label: CSSProperties = { fontSize: '0.85rem', fontWeight: 550 };
 const h2: CSSProperties = {
   fontFamily: 'var(--font-display)',
   fontSize: '1.15rem',
   fontWeight: 650,
   margin: '0 0 0.5rem',
-};
-const input: CSSProperties = {
-  border: '1px solid var(--line)',
-  borderRadius: 8,
-  padding: '0.55rem 0.7rem',
-  font: 'inherit',
-  background: '#fff',
-};
-const primary: CSSProperties = {
-  border: 'none',
-  borderRadius: 8,
-  padding: '0.55rem 0.9rem',
-  background: 'var(--ink)',
-  color: '#fff',
-  fontWeight: 550,
-  cursor: 'pointer',
-};
-const secondary: CSSProperties = {
-  ...primary,
-  background: 'var(--bg-soft)',
-  color: 'var(--ink)',
-  border: '1px solid var(--line)',
 };
