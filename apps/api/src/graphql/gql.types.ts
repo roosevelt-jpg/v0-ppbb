@@ -5236,3 +5236,200 @@ export class GqlControlPlaneAnalyticsEngine {
   @Field(() => Boolean)
   aggregatesSiblingHubs!: boolean;
 }
+
+@ObjectType()
+export class GqlDataPlaneCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlTranslationRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSpeechRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlVoiceRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlVisionRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlKnowledgeRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEmbeddingRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlDataPlaneStreamingEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGpuRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  thinExecutionLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesProductLogic!: boolean;
+
+  @Field(() => Boolean)
+  managesOrgsPoliciesBilling!: boolean;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}

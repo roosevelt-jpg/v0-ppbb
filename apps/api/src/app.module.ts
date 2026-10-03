@@ -128,6 +128,15 @@ import { GlobalRoutingControllerModule } from './global-routing-controller/globa
 import { SecretsCertificatePlatformModule } from './secrets-certificate-platform/secrets-certificate-platform.module';
 import { GlobalSchedulerModule } from './global-scheduler/global-scheduler.module';
 import { ControlPlaneAnalyticsModule } from './control-plane-analytics/control-plane-analytics.module';
+import { DataPlaneCloudModule } from './data-plane-cloud/data-plane-cloud.module';
+import { TranslationRuntimeModule } from './translation-runtime/translation-runtime.module';
+import { SpeechRuntimeModule } from './speech-runtime/speech-runtime.module';
+import { VoiceRuntimeModule } from './voice-runtime/voice-runtime.module';
+import { VisionRuntimeModule } from './vision-runtime/vision-runtime.module';
+import { KnowledgeRuntimeModule } from './knowledge-runtime/knowledge-runtime.module';
+import { EmbeddingRuntimeModule } from './embedding-runtime/embedding-runtime.module';
+import { DataPlaneStreamingModule } from './data-plane-streaming/data-plane-streaming.module';
+import { GpuRuntimeModule } from './gpu-runtime/gpu-runtime.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -291,6 +300,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SecretsCertificatePlatformModule,
     GlobalSchedulerModule,
     ControlPlaneAnalyticsModule,
+    DataPlaneCloudModule,
+    TranslationRuntimeModule,
+    SpeechRuntimeModule,
+    VoiceRuntimeModule,
+    VisionRuntimeModule,
+    KnowledgeRuntimeModule,
+    EmbeddingRuntimeModule,
+    DataPlaneStreamingModule,
+    GpuRuntimeModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

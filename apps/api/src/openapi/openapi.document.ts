@@ -11085,6 +11085,434 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/data-plane-cloud/products': {
+      get: {
+        summary: 'Data Plane products',
+        operationId: 'listDataPlaneCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/engine': {
+      get: {
+        summary: 'Data Plane engine alias',
+        operationId: 'getDataPlaneCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/routing': {
+      get: {
+        summary: 'Data Plane routing',
+        operationId: 'getDataPlaneCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/overview': {
+      get: {
+        summary: 'Data Plane overview',
+        operationId: 'getDataPlaneCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/monitoring': {
+      get: {
+        summary: 'Data Plane monitoring',
+        operationId: 'getDataPlaneCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/engine': {
+      get: {
+        summary: 'Translation Runtime engine',
+        operationId: 'getTranslationRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/products': {
+      get: {
+        summary: 'Translation Runtime products',
+        operationId: 'listTranslationRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/monitoring': {
+      get: {
+        summary: 'Translation Runtime monitoring',
+        operationId: 'getTranslationRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/routes': {
+      get: {
+        summary: 'Translation Runtime routes',
+        operationId: 'listTranslationRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/route': {
+      get: {
+        summary: 'Route via Translation Runtime',
+        operationId: 'routeTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/execute': {
+      get: {
+        summary: 'Execute via Translation Runtime',
+        operationId: 'executeTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/query': {
+      get: {
+        summary: 'Query Translation Runtime',
+        operationId: 'queryTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/engine': {
+      get: {
+        summary: 'Speech Runtime engine',
+        operationId: 'getSpeechRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/products': {
+      get: {
+        summary: 'Speech Runtime products',
+        operationId: 'listSpeechRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/monitoring': {
+      get: {
+        summary: 'Speech Runtime monitoring',
+        operationId: 'getSpeechRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/routes': {
+      get: {
+        summary: 'Speech Runtime routes',
+        operationId: 'listSpeechRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/route': {
+      get: {
+        summary: 'Route via Speech Runtime',
+        operationId: 'routeSpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/execute': {
+      get: {
+        summary: 'Execute via Speech Runtime',
+        operationId: 'executeSpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/query': {
+      get: {
+        summary: 'Query Speech Runtime',
+        operationId: 'querySpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/engine': {
+      get: {
+        summary: 'Voice Runtime engine',
+        operationId: 'getVoiceRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/products': {
+      get: {
+        summary: 'Voice Runtime products',
+        operationId: 'listVoiceRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/monitoring': {
+      get: {
+        summary: 'Voice Runtime monitoring',
+        operationId: 'getVoiceRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/routes': {
+      get: {
+        summary: 'Voice Runtime routes',
+        operationId: 'listVoiceRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/route': {
+      get: {
+        summary: 'Route via Voice Runtime',
+        operationId: 'routeVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/execute': {
+      get: {
+        summary: 'Execute via Voice Runtime',
+        operationId: 'executeVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/query': {
+      get: {
+        summary: 'Query Voice Runtime',
+        operationId: 'queryVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/engine': {
+      get: {
+        summary: 'Vision Runtime engine',
+        operationId: 'getVisionRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/products': {
+      get: {
+        summary: 'Vision Runtime products',
+        operationId: 'listVisionRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/monitoring': {
+      get: {
+        summary: 'Vision Runtime monitoring',
+        operationId: 'getVisionRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/routes': {
+      get: {
+        summary: 'Vision Runtime routes',
+        operationId: 'listVisionRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/route': {
+      get: {
+        summary: 'Route via Vision Runtime',
+        operationId: 'routeVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/execute': {
+      get: {
+        summary: 'Execute via Vision Runtime',
+        operationId: 'executeVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/query': {
+      get: {
+        summary: 'Query Vision Runtime',
+        operationId: 'queryVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/engine': {
+      get: {
+        summary: 'Knowledge Runtime engine',
+        operationId: 'getKnowledgeRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/products': {
+      get: {
+        summary: 'Knowledge Runtime products',
+        operationId: 'listKnowledgeRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/monitoring': {
+      get: {
+        summary: 'Knowledge Runtime monitoring',
+        operationId: 'getKnowledgeRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/routes': {
+      get: {
+        summary: 'Knowledge Runtime routes',
+        operationId: 'listKnowledgeRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/route': {
+      get: {
+        summary: 'Route via Knowledge Runtime',
+        operationId: 'routeKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/execute': {
+      get: {
+        summary: 'Execute via Knowledge Runtime',
+        operationId: 'executeKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/query': {
+      get: {
+        summary: 'Query Knowledge Runtime',
+        operationId: 'queryKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/engine': {
+      get: {
+        summary: 'Embedding Runtime engine',
+        operationId: 'getEmbeddingRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/products': {
+      get: {
+        summary: 'Embedding Runtime products',
+        operationId: 'listEmbeddingRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/monitoring': {
+      get: {
+        summary: 'Embedding Runtime monitoring',
+        operationId: 'getEmbeddingRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/routes': {
+      get: {
+        summary: 'Embedding Runtime routes',
+        operationId: 'listEmbeddingRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/route': {
+      get: {
+        summary: 'Route via Embedding Runtime',
+        operationId: 'routeEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/execute': {
+      get: {
+        summary: 'Execute via Embedding Runtime',
+        operationId: 'executeEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/query': {
+      get: {
+        summary: 'Query Embedding Runtime',
+        operationId: 'queryEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/engine': {
+      get: {
+        summary: 'Data Plane Streaming engine',
+        operationId: 'getDataPlaneStreamingEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/products': {
+      get: {
+        summary: 'Data Plane Streaming products',
+        operationId: 'listDataPlaneStreamingProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/monitoring': {
+      get: {
+        summary: 'Data Plane Streaming monitoring',
+        operationId: 'getDataPlaneStreamingMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/routes': {
+      get: {
+        summary: 'Data Plane Streaming routes',
+        operationId: 'listDataPlaneStreamingRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/route': {
+      get: {
+        summary: 'Route via Data Plane Streaming',
+        operationId: 'routeDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/execute': {
+      get: {
+        summary: 'Execute via Data Plane Streaming',
+        operationId: 'executeDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/query': {
+      get: {
+        summary: 'Query Data Plane Streaming',
+        operationId: 'queryDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/engine': {
+      get: {
+        summary: 'GPU Runtime engine',
+        operationId: 'getGpuRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/products': {
+      get: {
+        summary: 'GPU Runtime products',
+        operationId: 'listGpuRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/monitoring': {
+      get: {
+        summary: 'GPU Runtime monitoring',
+        operationId: 'getGpuRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/routes': {
+      get: {
+        summary: 'GPU Runtime routes',
+        operationId: 'listGpuRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/route': {
+      get: {
+        summary: 'Route via GPU Runtime',
+        operationId: 'routeGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/execute': {
+      get: {
+        summary: 'Execute via GPU Runtime',
+        operationId: 'executeGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/query': {
+      get: {
+        summary: 'Query GPU Runtime',
+        operationId: 'queryGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

@@ -5021,6 +5021,114 @@ export class VerbaLab {
     return this.requestJson('/v1/control-plane-analytics/engine', { method: 'GET' });
   }
 
+
+  async dataPlaneCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/data-plane-cloud/products', { method: 'GET' });
+  }
+
+  async translationRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/translation-runtime/engine', { method: 'GET' });
+  }
+
+  async speechRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/speech-runtime/engine', { method: 'GET' });
+  }
+
+  async voiceRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/voice-runtime/engine', { method: 'GET' });
+  }
+
+  async visionRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/vision-runtime/engine', { method: 'GET' });
+  }
+
+  async knowledgeRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/knowledge-runtime/engine', { method: 'GET' });
+  }
+
+  async embeddingRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/embedding-runtime/engine', { method: 'GET' });
+  }
+
+  async dataPlaneStreamingEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/data-plane-streaming/engine', { method: 'GET' });
+  }
+
+  async gpuRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/gpu-runtime/engine', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

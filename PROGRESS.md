@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-323 Done — Control Plane Cloud Production Audit; Volume 17 closed)
+Last updated: 2026-10-03 (VL-333 Done — Data Plane Cloud Production Audit; Volume 18 closed)
 
 ---
 
@@ -353,6 +353,16 @@ Last updated: 2026-10-03 (VL-323 Done — Control Plane Cloud Production Audit; 
 | VL-321 | Global Scheduler (Phase 188) | Done | Job/cron/workflow schedules; `executesInference=false`. ADR-0223. |
 | VL-322 | Control Plane Analytics (Phase 189) | Done | Sibling aggregation. ADR-0224. |
 | VL-323 | Control Plane Production Audit (Phase 190) | Done | Audit pack under `docs/control-plane-cloud-audit/`; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
+| VL-324 | Data Plane Foundation (Phase 191) | Done | `/data-plane-cloud` hub; ADR-0226. `managesOrgsPoliciesBilling=false`; `serviceMeshOs=false`. |
+| VL-325 | Translation Runtime (Phase 192) | Done | Thin over translate; `thinExecutionLayer`; ADR-0227. |
+| VL-326 | Speech Runtime (Phase 193) | Done | Thin over speech-cloud / speech-recognition; ADR-0228. |
+| VL-327 | Voice Runtime (Phase 194) | Done | Thin over voice-cloud / voice; ADR-0229. |
+| VL-328 | Vision Runtime (Phase 195) | Done | Thin over ocr / documents; ADR-0230. |
+| VL-329 | Knowledge Runtime (Phase 196) | Done | Thin over knowledge-cloud / knowledge / knowledge-fabric; ADR-0231. |
+| VL-330 | Embedding Runtime (Phase 197) | Done | Thin over embeddings / embedding-cloud; ADR-0232. |
+| VL-331 | Data Plane Streaming (Phase 198) | Done | Façade `data-plane-streaming` → streaming-runtime; `extendsStreamingRuntime`; ADR-0233. |
+| VL-332 | GPU Runtime (Phase 199) | Done | Thin over gpu-platform; `gpuBudgetLimitsRequired`; ADR-0234. |
+| VL-333 | Data Plane Production Audit (Phase 200) | Done | Audit pack under `docs/data-plane-cloud-audit/`; ADR-0235. Volume 18 closed. Service Mesh → past Volume 18. |
 
 ---
 
@@ -529,3 +539,5 @@ Last updated: 2026-10-03 (VL-323 Done — Control Plane Cloud Production Audit; 
 | 2026-10-03 | VL-313 Done: Platform Engineering Cloud Production Audit (Phase 180) — evidence pack; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
 | 2026-10-03 | VL-314–322 Done: Control Plane Cloud hubs (Phases 181–189) — foundation through CP analytics; ADR-0216–0224. Secrets envelope/metadata, deploy auth+rollback, least privilege. |
 | 2026-10-03 | VL-323 Done: Control Plane Cloud Production Audit (Phase 190) — evidence pack; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
+| 2026-10-03 | VL-324–332 Done: Data Plane Cloud hubs (Phases 191–199) — foundation through GPU runtime; ADR-0226–0234. Thin execution layers; no Service Mesh. |
+| 2026-10-03 | VL-333 Done: Data Plane Cloud Production Audit (Phase 200) — evidence pack; ADR-0235. Volume 18 closed. Service Mesh / VAIOS deferred past Volume 18. |

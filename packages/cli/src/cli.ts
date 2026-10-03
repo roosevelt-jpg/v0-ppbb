@@ -107,6 +107,15 @@ function usage(): never {
   verbalab secrets-certificate-platform-engine
   verbalab global-scheduler-engine
   verbalab control-plane-analytics-engine
+  verbalab data-plane-cloud-products
+  verbalab translation-runtime-engine
+  verbalab speech-runtime-engine
+  verbalab voice-runtime-engine
+  verbalab vision-runtime-engine
+  verbalab knowledge-runtime-engine
+  verbalab embedding-runtime-engine
+  verbalab data-plane-streaming-engine
+  verbalab gpu-runtime-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -823,6 +832,51 @@ async function main() {
     console.log(JSON.stringify(await vl.controlPlaneAnalyticsEngine(), null, 2));
     return;
   }
+  if (command === 'data-plane-cloud-products') {
+    console.log(JSON.stringify(await vl.dataPlaneCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'translation-runtime-engine') {
+    console.log(JSON.stringify(await vl.translationRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'speech-runtime-engine') {
+    console.log(JSON.stringify(await vl.speechRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-runtime-engine') {
+    console.log(JSON.stringify(await vl.voiceRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'vision-runtime-engine') {
+    console.log(JSON.stringify(await vl.visionRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-runtime-engine') {
+    console.log(JSON.stringify(await vl.knowledgeRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'embedding-runtime-engine') {
+    console.log(JSON.stringify(await vl.embeddingRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'data-plane-streaming-engine') {
+    console.log(JSON.stringify(await vl.dataPlaneStreamingEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'gpu-runtime-engine') {
+    console.log(JSON.stringify(await vl.gpuRuntimeEngine(), null, 2));
+    return;
+  }
+
 
 
 

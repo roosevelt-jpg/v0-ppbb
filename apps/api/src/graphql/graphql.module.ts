@@ -76,6 +76,15 @@ import { GlobalRoutingControllerApplicationModule } from '../global-routing-cont
 import { SecretsCertificatePlatformApplicationModule } from '../secrets-certificate-platform/application/secrets-certificate-platform-application.module';
 import { GlobalSchedulerApplicationModule } from '../global-scheduler/application/global-scheduler-application.module';
 import { ControlPlaneAnalyticsApplicationModule } from '../control-plane-analytics/application/control-plane-analytics-application.module';
+import { DataPlaneCloudApplicationModule } from '../data-plane-cloud/application/data-plane-cloud-application.module';
+import { TranslationRuntimeApplicationModule } from '../translation-runtime/application/translation-runtime-application.module';
+import { SpeechRuntimeApplicationModule } from '../speech-runtime/application/speech-runtime-application.module';
+import { VoiceRuntimeApplicationModule } from '../voice-runtime/application/voice-runtime-application.module';
+import { VisionRuntimeApplicationModule } from '../vision-runtime/application/vision-runtime-application.module';
+import { KnowledgeRuntimeApplicationModule } from '../knowledge-runtime/application/knowledge-runtime-application.module';
+import { EmbeddingRuntimeApplicationModule } from '../embedding-runtime/application/embedding-runtime-application.module';
+import { DataPlaneStreamingApplicationModule } from '../data-plane-streaming/application/data-plane-streaming-application.module';
+import { GpuRuntimeApplicationModule } from '../gpu-runtime/application/gpu-runtime-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -222,6 +231,15 @@ import { GlobalRoutingControllerGraphqlResolver } from './global-routing-control
 import { SecretsCertificatePlatformGraphqlResolver } from './secrets-certificate-platform.resolver';
 import { GlobalSchedulerGraphqlResolver } from './global-scheduler.resolver';
 import { ControlPlaneAnalyticsGraphqlResolver } from './control-plane-analytics.resolver';
+import { DataPlaneCloudGraphqlResolver } from './data-plane-cloud.resolver';
+import { TranslationRuntimeGraphqlResolver } from './translation-runtime.resolver';
+import { SpeechRuntimeGraphqlResolver } from './speech-runtime.resolver';
+import { VoiceRuntimeGraphqlResolver } from './voice-runtime.resolver';
+import { VisionRuntimeGraphqlResolver } from './vision-runtime.resolver';
+import { KnowledgeRuntimeGraphqlResolver } from './knowledge-runtime.resolver';
+import { EmbeddingRuntimeGraphqlResolver } from './embedding-runtime.resolver';
+import { DataPlaneStreamingGraphqlResolver } from './data-plane-streaming.resolver';
+import { GpuRuntimeGraphqlResolver } from './gpu-runtime.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -388,6 +406,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SecretsCertificatePlatformApplicationModule,
     GlobalSchedulerApplicationModule,
     ControlPlaneAnalyticsApplicationModule,
+    DataPlaneCloudApplicationModule,
+    TranslationRuntimeApplicationModule,
+    SpeechRuntimeApplicationModule,
+    VoiceRuntimeApplicationModule,
+    VisionRuntimeApplicationModule,
+    KnowledgeRuntimeApplicationModule,
+    EmbeddingRuntimeApplicationModule,
+    DataPlaneStreamingApplicationModule,
+    GpuRuntimeApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -542,6 +569,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SecretsCertificatePlatformGraphqlResolver,
     GlobalSchedulerGraphqlResolver,
     ControlPlaneAnalyticsGraphqlResolver,
+    DataPlaneCloudGraphqlResolver,
+    TranslationRuntimeGraphqlResolver,
+    SpeechRuntimeGraphqlResolver,
+    VoiceRuntimeGraphqlResolver,
+    VisionRuntimeGraphqlResolver,
+    KnowledgeRuntimeGraphqlResolver,
+    EmbeddingRuntimeGraphqlResolver,
+    DataPlaneStreamingGraphqlResolver,
+    GpuRuntimeGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,
