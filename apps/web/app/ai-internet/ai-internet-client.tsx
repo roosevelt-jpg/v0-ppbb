@@ -12,13 +12,13 @@ export function AiInternetClient() {
   }, []);
   return (
     <AppShell>
-      <main style={{ padding: '1.5rem', maxWidth: 880 }}>
-        <h1>AI Internet</h1>
+      <main style={{ padding: '1.5rem', maxWidth: 920 }}>
         <p style={{ color: 'var(--muted)' }}>
-          <Link href="/voice-fm">Voice FM</Link> · <Link href="/translate-fm">Translate FM</Link> · 
-          <Link href="/foundation-model-cloud">FM Cloud</Link>
+          <Link href="/ai-internet">AI Internet</Link>
         </p>
-        <pre style={{ background: 'var(--surface, #f4f4f5)', padding: 12 }}>
+        <h1>AI Internet</h1>
+        <p>Foundation for VerbaLab AI Internet — meshes every agent, model, memory, and enterprise node.</p>
+        <pre style={{ background: 'var(--surface, #f4f4f5)', padding: 12, overflow: 'auto' }}>
           {JSON.stringify(engine, null, 2)}
         </pre>
       </main>

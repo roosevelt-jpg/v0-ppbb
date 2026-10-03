@@ -117,7 +117,13 @@ export function isOwnTtsVoice(voice: string): boolean {
 }
 
 export function ownTtsConfigured(): boolean {
-  return Boolean(process.env.OWN_TTS_URL?.trim()) || process.env.OWN_TTS_FIXTURE === '1';
+  return (
+    Boolean(process.env.OWN_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_MODEL_BASE_URL?.trim()) ||
+    process.env.OWN_TTS_FIXTURE === '1' ||
+    process.env.VERBALAB_OWN_AI_FIXTURE === '1'
+  );
 }
 
 /** Minimal RIFF/WAV for fixture playback without claiming a real GPU run. */
@@ -301,12 +307,20 @@ export class UnconfiguredOwnTtsAdapter implements TtsProvider {
 }
 
 export function createOwnTtsAdapter(): TtsProvider {
-  if (process.env.OWN_TTS_FIXTURE === '1') {
+  if (process.env.OWN_TTS_FIXTURE === '1' || process.env.VERBALAB_OWN_AI_FIXTURE === '1') {
     return new FixtureOwnTtsAdapter();
   }
-  const url = process.env.OWN_TTS_URL?.trim() ?? '';
+  const url =
+    process.env.OWN_TTS_URL?.trim() ||
+    process.env.VERBALAB_TTS_URL?.trim() ||
+    (process.env.VERBALAB_MODEL_BASE_URL?.trim()
+      ? `${process.env.VERBALAB_MODEL_BASE_URL.replace(/\/$/, '')}/audio/speech`
+      : '');
   if (url) {
-    return new HttpOwnTtsAdapter(url, process.env.OWN_TTS_API_KEY?.trim() || undefined);
+    return new HttpOwnTtsAdapter(
+      url,
+      process.env.OWN_TTS_API_KEY?.trim() || process.env.VERBALAB_MODEL_API_KEY?.trim() || undefined,
+    );
   }
   return new UnconfiguredOwnTtsAdapter();
 }

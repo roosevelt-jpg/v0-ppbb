@@ -1,33 +1,68 @@
 import { Injectable } from '@nestjs/common';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
+import { AiInternetStoreService } from '../ai-internet-store/ai-internet-store.service';
 import { ownAiStackSummary } from '../gateway/verbalab-own-ai';
-import { aiInternetCatalog } from './ai-internet.catalog';
+import { aiinternetCapabilities, aiinternetCatalog } from './ai-internet.catalog';
 
 @Injectable()
 export class AiInternetService {
+  constructor(private readonly store: AiInternetStoreService) {}
+
   engine() {
     return {
-      ...aiInternetCatalog(),
+      ...aiinternetCatalog(),
+      capabilities: aiinternetCapabilities(),
       ownAi: ownAiStackSummary(),
-      pillars: [
-        { id: 'identity-fabric', status: 'mapped', home: '/identity-federation' },
-        { id: 'model-mesh', status: 'mapped', home: '/model-serving' },
-        { id: 'knowledge-mesh', status: 'mapped', home: '/knowledge-fabric' },
-        { id: 'agent-mesh', status: 'mapped', home: '/agent-fabric' },
-        { id: 'trust-mesh', status: 'mapped', home: '/trust-cloud' },
-        { id: 'economy-mesh', status: 'mapped', home: '/ai-economy' },
-      ],
-      note: 'AI Internet (v2 261–300) packaged as foundation hub over existing clouds — not a separate sci-fi OS.',
+      note: 'VL-394 AI Internet — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 
-  overview(session: SessionContext) {
+  async overview(session: SessionContext) {
+    const records = await this.store.list(session.organizationId, 'foundation');
+    const summary = await this.store.summary(session.organizationId);
     return {
       session: {
         organizationId: session.organizationId,
         workspaceId: session.workspaceId,
+        role: session.role,
       },
       engine: this.engine(),
+      records,
+      summary,
+      links: {
+        self: '/ai-internet',
+        aiInternet: '/ai-internet',
+        credentialsReadiness: '/credentials-readiness',
+      },
+    };
+  }
+
+  async listRecords(session: SessionContext) {
+    return {
+      data: await this.store.list(session.organizationId, 'foundation'),
+    };
+  }
+
+  async createRecord(
+    session: SessionContext,
+    body: { kind: string; title: string; summary?: string; content?: Record<string, unknown> },
+  ) {
+    const row = await this.store.create(session.organizationId, {
+      domain: 'foundation',
+      kind: body.kind,
+      title: body.title,
+      summary: body.summary,
+      content: body.content,
+      ownerLabel: session.userId ?? 'console',
+    });
+    return { data: row };
+  }
+
+  monitoring() {
+    return {
+      status: 'ready',
+      honesty: aiinternetCatalog().honesty,
+      ownAi: ownAiStackSummary(),
     };
   }
 }

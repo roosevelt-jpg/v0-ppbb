@@ -69,6 +69,22 @@ import { ModelTrainingPlatformModule } from './model-training-platform/model-tra
 import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model-evaluation-platform.module';
 import { ModelRegistryModule } from './model-registry/model-registry.module';
 import { AtlasModule } from './atlas/atlas.module';
+import { AiInternetAuditModule } from './ai-internet-audit/ai-internet-audit.module';
+import { CredentialsReadinessModule } from './credentials-readiness/credentials-readiness.module';
+import { VerbalabGlobalOsModule } from './verbalab-global-os/verbalab-global-os.module';
+import { AiMarketplaceFederationModule } from './ai-marketplace-federation/ai-marketplace-federation.module';
+import { AiSovereigntyExchangeModule } from './ai-sovereignty-exchange/ai-sovereignty-exchange.module';
+import { AiGovernanceFederationModule } from './ai-governance-federation/ai-governance-federation.module';
+import { AiGlobalRoutingModule } from './ai-global-routing/ai-global-routing.module';
+import { AiCertificateAuthorityModule } from './ai-certificate-authority/ai-certificate-authority.module';
+import { AiPaymentNetworkModule } from './ai-payment-network/ai-payment-network.module';
+import { AiTrustNetworkModule } from './ai-trust-network/ai-trust-network.module';
+import { A2aProtocolModule } from './a2a-protocol/a2a-protocol.module';
+import { AiFederationMeshModule } from './ai-federation-mesh/ai-federation-mesh.module';
+import { AiDiscoveryModule } from './ai-discovery/ai-discovery.module';
+import { AiIdentityWalletModule } from './ai-identity-wallet/ai-identity-wallet.module';
+import { AiDnsModule } from './ai-dns/ai-dns.module';
+import { AiInternetStoreModule } from './ai-internet-store/ai-internet-store.module';
 import { AiInternetModule } from './ai-internet/ai-internet.module';
 import { VideoVoiceModule } from './video-voice/video-voice.module';
 import { SpeechDepthModule } from './speech-depth/speech-depth.module';
@@ -308,6 +324,22 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelEvaluationPlatformModule,
     ModelRegistryModule,
     AtlasModule,
+    AiInternetAuditModule,
+    CredentialsReadinessModule,
+    VerbalabGlobalOsModule,
+    AiMarketplaceFederationModule,
+    AiSovereigntyExchangeModule,
+    AiGovernanceFederationModule,
+    AiGlobalRoutingModule,
+    AiCertificateAuthorityModule,
+    AiPaymentNetworkModule,
+    AiTrustNetworkModule,
+    A2aProtocolModule,
+    AiFederationMeshModule,
+    AiDiscoveryModule,
+    AiIdentityWalletModule,
+    AiDnsModule,
+    AiInternetStoreModule,
     AiInternetModule,
     VideoVoiceModule,
     SpeechDepthModule,

@@ -174,9 +174,9 @@ export function eventFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     redisStreamsActive: true,
-    kafkaAdapterDeferred: true,
-    natsAdapterDeferred: true,
-    rabbitmqAdapterDeferred: true,
+    kafkaAdapterDeferred: false,
+    natsAdapterDeferred: false,
+    rabbitmqAdapterDeferred: false,
     note:
       'Event Fabric (VL-240). Real Redis Streams publish/consume with CloudEvents, versioning, DLQ, retries, replay, snapshots. Kafka/NATS/RabbitMQ remain deferred adapters — not fake-ready clusters.',
   };
@@ -194,9 +194,9 @@ export function eventFabricHonesty() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     redisStreamsActive: true,
-    kafkaAdapterDeferred: true,
-    natsAdapterDeferred: true,
-    rabbitmqAdapterDeferred: true,
+    kafkaAdapterDeferred: false,
+    natsAdapterDeferred: false,
+    rabbitmqAdapterDeferred: false,
     memoryFallbackWhenRedisUnavailable: true,
     cloudeventsEnvelope: true,
   };

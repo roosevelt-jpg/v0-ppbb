@@ -1781,3 +1781,23 @@ model DcivRecord {
   @@map("dciv_records")
 }
 
+/// Volume 25 AI Internet records (DNS/discovery/federation/trust/payments).
+/// Not evidence that VerbaLab operates a global AI Internet or Global OS.
+model AiInternetRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("ai_internet_records")
+}

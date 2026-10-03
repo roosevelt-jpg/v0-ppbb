@@ -20,6 +20,30 @@ export type NavGroup = {
 export const CONSOLE_NAV: NavGroup[] = [
 
   {
+    id: 'ai-internet-stack',
+    label: 'AI Internet',
+    collapsible: true,
+    items: [
+      { href: '/ai-internet', label: 'AI Internet' },
+      { href: '/ai-dns', label: 'AI DNS' },
+      { href: '/ai-identity-wallet', label: 'AI Identity' },
+      { href: '/ai-discovery', label: 'AI Discovery' },
+      { href: '/ai-federation-mesh', label: 'Federation Mesh' },
+      { href: '/a2a-protocol', label: 'A2A Protocol' },
+      { href: '/ai-trust-network', label: 'Trust Network' },
+      { href: '/ai-payment-network', label: 'Payment Network' },
+      { href: '/ai-certificate-authority', label: 'AI CA' },
+      { href: '/ai-global-routing', label: 'Global Routing' },
+      { href: '/ai-governance-federation', label: 'Gov Federation' },
+      { href: '/ai-sovereignty-exchange', label: 'Sovereignty' },
+      { href: '/ai-marketplace-federation', label: 'Market Federation' },
+      { href: '/verbalab-global-os', label: 'Global OS' },
+      { href: '/credentials-readiness', label: 'Credentials' },
+      { href: '/ai-internet-audit', label: 'AI Internet Audit' },
+    ],
+  },
+
+  {
     id: 'own-models',
     label: 'Own models',
     collapsible: true,

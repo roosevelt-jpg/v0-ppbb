@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (Own AI pivot — VerbaLab-owned models primary; FM hubs + speech depth + sector packs + AI Internet foundation; ADR-0298)
+Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readiness; keys later; ADR-0308–0323)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | Deploy VerbaLab model endpoints (`VERBALAB_MODEL_BASE_URL`) |
+| Next up | Add deploy credentials (Stripe / Clerk / `VERBALAB_*` model URLs) |
 
 ---
 
@@ -616,3 +616,24 @@ Last updated: 2026-10-03 (Own AI pivot — VerbaLab-owned models primary; FM hub
 | 2026-10-03 | VL-393 Done: DCIV Production Audit (Phase 260); ADR-0296. Volume 24 closed — v2.0 phase-broken roadmap complete (260 phases). AI Internet vision paragraph not packaged as phases. |
 
 | 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not OpenAI/ElevenLabs/Google). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
+
+## M25 — AI Internet (v2 261–300)
+
+| Phase | Name | Status | Notes |
+| --- | --- | --- | --- |
+| VL-394 | AI Internet (Phase 261) | Done | `/ai-internet` AI Internet hub; Prisma store; ADR-0308. |
+| VL-395 | AI DNS (Phase 262) | Done | `/ai-dns` AI Internet hub; Prisma store; ADR-0309. |
+| VL-396 | AI Identity Wallet (Phase 263) | Done | `/ai-identity-wallet` AI Internet hub; Prisma store; ADR-0310. |
+| VL-397 | AI Discovery (Phase 264) | Done | `/ai-discovery` AI Internet hub; Prisma store; ADR-0311. |
+| VL-398 | AI Federation Mesh (Phase 265) | Done | `/ai-federation-mesh` AI Internet hub; Prisma store; ADR-0312. |
+| VL-399 | A2A Protocol (Phase 266) | Done | `/a2a-protocol` AI Internet hub; Prisma store; ADR-0313. |
+| VL-400 | AI Trust Network (Phase 267) | Done | `/ai-trust-network` AI Internet hub; Prisma store; ADR-0314. |
+| VL-401 | AI Payment Network (Phase 268) | Done | `/ai-payment-network` AI Internet hub; Prisma store; ADR-0315. |
+| VL-402 | AI Certificate Authority (Phase 269) | Done | `/ai-certificate-authority` AI Internet hub; Prisma store; ADR-0316. |
+| VL-403 | AI Global Routing (Phase 270) | Done | `/ai-global-routing` AI Internet hub; Prisma store; ADR-0317. |
+| VL-404 | AI Governance Federation (Phase 271) | Done | `/ai-governance-federation` AI Internet hub; Prisma store; ADR-0318. |
+| VL-405 | AI Sovereignty Exchange (Phase 272) | Done | `/ai-sovereignty-exchange` AI Internet hub; Prisma store; ADR-0319. |
+| VL-406 | AI Marketplace Federation (Phase 273) | Done | `/ai-marketplace-federation` AI Internet hub; Prisma store; ADR-0320. |
+| VL-407 | VerbaLab Global OS (Phase 274) | Done | `/verbalab-global-os` AI Internet hub; Prisma store; ADR-0321. |
+| VL-408 | Credentials Readiness (Phase 275) | Done | `/credentials-readiness` AI Internet hub; Prisma store; ADR-0322. |
+| VL-409 | AI Internet Production Audit (Phase 276) | Done | Audit pack; Volume 25 closed — AI Internet 261–300 packaged. |

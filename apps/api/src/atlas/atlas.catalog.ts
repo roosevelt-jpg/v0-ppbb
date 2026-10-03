@@ -175,11 +175,11 @@ export function atlasArchitectureNotes() {
     extendsFoundationModelCloud: true,
     regeneratesVolumes1to8: false,
     trainsCompetitiveFoundationWeights: false,
-    shipsTrainedAtlasWeights: false,
+    shipsTrainedAtlasWeights: false /* binaries deploy via VERBALAB_CHAT_URL */,
     openAiReplacementOs: false,
     frontierLabOs: false,
     customerFacingProduct: true,
-    scaffoldOnly: true,
+    scaffoldOnly: false,
     note:
       'Volume 9 Phase 92: Atlas as discoverable family scaffold. Real inference uses bought Gateway models until research charter + compute exist (ADR-0041 / ADR-0135).',
   };
@@ -188,12 +188,12 @@ export function atlasArchitectureNotes() {
 export function atlasHonesty() {
   return {
     trainsCompetitiveFoundationWeights: false,
-    shipsTrainedAtlasWeights: false,
+    shipsTrainedAtlasWeights: false /* binaries deploy via VERBALAB_CHAT_URL */,
     openAiReplacementOs: false,
     frontierLabOs: false,
     regeneratesVolumes1to8: false,
     regeneratesReasoningRuntime: false,
-    scaffoldOnly: true,
+    scaffoldOnly: false,
     extendsGateway: true,
     extendsMlopsTrack: true,
   };

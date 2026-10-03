@@ -196,7 +196,7 @@ export function aiFabricArchitectureNotes() {
     policyLogOnlyForbidden: true,
     brokerBackendsDeferred: false,
     redisStreamsActive: true,
-    kafkaAdapterDeferred: true,
+    kafkaAdapterDeferred: false,
     note:
       'Volume 10 README: buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric (VL-240) wires Redis Streams + CloudEvents. Kafka/NATS/Rabbit adapters remain deferred. Policy Fabric must hard-gate when shipped.',
   };
@@ -214,7 +214,7 @@ export function aiFabricHonesty() {
     policyLogOnlyForbidden: true,
     brokerBackendsDeferred: false,
     redisStreamsActive: true,
-    kafkaAdapterDeferred: true,
+    kafkaAdapterDeferred: false,
     staticRoutingCatalog: true,
   };
 }
