@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
@@ -63,10 +64,25 @@ export function TranslateClient() {
 
   return (
     <AppShell>
-      <h1 style={titleStyle}>Translate</h1>
-      <p style={ledeStyle}>Paste text, pick a pair, get a metered translation.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+        <div>
+          <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
+            PRODUCT
+          </p>
+          <h1 style={titleStyle}>Translate</h1>
+          <p style={ledeStyle}>Paste text, pick a pair, get a metered translation.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.55rem' }}>
+          <Link href="/glossary" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>
+            Glossary
+          </Link>
+          <Link href="/tm" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>
+            TM
+          </Link>
+        </div>
+      </div>
 
-      <form onSubmit={onSubmit} className="vl-panel" style={{ display: 'grid', gap: '1rem', padding: '1.35rem', marginTop: '1.5rem' }}>
+      <form onSubmit={onSubmit} className="vl-panel" style={{ display: 'grid', gap: '1rem', padding: '1.35rem', marginTop: '1.25rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <label className="vl-label">
             Source

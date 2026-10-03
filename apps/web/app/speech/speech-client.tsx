@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
-import { apiFetch } from '@/lib/api';
+import { API_URL, apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -42,6 +42,10 @@ export function SpeechClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ttsText, setTtsText] = useState('Karibu VerbaLab Speech Cloud.');
+  const [ttsBusy, setTtsBusy] = useState(false);
+  const [ttsError, setTtsError] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -54,134 +58,145 @@ export function SpeechClient() {
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
 
+  async function previewTts() {
+    setTtsBusy(true);
+    setTtsError(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const res = await fetch(`${API_URL}/v1/audio/speech`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ input: ttsText, voice: 'alloy', format: 'mp3' }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error?.message ?? `TTS failed (${res.status})`);
+      }
+      const blob = await res.blob();
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setAudioUrl(URL.createObjectURL(blob));
+    } catch (err) {
+      setTtsError(err instanceof Error ? err.message : 'TTS failed');
+    } finally {
+      setTtsBusy(false);
+    }
+  }
+
   return (
     <AppShell>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.85rem',
-          fontWeight: 720,
-          letterSpacing: '-0.03em',
-          margin: '0 0 0.35rem',
-        }}
-      >
-        Speech Cloud
-      </h1>
-      <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Parent hub for batch STT, segment SSE streaming, TTS, interpreter, voice studio, and deferred speech intelligence
-        products. Extends existing audio APIs — does not regenerate Language Cloud or Identity.
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.35rem' }}>
+        <div>
+          <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
+            PRODUCT
+          </p>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.55rem, 2.4vw, 2rem)',
+              fontWeight: 740,
+              letterSpacing: '-0.03em',
+              margin: '0.25rem 0 0.35rem',
+            }}
+          >
+            Speech
+          </h1>
+          <p style={{ color: 'var(--muted)', margin: 0, maxWidth: '40rem' }}>
+            STT, TTS, interpreter, and speech intelligence — with live usage and a quick voice preview.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.55rem' }}>
+          <Link href="/voice-studio" className="vl-btn vl-btn-primary">
+            Voice Studio
+          </Link>
+          <Link href="/speech-recognition" className="vl-btn vl-btn-secondary">
+            STT Engine
+          </Link>
+        </div>
+      </div>
 
-      {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
-      {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
+      {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
+      {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading speech hub…</p> : null}
 
       {data ? (
-        <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <section>
-            <h2 style={label}>This period</h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>
-              STT {data.usage.stt.requests} req · {data.usage.stt.minutes} min · TTS{' '}
-              {data.usage.tts.requests} req · {data.usage.tts.characters} chars
-            </p>
-            <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Since {data.usage.periodStart.slice(0, 10)} · {data.workspace.voiceClones} voice clones
-            </p>
+        <div style={{ display: 'grid', gap: '1.25rem' }}>
+          <section className="vl-stat-grid">
+            <div className="vl-panel" style={{ padding: '1.1rem' }}>
+              <p style={kicker}>STT this period</p>
+              <p style={stat}>{data.usage.stt.requests} requests</p>
+              <p style={muted}>{data.usage.stt.minutes} min · {data.usage.stt.seconds}s</p>
+            </div>
+            <div className="vl-panel" style={{ padding: '1.1rem' }}>
+              <p style={kicker}>TTS this period</p>
+              <p style={stat}>{data.usage.tts.requests} requests</p>
+              <p style={muted}>{data.usage.tts.characters.toLocaleString()} characters</p>
+            </div>
+            <div className="vl-panel" style={{ padding: '1.1rem' }}>
+              <p style={kicker}>Workspace</p>
+              <p style={stat}>{data.workspace.voiceClones} clones</p>
+              <p style={muted}>Since {data.usage.periodStart.slice(0, 10)}</p>
+            </div>
+          </section>
+
+          <section className="vl-panel" style={{ padding: '1.25rem', display: 'grid', gap: '0.85rem' }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.05rem', fontFamily: 'var(--font-display)' }}>Quick TTS preview</h2>
+              <p style={{ margin: '0.3rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
+                Generate a short clip with the audio speech API (voice: alloy).
+              </p>
+            </div>
+            <textarea
+              className="vl-field"
+              rows={3}
+              value={ttsText}
+              onChange={(e) => setTtsText(e.target.value)}
+              style={{ resize: 'vertical' }}
+            />
+            <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="vl-btn vl-btn-primary"
+                disabled={ttsBusy || !ttsText.trim()}
+                onClick={() => void previewTts()}
+              >
+                {ttsBusy ? 'Generating…' : 'Generate speech'}
+              </button>
+              {audioUrl ? <audio controls src={audioUrl} style={{ maxWidth: '100%' }} /> : null}
+            </div>
+            {ttsError ? <p style={{ margin: 0, color: 'var(--bad)' }}>{ttsError}</p> : null}
           </section>
 
           <section>
-            <h2 style={label}>Products</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.65rem' }}>
+            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem', fontWeight: 700 }}>Products in this hub</h2>
+            <div className="vl-hub-grid">
               {data.products.map((p) => (
-                <li key={p.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.65rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ fontWeight: 600 }}>
-                        {p.name}{' '}
-                        <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.85rem' }}>
-                          · {p.status}
-                        </span>
-                      </div>
-                      <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
-                        {p.notes}
-                      </div>
-                    </div>
-                    {p.console && (p.status === 'shipped' || p.status === 'partial') ? (
-                      <Link href={p.console} style={{ color: 'var(--accent)', fontWeight: 550, fontSize: '0.9rem' }}>
-                        Open →
-                      </Link>
-                    ) : null}
+                <div key={p.id} className="vl-hub-card" style={{ cursor: 'default' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+                    <h3>{p.name}</h3>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 650 }}>{p.status}</span>
                   </div>
-                </li>
+                  <p>{p.notes}</p>
+                  {p.console && (p.status === 'shipped' || p.status === 'partial') ? (
+                    <Link href={p.console} style={{ color: 'var(--brand)', fontWeight: 650, fontSize: '0.88rem' }}>
+                      Open console →
+                    </Link>
+                  ) : null}
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
 
-          <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <Link href={data.links.recognition ?? '/speech-recognition'} style={primary}>
-              STT Engine
-            </Link>
-            <Link href={data.links.audio} style={secondary}>
-              Voice Studio
-            </Link>
-            <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>
-              Speakers
-            </Link>
-            <Link href={data.links.interpret} style={secondary}>
-              Interpreter
-            </Link>
-            <Link href={data.links.voice} style={secondary}>
-              Voice FAQ
-            </Link>
-            <Link href={data.links.emotion ?? '/emotion-intelligence'} style={secondary}>
-              Emotion AI
-            </Link>
-            <Link href={data.links.audioIntelligence ?? '/audio-intelligence'} style={secondary}>
-              Audio AI
-            </Link>
-            <Link href={data.links.pronunciation ?? '/pronunciation-intelligence'} style={secondary}>
-              Pronunciation
-            </Link>
-            <Link href={data.links.wakeWord ?? '/wake-word'} style={secondary}>
-              Wake Word
-            </Link>
-            <Link href={data.links.callIntelligence ?? '/call-intelligence'} style={secondary}>
-              Calls
-            </Link>
-            <Link href={data.links.speechAnalytics ?? '/speech-analytics'} style={secondary}>
-              Speech Analytics
-            </Link>
-            <Link href={data.links.accentIntelligence ?? '/accent-intelligence'} style={secondary}>
-              Accent AI
-            </Link>
-            <Link href={data.links.accents} style={secondary}>
-              Accents
-            </Link>
-            <Link href={data.links.usage} style={secondary}>
-              Usage
-            </Link>
-            <Link href={data.links.billing} style={secondary}>
-              Billing
-            </Link>
-            <Link href={data.links.graphql} style={secondary}>
-              GraphQL
-            </Link>
-          </section>
-
-          <section>
-            <h2 style={label}>Architecture honesty</h2>
+          <section className="vl-panel" style={{ padding: '1.15rem 1.25rem' }}>
+            <h2 style={{ margin: '0 0 0.55rem', fontSize: '0.95rem', fontWeight: 700 }}>Architecture honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Batch {data.architecture.batch ? 'yes' : 'no'} · Streaming{' '}
               {data.architecture.streaming ? 'yes (segment SSE)' : 'deferred'} · GraphQL{' '}
-              {data.architecture.graphql ? 'yes' : 'no'} · CQRS{' '}
-              {data.architecture.cqrs ? 'yes (Speech Cloud hub)' : 'no'} · Billing{' '}
+              {data.architecture.graphql ? 'yes' : 'no'} · Billing{' '}
               {data.architecture.billing ? 'yes (STT/TTS metering)' : 'no'} · Monitoring{' '}
-              {data.architecture.monitoring ? 'yes' : 'no'} · Terraform{' '}
-              {data.architecture.terraform ? 'yes (AWS)' : 'no'} · Kubernetes{' '}
-              {data.architecture.kubernetes ? 'yes (EKS af-south-1)' : 'no'}
-            </p>
-            <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-              Deferred: live-mic WebSocket, forced-alignment phonemes, echo AEC, trained SER,
-              on-device wake DNN, realtime CCaaS streaming, WER evaluation lab.
+              {data.architecture.monitoring ? 'yes' : 'no'}
             </p>
           </section>
         </div>
@@ -190,30 +205,23 @@ export function SpeechClient() {
   );
 }
 
-const label: React.CSSProperties = {
-  fontSize: '0.8rem',
+const kicker: React.CSSProperties = {
+  margin: 0,
+  fontSize: '0.72rem',
+  letterSpacing: '0.07em',
   textTransform: 'uppercase',
-  letterSpacing: '0.06em',
   color: 'var(--muted)',
-  margin: '0 0 0.5rem',
+  fontWeight: 700,
 };
 
-const primary: React.CSSProperties = {
-  textDecoration: 'none',
-  padding: '0.65rem 1.1rem',
-  background: 'var(--ink)',
-  color: '#fff',
-  borderRadius: '0.45rem',
-  fontWeight: 600,
-  fontSize: '0.9rem',
+const stat: React.CSSProperties = {
+  margin: '0.45rem 0 0',
+  fontSize: '1.2rem',
+  fontWeight: 700,
 };
 
-const secondary: React.CSSProperties = {
-  textDecoration: 'none',
-  padding: '0.65rem 1.1rem',
-  border: '1px solid var(--line)',
-  borderRadius: '0.45rem',
-  fontWeight: 600,
-  fontSize: '0.9rem',
-  color: 'var(--ink)',
+const muted: React.CSSProperties = {
+  margin: '0.25rem 0 0',
+  color: 'var(--muted)',
+  fontSize: '0.88rem',
 };

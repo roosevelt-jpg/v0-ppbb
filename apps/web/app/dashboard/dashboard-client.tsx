@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
@@ -27,6 +27,29 @@ type Overview = {
   account: { role: string };
 };
 
+const HUBS = [
+  {
+    href: '/translate',
+    title: 'Translate',
+    body: 'Metered text translation with language pairs, glossary, and TM.',
+  },
+  {
+    href: '/voice-studio',
+    title: 'Voice',
+    body: 'Generate speech, compare voices, manage pronunciation and profiles.',
+  },
+  {
+    href: '/speech',
+    title: 'Speech',
+    body: 'STT / TTS hub, streaming, interpreter, and speech analytics.',
+  },
+  {
+    href: '/playground',
+    title: 'Playground',
+    body: 'Try APIs quickly without leaving the console.',
+  },
+] as const;
+
 export function DashboardClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
@@ -35,8 +58,7 @@ export function DashboardClient() {
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
-    const overview = await apiFetch<Overview>('/v1/cloud/overview', { token });
-    setData(overview);
+    setData(await apiFetch<Overview>('/v1/cloud/overview', { token }));
   }, [getToken]);
 
   useEffect(() => {
@@ -44,90 +66,140 @@ export function DashboardClient() {
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
 
+  const usagePct = useMemo(() => {
+    if (!data?.billing.characterQuota) return 0;
+    return Math.min(100, Math.round((data.billing.charactersUsed / data.billing.characterQuota) * 100));
+  }, [data]);
+
   return (
     <AppShell>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.85rem',
-          fontWeight: 720,
-          letterSpacing: '-0.03em',
-          margin: '0 0 0.35rem',
-        }}
-      >
-        Cloud dashboard
-      </h1>
-      <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '36rem' }}>
-        Organization, workspace, residency, and plan at a glance. Product work happens in Translate,
-        Voice Studio, and the rest of the console.
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+        <div>
+          <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
+            CONSOLE
+          </p>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.6rem, 2.5vw, 2.1rem)',
+              fontWeight: 740,
+              letterSpacing: '-0.03em',
+              margin: '0.25rem 0 0.35rem',
+            }}
+          >
+            {data ? `Welcome back, ${data.organization.name}` : 'Dashboard'}
+          </h1>
+          <p style={{ color: 'var(--muted)', margin: 0, maxWidth: '36rem' }}>
+            Jump into product hubs or review plan, residency, and workspace health.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start' }}>
+          <Link href="/translate" className="vl-btn vl-btn-primary">
+            Open Translate
+          </Link>
+          <Link href="/voice-studio" className="vl-btn vl-btn-secondary">
+            Open Voice
+          </Link>
+        </div>
+      </div>
 
-      {error ? (
-        <p style={{ color: '#b42318', marginBottom: '1rem' }}>{error}</p>
-      ) : null}
-
-      {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
+      {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
+      {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading workspace…</p> : null}
 
       {data ? (
-        <div style={{ display: 'grid', gap: '1.5rem' }}>
-          <section>
-            <h2 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
-              Organization
-            </h2>
-            <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 600 }}>{data.organization.name}</p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Plan {data.billing.planName} · {data.account.role} · billing {data.organization.billingStatus}
-            </p>
+        <div style={{ display: 'grid', gap: '1.35rem' }}>
+          <section className="vl-stat-grid">
+            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
+              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
+                Plan
+              </p>
+              <p style={{ margin: '0.45rem 0 0', fontSize: '1.25rem', fontWeight: 700 }}>{data.billing.planName}</p>
+              <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>
+                {data.account.role} · billing {data.organization.billingStatus}
+              </p>
+            </div>
+            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
+              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
+                Usage
+              </p>
+              <p style={{ margin: '0.45rem 0 0.55rem', fontSize: '1.05rem', fontWeight: 650 }}>
+                {data.billing.charactersUsed.toLocaleString()} / {data.billing.characterQuota.toLocaleString()}
+              </p>
+              <div className="vl-meter" aria-hidden>
+                <span style={{ width: `${usagePct}%` }} />
+              </div>
+              <p style={{ margin: '0.45rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
+                {data.billing.charactersRemaining.toLocaleString()} left · {data.billing.requests} requests
+              </p>
+            </div>
+            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
+              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
+                Workspace
+              </p>
+              <p style={{ margin: '0.45rem 0 0', fontSize: '1.15rem', fontWeight: 700 }}>
+                {data.workspace?.name ?? '—'}
+              </p>
+              <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>
+                {data.workspace?.defaultSourceLang ?? '—'} → {data.workspace?.defaultTargetLang ?? '—'} ·{' '}
+                {data.workspaces.length} workspace{data.workspaces.length === 1 ? '' : 's'}
+              </p>
+            </div>
           </section>
 
           <section>
-            <h2 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
-              Workspace
-            </h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>{data.workspace?.name ?? '—'}</p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Defaults {data.workspace?.defaultSourceLang ?? '—'} → {data.workspace?.defaultTargetLang ?? '—'} ·{' '}
-              {data.workspaces.length} workspace{data.workspaces.length === 1 ? '' : 's'}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Product hubs</h2>
+              <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Primary surfaces</span>
+            </div>
+            <div className="vl-hub-grid">
+              {HUBS.map((hub) => (
+                <Link key={hub.href} href={hub.href} className="vl-hub-card">
+                  <h3>{hub.title}</h3>
+                  <p>{hub.body}</p>
+                </Link>
+              ))}
+            </div>
           </section>
 
-          <section>
-            <h2 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
-              Usage this period
-            </h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>
-              {data.billing.charactersUsed.toLocaleString()} / {data.billing.characterQuota.toLocaleString()} characters
-            </p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              {data.billing.charactersRemaining.toLocaleString()} remaining · {data.billing.requests} requests
-            </p>
-            <p style={{ margin: '0.65rem 0 0' }}>
-              <Link href="/billing" style={{ color: 'var(--accent)', fontWeight: 550 }}>
-                Billing →
+          <section className="vl-panel" style={{ padding: '1.15rem 1.25rem', display: 'grid', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Residency</h2>
+                <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
+                  Deploy {data.residency.currentDeploy.name} ({data.residency.currentDeploy.code}) · pin{' '}
+                  {data.residency.dataRegion ?? 'none'}
+                </p>
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  alignSelf: 'center',
+                  fontSize: '0.82rem',
+                  fontWeight: 650,
+                  color: data.residency.matchesCurrentDeploy ? 'var(--ok)' : 'var(--bad)',
+                }}
+              >
+                {data.residency.matchesCurrentDeploy ? 'Matches this island' : 'Region mismatch'}
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>
+              <Link href="/data" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
+                Data & residency
               </Link>
-            </p>
-          </section>
-
-          <section>
-            <h2 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
-              Residency
-            </h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>
-              Deploy {data.residency.currentDeploy.name} ({data.residency.currentDeploy.code})
-            </p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Pin {data.residency.dataRegion ?? 'none'} ·{' '}
-              {data.residency.matchesCurrentDeploy ? 'matches this island' : 'mismatch — use regional API'}
-            </p>
-            <p style={{ margin: '0.65rem 0 0' }}>
-              <Link href="/data" style={{ color: 'var(--accent)', fontWeight: 550 }}>
-                Data & residency →
+              <Link href="/billing" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
+                Billing
               </Link>
-            </p>
+              <Link href="/keys" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
+                API keys
+              </Link>
+              <Link href="/usage" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
+                Usage
+              </Link>
+            </div>
           </section>
 
           <section>
-            <h2 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', margin: '0 0 0.5rem' }}>
+            <h2 style={{ margin: '0 0 0.55rem', fontSize: '0.85rem', color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Feature flags
             </h2>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
@@ -135,49 +207,19 @@ export function DashboardClient() {
                 <li
                   key={key}
                   style={{
-                    fontSize: '0.8rem',
-                    padding: '0.25rem 0.55rem',
-                    borderRadius: '0.35rem',
-                    background: on ? 'var(--bg-soft)' : 'transparent',
+                    fontSize: '0.78rem',
+                    padding: '0.28rem 0.55rem',
+                    borderRadius: '0.4rem',
+                    background: on ? 'var(--brand-soft)' : 'transparent',
                     border: '1px solid var(--line)',
-                    color: on ? 'var(--ink)' : 'var(--muted)',
+                    color: on ? 'var(--brand)' : 'var(--muted)',
+                    fontWeight: on ? 650 : 500,
                   }}
                 >
                   {key}
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', paddingTop: '0.5rem' }}>
-            <Link
-              href="/translate"
-              style={{
-                textDecoration: 'none',
-                padding: '0.65rem 1.1rem',
-                background: 'var(--ink)',
-                color: '#fff',
-                borderRadius: '0.45rem',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}
-            >
-              Translate
-            </Link>
-            <Link
-              href="/audio"
-              style={{
-                textDecoration: 'none',
-                padding: '0.65rem 1.1rem',
-                border: '1px solid var(--line)',
-                borderRadius: '0.45rem',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                color: 'var(--ink)',
-              }}
-            >
-              Voice Studio
-            </Link>
           </section>
         </div>
       ) : null}

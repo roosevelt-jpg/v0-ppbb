@@ -206,16 +206,19 @@ export function VoiceStudioClient() {
 
   return (
     <AppShell>
+      <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
+        PRODUCT
+      </p>
       <h1
         style={{
           fontFamily: 'var(--font-display)',
-          fontSize: '1.85rem',
-          fontWeight: 720,
+          fontSize: 'clamp(1.55rem, 2.4vw, 2rem)',
+          fontWeight: 740,
           letterSpacing: '-0.03em',
-          margin: '0 0 0.35rem',
+          margin: '0.25rem 0 0.35rem',
         }}
       >
-        Voice Studio
+        Voice
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Professional dashboard for library, pronunciation, SSML lite, linear timeline, and voice
@@ -224,18 +227,18 @@ export function VoiceStudioClient() {
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
-      <section style={{ display: 'grid', gap: '0.75rem', maxWidth: '44rem', marginBottom: '1.75rem' }}>
-        <label style={{ display: 'grid', gap: '0.35rem' }}>
-          <span style={label}>Text</span>
-          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} style={input} />
+      <section className="vl-panel" style={{ display: 'grid', gap: '0.85rem', padding: '1.25rem', marginBottom: '1.5rem' }}>
+        <label className="vl-label">
+          Text
+          <textarea className="vl-field" value={text} onChange={(e) => setText(e.target.value)} rows={2} style={{ resize: 'vertical' }} />
         </label>
-        <label style={{ display: 'grid', gap: '0.35rem' }}>
-          <span style={label}>SSML lite</span>
-          <textarea value={ssml} onChange={(e) => setSsml(e.target.value)} rows={3} style={input} />
+        <label className="vl-label">
+          SSML lite
+          <textarea className="vl-field" value={ssml} onChange={(e) => setSsml(e.target.value)} rows={3} style={{ resize: 'vertical' }} />
         </label>
-        <label style={{ display: 'grid', gap: '0.35rem' }}>
-          <span style={label}>Voice</span>
-          <select value={voice} onChange={(e) => setVoice(e.target.value)} style={input}>
+        <label className="vl-label">
+          Voice
+          <select className="vl-field" value={voice} onChange={(e) => setVoice(e.target.value)}>
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name} ({v.id})
@@ -244,19 +247,19 @@ export function VoiceStudioClient() {
           </select>
         </label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <button type="button" disabled={busy} onClick={() => void compileSsml()} style={secondary}>
+          <button type="button" disabled={busy} onClick={() => void compileSsml()} className="vl-btn vl-btn-secondary">
             Compile SSML
           </button>
-          <button type="button" disabled={busy} onClick={() => void preview(false)} style={primary}>
+          <button type="button" disabled={busy} onClick={() => void preview(false)} className="vl-btn vl-btn-primary">
             Preview text
           </button>
-          <button type="button" disabled={busy} onClick={() => void preview(true)} style={secondary}>
+          <button type="button" disabled={busy} onClick={() => void preview(true)} className="vl-btn vl-btn-secondary">
             Preview SSML
           </button>
-          <button type="button" disabled={busy} onClick={() => void renderTimeline()} style={secondary}>
+          <button type="button" disabled={busy} onClick={() => void renderTimeline()} className="vl-btn vl-btn-secondary">
             Render timeline
           </button>
-          <button type="button" disabled={busy} onClick={() => void saveProfile()} style={secondary}>
+          <button type="button" disabled={busy} onClick={() => void saveProfile()} className="vl-btn vl-btn-secondary">
             Save profile
           </button>
         </div>
@@ -267,9 +270,9 @@ export function VoiceStudioClient() {
       <section style={{ marginBottom: '1.75rem', maxWidth: '44rem' }}>
         <h2 style={h2}>Pronunciation lexicon</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          <input value={grapheme} onChange={(e) => setGrapheme(e.target.value)} placeholder="Grapheme" style={input} />
-          <input value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Spoken alias" style={input} />
-          <button type="button" disabled={busy} onClick={() => void addLexeme()} style={primary}>
+          <input value={grapheme} onChange={(e) => setGrapheme(e.target.value)} placeholder="Grapheme" className="vl-field" />
+          <input value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Spoken alias" className="vl-field" />
+          <button type="button" disabled={busy} onClick={() => void addLexeme()} className="vl-btn vl-btn-primary">
             Add
           </button>
         </div>
@@ -286,14 +289,14 @@ export function VoiceStudioClient() {
       <section style={{ marginBottom: '1.75rem', maxWidth: '44rem' }}>
         <h2 style={h2}>Voice comparison</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-          <select value={compareVoice} onChange={(e) => setCompareVoice(e.target.value)} style={input}>
+          <select value={compareVoice} onChange={(e) => setCompareVoice(e.target.value)} className="vl-field">
             {voices.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name}
               </option>
             ))}
           </select>
-          <button type="button" disabled={busy} onClick={() => void compare()} style={primary}>
+          <button type="button" disabled={busy} onClick={() => void compare()} className="vl-btn vl-btn-primary">
             Compare
           </button>
         </div>
