@@ -11,7 +11,7 @@
 | --- | --- |
 | Intelligence Cloud Foundation | **VL-180** — `/intelligence-cloud` + product catalog / overview |
 | Embedding Cloud | **Partial** — **VL-181** `/embedding-cloud` over VL-063 text; multimodal deferred |
-| Vector Cloud | **Partial** — pgvector in VL-062 Knowledge; dedicated vector DB deferred (VL-182) |
+| Vector Cloud | **Partial** — **VL-182** `/vector-cloud` over VL-062 pgvector; hybrid/Pinecone OS deferred |
 | Memory Cloud | **Deferred** — VL-183 (must include GDPR delete/export) |
 | Knowledge Graph Cloud | **Deferred** — VL-184; use RAG until then |
 | Context Engine | **Deferred** — VL-185 |

@@ -34,9 +34,10 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       id: 'vector',
       name: 'Vector Cloud',
       status: 'partial',
-      api: 'POST /v1/knowledge/query',
-      console: '/knowledge',
-      notes: 'pgvector retrieval in Knowledge/RAG (VL-062). Dedicated vector DB deferred (VL-182).',
+      api: 'GET /v1/vector-cloud/engine',
+      console: '/vector-cloud',
+      notes:
+        'pgvector hub VL-182 over VL-062 knowledge_chunks. Hybrid/sharding/Pinecone OS deferred.',
     },
     {
       id: 'memory',

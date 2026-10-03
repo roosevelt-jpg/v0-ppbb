@@ -18,6 +18,8 @@ function usage(): never {
   verbalab intelligence-products
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
+  verbalab vector-cloud-engine
+  verbalab vector-cloud-search --query <text> [--k <n>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -102,6 +104,28 @@ async function main() {
 
   if (command === 'embedding-cloud-models') {
     console.log(JSON.stringify(await vl.embeddingCloudModels(), null, 2));
+    return;
+  }
+
+  if (command === 'vector-cloud-engine') {
+    console.log(JSON.stringify(await vl.vectorCloudEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'vector-cloud-search') {
+    const query = argValue(rest, '--query');
+    if (!query) usage();
+    const kRaw = argValue(rest, '--k');
+    console.log(
+      JSON.stringify(
+        await vl.vectorCloudSearch({
+          query,
+          k: kRaw ? Number(kRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

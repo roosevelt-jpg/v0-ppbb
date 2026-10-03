@@ -2690,6 +2690,68 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/vector-cloud/engine': {
+      get: {
+        summary: 'Vector Cloud engine catalog',
+        operationId: 'getVectorCloudEngine',
+        responses: { '200': { description: 'Vector capabilities and honesty notes' } },
+      },
+    },
+    '/v1/vector-cloud/collections': {
+      get: {
+        summary: 'Vector collections inventory',
+        operationId: 'listVectorCloudCollections',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace knowledge collection' } },
+      },
+    },
+    '/v1/vector-cloud/namespaces': {
+      get: {
+        summary: 'Vector namespaces',
+        operationId: 'listVectorCloudNamespaces',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace as vector namespace' } },
+      },
+    },
+    '/v1/vector-cloud/indexes': {
+      get: {
+        summary: 'Vector indexes',
+        operationId: 'listVectorCloudIndexes',
+        responses: { '200': { description: 'pgvector HNSW index catalog' } },
+      },
+    },
+    '/v1/vector-cloud/stats': {
+      get: {
+        summary: 'Vector inventory stats',
+        operationId: 'getVectorCloudStats',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Document/vector counts' } },
+      },
+    },
+    '/v1/vector-cloud/search': {
+      post: {
+        summary: 'Nearest-neighbor vector search',
+        operationId: 'searchVectorCloud',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Ranked cosine hits over knowledge_chunks' } },
+      },
+    },
+    '/v1/vector-cloud/analytics': {
+      get: {
+        summary: 'Vector Cloud analytics',
+        operationId: 'getVectorCloudAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Search audit + inventory aggregates' } },
+      },
+    },
+    '/v1/vector-cloud/monitoring': {
+      get: {
+        summary: 'Vector Cloud monitoring snapshot',
+        operationId: 'getVectorCloudMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

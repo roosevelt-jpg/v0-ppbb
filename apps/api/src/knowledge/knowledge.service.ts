@@ -340,6 +340,99 @@ export class KnowledgeService {
     }));
   }
 
+  /**
+   * Nearest-neighbor / similarity search over workspace knowledge vectors (VL-182).
+   * Does not call chat — RAG answer path remains `query()`.
+   */
+  async searchVectors(input: {
+    query: string;
+    k?: number;
+    documentId?: string;
+    minScore?: number;
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId?: string;
+    userId?: string;
+    ip?: string;
+  }) {
+    const query = input.query?.trim();
+    if (!query) {
+      throw new ApiException('validation_error', 'query is required', HttpStatus.BAD_REQUEST);
+    }
+
+    if (input.documentId) {
+      const doc = await this.prisma.knowledgeDocument.findFirst({
+        where: {
+          id: input.documentId,
+          organizationId: input.organizationId,
+          workspaceId: input.workspaceId,
+        },
+      });
+      if (!doc) {
+        throw new ApiException('not_found', 'document not found', HttpStatus.NOT_FOUND);
+      }
+    }
+
+    const k = Math.min(Math.max(input.k ?? ragTopK(), 1), 20);
+    const embedded = await this.gateway.embed({ input: query });
+    await this.usage.recordEmbeddings({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      apiKeyId: input.apiKeyId,
+      tokens: Math.max(1, embedded.totalTokens || [...query].length),
+      provider: embedded.provider,
+    });
+
+    let hits = await this.retrieve({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      queryEmbedding: embedded.data[0]?.embedding ?? [],
+      k: input.documentId ? Math.min(k * 3, 60) : k,
+    });
+
+    if (input.documentId) {
+      hits = hits.filter((h) => h.documentId === input.documentId).slice(0, k);
+    }
+    if (typeof input.minScore === 'number' && Number.isFinite(input.minScore)) {
+      hits = hits.filter((h) => h.score >= input.minScore!);
+    }
+
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'vector_cloud.searched',
+      route: 'POST /v1/vector-cloud/search',
+      ip: input.ip,
+      metadata: {
+        hits: hits.length,
+        k,
+        documentId: input.documentId ?? null,
+        provider: embedded.provider,
+        model: embedded.model,
+      },
+    });
+
+    return {
+      query,
+      namespace: input.workspaceId,
+      collection: 'knowledge',
+      backend: 'pgvector',
+      metric: 'cosine',
+      model: embedded.model,
+      provider: embedded.provider,
+      hits: hits.map((hit, i) => ({
+        rank: i + 1,
+        id: hit.id,
+        documentId: hit.documentId,
+        filename: hit.filename,
+        ordinal: hit.ordinal,
+        score: hit.score,
+        content: hit.content,
+      })),
+      note: 'Nearest-neighbor cosine search over knowledge_chunks (VL-182 / VL-062). Not hybrid BM25.',
+    };
+  }
+
   async query(input: {
     question: string;
     k?: number;

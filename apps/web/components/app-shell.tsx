@@ -13,6 +13,7 @@ const links = [
   { href: '/voice-cloud', label: 'Voice' },
   { href: '/intelligence-cloud', label: 'Intelligence' },
   { href: '/embedding-cloud', label: 'Embeddings' },
+  { href: '/vector-cloud', label: 'Vectors' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

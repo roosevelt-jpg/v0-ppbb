@@ -397,6 +397,45 @@ export class GqlEmbeddingCloudEngine {
 }
 
 @ObjectType()
+export class GqlVectorCloudCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVectorCloudEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVectorCloudCapability])
+  capabilities!: GqlVectorCloudCapability[];
+
+  @Field()
+  managedVectorDbOs!: boolean;
+
+  @Field()
+  pineconeParity!: boolean;
+
+  @Field()
+  hybridBm25!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

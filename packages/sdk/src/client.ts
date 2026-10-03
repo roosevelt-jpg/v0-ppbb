@@ -1095,6 +1095,54 @@ export class VerbaLab {
     return this.requestJson('/v1/embedding-cloud/models', { method: 'GET' });
   }
 
+  async vectorCloudEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      managedVectorDbOs: boolean;
+      pineconeParity: boolean;
+      hybridBm25: boolean;
+      customSharding: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/vector-cloud/engine', { method: 'GET' });
+  }
+
+  async vectorCloudSearch(body: {
+    query: string;
+    k?: number;
+    documentId?: string;
+    minScore?: number;
+  }): Promise<{
+    query: string;
+    namespace: string;
+    collection: string;
+    backend: string;
+    metric: string;
+    hits: Array<{
+      rank: number;
+      id: string;
+      documentId: string;
+      filename: string;
+      ordinal: number;
+      score: number;
+      content: string;
+    }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/vector-cloud/search', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

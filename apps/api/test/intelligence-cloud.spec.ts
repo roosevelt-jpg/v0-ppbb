@@ -107,6 +107,11 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(embeddings.api).toContain('/v1/embedding-cloud/engine');
     expect(embeddings.console).toBe('/embedding-cloud');
 
+    const vector = res.body.products.find((p: { id: string }) => p.id === 'vector');
+    expect(vector.status).toBe('partial');
+    expect(vector.api).toContain('/v1/vector-cloud/engine');
+    expect(vector.console).toBe('/vector-cloud');
+
     const memory = res.body.products.find((p: { id: string }) => p.id === 'memory');
     expect(memory.status).toBe('deferred');
 
@@ -130,11 +135,14 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.workspace.knowledgeDocuments).toBeGreaterThanOrEqual(0);
     expect(overview.deferred.customAiKernel).toBe(true);
     expect(overview.deferred.embeddingCloudProduct).toBe(false);
+    expect(overview.deferred.vectorCloudProduct).toBe(false);
+    expect(overview.deferred.dedicatedVectorDb).toBe(true);
     expect(overview.deferred.memoryCloud).toBe(true);
     expect(overview.deferred.knowledgeGraphOs).toBe(true);
     expect(overview.deferred.customReasoner).toBe(true);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
     expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
+    expect(overview.links.vectorCloud).toBe('/vector-cloud');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);
