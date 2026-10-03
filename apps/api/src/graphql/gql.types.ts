@@ -6254,3 +6254,273 @@ export class GqlStandardsAnalyticsEngine {
   thirdPartyAccreditation!: boolean;
 }
 
+@ObjectType()
+export class GqlAiEconomyEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiCommercePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiLicensingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlRevenueSharingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiTalentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlResearchFundingPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalCommunityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlAiInvestmentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+
+@ObjectType()
+export class GqlEconomicIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalMarketplaceSoftware!: boolean;
+
+  @Field(() => Boolean)
+  worldsLargestAiEconomy!: boolean;
+
+  @Field(() => Boolean)
+  handRolledCardHandling!: boolean;
+
+  @Field(() => Boolean)
+  autonomousPayouts!: boolean;
+
+  @Field(() => Boolean)
+  fundingPortalOs!: boolean;
+
+  @Field(() => Boolean)
+  securitiesOfferingOs!: boolean;
+
+  @Field(() => Boolean)
+  investmentDashboardOnly!: boolean;
+}
+

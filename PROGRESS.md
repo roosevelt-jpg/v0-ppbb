@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VGAS ISO process maturity — ADR-0276; recognition flags still false)
+Last updated: 2026-10-03 (VL-383 Done — AIE Production Audit; Volume 23 closed)
 
 ---
 
@@ -403,6 +403,16 @@ Last updated: 2026-10-03 (VGAS ISO process maturity — ADR-0276; recognition fl
 | VL-371 | Global Partner Program (Phase 238) | Done | Partner portal records; ADR-0273. |
 | VL-372 | Standards Analytics (Phase 239) | Done | Adoption analytics; ADR-0274. |
 | VL-373 | VGAS Production Audit (Phase 240) | Done | Audit pack + certification guide; ADR-0275. Volume 22 closed. |
+| VL-374 | AI Economy Foundation (Phase 241) | Done | `/ai-economy`; ADR-0277. `worldsLargestAiEconomy=false`. |
+| VL-375 | AI Commerce Platform (Phase 242) | Done | Catalog/billing refs via Stripe; `handRolledCardHandling=false`; ADR-0278. |
+| VL-376 | AI Licensing Platform (Phase 243) | Done | Entitlement ledger; ADR-0279. |
+| VL-377 | Revenue Sharing Platform (Phase 244) | Done | Royalty/payout ledger; `autonomousPayouts=false`; ADR-0280. |
+| VL-378 | AI Talent Platform (Phase 245) | Done | Linguist/voice/translator marketplace; ADR-0281. |
+| VL-379 | Research Funding Platform (Phase 246) | Done | Grant tracking; ADR-0282. |
+| VL-380 | Global Community Platform (Phase 247) | Done | Forums/events/hackathons; ADR-0283. |
+| VL-381 | AI Investment Platform (Phase 248) | Done | Dashboard only; `fundingPortalOs=false`; ADR-0284. |
+| VL-382 | Economic Intelligence (Phase 249) | Done | Exec/adoption/revenue dashboards; ADR-0285. |
+| VL-383 | AIE Production Audit (Phase 250) | Done | Audit pack + economy report; ADR-0286. Volume 23 closed. |
 
 ---
 
@@ -590,3 +600,6 @@ Last updated: 2026-10-03 (VGAS ISO process maturity — ADR-0276; recognition fl
 | 2026-10-03 | VL-364-372 Done: VGAS hubs (Phases 231-239); ADR-0266-0274. internationalStandardAdoption/thirdPartyAccreditation=false. |
 | 2026-10-03 | VL-373 Done: VGAS Production Audit (Phase 240); ADR-0275. Volume 22 closed. Ask for Volume 23 when ready. |
 | 2026-10-03 | VGAS ISO process maturity: document control + 17024-inspired scheme + recognition pathway; ADR-0276. `isoProcessMaturity=true`; isoIeeeW3cRecognition/thirdPartyAccreditation remain false. |
+| 2026-10-03 | VL-374-382 Done: AIE hubs (Phases 241-249); ADR-0277-0285. Marketplace software; investment dashboard only; no autonomous payouts. |
+| 2026-10-03 | VL-383 Done: AIE Production Audit (Phase 250); ADR-0286. Volume 23 closed. Ask for Volume 24 when ready. |
+

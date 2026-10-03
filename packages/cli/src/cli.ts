@@ -125,6 +125,16 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab ai-economy-products
+  verbalab ai-commerce-platform-engine
+  verbalab ai-licensing-platform-engine
+  verbalab revenue-sharing-platform-engine
+  verbalab ai-talent-platform-engine
+  verbalab research-funding-platform-engine
+  verbalab global-community-platform-engine
+  verbalab ai-investment-platform-engine
+  verbalab economic-intelligence-engine
+  verbalab ai-economy-guards
   verbalab global-ai-standards-products
   verbalab global-ai-standards-iso-process
   verbalab ai-certification-platform-engine
@@ -961,6 +971,56 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'ai-economy-products') {
+    console.log(JSON.stringify(await vl.aiEconomyProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-commerce-platform-engine') {
+    console.log(JSON.stringify(await vl.aiCommercePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-licensing-platform-engine') {
+    console.log(JSON.stringify(await vl.aiLicensingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'revenue-sharing-platform-engine') {
+    console.log(JSON.stringify(await vl.revenueSharingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-talent-platform-engine') {
+    console.log(JSON.stringify(await vl.aiTalentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-funding-platform-engine') {
+    console.log(JSON.stringify(await vl.researchFundingPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-community-platform-engine') {
+    console.log(JSON.stringify(await vl.globalCommunityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-investment-platform-engine') {
+    console.log(JSON.stringify(await vl.aiInvestmentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'economic-intelligence-engine') {
+    console.log(JSON.stringify(await vl.economicIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-economy-guards') {
+    console.log(JSON.stringify(await vl.aiEconomyGuards(), null, 2));
+    return;
+  }
+
   if (command === 'global-ai-standards-products') {
     console.log(JSON.stringify(await vl.globalAiStandardsProducts(), null, 2));
     return;

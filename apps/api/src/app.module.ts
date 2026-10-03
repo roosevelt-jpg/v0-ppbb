@@ -166,6 +166,15 @@ import { CorporateKnowledgeSystemModule } from './corporate-knowledge-system/cor
 import { ExecutiveIntelligencePlatformModule } from './executive-intelligence-platform/executive-intelligence-platform.module';
 import { CorporateRiskPlatformModule } from './corporate-risk-platform/corporate-risk-platform.module';
 import { GlobalAiStandardsModule } from './global-ai-standards/global-ai-standards.module';
+import { AiEconomyModule } from './ai-economy/ai-economy.module';
+import { AiCommercePlatformModule } from './ai-commerce-platform/ai-commerce-platform.module';
+import { AiLicensingPlatformModule } from './ai-licensing-platform/ai-licensing-platform.module';
+import { RevenueSharingPlatformModule } from './revenue-sharing-platform/revenue-sharing-platform.module';
+import { AiTalentPlatformModule } from './ai-talent-platform/ai-talent-platform.module';
+import { ResearchFundingPlatformModule } from './research-funding-platform/research-funding-platform.module';
+import { GlobalCommunityPlatformModule } from './global-community-platform/global-community-platform.module';
+import { AiInvestmentPlatformModule } from './ai-investment-platform/ai-investment-platform.module';
+import { EconomicIntelligenceModule } from './economic-intelligence/economic-intelligence.module';
 import { AiCertificationPlatformModule } from './ai-certification-platform/ai-certification-platform.module';
 import { AiComplianceFrameworkModule } from './ai-compliance-framework/ai-compliance-framework.module';
 import { ReferenceArchitecturesModule } from './reference-architectures/reference-architectures.module';
@@ -374,6 +383,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ExecutiveIntelligencePlatformModule,
     CorporateRiskPlatformModule,
     GlobalAiStandardsModule,
+    AiEconomyModule,
+    AiCommercePlatformModule,
+    AiLicensingPlatformModule,
+    RevenueSharingPlatformModule,
+    AiTalentPlatformModule,
+    ResearchFundingPlatformModule,
+    GlobalCommunityPlatformModule,
+    AiInvestmentPlatformModule,
+    EconomicIntelligenceModule,
     AiCertificationPlatformModule,
     AiComplianceFrameworkModule,
     ReferenceArchitecturesModule,

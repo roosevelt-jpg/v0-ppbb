@@ -13064,6 +13064,336 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/ai-economy/products': {
+      get: {
+        summary: 'AIE products',
+        operationId: 'listAiEconomyProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/engine': {
+      get: {
+        summary: 'AIE engine',
+        operationId: 'getAiEconomyEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/routing': {
+      get: {
+        summary: 'AIE routing',
+        operationId: 'getAiEconomyRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/guards': {
+      get: {
+        summary: 'AIE money/securities guards',
+        operationId: 'getAiEconomyGuards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/overview': {
+      get: {
+        summary: 'AIE overview',
+        operationId: 'getAiEconomyOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/records': {
+      get: {
+        summary: 'AIE records',
+        operationId: 'listAiEconomyRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/monitoring': {
+      get: {
+        summary: 'AIE monitoring',
+        operationId: 'getAiEconomyMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/engine': {
+      get: {
+        summary: 'AI Commerce Platform engine',
+        operationId: 'getAiCommercePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/products': {
+      get: {
+        summary: 'AI Commerce Platform products',
+        operationId: 'listAiCommercePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/monitoring': {
+      get: {
+        summary: 'AI Commerce Platform monitoring',
+        operationId: 'getAiCommercePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/routes': {
+      get: {
+        summary: 'AI Commerce Platform routes',
+        operationId: 'listAiCommercePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/records': {
+      get: {
+        summary: 'AI Commerce Platform records',
+        operationId: 'listAiCommercePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/engine': {
+      get: {
+        summary: 'AI Licensing Platform engine',
+        operationId: 'getAiLicensingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/products': {
+      get: {
+        summary: 'AI Licensing Platform products',
+        operationId: 'listAiLicensingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/monitoring': {
+      get: {
+        summary: 'AI Licensing Platform monitoring',
+        operationId: 'getAiLicensingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/routes': {
+      get: {
+        summary: 'AI Licensing Platform routes',
+        operationId: 'listAiLicensingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/records': {
+      get: {
+        summary: 'AI Licensing Platform records',
+        operationId: 'listAiLicensingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/engine': {
+      get: {
+        summary: 'Revenue Sharing Platform engine',
+        operationId: 'getRevenueSharingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/products': {
+      get: {
+        summary: 'Revenue Sharing Platform products',
+        operationId: 'listRevenueSharingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/monitoring': {
+      get: {
+        summary: 'Revenue Sharing Platform monitoring',
+        operationId: 'getRevenueSharingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/routes': {
+      get: {
+        summary: 'Revenue Sharing Platform routes',
+        operationId: 'listRevenueSharingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/records': {
+      get: {
+        summary: 'Revenue Sharing Platform records',
+        operationId: 'listRevenueSharingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/engine': {
+      get: {
+        summary: 'AI Talent Platform engine',
+        operationId: 'getAiTalentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/products': {
+      get: {
+        summary: 'AI Talent Platform products',
+        operationId: 'listAiTalentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/monitoring': {
+      get: {
+        summary: 'AI Talent Platform monitoring',
+        operationId: 'getAiTalentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/routes': {
+      get: {
+        summary: 'AI Talent Platform routes',
+        operationId: 'listAiTalentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/records': {
+      get: {
+        summary: 'AI Talent Platform records',
+        operationId: 'listAiTalentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/engine': {
+      get: {
+        summary: 'Research Funding Platform engine',
+        operationId: 'getResearchFundingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/products': {
+      get: {
+        summary: 'Research Funding Platform products',
+        operationId: 'listResearchFundingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/monitoring': {
+      get: {
+        summary: 'Research Funding Platform monitoring',
+        operationId: 'getResearchFundingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/routes': {
+      get: {
+        summary: 'Research Funding Platform routes',
+        operationId: 'listResearchFundingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/records': {
+      get: {
+        summary: 'Research Funding Platform records',
+        operationId: 'listResearchFundingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/engine': {
+      get: {
+        summary: 'Global Community Platform engine',
+        operationId: 'getGlobalCommunityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/products': {
+      get: {
+        summary: 'Global Community Platform products',
+        operationId: 'listGlobalCommunityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/monitoring': {
+      get: {
+        summary: 'Global Community Platform monitoring',
+        operationId: 'getGlobalCommunityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/routes': {
+      get: {
+        summary: 'Global Community Platform routes',
+        operationId: 'listGlobalCommunityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/records': {
+      get: {
+        summary: 'Global Community Platform records',
+        operationId: 'listGlobalCommunityPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/engine': {
+      get: {
+        summary: 'AI Investment Platform engine',
+        operationId: 'getAiInvestmentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/products': {
+      get: {
+        summary: 'AI Investment Platform products',
+        operationId: 'listAiInvestmentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/monitoring': {
+      get: {
+        summary: 'AI Investment Platform monitoring',
+        operationId: 'getAiInvestmentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/routes': {
+      get: {
+        summary: 'AI Investment Platform routes',
+        operationId: 'listAiInvestmentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/records': {
+      get: {
+        summary: 'AI Investment Platform records',
+        operationId: 'listAiInvestmentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/engine': {
+      get: {
+        summary: 'Economic Intelligence engine',
+        operationId: 'getEconomicIntelligenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/products': {
+      get: {
+        summary: 'Economic Intelligence products',
+        operationId: 'listEconomicIntelligenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/monitoring': {
+      get: {
+        summary: 'Economic Intelligence monitoring',
+        operationId: 'getEconomicIntelligenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/routes': {
+      get: {
+        summary: 'Economic Intelligence routes',
+        operationId: 'listEconomicIntelligenceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/records': {
+      get: {
+        summary: 'Economic Intelligence records',
+        operationId: 'listEconomicIntelligenceRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

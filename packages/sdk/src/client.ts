@@ -5453,6 +5453,47 @@ export class VerbaLab {
     return this.requestJson(`/v1/global-ai-standards/verify/${code}`, { method: 'GET' });
   }
 
+
+  async aiEconomyProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-economy/products', { method: 'GET' });
+  }
+
+  async aiCommercePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-commerce-platform/engine', { method: 'GET' });
+  }
+
+  async aiLicensingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-licensing-platform/engine', { method: 'GET' });
+  }
+
+  async revenueSharingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/revenue-sharing-platform/engine', { method: 'GET' });
+  }
+
+  async aiTalentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-talent-platform/engine', { method: 'GET' });
+  }
+
+  async researchFundingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/research-funding-platform/engine', { method: 'GET' });
+  }
+
+  async globalCommunityPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-community-platform/engine', { method: 'GET' });
+  }
+
+  async aiInvestmentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-investment-platform/engine', { method: 'GET' });
+  }
+
+  async economicIntelligenceEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/economic-intelligence/engine', { method: 'GET' });
+  }
+
+  async aiEconomyGuards(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-economy/guards', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

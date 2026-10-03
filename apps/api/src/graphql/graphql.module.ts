@@ -113,6 +113,15 @@ import { CorporateKnowledgeSystemApplicationModule } from '../corporate-knowledg
 import { ExecutiveIntelligencePlatformApplicationModule } from '../executive-intelligence-platform/application/executive-intelligence-platform-application.module';
 import { CorporateRiskPlatformApplicationModule } from '../corporate-risk-platform/application/corporate-risk-platform-application.module';
 import { GlobalAiStandardsApplicationModule } from '../global-ai-standards/application/global-ai-standards-application.module';
+import { AiEconomyApplicationModule } from '../ai-economy/application/ai-economy-application.module';
+import { AiCommercePlatformApplicationModule } from '../ai-commerce-platform/application/ai-commerce-platform-application.module';
+import { AiLicensingPlatformApplicationModule } from '../ai-licensing-platform/application/ai-licensing-platform-application.module';
+import { RevenueSharingPlatformApplicationModule } from '../revenue-sharing-platform/application/revenue-sharing-platform-application.module';
+import { AiTalentPlatformApplicationModule } from '../ai-talent-platform/application/ai-talent-platform-application.module';
+import { ResearchFundingPlatformApplicationModule } from '../research-funding-platform/application/research-funding-platform-application.module';
+import { GlobalCommunityPlatformApplicationModule } from '../global-community-platform/application/global-community-platform-application.module';
+import { AiInvestmentPlatformApplicationModule } from '../ai-investment-platform/application/ai-investment-platform-application.module';
+import { EconomicIntelligenceApplicationModule } from '../economic-intelligence/application/economic-intelligence-application.module';
 import { AiCertificationPlatformApplicationModule } from '../ai-certification-platform/application/ai-certification-platform-application.module';
 import { AiComplianceFrameworkApplicationModule } from '../ai-compliance-framework/application/ai-compliance-framework-application.module';
 import { ReferenceArchitecturesApplicationModule } from '../reference-architectures/application/reference-architectures-application.module';
@@ -304,6 +313,15 @@ import { CorporateKnowledgeSystemGraphqlResolver } from './corporate-knowledge-s
 import { ExecutiveIntelligencePlatformGraphqlResolver } from './executive-intelligence-platform.resolver';
 import { CorporateRiskPlatformGraphqlResolver } from './corporate-risk-platform.resolver';
 import { GlobalAiStandardsGraphqlResolver } from './global-ai-standards.resolver';
+import { AiEconomyGraphqlResolver } from './ai-economy.resolver';
+import { AiCommercePlatformGraphqlResolver } from './ai-commerce-platform.resolver';
+import { AiLicensingPlatformGraphqlResolver } from './ai-licensing-platform.resolver';
+import { RevenueSharingPlatformGraphqlResolver } from './revenue-sharing-platform.resolver';
+import { AiTalentPlatformGraphqlResolver } from './ai-talent-platform.resolver';
+import { ResearchFundingPlatformGraphqlResolver } from './research-funding-platform.resolver';
+import { GlobalCommunityPlatformGraphqlResolver } from './global-community-platform.resolver';
+import { AiInvestmentPlatformGraphqlResolver } from './ai-investment-platform.resolver';
+import { EconomicIntelligenceGraphqlResolver } from './economic-intelligence.resolver';
 import { AiCertificationPlatformGraphqlResolver } from './ai-certification-platform.resolver';
 import { AiComplianceFrameworkGraphqlResolver } from './ai-compliance-framework.resolver';
 import { ReferenceArchitecturesGraphqlResolver } from './reference-architectures.resolver';
@@ -515,6 +533,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ExecutiveIntelligencePlatformApplicationModule,
     CorporateRiskPlatformApplicationModule,
     GlobalAiStandardsApplicationModule,
+    AiEconomyApplicationModule,
+    AiCommercePlatformApplicationModule,
+    AiLicensingPlatformApplicationModule,
+    RevenueSharingPlatformApplicationModule,
+    AiTalentPlatformApplicationModule,
+    ResearchFundingPlatformApplicationModule,
+    GlobalCommunityPlatformApplicationModule,
+    AiInvestmentPlatformApplicationModule,
+    EconomicIntelligenceApplicationModule,
     AiCertificationPlatformApplicationModule,
     AiComplianceFrameworkApplicationModule,
     ReferenceArchitecturesApplicationModule,
@@ -714,6 +741,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ExecutiveIntelligencePlatformGraphqlResolver,
     CorporateRiskPlatformGraphqlResolver,
     GlobalAiStandardsGraphqlResolver,
+    AiEconomyGraphqlResolver,
+    AiCommercePlatformGraphqlResolver,
+    AiLicensingPlatformGraphqlResolver,
+    RevenueSharingPlatformGraphqlResolver,
+    AiTalentPlatformGraphqlResolver,
+    ResearchFundingPlatformGraphqlResolver,
+    GlobalCommunityPlatformGraphqlResolver,
+    AiInvestmentPlatformGraphqlResolver,
+    EconomicIntelligenceGraphqlResolver,
     AiCertificationPlatformGraphqlResolver,
     AiComplianceFrameworkGraphqlResolver,
     ReferenceArchitecturesGraphqlResolver,
