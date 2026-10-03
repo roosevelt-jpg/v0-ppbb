@@ -72,6 +72,7 @@ import { AiFabricModule } from './ai-fabric/ai-fabric.module';
 import { EventFabricModule } from './event-fabric/event-fabric.module';
 import { ContextFabricModule } from './context-fabric/context-fabric.module';
 import { KnowledgeFabricModule } from './knowledge-fabric/knowledge-fabric.module';
+import { PromptFabricModule } from './prompt-fabric/prompt-fabric.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -162,6 +163,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     EventFabricModule,
     ContextFabricModule,
     KnowledgeFabricModule,
+    PromptFabricModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

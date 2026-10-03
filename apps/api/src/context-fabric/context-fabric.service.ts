@@ -241,7 +241,7 @@ export class ContextFabricService {
       },
       deferred: {
         knowledgeFabric: false,
-        promptFabric: true,
+        promptFabric: false,
         reasoningFabric: true,
         memoryFabric: true,
         agentFabric: true,
@@ -253,6 +253,7 @@ export class ContextFabricService {
       links: {
         contextFabric: '/context-fabric',
         knowledgeFabric: '/knowledge-fabric',
+        promptFabric: '/prompt-fabric',
         contextRuntime: '/context-runtime',
         eventFabric: '/event-fabric',
         aiFabric: '/ai-fabric',

@@ -33,6 +33,8 @@ function usage(): never {
   verbalab knowledge-fabric-products
   verbalab knowledge-fabric-route [--kind <kind>]...
   verbalab knowledge-fabric-federate [--kind <kind>]...
+  verbalab prompt-fabric-products
+  verbalab prompt-fabric-route [--feature <feature>] [--kind <kind>]...
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -316,6 +318,33 @@ async function main() {
     }
     console.log(
       JSON.stringify(await vl.knowledgeFabricFederate(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'prompt-fabric-products') {
+    console.log(JSON.stringify(await vl.promptFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'prompt-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    const feature = argValue(rest, '--feature') ?? undefined;
+    console.log(
+      JSON.stringify(
+        await vl.promptFabricRoute({
+          ...(kinds.length ? { kinds } : {}),
+          ...(feature ? { feature } : {}),
+        }),
+        null,
+        2,
+      ),
     );
     return;
   }

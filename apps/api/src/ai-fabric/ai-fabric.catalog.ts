@@ -55,10 +55,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'prompt-fabric',
       name: 'Prompt Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Prompt routing across clouds (Phase 110 / VL-243).',
+      status: 'shipped',
+      api: 'GET /v1/prompt-fabric/products',
+      console: '/prompt-fabric',
+      notes:
+        'Prompt router over Prompt Runtime (VL-243). Not prompt mesh/research lab OS.',
     },
     {
       id: 'reasoning-fabric',

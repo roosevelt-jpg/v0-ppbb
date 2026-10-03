@@ -24,6 +24,7 @@ const links = [
   { href: '/event-fabric', label: 'Event Fabric' },
   { href: '/context-fabric', label: 'Context Fabric' },
   { href: '/knowledge-fabric', label: 'Knowledge Fabric' },
+  { href: '/prompt-fabric', label: 'Prompt Fabric' },
   { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },

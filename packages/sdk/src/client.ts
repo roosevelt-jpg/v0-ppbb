@@ -1417,6 +1417,81 @@ export class VerbaLab {
     });
   }
 
+  async promptFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    routes: Array<{
+      kind: string;
+      name: string;
+      target: string;
+      api: string;
+      cloud: string;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/prompt-fabric/products', { method: 'GET' });
+  }
+
+  async promptFabricRoute(body?: {
+    kinds?: string[];
+    feature?: string;
+  }): Promise<{
+    plan: Array<Record<string, unknown>>;
+    missing: string[];
+    runtimeRoute: Record<string, unknown> | null;
+  }> {
+    return this.requestJson('/v1/prompt-fabric/route', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async promptFabricValidate(body?: {
+    key?: string;
+    body?: string;
+    version?: number;
+    variables?: Record<string, string>;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/prompt-fabric/validate', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async promptFabricDistribute(body?: {
+    keys?: string[];
+    targetWorkspaceIds?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/prompt-fabric/distribute', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async promptFabricSync(body: {
+    targetWorkspaceId: string;
+    keys?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/prompt-fabric/sync', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

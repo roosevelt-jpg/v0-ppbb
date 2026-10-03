@@ -3435,6 +3435,124 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + recent plans + honesty' } },
       },
     },
+    '/v1/prompt-fabric/products': {
+      get: {
+        summary: 'Prompt Fabric capability catalog',
+        operationId: 'listPromptFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Prompt router capabilities, Prompt Runtime handoff, policy honesty',
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/engine': {
+      get: {
+        summary: 'Prompt Fabric engine (alias of products)',
+        operationId: 'getPromptFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/prompt-fabric/routes': {
+      get: {
+        summary: 'Prompt Fabric routing table',
+        operationId: 'listPromptFabricRoutes',
+        responses: { '200': { description: 'kind → Prompt Runtime / cloud handoffs' } },
+      },
+    },
+    '/v1/prompt-fabric/route': {
+      post: {
+        summary: 'Plan prompt routing for kinds/features',
+        operationId: 'planPromptFabricRoute',
+        responses: { '200': { description: 'Router plan + optional runtime route' } },
+      },
+    },
+    '/v1/prompt-fabric/versions': {
+      get: {
+        summary: 'List prompt versions via Prompt Runtime',
+        operationId: 'listPromptFabricVersions',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        parameters: [{ name: 'key', in: 'query', schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Version list' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/validate': {
+      post: {
+        summary: 'Validate a prompt via Prompt Runtime',
+        operationId: 'validatePromptFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Validation findings' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/policies': {
+      get: {
+        summary: 'Prompt policy handoff (Policy Runtime)',
+        operationId: 'getPromptFabricPolicies',
+        responses: { '200': { description: 'Policy Runtime discovery + Policy Fabric deferral' } },
+      },
+    },
+    '/v1/prompt-fabric/distribute': {
+      post: {
+        summary: 'Plan prompt distribution to same-org workspaces',
+        operationId: 'distributePromptFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/sync': {
+      post: {
+        summary: 'Plan prompt sync between same-org workspaces',
+        operationId: 'syncPromptFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sync cursor/plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/overview': {
+      get: {
+        summary: 'Prompt Fabric org overview',
+        operationId: 'getPromptFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + routes + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/prompt-fabric/monitoring': {
+      get: {
+        summary: 'Prompt Fabric monitoring',
+        operationId: 'getPromptFabricMonitoring',
+        responses: { '200': { description: 'Counters + recent plans + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

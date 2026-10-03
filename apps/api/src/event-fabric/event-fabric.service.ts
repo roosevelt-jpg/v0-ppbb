@@ -141,7 +141,7 @@ export class EventFabricService {
         rabbitmqAdapter: true,
         contextFabric: false,
         knowledgeFabric: false,
-        promptFabric: true,
+        promptFabric: false,
         reasoningFabric: true,
         memoryFabric: true,
         agentFabric: true,

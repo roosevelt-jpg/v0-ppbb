@@ -20,6 +20,7 @@ import { AiFabricApplicationModule } from '../ai-fabric/application/ai-fabric-ap
 import { EventFabricApplicationModule } from '../event-fabric/application/event-fabric-application.module';
 import { ContextFabricApplicationModule } from '../context-fabric/application/context-fabric-application.module';
 import { KnowledgeFabricApplicationModule } from '../knowledge-fabric/application/knowledge-fabric-application.module';
+import { PromptFabricApplicationModule } from '../prompt-fabric/application/prompt-fabric-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -93,6 +94,7 @@ import { AiFabricGraphqlResolver } from './ai-fabric.resolver';
 import { EventFabricGraphqlResolver } from './event-fabric.resolver';
 import { ContextFabricGraphqlResolver } from './context-fabric.resolver';
 import { KnowledgeFabricGraphqlResolver } from './knowledge-fabric.resolver';
+import { PromptFabricGraphqlResolver } from './prompt-fabric.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -186,6 +188,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EventFabricApplicationModule,
     ContextFabricApplicationModule,
     KnowledgeFabricApplicationModule,
+    PromptFabricApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -267,6 +270,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EventFabricGraphqlResolver,
     ContextFabricGraphqlResolver,
     KnowledgeFabricGraphqlResolver,
+    PromptFabricGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

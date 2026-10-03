@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-242 Done — Knowledge Fabric)
+Last updated: 2026-10-03 (VL-243 Done — Prompt Fabric)
 
 ---
 
@@ -272,7 +272,7 @@ Last updated: 2026-10-03 (VL-242 Done — Knowledge Fabric)
 | VL-240 | Event Fabric (Phase 107) | Done | Redis Streams + CloudEvents (DLQ/retries/replay/snapshots); Kafka/NATS/Rabbit adapters deferred; ADR-0142. |
 | VL-241 | Context Fabric (Phase 108) | Done | Router over Context Runtime + optional Event Fabric propagate; SSE ticks; ADR-0143. Not infinite-context/WebSocket OS. |
 | VL-242 | Knowledge Fabric (Phase 109) | Done | Router over Knowledge Cloud; same-org distribute/sync + federation handoffs; ADR-0144. Not Confluence/Neo4j OS. |
-| VL-243 | Prompt Fabric (Phase 110) | Not Started | |
+| VL-243 | Prompt Fabric (Phase 110) | Done | Router over Prompt Runtime; versioning/validate/same-org sync; Policy Runtime handoff; ADR-0145. Not prompt mesh/research lab. |
 | VL-244 | Reasoning Fabric (Phase 111) | Not Started | |
 | VL-245 | Memory Fabric (Phase 112) | Not Started | |
 | VL-246 | Agent Fabric (Phase 113) | Not Started | Must stay sandboxed + Policy-gated. |
@@ -425,3 +425,4 @@ Last updated: 2026-10-03 (VL-242 Done — Knowledge Fabric)
 | 2026-10-03 | VL-240 Done: Event Fabric (Phase 107) — Redis Streams + CloudEvents; DLQ/retries/replay/snapshots; ADR-0142. Kafka/NATS/Rabbit deferred adapters. |
 | 2026-10-03 | VL-241 Done: Context Fabric (Phase 108) — router over Context Runtime; optional Event Fabric propagate; ADR-0143. Not infinite-context/WebSocket OS. |
 | 2026-10-03 | VL-242 Done: Knowledge Fabric (Phase 109) — router over Knowledge Cloud; same-org distribute/sync; ADR-0144. Not Confluence/Neo4j federation OS. |
+| 2026-10-03 | VL-243 Done: Prompt Fabric (Phase 110) — router over Prompt Runtime; validate/version/same-org sync; ADR-0145. Not prompt mesh/research lab OS. |
