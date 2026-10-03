@@ -26,6 +26,7 @@ const links = [
   { href: '/knowledge-fabric', label: 'Knowledge Fabric' },
   { href: '/prompt-fabric', label: 'Prompt Fabric' },
   { href: '/reasoning-fabric', label: 'Reasoning Fabric' },
+  { href: '/memory-fabric', label: 'Memory Fabric' },
   { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },

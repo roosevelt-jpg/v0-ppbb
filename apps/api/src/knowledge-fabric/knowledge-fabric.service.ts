@@ -330,7 +330,7 @@ export class KnowledgeFabricService {
       deferred: {
         promptFabric: false,
         reasoningFabric: false,
-        memoryFabric: true,
+        memoryFabric: false,
         agentFabric: true,
         policyFabric: true,
         confluenceSharepointOs: true,

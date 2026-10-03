@@ -3680,6 +3680,158 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + honesty' } },
       },
     },
+    '/v1/memory-fabric/products': {
+      get: {
+        summary: 'Memory Fabric capability catalog',
+        operationId: 'listMemoryFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Memory router capabilities, pipelines, Runtime handoff honesty',
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/engine': {
+      get: {
+        summary: 'Memory Fabric engine (alias of products)',
+        operationId: 'getMemoryFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/memory-fabric/routes': {
+      get: {
+        summary: 'Memory Fabric routing table',
+        operationId: 'listMemoryFabricRoutes',
+        responses: { '200': { description: 'kind → Runtime/Cloud handoffs' } },
+      },
+    },
+    '/v1/memory-fabric/route': {
+      post: {
+        summary: 'Plan memory routing for selected kinds',
+        operationId: 'planMemoryFabricRoute',
+        responses: { '200': { description: 'Router plan' } },
+      },
+    },
+    '/v1/memory-fabric/pipeline': {
+      post: {
+        summary: 'Plan a memory pipeline (ordered Runtime handoffs)',
+        operationId: 'planMemoryFabricPipeline',
+        responses: { '200': { description: 'Pipeline + routed steps' } },
+      },
+    },
+    '/v1/memory-fabric/versions': {
+      get: {
+        summary: 'Memory Fabric version catalog',
+        operationId: 'listMemoryFabricVersions',
+        responses: { '200': { description: 'Router/pipeline/sync versions' } },
+      },
+    },
+    '/v1/memory-fabric/cache': {
+      get: {
+        summary: 'Memory cache handoff (Intelligent Cache)',
+        operationId: 'getMemoryFabricCache',
+        responses: { '200': { description: 'Intelligent Cache discovery' } },
+      },
+    },
+    '/v1/memory-fabric/federate': {
+      post: {
+        summary: 'List memory federation handoff targets',
+        operationId: 'federateMemoryFabric',
+        responses: { '200': { description: 'Federation handoff catalog' } },
+      },
+    },
+    '/v1/memory-fabric/sync': {
+      post: {
+        summary: 'Sandbox memory sync via Memory Runtime',
+        operationId: 'syncMemoryFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sync stamp result' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/memories': {
+      get: {
+        summary: 'List memories via Memory Runtime',
+        operationId: 'listMemoryFabricMemories',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Memory list' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/search': {
+      post: {
+        summary: 'Search memories via Memory Runtime',
+        operationId: 'searchMemoryFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Search hits' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/replicate': {
+      post: {
+        summary: 'Plan same-org memory replication',
+        operationId: 'replicateMemoryFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Replication plan' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/distribute': {
+      post: {
+        summary: 'Plan memory distribution to same-org workspaces',
+        operationId: 'distributeMemoryFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/overview': {
+      get: {
+        summary: 'Memory Fabric org overview',
+        operationId: 'getMemoryFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + pipelines + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/memory-fabric/monitoring': {
+      get: {
+        summary: 'Memory Fabric monitoring',
+        operationId: 'getMemoryFabricMonitoring',
+        responses: { '200': { description: 'Counters + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

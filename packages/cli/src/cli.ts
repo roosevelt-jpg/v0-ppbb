@@ -38,6 +38,9 @@ function usage(): never {
   verbalab reasoning-fabric-products
   verbalab reasoning-fabric-route [--kind <kind>]...
   verbalab reasoning-fabric-pipeline [--id <pipelineId>]
+  verbalab memory-fabric-products
+  verbalab memory-fabric-route [--kind <kind>]...
+  verbalab memory-fabric-pipeline [--id <pipelineId>]
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -376,6 +379,37 @@ async function main() {
     console.log(
       JSON.stringify(
         await vl.reasoningFabricPipeline(pipelineId ? { pipelineId } : {}),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'memory-fabric-products') {
+    console.log(JSON.stringify(await vl.memoryFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'memory-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.memoryFabricRoute(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'memory-fabric-pipeline') {
+    const pipelineId = argValue(rest, '--id') ?? undefined;
+    console.log(
+      JSON.stringify(
+        await vl.memoryFabricPipeline(pipelineId ? { pipelineId } : {}),
         null,
         2,
       ),

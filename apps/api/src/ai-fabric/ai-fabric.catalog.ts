@@ -73,10 +73,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'memory-fabric',
       name: 'Memory Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Memory routing (Phase 112 / VL-245). Extends Memory Runtime.',
+      status: 'shipped',
+      api: 'GET /v1/memory-fabric/products',
+      console: '/memory-fabric',
+      notes:
+        'Memory router over Memory Runtime (VL-245). Not Mem0 / multi-region replication OS.',
     },
     {
       id: 'agent-fabric',

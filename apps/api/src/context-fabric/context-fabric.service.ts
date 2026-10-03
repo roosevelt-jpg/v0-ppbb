@@ -243,7 +243,7 @@ export class ContextFabricService {
         knowledgeFabric: false,
         promptFabric: false,
         reasoningFabric: false,
-        memoryFabric: true,
+        memoryFabric: false,
         agentFabric: true,
         policyFabric: true,
         websocketOs: true,
