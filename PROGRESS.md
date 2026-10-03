@@ -239,7 +239,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-207 | AI Router (Phase 74) | Done | `/v1/ai-router/*` dry-run resolve + policies over Gateway; ADR-0118. Not a mesh; cache deferred; spend enforce VL-211. |
 | VL-208 | Streaming Runtime (Phase 75) | Done | `/v1/streaming-runtime/*` SSE hub + sandbox LLM chunks; ADR-0119. Links existing speech/voice/translate SSE; WS/gRPC/video deferred. |
 | VL-209 | Batch Runtime (Phase 76) | Done | `/v1/batch-runtime/*` over BullMQ + sandbox runs; priority/retry/checkpoint; ADR-0120. Not Spark/Airflow; video deferred. |
-| VL-210 | Intelligent Cache (Phase 77) | Not Started | |
+| VL-210 | Intelligent Cache (Phase 77) | Done | `/v1/intelligent-cache/*` opt-in exact-key/normalized-hash store; ADR-0121. Not Redis Cluster/vector/CDN; Gateway not auto-wired. |
 | VL-211 | Cost Optimization Engine (Phase 78) | Not Started | Must enforce spend caps. |
 | VL-212 | AI Runtime Analytics (Phase 79) | Not Started | |
 | VL-213 | Inference Cloud Production Audit (Phase 80) | Not Started | |
@@ -366,3 +366,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-207 Done: AI Router (Phase 74) — dry-run model/provider routing + policies; ADR-0118. Not a mesh; does not enforce spend caps. |
 | 2026-10-03 | VL-208 Done: Streaming Runtime (Phase 75) — SSE hub + sandbox LLM chunks; ADR-0119. Links existing product SSE; WS/gRPC/video deferred. |
 | 2026-10-03 | VL-209 Done: Batch Runtime (Phase 76) — BullMQ hub + sandbox runs; priority/retry/checkpoint; ADR-0120. Not Spark/Airflow OS. |
+| 2026-10-03 | VL-210 Done: Intelligent Cache (Phase 77) — opt-in exact-key/normalized-hash store; ADR-0121. Not Redis/vector/CDN OS; Gateway not auto-wired. |

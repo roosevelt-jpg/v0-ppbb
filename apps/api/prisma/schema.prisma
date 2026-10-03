@@ -92,6 +92,7 @@ model Organization {
   aiRouterDecisions            AiRouterDecision[]
   streamingSessions            StreamingSession[]
   batchRuns                    BatchRun[]
+  cacheEntries                 CacheEntry[]
 
   @@map("organizations")
 }
@@ -176,6 +177,7 @@ model Workspace {
   aiRouterDecisions      AiRouterDecision[]
   streamingSessions      StreamingSession[]
   batchRuns              BatchRun[]
+  cacheEntries           CacheEntry[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1551,6 +1553,32 @@ model BatchRun {
   @@index([organizationId, workspaceId, status])
   @@index([workspaceId, kind, priorityWeight])
   @@map("batch_runs")
+}
+
+/// Intelligent Cache entry (VL-210). Exact-key / normalized-hash sandbox store — not Redis Cluster OS.
+model CacheEntry {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  workspaceId    String    @map("workspace_id")
+  /// semantic | translation | embedding | speech | voice | document | prompt | context
+  namespace       String
+  cacheKey       String    @map("cache_key")
+  valueJson      Json      @map("value_json")
+  hits           Int       @default(0)
+  misses         Int       @default(0)
+  expiresAt      DateTime? @map("expires_at")
+  labels         String[]  @default([])
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, workspaceId, namespace, cacheKey])
+  @@index([organizationId, workspaceId, namespace])
+  @@index([expiresAt])
+  @@map("cache_entries")
 }
 
 

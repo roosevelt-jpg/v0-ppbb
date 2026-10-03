@@ -1369,6 +1369,52 @@ export class VerbaLab {
     });
   }
 
+  async intelligentCacheEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      redisClusterOs: boolean;
+      vectorSemanticOs: boolean;
+      cdnOs: boolean;
+      autoWiresGatewayResponses: boolean;
+      exactKeyLookup: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/intelligent-cache/engine', { method: 'GET' });
+  }
+
+  async intelligentCachePut(input: {
+    namespace: string;
+    key?: string;
+    text?: string;
+    value?: unknown;
+    ttlSec?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/intelligent-cache/put', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async intelligentCacheLookup(input: {
+    namespace: string;
+    key?: string;
+    text?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/intelligent-cache/lookup', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

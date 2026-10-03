@@ -92,7 +92,7 @@ describe('AI Router (VL-207)', () => {
     expect(res.body.capabilities.some((c: { id: string }) => c.id === 'caching')).toBe(true);
     expect(
       res.body.capabilities.find((c: { id: string }) => c.id === 'caching').status,
-    ).toBe('deferred');
+    ).toBe('partial');
 
     const features = await request(app.getHttpServer()).get('/v1/ai-router/features').expect(200);
     expect(features.body.features.some((f: { feature: string }) => f.feature === 'chat')).toBe(
@@ -151,7 +151,7 @@ describe('AI Router (VL-207)', () => {
       .set('Authorization', `Bearer ${key.secret}`)
       .expect(200);
     expect(mon.body.honesty.extendsAiGateway).toBe(true);
-    expect(mon.body.deferred).toContain('caching');
+    expect(mon.body.deferred).not.toContain('caching');
   });
 
   it('exposes aiRouterEngine via GraphQL', async () => {

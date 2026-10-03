@@ -31,6 +31,9 @@ function usage(): never {
   verbalab streaming-runtime-surfaces [--kind speech|voice|translation|llm|video|realtime]
   verbalab batch-runtime-engine
   verbalab batch-runtime-run --kind <kind> --item <text> [--priority low|normal|high]
+  verbalab intelligent-cache-engine
+  verbalab intelligent-cache-put --namespace <ns> --key <key> [--value <json>]
+  verbalab intelligent-cache-lookup --namespace <ns> --key <key>
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -286,6 +289,40 @@ async function main() {
         null,
         2,
       ),
+    );
+    return;
+  }
+
+  if (command === 'intelligent-cache-engine') {
+    console.log(JSON.stringify(await vl.intelligentCacheEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'intelligent-cache-put') {
+    const namespace = argValue(rest, '--namespace');
+    const key = argValue(rest, '--key');
+    if (!namespace || !key) usage();
+    const valueRaw = argValue(rest, '--value');
+    console.log(
+      JSON.stringify(
+        await vl.intelligentCachePut({
+          namespace,
+          key,
+          value: valueRaw ? JSON.parse(valueRaw) : { ok: true },
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'intelligent-cache-lookup') {
+    const namespace = argValue(rest, '--namespace');
+    const key = argValue(rest, '--key');
+    if (!namespace || !key) usage();
+    console.log(
+      JSON.stringify(await vl.intelligentCacheLookup({ namespace, key }), null, 2),
     );
     return;
   }

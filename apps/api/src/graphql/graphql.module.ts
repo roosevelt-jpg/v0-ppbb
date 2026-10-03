@@ -15,6 +15,7 @@ import { ModelServingModule } from '../model-serving/model-serving.module';
 import { AiRouterModule } from '../ai-router/ai-router.module';
 import { StreamingRuntimeModule } from '../streaming-runtime/streaming-runtime.module';
 import { BatchRuntimeModule } from '../batch-runtime/batch-runtime.module';
+import { IntelligentCacheModule } from '../intelligent-cache/intelligent-cache.module';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
@@ -67,6 +68,7 @@ import { ModelServingGraphqlResolver } from './model-serving.resolver';
 import { AiRouterGraphqlResolver } from './ai-router.resolver';
 import { StreamingRuntimeGraphqlResolver } from './streaming-runtime.resolver';
 import { BatchRuntimeGraphqlResolver } from './batch-runtime.resolver';
+import { IntelligentCacheGraphqlResolver } from './intelligent-cache.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
@@ -139,6 +141,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiRouterModule,
     StreamingRuntimeModule,
     BatchRuntimeModule,
+    IntelligentCacheModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
@@ -199,6 +202,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiRouterGraphqlResolver,
     StreamingRuntimeGraphqlResolver,
     BatchRuntimeGraphqlResolver,
+    IntelligentCacheGraphqlResolver,
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,

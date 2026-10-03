@@ -124,6 +124,9 @@ export function InferenceCloudClient() {
               <Link href={data.links.batchRuntime ?? '/batch-runtime'} style={secondary}>
                 Batch
               </Link>
+              <Link href={data.links.intelligentCache ?? '/intelligent-cache'} style={secondary}>
+                Cache
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

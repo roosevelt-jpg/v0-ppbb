@@ -709,6 +709,69 @@ export class GqlBatchRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlIntelligentCacheCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlIntelligentCacheEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlIntelligentCacheCapability])
+  capabilities!: GqlIntelligentCacheCapability[];
+
+  @Field()
+  redisClusterOs!: boolean;
+
+  @Field()
+  vectorSemanticOs!: boolean;
+
+  @Field()
+  cdnOs!: boolean;
+
+  @Field()
+  autoWiresGatewayResponses!: boolean;
+
+  @Field()
+  regeneratesAiGateway!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  sandboxEntries!: boolean;
+
+  @Field()
+  exactKeyLookup!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxEntriesPerWorkspace!: number;
+
+  @Field()
+  defaultTtlSec!: number;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

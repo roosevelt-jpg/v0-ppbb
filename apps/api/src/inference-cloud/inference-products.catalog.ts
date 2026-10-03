@@ -69,10 +69,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'intelligent-cache',
       name: 'Intelligent Cache',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Inference result cache (Phase 77 / VL-210). Response cache deferred (Gateway honesty).',
+      status: 'partial',
+      api: 'GET /v1/intelligent-cache/engine',
+      console: '/intelligent-cache',
+      notes:
+        'Opt-in exact-key / normalized-hash cache namespaces (VL-210). Not Redis Cluster/vector/CDN OS; Gateway not auto-wired.',
     },
     {
       id: 'cost-optimization',

@@ -19,6 +19,7 @@ const links = [
   { href: '/ai-router', label: 'AI Router' },
   { href: '/streaming-runtime', label: 'Streaming Runtime' },
   { href: '/batch-runtime', label: 'Batch Runtime' },
+  { href: '/intelligent-cache', label: 'Intelligent Cache' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },

@@ -59,6 +59,7 @@ import { ModelServingModule } from './model-serving/model-serving.module';
 import { AiRouterModule } from './ai-router/ai-router.module';
 import { StreamingRuntimeModule } from './streaming-runtime/streaming-runtime.module';
 import { BatchRuntimeModule } from './batch-runtime/batch-runtime.module';
+import { IntelligentCacheModule } from './intelligent-cache/intelligent-cache.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -128,6 +129,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiRouterModule,
     StreamingRuntimeModule,
     BatchRuntimeModule,
+    IntelligentCacheModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

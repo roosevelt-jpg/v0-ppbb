@@ -300,7 +300,8 @@ export class AiRouterService {
       },
       caching: {
         enabled: false,
-        note: 'Deferred to Intelligent Cache (VL-210).',
+        note: 'Opt-in via Intelligent Cache (VL-210) — resolve does not auto-cache.',
+        api: 'GET /v1/intelligent-cache/engine',
       },
       loadBalancing: {
         strategy: 'weighted_static',

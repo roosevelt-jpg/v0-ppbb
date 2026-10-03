@@ -291,9 +291,9 @@ export function aiRouterCatalog() {
       {
         id: 'caching',
         name: 'Caching',
-        status: 'deferred',
-        api: null,
-        notes: 'Inference result cache deferred to Intelligent Cache (VL-210).',
+        status: 'partial',
+        api: 'GET /v1/intelligent-cache/engine',
+        notes: 'Opt-in via Intelligent Cache (VL-210) — Router does not auto-cache resolves.',
       },
       {
         id: 'streaming',

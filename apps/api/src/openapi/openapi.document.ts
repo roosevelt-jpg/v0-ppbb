@@ -3209,6 +3209,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/intelligent-cache/engine': {
+      get: {
+        summary: 'Intelligent Cache catalog',
+        operationId: 'getIntelligentCacheEngine',
+        responses: {
+          '200': {
+            description: 'Namespaces, ceilings, and honesty flags',
+          },
+        },
+      },
+    },
+    '/v1/intelligent-cache/namespaces': {
+      get: {
+        summary: 'Cache namespaces',
+        operationId: 'listIntelligentCacheNamespaces',
+        responses: {
+          '200': {
+            description: 'Semantic/translation/embedding/speech/voice/document/prompt/context',
+          },
+        },
+      },
+    },
+    '/v1/intelligent-cache/ceilings': {
+      get: {
+        summary: 'Cache entry/TTL ceilings',
+        operationId: 'getIntelligentCacheCeilings',
+        responses: { '200': { description: 'maxEntriesPerWorkspace + defaultTtlSec' } },
+      },
+    },
+    '/v1/intelligent-cache/entries': {
+      get: {
+        summary: 'List active cache entries',
+        operationId: 'listIntelligentCacheEntries',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace entries (values omitted)' } },
+      },
+    },
+    '/v1/intelligent-cache/put': {
+      post: {
+        summary: 'Put cache entry',
+        operationId: 'putIntelligentCacheEntry',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Entry stored' },
+          '402': { description: 'Hard entry ceiling exceeded' },
+        },
+      },
+    },
+    '/v1/intelligent-cache/lookup': {
+      post: {
+        summary: 'Lookup cache entry (exact key / normalized hash)',
+        operationId: 'lookupIntelligentCacheEntry',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Hit or miss' } },
+      },
+    },
+    '/v1/intelligent-cache/invalidate': {
+      post: {
+        summary: 'Invalidate cache entries',
+        operationId: 'invalidateIntelligentCache',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Deleted count' } },
+      },
+    },
+    '/v1/intelligent-cache/analytics': {
+      get: {
+        summary: 'Intelligent Cache analytics',
+        operationId: 'getIntelligentCacheAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Hit/entry aggregates' } },
+      },
+    },
+    '/v1/intelligent-cache/monitoring': {
+      get: {
+        summary: 'Intelligent Cache monitoring',
+        operationId: 'getIntelligentCacheMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',
