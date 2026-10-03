@@ -5494,6 +5494,47 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-economy/guards', { method: 'GET' });
   }
 
+
+  async digitalCivilizationProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/digital-civilization/products', { method: 'GET' });
+  }
+
+  async nationalAiPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/national-ai-platform/engine', { method: 'GET' });
+  }
+
+  async smartCityPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/smart-city-platform/engine', { method: 'GET' });
+  }
+
+  async enterpriseNationPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-nation-platform/engine', { method: 'GET' });
+  }
+
+  async globalLanguagePreservationEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-language-preservation/engine', { method: 'GET' });
+  }
+
+  async universalTranslationGridEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/universal-translation-grid/engine', { method: 'GET' });
+  }
+
+  async globalKnowledgeNetworkEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-knowledge-network/engine', { method: 'GET' });
+  }
+
+  async globalAiFederationEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-federation/engine', { method: 'GET' });
+  }
+
+  async civilizationIntelligenceDashboardEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/civilization-intelligence-dashboard/engine', { method: 'GET' });
+  }
+
+  async digitalCivilizationGuards(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/digital-civilization/guards', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

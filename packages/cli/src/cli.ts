@@ -125,6 +125,16 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab digital-civilization-products
+  verbalab national-ai-platform-engine
+  verbalab smart-city-platform-engine
+  verbalab enterprise-nation-platform-engine
+  verbalab global-language-preservation-engine
+  verbalab universal-translation-grid-engine
+  verbalab global-knowledge-network-engine
+  verbalab global-ai-federation-engine
+  verbalab civilization-intelligence-dashboard-engine
+  verbalab digital-civilization-guards
   verbalab ai-economy-products
   verbalab ai-commerce-platform-engine
   verbalab ai-licensing-platform-engine
@@ -971,6 +981,56 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'digital-civilization-products') {
+    console.log(JSON.stringify(await vl.digitalCivilizationProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'national-ai-platform-engine') {
+    console.log(JSON.stringify(await vl.nationalAiPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'smart-city-platform-engine') {
+    console.log(JSON.stringify(await vl.smartCityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-nation-platform-engine') {
+    console.log(JSON.stringify(await vl.enterpriseNationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-language-preservation-engine') {
+    console.log(JSON.stringify(await vl.globalLanguagePreservationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'universal-translation-grid-engine') {
+    console.log(JSON.stringify(await vl.universalTranslationGridEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-knowledge-network-engine') {
+    console.log(JSON.stringify(await vl.globalKnowledgeNetworkEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-federation-engine') {
+    console.log(JSON.stringify(await vl.globalAiFederationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'civilization-intelligence-dashboard-engine') {
+    console.log(JSON.stringify(await vl.civilizationIntelligenceDashboardEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'digital-civilization-guards') {
+    console.log(JSON.stringify(await vl.digitalCivilizationGuards(), null, 2));
+    return;
+  }
+
   if (command === 'ai-economy-products') {
     console.log(JSON.stringify(await vl.aiEconomyProducts(), null, 2));
     return;

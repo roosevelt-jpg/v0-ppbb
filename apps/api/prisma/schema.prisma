@@ -1760,3 +1760,24 @@ model AieRecord {
   @@map("aie_records")
 }
 
+/// Volume 24 Digital Civilization records (public-sector/city/enterprise demos).
+/// Not evidence that VerbaLab operates national infrastructure or production gov systems.
+model DcivRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("dciv_records")
+}
+

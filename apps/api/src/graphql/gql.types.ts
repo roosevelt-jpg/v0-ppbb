@@ -6524,3 +6524,273 @@ export class GqlEconomicIntelligenceEngine {
   investmentDashboardOnly!: boolean;
 }
 
+@ObjectType()
+export class GqlDigitalCivilizationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlNationalAiPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlSmartCityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseNationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalLanguagePreservationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlUniversalTranslationGridEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalKnowledgeNetworkEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalAiFederationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCivilizationIntelligenceDashboardEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  demoPublicSectorPlatform!: boolean;
+
+  @Field(() => Boolean)
+  runsNationalInfrastructure!: boolean;
+
+  @Field(() => Boolean)
+  productionGovernmentDeployment!: boolean;
+
+  @Field(() => Boolean)
+  productionCourtPoliceMilitary!: boolean;
+
+  @Field(() => Boolean)
+  productionEmergencyDispatch!: boolean;
+
+  @Field(() => Boolean)
+  productionCitizenIdentityAuth!: boolean;
+
+  @Field(() => Boolean)
+  civilizationInfrastructureOs!: boolean;
+}
+

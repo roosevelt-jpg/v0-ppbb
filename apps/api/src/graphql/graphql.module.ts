@@ -122,6 +122,15 @@ import { ResearchFundingPlatformApplicationModule } from '../research-funding-pl
 import { GlobalCommunityPlatformApplicationModule } from '../global-community-platform/application/global-community-platform-application.module';
 import { AiInvestmentPlatformApplicationModule } from '../ai-investment-platform/application/ai-investment-platform-application.module';
 import { EconomicIntelligenceApplicationModule } from '../economic-intelligence/application/economic-intelligence-application.module';
+import { DigitalCivilizationApplicationModule } from '../digital-civilization/application/digital-civilization-application.module';
+import { NationalAiPlatformApplicationModule } from '../national-ai-platform/application/national-ai-platform-application.module';
+import { SmartCityPlatformApplicationModule } from '../smart-city-platform/application/smart-city-platform-application.module';
+import { EnterpriseNationPlatformApplicationModule } from '../enterprise-nation-platform/application/enterprise-nation-platform-application.module';
+import { GlobalLanguagePreservationApplicationModule } from '../global-language-preservation/application/global-language-preservation-application.module';
+import { UniversalTranslationGridApplicationModule } from '../universal-translation-grid/application/universal-translation-grid-application.module';
+import { GlobalKnowledgeNetworkApplicationModule } from '../global-knowledge-network/application/global-knowledge-network-application.module';
+import { GlobalAiFederationApplicationModule } from '../global-ai-federation/application/global-ai-federation-application.module';
+import { CivilizationIntelligenceDashboardApplicationModule } from '../civilization-intelligence-dashboard/application/civilization-intelligence-dashboard-application.module';
 import { AiCertificationPlatformApplicationModule } from '../ai-certification-platform/application/ai-certification-platform-application.module';
 import { AiComplianceFrameworkApplicationModule } from '../ai-compliance-framework/application/ai-compliance-framework-application.module';
 import { ReferenceArchitecturesApplicationModule } from '../reference-architectures/application/reference-architectures-application.module';
@@ -322,6 +331,15 @@ import { ResearchFundingPlatformGraphqlResolver } from './research-funding-platf
 import { GlobalCommunityPlatformGraphqlResolver } from './global-community-platform.resolver';
 import { AiInvestmentPlatformGraphqlResolver } from './ai-investment-platform.resolver';
 import { EconomicIntelligenceGraphqlResolver } from './economic-intelligence.resolver';
+import { DigitalCivilizationGraphqlResolver } from './digital-civilization.resolver';
+import { NationalAiPlatformGraphqlResolver } from './national-ai-platform.resolver';
+import { SmartCityPlatformGraphqlResolver } from './smart-city-platform.resolver';
+import { EnterpriseNationPlatformGraphqlResolver } from './enterprise-nation-platform.resolver';
+import { GlobalLanguagePreservationGraphqlResolver } from './global-language-preservation.resolver';
+import { UniversalTranslationGridGraphqlResolver } from './universal-translation-grid.resolver';
+import { GlobalKnowledgeNetworkGraphqlResolver } from './global-knowledge-network.resolver';
+import { GlobalAiFederationGraphqlResolver } from './global-ai-federation.resolver';
+import { CivilizationIntelligenceDashboardGraphqlResolver } from './civilization-intelligence-dashboard.resolver';
 import { AiCertificationPlatformGraphqlResolver } from './ai-certification-platform.resolver';
 import { AiComplianceFrameworkGraphqlResolver } from './ai-compliance-framework.resolver';
 import { ReferenceArchitecturesGraphqlResolver } from './reference-architectures.resolver';
@@ -542,6 +560,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     GlobalCommunityPlatformApplicationModule,
     AiInvestmentPlatformApplicationModule,
     EconomicIntelligenceApplicationModule,
+    DigitalCivilizationApplicationModule,
+    NationalAiPlatformApplicationModule,
+    SmartCityPlatformApplicationModule,
+    EnterpriseNationPlatformApplicationModule,
+    GlobalLanguagePreservationApplicationModule,
+    UniversalTranslationGridApplicationModule,
+    GlobalKnowledgeNetworkApplicationModule,
+    GlobalAiFederationApplicationModule,
+    CivilizationIntelligenceDashboardApplicationModule,
     AiCertificationPlatformApplicationModule,
     AiComplianceFrameworkApplicationModule,
     ReferenceArchitecturesApplicationModule,
@@ -750,6 +777,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     GlobalCommunityPlatformGraphqlResolver,
     AiInvestmentPlatformGraphqlResolver,
     EconomicIntelligenceGraphqlResolver,
+    DigitalCivilizationGraphqlResolver,
+    NationalAiPlatformGraphqlResolver,
+    SmartCityPlatformGraphqlResolver,
+    EnterpriseNationPlatformGraphqlResolver,
+    GlobalLanguagePreservationGraphqlResolver,
+    UniversalTranslationGridGraphqlResolver,
+    GlobalKnowledgeNetworkGraphqlResolver,
+    GlobalAiFederationGraphqlResolver,
+    CivilizationIntelligenceDashboardGraphqlResolver,
     AiCertificationPlatformGraphqlResolver,
     AiComplianceFrameworkGraphqlResolver,
     ReferenceArchitecturesGraphqlResolver,

@@ -13394,6 +13394,336 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/digital-civilization/products': {
+      get: {
+        summary: 'DCIV products',
+        operationId: 'listDigitalCivilizationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/engine': {
+      get: {
+        summary: 'DCIV engine',
+        operationId: 'getDigitalCivilizationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/routing': {
+      get: {
+        summary: 'DCIV routing',
+        operationId: 'getDigitalCivilizationRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/guards': {
+      get: {
+        summary: 'DCIV public-sector guards',
+        operationId: 'getDigitalCivilizationGuards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/overview': {
+      get: {
+        summary: 'DCIV overview',
+        operationId: 'getDigitalCivilizationOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/records': {
+      get: {
+        summary: 'DCIV records',
+        operationId: 'listDigitalCivilizationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/monitoring': {
+      get: {
+        summary: 'DCIV monitoring',
+        operationId: 'getDigitalCivilizationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/engine': {
+      get: {
+        summary: 'National AI Platform engine',
+        operationId: 'getNationalAiPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/products': {
+      get: {
+        summary: 'National AI Platform products',
+        operationId: 'listNationalAiPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/monitoring': {
+      get: {
+        summary: 'National AI Platform monitoring',
+        operationId: 'getNationalAiPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/routes': {
+      get: {
+        summary: 'National AI Platform routes',
+        operationId: 'listNationalAiPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/records': {
+      get: {
+        summary: 'National AI Platform records',
+        operationId: 'listNationalAiPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/engine': {
+      get: {
+        summary: 'Smart City Platform engine',
+        operationId: 'getSmartCityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/products': {
+      get: {
+        summary: 'Smart City Platform products',
+        operationId: 'listSmartCityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/monitoring': {
+      get: {
+        summary: 'Smart City Platform monitoring',
+        operationId: 'getSmartCityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/routes': {
+      get: {
+        summary: 'Smart City Platform routes',
+        operationId: 'listSmartCityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/records': {
+      get: {
+        summary: 'Smart City Platform records',
+        operationId: 'listSmartCityPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/engine': {
+      get: {
+        summary: 'Enterprise Nation Platform engine',
+        operationId: 'getEnterpriseNationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/products': {
+      get: {
+        summary: 'Enterprise Nation Platform products',
+        operationId: 'listEnterpriseNationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/monitoring': {
+      get: {
+        summary: 'Enterprise Nation Platform monitoring',
+        operationId: 'getEnterpriseNationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/routes': {
+      get: {
+        summary: 'Enterprise Nation Platform routes',
+        operationId: 'listEnterpriseNationPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/records': {
+      get: {
+        summary: 'Enterprise Nation Platform records',
+        operationId: 'listEnterpriseNationPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/engine': {
+      get: {
+        summary: 'Global Language Preservation engine',
+        operationId: 'getGlobalLanguagePreservationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/products': {
+      get: {
+        summary: 'Global Language Preservation products',
+        operationId: 'listGlobalLanguagePreservationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/monitoring': {
+      get: {
+        summary: 'Global Language Preservation monitoring',
+        operationId: 'getGlobalLanguagePreservationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/routes': {
+      get: {
+        summary: 'Global Language Preservation routes',
+        operationId: 'listGlobalLanguagePreservationRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/records': {
+      get: {
+        summary: 'Global Language Preservation records',
+        operationId: 'listGlobalLanguagePreservationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/engine': {
+      get: {
+        summary: 'Universal Translation Grid engine',
+        operationId: 'getUniversalTranslationGridEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/products': {
+      get: {
+        summary: 'Universal Translation Grid products',
+        operationId: 'listUniversalTranslationGridProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/monitoring': {
+      get: {
+        summary: 'Universal Translation Grid monitoring',
+        operationId: 'getUniversalTranslationGridMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/routes': {
+      get: {
+        summary: 'Universal Translation Grid routes',
+        operationId: 'listUniversalTranslationGridRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/records': {
+      get: {
+        summary: 'Universal Translation Grid records',
+        operationId: 'listUniversalTranslationGridRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/engine': {
+      get: {
+        summary: 'Global Knowledge Network engine',
+        operationId: 'getGlobalKnowledgeNetworkEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/products': {
+      get: {
+        summary: 'Global Knowledge Network products',
+        operationId: 'listGlobalKnowledgeNetworkProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/monitoring': {
+      get: {
+        summary: 'Global Knowledge Network monitoring',
+        operationId: 'getGlobalKnowledgeNetworkMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/routes': {
+      get: {
+        summary: 'Global Knowledge Network routes',
+        operationId: 'listGlobalKnowledgeNetworkRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/records': {
+      get: {
+        summary: 'Global Knowledge Network records',
+        operationId: 'listGlobalKnowledgeNetworkRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/engine': {
+      get: {
+        summary: 'Global AI Federation engine',
+        operationId: 'getGlobalAiFederationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/products': {
+      get: {
+        summary: 'Global AI Federation products',
+        operationId: 'listGlobalAiFederationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/monitoring': {
+      get: {
+        summary: 'Global AI Federation monitoring',
+        operationId: 'getGlobalAiFederationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/routes': {
+      get: {
+        summary: 'Global AI Federation routes',
+        operationId: 'listGlobalAiFederationRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/records': {
+      get: {
+        summary: 'Global AI Federation records',
+        operationId: 'listGlobalAiFederationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/engine': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard engine',
+        operationId: 'getCivilizationIntelligenceDashboardEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/products': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard products',
+        operationId: 'listCivilizationIntelligenceDashboardProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/monitoring': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard monitoring',
+        operationId: 'getCivilizationIntelligenceDashboardMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/routes': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard routes',
+        operationId: 'listCivilizationIntelligenceDashboardRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/records': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard records',
+        operationId: 'listCivilizationIntelligenceDashboardRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

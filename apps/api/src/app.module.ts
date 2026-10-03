@@ -175,6 +175,15 @@ import { ResearchFundingPlatformModule } from './research-funding-platform/resea
 import { GlobalCommunityPlatformModule } from './global-community-platform/global-community-platform.module';
 import { AiInvestmentPlatformModule } from './ai-investment-platform/ai-investment-platform.module';
 import { EconomicIntelligenceModule } from './economic-intelligence/economic-intelligence.module';
+import { DigitalCivilizationModule } from './digital-civilization/digital-civilization.module';
+import { NationalAiPlatformModule } from './national-ai-platform/national-ai-platform.module';
+import { SmartCityPlatformModule } from './smart-city-platform/smart-city-platform.module';
+import { EnterpriseNationPlatformModule } from './enterprise-nation-platform/enterprise-nation-platform.module';
+import { GlobalLanguagePreservationModule } from './global-language-preservation/global-language-preservation.module';
+import { UniversalTranslationGridModule } from './universal-translation-grid/universal-translation-grid.module';
+import { GlobalKnowledgeNetworkModule } from './global-knowledge-network/global-knowledge-network.module';
+import { GlobalAiFederationModule } from './global-ai-federation/global-ai-federation.module';
+import { CivilizationIntelligenceDashboardModule } from './civilization-intelligence-dashboard/civilization-intelligence-dashboard.module';
 import { AiCertificationPlatformModule } from './ai-certification-platform/ai-certification-platform.module';
 import { AiComplianceFrameworkModule } from './ai-compliance-framework/ai-compliance-framework.module';
 import { ReferenceArchitecturesModule } from './reference-architectures/reference-architectures.module';
@@ -392,6 +401,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     GlobalCommunityPlatformModule,
     AiInvestmentPlatformModule,
     EconomicIntelligenceModule,
+    DigitalCivilizationModule,
+    NationalAiPlatformModule,
+    SmartCityPlatformModule,
+    EnterpriseNationPlatformModule,
+    GlobalLanguagePreservationModule,
+    UniversalTranslationGridModule,
+    GlobalKnowledgeNetworkModule,
+    GlobalAiFederationModule,
+    CivilizationIntelligenceDashboardModule,
     AiCertificationPlatformModule,
     AiComplianceFrameworkModule,
     ReferenceArchitecturesModule,

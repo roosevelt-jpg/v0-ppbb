@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-383 Done — AIE Production Audit; Volume 23 closed)
+Last updated: 2026-10-03 (VL-393 Done — DCIV Production Audit; Volume 24 closed — v2.0 phase roadmap complete)
 
 ---
 
@@ -413,6 +413,16 @@ Last updated: 2026-10-03 (VL-383 Done — AIE Production Audit; Volume 23 closed
 | VL-381 | AI Investment Platform (Phase 248) | Done | Dashboard only; `fundingPortalOs=false`; ADR-0284. |
 | VL-382 | Economic Intelligence (Phase 249) | Done | Exec/adoption/revenue dashboards; ADR-0285. |
 | VL-383 | AIE Production Audit (Phase 250) | Done | Audit pack + economy report; ADR-0286. Volume 23 closed. |
+| VL-384 | Digital Civilization Foundation (Phase 251) | Done | `/digital-civilization`; ADR-0287. `civilizationInfrastructureOs=false`. |
+| VL-385 | National AI Platform (Phase 252) | Done | Demo public-sector desks; court/police/military/citizen-ID production=false; ADR-0288. |
+| VL-386 | Smart City Platform (Phase 253) | Done | City integrations; `productionEmergencyDispatch=false`; ADR-0289. |
+| VL-387 | Enterprise Nation Platform (Phase 254) | Done | Bank/hospital/university/telecom verticals; ADR-0290. |
+| VL-388 | Global Language Preservation (Phase 255) | Done | Archives/museums; consent gates; ADR-0291. |
+| VL-389 | Universal Translation Grid (Phase 256) | Done | Multi-channel translation infra; ADR-0292. |
+| VL-390 | Global Knowledge Network (Phase 257) | Done | Uni/library/museum nodes; ADR-0293. |
+| VL-391 | Global AI Federation (Phase 258) | Done | Federated collab; security-review flag; ADR-0294. |
+| VL-392 | Civilization Intelligence Dashboard (Phase 259) | Done | Adoption/impact metrics; ADR-0295. |
+| VL-393 | DCIV Production Audit (Phase 260) | Done | Audit pack + civilization report; ADR-0296. Volume 24 closed (v2.0 phases complete). |
 
 ---
 
@@ -602,4 +612,6 @@ Last updated: 2026-10-03 (VL-383 Done — AIE Production Audit; Volume 23 closed
 | 2026-10-03 | VGAS ISO process maturity: document control + 17024-inspired scheme + recognition pathway; ADR-0276. `isoProcessMaturity=true`; isoIeeeW3cRecognition/thirdPartyAccreditation remain false. |
 | 2026-10-03 | VL-374-382 Done: AIE hubs (Phases 241-249); ADR-0277-0285. Marketplace software; investment dashboard only; no autonomous payouts. |
 | 2026-10-03 | VL-383 Done: AIE Production Audit (Phase 250); ADR-0286. Volume 23 closed. Ask for Volume 24 when ready. |
+| 2026-10-03 | VL-384-392 Done: DCIV hubs (Phases 251-259); ADR-0287-0295. Demo public-sector platforms; high-stakes production flags false. |
+| 2026-10-03 | VL-393 Done: DCIV Production Audit (Phase 260); ADR-0296. Volume 24 closed — v2.0 phase-broken roadmap complete (260 phases). AI Internet vision paragraph not packaged as phases. |
 
