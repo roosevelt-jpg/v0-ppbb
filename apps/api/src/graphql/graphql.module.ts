@@ -94,6 +94,15 @@ import { AgentOperatingSystemApplicationModule } from '../agent-operating-system
 import { AiMemoryOperatingSystemApplicationModule } from '../ai-memory-operating-system/application/ai-memory-operating-system-application.module';
 import { KnowledgeOperatingSystemApplicationModule } from '../knowledge-operating-system/application/knowledge-operating-system-application.module';
 import { PluginOperatingSystemApplicationModule } from '../plugin-operating-system/application/plugin-operating-system-application.module';
+import { EnterpriseEngineeringSystemApplicationModule } from '../enterprise-engineering-system/application/enterprise-engineering-system-application.module';
+import { EngineeringGovernanceApplicationModule } from '../engineering-governance/application/engineering-governance-application.module';
+import { ArchitectureGovernanceApplicationModule } from '../architecture-governance/application/architecture-governance-application.module';
+import { RepositoryStandardsApplicationModule } from '../repository-standards/application/repository-standards-application.module';
+import { EngineeringQualityPlatformApplicationModule } from '../engineering-quality-platform/application/engineering-quality-platform-application.module';
+import { AiEngineeringStandardsApplicationModule } from '../ai-engineering-standards/application/ai-engineering-standards-application.module';
+import { ApiEngineeringStandardsApplicationModule } from '../api-engineering-standards/application/api-engineering-standards-application.module';
+import { DatabaseEngineeringStandardsApplicationModule } from '../database-engineering-standards/application/database-engineering-standards-application.module';
+import { InfrastructureEngineeringStandardsApplicationModule } from '../infrastructure-engineering-standards/application/infrastructure-engineering-standards-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -258,6 +267,15 @@ import { AgentOperatingSystemGraphqlResolver } from './agent-operating-system.re
 import { AiMemoryOperatingSystemGraphqlResolver } from './ai-memory-operating-system.resolver';
 import { KnowledgeOperatingSystemGraphqlResolver } from './knowledge-operating-system.resolver';
 import { PluginOperatingSystemGraphqlResolver } from './plugin-operating-system.resolver';
+import { EnterpriseEngineeringSystemGraphqlResolver } from './enterprise-engineering-system.resolver';
+import { EngineeringGovernanceGraphqlResolver } from './engineering-governance.resolver';
+import { ArchitectureGovernanceGraphqlResolver } from './architecture-governance.resolver';
+import { RepositoryStandardsGraphqlResolver } from './repository-standards.resolver';
+import { EngineeringQualityPlatformGraphqlResolver } from './engineering-quality-platform.resolver';
+import { AiEngineeringStandardsGraphqlResolver } from './ai-engineering-standards.resolver';
+import { ApiEngineeringStandardsGraphqlResolver } from './api-engineering-standards.resolver';
+import { DatabaseEngineeringStandardsGraphqlResolver } from './database-engineering-standards.resolver';
+import { InfrastructureEngineeringStandardsGraphqlResolver } from './infrastructure-engineering-standards.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -442,6 +460,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiMemoryOperatingSystemApplicationModule,
     KnowledgeOperatingSystemApplicationModule,
     PluginOperatingSystemApplicationModule,
+    EnterpriseEngineeringSystemApplicationModule,
+    EngineeringGovernanceApplicationModule,
+    ArchitectureGovernanceApplicationModule,
+    RepositoryStandardsApplicationModule,
+    EngineeringQualityPlatformApplicationModule,
+    AiEngineeringStandardsApplicationModule,
+    ApiEngineeringStandardsApplicationModule,
+    DatabaseEngineeringStandardsApplicationModule,
+    InfrastructureEngineeringStandardsApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -614,6 +641,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiMemoryOperatingSystemGraphqlResolver,
     KnowledgeOperatingSystemGraphqlResolver,
     PluginOperatingSystemGraphqlResolver,
+    EnterpriseEngineeringSystemGraphqlResolver,
+    EngineeringGovernanceGraphqlResolver,
+    ArchitectureGovernanceGraphqlResolver,
+    RepositoryStandardsGraphqlResolver,
+    EngineeringQualityPlatformGraphqlResolver,
+    AiEngineeringStandardsGraphqlResolver,
+    ApiEngineeringStandardsGraphqlResolver,
+    DatabaseEngineeringStandardsGraphqlResolver,
+    InfrastructureEngineeringStandardsGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

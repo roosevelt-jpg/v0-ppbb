@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-343 Done — VAIOS Production Audit; Volume 19 closed)
+Last updated: 2026-10-03 (VL-353 Done — Enterprise Engineering System Production Audit; Volume 20 closed)
 
 ---
 
@@ -373,6 +373,16 @@ Last updated: 2026-10-03 (VL-343 Done — VAIOS Production Audit; Volume 19 clos
 | VL-341 | Knowledge Operating System (Phase 208) | Done | Façade over knowledge-runtime/fabric/cloud + AKG; ADR-0243. |
 | VL-342 | Plugin Operating System (Phase 209) | Done | Façade over plugin-runtime + marketplace; existing policy gates; ADR-0244. |
 | VL-343 | VAIOS Production Audit (Phase 210) | Done | Audit pack under `docs/vaios-audit/`; ADR-0245. Volume 19 closed. Enterprise Engineering System → past Volume 19. |
+| VL-344 | Enterprise Engineering System Foundation (Phase 211) | Done | `/enterprise-engineering-system` hub; ADR-0246. `architectureKnowledgeBaseOs=false`; `adrFactoryOs=false`. |
+| VL-345 | Engineering Governance (Phase 212) | Done | Councils + CAB/TSC; `humanSignOffRequired`; ADR-0247. |
+| VL-346 | Architecture Governance (Phase 213) | Done | ADR/RFC workflows point at `docs/adr`; `adrFactoryOs=false`; ADR-0248. |
+| VL-347 | Repository Standards (Phase 214) | Done | Monorepo/polyrepo/naming/branch/git standards; ADR-0249. |
+| VL-348 | Engineering Quality Platform (Phase 215) | Done | Quality catalog + dashboard snapshot; `sonarqubeOs=false`; ADR-0250. |
+| VL-349 | AI Engineering Standards (Phase 216) | Done | AI standards + retroactiveChecks Vol 11/12/17; ADR-0251. |
+| VL-350 | API Engineering Standards (Phase 217) | Done | REST/GraphQL/gRPC/SDK standards; ADR-0252. |
+| VL-351 | Database Engineering Standards (Phase 218) | Done | Postgres/Redis/ES/vector/KG standards; `databaseOs=false`; ADR-0253. |
+| VL-352 | Infrastructure Engineering Standards (Phase 219) | Done | IaC/deploy/GPU; FinOps+secrets honesty; `kubernetesOs=false`; ADR-0254. |
+| VL-353 | EES Production Audit (Phase 220) | Done | Audit pack under `docs/enterprise-engineering-system-audit/`; ADR-0255. Volume 20 closed. |
 
 ---
 
@@ -553,3 +563,5 @@ Last updated: 2026-10-03 (VL-343 Done — VAIOS Production Audit; Volume 19 clos
 | 2026-10-03 | VL-333 Done: Data Plane Cloud Production Audit (Phase 200) — evidence pack; ADR-0235. Volume 18 closed. Service Mesh / VAIOS deferred past Volume 18. |
 | 2026-10-03 | VL-334–342 Done: VAIOS hubs (Phases 201–209) — foundation through Plugin OS; ADR-0236–0244. Unifying orchestration over Kernel + Fabric + Data Plane; notLinux/notKubernetes. |
 | 2026-10-03 | VL-343 Done: VAIOS Production Audit (Phase 210) — evidence pack; ADR-0245. Volume 19 closed. Enterprise Engineering System deferred past Volume 19. |
+| 2026-10-03 | VL-344–352 Done: Enterprise Engineering System hubs (Phases 211–219) — foundation through Infrastructure Standards; ADR-0246–0254. Standards/governance for humans+Cursor; architectureKnowledgeBaseOs/adrFactoryOs=false. |
+| 2026-10-03 | VL-353 Done: EES Production Audit (Phase 220) — evidence pack; ADR-0255. Volume 20 closed. Architecture Knowledge Base / mass ADR factory deferred past Volume 20. |

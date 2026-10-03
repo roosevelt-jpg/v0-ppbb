@@ -5237,6 +5237,132 @@ export class VerbaLab {
     return this.requestJson('/v1/plugin-operating-system/engine', { method: 'GET' });
   }
 
+
+  async enterpriseEngineeringSystemProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/enterprise-engineering-system/products', { method: 'GET' });
+  }
+
+  async engineeringGovernanceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/engineering-governance/engine', { method: 'GET' });
+  }
+
+  async architectureGovernanceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/architecture-governance/engine', { method: 'GET' });
+  }
+
+  async repositoryStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/repository-standards/engine', { method: 'GET' });
+  }
+
+  async engineeringQualityPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/engineering-quality-platform/engine', { method: 'GET' });
+  }
+
+  async aiEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/ai-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async apiEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/api-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async databaseEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/database-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async infrastructureEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/infrastructure-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async aiEngineeringStandardsChecks(): Promise<{
+    product: string;
+    retroactiveChecks: Array<Record<string, unknown>>;
+    checkedAgainstStandards: boolean;
+    fakeComplianceCertification: boolean;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ai-engineering-standards/check/list', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

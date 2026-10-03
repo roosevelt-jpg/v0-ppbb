@@ -11941,6 +11941,455 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/enterprise-engineering-system/products': {
+      get: {
+        summary: 'EES products',
+        operationId: 'listEnterpriseEngineeringSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/engine': {
+      get: {
+        summary: 'EES engine alias',
+        operationId: 'getEnterpriseEngineeringSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/routing': {
+      get: {
+        summary: 'EES routing',
+        operationId: 'getEnterpriseEngineeringSystemRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/overview': {
+      get: {
+        summary: 'EES overview',
+        operationId: 'getEnterpriseEngineeringSystemOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/monitoring': {
+      get: {
+        summary: 'EES monitoring',
+        operationId: 'getEnterpriseEngineeringSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/engine': {
+      get: {
+        summary: 'Engineering Governance engine',
+        operationId: 'getEngineeringGovernanceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/products': {
+      get: {
+        summary: 'Engineering Governance products',
+        operationId: 'listEngineeringGovernanceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/monitoring': {
+      get: {
+        summary: 'Engineering Governance monitoring',
+        operationId: 'getEngineeringGovernanceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/routes': {
+      get: {
+        summary: 'Engineering Governance routes',
+        operationId: 'listEngineeringGovernanceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/route': {
+      get: {
+        summary: 'Route via Engineering Governance',
+        operationId: 'routeEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/execute': {
+      get: {
+        summary: 'Execute via Engineering Governance',
+        operationId: 'executeEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/query': {
+      get: {
+        summary: 'Query Engineering Governance',
+        operationId: 'queryEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/engine': {
+      get: {
+        summary: 'Architecture Governance engine',
+        operationId: 'getArchitectureGovernanceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/products': {
+      get: {
+        summary: 'Architecture Governance products',
+        operationId: 'listArchitectureGovernanceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/monitoring': {
+      get: {
+        summary: 'Architecture Governance monitoring',
+        operationId: 'getArchitectureGovernanceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/routes': {
+      get: {
+        summary: 'Architecture Governance routes',
+        operationId: 'listArchitectureGovernanceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/route': {
+      get: {
+        summary: 'Route via Architecture Governance',
+        operationId: 'routeArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/execute': {
+      get: {
+        summary: 'Execute via Architecture Governance',
+        operationId: 'executeArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/query': {
+      get: {
+        summary: 'Query Architecture Governance',
+        operationId: 'queryArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/adr-series': {
+      get: {
+        summary: 'ADR series note',
+        operationId: 'getArchitectureGovernanceAdrSeries',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/engine': {
+      get: {
+        summary: 'Repository Standards engine',
+        operationId: 'getRepositoryStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/products': {
+      get: {
+        summary: 'Repository Standards products',
+        operationId: 'listRepositoryStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/monitoring': {
+      get: {
+        summary: 'Repository Standards monitoring',
+        operationId: 'getRepositoryStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/routes': {
+      get: {
+        summary: 'Repository Standards routes',
+        operationId: 'listRepositoryStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/route': {
+      get: {
+        summary: 'Route via Repository Standards',
+        operationId: 'routeRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/execute': {
+      get: {
+        summary: 'Execute via Repository Standards',
+        operationId: 'executeRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/query': {
+      get: {
+        summary: 'Query Repository Standards',
+        operationId: 'queryRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/engine': {
+      get: {
+        summary: 'Engineering Quality Platform engine',
+        operationId: 'getEngineeringQualityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/products': {
+      get: {
+        summary: 'Engineering Quality Platform products',
+        operationId: 'listEngineeringQualityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/monitoring': {
+      get: {
+        summary: 'Engineering Quality Platform monitoring',
+        operationId: 'getEngineeringQualityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/routes': {
+      get: {
+        summary: 'Engineering Quality Platform routes',
+        operationId: 'listEngineeringQualityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/route': {
+      get: {
+        summary: 'Route via Engineering Quality Platform',
+        operationId: 'routeEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/execute': {
+      get: {
+        summary: 'Execute via Engineering Quality Platform',
+        operationId: 'executeEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/query': {
+      get: {
+        summary: 'Query Engineering Quality Platform',
+        operationId: 'queryEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/engine': {
+      get: {
+        summary: 'AI Engineering Standards engine',
+        operationId: 'getAiEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/products': {
+      get: {
+        summary: 'AI Engineering Standards products',
+        operationId: 'listAiEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/monitoring': {
+      get: {
+        summary: 'AI Engineering Standards monitoring',
+        operationId: 'getAiEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/routes': {
+      get: {
+        summary: 'AI Engineering Standards routes',
+        operationId: 'listAiEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/route': {
+      get: {
+        summary: 'Route via AI Engineering Standards',
+        operationId: 'routeAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via AI Engineering Standards',
+        operationId: 'executeAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/query': {
+      get: {
+        summary: 'Query AI Engineering Standards',
+        operationId: 'queryAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/checks': {
+      get: {
+        summary: 'AI engineering retroactive checks',
+        operationId: 'listAiEngineeringStandardsChecks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/check/list': {
+      get: {
+        summary: 'AI engineering check list',
+        operationId: 'listAiEngineeringStandardsCheckList',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/engine': {
+      get: {
+        summary: 'API Engineering Standards engine',
+        operationId: 'getApiEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/products': {
+      get: {
+        summary: 'API Engineering Standards products',
+        operationId: 'listApiEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/monitoring': {
+      get: {
+        summary: 'API Engineering Standards monitoring',
+        operationId: 'getApiEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/routes': {
+      get: {
+        summary: 'API Engineering Standards routes',
+        operationId: 'listApiEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/route': {
+      get: {
+        summary: 'Route via API Engineering Standards',
+        operationId: 'routeApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via API Engineering Standards',
+        operationId: 'executeApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/query': {
+      get: {
+        summary: 'Query API Engineering Standards',
+        operationId: 'queryApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/engine': {
+      get: {
+        summary: 'Database Engineering Standards engine',
+        operationId: 'getDatabaseEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/products': {
+      get: {
+        summary: 'Database Engineering Standards products',
+        operationId: 'listDatabaseEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/monitoring': {
+      get: {
+        summary: 'Database Engineering Standards monitoring',
+        operationId: 'getDatabaseEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/routes': {
+      get: {
+        summary: 'Database Engineering Standards routes',
+        operationId: 'listDatabaseEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/route': {
+      get: {
+        summary: 'Route via Database Engineering Standards',
+        operationId: 'routeDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via Database Engineering Standards',
+        operationId: 'executeDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/query': {
+      get: {
+        summary: 'Query Database Engineering Standards',
+        operationId: 'queryDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/engine': {
+      get: {
+        summary: 'Infrastructure Engineering Standards engine',
+        operationId: 'getInfrastructureEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/products': {
+      get: {
+        summary: 'Infrastructure Engineering Standards products',
+        operationId: 'listInfrastructureEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/monitoring': {
+      get: {
+        summary: 'Infrastructure Engineering Standards monitoring',
+        operationId: 'getInfrastructureEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/routes': {
+      get: {
+        summary: 'Infrastructure Engineering Standards routes',
+        operationId: 'listInfrastructureEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/route': {
+      get: {
+        summary: 'Route via Infrastructure Engineering Standards',
+        operationId: 'routeInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via Infrastructure Engineering Standards',
+        operationId: 'executeInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/query': {
+      get: {
+        summary: 'Query Infrastructure Engineering Standards',
+        operationId: 'queryInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

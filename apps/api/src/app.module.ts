@@ -146,6 +146,15 @@ import { AgentOperatingSystemModule } from './agent-operating-system/agent-opera
 import { AiMemoryOperatingSystemModule } from './ai-memory-operating-system/ai-memory-operating-system.module';
 import { KnowledgeOperatingSystemModule } from './knowledge-operating-system/knowledge-operating-system.module';
 import { PluginOperatingSystemModule } from './plugin-operating-system/plugin-operating-system.module';
+import { EnterpriseEngineeringSystemModule } from './enterprise-engineering-system/enterprise-engineering-system.module';
+import { EngineeringGovernanceModule } from './engineering-governance/engineering-governance.module';
+import { ArchitectureGovernanceModule } from './architecture-governance/architecture-governance.module';
+import { RepositoryStandardsModule } from './repository-standards/repository-standards.module';
+import { EngineeringQualityPlatformModule } from './engineering-quality-platform/engineering-quality-platform.module';
+import { AiEngineeringStandardsModule } from './ai-engineering-standards/ai-engineering-standards.module';
+import { ApiEngineeringStandardsModule } from './api-engineering-standards/api-engineering-standards.module';
+import { DatabaseEngineeringStandardsModule } from './database-engineering-standards/database-engineering-standards.module';
+import { InfrastructureEngineeringStandardsModule } from './infrastructure-engineering-standards/infrastructure-engineering-standards.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -327,6 +336,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiMemoryOperatingSystemModule,
     KnowledgeOperatingSystemModule,
     PluginOperatingSystemModule,
+    EnterpriseEngineeringSystemModule,
+    EngineeringGovernanceModule,
+    ArchitectureGovernanceModule,
+    RepositoryStandardsModule,
+    EngineeringQualityPlatformModule,
+    AiEngineeringStandardsModule,
+    ApiEngineeringStandardsModule,
+    DatabaseEngineeringStandardsModule,
+    InfrastructureEngineeringStandardsModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

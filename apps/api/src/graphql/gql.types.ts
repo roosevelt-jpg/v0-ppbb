@@ -5678,3 +5678,200 @@ export class GqlPluginOperatingSystemEngine {
   @Field(() => Boolean)
   enterpriseEngineeringSystemOs!: boolean;
 }
+
+@ObjectType()
+export class GqlEnterpriseEngineeringSystemProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlEngineeringGovernanceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlArchitectureGovernanceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRepositoryStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEngineeringQualityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlApiEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlDatabaseEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlInfrastructureEngineeringStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  engineeringOsForHumansAndCursor!: boolean;
+
+  @Field(() => Boolean)
+  customerFacingProductCloud!: boolean;
+
+  @Field(() => Boolean)
+  architectureKnowledgeBaseOs!: boolean;
+
+  @Field(() => Boolean)
+  adrFactoryOs!: boolean;
+}

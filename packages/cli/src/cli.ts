@@ -125,6 +125,16 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab enterprise-engineering-system-products
+  verbalab engineering-governance-engine
+  verbalab architecture-governance-engine
+  verbalab repository-standards-engine
+  verbalab engineering-quality-platform-engine
+  verbalab ai-engineering-standards-engine
+  verbalab api-engineering-standards-engine
+  verbalab database-engineering-standards-engine
+  verbalab infrastructure-engineering-standards-engine
+  verbalab ai-engineering-standards-checks
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -929,6 +939,56 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'enterprise-engineering-system-products') {
+    console.log(JSON.stringify(await vl.enterpriseEngineeringSystemProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'engineering-governance-engine') {
+    console.log(JSON.stringify(await vl.engineeringGovernanceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'architecture-governance-engine') {
+    console.log(JSON.stringify(await vl.architectureGovernanceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'repository-standards-engine') {
+    console.log(JSON.stringify(await vl.repositoryStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'engineering-quality-platform-engine') {
+    console.log(JSON.stringify(await vl.engineeringQualityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.aiEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'api-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.apiEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'database-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.databaseEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'infrastructure-engineering-standards-engine') {
+    console.log(JSON.stringify(await vl.infrastructureEngineeringStandardsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-engineering-standards-checks') {
+    console.log(JSON.stringify(await vl.aiEngineeringStandardsChecks(), null, 2));
+    return;
+  }
+
 
 
 
