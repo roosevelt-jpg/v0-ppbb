@@ -47,6 +47,15 @@ import { ContinuousEvaluationApplicationModule } from '../continuous-evaluation/
 import { TrainingPipelineApplicationModule } from '../training-pipeline/application/training-pipeline-application.module';
 import { DatasetPipelineApplicationModule } from '../dataset-pipeline/application/dataset-pipeline-application.module';
 import { MlopsLlmopsCloudApplicationModule } from '../mlops-llmops-cloud/application/mlops-llmops-cloud-application.module';
+import { TrustCloudApplicationModule } from '../trust-cloud/application/trust-cloud-application.module';
+import { AiSafetyPlatformApplicationModule } from '../ai-safety-platform/application/ai-safety-platform-application.module';
+import { AiGovernancePlatformApplicationModule } from '../ai-governance-platform/application/ai-governance-platform-application.module';
+import { ExplainabilityPlatformApplicationModule } from '../explainability-platform/application/explainability-platform-application.module';
+import { PrivacyPlatformApplicationModule } from '../privacy-platform/application/privacy-platform-application.module';
+import { CompliancePlatformApplicationModule } from '../compliance-platform/application/compliance-platform-application.module';
+import { RiskIntelligenceApplicationModule } from '../risk-intelligence/application/risk-intelligence-application.module';
+import { IdentityFederationApplicationModule } from '../identity-federation/application/identity-federation-application.module';
+import { TrustAnalyticsApplicationModule } from '../trust-analytics/application/trust-analytics-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -164,6 +173,15 @@ import { ContinuousEvaluationGraphqlResolver } from './continuous-evaluation.res
 import { TrainingPipelineGraphqlResolver } from './training-pipeline.resolver';
 import { DatasetPipelineGraphqlResolver } from './dataset-pipeline.resolver';
 import { MlopsLlmopsCloudGraphqlResolver } from './mlops-llmops-cloud.resolver';
+import { TrustCloudGraphqlResolver } from './trust-cloud.resolver';
+import { AiSafetyPlatformGraphqlResolver } from './ai-safety-platform.resolver';
+import { AiGovernancePlatformGraphqlResolver } from './ai-governance-platform.resolver';
+import { ExplainabilityPlatformGraphqlResolver } from './explainability-platform.resolver';
+import { PrivacyPlatformGraphqlResolver } from './privacy-platform.resolver';
+import { CompliancePlatformGraphqlResolver } from './compliance-platform.resolver';
+import { RiskIntelligenceGraphqlResolver } from './risk-intelligence.resolver';
+import { IdentityFederationGraphqlResolver } from './identity-federation.resolver';
+import { TrustAnalyticsGraphqlResolver } from './trust-analytics.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -301,6 +319,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     TrainingPipelineApplicationModule,
     DatasetPipelineApplicationModule,
     MlopsLlmopsCloudApplicationModule,
+    TrustCloudApplicationModule,
+    AiSafetyPlatformApplicationModule,
+    AiGovernancePlatformApplicationModule,
+    ExplainabilityPlatformApplicationModule,
+    PrivacyPlatformApplicationModule,
+    CompliancePlatformApplicationModule,
+    RiskIntelligenceApplicationModule,
+    IdentityFederationApplicationModule,
+    TrustAnalyticsApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -426,6 +453,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     TrainingPipelineGraphqlResolver,
     DatasetPipelineGraphqlResolver,
     MlopsLlmopsCloudGraphqlResolver,
+    TrustCloudGraphqlResolver,
+    AiSafetyPlatformGraphqlResolver,
+    AiGovernancePlatformGraphqlResolver,
+    ExplainabilityPlatformGraphqlResolver,
+    PrivacyPlatformGraphqlResolver,
+    CompliancePlatformGraphqlResolver,
+    RiskIntelligenceGraphqlResolver,
+    IdentityFederationGraphqlResolver,
+    TrustAnalyticsGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

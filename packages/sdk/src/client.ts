@@ -2116,6 +2116,105 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-operations-dashboard/engine', { method: 'GET' });
   }
 
+  async trustCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/trust-cloud/products', { method: 'GET' });
+  }
+
+  async aiSafetyPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-safety-platform/engine', { method: 'GET' });
+  }
+
+  async aiGovernancePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-governance-platform/engine', { method: 'GET' });
+  }
+
+  async explainabilityPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/explainability-platform/engine', { method: 'GET' });
+  }
+
+  async privacyPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/privacy-platform/engine', { method: 'GET' });
+  }
+
+  async compliancePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/compliance-platform/engine', { method: 'GET' });
+  }
+
+  async riskIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/risk-intelligence/engine', { method: 'GET' });
+  }
+
+  async identityFederationEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/identity-federation/engine', { method: 'GET' });
+  }
+
+  async trustAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/trust-analytics/engine', { method: 'GET' });
+  }
+
   async researchCloudProducts(): Promise<{
     product: string;
     products: Array<{

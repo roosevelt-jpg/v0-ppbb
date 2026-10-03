@@ -78,6 +78,15 @@ function usage(): never {
   verbalab ai-drift-detection-engine
   verbalab continuous-learning-engine
   verbalab ai-operations-dashboard-engine
+  verbalab trust-cloud-products
+  verbalab ai-safety-platform-engine
+  verbalab ai-governance-platform-engine
+  verbalab explainability-platform-engine
+  verbalab privacy-platform-engine
+  verbalab compliance-platform-engine
+  verbalab risk-intelligence-engine
+  verbalab identity-federation-engine
+  verbalab trust-analytics-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -652,6 +661,51 @@ async function main() {
     console.log(JSON.stringify(await vl.aiOperationsDashboardEngine(), null, 2));
     return;
   }
+  if (command === 'trust-cloud-products') {
+    console.log(JSON.stringify(await vl.trustCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-safety-platform-engine') {
+    console.log(JSON.stringify(await vl.aiSafetyPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-governance-platform-engine') {
+    console.log(JSON.stringify(await vl.aiGovernancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'explainability-platform-engine') {
+    console.log(JSON.stringify(await vl.explainabilityPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'privacy-platform-engine') {
+    console.log(JSON.stringify(await vl.privacyPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'compliance-platform-engine') {
+    console.log(JSON.stringify(await vl.compliancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'risk-intelligence-engine') {
+    console.log(JSON.stringify(await vl.riskIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'identity-federation-engine') {
+    console.log(JSON.stringify(await vl.identityFederationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'trust-analytics-engine') {
+    console.log(JSON.stringify(await vl.trustAnalyticsEngine(), null, 2));
+    return;
+  }
+
 
   if (command === 'experiment-platform-engine') {
     console.log(JSON.stringify(await vl.experimentPlatformEngine(), null, 2));

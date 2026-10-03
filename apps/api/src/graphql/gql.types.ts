@@ -4802,3 +4802,128 @@ export class GqlAiOperationsDashboardEngine {
   trustCloudOs!: boolean;
 }
 
+
+@ObjectType()
+export class GqlTrustCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAiSafetyPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyRuntimeIntegrated!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiGovernancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  humanSignOffRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlExplainabilityPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  shapOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPrivacyPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlCompliancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  complianceToolingNotCertification!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRiskIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  grcSuiteOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlIdentityFederationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  oktaOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTrustAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  siemOs!: boolean;
+}

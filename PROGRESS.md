@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-291 Done — MLOps & LLMOps Cloud Production Audit; Volume 14 closed)
+Last updated: 2026-10-03 (VL-301 Done — Trust Cloud Production Audit; Volume 15 closed)
 
 ---
 
@@ -321,6 +321,16 @@ Last updated: 2026-10-03 (VL-291 Done — MLOps & LLMOps Cloud Production Audit;
 | VL-289 | Continuous Learning (Phase 156) | Done | `/continuous-learning`; ADR-0191. Never auto-promote; human+drift+eval+vetted feedback. |
 | VL-290 | AI Operations Dashboard (Phase 157) | Done | `/ai-operations-dashboard` sibling aggregation; ADR-0192. |
 | VL-291 | MLOps & LLMOps Cloud Production Audit (Phase 158) | Done | Audit pack under `docs/mlops-llmops-cloud-audit/`; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
+| VL-292 | Trust Cloud Foundation (Phase 159) | Done | `/trust-cloud` hub; ADR-0194. Enforcement layer. `platformEngineeringOs=false`. |
+| VL-293 | AI Safety Platform (Phase 160) | Done | Safety detections + check/evaluate; `policyRuntimeIntegrated=true`. ADR-0195. |
+| VL-294 | AI Governance Platform (Phase 161) | Done | Human approve/reject workflow; `humanSignOffRequired=true`. ADR-0196. |
+| VL-295 | Explainability Platform (Phase 162) | Done | Confidence/evidence/attribution/traces; `shapOs=false`. ADR-0197. |
+| VL-296 | Privacy Platform (Phase 163) | Done | PII/PHI + TK consent enforcement; `traditionalKnowledgeConsentRequired=true`. ADR-0198. |
+| VL-297 | Compliance Platform (Phase 164) | Done | Control mapping; tooling not certification. ADR-0199. |
+| VL-298 | Risk Intelligence (Phase 165) | Done | Risk scoring seed + analytics; `grcSuiteOs=false`. ADR-0200. |
+| VL-299 | Identity Federation (Phase 166) | Done | Federation readiness over Clerk; `oktaOs=false`. ADR-0201. |
+| VL-300 | Trust Analytics (Phase 167) | Done | Aggregates sibling trust hubs; `siemOs=false`. ADR-0202. |
+| VL-301 | Trust Cloud Production Audit (Phase 168) | Done | Audit pack under `docs/trust-cloud-audit/`; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
 
 ---
 
@@ -491,3 +501,5 @@ Last updated: 2026-10-03 (VL-291 Done — MLOps & LLMOps Cloud Production Audit;
 | 2026-10-03 | VL-280 Done: Research Cloud Production Audit (Phase 147) — evidence pack; ADR-0182. Volume 13 closed. AI Sovereignty / MLOps → Volume 14+. |
 | 2026-10-03 | VL-281–290 Done: MLOps & LLMOps Cloud hubs (Phases 148–157) — foundation through AI ops dashboard; ADR-0183–0192. Promote gates + AgentOps policy visibility honesty. |
 | 2026-10-03 | VL-291 Done: MLOps & LLMOps Cloud Production Audit (Phase 158) — evidence pack; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
+| 2026-10-03 | VL-292–300 Done: Trust Cloud hubs (Phases 159–167) — foundation through trust analytics; ADR-0194–0202. Safety↔Policy, Privacy TK consent, Governance human sign-off, Compliance honesty. |
+| 2026-10-03 | VL-301 Done: Trust Cloud Production Audit (Phase 168) — evidence pack; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |

@@ -9948,6 +9948,385 @@ export const openApiDocument = {
         responses: { '200': { description: 'Localized content + serialized file' } },
       },
     },
+    '/v1/trust-cloud/products': {
+      get: {
+        summary: 'Trust Cloud products',
+        operationId: 'listTrustCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/engine': {
+      get: {
+        summary: 'Trust Cloud engine alias',
+        operationId: 'getTrustCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/routing': {
+      get: {
+        summary: 'Trust Cloud routing',
+        operationId: 'getTrustCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/overview': {
+      get: {
+        summary: 'Trust Cloud overview',
+        operationId: 'getTrustCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/monitoring': {
+      get: {
+        summary: 'Trust Cloud monitoring',
+        operationId: 'getTrustCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/engine': {
+      get: {
+        summary: 'AI Safety Platform engine',
+        operationId: 'getAiSafetyPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/products': {
+      get: {
+        summary: 'AI Safety Platform products',
+        operationId: 'listAiSafetyPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/monitoring': {
+      get: {
+        summary: 'AI Safety Platform monitoring',
+        operationId: 'getAiSafetyPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/detections': {
+      get: {
+        summary: 'AI Safety Platform detections',
+        operationId: 'listAiSafetyPlatformDetections',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/query': {
+      get: {
+        summary: 'Query AI Safety Platform',
+        operationId: 'queryAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/check': {
+      get: {
+        summary: 'Check AI Safety Platform',
+        operationId: 'checkAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/evaluate': {
+      get: {
+        summary: 'Evaluate AI Safety Platform',
+        operationId: 'evaluateAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/engine': {
+      get: {
+        summary: 'AI Governance Platform engine',
+        operationId: 'getAiGovernancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/products': {
+      get: {
+        summary: 'AI Governance Platform products',
+        operationId: 'listAiGovernancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/monitoring': {
+      get: {
+        summary: 'AI Governance Platform monitoring',
+        operationId: 'getAiGovernancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals': {
+      get: {
+        summary: 'AI Governance Platform approvals',
+        operationId: 'listAiGovernancePlatformApprovals',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/query': {
+      get: {
+        summary: 'Query AI Governance Platform',
+        operationId: 'queryAiGovernancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/check': {
+      get: {
+        summary: 'Check AI Governance Platform',
+        operationId: 'checkAiGovernancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals/{id}/approve': {
+      post: {
+        summary: 'Approve governance approval',
+        operationId: 'approveAiGovernancePlatformApproval',
+        responses: { '200': { description: 'Updated approval' }, '201': { description: 'Updated approval' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals/{id}/reject': {
+      post: {
+        summary: 'Reject governance approval',
+        operationId: 'rejectAiGovernancePlatformApproval',
+        responses: { '200': { description: 'Updated approval' }, '201': { description: 'Updated approval' } },
+      },
+    },
+    '/v1/ai-governance-platform/status/{id}': {
+      get: {
+        summary: 'Governance approval status',
+        operationId: 'getAiGovernancePlatformStatus',
+        responses: { '200': { description: 'Approval status' } },
+      },
+    },
+    '/v1/explainability-platform/engine': {
+      get: {
+        summary: 'Explainability Platform engine',
+        operationId: 'getExplainabilityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/products': {
+      get: {
+        summary: 'Explainability Platform products',
+        operationId: 'listExplainabilityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/monitoring': {
+      get: {
+        summary: 'Explainability Platform monitoring',
+        operationId: 'getExplainabilityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/explanations': {
+      get: {
+        summary: 'List Explainability Platform rows',
+        operationId: 'listExplainabilityPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/query': {
+      get: {
+        summary: 'Query Explainability Platform',
+        operationId: 'queryExplainabilityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/engine': {
+      get: {
+        summary: 'Privacy Platform engine',
+        operationId: 'getPrivacyPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/products': {
+      get: {
+        summary: 'Privacy Platform products',
+        operationId: 'listPrivacyPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/monitoring': {
+      get: {
+        summary: 'Privacy Platform monitoring',
+        operationId: 'getPrivacyPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/assets': {
+      get: {
+        summary: 'Privacy Platform assets',
+        operationId: 'listPrivacyPlatformAssets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/query': {
+      get: {
+        summary: 'Query Privacy Platform',
+        operationId: 'queryPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/check': {
+      get: {
+        summary: 'Check Privacy Platform',
+        operationId: 'checkPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/consent-check': {
+      get: {
+        summary: 'Consent check Privacy Platform',
+        operationId: 'consentCheckPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/release': {
+      get: {
+        summary: 'Release Privacy Platform',
+        operationId: 'releasePrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/engine': {
+      get: {
+        summary: 'Compliance Platform engine',
+        operationId: 'getCompliancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/products': {
+      get: {
+        summary: 'Compliance Platform products',
+        operationId: 'listCompliancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/monitoring': {
+      get: {
+        summary: 'Compliance Platform monitoring',
+        operationId: 'getCompliancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/controls': {
+      get: {
+        summary: 'List Compliance Platform rows',
+        operationId: 'listCompliancePlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/query': {
+      get: {
+        summary: 'Query Compliance Platform',
+        operationId: 'queryCompliancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/engine': {
+      get: {
+        summary: 'Risk Intelligence engine',
+        operationId: 'getRiskIntelligenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/products': {
+      get: {
+        summary: 'Risk Intelligence products',
+        operationId: 'listRiskIntelligenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/monitoring': {
+      get: {
+        summary: 'Risk Intelligence monitoring',
+        operationId: 'getRiskIntelligenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/scores': {
+      get: {
+        summary: 'List Risk Intelligence rows',
+        operationId: 'listRiskIntelligenceRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/query': {
+      get: {
+        summary: 'Query Risk Intelligence',
+        operationId: 'queryRiskIntelligence',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/engine': {
+      get: {
+        summary: 'Identity Federation engine',
+        operationId: 'getIdentityFederationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/products': {
+      get: {
+        summary: 'Identity Federation products',
+        operationId: 'listIdentityFederationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/monitoring': {
+      get: {
+        summary: 'Identity Federation monitoring',
+        operationId: 'getIdentityFederationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/federation': {
+      get: {
+        summary: 'List Identity Federation rows',
+        operationId: 'listIdentityFederationRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/query': {
+      get: {
+        summary: 'Query Identity Federation',
+        operationId: 'queryIdentityFederation',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/engine': {
+      get: {
+        summary: 'Trust Analytics engine',
+        operationId: 'getTrustAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/products': {
+      get: {
+        summary: 'Trust Analytics products',
+        operationId: 'listTrustAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/monitoring': {
+      get: {
+        summary: 'Trust Analytics monitoring',
+        operationId: 'getTrustAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/snapshot': {
+      get: {
+        summary: 'List Trust Analytics rows',
+        operationId: 'listTrustAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/query': {
+      get: {
+        summary: 'Query Trust Analytics',
+        operationId: 'queryTrustAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

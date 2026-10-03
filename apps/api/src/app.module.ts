@@ -99,6 +99,15 @@ import { ContinuousEvaluationModule } from './continuous-evaluation/continuous-e
 import { TrainingPipelineModule } from './training-pipeline/training-pipeline.module';
 import { DatasetPipelineModule } from './dataset-pipeline/dataset-pipeline.module';
 import { MlopsLlmopsCloudModule } from './mlops-llmops-cloud/mlops-llmops-cloud.module';
+import { TrustCloudModule } from './trust-cloud/trust-cloud.module';
+import { AiSafetyPlatformModule } from './ai-safety-platform/ai-safety-platform.module';
+import { AiGovernancePlatformModule } from './ai-governance-platform/ai-governance-platform.module';
+import { ExplainabilityPlatformModule } from './explainability-platform/explainability-platform.module';
+import { PrivacyPlatformModule } from './privacy-platform/privacy-platform.module';
+import { CompliancePlatformModule } from './compliance-platform/compliance-platform.module';
+import { RiskIntelligenceModule } from './risk-intelligence/risk-intelligence.module';
+import { IdentityFederationModule } from './identity-federation/identity-federation.module';
+import { TrustAnalyticsModule } from './trust-analytics/trust-analytics.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -233,6 +242,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     TrainingPipelineModule,
     DatasetPipelineModule,
     MlopsLlmopsCloudModule,
+    TrustCloudModule,
+    AiSafetyPlatformModule,
+    AiGovernancePlatformModule,
+    ExplainabilityPlatformModule,
+    PrivacyPlatformModule,
+    CompliancePlatformModule,
+    RiskIntelligenceModule,
+    IdentityFederationModule,
+    TrustAnalyticsModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,
