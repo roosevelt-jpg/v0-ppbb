@@ -362,3 +362,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-203 Done: Knowledge Cloud Production Audit (Phase 70) — checklist/tests/reports; ADR-0114. Volume closed. |
 | 2026-10-03 | VL-204 Done: Inference Cloud Foundation (Phase 71) — hub/catalog/overview; ADR-0115. Extends AI Gateway; no GPU hyperscaler. Spend-safety notes for GPU/Cost phases. |
 | 2026-10-03 | VL-205 Done: GPU Platform (Phase 72) — sandbox allocations + hard ceilings; ADR-0116. No cloud GPU APIs; open-ended autoscale forbidden. |
+| 2026-10-03 | VL-206 Done: Model Serving (Phase 73) — Gateway/registry hub + sandbox canary/blue-green/rollback; ADR-0117. Not vLLM/KServe OS. |
