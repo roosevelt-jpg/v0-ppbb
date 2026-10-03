@@ -14,6 +14,7 @@ function usage(): never {
   verbalab icu-validate --message <icu>
   verbalab languages
   verbalab speech-products
+  verbalab voice-products
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -63,6 +64,11 @@ async function main() {
 
   if (command === 'speech-products') {
     console.log(JSON.stringify(await vl.speechProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-products') {
+    console.log(JSON.stringify(await vl.voiceProducts(), null, 2));
     return;
   }
 

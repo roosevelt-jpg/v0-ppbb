@@ -10,6 +10,7 @@ const links = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/language', label: 'Language' },
   { href: '/speech', label: 'Speech' },
+  { href: '/voice-cloud', label: 'Voice' },
   { href: '/speech-recognition', label: 'STT Engine' },
   { href: '/speaker-intelligence', label: 'Speakers' },
   { href: '/accent-intelligence', label: 'Accent AI' },

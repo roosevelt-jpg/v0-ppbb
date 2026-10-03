@@ -29,24 +29,24 @@ Every VerbaLab product cloud **shall** organize work and docs against these **12
 
 ### Mapping today
 
-| Layer | Language Cloud | Speech Cloud |
-| --- | --- | --- |
-| Foundation | VL-130 `/language` | VL-150 `/speech` |
-| Core Engine | VL-140 Translate | VL-151 Recognition |
-| AI Models | Google/OpenAI MT (+ optional LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs clones |
-| Intelligence | Dialect/Accent/Grammar/Style/LI/TM | Speaker/Accent/Emotion/Audio/Pronunciation/Wake/Call |
-| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL |
-| SDK / CLI | `@verbalab/sdk` / CLI | same packages, speech methods |
-| Dashboard | `/language`, product consoles | `/speech`, product consoles |
-| Analytics | VL-146 `/v1/analytics` | VL-159 `/v1/speech-analytics` |
-| Billing | shared STT/TTS/translate metering | shared STT/TTS metering |
-| Security / Monitoring | shared | shared |
-| Production Audit | VL-147 | VL-160 |
+| Layer | Language Cloud | Speech Cloud | Voice Cloud |
+| --- | --- | --- | --- |
+| Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` |
+| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS *(scheduled)*; today VL-042/121 |
+| AI Models | Google/OpenAI MT (+ optional LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs clones | OpenAI/own TTS, ElevenLabs clones |
+| Intelligence | Dialect/Accent/Grammar/Style/LI/TM | Speaker/Accent/Emotion/Audio/Pronunciation/Wake/Call | Emotion TTS / biometrics / enhance *(later phases)* |
+| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/voice-cloud*` + GraphQL |
+| SDK / CLI | `@verbalab/sdk` / CLI | same packages, speech methods | same packages, `voiceProducts` |
+| Dashboard | `/language`, product consoles | `/speech`, product consoles | `/voice-cloud`, `/audio` |
+| Analytics | VL-146 `/v1/analytics` | VL-159 `/v1/speech-analytics` | Phase 35 scheduled |
+| Billing | shared STT/TTS/translate metering | shared STT/TTS metering | shared TTS metering |
+| Security / Monitoring | shared | shared | shared + clone consent/watermark |
+| Production Audit | VL-147 | VL-160 | Phase 36 scheduled |
 
 ### Rules
 
 - **Extend shared platform** (Identity, Gateway, Billing, Observability, Deploy). Do not regenerate per cloud.  
-- **Do not** create Voice/Vision/… clouds until scheduled on ROADMAP with executable phases.  
+- **Do not** create Vision/Media/… clouds until scheduled on ROADMAP with executable phases. Voice Cloud is scheduled as VL-170+.  
 - Layers may be **partial** with honest deferred notes — empty stubs are forbidden.  
 - Living docs: `ARCHITECTURE.md` + this ADR.
 

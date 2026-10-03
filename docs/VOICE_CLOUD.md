@@ -1,0 +1,73 @@
+# VerbaLab Voice Cloud
+
+**Status:** Foundation shipped (VL-170 / library Phase 27)  
+**Rule:** Parent hub for voice synthesis products. Extend existing audio / voice-clone / studio modules. Do not regenerate Speech Cloud, Language Cloud, Identity, or AI Gateway. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080).
+
+---
+
+## Library term → VerbaLab
+
+| Library ask | VerbaLab reality |
+| --- | --- |
+| Voice Cloud Foundation | **VL-170** — `/voice-cloud` + product catalog / overview |
+| Neural TTS | **VL-042 / VL-121** — `POST /v1/audio/speech`, `GET /v1/audio/voices` |
+| Streaming / Batch TTS productization | **Deferred** — Phase 28 (VL-171) |
+| Voice Cloning / Instant Cloning | **Partial** — **VL-064** ElevenLabs + consent + review + watermark |
+| Professional Voice Studio | **VL-120** — `/audio` African studio UX |
+| Emotion Voice | **Deferred** — Phase 30 (VL-173). VL-154 is speech emotion *detection*, not synthesis |
+| Voice Conversion | **Deferred** |
+| Voice Enhancement | **Partial** — Audio Intelligence enhance (VL-155); Phase 32 expands |
+| Voice Restoration / Audio Mastering | **Deferred** — Phase 32 |
+| Voice Biometrics / Authentication | **Partial** — Speaker Intelligence verify/identify (VL-152); NIST/anti-spoof Phase 33 |
+| Voice Profiles | **Partial** — speaker profiles (VL-152) |
+| Voice Marketplace | **Deferred** — Phase 34 (existing Marketplace ≠ voice SKUs) |
+| Voice Analytics | **Deferred** — Phase 35 |
+| Production Audit | Phase 36 (VL-179) |
+| GraphQL / CQRS | Bounded Voice Cloud slice (products query + catalog port) |
+| Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
+
+---
+
+## Surfaces
+
+| Surface | Path |
+| --- | --- |
+| Console hub | `/voice-cloud` |
+| REST catalog | `GET /v1/voice-cloud/products` (public) |
+| REST overview | `GET /v1/voice-cloud/overview` (Clerk session) |
+| GraphQL | `voiceProducts` |
+| OpenAPI | `/v1/openapi.json` |
+| SDK | `voiceProducts()` on `@verbalab/sdk` |
+| CLI | `verbalab voice-products` |
+| Docs | this file + ADR-0081 |
+
+---
+
+## Trust / safety (cloning)
+
+Voice cloning already wires Identity/Trust foundations (VL-064 / ADR-0042):
+
+- Explicit consent attestation before clone enrollment  
+- Abuse review (`pending_review` → approve/reject)  
+- Watermark header required when speaking via `clone:{id}`  
+- Audit events on clone create/review/disable  
+
+Later Phase 29 must **extend** these controls, not bypass them.
+
+---
+
+## Architecture honesty
+
+Voice Cloud is a **bounded enterprise voice API hub** in the Nest modular monolith:
+
+- DDD / hexagonal / CQRS apply to the **Voice Cloud application slice** (catalog ports + GraphQL queries) — not a greenfield rewrite of `AudioModule` / `VoiceClonesModule`.
+- Event-driven = existing audit + jobs only.
+- Streaming TTS product surface = deferred (Phase 28).
+- Monitoring / billing = shared observability + TTS character metering + Stripe entitlements.
+- Infra = Docker + Fly + GitHub Actions + optional Terraform/EKS (shared).
+
+Voice Cloud is **not** ElevenLabs + Resemble + Nuance + Amazon Polly + Adobe Podcast + Clearview biometrics combined.
+
+Cloud blueprint: [`CLOUD_BLUEPRINT.md`](./CLOUD_BLUEPRINT.md) (ADR-0080). ADR: [`adr/0081-voice-cloud-foundation.md`](./adr/0081-voice-cloud-foundation.md).
+
+Library phase pack: [`roadmap/volume3-voice-cloud/`](./roadmap/volume3-voice-cloud/).

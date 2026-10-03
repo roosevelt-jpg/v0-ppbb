@@ -1033,6 +1033,21 @@ export class VerbaLab {
     return this.requestJson('/v1/speech/products', { method: 'GET' });
   }
 
+  async voiceProducts(): Promise<{
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/voice-cloud/products', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

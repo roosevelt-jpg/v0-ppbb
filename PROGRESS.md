@@ -199,6 +199,7 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | VL-158 | Call Intelligence (Phase 24) | Done | `/v1/call-intelligence` calls/analyze/report; ADR-0077. Heuristic QA/compliance. Voice FAQ separate. |
 | VL-159 | Speech Analytics (Phase 25) | Done | `/v1/speech-analytics` usage/overview/report; ADR-0078. Accuracy proxies; WER lab deferred. |
 | VL-160 | Speech Cloud Production Audit (Phase 26) | Done | Audit gate + reports under `docs/speech-cloud-audit/`; ADR-0079. Blueprint ADR-0080. Rejects commercial speech-OS parity. |
+| VL-170 | Voice Cloud Foundation (Phase 27) | Done | `/voice-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0081. Maps onto VL-042/064/120/121; emotion/marketplace deferred. |
 
 ---
 
@@ -282,3 +283,4 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | 2026-09-07 | VL-158 Done: Call Intelligence (Phase 24) — ingest/analyze/report; ADR-0077. Heuristic coaching/QA; Voice FAQ separate. |
 | 2026-09-07 | VL-159 Done: Speech Analytics (Phase 25) — usage/languages/costs/accuracy proxies/report; ADR-0078. WER lab deferred. |
 | 2026-09-07 | VL-160 Done: Speech Cloud Production Audit — checklist/tests/reports; ADR-0079. Cloud Blueprint ADR-0080. Volume closed. |
+| 2026-10-03 | VL-170 Done: Voice Cloud Foundation (Phase 27) — `/voice-cloud` hub + catalog/overview + CQRS/GraphQL slice; ADR-0081. Extends TTS/clones/studio; Volume 3 started. |

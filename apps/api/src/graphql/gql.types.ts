@@ -319,6 +319,27 @@ export class GqlSpeechProduct {
 }
 
 @ObjectType()
+export class GqlVoiceProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

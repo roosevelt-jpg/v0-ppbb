@@ -20,6 +20,8 @@ This is the **starting** architecture for a small team. It is allowed to disagre
 
 **Speech Cloud (VL-150):** [`docs/SPEECH_CLOUD.md`](docs/SPEECH_CLOUD.md) — hub over batch STT/TTS/interpreter/voice; streaming and speech-intelligence products deferred.
 
+**Voice Cloud (VL-170):** [`docs/VOICE_CLOUD.md`](docs/VOICE_CLOUD.md) — hub over neural TTS, consent-gated clones, Voice Studio; emotion/marketplace/biometrics OS deferred.
+
 ---
 
 ## What we are actually building (now)
@@ -306,6 +308,7 @@ That is a company. It is not Translation Cloud + Speech Cloud + Voice Cloud + OC
 | AI Gateway Cloud | `gateway` module |
 | Language Cloud | `languages` + `translate` module |
 | Speech Cloud | `speech-cloud` hub + existing `audio` / `interpret` / `voice*` |
+| Voice Cloud | `voice-cloud` hub + existing `audio` / `voice-clones` / speaker + enhance |
 | Speaker Intelligence | `speaker-intelligence` + local fingerprints / gap diarization |
 | Speech / Voice / Vision | Later modules + vendor adapters |
 | Everything else | See ROADMAP vision backlog |
@@ -363,3 +366,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Speech Analytics partial (VL-159 / Phase 25). See SPEECH_ANALYTICS + ADR-0078. Usage/audit aggregates; WER lab deferred. Language Analytics separate.
 - Speech Cloud volume complete through Production Audit (VL-150–160). See SPEECH_CLOUD + `docs/speech-cloud-audit/` and ADR-0069–0079. Competitor-parity claims rejected.
 - **VerbaLab Cloud Blueprint (12 layers)** accepted (ADR-0080 / `docs/CLOUD_BLUEPRINT.md`). Future clouds map Foundation → Production Audit without regenerating Identity/Gateway/Billing.
+- Voice Cloud Foundation shipped (VL-170 / Phase 27). See VOICE_CLOUD + ADR-0081. Extends TTS/clones/studio; does not regenerate Speech Cloud.

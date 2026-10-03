@@ -42,7 +42,7 @@ This roadmap is a **backlog and vision**, not a one-shot build script. v1 and v2
 | 4 Language registry | 7 Language Registry (+ 128 African registry) | **VL-020** |
 | 5 Translation Cloud | 6–15 Language Cloud | **VL-022–VL-024, VL-040, VL-050–VL-054** |
 | 6 Speech Cloud | 16–26 Speech Cloud | **VL-150+**; **VL-151** recognition; **VL-041/042** vendor STT/TTS |
-| 7 Voice Cloud | 27–36 Voice Cloud | **VL-042, VL-064** (vendor) |
+| 7 Voice Cloud | 27–36 Voice Cloud | **VL-170+**; foundation hub; **VL-042/064/120/121** engines |
 | 8 OCR Cloud | 37–46 Vision Cloud | **VL-043** (vendor) |
 | 9 Live Interpreter | (no dedicated volume; compose STT+MT+TTS) | **VL-061** |
 | 10 AI Chat | Intelligence Cloud 47–59 | **VL-060** |
@@ -1016,6 +1016,102 @@ User override (2026-09-07): build tracks 1–5 from the library ambition as **bo
 
 ---
 
+## M13 — Voice Cloud volume (library Phases 27–36)
+
+Executable Voice Cloud phases. Extend TTS/clones/studio — do not regenerate Speech or Language Cloud. Phase pack: `docs/roadmap/volume3-voice-cloud/`.
+
+#### VL-170 — Voice Cloud Foundation (Phase 27)
+
+- **Goal:** `/voice-cloud` hub + catalog/overview + bounded CQRS/GraphQL; map library Voice products onto VL-042/064/120/121/152/155 with honest deferred flags.
+- **Complexity:** S
+- **Depends on:** VL-042, VL-064, VL-120, VL-121, VL-160
+- **Buy vs build:** Build hub; buy TTS/clone vendors
+- **Sources:** Library Phase 27; ADR-0081
+- **Out of scope:** New synthesis engines, emotion TTS, marketplace, regenerating Speech Cloud
+
+#### VL-171 — Neural Text-to-Speech (Phase 28)
+
+- **Goal:** Productize streaming/batch TTS surfaces, natural voice catalog honesty, dialects/accents/personalities where vendors allow — over existing speech endpoint.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-042, VL-121
+- **Buy vs build:** Buy vendor TTS; build API/product façade
+- **Sources:** Library Phase 28
+- **Out of scope:** Training a frontier TTS model in-house
+
+#### VL-172 — Voice Cloning Platform (Phase 29)
+
+- **Goal:** Extend VL-064 consent/review/watermark for professional + instant cloning, ownership/licensing/permissions — wire Identity/Trust, not ToS-only checkboxes.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-064
+- **Buy vs build:** Buy Instant Voice Cloning vendor; build consent/audit/governance
+- **Sources:** Library Phase 29; ADR-0042
+- **Out of scope:** Cloning without consent capture; skipping abuse review
+
+#### VL-173 — Emotion Voice Engine (Phase 30)
+
+- **Goal:** Emotion-conditioned synthesis (happy/sad/…/domain tones) if vendor supports; else honest deferred.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-171
+- **Buy vs build:** Buy expressive TTS vendor features
+- **Sources:** Library Phase 30
+- **Out of scope:** Confusing with VL-154 speech emotion *detection*
+
+#### VL-174 — Voice Studio (Phase 31)
+
+- **Goal:** Extend `/audio` with pronunciation/SSML/timeline/comparison where feasible without inventing a DAW.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-120
+- **Buy vs build:** Build UX over existing APIs
+- **Sources:** Library Phase 31
+- **Out of scope:** Full nonlinear video/audio NLE
+
+#### VL-175 — Voice Enhancement Platform (Phase 32)
+
+- **Goal:** Expand Audio Intelligence enhance path toward cleanup/restoration/mastering with honest capability limits.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-155
+- **Buy vs build:** Heuristics first; buy spectral ML later if paid
+- **Sources:** Library Phase 32
+- **Out of scope:** Adobe Enhance / Krisp parity claims
+
+#### VL-176 — Voice Biometrics (Phase 33)
+
+- **Goal:** Harden speaker verify/identify toward auth with encryption-at-rest, deletion path, anti-spoof/liveness as far as honest heuristics allow.
+- **Complexity:** L
+- **Depends on:** VL-170, VL-152
+- **Buy vs build:** Prefer specialist vendor for NIST-grade; build governance
+- **Sources:** Library Phase 33
+- **Out of scope:** Claiming NIST/PAD certification without evidence
+
+#### VL-177 — Voice Marketplace (Phase 34)
+
+- **Goal:** Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace.
+- **Complexity:** L
+- **Depends on:** VL-170, VL-172, VL-090
+- **Buy vs build:** Build catalog + Stripe; legal review required
+- **Sources:** Library Phase 34
+- **Out of scope:** Celebrity voice SKUs without rights chain
+
+#### VL-178 — Voice Analytics (Phase 35)
+
+- **Goal:** Voice usage/voices/revenue/latency/quality aggregates over usage_events + clone audits.
+- **Complexity:** M
+- **Depends on:** VL-170, VL-171
+- **Buy vs build:** Build aggregates
+- **Sources:** Library Phase 35
+- **Out of scope:** Regenerating Speech Analytics
+
+#### VL-179 — Voice Cloud Production Audit (Phase 36)
+
+- **Goal:** Checklist + evidence pack over VL-170–178. Reject competitor-parity marketing.
+- **Complexity:** S
+- **Depends on:** VL-170–178
+- **Buy vs build:** N/A (audit gate)
+- **Sources:** Library Phase 36
+- **Out of scope:** New voice features during audit
+
+---
+
 ## Vision backlog (explicitly not scheduled)
 
 These are in the libraries. They are **not** executable phases for a small team. Do not generate code for them. Do not mark them Done by creating empty folders.
@@ -1024,7 +1120,7 @@ These are in the libraries. They are **not** executable phases for a small team.
 | --- | --- | --- |
 | v2 10–12 Grammar/Style/Language Intelligence | Separate NLP companies | LLM prompts + glossary until proven |
 | v2 18–25 Speaker/accent/emotion/pronunciation/wake-word/call intelligence | Speech research org | Vendor features if a customer pays |
-| v2 30–35 Emotion voice, studio, enhancement, biometrics, voice marketplace | Voice company | ElevenLabs + consent |
+| v2 30–35 Emotion voice, studio, enhancement, biometrics, voice marketplace | Voice company | Scheduled as VL-173–177; buy vendors + consent |
 | v2 39–45 Document/invoice/ID/image intelligence, visual search | Vision company | Document AI vendor |
 | v2 47–59 Intelligence Cloud (reasoner, decision engine, orchestration) | Custom AI kernel | LLM + gateway |
 | v2 63–67 Ontology, taxonomy, knowledge intelligence | Enterprise knowledge graph vendor | RAG (VL-062) |

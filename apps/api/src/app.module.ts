@@ -50,6 +50,7 @@ import { EnterpriseCloudModule } from './enterprise-cloud/enterprise-cloud.modul
 import { GatewayCloudModule } from './gateway-cloud/gateway-cloud.module';
 import { LanguageCloudModule } from './language-cloud/language-cloud.module';
 import { SpeechCloudModule } from './speech-cloud/speech-cloud.module';
+import { VoiceCloudModule } from './voice-cloud/voice-cloud.module';
 import { SpeechRecognitionModule } from './speech-recognition/speech-recognition.module';
 import { SpeakerIntelligenceModule } from './speaker-intelligence/speaker-intelligence.module';
 import { EmotionIntelligenceModule } from './emotion-intelligence/emotion-intelligence.module';
@@ -82,6 +83,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     GatewayCloudModule,
     LanguageCloudModule,
     SpeechCloudModule,
+    VoiceCloudModule,
     SpeechRecognitionModule,
     SpeakerIntelligenceModule,
     EmotionIntelligenceModule,

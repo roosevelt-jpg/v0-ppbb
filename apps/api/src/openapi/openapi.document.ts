@@ -2566,6 +2566,58 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/voice-cloud/products': {
+      get: {
+        summary: 'Voice Cloud product catalog',
+        operationId: 'listVoiceProducts',
+        responses: {
+          '200': {
+            description: 'Voice products and architecture honesty notes',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    products: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          name: { type: 'string' },
+                          status: { type: 'string', enum: ['shipped', 'partial', 'deferred'] },
+                          api: { type: 'string', nullable: true },
+                          console: { type: 'string', nullable: true },
+                          notes: { type: 'string' },
+                        },
+                      },
+                    },
+                    architecture: { type: 'object' },
+                    docs: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/v1/voice-cloud/overview': {
+      get: {
+        summary: 'Voice Cloud org overview',
+        operationId: 'getVoiceOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session TTS usage, products, deferred flags, and console links',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',
