@@ -26,3 +26,5 @@
 ## Honesty
 
 WAV PCM preferred. Not vendor denoise / generative upscaling / stem separation. See ADR-0074.
+
+Productized cleanup profiles (mic/podcast/meeting/broadcast/restore) live under Voice Enhancement (**VL-175** / [`VOICE_ENHANCEMENT.md`](./VOICE_ENHANCEMENT.md)).

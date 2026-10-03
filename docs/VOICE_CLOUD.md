@@ -16,8 +16,8 @@
 | Professional Voice Studio | **VL-174** — `/voice-studio` (+ legacy VL-120 `/audio`) |
 | Emotion Voice | **Partial** — **VL-173** `/emotion-voice` soft prosody + voice profiles; trained expressive TTS deferred. Distinct from VL-154 detection |
 | Voice Conversion | **Deferred** |
-| Voice Enhancement | **Partial** — Audio Intelligence enhance (VL-155); Phase 32 expands |
-| Voice Restoration / Audio Mastering | **Deferred** — Phase 32 |
+| Voice Enhancement | **Partial** — **VL-175** `/voice-enhancement` profiles over VL-155 heuristics |
+| Voice Restoration / Audio Mastering | **Partial** — restore + broadcast soft-limit profiles; LUFS/ML deferred |
 | Voice Biometrics / Authentication | **Partial** — Speaker Intelligence verify/identify (VL-152); NIST/anti-spoof Phase 33 |
 | Voice Profiles | **Partial** — speaker profiles (VL-152) |
 | Voice Marketplace | **Deferred** — Phase 34 (existing Marketplace ≠ voice SKUs) |

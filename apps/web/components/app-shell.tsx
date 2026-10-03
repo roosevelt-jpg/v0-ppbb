@@ -18,6 +18,7 @@ const links = [
   { href: '/speaker-intelligence', label: 'Speakers' },
   { href: '/accent-intelligence', label: 'Accent AI' },
   { href: '/emotion-intelligence', label: 'Emotion AI' },
+  { href: '/voice-enhancement', label: 'Enhancement' },
   { href: '/audio-intelligence', label: 'Audio AI' },
   { href: '/pronunciation-intelligence', label: 'Pronunciation' },
   { href: '/wake-word', label: 'Wake Word' },

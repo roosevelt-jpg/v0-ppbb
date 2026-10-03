@@ -136,8 +136,11 @@ export function VoiceCloudClient() {
             <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>
               Speakers / biometrics
             </Link>
-            <Link href={data.links.audioIntelligence ?? '/audio-intelligence'} style={secondary}>
+            <Link href={data.links.voiceEnhancement ?? '/voice-enhancement'} style={secondary}>
               Enhancement
+            </Link>
+            <Link href={data.links.audioIntelligence ?? '/audio-intelligence'} style={secondary}>
+              Audio AI
             </Link>
             <Link href={data.links.voiceFaq ?? '/voice'} style={secondary}>
               Voice FAQ

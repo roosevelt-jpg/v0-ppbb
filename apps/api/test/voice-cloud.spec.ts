@@ -118,6 +118,10 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(emotion.status).toBe('partial');
     expect(emotion.api).toContain('/v1/emotion-voice/engine');
 
+    const enhancement = res.body.products.find((p: { id: string }) => p.id === 'voice-enhancement');
+    expect(enhancement.status).toBe('partial');
+    expect(enhancement.api).toContain('/v1/voice-enhancement/engine');
+
     const marketplace = res.body.products.find((p: { id: string }) => p.id === 'voice-marketplace');
     expect(marketplace.status).toBe('deferred');
 
@@ -148,6 +152,9 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(overview.links.emotionVoice).toBe('/emotion-voice');
     expect(overview.links.neuralTts).toBe('/neural-tts');
     expect(overview.links.voiceStudio).toBe('/voice-studio');
+    expect(overview.links.voiceEnhancement).toBe('/voice-enhancement');
+    expect(overview.deferred.voiceRestoration).toBe(false);
+    expect(overview.deferred.liveAec).toBe(true);
     expect(overview.deferred.voiceMarketplace).toBe(true);
     expect(overview.deferred.nistVoiceBiometrics).toBe(true);
     expect(overview.links.audio).toBe('/audio');

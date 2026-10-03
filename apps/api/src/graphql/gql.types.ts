@@ -553,6 +553,57 @@ export class GqlVoiceStudioEngine {
 }
 
 @ObjectType()
+export class GqlVoiceEnhancementCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceEnhancementEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceEnhancementCapability])
+  capabilities!: GqlVoiceEnhancementCapability[];
+
+  @Field()
+  spectralMlDenoise!: boolean;
+
+  @Field()
+  liveAec!: boolean;
+}
+
+@ObjectType()
+export class GqlVoiceEnhancementProfile {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  category!: string;
+
+  @Field()
+  description!: string;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

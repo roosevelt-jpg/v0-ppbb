@@ -131,7 +131,14 @@ export function analyzeAudioBuffer(buffer: Buffer): AudioAnalysis {
 /** Simple noise gate + soft high-pass-ish differentiation attenuate + normalize. */
 export function enhanceAudio(
   buffer: Buffer,
-  options?: { gateMultiplier?: number; targetPeak?: number },
+  options?: {
+    gateMultiplier?: number;
+    targetPeak?: number;
+    /** High-pass coefficient (0–1). Higher = stronger rumble cut. */
+    hpAlpha?: number;
+    /** Attenuation factor for gated (below-threshold) samples. */
+    gateFloor?: number;
+  },
 ): { wav: Buffer; analysisBefore: AudioAnalysis; analysisAfter: AudioAnalysis } {
   const before = analyzeAudioBuffer(buffer);
   const { samples, sampleRate } = extractPcmMono(buffer);
@@ -139,14 +146,15 @@ export function enhanceAudio(
   const out = new Float32Array(samples.length);
   let prevY = 0;
   let prevX = 0;
-  const alpha = 0.96;
+  const alpha = options?.hpAlpha ?? 0.96;
+  const gateFloor = options?.gateFloor ?? 0.12;
   for (let i = 0; i < samples.length; i++) {
     const x = samples[i] ?? 0;
     // First-order high-pass then gate
     const y = alpha * (prevY + x - prevX);
     prevX = x;
     prevY = y;
-    out[i] = Math.abs(y) < gate ? y * 0.12 : y;
+    out[i] = Math.abs(y) < gate ? y * gateFloor : y;
   }
   const targetPeak = options?.targetPeak ?? 0.9;
   let peak = 0;
@@ -157,6 +165,28 @@ export function enhanceAudio(
   const wav = encodeWavPcm16(out, sampleRate);
   const after = analyzeAudioBuffer(wav);
   return { wav, analysisBefore: before, analysisAfter: after };
+}
+
+/** Soft limiter / gentle compression for broadcast-ish loudness (heuristic, not LUFS mastering). */
+export function softLimitAudio(
+  buffer: Buffer,
+  threshold = 0.75,
+  ratio = 2.5,
+): Buffer {
+  const { samples, sampleRate } = extractPcmMono(buffer);
+  const out = new Float32Array(samples.length);
+  for (let i = 0; i < samples.length; i++) {
+    const x = samples[i] ?? 0;
+    const a = Math.abs(x);
+    if (a <= threshold) {
+      out[i] = x;
+    } else {
+      const over = a - threshold;
+      const compressed = threshold + over / ratio;
+      out[i] = Math.sign(x) * Math.min(0.98, compressed);
+    }
+  }
+  return encodeWavPcm16(out, sampleRate);
 }
 
 /** Linear upsample (not generative audio upscaling). */

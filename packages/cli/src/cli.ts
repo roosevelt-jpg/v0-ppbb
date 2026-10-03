@@ -23,6 +23,8 @@ function usage(): never {
   verbalab emotion-voice-profiles
   verbalab voice-studio-engine
   verbalab voice-studio-library
+  verbalab voice-enhancement-engine
+  verbalab voice-enhancement-profiles
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -127,6 +129,16 @@ async function main() {
 
   if (command === 'voice-studio-library') {
     console.log(JSON.stringify(await vl.voiceStudioLibrary(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-enhancement-engine') {
+    console.log(JSON.stringify(await vl.voiceEnhancementEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-enhancement-profiles') {
+    console.log(JSON.stringify(await vl.voiceEnhancementProfiles(), null, 2));
     return;
   }
 

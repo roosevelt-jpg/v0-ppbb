@@ -2905,6 +2905,51 @@ export const openApiDocument = {
         responses: { '200': { description: 'Linear concat + per-clip audio' } },
       },
     },
+    '/v1/voice-enhancement/engine': {
+      get: {
+        summary: 'Voice Enhancement engine catalog',
+        operationId: 'getVoiceEnhancementEngine',
+        responses: { '200': { description: 'Capabilities and honesty notes' } },
+      },
+    },
+    '/v1/voice-enhancement/profiles': {
+      get: {
+        summary: 'Voice Enhancement cleanup profiles',
+        operationId: 'listVoiceEnhancementProfiles',
+        responses: { '200': { description: 'Mic/podcast/meeting/broadcast/restore profiles' } },
+      },
+    },
+    '/v1/voice-enhancement/echo': {
+      get: {
+        summary: 'Echo cancellation status (deferred)',
+        operationId: 'getVoiceEnhancementEcho',
+        responses: { '200': { description: 'Deferred AEC status' } },
+      },
+    },
+    '/v1/voice-enhancement/enhance': {
+      post: {
+        summary: 'Enhance audio with a cleanup profile',
+        operationId: 'enhanceVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'WAV base64 + before/after metrics' } },
+      },
+    },
+    '/v1/voice-enhancement/upscale': {
+      post: {
+        summary: 'Linear audio upsample',
+        operationId: 'upscaleVoiceEnhancement',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Upsampled WAV base64' } },
+      },
+    },
+    '/v1/voice-enhancement/enhance/stream': {
+      post: {
+        summary: 'Enhance with SSE progress',
+        operationId: 'streamEnhanceVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'text/event-stream' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

@@ -1166,6 +1166,32 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-studio/library', { method: 'GET' });
   }
 
+  async voiceEnhancementEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: { spectralMlDenoise: boolean; liveAec: boolean };
+  }> {
+    return this.requestJson('/v1/voice-enhancement/engine', { method: 'GET' });
+  }
+
+  async voiceEnhancementProfiles(): Promise<{
+    profiles: Array<{
+      id: string;
+      name: string;
+      category: string;
+      description: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/voice-enhancement/profiles', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;
