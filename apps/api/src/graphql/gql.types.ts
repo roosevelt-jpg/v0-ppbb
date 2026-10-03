@@ -1144,6 +1144,57 @@ export class GqlIntelligenceAnalytics {
 }
 
 @ObjectType()
+export class GqlKnowledgeAnalyticsCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeAnalytics {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeAnalyticsCapability])
+  capabilities!: GqlKnowledgeAnalyticsCapability[];
+
+  @Field()
+  regeneratesLanguageAnalytics!: boolean;
+
+  @Field()
+  regeneratesSpeechAnalytics!: boolean;
+
+  @Field()
+  regeneratesVoiceAnalytics!: boolean;
+
+  @Field()
+  regeneratesIntelligenceAnalytics!: boolean;
+
+  @Field()
+  biDashboardOs!: boolean;
+
+  @Field()
+  aggregatesOnly!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

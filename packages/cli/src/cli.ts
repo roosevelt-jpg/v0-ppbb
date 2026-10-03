@@ -53,6 +53,9 @@ function usage(): never {
   verbalab intelligence-analytics
   verbalab intelligence-analytics-overview
   verbalab intelligence-analytics-report
+  verbalab knowledge-analytics
+  verbalab knowledge-analytics-overview
+  verbalab knowledge-analytics-report
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -216,6 +219,39 @@ async function main() {
 
   if (command === 'knowledge-apis-surfaces') {
     console.log(JSON.stringify(await vl.knowledgeApisSurfaces(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-analytics') {
+    console.log(JSON.stringify(await vl.knowledgeAnalyticsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-analytics-overview') {
+    console.log(
+      JSON.stringify(
+        await vl.knowledgeAnalyticsOverview({
+          from: argValue(rest, '--from') ?? undefined,
+          to: argValue(rest, '--to') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'knowledge-analytics-report') {
+    console.log(
+      JSON.stringify(
+        await vl.knowledgeAnalyticsReport({
+          from: argValue(rest, '--from') ?? undefined,
+          to: argValue(rest, '--to') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

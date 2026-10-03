@@ -1450,6 +1450,57 @@ export class VerbaLab {
     return this.requestJson('/v1/knowledge-apis/surfaces', { method: 'GET' });
   }
 
+  async knowledgeAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      regeneratesLanguageAnalytics: boolean;
+      regeneratesSpeechAnalytics: boolean;
+      regeneratesVoiceAnalytics: boolean;
+      regeneratesIntelligenceAnalytics: boolean;
+      biDashboardOs: boolean;
+      enterpriseReportingSuite: boolean;
+      aggregatesOnly: boolean;
+      orgWorkspaceScoped: boolean;
+      calibratedConfidence: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-analytics/engine', { method: 'GET' });
+  }
+
+  async knowledgeAnalyticsOverview(params?: {
+    from?: string;
+    to?: string;
+  }): Promise<Record<string, unknown>> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/knowledge-analytics/overview${suffix}`, {
+      method: 'GET',
+    });
+  }
+
+  async knowledgeAnalyticsReport(params?: {
+    from?: string;
+    to?: string;
+  }): Promise<Record<string, unknown>> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/knowledge-analytics/report${suffix}`, {
+      method: 'GET',
+    });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

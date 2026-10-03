@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-201 Done — Enterprise Knowledge APIs)
+Last updated: 2026-10-03 (VL-202 Done — Knowledge Analytics)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-202 Knowledge Analytics (Phase 69) |
+| Next up | VL-203 Knowledge Cloud Production Audit (Phase 70) |
 
 ---
 
@@ -231,6 +231,7 @@ Last updated: 2026-10-03 (VL-201 Done — Enterprise Knowledge APIs)
 | VL-199 | Knowledge Memory (Phase 66) | Done | `/v1/knowledge-memory/*` over VL-183 MemoryRecord (layer=knowledge); evolve/versions; ADR-0110. Not Mem0 OS; distinct from Memory Cloud hub. |
 | VL-200 | Knowledge Intelligence (Phase 67) | Done | `/v1/knowledge-intelligence/*` discover/link/recommend/validate/duplicates/confidence; ADR-0111. Not BI/Palantir OS; ≠ VL-191. |
 | VL-201 | Enterprise Knowledge APIs (Phase 68) | Done | `/v1/knowledge-apis/*` REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
+| VL-202 | Knowledge Analytics (Phase 69) | Done | `/v1/knowledge-analytics/*` growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS; ≠ sibling analytics. |
 
 ---
 
@@ -346,3 +347,4 @@ Last updated: 2026-10-03 (VL-201 Done — Enterprise Knowledge APIs)
 | 2026-10-03 | VL-199 Done: Knowledge Memory (Phase 66) — knowledge-layer over VL-183; evolve/versions; ADR-0110. Not Mem0 OS; distinct from Memory Cloud hub. |
 | 2026-10-03 | VL-200 Done: Knowledge Intelligence (Phase 67) — discover/link/recommend/validate/duplicates/confidence; ADR-0111. Not BI/Palantir OS. |
 | 2026-10-03 | VL-201 Done: Enterprise Knowledge APIs (Phase 68) — REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
+| 2026-10-03 | VL-202 Done: Knowledge Analytics (Phase 69) — growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS. |

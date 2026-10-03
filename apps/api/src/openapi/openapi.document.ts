@@ -3345,6 +3345,97 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-analytics/engine': {
+      get: {
+        summary: 'Knowledge Analytics catalog',
+        operationId: 'getKnowledgeAnalyticsEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities and Language/Speech/Voice/Intelligence separation honesty',
+          },
+        },
+      },
+    },
+    '/v1/knowledge-analytics/overview': {
+      get: {
+        summary: 'Knowledge Analytics overview',
+        operationId: 'getKnowledgeAnalyticsOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Growth/usage/quality/search/gaps snapshot' } },
+      },
+    },
+    '/v1/knowledge-analytics/growth': {
+      get: {
+        summary: 'Knowledge growth metrics',
+        operationId: 'getKnowledgeAnalyticsGrowth',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Document/chunk growth' } },
+      },
+    },
+    '/v1/knowledge-analytics/usage': {
+      get: {
+        summary: 'Knowledge Cloud surface usage',
+        operationId: 'getKnowledgeAnalyticsUsage',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Per-surface audit counts' } },
+      },
+    },
+    '/v1/knowledge-analytics/quality': {
+      get: {
+        summary: 'Knowledge quality proxies',
+        operationId: 'getKnowledgeAnalyticsQuality',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Ready/failed/chunk coverage' } },
+      },
+    },
+    '/v1/knowledge-analytics/search': {
+      get: {
+        summary: 'Search success metrics',
+        operationId: 'getKnowledgeAnalyticsSearch',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Enterprise search hit rates' } },
+      },
+    },
+    '/v1/knowledge-analytics/gaps': {
+      get: {
+        summary: 'Knowledge gap heuristics',
+        operationId: 'getKnowledgeAnalyticsGaps',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Unchunked/failed/unassigned gaps' } },
+      },
+    },
+    '/v1/knowledge-analytics/confidence': {
+      get: {
+        summary: 'Knowledge confidence averages',
+        operationId: 'getKnowledgeAnalyticsConfidence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Heuristic confidence bands' } },
+      },
+    },
+    '/v1/knowledge-analytics/relationships': {
+      get: {
+        summary: 'Knowledge relationship counts',
+        operationId: 'getKnowledgeAnalyticsRelationships',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'KG/taxonomy/ontology counts' } },
+      },
+    },
+    '/v1/knowledge-analytics/report': {
+      get: {
+        summary: 'Bundled Knowledge Analytics report',
+        operationId: 'getKnowledgeAnalyticsReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Full JSON report' } },
+      },
+    },
+    '/v1/knowledge-analytics/monitoring': {
+      get: {
+        summary: 'Knowledge Analytics monitoring snapshot',
+        operationId: 'getKnowledgeAnalyticsMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

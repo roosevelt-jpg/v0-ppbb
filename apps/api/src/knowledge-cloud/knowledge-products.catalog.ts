@@ -96,11 +96,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'knowledge-analytics',
       name: 'Knowledge Analytics',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/knowledge-analytics/engine',
+      console: '/knowledge-analytics',
       notes:
-        'Usage/quality analytics (Phase 69 / VL-202). ≠ Language/Speech/Voice/Intelligence analytics.',
+        'Growth/usage/quality/search/gaps/confidence/relationships (VL-202). ≠ Language/Speech/Voice/Intelligence analytics; not BI OS.',
     },
     {
       id: 'knowledge-graph-bridge',

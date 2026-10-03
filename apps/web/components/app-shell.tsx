@@ -21,6 +21,7 @@ const links = [
   { href: '/knowledge-memory', label: 'Knowledge Memory' },
   { href: '/knowledge-intelligence', label: 'Knowledge Intel' },
   { href: '/knowledge-apis', label: 'Knowledge APIs' },
+  { href: '/knowledge-analytics', label: 'Knowledge Analytics' },
   { href: '/embedding-cloud', label: 'Embeddings' },
   { href: '/vector-cloud', label: 'Vectors' },
   { href: '/memory-cloud', label: 'Memory' },

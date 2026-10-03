@@ -188,6 +188,8 @@ describe('Knowledge Cloud Foundation (VL-193)', () => {
     expect(overview.links.knowledgeIntelligence).toBe('/knowledge-intelligence');
     expect(overview.deferred.enterpriseKnowledgeApisPack).toBe(false);
     expect(overview.links.knowledgeApis).toBe('/knowledge-apis');
+    expect(overview.deferred.knowledgeAnalytics).toBe(false);
+    expect(overview.links.knowledgeAnalytics).toBe('/knowledge-analytics');
     expect(overview.deferred.enterpriseKnowledgeOs).toBe(true);
     expect(overview.deferred.ontologyOs).toBe(true);
     expect(overview.deferred.neo4jKnowledgeOs).toBe(true);

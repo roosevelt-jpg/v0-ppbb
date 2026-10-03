@@ -81,6 +81,16 @@ export function knowledgeApiSurfaces() {
       console: '/knowledge-intelligence',
     },
     {
+      product: 'knowledge-analytics',
+      rest: [
+        'GET /v1/knowledge-analytics/engine',
+        'GET /v1/knowledge-analytics/overview',
+        'GET /v1/knowledge-analytics/report',
+      ],
+      graphql: ['knowledgeAnalytics'],
+      console: '/knowledge-analytics',
+    },
+    {
       product: 'vl062-knowledge',
       rest: [
         'GET /v1/knowledge/documents',

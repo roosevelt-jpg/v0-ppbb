@@ -61,6 +61,7 @@ import { EnterpriseRagModule } from './enterprise-rag/enterprise-rag.module';
 import { KnowledgeMemoryModule } from './knowledge-memory/knowledge-memory.module';
 import { KnowledgeIntelligenceModule } from './knowledge-intelligence/knowledge-intelligence.module';
 import { KnowledgeApisModule } from './knowledge-apis/knowledge-apis.module';
+import { KnowledgeAnalyticsModule } from './knowledge-analytics/knowledge-analytics.module';
 import { EmbeddingCloudModule } from './embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from './vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from './memory-cloud/memory-cloud.module';
@@ -123,6 +124,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     KnowledgeMemoryModule,
     KnowledgeIntelligenceModule,
     KnowledgeApisModule,
+    KnowledgeAnalyticsModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
