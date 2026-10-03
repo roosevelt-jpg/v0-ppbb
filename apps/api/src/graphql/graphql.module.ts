@@ -85,6 +85,15 @@ import { KnowledgeRuntimeApplicationModule } from '../knowledge-runtime/applicat
 import { EmbeddingRuntimeApplicationModule } from '../embedding-runtime/application/embedding-runtime-application.module';
 import { DataPlaneStreamingApplicationModule } from '../data-plane-streaming/application/data-plane-streaming-application.module';
 import { GpuRuntimeApplicationModule } from '../gpu-runtime/application/gpu-runtime-application.module';
+import { VaiosApplicationModule } from '../vaios/application/vaios-application.module';
+import { AiSchedulerApplicationModule } from '../ai-scheduler/application/ai-scheduler-application.module';
+import { RuntimeManagerApplicationModule } from '../runtime-manager/application/runtime-manager-application.module';
+import { ResourceManagerApplicationModule } from '../resource-manager/application/resource-manager-application.module';
+import { WorkflowOperatingSystemApplicationModule } from '../workflow-operating-system/application/workflow-operating-system-application.module';
+import { AgentOperatingSystemApplicationModule } from '../agent-operating-system/application/agent-operating-system-application.module';
+import { AiMemoryOperatingSystemApplicationModule } from '../ai-memory-operating-system/application/ai-memory-operating-system-application.module';
+import { KnowledgeOperatingSystemApplicationModule } from '../knowledge-operating-system/application/knowledge-operating-system-application.module';
+import { PluginOperatingSystemApplicationModule } from '../plugin-operating-system/application/plugin-operating-system-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -240,6 +249,15 @@ import { KnowledgeRuntimeGraphqlResolver } from './knowledge-runtime.resolver';
 import { EmbeddingRuntimeGraphqlResolver } from './embedding-runtime.resolver';
 import { DataPlaneStreamingGraphqlResolver } from './data-plane-streaming.resolver';
 import { GpuRuntimeGraphqlResolver } from './gpu-runtime.resolver';
+import { VaiosGraphqlResolver } from './vaios.resolver';
+import { AiSchedulerGraphqlResolver } from './ai-scheduler.resolver';
+import { RuntimeManagerGraphqlResolver } from './runtime-manager.resolver';
+import { ResourceManagerGraphqlResolver } from './resource-manager.resolver';
+import { WorkflowOperatingSystemGraphqlResolver } from './workflow-operating-system.resolver';
+import { AgentOperatingSystemGraphqlResolver } from './agent-operating-system.resolver';
+import { AiMemoryOperatingSystemGraphqlResolver } from './ai-memory-operating-system.resolver';
+import { KnowledgeOperatingSystemGraphqlResolver } from './knowledge-operating-system.resolver';
+import { PluginOperatingSystemGraphqlResolver } from './plugin-operating-system.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -415,6 +433,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmbeddingRuntimeApplicationModule,
     DataPlaneStreamingApplicationModule,
     GpuRuntimeApplicationModule,
+    VaiosApplicationModule,
+    AiSchedulerApplicationModule,
+    RuntimeManagerApplicationModule,
+    ResourceManagerApplicationModule,
+    WorkflowOperatingSystemApplicationModule,
+    AgentOperatingSystemApplicationModule,
+    AiMemoryOperatingSystemApplicationModule,
+    KnowledgeOperatingSystemApplicationModule,
+    PluginOperatingSystemApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -578,6 +605,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmbeddingRuntimeGraphqlResolver,
     DataPlaneStreamingGraphqlResolver,
     GpuRuntimeGraphqlResolver,
+    VaiosGraphqlResolver,
+    AiSchedulerGraphqlResolver,
+    RuntimeManagerGraphqlResolver,
+    ResourceManagerGraphqlResolver,
+    WorkflowOperatingSystemGraphqlResolver,
+    AgentOperatingSystemGraphqlResolver,
+    AiMemoryOperatingSystemGraphqlResolver,
+    KnowledgeOperatingSystemGraphqlResolver,
+    PluginOperatingSystemGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

@@ -137,6 +137,15 @@ import { KnowledgeRuntimeModule } from './knowledge-runtime/knowledge-runtime.mo
 import { EmbeddingRuntimeModule } from './embedding-runtime/embedding-runtime.module';
 import { DataPlaneStreamingModule } from './data-plane-streaming/data-plane-streaming.module';
 import { GpuRuntimeModule } from './gpu-runtime/gpu-runtime.module';
+import { VaiosModule } from './vaios/vaios.module';
+import { AiSchedulerModule } from './ai-scheduler/ai-scheduler.module';
+import { RuntimeManagerModule } from './runtime-manager/runtime-manager.module';
+import { ResourceManagerModule } from './resource-manager/resource-manager.module';
+import { WorkflowOperatingSystemModule } from './workflow-operating-system/workflow-operating-system.module';
+import { AgentOperatingSystemModule } from './agent-operating-system/agent-operating-system.module';
+import { AiMemoryOperatingSystemModule } from './ai-memory-operating-system/ai-memory-operating-system.module';
+import { KnowledgeOperatingSystemModule } from './knowledge-operating-system/knowledge-operating-system.module';
+import { PluginOperatingSystemModule } from './plugin-operating-system/plugin-operating-system.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -309,6 +318,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     EmbeddingRuntimeModule,
     DataPlaneStreamingModule,
     GpuRuntimeModule,
+    VaiosModule,
+    AiSchedulerModule,
+    RuntimeManagerModule,
+    ResourceManagerModule,
+    WorkflowOperatingSystemModule,
+    AgentOperatingSystemModule,
+    AiMemoryOperatingSystemModule,
+    KnowledgeOperatingSystemModule,
+    PluginOperatingSystemModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

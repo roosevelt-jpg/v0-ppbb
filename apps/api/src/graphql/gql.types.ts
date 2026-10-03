@@ -5433,3 +5433,248 @@ export class GqlGpuRuntimeEngine {
   @Field(() => Boolean)
   serviceMeshOs!: boolean;
 }
+
+@ObjectType()
+export class GqlVaiosProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAiSchedulerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRuntimeManagerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlResourceManagerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlWorkflowOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgentOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiMemoryOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlKnowledgeOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPluginOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  unifyingOrchestrationLayer!: boolean;
+
+  @Field(() => Boolean)
+  duplicatesKernelOrFabric!: boolean;
+
+  @Field(() => Boolean)
+  notLinux!: boolean;
+
+  @Field(() => Boolean)
+  notKubernetes!: boolean;
+
+  @Field(() => Boolean)
+  literalOsKernel!: boolean;
+
+  @Field(() => Boolean)
+  enterpriseEngineeringSystemOs!: boolean;
+}

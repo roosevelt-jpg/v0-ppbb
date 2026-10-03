@@ -116,6 +116,15 @@ function usage(): never {
   verbalab embedding-runtime-engine
   verbalab data-plane-streaming-engine
   verbalab gpu-runtime-engine
+  verbalab vaios-products
+  verbalab ai-scheduler-engine
+  verbalab runtime-manager-engine
+  verbalab resource-manager-engine
+  verbalab workflow-operating-system-engine
+  verbalab agent-operating-system-engine
+  verbalab ai-memory-operating-system-engine
+  verbalab knowledge-operating-system-engine
+  verbalab plugin-operating-system-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -876,6 +885,51 @@ async function main() {
     console.log(JSON.stringify(await vl.gpuRuntimeEngine(), null, 2));
     return;
   }
+  if (command === 'vaios-products') {
+    console.log(JSON.stringify(await vl.vaiosProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-scheduler-engine') {
+    console.log(JSON.stringify(await vl.aiSchedulerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'runtime-manager-engine') {
+    console.log(JSON.stringify(await vl.runtimeManagerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'resource-manager-engine') {
+    console.log(JSON.stringify(await vl.resourceManagerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'workflow-operating-system-engine') {
+    console.log(JSON.stringify(await vl.workflowOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agent-operating-system-engine') {
+    console.log(JSON.stringify(await vl.agentOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-memory-operating-system-engine') {
+    console.log(JSON.stringify(await vl.aiMemoryOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-operating-system-engine') {
+    console.log(JSON.stringify(await vl.knowledgeOperatingSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'plugin-operating-system-engine') {
+    console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
+    return;
+  }
+
 
 
 

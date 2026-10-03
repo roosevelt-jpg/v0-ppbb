@@ -5129,6 +5129,114 @@ export class VerbaLab {
     return this.requestJson('/v1/gpu-runtime/engine', { method: 'GET' });
   }
 
+
+  async vaiosProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/vaios/products', { method: 'GET' });
+  }
+
+  async aiSchedulerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-scheduler/engine', { method: 'GET' });
+  }
+
+  async runtimeManagerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/runtime-manager/engine', { method: 'GET' });
+  }
+
+  async resourceManagerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/resource-manager/engine', { method: 'GET' });
+  }
+
+  async workflowOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/workflow-operating-system/engine', { method: 'GET' });
+  }
+
+  async agentOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agent-operating-system/engine', { method: 'GET' });
+  }
+
+  async aiMemoryOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-memory-operating-system/engine', { method: 'GET' });
+  }
+
+  async knowledgeOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/knowledge-operating-system/engine', { method: 'GET' });
+  }
+
+  async pluginOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/plugin-operating-system/engine', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

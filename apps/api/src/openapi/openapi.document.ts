@@ -11513,6 +11513,434 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/vaios/products': {
+      get: {
+        summary: 'VAIOS products',
+        operationId: 'listVaiosProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/engine': {
+      get: {
+        summary: 'VAIOS engine alias',
+        operationId: 'getVaiosEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/routing': {
+      get: {
+        summary: 'VAIOS routing',
+        operationId: 'getVaiosRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/overview': {
+      get: {
+        summary: 'VAIOS overview',
+        operationId: 'getVaiosOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/monitoring': {
+      get: {
+        summary: 'VAIOS monitoring',
+        operationId: 'getVaiosMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/engine': {
+      get: {
+        summary: 'AI Scheduler engine',
+        operationId: 'getAiSchedulerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/products': {
+      get: {
+        summary: 'AI Scheduler products',
+        operationId: 'listAiSchedulerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/monitoring': {
+      get: {
+        summary: 'AI Scheduler monitoring',
+        operationId: 'getAiSchedulerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/routes': {
+      get: {
+        summary: 'AI Scheduler routes',
+        operationId: 'listAiSchedulerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/route': {
+      get: {
+        summary: 'Route via AI Scheduler',
+        operationId: 'routeAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/execute': {
+      get: {
+        summary: 'Execute via AI Scheduler',
+        operationId: 'executeAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/query': {
+      get: {
+        summary: 'Query AI Scheduler',
+        operationId: 'queryAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/engine': {
+      get: {
+        summary: 'Runtime Manager engine',
+        operationId: 'getRuntimeManagerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/products': {
+      get: {
+        summary: 'Runtime Manager products',
+        operationId: 'listRuntimeManagerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/monitoring': {
+      get: {
+        summary: 'Runtime Manager monitoring',
+        operationId: 'getRuntimeManagerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/routes': {
+      get: {
+        summary: 'Runtime Manager routes',
+        operationId: 'listRuntimeManagerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/route': {
+      get: {
+        summary: 'Route via Runtime Manager',
+        operationId: 'routeRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/execute': {
+      get: {
+        summary: 'Execute via Runtime Manager',
+        operationId: 'executeRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/query': {
+      get: {
+        summary: 'Query Runtime Manager',
+        operationId: 'queryRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/engine': {
+      get: {
+        summary: 'Resource Manager engine',
+        operationId: 'getResourceManagerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/products': {
+      get: {
+        summary: 'Resource Manager products',
+        operationId: 'listResourceManagerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/monitoring': {
+      get: {
+        summary: 'Resource Manager monitoring',
+        operationId: 'getResourceManagerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/routes': {
+      get: {
+        summary: 'Resource Manager routes',
+        operationId: 'listResourceManagerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/route': {
+      get: {
+        summary: 'Route via Resource Manager',
+        operationId: 'routeResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/execute': {
+      get: {
+        summary: 'Execute via Resource Manager',
+        operationId: 'executeResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/query': {
+      get: {
+        summary: 'Query Resource Manager',
+        operationId: 'queryResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/engine': {
+      get: {
+        summary: 'Workflow Operating System engine',
+        operationId: 'getWorkflowOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/products': {
+      get: {
+        summary: 'Workflow Operating System products',
+        operationId: 'listWorkflowOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/monitoring': {
+      get: {
+        summary: 'Workflow Operating System monitoring',
+        operationId: 'getWorkflowOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/routes': {
+      get: {
+        summary: 'Workflow Operating System routes',
+        operationId: 'listWorkflowOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/route': {
+      get: {
+        summary: 'Route via Workflow Operating System',
+        operationId: 'routeWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/execute': {
+      get: {
+        summary: 'Execute via Workflow Operating System',
+        operationId: 'executeWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/query': {
+      get: {
+        summary: 'Query Workflow Operating System',
+        operationId: 'queryWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/engine': {
+      get: {
+        summary: 'Agent Operating System engine',
+        operationId: 'getAgentOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/products': {
+      get: {
+        summary: 'Agent Operating System products',
+        operationId: 'listAgentOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/monitoring': {
+      get: {
+        summary: 'Agent Operating System monitoring',
+        operationId: 'getAgentOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/routes': {
+      get: {
+        summary: 'Agent Operating System routes',
+        operationId: 'listAgentOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/route': {
+      get: {
+        summary: 'Route via Agent Operating System',
+        operationId: 'routeAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/execute': {
+      get: {
+        summary: 'Execute via Agent Operating System',
+        operationId: 'executeAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/query': {
+      get: {
+        summary: 'Query Agent Operating System',
+        operationId: 'queryAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/engine': {
+      get: {
+        summary: 'AI Memory Operating System engine',
+        operationId: 'getAiMemoryOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/products': {
+      get: {
+        summary: 'AI Memory Operating System products',
+        operationId: 'listAiMemoryOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/monitoring': {
+      get: {
+        summary: 'AI Memory Operating System monitoring',
+        operationId: 'getAiMemoryOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/routes': {
+      get: {
+        summary: 'AI Memory Operating System routes',
+        operationId: 'listAiMemoryOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/route': {
+      get: {
+        summary: 'Route via AI Memory Operating System',
+        operationId: 'routeAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/execute': {
+      get: {
+        summary: 'Execute via AI Memory Operating System',
+        operationId: 'executeAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/query': {
+      get: {
+        summary: 'Query AI Memory Operating System',
+        operationId: 'queryAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/engine': {
+      get: {
+        summary: 'Knowledge Operating System engine',
+        operationId: 'getKnowledgeOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/products': {
+      get: {
+        summary: 'Knowledge Operating System products',
+        operationId: 'listKnowledgeOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/monitoring': {
+      get: {
+        summary: 'Knowledge Operating System monitoring',
+        operationId: 'getKnowledgeOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/routes': {
+      get: {
+        summary: 'Knowledge Operating System routes',
+        operationId: 'listKnowledgeOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/route': {
+      get: {
+        summary: 'Route via Knowledge Operating System',
+        operationId: 'routeKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/execute': {
+      get: {
+        summary: 'Execute via Knowledge Operating System',
+        operationId: 'executeKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/query': {
+      get: {
+        summary: 'Query Knowledge Operating System',
+        operationId: 'queryKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/engine': {
+      get: {
+        summary: 'Plugin Operating System engine',
+        operationId: 'getPluginOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/products': {
+      get: {
+        summary: 'Plugin Operating System products',
+        operationId: 'listPluginOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/monitoring': {
+      get: {
+        summary: 'Plugin Operating System monitoring',
+        operationId: 'getPluginOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/routes': {
+      get: {
+        summary: 'Plugin Operating System routes',
+        operationId: 'listPluginOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/route': {
+      get: {
+        summary: 'Route via Plugin Operating System',
+        operationId: 'routePluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/execute': {
+      get: {
+        summary: 'Execute via Plugin Operating System',
+        operationId: 'executePluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/query': {
+      get: {
+        summary: 'Query Plugin Operating System',
+        operationId: 'queryPluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

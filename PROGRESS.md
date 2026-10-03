@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-333 Done — Data Plane Cloud Production Audit; Volume 18 closed)
+Last updated: 2026-10-03 (VL-343 Done — VAIOS Production Audit; Volume 19 closed)
 
 ---
 
@@ -363,6 +363,16 @@ Last updated: 2026-10-03 (VL-333 Done — Data Plane Cloud Production Audit; Vol
 | VL-331 | Data Plane Streaming (Phase 198) | Done | Façade `data-plane-streaming` → streaming-runtime; `extendsStreamingRuntime`; ADR-0233. |
 | VL-332 | GPU Runtime (Phase 199) | Done | Thin over gpu-platform; `gpuBudgetLimitsRequired`; ADR-0234. |
 | VL-333 | Data Plane Production Audit (Phase 200) | Done | Audit pack under `docs/data-plane-cloud-audit/`; ADR-0235. Volume 18 closed. Service Mesh → past Volume 18. |
+| VL-334 | VAIOS Foundation (Phase 201) | Done | `/vaios` hub; ADR-0236. `unifyingOrchestrationLayer`; `notLinux`/`notKubernetes`; `enterpriseEngineeringSystemOs=false`. |
+| VL-335 | AI Scheduler (Phase 202) | Done | Unifies global-scheduler/GPU/workflow/agent queues; ADR-0237. |
+| VL-336 | Runtime Manager (Phase 203) | Done | Lifecycle catalog over Kernel + Data Plane runtimes; ADR-0238. |
+| VL-337 | Resource Manager (Phase 204) | Done | Resource allocation catalog; `gpuBudgetLimitsRequired`; ADR-0239. |
+| VL-338 | Workflow Operating System (Phase 205) | Done | Façade over workflow-runtime + marketplace; ADR-0240. |
+| VL-339 | Agent Operating System (Phase 206) | Done | Façade over agent-runtime + fabric + marketplace; ADR-0241. |
+| VL-340 | AI Memory Operating System (Phase 207) | Done | Façade over memory-runtime + fabric + knowledge-memory; ADR-0242. |
+| VL-341 | Knowledge Operating System (Phase 208) | Done | Façade over knowledge-runtime/fabric/cloud + AKG; ADR-0243. |
+| VL-342 | Plugin Operating System (Phase 209) | Done | Façade over plugin-runtime + marketplace; existing policy gates; ADR-0244. |
+| VL-343 | VAIOS Production Audit (Phase 210) | Done | Audit pack under `docs/vaios-audit/`; ADR-0245. Volume 19 closed. Enterprise Engineering System → past Volume 19. |
 
 ---
 
@@ -541,3 +551,5 @@ Last updated: 2026-10-03 (VL-333 Done — Data Plane Cloud Production Audit; Vol
 | 2026-10-03 | VL-323 Done: Control Plane Cloud Production Audit (Phase 190) — evidence pack; ADR-0225. Volume 17 closed. Data Plane → Volume 18+. |
 | 2026-10-03 | VL-324–332 Done: Data Plane Cloud hubs (Phases 191–199) — foundation through GPU runtime; ADR-0226–0234. Thin execution layers; no Service Mesh. |
 | 2026-10-03 | VL-333 Done: Data Plane Cloud Production Audit (Phase 200) — evidence pack; ADR-0235. Volume 18 closed. Service Mesh / VAIOS deferred past Volume 18. |
+| 2026-10-03 | VL-334–342 Done: VAIOS hubs (Phases 201–209) — foundation through Plugin OS; ADR-0236–0244. Unifying orchestration over Kernel + Fabric + Data Plane; notLinux/notKubernetes. |
+| 2026-10-03 | VL-343 Done: VAIOS Production Audit (Phase 210) — evidence pack; ADR-0245. Volume 19 closed. Enterprise Engineering System deferred past Volume 19. |
