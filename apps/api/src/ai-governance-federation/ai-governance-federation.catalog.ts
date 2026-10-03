@@ -4,7 +4,7 @@ export function aigovernancefederationCatalog() {
   return {
     id: 'ai-governance-federation',
     title: 'AI Governance Federation',
-    vl: 'VL-404',
+    vl: 'Shipped.',
     phase: 271,
     domain: 'governance',
     blurb: 'Governance, compliance, and audit federation across VerbaLab nodes.',

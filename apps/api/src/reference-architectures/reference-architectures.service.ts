@@ -20,10 +20,10 @@ export class ReferenceArchitecturesService {
       honesty: referenceArchitecturesHonesty(),
       safety: {
         ...referenceArchitecturesHonesty(),
-        note: 'VL-367 Industry vertical blueprints.',
+        note: 'Industry vertical blueprints.',
       },
       docs: '/docs/REFERENCE_ARCHITECTURES.md',
-      note: 'VL-367 Industry vertical blueprints.',
+      note: 'Industry vertical blueprints.',
     };
   }
 
@@ -35,7 +35,7 @@ export class ReferenceArchitecturesService {
       domain: 'reference',
       capabilities: referenceArchitecturesCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: referenceArchitecturesHonesty(),
-      note: 'Reference Architectures monitoring (VL-367).',
+      note: 'Reference Architectures monitoring.',
     };
   }
 

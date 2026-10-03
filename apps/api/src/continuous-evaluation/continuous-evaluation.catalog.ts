@@ -89,7 +89,7 @@ export function continuousEvalGateStatus() {
       extendsEvaluationPlatform: true,
       usedAsContinuousLearningPromoteGate: true,
     },
-    note: 'Continuous Evaluation gate status for Continuous Learning promote (VL-284).',
+    note: 'Continuous Evaluation gate status for Continuous Learning promote.',
   };
 }
 
@@ -121,6 +121,6 @@ export function continuousEvaluationEngineCatalog() {
       note: 'Gate status is a required Continuous Learning promote check.',
     },
     docs: '/docs/CONTINUOUS_EVALUATION.md',
-    note: 'Continuous Evaluation (VL-284). Extends evaluation-platform / model-evaluation. Exposes gate status for Continuous Learning.',
+    note: 'Continuous Evaluation. Extends evaluation-platform / model-evaluation. Exposes gate status for Continuous Learning.',
   };
 }

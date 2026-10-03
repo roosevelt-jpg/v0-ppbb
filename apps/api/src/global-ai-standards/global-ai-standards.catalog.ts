@@ -17,7 +17,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-ai-standards/products',
       console: '/global-ai-standards',
-      notes: 'VL-364 VGAS foundation. internationalStandardAdoption=false.',
+      notes: 'VGAS foundation. internationalStandardAdoption=false.',
     },
     {
       id: 'ai-certification-platform',
@@ -25,7 +25,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-certification-platform/engine',
       console: '/ai-certification-platform',
-      notes: 'VL-365 VerbaLab-issued certificates. thirdPartyAccreditation=false.',
+      notes: 'VerbaLab-issued certificates. thirdPartyAccreditation=false.',
     },
     {
       id: 'ai-compliance-framework',
@@ -33,7 +33,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-compliance-framework/engine',
       console: '/ai-compliance-framework',
-      notes: 'VL-366 Self-assessment gap-analysis tooling.',
+      notes: 'Self-assessment gap-analysis tooling.',
     },
     {
       id: 'reference-architectures',
@@ -41,7 +41,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/reference-architectures/engine',
       console: '/reference-architectures',
-      notes: 'VL-367 Industry vertical blueprints.',
+      notes: 'Industry vertical blueprints.',
     },
     {
       id: 'best-practices-library',
@@ -49,7 +49,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/best-practices-library/engine',
       console: '/best-practices-library',
-      notes: 'VL-368 Pattern catalog.',
+      notes: 'Pattern catalog.',
     },
     {
       id: 'enterprise-assessment-platform',
@@ -57,7 +57,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/enterprise-assessment-platform/engine',
       console: '/enterprise-assessment-platform',
-      notes: 'VL-369 Maturity assessment tooling.',
+      notes: 'Maturity assessment tooling.',
     },
     {
       id: 'standards-repository',
@@ -65,7 +65,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/standards-repository/engine',
       console: '/standards-repository',
-      notes: 'VL-370 Versioned standards content store.',
+      notes: 'Versioned standards content store.',
     },
     {
       id: 'global-partner-program',
@@ -73,7 +73,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-partner-program/engine',
       console: '/global-partner-program',
-      notes: 'VL-371 Partner onboarding portal.',
+      notes: 'Partner onboarding portal.',
     },
     {
       id: 'standards-analytics',
@@ -81,7 +81,7 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/standards-analytics/engine',
       console: '/standards-analytics',
-      notes: 'VL-372 Adoption analytics.',
+      notes: 'Adoption analytics.',
     },
     {
       id: 'certificate-verification',

@@ -33,7 +33,7 @@ export class NestBestPracticesLibraryCatalogAdapter implements BestPracticesLibr
       status: 'shipped',
       api: 'GET /v1/best-practices-library/engine',
       console: '/best-practices-library',
-      notes: 'VL-368 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

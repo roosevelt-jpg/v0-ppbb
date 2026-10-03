@@ -13,7 +13,7 @@ export class A2aProtocolService {
       ...a2aprotocolCatalog(),
       capabilities: a2aprotocolCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-399 A2A Protocol — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'A2A Protocol — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

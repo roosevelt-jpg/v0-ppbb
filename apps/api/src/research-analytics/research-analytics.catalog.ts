@@ -8,7 +8,7 @@ export function researchAnalyticsEngineCatalog() {
   return {
     product: 'VerbaLab Research Analytics',
     note:
-      'Research Analytics (VL-279). Aggregates experiments/publications/patents/model progress/ROI/benchmark improvements/TRL from sibling catalogs — honest static/computed summary, not a BI OS.',
+      'Research Analytics. Aggregates experiments/publications/patents/model progress/ROI/benchmark improvements/TRL from sibling catalogs — honest static/computed summary, not a BI OS.',
     snapshot: {
       experiments: { trackedRuns: 3, completed: 2, running: 1 },
       publications: { records: 5, withDoi: 0, doiRegistryOs: false },

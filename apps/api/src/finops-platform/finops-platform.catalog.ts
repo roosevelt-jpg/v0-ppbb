@@ -173,6 +173,6 @@ export function finopsPlatformEngineCatalog() {
     },
     docs: '/docs/FINOPS_PLATFORM.md',
     note:
-      'FinOps Platform (VL-309). Cloud/GPU/model/storage/bandwidth + chargeback/showback/forecast/budgets. gpuBudgetAlertsEnabled=true; finopsOs=false.',
+      'FinOps Platform. Cloud/GPU/model/storage/bandwidth + chargeback/showback/forecast/budgets. gpuBudgetAlertsEnabled=true; finopsOs=false.',
   };
 }

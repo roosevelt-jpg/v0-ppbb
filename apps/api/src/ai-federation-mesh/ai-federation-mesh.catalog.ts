@@ -4,7 +4,7 @@ export function aifederationmeshCatalog() {
   return {
     id: 'ai-federation-mesh',
     title: 'AI Federation Mesh',
-    vl: 'VL-398',
+    vl: 'Shipped.',
     phase: 265,
     domain: 'federation',
     blurb: 'Model, runtime, memory, and knowledge federation between VerbaLab nodes.',

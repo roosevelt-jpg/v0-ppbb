@@ -13,7 +13,7 @@ export class AiIdentityWalletService {
       ...aiidentitywalletCatalog(),
       capabilities: aiidentitywalletCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-396 AI Identity Wallet — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Identity Wallet — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

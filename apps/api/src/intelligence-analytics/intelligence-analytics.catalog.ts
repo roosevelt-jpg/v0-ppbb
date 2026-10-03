@@ -13,7 +13,7 @@ export function intelligenceAnalyticsCatalog() {
   return {
     product: 'VerbaLab Intelligence Analytics',
     note:
-      'Usage/quality aggregates for Intelligence Cloud surfaces (VL-191): embeddings, memory, knowledge/vector, context, reasoning, recommendations, prompts, decisions, orchestration, chat. Distinct from Language/Speech/Voice analytics. Not a BI dashboard OS or enterprise reporting suite.',
+      'Usage/quality aggregates for Intelligence Cloud surfaces: embeddings, memory, knowledge/vector, context, reasoning, recommendations, prompts, decisions, orchestration, chat. Distinct from Language/Speech/Voice analytics. Not a BI dashboard OS or enterprise reporting suite.',
     capabilities: [
       {
         id: 'reasoning-analytics',

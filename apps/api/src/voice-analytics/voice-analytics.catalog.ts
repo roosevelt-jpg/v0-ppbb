@@ -83,7 +83,7 @@ export function voiceAnalyticsCatalog() {
         name: 'Marketplace',
         status: 'shipped',
         api: 'GET /v1/voice-analytics/marketplace',
-        notes: 'Listing/install/review/sale aggregates (VL-177).',
+        notes: 'Listing/install/review/sale aggregates.',
       },
       {
         id: 'reports',

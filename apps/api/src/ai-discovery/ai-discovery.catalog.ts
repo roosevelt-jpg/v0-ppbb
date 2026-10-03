@@ -4,7 +4,7 @@ export function aidiscoveryCatalog() {
   return {
     id: 'ai-discovery',
     title: 'AI Discovery',
-    vl: 'VL-397',
+    vl: 'Shipped.',
     phase: 264,
     domain: 'discovery',
     blurb: 'Service discovery, capability registry, and resource discovery for VerbaLab nodes.',

@@ -13,7 +13,7 @@ export function recommendationEngineCatalog() {
   return {
     product: 'VerbaLab Recommendation Engine',
     note:
-      'Light rankers over languages, voices, knowledge/content, translation pairs, models, and workflow APIs (VL-187). Uses registry/TTS/Vector/Memory catalogs + optional memory text signals. Not a collaborative-filtering / retail recommender OS.',
+      'Light rankers over languages, voices, knowledge/content, translation pairs, models, and workflow APIs. Uses registry/TTS/Vector/Memory catalogs + optional memory text signals. Not a collaborative-filtering / retail recommender OS.',
     capabilities: [
       {
         id: 'content-recommendation',

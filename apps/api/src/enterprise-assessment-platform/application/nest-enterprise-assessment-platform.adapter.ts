@@ -33,7 +33,7 @@ export class NestEnterpriseAssessmentPlatformCatalogAdapter implements Enterpris
       status: 'shipped',
       api: 'GET /v1/enterprise-assessment-platform/engine',
       console: '/enterprise-assessment-platform',
-      notes: 'VL-369 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

@@ -3,7 +3,7 @@ export function visionfmCatalog() {
     id: 'vision-fm',
     title: 'Vision FM',
     phase: 96,
-    vl: 'VL-229',
+    vl: 'Shipped.',
     modality: 'ocr',
     blurb: 'VerbaLab OCR / document vision FM',
     honesty: {

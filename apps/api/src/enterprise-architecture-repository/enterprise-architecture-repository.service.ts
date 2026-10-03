@@ -20,10 +20,10 @@ export class EnterpriseArchitectureRepositoryService {
       honesty: enterpriseArchitectureRepositoryHonesty(),
       safety: {
         ...enterpriseArchitectureRepositoryHonesty(),
-        note: 'VL-359. Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
+        note: 'Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
       },
       docs: '/docs/ENTERPRISE_ARCHITECTURE_REPOSITORY.md',
-      note: 'VL-359. Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
+      note: 'Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
     };
   }
 
@@ -37,7 +37,7 @@ export class EnterpriseArchitectureRepositoryService {
       domain: 'architecture',
       capabilities: enterpriseArchitectureRepositoryCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: enterpriseArchitectureRepositoryHonesty(),
-      note: 'Enterprise Architecture Repository monitoring (VL-359).',
+      note: 'Enterprise Architecture Repository monitoring.',
     };
   }
 

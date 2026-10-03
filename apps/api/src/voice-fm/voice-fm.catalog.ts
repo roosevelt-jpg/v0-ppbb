@@ -3,7 +3,7 @@ export function voicefmCatalog() {
     id: 'voice-fm',
     title: 'Voice FM',
     phase: 95,
-    vl: 'VL-228',
+    vl: 'Shipped.',
     modality: 'tts',
     blurb: 'VerbaLab neural TTS + cloning FM',
     honesty: {

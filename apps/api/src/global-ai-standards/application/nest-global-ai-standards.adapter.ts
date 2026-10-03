@@ -33,7 +33,7 @@ export class NestGlobalAiStandardsCatalogAdapter implements GlobalAiStandardsCat
       status: 'shipped',
       api: 'GET /v1/global-ai-standards/products',
       console: '/global-ai-standards',
-      notes: 'VL-364 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

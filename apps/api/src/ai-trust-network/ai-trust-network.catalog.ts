@@ -4,7 +4,7 @@ export function aitrustnetworkCatalog() {
   return {
     id: 'ai-trust-network',
     title: 'AI Trust Network',
-    vl: 'VL-400',
+    vl: 'Shipped.',
     phase: 267,
     domain: 'trust',
     blurb: 'Trust and reputation network for AI nodes and agents.',

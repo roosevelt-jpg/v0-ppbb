@@ -20,10 +20,10 @@ export class EnterpriseAssessmentPlatformService {
       honesty: enterpriseAssessmentPlatformHonesty(),
       safety: {
         ...enterpriseAssessmentPlatformHonesty(),
-        note: 'VL-369 Maturity assessment tooling.',
+        note: 'Maturity assessment tooling.',
       },
       docs: '/docs/ENTERPRISE_ASSESSMENT_PLATFORM.md',
-      note: 'VL-369 Maturity assessment tooling.',
+      note: 'Maturity assessment tooling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class EnterpriseAssessmentPlatformService {
       domain: 'assessment',
       capabilities: enterpriseAssessmentPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: enterpriseAssessmentPlatformHonesty(),
-      note: 'Enterprise Assessment Platform monitoring (VL-369).',
+      note: 'Enterprise Assessment Platform monitoring.',
     };
   }
 

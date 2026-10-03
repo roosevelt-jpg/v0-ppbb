@@ -28,7 +28,7 @@ export class DigitalCivilizationService {
         note: 'Platform products for demos/licensing — not civilization infrastructure already running nations.',
       },
       docs: '/docs/DIGITAL_CIVILIZATION.md',
-      note: 'Digital Civilization Foundation (VL-384). civilizationInfrastructureOs=false.',
+      note: 'Digital Civilization Foundation. civilizationInfrastructureOs=false.',
     };
   }
 
@@ -71,7 +71,7 @@ export class DigitalCivilizationService {
       honesty: digitalCivilizationHonesty(),
       links: Object.fromEntries(digitalCivilizationProductCatalog().filter((p) => p.console).map((p) => [p.id, p.console])),
       docs: '/docs/DIGITAL_CIVILIZATION.md',
-      note: 'DCIV overview (VL-384-393).',
+      note: 'DCIV overview.',
     };
   }
 
@@ -94,7 +94,7 @@ export class DigitalCivilizationService {
       mode: 'foundation',
       products: digitalCivilizationProductCatalog().map((p) => ({ id: p.id, status: p.status })),
       honesty: digitalCivilizationHonesty(),
-      note: 'DCIV monitoring snapshot (VL-384).',
+      note: 'DCIV monitoring snapshot.',
     };
   }
 }

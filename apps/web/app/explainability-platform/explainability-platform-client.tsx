@@ -3,12 +3,17 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
 
 type Engine = {
   product: string;
   note: string;
-  honesty: Record<string, boolean | string>;
+  honesty: Record<string, unknown>;
   safety?: { note?: string } & Record<string, unknown>;
+  capabilities?: CatalogRow[];
+  detections?: CatalogRow[];
+  approvals?: CatalogRow[];
+  surfaces?: CatalogRow[];
 };
 
 export function ExplainabilityPlatformClient() {
@@ -32,17 +37,14 @@ export function ExplainabilityPlatformClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
-        <div style={{ display: 'grid', gap: '1.25rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{data.note}</p>
-          {data.safety?.note ? (
-            <p style={{ margin: 0, borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem', color: 'var(--muted)' }}>
-              {String(data.safety.note)}
-            </p>
-          ) : null}
-          <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty }, null, 2)}
-          </pre>
-        </div>
+        <CatalogConsole
+          note={data.note}
+          safetyNote={data.safety?.note ? String(data.safety.note) : undefined}
+          honesty={data.honesty}
+          sections={[{ title: 'Capabilities', rows: data.capabilities ?? [] }]}
+          backHref="/trust-cloud"
+          backLabel="Trust Cloud"
+        />
       ) : null}
     </AppShell>
   );

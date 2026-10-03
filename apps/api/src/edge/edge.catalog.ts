@@ -3,7 +3,7 @@ export function edgeCatalog() {
     id: 'edge',
     title: 'Edge',
     phase: 99,
-    vl: 'VL-232',
+    vl: 'Shipped.',
     modality: 'edge',
     blurb: 'On-device / edge inference pack',
     honesty: {

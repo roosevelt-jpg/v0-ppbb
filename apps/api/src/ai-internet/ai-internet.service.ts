@@ -13,7 +13,7 @@ export class AiInternetService {
       ...aiinternetCatalog(),
       capabilities: aiinternetCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-394 AI Internet — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Internet — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

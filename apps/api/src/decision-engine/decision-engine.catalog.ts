@@ -13,7 +13,7 @@ export function decisionEngineCatalog() {
   return {
     product: 'VerbaLab AI Decision Engine',
     note:
-      'Bounded decision helpers for model selection, routing, fallback, confidence, risk, policy, safety, tools, workflows, and cost (VL-189). Light rules over plan/entitlements + fixed catalogs. Optional LLM narrative deferred for most kinds. Not an enterprise BRMS (Drools/Pega parity).',
+      'Bounded decision helpers for model selection, routing, fallback, confidence, risk, policy, safety, tools, workflows, and cost. Light rules over plan/entitlements + fixed catalogs. Optional LLM narrative deferred for most kinds. Not an enterprise BRMS (Drools/Pega parity).',
     capabilities: [
       {
         id: 'model-selection',
@@ -104,7 +104,7 @@ export function decisionEngineCatalog() {
         name: 'Enterprise BRMS',
         status: 'deferred',
         api: null,
-        notes: 'Drools/Pega parity deferred (VL-189 out of scope).',
+        notes: 'Drools/Pega parity deferred (out of scope).',
       },
     ] satisfies DecisionCapability[],
     honesty: {

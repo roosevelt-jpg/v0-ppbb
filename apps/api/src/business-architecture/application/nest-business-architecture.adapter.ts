@@ -33,7 +33,7 @@ export class NestBusinessArchitectureCatalogAdapter implements BusinessArchitect
       status: 'shipped',
       api: 'GET /v1/business-architecture/engine',
       console: '/business-architecture',
-      notes: 'VL-358 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

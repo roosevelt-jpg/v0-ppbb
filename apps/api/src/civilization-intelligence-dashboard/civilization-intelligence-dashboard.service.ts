@@ -20,10 +20,10 @@ export class CivilizationIntelligenceDashboardService {
       honesty: civilizationIntelligenceDashboardHonesty(),
       safety: {
         ...civilizationIntelligenceDashboardHonesty(),
-        note: 'VL-392 Adoption/impact analytics dashboards — reporting tooling.',
+        note: 'Adoption/impact analytics dashboards — reporting tooling.',
       },
       docs: '/docs/CIVILIZATION_INTELLIGENCE_DASHBOARD.md',
-      note: 'VL-392 Adoption/impact analytics dashboards — reporting tooling.',
+      note: 'Adoption/impact analytics dashboards — reporting tooling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class CivilizationIntelligenceDashboardService {
       domain: 'intelligence',
       capabilities: civilizationIntelligenceDashboardCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: civilizationIntelligenceDashboardHonesty(),
-      note: 'Civilization Intelligence Dashboard monitoring (VL-392).',
+      note: 'Civilization Intelligence Dashboard monitoring.',
     };
   }
 

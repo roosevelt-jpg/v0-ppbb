@@ -3,7 +3,7 @@ export function fusionCatalog() {
     id: 'fusion',
     title: 'Fusion',
     phase: 100,
-    vl: 'VL-233',
+    vl: 'Shipped.',
     modality: 'multimodal',
     blurb: 'Multimodal fusion FM',
     honesty: {

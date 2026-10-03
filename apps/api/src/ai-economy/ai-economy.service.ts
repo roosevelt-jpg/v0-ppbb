@@ -28,7 +28,7 @@ export class AiEconomyService {
         note: 'Marketplace/commerce software — not world-largest economy status; Stripe for payments; investment dashboard only.',
       },
       docs: '/docs/AI_ECONOMY.md',
-      note: 'AI Economy Foundation (VL-374). worldsLargestAiEconomy=false.',
+      note: 'AI Economy Foundation. worldsLargestAiEconomy=false.',
     };
   }
 
@@ -69,7 +69,7 @@ export class AiEconomyService {
       honesty: aiEconomyHonesty(),
       links: Object.fromEntries(aiEconomyProductCatalog().filter((p) => p.console).map((p) => [p.id, p.console])),
       docs: '/docs/AI_ECONOMY.md',
-      note: 'AIE overview (VL-374-383).',
+      note: 'AIE overview.',
     };
   }
 
@@ -92,7 +92,7 @@ export class AiEconomyService {
       mode: 'foundation',
       products: aiEconomyProductCatalog().map((p) => ({ id: p.id, status: p.status })),
       honesty: aiEconomyHonesty(),
-      note: 'AIE monitoring snapshot (VL-374).',
+      note: 'AIE monitoring snapshot.',
     };
   }
 }

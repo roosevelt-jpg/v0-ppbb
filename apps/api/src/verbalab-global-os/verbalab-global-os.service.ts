@@ -13,7 +13,7 @@ export class VerbalabGlobalOsService {
       ...verbalabglobalosCatalog(),
       capabilities: verbalabglobalosCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-407 VerbaLab Global OS — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'VerbaLab Global OS — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

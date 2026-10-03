@@ -33,7 +33,7 @@ export class NestAiComplianceFrameworkCatalogAdapter implements AiComplianceFram
       status: 'shipped',
       api: 'GET /v1/ai-compliance-framework/engine',
       console: '/ai-compliance-framework',
-      notes: 'VL-366 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

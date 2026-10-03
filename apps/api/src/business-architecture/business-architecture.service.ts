@@ -20,10 +20,10 @@ export class BusinessArchitectureService {
       honesty: businessArchitectureHonesty(),
       safety: {
         ...businessArchitectureHonesty(),
-        note: 'VL-358. Capability, value-stream, process, journey modeling.',
+        note: 'Capability, value-stream, process, journey modeling.',
       },
       docs: '/docs/BUSINESS_ARCHITECTURE.md',
-      note: 'VL-358. Capability, value-stream, process, journey modeling.',
+      note: 'Capability, value-stream, process, journey modeling.',
     };
   }
 
@@ -37,7 +37,7 @@ export class BusinessArchitectureService {
       domain: 'capability',
       capabilities: businessArchitectureCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: businessArchitectureHonesty(),
-      note: 'Business Architecture monitoring (VL-358).',
+      note: 'Business Architecture monitoring.',
     };
   }
 

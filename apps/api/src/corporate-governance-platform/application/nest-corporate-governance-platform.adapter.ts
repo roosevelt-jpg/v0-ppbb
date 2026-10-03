@@ -33,7 +33,7 @@ export class NestCorporateGovernancePlatformCatalogAdapter implements CorporateG
       status: 'shipped',
       api: 'GET /v1/corporate-governance-platform/engine',
       console: '/corporate-governance-platform',
-      notes: 'VL-355 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

@@ -169,7 +169,7 @@ export class VoiceMarketplaceService {
     if (input.celebrityClaim) {
       throw new ApiException(
         'validation_error',
-        'Celebrity voice SKUs are forbidden without a verified rights chain (VL-177 out of scope).',
+        'Celebrity voice SKUs are forbidden without a verified rights chain (out of scope).',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -267,7 +267,7 @@ export class VoiceMarketplaceService {
         if (!clone.ownershipAttested || !clone.consentAttested) {
           throw new ApiException(
             'validation_error',
-            'Clone must have consent + ownership attestation before marketplace publish (VL-172)',
+            'Clone must have consent + ownership attestation before marketplace publish',
             HttpStatus.BAD_REQUEST,
           );
         }
@@ -626,7 +626,7 @@ export class VoiceMarketplaceService {
       revenueCents: sales._sum.amountCents ?? 0,
       reviewsReceived: reviews,
       product: 'VerbaLab Voice Marketplace',
-      note: 'Publisher-side aggregates. Full Voice Analytics hub: VL-178 /voice-analytics.',
+      note: 'Publisher-side aggregates. Full Voice Analytics hub: /voice-analytics.',
       docs: '/docs/VOICE_MARKETPLACE.md',
     };
   }

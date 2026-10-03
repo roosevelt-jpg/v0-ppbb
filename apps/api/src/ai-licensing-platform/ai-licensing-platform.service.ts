@@ -20,10 +20,10 @@ export class AiLicensingPlatformService {
       honesty: aiLicensingPlatformHonesty(),
       safety: {
         ...aiLicensingPlatformHonesty(),
-        note: 'VL-376 License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
+        note: 'License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
       },
       docs: '/docs/AI_LICENSING_PLATFORM.md',
-      note: 'VL-376 License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
+      note: 'License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
     };
   }
 
@@ -35,7 +35,7 @@ export class AiLicensingPlatformService {
       domain: 'licensing',
       capabilities: aiLicensingPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiLicensingPlatformHonesty(),
-      note: 'AI Licensing Platform monitoring (VL-376).',
+      note: 'AI Licensing Platform monitoring.',
     };
   }
 

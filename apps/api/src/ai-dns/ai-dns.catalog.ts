@@ -4,7 +4,7 @@ export function aidnsCatalog() {
   return {
     id: 'ai-dns',
     title: 'AI DNS',
-    vl: 'VL-395',
+    vl: 'Shipped.',
     phase: 262,
     domain: 'dns',
     blurb: 'Name resolution for AI services, models, and agent endpoints.',

@@ -13,7 +13,7 @@ export function ontologyPlatformCatalog() {
   return {
     product: 'VerbaLab Ontology Platform',
     note:
-      'Workspace-scoped concepts, hierarchies (is_a), synonyms, and multilingual labels over Knowledge Graph entities (VL-196 / VL-184). Not OWL/RDF/Protege OS; vertical medical/legal packs are light domain tags, not certified ontologies.',
+      'Workspace-scoped concepts, hierarchies (is_a), synonyms, and multilingual labels over Knowledge Graph entities (/ ). Not OWL/RDF/Protege OS; vertical medical/legal packs are light domain tags, not certified ontologies.',
     capabilities: [
       {
         id: 'concepts',
@@ -48,7 +48,7 @@ export function ontologyPlatformCatalog() {
         name: 'Categories',
         status: 'shipped',
         api: 'POST /v1/ontology/concepts',
-        notes: 'type=category concepts. Taxonomy platform is VL-197.',
+        notes: 'type=category concepts. Taxonomy platform is',
       },
       {
         id: 'synonyms',

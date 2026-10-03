@@ -20,10 +20,10 @@ export class AiTalentPlatformService {
       honesty: aiTalentPlatformHonesty(),
       safety: {
         ...aiTalentPlatformHonesty(),
-        note: 'VL-378 Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
+        note: 'Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
       },
       docs: '/docs/AI_TALENT_PLATFORM.md',
-      note: 'VL-378 Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
+      note: 'Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
     };
   }
 
@@ -35,7 +35,7 @@ export class AiTalentPlatformService {
       domain: 'talent',
       capabilities: aiTalentPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiTalentPlatformHonesty(),
-      note: 'AI Talent Platform monitoring (VL-378).',
+      note: 'AI Talent Platform monitoring.',
     };
   }
 

@@ -31,7 +31,7 @@ export class AiInternetAuditService {
     return {
       id: 'ai-internet-audit',
       title: 'AI Internet Production Audit',
-      vl: 'VL-409',
+      vl: 'Shipped.',
       phase: 276,
       hubs: HUBS,
       libraryCoverage: {
@@ -43,7 +43,7 @@ export class AiInternetAuditService {
       honesty: aiInternetHonesty(),
       ownAi: ownAiStackSummary(),
       docs: '/docs/ai-internet-audit/PRODUCTION_READINESS.md',
-      note: 'VL-409 Volume 25 audit — AI Internet protocol software complete; keys later.',
+      note: 'Volume 25 audit — AI Internet protocol software complete; keys later.',
     };
   }
 

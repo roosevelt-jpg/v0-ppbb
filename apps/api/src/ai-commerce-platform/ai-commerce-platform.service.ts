@@ -20,10 +20,10 @@ export class AiCommercePlatformService {
       honesty: aiCommercePlatformHonesty(),
       safety: {
         ...aiCommercePlatformHonesty(),
-        note: 'VL-375 Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
+        note: 'Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
       },
       docs: '/docs/AI_COMMERCE_PLATFORM.md',
-      note: 'VL-375 Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
+      note: 'Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class AiCommercePlatformService {
       domain: 'commerce',
       capabilities: aiCommercePlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiCommercePlatformHonesty(),
-      note: 'AI Commerce Platform monitoring (VL-375).',
+      note: 'AI Commerce Platform monitoring.',
     };
   }
 

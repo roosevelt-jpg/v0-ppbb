@@ -20,10 +20,10 @@ export class AiComplianceFrameworkService {
       honesty: aiComplianceFrameworkHonesty(),
       safety: {
         ...aiComplianceFrameworkHonesty(),
-        note: 'VL-366 Self-assessment gap-analysis tooling.',
+        note: 'Self-assessment gap-analysis tooling.',
       },
       docs: '/docs/AI_COMPLIANCE_FRAMEWORK.md',
-      note: 'VL-366 Self-assessment gap-analysis tooling.',
+      note: 'Self-assessment gap-analysis tooling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class AiComplianceFrameworkService {
       domain: 'compliance',
       capabilities: aiComplianceFrameworkCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiComplianceFrameworkHonesty(),
-      note: 'AI Compliance Framework monitoring (VL-366).',
+      note: 'AI Compliance Framework monitoring.',
     };
   }
 

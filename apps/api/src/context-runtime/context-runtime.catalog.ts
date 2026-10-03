@@ -53,7 +53,7 @@ export function contextRuntimeCatalog() {
   return {
     product: 'VerbaLab Context Runtime',
     note:
-      'Context Runtime (VL-217). Kernel assembly over VL-185 Context Engine (conversation/workspace/org/project/language/user/knowledge/model blocks, prioritization, char-budget compression, retrieval). Optional Intelligent Cache namespace=context. Not an infinite context window, not LLM summarization OS, not realtime push. Does not regenerate Context Engine.',
+      'Context Runtime. Kernel assembly over Context Engine (conversation/workspace/org/project/language/user/knowledge/model blocks, prioritization, char-budget compression, retrieval). Optional Intelligent Cache namespace=context. Not an infinite context window, not LLM summarization OS, not realtime push. Does not regenerate Context Engine.',
     capabilities: [
       {
         id: 'conversation-context',

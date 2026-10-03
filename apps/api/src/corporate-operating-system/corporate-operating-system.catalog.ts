@@ -15,7 +15,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-operating-system/products',
       console: '/corporate-operating-system',
-      notes: 'VL-354 foundation. internalBusinessSoftware=true; realCorporateGovernance=false.',
+      notes: 'foundation. internalBusinessSoftware=true; realCorporateGovernance=false.',
     },
     {
       id: 'corporate-governance-platform',
@@ -23,7 +23,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-governance-platform/engine',
       console: '/corporate-governance-platform',
-      notes: 'VL-355 committee/board tracking tooling.',
+      notes: 'committee/board tracking tooling.',
     },
     {
       id: 'strategic-planning-platform',
@@ -31,7 +31,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/strategic-planning-platform/engine',
       console: '/strategic-planning-platform',
-      notes: 'VL-356 strategy/OKR tooling.',
+      notes: 'strategy/OKR tooling.',
     },
     {
       id: 'enterprise-portfolio-management',
@@ -39,7 +39,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/enterprise-portfolio-management/engine',
       console: '/enterprise-portfolio-management',
-      notes: 'VL-357 portfolio tracking.',
+      notes: 'portfolio tracking.',
     },
     {
       id: 'business-architecture',
@@ -47,7 +47,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/business-architecture/engine',
       console: '/business-architecture',
-      notes: 'VL-358 capability/value-stream models.',
+      notes: 'capability/value-stream models.',
     },
     {
       id: 'enterprise-architecture-repository',
@@ -55,7 +55,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/enterprise-architecture-repository/engine',
       console: '/enterprise-architecture-repository',
-      notes: 'VL-359 architecture artifact store; togafModelingSuiteOs=false.',
+      notes: 'architecture artifact store; togafModelingSuiteOs=false.',
     },
     {
       id: 'corporate-knowledge-system',
@@ -63,7 +63,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-knowledge-system/engine',
       console: '/corporate-knowledge-system',
-      notes: 'VL-360 knowledge portal; confluenceOs=false.',
+      notes: 'knowledge portal; confluenceOs=false.',
     },
     {
       id: 'executive-intelligence-platform',
@@ -71,7 +71,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/executive-intelligence-platform/engine',
       console: '/executive-intelligence-platform',
-      notes: 'VL-361 executive/board KPI cockpits.',
+      notes: 'executive/board KPI cockpits.',
     },
     {
       id: 'corporate-risk-platform',
@@ -79,7 +79,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-risk-platform/engine',
       console: '/corporate-risk-platform',
-      notes: 'VL-362 enterprise risk register.',
+      notes: 'enterprise risk register.',
     },
     {
       id: 'digital-constitution',
@@ -87,7 +87,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-operating-system/constitution',
       console: '/corporate-operating-system',
-      notes: 'VL-363 audit packs Digital Constitution layers (versioned principles).',
+      notes: 'audit packs Digital Constitution layers (versioned principles).',
     },
   ];
 }

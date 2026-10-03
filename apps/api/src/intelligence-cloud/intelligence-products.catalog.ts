@@ -19,7 +19,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/intelligence-cloud/products',
       console: '/intelligence-cloud',
       notes:
-        'Intelligence Cloud parent hub (VL-180). Shared reasoning/memory/orchestration layer over LLM gateway — not a custom AI kernel.',
+        'Intelligence Cloud parent hub. Shared reasoning/memory/orchestration layer over LLM gateway — not a custom AI kernel.',
     },
     {
       id: 'embeddings',
@@ -28,7 +28,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/embedding-cloud/engine',
       console: '/embedding-cloud',
       notes:
-        'Shipped text/document/code embeddings (VL-181) over Own AI/gateway; speech/image via caption→embed path. Dedicated multimodal encoders deferred.',
+        'Shipped text/document/code embeddings over Own AI/gateway; speech/image via caption→embed path. Dedicated multimodal encoders deferred.',
     },
     {
       id: 'vector',
@@ -37,7 +37,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/vector-cloud/engine',
       console: '/vector-cloud',
       notes:
-        'Shipped pgvector hub (VL-182) + hybrid search over VL-062. Sharding/Pinecone OS deferred.',
+        'Shipped pgvector hub + hybrid search over Sharding/Pinecone OS deferred.',
     },
     {
       id: 'memory',
@@ -46,7 +46,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/memory-cloud/engine',
       console: '/memory-cloud',
       notes:
-        'Shipped persistent memory + GDPR export/erase + retention sweeper (VL-183). Embedding NN semantic memory deferred.',
+        'Shipped persistent memory + GDPR export/erase + retention sweeper. Embedding NN semantic memory deferred.',
     },
     {
       id: 'knowledge-graph',
@@ -55,7 +55,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/knowledge-graph/engine',
       console: '/knowledge-graph',
       notes:
-        'Shipped bounded Postgres ER (VL-184). Prefer RAG. Neo4j OS deferred; ontology/taxonomy are sibling hubs.',
+        'Shipped bounded Postgres ER. Prefer RAG. Neo4j OS deferred; ontology/taxonomy are sibling hubs.',
     },
     {
       id: 'context-engine',
@@ -64,7 +64,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/context-engine/engine',
       console: '/context-engine',
       notes:
-        'Shipped assemble retrieval + memory + prompt with char-budget compression (VL-185). Infinite window/realtime deferred.',
+        'Shipped assemble retrieval + memory + prompt with char-budget compression. Infinite window/realtime deferred.',
     },
     {
       id: 'reasoning',
@@ -73,7 +73,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/reasoning-cloud/engine',
       console: '/reasoning-cloud',
       notes:
-        'Shipped LLM-gateway strategies + allowlisted tool execution (VL-186). Not a custom reasoner kernel.',
+        'Shipped LLM-gateway strategies + allowlisted tool execution. Not a custom reasoner kernel.',
     },
     {
       id: 'recommendations',
@@ -82,7 +82,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/recommendation-engine/engine',
       console: '/recommendation-engine',
       notes:
-        'Shipped light rankers over languages/voices/knowledge (VL-187). Not a retail recommender OS.',
+        'Shipped light rankers over languages/voices/knowledge. Not a retail recommender OS.',
     },
     {
       id: 'prompt-intelligence',
@@ -91,7 +91,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/prompt-intelligence/engine',
       console: '/prompt-intelligence',
       notes:
-        'Shipped hub over VL-086 versioned prompts with heuristic eval/security (VL-188). Not an auto-prompt research lab.',
+        'Shipped hub over versioned prompts with heuristic eval/security. Not an auto-prompt research lab.',
     },
     {
       id: 'decision-engine',
@@ -100,7 +100,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/decision-engine/engine',
       console: '/decision-engine',
       notes:
-        'Shipped bounded policy/routing helpers (VL-189). Not Drools/Pega BRMS.',
+        'Shipped bounded policy/routing helpers. Not Drools/Pega BRMS.',
     },
     {
       id: 'orchestration',
@@ -109,7 +109,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/ai-orchestration/engine',
       console: '/ai-orchestration',
       notes:
-        'Shipped load-bearing e2e pipelines over gateway/engines (VL-190). Not a multi-cloud agent OS.',
+        'Shipped load-bearing e2e pipelines over gateway/engines. Not a multi-cloud agent OS.',
     },
     {
       id: 'agent-intelligence',
@@ -126,7 +126,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       api: 'GET /v1/intelligence-analytics/engine',
       console: '/intelligence-analytics',
       notes:
-        'Shipped usage/quality aggregates for Intelligence Cloud (VL-191). Not BI OS.',
+        'Shipped usage/quality aggregates for Intelligence Cloud. Not BI OS.',
     },
     {
       id: 'ai-observability',

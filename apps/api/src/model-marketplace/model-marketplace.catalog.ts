@@ -37,7 +37,7 @@ export function modelMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Model Marketplace',
     note:
-      'Model Marketplace (VL-251). Publish/license model SKUs over Model Registry cards (VL-237 / VL-110). Entitlements on install — not weight hosting, Hugging Face hub, or traffic-mesh deploy OS. Monetization records MarketplaceSale receipts; Stripe Connect via VL-092.',
+      'Model Marketplace. Publish/license model SKUs over Model Registry cards (/ ). Entitlements on install — not weight hosting, Hugging Face hub, or traffic-mesh deploy OS. Monetization records MarketplaceSale receipts; Stripe Connect via',
     capabilities: [
       {
         id: 'foundation-models',
@@ -79,7 +79,7 @@ export function modelMarketplaceEngineCatalog() {
         name: 'Commercial Models',
         status: 'partial',
         api: 'POST /v1/model-marketplace/listings/:id/install',
-        notes: 'Paid listings record sales; Stripe Connect path shared with VL-092.',
+        notes: 'Paid listings record sales; Stripe Connect path shared with',
       },
       {
         id: 'versioning',
@@ -101,7 +101,7 @@ export function modelMarketplaceEngineCatalog() {
         status: 'partial',
         api: 'GET /v1/model-marketplace/sales',
         notes:
-          '15% platform fee recorded on paid installs. Creator Economy (VL-258) deepens payout math — hand-check before live creators.',
+          '15% platform fee recorded on paid installs. Creator Economy deepens payout math — hand-check before live creators.',
       },
       {
         id: 'analytics',

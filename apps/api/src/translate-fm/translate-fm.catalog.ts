@@ -3,7 +3,7 @@ export function translatefmCatalog() {
     id: 'translate-fm',
     title: 'Translate FM',
     phase: 101,
-    vl: 'VL-234',
+    vl: 'Shipped.',
     modality: 'mt',
     blurb: 'VerbaLab African MT foundation model',
     honesty: {

@@ -13,7 +13,7 @@ export function voiceMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Voice Marketplace',
     note:
-      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace (VL-090). Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not ElevenLabs Voice Library / Soundraw parity.',
+      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace. Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not ElevenLabs Voice Library / Soundraw parity.',
     capabilities: [
       {
         id: 'marketplace',
@@ -41,7 +41,7 @@ export function voiceMarketplaceEngineCatalog() {
         name: 'Voice Selling',
         status: 'shipped',
         api: 'POST /v1/voice-marketplace/listings/:id/install',
-        notes: 'Paid listings record sales; Stripe Connect path shared with VL-092 patterns when configured.',
+        notes: 'Paid listings record sales; Stripe Connect path shared with patterns when configured.',
       },
       {
         id: 'subscriptions',
@@ -97,7 +97,7 @@ export function voiceMarketplaceEngineCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/voice-marketplace/analytics',
-        notes: 'Listing/install/rating aggregates. Full Voice Analytics hub: VL-178.',
+        notes: 'Listing/install/rating aggregates. Full Voice Analytics hub:',
       },
       {
         id: 'billing',

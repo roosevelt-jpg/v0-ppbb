@@ -13,7 +13,7 @@ export function knowledgeBaseCatalog() {
   return {
     product: 'VerbaLab Enterprise Knowledge Base',
     note:
-      'Org/workspace-scoped document store over VL-062 ingest (VL-194). Collections/tags/content kinds + Markdown/HTML + light approval + OCR caption ingest. Not a Confluence/SharePoint OS.',
+      'Org/workspace-scoped document store over ingest. Collections/tags/content kinds + Markdown/HTML + light approval + OCR caption ingest. Not a Confluence/SharePoint OS.',
     capabilities: [
       {
         id: 'document-ingest',
@@ -41,7 +41,7 @@ export function knowledgeBaseCatalog() {
         name: 'Tags',
         status: 'shipped',
         api: 'GET /v1/knowledge/documents?tag=',
-        notes: 'Freeform tags for filter. Taxonomy platform is VL-197.',
+        notes: 'Freeform tags for filter. Taxonomy platform is',
       },
       {
         id: 'content-kinds',

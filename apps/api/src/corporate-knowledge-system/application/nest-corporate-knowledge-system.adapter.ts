@@ -33,7 +33,7 @@ export class NestCorporateKnowledgeSystemCatalogAdapter implements CorporateKnow
       status: 'shipped',
       api: 'GET /v1/corporate-knowledge-system/engine',
       console: '/corporate-knowledge-system',
-      notes: 'VL-360 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

@@ -20,10 +20,10 @@ export class UniversalTranslationGridService {
       honesty: universalTranslationGridHonesty(),
       safety: {
         ...universalTranslationGridHonesty(),
-        note: 'VL-389 Translation infrastructure across speech/doc/broadcast/IoT channels.',
+        note: 'Translation infrastructure across speech/doc/broadcast/IoT channels.',
       },
       docs: '/docs/UNIVERSAL_TRANSLATION_GRID.md',
-      note: 'VL-389 Translation infrastructure across speech/doc/broadcast/IoT channels.',
+      note: 'Translation infrastructure across speech/doc/broadcast/IoT channels.',
     };
   }
 
@@ -35,7 +35,7 @@ export class UniversalTranslationGridService {
       domain: 'grid',
       capabilities: universalTranslationGridCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: universalTranslationGridHonesty(),
-      note: 'Universal Translation Grid monitoring (VL-389).',
+      note: 'Universal Translation Grid monitoring.',
     };
   }
 

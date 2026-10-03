@@ -50,7 +50,7 @@ export class EchoService {
         gateway: '/gateway',
       },
       docs: '/docs/ECHO.md',
-      note: 'VL-227 Echo — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Echo — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

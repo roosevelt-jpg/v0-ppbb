@@ -13,7 +13,7 @@ export function taxonomyPlatformCatalog() {
   return {
     product: 'VerbaLab Taxonomy Platform',
     note:
-      'Workspace-scoped categories, tags, content-type terms, and knowledge trees (VL-197). Assigns to Knowledge Base documents. Not an enterprise taxonomy OS; automatic classification is keyword-heuristic only.',
+      'Workspace-scoped categories, tags, content-type terms, and knowledge trees. Assigns to Knowledge Base documents. Not an enterprise taxonomy OS; automatic classification is keyword-heuristic only.',
     capabilities: [
       {
         id: 'categories',

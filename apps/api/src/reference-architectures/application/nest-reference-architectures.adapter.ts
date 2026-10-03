@@ -33,7 +33,7 @@ export class NestReferenceArchitecturesCatalogAdapter implements ReferenceArchit
       status: 'shipped',
       api: 'GET /v1/reference-architectures/engine',
       console: '/reference-architectures',
-      notes: 'VL-367 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

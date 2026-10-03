@@ -13,7 +13,7 @@ export class AiPaymentNetworkService {
       ...aipaymentnetworkCatalog(),
       capabilities: aipaymentnetworkCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-401 AI Payment Network — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Payment Network — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

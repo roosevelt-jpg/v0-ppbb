@@ -95,7 +95,7 @@ export function neuralTtsEngineCatalog() {
         status: 'shipped',
         api: 'GET /v1/tts/voices',
         notes:
-          'Shipped personality labels on catalog (warm, formal, …). Emotion synthesis via VL-173 Emotion Voice.',
+          'Shipped personality labels on catalog (warm, formal, …). Emotion synthesis via Emotion Voice.',
       },
       {
         id: 'enterprise-voices',
@@ -103,7 +103,7 @@ export function neuralTtsEngineCatalog() {
         status: 'shipped',
         api: 'GET /v1/voice-cloning/library',
         notes:
-          'Shipped consent-gated clone:{id} voices via Voice Cloning Platform (VL-064/172).',
+          'Shipped consent-gated clone:{id} voices via Voice Cloning Platform (/172).',
       },
       {
         id: 'monitoring',
@@ -117,7 +117,7 @@ export function neuralTtsEngineCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/tts/engine/analytics',
-        notes: 'Shipped TTS usage summary. Full Voice Analytics hub: VL-178 /voice-analytics.',
+        notes: 'Shipped TTS usage summary. Full Voice Analytics hub: /voice-analytics.',
       },
     ] satisfies TtsCapability[],
     engines: [

@@ -3,7 +3,7 @@ export function reasonfmCatalog() {
     id: 'reason-fm',
     title: 'Reason FM',
     phase: 98,
-    vl: 'VL-231',
+    vl: 'Shipped.',
     modality: 'chat',
     blurb: 'VerbaLab reasoning specialist',
     honesty: {

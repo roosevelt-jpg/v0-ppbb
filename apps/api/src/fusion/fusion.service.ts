@@ -50,7 +50,7 @@ export class FusionService {
         gateway: '/gateway',
       },
       docs: '/docs/FUSION.md',
-      note: 'VL-233 Fusion — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Fusion — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

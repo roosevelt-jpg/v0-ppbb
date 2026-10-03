@@ -20,10 +20,10 @@ export class EnterprisePortfolioManagementService {
       honesty: enterprisePortfolioManagementHonesty(),
       safety: {
         ...enterprisePortfolioManagementHonesty(),
-        note: 'VL-357. Products/programs/projects/budgets/capacity tracking.',
+        note: 'Products/programs/projects/budgets/capacity tracking.',
       },
       docs: '/docs/ENTERPRISE_PORTFOLIO_MANAGEMENT.md',
-      note: 'VL-357. Products/programs/projects/budgets/capacity tracking.',
+      note: 'Products/programs/projects/budgets/capacity tracking.',
     };
   }
 
@@ -37,7 +37,7 @@ export class EnterprisePortfolioManagementService {
       domain: 'portfolio',
       capabilities: enterprisePortfolioManagementCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: enterprisePortfolioManagementHonesty(),
-      note: 'Enterprise Portfolio Management monitoring (VL-357).',
+      note: 'Enterprise Portfolio Management monitoring.',
     };
   }
 

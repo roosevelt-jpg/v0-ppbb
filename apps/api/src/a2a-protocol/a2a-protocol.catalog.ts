@@ -4,7 +4,7 @@ export function a2aprotocolCatalog() {
   return {
     id: 'a2a-protocol',
     title: 'A2A Protocol',
-    vl: 'VL-399',
+    vl: 'Shipped.',
     phase: 266,
     domain: 'a2a',
     blurb: 'Agent-to-agent communication and cross-platform AI messaging.',

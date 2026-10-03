@@ -50,7 +50,7 @@ export class VectorFmService {
         gateway: '/gateway',
       },
       docs: '/docs/VECTOR_FM.md',
-      note: 'VL-230 Vector FM — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Vector FM — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

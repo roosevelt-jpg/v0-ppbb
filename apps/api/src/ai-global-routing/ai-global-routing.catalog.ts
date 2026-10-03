@@ -4,7 +4,7 @@ export function aiglobalroutingCatalog() {
   return {
     id: 'ai-global-routing',
     title: 'AI Global Routing',
-    vl: 'VL-403',
+    vl: 'Shipped.',
     phase: 270,
     domain: 'routing',
     blurb: 'Global routing, edge federation, and multi-cloud fabric control.',

@@ -26,10 +26,10 @@ export class NationalAiPlatformService {
       honesty: nationalAiPlatformHonesty(),
       safety: {
         ...nationalAiPlatformHonesty(),
-        note: 'VL-385 Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
+        note: 'Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
       },
       docs: '/docs/NATIONAL_AI_PLATFORM.md',
-      note: 'VL-385 Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
+      note: 'Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
     };
   }
 
@@ -41,7 +41,7 @@ export class NationalAiPlatformService {
       domain: 'national',
       capabilities: nationalAiPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: nationalAiPlatformHonesty(),
-      note: 'National AI Platform monitoring (VL-385).',
+      note: 'National AI Platform monitoring.',
     };
   }
 

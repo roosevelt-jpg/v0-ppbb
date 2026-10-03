@@ -20,10 +20,10 @@ export class RevenueSharingPlatformService {
       honesty: revenueSharingPlatformHonesty(),
       safety: {
         ...revenueSharingPlatformHonesty(),
-        note: 'VL-377 Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
+        note: 'Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
       },
       docs: '/docs/REVENUE_SHARING_PLATFORM.md',
-      note: 'VL-377 Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
+      note: 'Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
     };
   }
 
@@ -35,7 +35,7 @@ export class RevenueSharingPlatformService {
       domain: 'revenue',
       capabilities: revenueSharingPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: revenueSharingPlatformHonesty(),
-      note: 'Revenue Sharing Platform monitoring (VL-377).',
+      note: 'Revenue Sharing Platform monitoring.',
     };
   }
 

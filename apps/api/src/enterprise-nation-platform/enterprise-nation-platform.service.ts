@@ -85,11 +85,11 @@ export class EnterpriseNationPlatformService {
       ...overlay,
       safety: {
         ...overlay.honesty,
-        note: 'VL-387 + ADR-0325 — bank/hospital/government unlock via Model Runtime gates.',
+        note: '+ ADR-0325 — bank/hospital/government unlock via Model Runtime gates.',
       },
       docs: '/docs/ENTERPRISE_NATION_PLATFORM.md',
       modelRuntime: '/model-runtime',
-      note: 'VL-387 Vertical platform for banks/hospitals/universities/telecoms — production unlocks gated.',
+      note: 'Vertical platform for banks/hospitals/universities/telecoms — production unlocks gated.',
     };
   }
 
@@ -104,7 +104,7 @@ export class EnterpriseNationPlatformService {
       domain: 'enterprise',
       capabilities: enterpriseNationPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       ...overlay,
-      note: 'Enterprise Nation Platform monitoring (VL-387) with Model Runtime unlock overlay.',
+      note: 'Enterprise Nation Platform monitoring with Model Runtime unlock overlay.',
     };
   }
 

@@ -124,7 +124,7 @@ export function analyzeAudioBuffer(buffer: Buffer): AudioAnalysis {
     silenceRatio: Number(silenceRatio.toFixed(3)),
     silenceRegions,
     speechRatio: Number(speechRatio.toFixed(3)),
-    note: 'Heuristic energy analysis on PCM — not a learned noise classifier (VL-155).',
+    note: 'Heuristic energy analysis on PCM — not a learned noise classifier.',
   };
 }
 

@@ -4,7 +4,7 @@ export function aicertificateauthorityCatalog() {
   return {
     id: 'ai-certificate-authority',
     title: 'AI Certificate Authority',
-    vl: 'VL-402',
+    vl: 'Shipped.',
     phase: 269,
     domain: 'ca',
     blurb: 'AI certificate authority for node certificates and signed capabilities.',

@@ -13,7 +13,7 @@ export class AiFederationMeshService {
       ...aifederationmeshCatalog(),
       capabilities: aifederationmeshCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-398 AI Federation Mesh — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Federation Mesh — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

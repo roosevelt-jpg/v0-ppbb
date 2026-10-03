@@ -13,7 +13,7 @@ export class AiGovernanceFederationService {
       ...aigovernancefederationCatalog(),
       capabilities: aigovernancefederationCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-404 AI Governance Federation — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Governance Federation — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

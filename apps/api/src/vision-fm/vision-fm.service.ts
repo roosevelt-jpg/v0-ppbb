@@ -50,7 +50,7 @@ export class VisionFmService {
         gateway: '/gateway',
       },
       docs: '/docs/VISION_FM.md',
-      note: 'VL-229 Vision FM — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Vision FM — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

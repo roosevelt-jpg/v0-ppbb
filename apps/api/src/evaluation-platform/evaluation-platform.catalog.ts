@@ -26,7 +26,7 @@ export function evaluationPlatformEngineCatalog() {
   return {
     product: 'VerbaLab Evaluation Platform',
     note:
-      'Evaluation Platform (VL-275). Enterprise evaluation catalog extending VL-236 model-evaluation-platform and VL-100 eval — does not regenerate those surfaces.',
+      'Evaluation Platform. Enterprise evaluation catalog extending model-evaluation-platform and eval — does not regenerate those surfaces.',
     capabilities,
     extends: {
       modelEvaluationPlatform: true,

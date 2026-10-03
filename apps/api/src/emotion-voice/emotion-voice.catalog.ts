@@ -15,7 +15,7 @@ export function emotionVoiceEngineCatalog() {
   return {
     product: 'VerbaLab Emotion Voice',
     note:
-      'Emotion-conditioned synthesis façade over Neural TTS (VL-171). Soft prosody + voice recommendations for OpenAI/own voices; ElevenLabs style settings on clone:{id} when available. Not trained expressive TTS / Hume / Azure Neural Emotion. Distinct from Speech Emotion Intelligence detection (VL-154).',
+      'Emotion-conditioned synthesis façade over Neural TTS. Soft prosody + voice recommendations for OpenAI/own voices; ElevenLabs style settings on clone:{id} when available. Not trained expressive TTS / Hume / Azure Neural Emotion. Distinct from Speech Emotion Intelligence detection.',
     capabilities: [
       {
         id: 'emotion-profiles',
@@ -37,7 +37,7 @@ export function emotionVoiceEngineCatalog() {
         name: 'Streaming Emotion Synthesis',
         status: 'shipped',
         api: 'POST /v1/emotion-voice/stream',
-        notes: 'Shipped chunk SSE after synthesis (same honesty as VL-171).',
+        notes: 'Shipped chunk SSE after synthesis (same honesty as ).',
       },
       {
         id: 'happy',
@@ -142,13 +142,13 @@ export function emotionVoiceEngineCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/emotion-voice/engine/analytics',
-        notes: 'Shipped usage by profile from audit events; TTS metering shared with VL-178.',
+        notes: 'Shipped usage by profile from audit events; TTS metering shared with',
       },
     ] satisfies EmotionVoiceCapability[],
     related: {
       speechEmotionDetection: '/docs/EMOTION_INTELLIGENCE.md',
       neuralTts: '/docs/NEURAL_TTS.md',
-      note: 'VL-154 detects emotion in speech/text. VL-173 synthesizes with emotion profiles.',
+      note: 'detects emotion in speech/text. synthesizes with emotion profiles.',
     },
     links: {
       console: '/emotion-voice',

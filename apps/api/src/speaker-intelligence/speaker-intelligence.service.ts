@@ -43,7 +43,7 @@ export class SpeakerIntelligenceService {
     });
     return {
       data: rows.map((r) => this.profileDto(r)),
-      note: 'Workspace speaker profiles — local fingerprints only (VL-152).',
+      note: 'Workspace speaker profiles — local fingerprints only.',
     };
   }
 

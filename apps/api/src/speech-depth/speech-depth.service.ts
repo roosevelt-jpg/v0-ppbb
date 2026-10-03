@@ -14,7 +14,7 @@ export class SpeechDepthService {
       capabilities: speechDepthCapabilities(),
       ownAi: ownAiStackSummary(),
       dialects: ['sw-KE', 'sw-TZ', 'yo-NG', 'ha-NG', 'am-ET', 'zu-ZA', 'af-ZA', 'ar-EG', 'fr-SN'],
-      note: 'VL-122 Speech depth — streaming + African dialect hints on VerbaLab Echo.',
+      note: 'Speech depth — streaming + African dialect hints on VerbaLab Echo.',
     };
   }
 

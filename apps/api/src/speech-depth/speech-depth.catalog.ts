@@ -2,7 +2,7 @@ export function speechDepthCatalog() {
   return {
     id: 'speech-depth',
     title: 'Speech Depth',
-    vl: 'VL-122',
+    vl: 'Shipped.',
     honesty: {
       ownedModels: true,
       streamingViaOwnStt: true,

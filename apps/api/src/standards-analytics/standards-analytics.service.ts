@@ -20,10 +20,10 @@ export class StandardsAnalyticsService {
       honesty: standardsAnalyticsHonesty(),
       safety: {
         ...standardsAnalyticsHonesty(),
-        note: 'VL-372 Adoption analytics.',
+        note: 'Adoption analytics.',
       },
       docs: '/docs/STANDARDS_ANALYTICS.md',
-      note: 'VL-372 Adoption analytics.',
+      note: 'Adoption analytics.',
     };
   }
 
@@ -35,7 +35,7 @@ export class StandardsAnalyticsService {
       domain: 'analytics',
       capabilities: standardsAnalyticsCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: standardsAnalyticsHonesty(),
-      note: 'Standards Analytics monitoring (VL-372).',
+      note: 'Standards Analytics monitoring.',
     };
   }
 

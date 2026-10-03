@@ -20,10 +20,10 @@ export class StrategicPlanningPlatformService {
       honesty: strategicPlanningPlatformHonesty(),
       safety: {
         ...strategicPlanningPlatformHonesty(),
-        note: 'VL-356. Strategy/OKR/roadmap tooling for 3/5/10/20-year horizons.',
+        note: 'Strategy/OKR/roadmap tooling for 3/5/10/20-year horizons.',
       },
       docs: '/docs/STRATEGIC_PLANNING_PLATFORM.md',
-      note: 'VL-356. Strategy/OKR/roadmap tooling for 3/5/10/20-year horizons.',
+      note: 'Strategy/OKR/roadmap tooling for 3/5/10/20-year horizons.',
     };
   }
 
@@ -37,7 +37,7 @@ export class StrategicPlanningPlatformService {
       domain: 'strategy',
       capabilities: strategicPlanningPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: strategicPlanningPlatformHonesty(),
-      note: 'Strategic Planning Platform monitoring (VL-356).',
+      note: 'Strategic Planning Platform monitoring.',
     };
   }
 

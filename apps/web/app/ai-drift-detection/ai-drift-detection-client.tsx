@@ -3,12 +3,16 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
 
 type Engine = {
   product: string;
   note: string;
-  honesty: Record<string, boolean>;
+  honesty: Record<string, unknown>;
   safety?: { note?: string } & Record<string, unknown>;
+  capabilities?: CatalogRow[];
+  signals?: CatalogRow[];
+  driftClear?: boolean;
 };
 
 export function AiDriftDetectionClient() {
@@ -32,17 +36,25 @@ export function AiDriftDetectionClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
-        <div style={{ display: 'grid', gap: '1.25rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{data.note}</p>
-          {data.safety?.note ? (
-            <p style={{ margin: 0, borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem', color: 'var(--muted)' }}>
-              {String(data.safety.note)}
-            </p>
-          ) : null}
-          <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty }, null, 2)}
-          </pre>
-        </div>
+        <CatalogConsole
+          note={data.note}
+          safetyNote={data.safety?.note ? String(data.safety.note) : undefined}
+          honesty={data.honesty}
+          statusChips={[{ label: 'driftClear', value: data.driftClear ? 'true' : 'false' }]}
+          sections={[
+            { title: 'Capabilities', rows: data.capabilities ?? [] },
+            {
+              title: 'Signals',
+              rows: (data.signals ?? []).map((s) => ({
+                ...s,
+                name: String(s.name ?? s.id),
+                status: String(s.severity ?? s.status ?? ''),
+              })),
+            },
+          ]}
+          backHref="/mlops-llmops-cloud"
+          backLabel="MLOps & LLMOps Cloud"
+        />
       ) : null}
     </AppShell>
   );

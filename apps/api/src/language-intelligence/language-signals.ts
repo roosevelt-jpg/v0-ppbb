@@ -81,7 +81,7 @@ export function analyzeSentiment(text: string) {
     positiveHits: pos,
     negativeHits: neg,
     confidence: Number(confidence.toFixed(3)),
-    note: 'Lexicon polarity scoring (VL-144) — not a production sentiment suite.',
+    note: 'Lexicon polarity scoring — not a production sentiment suite.',
   };
 }
 
@@ -122,7 +122,7 @@ export function analyzeEmotion(text: string) {
     scores,
     signals: signals.slice(0, 12),
     confidence: Number(confidence.toFixed(3)),
-    note: 'Text cue emotion buckets (VL-144) — not acoustic emotion recognition.',
+    note: 'Text cue emotion buckets — not acoustic emotion recognition.',
   };
 }
 
@@ -161,7 +161,7 @@ export function analyzeIntent(text: string) {
     label,
     scores,
     confidence,
-    note: 'Heuristic intent labels (VL-144) — not a trained NLU/dialog model.',
+    note: 'Heuristic intent labels — not a trained NLU/dialog model.',
   };
 }
 
@@ -191,7 +191,7 @@ export function analyzeReadability(text: string) {
     words: wordCount,
     sentences: sentenceCount,
     syllables: syllableCount,
-    note: 'English-leaning Flesch-like heuristic (VL-144) — not a certified readability product.',
+    note: 'English-leaning Flesch-like heuristic — not a certified readability product.',
   };
 }
 
@@ -224,7 +224,7 @@ export function analyzeComplexity(text: string) {
     averageWordLength: Number(avgWordLen.toFixed(2)),
     averageSentenceLength: Number(avgSentenceLen.toFixed(2)),
     longWordRatio: Number((longWords / wordCount).toFixed(3)),
-    note: 'Lexical/syntactic density heuristic (VL-144) — not a linguistics complexity suite.',
+    note: 'Lexical/syntactic density heuristic — not a linguistics complexity suite.',
   };
 }
 

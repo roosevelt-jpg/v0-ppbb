@@ -33,7 +33,7 @@ export class NestEnterprisePortfolioManagementCatalogAdapter implements Enterpri
       status: 'shipped',
       api: 'GET /v1/enterprise-portfolio-management/engine',
       console: '/enterprise-portfolio-management',
-      notes: 'VL-357 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

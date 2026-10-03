@@ -338,7 +338,7 @@ export function detectTone(text: string): ToneDetectResult {
     scores,
     signals: signals.slice(0, 24),
     suggestedProfile: detectedTone,
-    note: 'Heuristic cue scoring (VL-143) — not a trained tone classifier or author-style model.',
+    note: 'Heuristic cue scoring — not a trained tone classifier or author-style model.',
   };
 }
 

@@ -20,10 +20,10 @@ export class GlobalPartnerProgramService {
       honesty: globalPartnerProgramHonesty(),
       safety: {
         ...globalPartnerProgramHonesty(),
-        note: 'VL-371 Partner onboarding portal.',
+        note: 'Partner onboarding portal.',
       },
       docs: '/docs/GLOBAL_PARTNER_PROGRAM.md',
-      note: 'VL-371 Partner onboarding portal.',
+      note: 'Partner onboarding portal.',
     };
   }
 
@@ -35,7 +35,7 @@ export class GlobalPartnerProgramService {
       domain: 'partner',
       capabilities: globalPartnerProgramCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: globalPartnerProgramHonesty(),
-      note: 'Global Partner Program monitoring (VL-371).',
+      note: 'Global Partner Program monitoring.',
     };
   }
 

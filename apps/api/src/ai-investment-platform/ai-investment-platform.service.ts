@@ -24,10 +24,10 @@ export class AiInvestmentPlatformService {
       honesty: aiInvestmentPlatformHonesty(),
       safety: {
         ...aiInvestmentPlatformHonesty(),
-        note: 'VL-381 Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+        note: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
       },
       docs: '/docs/AI_INVESTMENT_PLATFORM.md',
-      note: 'VL-381 Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+      note: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
     };
   }
 
@@ -39,7 +39,7 @@ export class AiInvestmentPlatformService {
       domain: 'investment',
       capabilities: aiInvestmentPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiInvestmentPlatformHonesty(),
-      note: 'AI Investment Platform monitoring (VL-381).',
+      note: 'AI Investment Platform monitoring.',
     };
   }
 

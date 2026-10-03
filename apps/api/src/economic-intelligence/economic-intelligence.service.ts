@@ -20,10 +20,10 @@ export class EconomicIntelligenceService {
       honesty: economicIntelligenceHonesty(),
       safety: {
         ...economicIntelligenceHonesty(),
-        note: 'VL-382 Executive/adoption/revenue analytics dashboards — reporting tooling.',
+        note: 'Executive/adoption/revenue analytics dashboards — reporting tooling.',
       },
       docs: '/docs/ECONOMIC_INTELLIGENCE.md',
-      note: 'VL-382 Executive/adoption/revenue analytics dashboards — reporting tooling.',
+      note: 'Executive/adoption/revenue analytics dashboards — reporting tooling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class EconomicIntelligenceService {
       domain: 'intelligence',
       capabilities: economicIntelligenceCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: economicIntelligenceHonesty(),
-      note: 'Economic Intelligence monitoring (VL-382).',
+      note: 'Economic Intelligence monitoring.',
     };
   }
 

@@ -3,7 +3,7 @@ export function baobabCatalog() {
     id: 'baobab',
     title: 'Baobab',
     phase: 93,
-    vl: 'VL-226',
+    vl: 'Shipped.',
     modality: 'chat',
     blurb: 'African language specialist LLM',
     honesty: {

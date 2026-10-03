@@ -20,10 +20,10 @@ export class ResearchFundingPlatformService {
       honesty: researchFundingPlatformHonesty(),
       safety: {
         ...researchFundingPlatformHonesty(),
-        note: 'VL-379 Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+        note: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
       },
       docs: '/docs/RESEARCH_FUNDING_PLATFORM.md',
-      note: 'VL-379 Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+      note: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
     };
   }
 
@@ -35,7 +35,7 @@ export class ResearchFundingPlatformService {
       domain: 'funding',
       capabilities: researchFundingPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: researchFundingPlatformHonesty(),
-      note: 'Research Funding Platform monitoring (VL-379).',
+      note: 'Research Funding Platform monitoring.',
     };
   }
 

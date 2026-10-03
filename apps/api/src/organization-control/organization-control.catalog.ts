@@ -41,14 +41,14 @@ export function organizationControlEngineCatalog() {
   return {
     product: 'VerbaLab Organization Control',
     capabilities: [
-      { id: 'organizations', name: 'Organizations', status: 'shipped', notes: 'VL-315.' },
-      { id: 'business_units', name: 'Business Units', status: 'shipped', notes: 'VL-315.' },
-      { id: 'departments', name: 'Departments', status: 'shipped', notes: 'VL-315.' },
-      { id: 'teams', name: 'Teams', status: 'shipped', notes: 'VL-315.' },
-      { id: 'projects', name: 'Projects', status: 'shipped', notes: 'VL-315.' },
-      { id: 'environments', name: 'Environments', status: 'shipped', notes: 'VL-315.' },
-      { id: 'quotas', name: 'Quotas', status: 'shipped', notes: 'VL-315.' },
-      { id: 'policies', name: 'Org Policies', status: 'shipped', notes: 'VL-315.' },
+      { id: 'organizations', name: 'Organizations', status: 'shipped', notes: 'Shipped.' },
+      { id: 'business_units', name: 'Business Units', status: 'shipped', notes: 'Shipped.' },
+      { id: 'departments', name: 'Departments', status: 'shipped', notes: 'Shipped.' },
+      { id: 'teams', name: 'Teams', status: 'shipped', notes: 'Shipped.' },
+      { id: 'projects', name: 'Projects', status: 'shipped', notes: 'Shipped.' },
+      { id: 'environments', name: 'Environments', status: 'shipped', notes: 'Shipped.' },
+      { id: 'quotas', name: 'Quotas', status: 'shipped', notes: 'Shipped.' },
+      { id: 'policies', name: 'Org Policies', status: 'shipped', notes: 'Shipped.' },
       { id: 'roles', name: 'Role Catalog', status: 'shipped', notes: 'admin vs operator vs viewer.' },
     ],
     organizations: [
@@ -128,6 +128,6 @@ export function organizationControlEngineCatalog() {
     },
     docs: '/docs/ORGANIZATION_CONTROL.md',
     note:
-      'Organization Control (VL-315). Orgs/BUs/departments/teams/projects/environments/quotas/policies with least-privilege roles. Does not regenerate Clerk.',
+      'Organization Control. Orgs/BUs/departments/teams/projects/environments/quotas/policies with least-privilege roles. Does not regenerate Clerk.',
   };
 }

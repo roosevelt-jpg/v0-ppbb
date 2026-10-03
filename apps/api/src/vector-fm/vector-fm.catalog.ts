@@ -3,7 +3,7 @@ export function vectorfmCatalog() {
     id: 'vector-fm',
     title: 'Vector FM',
     phase: 97,
-    vl: 'VL-230',
+    vl: 'Shipped.',
     modality: 'embed',
     blurb: 'VerbaLab embeddings FM',
     honesty: {

@@ -20,10 +20,10 @@ export class ExecutiveIntelligencePlatformService {
       honesty: executiveIntelligencePlatformHonesty(),
       safety: {
         ...executiveIntelligencePlatformHonesty(),
-        note: 'VL-361. Executive/board KPI cockpit — reporting tooling, not executive judgment.',
+        note: 'Executive/board KPI cockpit — reporting tooling, not executive judgment.',
       },
       docs: '/docs/EXECUTIVE_INTELLIGENCE_PLATFORM.md',
-      note: 'VL-361. Executive/board KPI cockpit — reporting tooling, not executive judgment.',
+      note: 'Executive/board KPI cockpit — reporting tooling, not executive judgment.',
     };
   }
 
@@ -37,7 +37,7 @@ export class ExecutiveIntelligencePlatformService {
       domain: 'executive',
       capabilities: executiveIntelligencePlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: executiveIntelligencePlatformHonesty(),
-      note: 'Executive Intelligence Platform monitoring (VL-361).',
+      note: 'Executive Intelligence Platform monitoring.',
     };
   }
 

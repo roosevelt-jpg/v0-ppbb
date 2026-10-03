@@ -4,7 +4,7 @@ export function credentialsreadinessCatalog() {
   return {
     id: 'credentials-readiness',
     title: 'Credentials Readiness',
-    vl: 'VL-408',
+    vl: 'Shipped.',
     phase: 275,
     domain: 'credentials',
     blurb: 'Production credentials checklist — Stripe, Clerk, VerbaLab model endpoints added later.',

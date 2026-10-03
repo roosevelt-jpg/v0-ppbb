@@ -6,12 +6,12 @@ export function globalSchedulerEngineCatalog() {
   return {
     product: 'VerbaLab Global Scheduler',
     capabilities: [
-      { id: 'jobs', name: 'Jobs', status: 'shipped', notes: 'VL-321 capability.' },
-      { id: 'cron', name: 'Cron', status: 'shipped', notes: 'VL-321 capability.' },
-      { id: 'distributed', name: 'Distributed Scheduling', status: 'shipped', notes: 'VL-321 capability.' },
-      { id: 'workflow', name: 'Workflow Scheduling', status: 'shipped', notes: 'VL-321 capability.' },
-      { id: 'training', name: 'Training Scheduling', status: 'shipped', notes: 'VL-321 capability.' },
-      { id: 'inference', name: 'Inference Scheduling', status: 'shipped', notes: 'VL-321 capability.' }
+      { id: 'jobs', name: 'Jobs', status: 'shipped', notes: 'capability.' },
+      { id: 'cron', name: 'Cron', status: 'shipped', notes: 'capability.' },
+      { id: 'distributed', name: 'Distributed Scheduling', status: 'shipped', notes: 'capability.' },
+      { id: 'workflow', name: 'Workflow Scheduling', status: 'shipped', notes: 'capability.' },
+      { id: 'training', name: 'Training Scheduling', status: 'shipped', notes: 'capability.' },
+      { id: 'inference', name: 'Inference Scheduling', status: 'shipped', notes: 'capability.' }
     ],
     schedules: [
       {
@@ -70,9 +70,9 @@ export function globalSchedulerEngineCatalog() {
     safety: {
       executesInference: false,
       executesInference: false,
-      note: 'Global Scheduler (VL-321). Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
+      note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
     },
     docs: '/docs/GLOBAL_SCHEDULER.md',
-    note: 'Global Scheduler (VL-321). Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
+    note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
   };
 }

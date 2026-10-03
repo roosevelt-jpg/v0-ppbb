@@ -20,10 +20,10 @@ export class GlobalKnowledgeNetworkService {
       honesty: globalKnowledgeNetworkHonesty(),
       safety: {
         ...globalKnowledgeNetworkHonesty(),
-        note: 'VL-390 Research/library/museum knowledge sharing network product.',
+        note: 'Research/library/museum knowledge sharing network product.',
       },
       docs: '/docs/GLOBAL_KNOWLEDGE_NETWORK.md',
-      note: 'VL-390 Research/library/museum knowledge sharing network product.',
+      note: 'Research/library/museum knowledge sharing network product.',
     };
   }
 
@@ -35,7 +35,7 @@ export class GlobalKnowledgeNetworkService {
       domain: 'knowledge',
       capabilities: globalKnowledgeNetworkCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: globalKnowledgeNetworkHonesty(),
-      note: 'Global Knowledge Network monitoring (VL-390).',
+      note: 'Global Knowledge Network monitoring.',
     };
   }
 

@@ -4,7 +4,7 @@ export function aimarketplacefederationCatalog() {
   return {
     id: 'ai-marketplace-federation',
     title: 'AI Marketplace Federation',
-    vl: 'VL-406',
+    vl: 'Shipped.',
     phase: 273,
     domain: 'marketplace',
     blurb: 'Federated marketplace listings across VerbaLab ecosystem nodes.',

@@ -22,10 +22,10 @@ export class AiCertificationPlatformService {
       honesty: aiCertificationPlatformHonesty(),
       safety: {
         ...aiCertificationPlatformHonesty(),
-        note: 'VL-365 VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
+        note: 'VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
       },
       docs: '/docs/AI_CERTIFICATION_PLATFORM.md',
-      note: 'VL-365 VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
+      note: 'VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
     };
   }
 
@@ -46,7 +46,7 @@ export class AiCertificationPlatformService {
       domain: 'certification',
       capabilities: aiCertificationPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: aiCertificationPlatformHonesty(),
-      note: 'AI Certification Platform monitoring (VL-365).',
+      note: 'AI Certification Platform monitoring.',
     };
   }
 

@@ -33,7 +33,7 @@ export class NestEnterpriseArchitectureRepositoryCatalogAdapter implements Enter
       status: 'shipped',
       api: 'GET /v1/enterprise-architecture-repository/engine',
       console: '/enterprise-architecture-repository',
-      notes: 'VL-359 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

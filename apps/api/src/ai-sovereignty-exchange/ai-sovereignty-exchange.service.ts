@@ -13,7 +13,7 @@ export class AiSovereigntyExchangeService {
       ...aisovereigntyexchangeCatalog(),
       capabilities: aisovereigntyexchangeCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-405 AI Sovereignty Exchange — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Sovereignty Exchange — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

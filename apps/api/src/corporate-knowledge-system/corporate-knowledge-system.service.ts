@@ -20,10 +20,10 @@ export class CorporateKnowledgeSystemService {
       honesty: corporateKnowledgeSystemHonesty(),
       safety: {
         ...corporateKnowledgeSystemHonesty(),
-        note: 'VL-360. Policies/SOPs/playbooks/decision records portal — not Confluence OS.',
+        note: 'Policies/SOPs/playbooks/decision records portal — not Confluence OS.',
       },
       docs: '/docs/CORPORATE_KNOWLEDGE_SYSTEM.md',
-      note: 'VL-360. Policies/SOPs/playbooks/decision records portal — not Confluence OS.',
+      note: 'Policies/SOPs/playbooks/decision records portal — not Confluence OS.',
     };
   }
 
@@ -37,7 +37,7 @@ export class CorporateKnowledgeSystemService {
       domain: 'knowledge',
       capabilities: corporateKnowledgeSystemCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: corporateKnowledgeSystemHonesty(),
-      note: 'Corporate Knowledge System monitoring (VL-360).',
+      note: 'Corporate Knowledge System monitoring.',
     };
   }
 

@@ -1,4 +1,5 @@
 import { getDevBearer } from '@/lib/dev-auth';
+import { hidePhaseIdsInCopyFields } from '@/lib/ui-copy';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -44,7 +45,8 @@ export async function apiFetch<T>(
     throw new Error(body.error?.message ?? `Request failed (${response.status})`);
   }
 
-  return body as T;
+  // Never surface internal VL-### phase IDs in console-bound note/notes copy.
+  return hidePhaseIdsInCopyFields(body) as T;
 }
 
 export { API_URL };

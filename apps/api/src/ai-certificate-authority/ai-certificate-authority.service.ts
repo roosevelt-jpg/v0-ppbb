@@ -13,7 +13,7 @@ export class AiCertificateAuthorityService {
       ...aicertificateauthorityCatalog(),
       capabilities: aicertificateauthorityCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-402 AI Certificate Authority — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Certificate Authority — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

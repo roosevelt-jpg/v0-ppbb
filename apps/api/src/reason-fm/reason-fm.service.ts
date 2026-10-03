@@ -50,7 +50,7 @@ export class ReasonFmService {
         gateway: '/gateway',
       },
       docs: '/docs/REASON_FM.md',
-      note: 'VL-231 Reason FM — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Reason FM — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

@@ -60,6 +60,6 @@ export function datasetPipelineEngineCatalog() {
       note: 'PII must clear before training/feedback use.',
     },
     docs: '/docs/DATASET_PIPELINE.md',
-    note: 'Dataset Pipeline (VL-282). Validation/cleaning/normalization/dedup/PII/annotation/versioning/quality/approval/lineage/cards.',
+    note: 'Dataset Pipeline. Validation/cleaning/normalization/dedup/PII/annotation/versioning/quality/approval/lineage/cards.',
   };
 }

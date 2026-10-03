@@ -59,6 +59,6 @@ export function identityFederationEngineCatalog() {
       note: 'Identity Federation is discovery/readiness over Clerk and existing API keys — not Okta OS or a SAML IdP OS.',
     },
     docs: '/docs/IDENTITY_FEDERATION.md',
-    note: 'Identity Federation (VL-299). OAuth2/OIDC/SAML/SCIM/enterprise/machine/service identity catalog. oktaOs=false; samlIdpOs=false.',
+    note: 'Identity Federation. OAuth2/OIDC/SAML/SCIM/enterprise/machine/service identity catalog. oktaOs=false; samlIdpOs=false.',
   };
 }

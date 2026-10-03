@@ -33,7 +33,7 @@ export class NestStrategicPlanningPlatformCatalogAdapter implements StrategicPla
       status: 'shipped',
       api: 'GET /v1/strategic-planning-platform/engine',
       console: '/strategic-planning-platform',
-      notes: 'VL-356 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

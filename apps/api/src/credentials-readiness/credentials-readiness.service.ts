@@ -100,7 +100,7 @@ export class CredentialsReadinessService {
       checklist,
       score: { ready: readyCount, total: values.length },
       ownAi: ownAiStackSummary(),
-      note: 'VL-408 Credentials readiness — platform fully wired; add Stripe/Clerk/model keys at deploy.',
+      note: 'Credentials readiness — platform fully wired; add Stripe/Clerk/model keys at deploy.',
     };
   }
 

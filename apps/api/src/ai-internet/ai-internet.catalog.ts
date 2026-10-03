@@ -4,7 +4,7 @@ export function aiinternetCatalog() {
   return {
     id: 'ai-internet',
     title: 'AI Internet',
-    vl: 'VL-394',
+    vl: 'Shipped.',
     phase: 261,
     domain: 'foundation',
     blurb: 'Foundation for VerbaLab AI Internet — meshes every agent, model, memory, and enterprise node.',

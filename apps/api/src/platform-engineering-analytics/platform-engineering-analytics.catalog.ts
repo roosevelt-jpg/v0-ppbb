@@ -32,6 +32,6 @@ export function platformEngineeringAnalyticsEngineCatalog() {
     },
     docs: '/docs/PLATFORM_ENGINEERING_ANALYTICS.md',
     note:
-      'Platform Engineering Analytics (VL-312). DORA metrics + velocity/adoption/cost/reliability from siblings.',
+      'Platform Engineering Analytics. DORA metrics + velocity/adoption/cost/reliability from siblings.',
   };
 }

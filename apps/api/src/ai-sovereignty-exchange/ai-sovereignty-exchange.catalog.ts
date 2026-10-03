@@ -4,7 +4,7 @@ export function aisovereigntyexchangeCatalog() {
   return {
     id: 'ai-sovereignty-exchange',
     title: 'AI Sovereignty Exchange',
-    vl: 'VL-405',
+    vl: 'Shipped.',
     phase: 272,
     domain: 'sovereignty',
     blurb: 'Sovereignty, policy, and compliance exchange with residency pins.',

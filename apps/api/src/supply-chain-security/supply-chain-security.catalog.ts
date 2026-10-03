@@ -164,6 +164,6 @@ export function supplyChainSecurityEngineCatalog() {
     },
     docs: '/docs/SUPPLY_CHAIN_SECURITY.md',
     note:
-      'Supply Chain Security (VL-310). SBOM/signing/dependency/container/SAST/DAST/secrets/license catalog with scan/findings path. snykOs=false.',
+      'Supply Chain Security. SBOM/signing/dependency/container/SAST/DAST/secrets/license catalog with scan/findings path. snykOs=false.',
   };
 }

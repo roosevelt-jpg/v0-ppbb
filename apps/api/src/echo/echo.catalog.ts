@@ -3,7 +3,7 @@ export function echoCatalog() {
     id: 'echo',
     title: 'Echo',
     phase: 94,
-    vl: 'VL-227',
+    vl: 'Shipped.',
     modality: 'stt',
     blurb: 'VerbaLab speech recognition FM',
     honesty: {

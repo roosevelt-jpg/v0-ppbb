@@ -50,7 +50,7 @@ export class TranslateFmService {
         gateway: '/gateway',
       },
       docs: '/docs/TRANSLATE_FM.md',
-      note: 'VL-234 Translate FM — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Translate FM — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

@@ -20,10 +20,10 @@ export class CorporateRiskPlatformService {
       honesty: corporateRiskPlatformHonesty(),
       safety: {
         ...corporateRiskPlatformHonesty(),
-        note: 'VL-362. Enterprise risk register tooling across AI/cyber/regulatory domains.',
+        note: 'Enterprise risk register tooling across AI/cyber/regulatory domains.',
       },
       docs: '/docs/CORPORATE_RISK_PLATFORM.md',
-      note: 'VL-362. Enterprise risk register tooling across AI/cyber/regulatory domains.',
+      note: 'Enterprise risk register tooling across AI/cyber/regulatory domains.',
     };
   }
 
@@ -37,7 +37,7 @@ export class CorporateRiskPlatformService {
       domain: 'risk',
       capabilities: corporateRiskPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: corporateRiskPlatformHonesty(),
-      note: 'Corporate Risk Platform monitoring (VL-362).',
+      note: 'Corporate Risk Platform monitoring.',
     };
   }
 

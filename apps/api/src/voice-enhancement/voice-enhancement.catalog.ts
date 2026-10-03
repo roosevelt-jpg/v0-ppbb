@@ -13,7 +13,7 @@ export function voiceEnhancementEngineCatalog() {
   return {
     product: 'VerbaLab Voice Enhancement',
     note:
-      'Voice cleanup/restoration/mastering façade over Audio Intelligence PCM heuristics (VL-155). Profile pipelines for mic/podcast/meeting/broadcast. Not Krisp, Adobe Enhance, Demucs, or live AEC parity.',
+      'Voice cleanup/restoration/mastering façade over Audio Intelligence PCM heuristics. Profile pipelines for mic/podcast/meeting/broadcast. Not Krisp, Adobe Enhance, Demucs, or live AEC parity.',
     capabilities: [
       {
         id: 'noise-removal',
@@ -27,7 +27,7 @@ export function voiceEnhancementEngineCatalog() {
         name: 'Echo Cancellation',
         status: 'deferred',
         api: 'GET /v1/voice-enhancement/echo',
-        notes: 'Requires AEC reference / vendor SDK. Still deferred (same as VL-155).',
+        notes: 'Requires AEC reference / vendor SDK. Still deferred (same as ).',
       },
       {
         id: 'audio-upscaling',
@@ -76,7 +76,7 @@ export function voiceEnhancementEngineCatalog() {
         name: 'Enhancement Engine',
         status: 'shipped',
         api: 'GET /v1/voice-enhancement/engine',
-        notes: 'Catalog + profiles over VL-155 DSP.',
+        notes: 'Catalog + profiles over DSP.',
       },
       {
         id: 'realtime',

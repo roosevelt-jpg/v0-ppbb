@@ -6,9 +6,14 @@ export function hidePhaseIds(text: string): string {
   return text
     .replace(/\s*\(VL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\)/gi, '')
     .replace(/\bVL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\b\.?\s*/gi, '')
+    .replace(/\(Phase\s+(\d+)\s*\/\s*\)/gi, '(Phase $1)')
+    .replace(/\s*\/\s*[–—-]/g, ' —')
+    .replace(/[–—-]\s*[–—-]/g, '—')
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([.,;:])/g, '$1')
     .replace(/^[\s.—–-]+/, '')
+    .replace(/\s+[–—-]\s*$/g, '')
+    .replace(/\bfrom\s*$/i, '')
     .trim();
 }
 

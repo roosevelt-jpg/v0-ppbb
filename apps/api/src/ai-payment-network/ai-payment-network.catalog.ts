@@ -4,7 +4,7 @@ export function aipaymentnetworkCatalog() {
   return {
     id: 'ai-payment-network',
     title: 'AI Payment Network',
-    vl: 'VL-401',
+    vl: 'Shipped.',
     phase: 268,
     domain: 'payments',
     blurb: 'AI payment and contract protocol over existing Stripe billing (keys later).',

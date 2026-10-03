@@ -33,7 +33,7 @@ export class NestCorporateRiskPlatformCatalogAdapter implements CorporateRiskPla
       status: 'shipped',
       api: 'GET /v1/corporate-risk-platform/engine',
       console: '/corporate-risk-platform',
-      notes: 'VL-362 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

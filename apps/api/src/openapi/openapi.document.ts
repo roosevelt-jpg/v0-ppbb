@@ -2961,7 +2961,7 @@ export const openApiDocument = {
         responses: {
           '200': {
             description:
-              'Cards/versions/deploy capabilities + VL-110 live summary (not MLflow/mesh OS)',
+              'Cards/versions/deploy capabilities + live summary (not MLflow/mesh OS)',
           },
         },
       },
@@ -2977,7 +2977,7 @@ export const openApiDocument = {
     },
     '/v1/model-registry/cards': {
       get: {
-        summary: 'Model cards from VL-110 entries',
+        summary: 'Model cards from entries',
         operationId: 'listModelRegistryCards',
         responses: {
           '200': { description: 'Lightweight cards derived from registry metadata' },
@@ -6257,7 +6257,7 @@ export const openApiDocument = {
         summary: 'Prompt Runtime registry façade',
         operationId: 'getPromptRuntimeRegistry',
         security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
-        responses: { '200': { description: 'VL-086 registry rows' } },
+        responses: { '200': { description: 'registry rows' } },
       },
     },
     '/v1/prompt-runtime/templates': {
@@ -8098,7 +8098,7 @@ export const openApiDocument = {
       get: {
         summary: 'Knowledge Memory scopes',
         operationId: 'listKnowledgeMemoryScopes',
-        responses: { '200': { description: 'Scope map onto VL-183 Memory Cloud' } },
+        responses: { '200': { description: 'Scope map onto Memory Cloud' } },
       },
     },
     '/v1/knowledge-memory/memories': {
@@ -9686,7 +9686,7 @@ export const openApiDocument = {
                     type: 'string',
                     example: 'alloy',
                     description:
-                      'Stock OpenAI voice id, own:* rented African TTS (VL-121), or clone:{voiceCloneId}',
+                      'Stock OpenAI voice id, own:* rented African TTS, or clone:{voiceCloneId}',
                   },
                   language: { type: 'string' },
                   format: { type: 'string', enum: ['mp3', 'wav', 'opus', 'aac', 'flac'] },

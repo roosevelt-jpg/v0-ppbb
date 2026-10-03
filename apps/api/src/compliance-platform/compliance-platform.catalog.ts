@@ -106,6 +106,6 @@ export function compliancePlatformEngineCatalog() {
         'Dashboards and control mappings support compliance work. They do NOT make VerbaLab GDPR/HIPAA/SOC2/PCI certified. Lawyers and external auditors are still required.',
     },
     docs: '/docs/COMPLIANCE_PLATFORM.md',
-    note: 'Compliance Platform (VL-297). Tooling not certification — lawyers/auditors still required.',
+    note: 'Compliance Platform. Tooling not certification — lawyers/auditors still required.',
   };
 }

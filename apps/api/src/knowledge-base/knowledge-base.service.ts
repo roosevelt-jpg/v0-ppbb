@@ -24,7 +24,7 @@ export class KnowledgeBaseService {
     return {
       kinds: KNOWLEDGE_CONTENT_KINDS.map((id) => ({ id })),
       deferred: ['video', 'audio', 'powerpoint', 'excel', 'web_crawl'],
-      note: 'Shipped text kinds + OCR caption image path for VL-194. Full media CMS/Office decks deferred.',
+      note: 'Shipped text kinds + OCR caption image path for Full media CMS/Office decks deferred.',
     };
   }
 
@@ -61,7 +61,7 @@ export class KnowledgeBaseService {
       ready,
       failed,
       chunks,
-      note: 'Workspace-scoped Knowledge Base counts (VL-194).',
+      note: 'Workspace-scoped Knowledge Base counts.',
     };
   }
 

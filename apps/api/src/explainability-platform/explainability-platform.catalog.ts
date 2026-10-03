@@ -84,6 +84,6 @@ export function explainabilityPlatformEngineCatalog() {
       note: 'Explainability catalog for confidence/evidence/attribution/traces — not a SHAP/LIME research OS.',
     },
     docs: '/docs/EXPLAINABILITY_PLATFORM.md',
-    note: 'Explainability Platform (VL-295). Decision explainability seed — shapOs=false.',
+    note: 'Explainability Platform. Decision explainability seed — shapOs=false.',
   };
 }

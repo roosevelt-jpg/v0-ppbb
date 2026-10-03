@@ -13,7 +13,7 @@ export class AiDiscoveryService {
       ...aidiscoveryCatalog(),
       capabilities: aidiscoveryCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-397 AI Discovery — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Discovery — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

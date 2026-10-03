@@ -139,6 +139,6 @@ export function privacyPlatformEngineCatalog() {
         'Before release of traditional knowledge, require Volume 12 consent fields. Block when consentStatus is restricted or unverified. Integrates with cultural consent concepts.',
     },
     docs: '/docs/PRIVACY_PLATFORM.md',
-    note: 'Privacy Platform (VL-296). Detection/redaction + Volume 12 TK consent enforcement.',
+    note: 'Privacy Platform. Detection/redaction + Volume 12 TK consent enforcement.',
   };
 }

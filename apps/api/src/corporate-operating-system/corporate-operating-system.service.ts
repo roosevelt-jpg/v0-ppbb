@@ -26,7 +26,7 @@ export class CorporateOperatingSystemService {
         note: 'Tooling for how the company runs — not a real board or legal counsel.',
       },
       docs: '/docs/CORPORATE_OPERATING_SYSTEM.md',
-      note: 'Corporate Operating System Foundation (VL-354). internalBusinessSoftware=true; realCorporateGovernance=false.',
+      note: 'Corporate Operating System Foundation. internalBusinessSoftware=true; realCorporateGovernance=false.',
     };
   }
 
@@ -51,7 +51,7 @@ export class CorporateOperatingSystemService {
       layers: digitalConstitutionLayers(),
       honesty: corporateOperatingSystemHonesty(),
       docs: '/docs/DIGITAL_CONSTITUTION.md',
-      note: 'Version-controlled constitutional principles (VL-363). Not legal incorporation documents.',
+      note: 'Version-controlled constitutional principles. Not legal incorporation documents.',
     };
   }
 
@@ -79,7 +79,7 @@ export class CorporateOperatingSystemService {
           .map((p) => [p.id, p.console]),
       ),
       docs: '/docs/CORPORATE_OPERATING_SYSTEM.md',
-      note: 'VCOS overview (VL-354–363). Internal business software for African AI company operations.',
+      note: 'VCOS overview. Internal business software for African AI company operations.',
     };
   }
 
@@ -115,7 +115,7 @@ export class CorporateOperatingSystemService {
       mode: 'foundation',
       products: corporateOperatingSystemProductCatalog().map((p) => ({ id: p.id, status: p.status })),
       honesty: corporateOperatingSystemHonesty(),
-      note: 'VCOS monitoring snapshot (VL-354).',
+      note: 'VCOS monitoring snapshot.',
     };
   }
 }

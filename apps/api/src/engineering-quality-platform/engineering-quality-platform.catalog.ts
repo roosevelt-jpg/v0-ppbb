@@ -10,14 +10,14 @@ export function engineeringQualityPlatformEngineCatalog() {
     architectureKnowledgeBaseOs: false,
     adrFactoryOs: false,
     capabilities: [
-      { id: 'static_analysis', name: 'Static Analysis', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'complexity', name: 'Complexity Analysis', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'dependency', name: 'Dependency Analysis', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'security', name: 'Security Analysis', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'performance', name: 'Performance Analysis', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'tech_debt', name: 'Technical Debt', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'coverage', name: 'Coverage', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' },
-      { id: 'mutation', name: 'Mutation Testing', status: 'shipped', notes: 'VL-348 standards capability — catalog, not a new OS.' }
+      { id: 'static_analysis', name: 'Static Analysis', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'complexity', name: 'Complexity Analysis', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'dependency', name: 'Dependency Analysis', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'security', name: 'Security Analysis', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'performance', name: 'Performance Analysis', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'tech_debt', name: 'Technical Debt', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'coverage', name: 'Coverage', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' },
+      { id: 'mutation', name: 'Mutation Testing', status: 'shipped', notes: 'standards capability — catalog, not a new OS.' }
     ],
     routes: [
       {
@@ -74,9 +74,9 @@ export function engineeringQualityPlatformEngineCatalog() {
       customerFacingProductCloud: false,
       architectureKnowledgeBaseOs: false,
       adrFactoryOs: false,
-      note: 'Engineering Quality Platform (VL-348). Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
+      note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
     },
     docs: '/docs/ENGINEERING_QUALITY_PLATFORM.md',
-    note: 'Engineering Quality Platform (VL-348). Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
+    note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
   };
 }

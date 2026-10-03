@@ -50,7 +50,7 @@ export class VoiceFmService {
         gateway: '/gateway',
       },
       docs: '/docs/VOICE_FM.md',
-      note: 'VL-228 Voice FM — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Voice FM — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

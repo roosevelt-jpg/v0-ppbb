@@ -6,13 +6,13 @@ export function globalPolicyEngineCatalog() {
   return {
     product: 'VerbaLab Global Policy Engine',
     capabilities: [
-      { id: 'security', name: 'Security Policies', status: 'shipped', notes: 'VL-317.' },
+      { id: 'security', name: 'Security Policies', status: 'shipped', notes: 'Shipped.' },
       { id: 'ai', name: 'AI Policies', status: 'shipped', notes: 'Via Policy Runtime / Trust.' },
-      { id: 'billing', name: 'Billing Policies', status: 'shipped', notes: 'VL-317.' },
-      { id: 'compliance', name: 'Compliance Policies', status: 'shipped', notes: 'VL-317.' },
-      { id: 'routing', name: 'Routing Policies', status: 'shipped', notes: 'VL-317.' },
-      { id: 'regional', name: 'Regional Policies', status: 'shipped', notes: 'VL-317.' },
-      { id: 'data_residency', name: 'Data Residency Policies', status: 'shipped', notes: 'VL-317.' },
+      { id: 'billing', name: 'Billing Policies', status: 'shipped', notes: 'Shipped.' },
+      { id: 'compliance', name: 'Compliance Policies', status: 'shipped', notes: 'Shipped.' },
+      { id: 'routing', name: 'Routing Policies', status: 'shipped', notes: 'Shipped.' },
+      { id: 'regional', name: 'Regional Policies', status: 'shipped', notes: 'Shipped.' },
+      { id: 'data_residency', name: 'Data Residency Policies', status: 'shipped', notes: 'Shipped.' },
     ],
     policies: [
       {
@@ -92,6 +92,6 @@ export function globalPolicyEngineCatalog() {
     },
     docs: '/docs/GLOBAL_POLICY_ENGINE.md',
     note:
-      'Global Policy Engine (VL-317). Security/AI/billing/compliance/routing/regional/data-residency. policyRuntimeIntegrated=true.',
+      'Global Policy Engine. Security/AI/billing/compliance/routing/regional/data-residency. policyRuntimeIntegrated=true.',
   };
 }

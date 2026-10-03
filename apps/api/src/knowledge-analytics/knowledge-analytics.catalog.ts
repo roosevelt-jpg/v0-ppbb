@@ -69,7 +69,7 @@ export function knowledgeAnalyticsCatalog() {
   return {
     product: 'VerbaLab Knowledge Analytics',
     note:
-      'Usage/quality aggregates for Knowledge Cloud (VL-202): growth, usage, quality, search success, gaps, confidence, relationships. Distinct from Language/Speech/Voice/Intelligence analytics. Not a BI dashboard OS or enterprise reporting suite.',
+      'Usage/quality aggregates for Knowledge Cloud: growth, usage, quality, search success, gaps, confidence, relationships. Distinct from Language/Speech/Voice/Intelligence analytics. Not a BI dashboard OS or enterprise reporting suite.',
     capabilities: [
       {
         id: 'knowledge-growth',

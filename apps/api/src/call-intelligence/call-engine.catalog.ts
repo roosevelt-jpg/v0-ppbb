@@ -62,7 +62,7 @@ export function callIntelligenceEngineCatalog() {
         name: 'Emotion',
         status: 'shipped',
         api: 'analyze',
-        notes: 'Speech emotion cue labels (VL-154 signals) — not SER lab.',
+        notes: 'Speech emotion cue labels (signals) — not SER lab.',
       },
       {
         id: 'compliance-detection',

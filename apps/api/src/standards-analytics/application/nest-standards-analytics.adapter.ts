@@ -33,7 +33,7 @@ export class NestStandardsAnalyticsCatalogAdapter implements StandardsAnalyticsC
       status: 'shipped',
       api: 'GET /v1/standards-analytics/engine',
       console: '/standards-analytics',
-      notes: 'VL-372 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

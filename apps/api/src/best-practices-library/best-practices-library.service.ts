@@ -20,10 +20,10 @@ export class BestPracticesLibraryService {
       honesty: bestPracticesLibraryHonesty(),
       safety: {
         ...bestPracticesLibraryHonesty(),
-        note: 'VL-368 Pattern catalog.',
+        note: 'Pattern catalog.',
       },
       docs: '/docs/BEST_PRACTICES_LIBRARY.md',
-      note: 'VL-368 Pattern catalog.',
+      note: 'Pattern catalog.',
     };
   }
 
@@ -35,7 +35,7 @@ export class BestPracticesLibraryService {
       domain: 'practices',
       capabilities: bestPracticesLibraryCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: bestPracticesLibraryHonesty(),
-      note: 'Best Practices Library monitoring (VL-368).',
+      note: 'Best Practices Library monitoring.',
     };
   }
 

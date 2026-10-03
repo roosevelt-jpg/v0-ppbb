@@ -20,10 +20,10 @@ export class GlobalLanguagePreservationService {
       honesty: globalLanguagePreservationHonesty(),
       safety: {
         ...globalLanguagePreservationHonesty(),
-        note: 'VL-388 Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
+        note: 'Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
       },
       docs: '/docs/GLOBAL_LANGUAGE_PRESERVATION.md',
-      note: 'VL-388 Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
+      note: 'Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
     };
   }
 
@@ -35,7 +35,7 @@ export class GlobalLanguagePreservationService {
       domain: 'preservation',
       capabilities: globalLanguagePreservationCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: globalLanguagePreservationHonesty(),
-      note: 'Global Language Preservation monitoring (VL-388).',
+      note: 'Global Language Preservation monitoring.',
     };
   }
 

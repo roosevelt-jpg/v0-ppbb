@@ -20,10 +20,10 @@ export class CorporateGovernancePlatformService {
       honesty: corporateGovernancePlatformHonesty(),
       safety: {
         ...corporateGovernancePlatformHonesty(),
-        note: 'VL-355. Board/committee tracking tooling — not a real board.',
+        note: 'Board/committee tracking tooling — not a real board.',
       },
       docs: '/docs/CORPORATE_GOVERNANCE_PLATFORM.md',
-      note: 'VL-355. Board/committee tracking tooling — not a real board.',
+      note: 'Board/committee tracking tooling — not a real board.',
     };
   }
 
@@ -37,7 +37,7 @@ export class CorporateGovernancePlatformService {
       domain: 'governance',
       capabilities: corporateGovernancePlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: corporateGovernancePlatformHonesty(),
-      note: 'Corporate Governance Platform monitoring (VL-355).',
+      note: 'Corporate Governance Platform monitoring.',
     };
   }
 

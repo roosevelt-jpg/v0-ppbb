@@ -13,7 +13,7 @@ export class AiDnsService {
       ...aidnsCatalog(),
       capabilities: aidnsCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-395 AI DNS — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI DNS — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

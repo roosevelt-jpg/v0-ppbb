@@ -33,7 +33,7 @@ export class NestAiCertificationPlatformCatalogAdapter implements AiCertificatio
       status: 'shipped',
       api: 'GET /v1/ai-certification-platform/engine',
       console: '/ai-certification-platform',
-      notes: 'VL-365 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

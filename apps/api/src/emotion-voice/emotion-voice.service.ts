@@ -52,7 +52,7 @@ export class EmotionVoiceService {
         expressiveCloneControl: Boolean(p.elevenLabs),
       })),
       note:
-        'Profiles drive soft prosody + voice defaults. Trained emotion TTS models are not claimed. Distinct from /v1/emotion detect (VL-154).',
+        'Profiles drive soft prosody + voice defaults. Trained emotion TTS models are not claimed. Distinct from /v1/emotion detect.',
       docs: '/docs/EMOTION_VOICE.md',
     };
   }

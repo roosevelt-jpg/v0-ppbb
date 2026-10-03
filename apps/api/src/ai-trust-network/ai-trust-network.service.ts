@@ -13,7 +13,7 @@ export class AiTrustNetworkService {
       ...aitrustnetworkCatalog(),
       capabilities: aitrustnetworkCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-400 AI Trust Network — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Trust Network — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

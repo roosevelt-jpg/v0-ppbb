@@ -33,7 +33,7 @@ export class NestGlobalPartnerProgramCatalogAdapter implements GlobalPartnerProg
       status: 'shipped',
       api: 'GET /v1/global-partner-program/engine',
       console: '/global-partner-program',
-      notes: 'VL-371 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

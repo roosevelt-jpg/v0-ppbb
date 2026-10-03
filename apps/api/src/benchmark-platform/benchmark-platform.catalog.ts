@@ -44,7 +44,7 @@ export function benchmarkPlatformEngineCatalog() {
   return {
     product: 'VerbaLab Benchmark Platform',
     note:
-      'Benchmark Platform (VL-274). Internal suites and leaderboard seed — not a public leaderboard OS and never claims market leadership or SOTA.',
+      'Benchmark Platform. Internal suites and leaderboard seed — not a public leaderboard OS and never claims market leadership or SOTA.',
     suites,
     leaderboard,
     capabilities: suites,

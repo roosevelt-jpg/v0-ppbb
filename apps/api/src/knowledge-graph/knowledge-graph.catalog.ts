@@ -13,7 +13,7 @@ export function knowledgeGraphCatalog() {
   return {
     product: 'VerbaLab Knowledge Graph Cloud',
     note:
-      'Bounded entity/relationship layer in Postgres (VL-184). Prefer Knowledge/RAG (VL-062) for retrieval. Not Neo4j / ontology / taxonomy enterprise OS. Vertical domain graphs are catalog stubs.',
+      'Bounded entity/relationship layer in Postgres. Prefer Knowledge/RAG for retrieval. Not Neo4j / ontology / taxonomy enterprise OS. Vertical domain graphs are catalog stubs.',
     capabilities: [
       {
         id: 'entities',
@@ -34,7 +34,7 @@ export function knowledgeGraphCatalog() {
         name: 'Knowledge Linking',
         status: 'shipped',
         api: 'POST /v1/knowledge-graph/entities',
-        notes: 'Optional documentId → Knowledge document (VL-062).',
+        notes: 'Optional documentId → Knowledge document.',
       },
       {
         id: 'semantic-relationships',
@@ -48,14 +48,14 @@ export function knowledgeGraphCatalog() {
         name: 'Ontologies',
         status: 'shipped',
         api: 'GET /v1/ontology/engine',
-        notes: 'Bounded Ontology Platform (VL-196) over this KG. Not OWL/Protege OS.',
+        notes: 'Bounded Ontology Platform over this KG. Not OWL/Protege OS.',
       },
       {
         id: 'taxonomies',
         name: 'Taxonomies',
         status: 'shipped',
         api: 'GET /v1/taxonomy/engine',
-        notes: 'Bounded Taxonomy Platform (VL-197). Distinct from Ontology; not enterprise taxonomy OS.',
+        notes: 'Bounded Taxonomy Platform. Distinct from Ontology; not enterprise taxonomy OS.',
       },
       {
         id: 'enterprise-graph',

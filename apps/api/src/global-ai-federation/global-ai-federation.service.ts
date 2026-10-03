@@ -20,10 +20,10 @@ export class GlobalAiFederationService {
       honesty: globalAiFederationHonesty(),
       safety: {
         ...globalAiFederationHonesty(),
-        note: 'VL-391 Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
+        note: 'Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
       },
       docs: '/docs/GLOBAL_AI_FEDERATION.md',
-      note: 'VL-391 Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
+      note: 'Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
     };
   }
 
@@ -35,7 +35,7 @@ export class GlobalAiFederationService {
       domain: 'federation',
       capabilities: globalAiFederationCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: globalAiFederationHonesty(),
-      note: 'Global AI Federation monitoring (VL-391).',
+      note: 'Global AI Federation monitoring.',
     };
   }
 

@@ -85,7 +85,7 @@ export function openSciencePlatformEngineCatalog() {
   return {
     product: 'VerbaLab Open Science Platform',
     note:
-      'Open Science Platform (VL-278). Open models/datasets/benchmarks/APIs/collaborations with traditional-knowledge consent gate. traditionalKnowledgeConsentRequired=true.',
+      'Open Science Platform. Open models/datasets/benchmarks/APIs/collaborations with traditional-knowledge consent gate. traditionalKnowledgeConsentRequired=true.',
     candidates,
     capabilities: [
       { id: 'open-models', name: 'Open models', status: 'shipped' as OpenScienceStatus, api: 'GET /v1/open-science-platform/releases', notes: 'Model release candidates.' },

@@ -43,7 +43,7 @@ export function voiceCloningEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/speakers/verify',
         notes:
-          'Shipped speaker verify/identify via VL-152 + enrollment sample/consent gate. PAD/NIST biometrics deferred to VL-176 honesty.',
+          'Shipped speaker verify/identify via + enrollment sample/consent gate. PAD/NIST biometrics deferred to honesty.',
       },
       {
         id: 'voice-ownership',
@@ -100,7 +100,7 @@ export function voiceCloningEngineCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/voice-cloning/engine/analytics',
-        notes: 'Shipped clone counts by status/mode. Full Voice Analytics hub: VL-178.',
+        notes: 'Shipped clone counts by status/mode. Full Voice Analytics hub:',
       },
     ] satisfies CloningCapability[],
     engines: [

@@ -50,7 +50,7 @@ export class BaobabService {
         gateway: '/gateway',
       },
       docs: '/docs/BAOBAB.md',
-      note: 'VL-226 Baobab — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Baobab — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

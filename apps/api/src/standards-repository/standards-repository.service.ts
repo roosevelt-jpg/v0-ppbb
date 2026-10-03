@@ -20,10 +20,10 @@ export class StandardsRepositoryService {
       honesty: standardsRepositoryHonesty(),
       safety: {
         ...standardsRepositoryHonesty(),
-        note: 'VL-370 Versioned standards content store.',
+        note: 'Versioned standards content store.',
       },
       docs: '/docs/STANDARDS_REPOSITORY.md',
-      note: 'VL-370 Versioned standards content store.',
+      note: 'Versioned standards content store.',
     };
   }
 
@@ -35,7 +35,7 @@ export class StandardsRepositoryService {
       domain: 'repository',
       capabilities: standardsRepositoryCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: standardsRepositoryHonesty(),
-      note: 'Standards Repository monitoring (VL-370).',
+      note: 'Standards Repository monitoring.',
     };
   }
 

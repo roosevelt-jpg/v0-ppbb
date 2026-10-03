@@ -93,6 +93,6 @@ export function agentopsPlatformEngineCatalog() {
       note: 'Policy violations and blocked actions are surfaced in engine/monitoring for humans — not log-only.',
     },
     docs: '/docs/AGENTOPS_PLATFORM.md',
-    note: 'AgentOps Platform (VL-287). Lifecycle/versioning/eval/monitoring/replay/memory/analytics/safety with human-visible policy violations.',
+    note: 'AgentOps Platform. Lifecycle/versioning/eval/monitoring/replay/memory/analytics/safety with human-visible policy violations.',
   };
 }

@@ -20,10 +20,10 @@ export class GlobalCommunityPlatformService {
       honesty: globalCommunityPlatformHonesty(),
       safety: {
         ...globalCommunityPlatformHonesty(),
-        note: 'VL-380 Forums/events/hackathons/open-source community tooling.',
+        note: 'Forums/events/hackathons/open-source community tooling.',
       },
       docs: '/docs/GLOBAL_COMMUNITY_PLATFORM.md',
-      note: 'VL-380 Forums/events/hackathons/open-source community tooling.',
+      note: 'Forums/events/hackathons/open-source community tooling.',
     };
   }
 
@@ -35,7 +35,7 @@ export class GlobalCommunityPlatformService {
       domain: 'community',
       capabilities: globalCommunityPlatformCapabilities().map((c) => ({ id: c.id, status: c.status })),
       honesty: globalCommunityPlatformHonesty(),
-      note: 'Global Community Platform monitoring (VL-380).',
+      note: 'Global Community Platform monitoring.',
     };
   }
 

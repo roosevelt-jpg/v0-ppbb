@@ -2,7 +2,7 @@ export function videoVoiceCatalog() {
   return {
     id: 'video-voice',
     title: 'Video Voice',
-    vl: 'VL-124',
+    vl: 'Shipped.',
     blurb: 'Clone + dub voices for video in African languages (VerbaLab Voice FM).',
     honesty: {
       ownedModels: true,

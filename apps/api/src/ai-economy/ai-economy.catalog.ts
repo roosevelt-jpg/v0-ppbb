@@ -17,7 +17,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-economy/products',
       console: '/ai-economy',
-      notes: 'VL-374 AIE foundation. worldsLargestAiEconomy=false; marketplace software only.',
+      notes: 'AIE foundation. worldsLargestAiEconomy=false; marketplace software only.',
     },
     {
       id: 'ai-commerce-platform',
@@ -25,7 +25,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-commerce-platform/engine',
       console: '/ai-commerce-platform',
-      notes: 'VL-375 Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
+      notes: 'Catalogs/subscriptions/invoices via existing Stripe billing — no hand-rolled card handling.',
     },
     {
       id: 'ai-licensing-platform',
@@ -33,7 +33,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-licensing-platform/engine',
       console: '/ai-licensing-platform',
-      notes: 'VL-376 License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
+      notes: 'License entitlement ledger for models/datasets/voice/translation — not legal counsel.',
     },
     {
       id: 'revenue-sharing-platform',
@@ -41,7 +41,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/revenue-sharing-platform/engine',
       console: '/revenue-sharing-platform',
-      notes: 'VL-377 Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
+      notes: 'Royalty/payout ledger + workflow. autonomousPayouts=false; finance/legal set terms.',
     },
     {
       id: 'ai-talent-platform',
@@ -49,7 +49,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-talent-platform/engine',
       console: '/ai-talent-platform',
-      notes: 'VL-378 Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
+      notes: 'Marketplace matching for linguists/voice artists/translators/annotators — contracts still human.',
     },
     {
       id: 'research-funding-platform',
@@ -57,7 +57,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/research-funding-platform/engine',
       console: '/research-funding-platform',
-      notes: 'VL-379 Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+      notes: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
     },
     {
       id: 'global-community-platform',
@@ -65,7 +65,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-community-platform/engine',
       console: '/global-community-platform',
-      notes: 'VL-380 Forums/events/hackathons/open-source community tooling.',
+      notes: 'Forums/events/hackathons/open-source community tooling.',
     },
     {
       id: 'ai-investment-platform',
@@ -73,7 +73,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-investment-platform/engine',
       console: '/ai-investment-platform',
-      notes: 'VL-381 Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+      notes: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
     },
     {
       id: 'economic-intelligence',
@@ -81,7 +81,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/economic-intelligence/engine',
       console: '/economic-intelligence',
-      notes: 'VL-382 Executive/adoption/revenue analytics dashboards — reporting tooling.',
+      notes: 'Executive/adoption/revenue analytics dashboards — reporting tooling.',
     },
     {
       id: 'investment-dashboard-guard',

@@ -28,7 +28,7 @@ export class GlobalAiStandardsService {
         note: 'VerbaLab standards platform software - not external ISO/IEEE/W3C adoption.',
       },
       docs: '/docs/GLOBAL_AI_STANDARDS.md',
-      note: 'Global AI Standards Foundation (VL-364). internationalStandardAdoption=false; thirdPartyAccreditation=false.',
+      note: 'Global AI Standards Foundation. internationalStandardAdoption=false; thirdPartyAccreditation=false.',
     };
   }
 
@@ -54,7 +54,7 @@ export class GlobalAiStandardsService {
       honesty: globalAiStandardsHonesty(),
       links: Object.fromEntries(globalAiStandardsProductCatalog().filter((p) => p.console).map((p) => [p.id, p.console])),
       docs: '/docs/GLOBAL_AI_STANDARDS.md',
-      note: 'VGAS overview (VL-364-373).',
+      note: 'VGAS overview.',
     };
   }
 
@@ -85,7 +85,7 @@ export class GlobalAiStandardsService {
       mode: 'foundation',
       products: globalAiStandardsProductCatalog().map((p) => ({ id: p.id, status: p.status })),
       honesty: globalAiStandardsHonesty(),
-      note: 'VGAS monitoring snapshot (VL-364).',
+      note: 'VGAS monitoring snapshot.',
     };
   }
 }

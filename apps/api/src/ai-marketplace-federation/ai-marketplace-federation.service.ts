@@ -13,7 +13,7 @@ export class AiMarketplaceFederationService {
       ...aimarketplacefederationCatalog(),
       capabilities: aimarketplacefederationCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-406 AI Marketplace Federation — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Marketplace Federation — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

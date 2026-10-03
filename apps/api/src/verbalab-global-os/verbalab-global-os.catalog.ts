@@ -4,7 +4,7 @@ export function verbalabglobalosCatalog() {
   return {
     id: 'verbalab-global-os',
     title: 'VerbaLab Global OS',
-    vl: 'VL-407',
+    vl: 'Shipped.',
     phase: 274,
     domain: 'global_os',
     blurb: 'v6.0 Global OS foundation — AI-native orchestration over VAIOS, not Linux/K8s replacement claims.',

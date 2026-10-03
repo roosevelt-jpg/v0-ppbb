@@ -13,7 +13,7 @@ export function memoryCloudCatalog() {
   return {
     product: 'VerbaLab Memory Cloud',
     note:
-      'Persistent AI interaction memory in Postgres with subject export/erase (VL-183). Conversation/workspace/org/project/agent scopes. Not an infinite personalization OS; semantic vector memory deferred to Vector Cloud patterns.',
+      'Persistent AI interaction memory in Postgres with subject export/erase. Conversation/workspace/org/project/agent scopes. Not an infinite personalization OS; semantic vector memory deferred to Vector Cloud patterns.',
     capabilities: [
       {
         id: 'conversation-memory',

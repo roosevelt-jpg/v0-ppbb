@@ -40,7 +40,7 @@ export class VideoVoiceService {
         voiceFm: '/voice-fm',
         translateFm: '/translate-fm',
       },
-      note: 'VL-124 Video voice — end-to-end dubbing on VerbaLab-owned Voice FM + Translate FM.',
+      note: 'Video voice — end-to-end dubbing on VerbaLab-owned Voice FM + Translate FM.',
     };
   }
 }

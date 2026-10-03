@@ -33,7 +33,7 @@ export class NestCorporateOperatingSystemCatalogAdapter implements CorporateOper
       status: 'shipped',
       api: 'GET /v1/corporate-operating-system/products',
       console: '/corporate-operating-system',
-      notes: 'VL-354 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

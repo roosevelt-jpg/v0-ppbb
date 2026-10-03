@@ -29,7 +29,7 @@ export function workflowMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Workflow Marketplace',
     note:
-      'Workflow Marketplace (VL-255). Publish/install/run sandboxed workflow templates. Execution always goes through Workflow Runtime run + WorkflowPolicyGate (hard allowlist) and Policy Fabric hard gate — never live step execution. Extends VL-220 / listings kind=workflow. Not a Zapier/Temporal/Airflow OS.',
+      'Workflow Marketplace. Publish/install/run sandboxed workflow templates. Execution always goes through Workflow Runtime run + WorkflowPolicyGate (hard allowlist) and Policy Fabric hard gate — never live step execution. Extends / listings kind=workflow. Not a Zapier/Temporal/Airflow OS.',
     capabilities: [
       {
         id: 'automation-templates',

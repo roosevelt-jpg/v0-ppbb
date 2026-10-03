@@ -50,7 +50,7 @@ export class EdgeService {
         gateway: '/gateway',
       },
       docs: '/docs/EDGE.md',
-      note: 'VL-232 Edge — VerbaLab-owned model family wired to own-AI gateway.',
+      note: 'Edge — VerbaLab-owned model family wired to own-AI gateway.',
     };
   }
 

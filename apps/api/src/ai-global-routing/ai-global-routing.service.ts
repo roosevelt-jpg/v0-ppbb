@@ -13,7 +13,7 @@ export class AiGlobalRoutingService {
       ...aiglobalroutingCatalog(),
       capabilities: aiglobalroutingCapabilities(),
       ownAi: ownAiStackSummary(),
-      note: 'VL-403 AI Global Routing — AI Internet protocol software; runsGlobalAiInternet=false.',
+      note: 'AI Global Routing — AI Internet protocol software; runsGlobalAiInternet=false.',
     };
   }
 

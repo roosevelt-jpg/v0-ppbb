@@ -17,7 +17,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/digital-civilization/products',
       console: '/digital-civilization',
-      notes: 'VL-384 DCIV foundation. civilizationInfrastructureOs=false; product platforms only.',
+      notes: 'DCIV foundation. civilizationInfrastructureOs=false; product platforms only.',
     },
     {
       id: 'national-ai-platform',
@@ -25,7 +25,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/national-ai-platform/engine',
       console: '/national-ai-platform',
-      notes: 'VL-385 Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
+      notes: 'Gov/public-sector demo platform. productionCourtPoliceMilitary=false; productionCitizenIdentityAuth=false.',
     },
     {
       id: 'smart-city-platform',
@@ -33,7 +33,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/smart-city-platform/engine',
       console: '/smart-city-platform',
-      notes: 'VL-386 City systems integration demo. productionEmergencyDispatch=false.',
+      notes: 'City systems integration demo. productionEmergencyDispatch=false.',
     },
     {
       id: 'enterprise-nation-platform',
@@ -41,7 +41,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/enterprise-nation-platform/engine',
       console: '/enterprise-nation-platform',
-      notes: 'VL-387 Vertical platform for banks/hospitals/universities/telecoms — licensable product groundwork.',
+      notes: 'Vertical platform for banks/hospitals/universities/telecoms — licensable product groundwork.',
     },
     {
       id: 'global-language-preservation',
@@ -49,7 +49,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-language-preservation/engine',
       console: '/global-language-preservation',
-      notes: 'VL-388 Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
+      notes: 'Endangered-language archives/digital museums. consentRequiredForCulturalArchives=true.',
     },
     {
       id: 'universal-translation-grid',
@@ -57,7 +57,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/universal-translation-grid/engine',
       console: '/universal-translation-grid',
-      notes: 'VL-389 Translation infrastructure across speech/doc/broadcast/IoT channels.',
+      notes: 'Translation infrastructure across speech/doc/broadcast/IoT channels.',
     },
     {
       id: 'global-knowledge-network',
@@ -65,7 +65,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-knowledge-network/engine',
       console: '/global-knowledge-network',
-      notes: 'VL-390 Research/library/museum knowledge sharing network product.',
+      notes: 'Research/library/museum knowledge sharing network product.',
     },
     {
       id: 'global-ai-federation',
@@ -73,7 +73,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/global-ai-federation/engine',
       console: '/global-ai-federation',
-      notes: 'VL-391 Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
+      notes: 'Federated learning/cross-border collaboration. federationSecurityReviewRequired=true.',
     },
     {
       id: 'civilization-intelligence-dashboard',
@@ -81,7 +81,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/civilization-intelligence-dashboard/engine',
       console: '/civilization-intelligence-dashboard',
-      notes: 'VL-392 Adoption/impact analytics dashboards — reporting tooling.',
+      notes: 'Adoption/impact analytics dashboards — reporting tooling.',
     },
     {
       id: 'public-sector-guards',

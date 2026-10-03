@@ -13,7 +13,7 @@ export function reasoningCloudCatalog() {
   return {
     product: 'VerbaLab Reasoning Cloud',
     note:
-      'Multi-step reasoning via AI Gateway chat prompts (VL-186). Chain/plan/decision/problem-solving shipped as prompt strategies. Tree-of-thought is shallow branching. Not a proprietary symbolic reasoner or agent OS.',
+      'Multi-step reasoning via AI Gateway chat prompts. Chain/plan/decision/problem-solving shipped as prompt strategies. Tree-of-thought is shallow branching. Not a proprietary symbolic reasoner or agent OS.',
     capabilities: [
       {
         id: 'chain-of-thought',

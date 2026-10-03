@@ -13,7 +13,7 @@ export function vectorCloudCatalog() {
   return {
     product: 'VerbaLab Vector Cloud',
     note:
-      'Enterprise vector search over Postgres pgvector knowledge_chunks (VL-062). Workspace = namespace; collection = knowledge. Not a managed vector DB OS (Pinecone/Weaviate/Qdrant parity deferred).',
+      'Enterprise vector search over Postgres pgvector knowledge_chunks. Workspace = namespace; collection = knowledge. Not a managed vector DB OS (Pinecone/Weaviate/Qdrant parity deferred).',
     capabilities: [
       {
         id: 'vector-storage',
@@ -69,14 +69,14 @@ export function vectorCloudCatalog() {
         name: 'Index Management',
         status: 'shipped',
         api: 'GET /v1/vector-cloud/indexes',
-        notes: 'HNSW cosine index from VL-062 — create/drop API deferred.',
+        notes: 'HNSW cosine index from — create/drop API deferred.',
       },
       {
         id: 'hybrid-search',
         name: 'Hybrid Search',
         status: 'shipped',
         api: 'POST /v1/enterprise-search/search',
-        notes: 'Keyword+semantic RRF hybrid via Enterprise Search (VL-195). Pinecone/BM25 OS deferred.',
+        notes: 'Keyword+semantic RRF hybrid via Enterprise Search. Pinecone/BM25 OS deferred.',
       },
       {
         id: 'sharding',
