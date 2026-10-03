@@ -1,6 +1,6 @@
 # VerbaLab Ecosystem Cloud
 
-**Status:** Foundation shipped (VL-249); Plugin (VL-250) + Model (VL-251) + Dataset (VL-252) marketplaces shipped. Remaining: VL-253–257 marketplaces, Creator Economy VL-258, audit VL-259.  
+**Status:** Foundation shipped (VL-249); Plugin (VL-250) + Model (VL-251) + Dataset (VL-252) + Prompt (VL-253) marketplaces shipped. Remaining: VL-254–257 marketplaces, Creator Economy VL-258, audit VL-259.  
 **Rule:** Ecosystem Cloud is the **marketplace + monetization hub** over existing VL-090+ content marketplace and voice marketplace — **not** a payment-processor OS, card vault, or regenerate of Volumes 1–10. Roadmap: [`docs/roadmap/volume11-ecosystem-cloud/`](./roadmap/volume11-ecosystem-cloud/).
 
 Volume 11 README: this is a **real-money** volume (payments, licensing, royalty payouts). Use an established processor (Stripe, etc.); never store raw card data. Plugin/Agent marketplaces must enforce Volume 8 sandboxes + Policy hard-gate before third-party code runs. Creator Economy payout math must be hand-checked before live creators.
@@ -15,7 +15,7 @@ Volume 11 README: this is a **real-money** volume (payments, licensing, royalty 
 | Plugin Marketplace | **Shipped** — VL-250 — [`PLUGIN_MARKETPLACE.md`](./PLUGIN_MARKETPLACE.md); sandbox + Policy required |
 | Model Marketplace | **Shipped** — VL-251 — [`MODEL_MARKETPLACE.md`](./MODEL_MARKETPLACE.md) |
 | Dataset Marketplace | **Shipped** — VL-252 — [`DATASET_MARKETPLACE.md`](./DATASET_MARKETPLACE.md) |
-| Prompt Marketplace | **Deferred** — VL-253 — extends content `prompt` kind |
+| Prompt Marketplace | **Shipped** — VL-253 — [`PROMPT_MARKETPLACE.md`](./PROMPT_MARKETPLACE.md) |
 | Agent Marketplace | **Deferred** — VL-254 — sandbox + Policy required |
 | Workflow Marketplace | **Deferred** — VL-255 |
 | Connector Marketplace | **Deferred** — VL-256 |

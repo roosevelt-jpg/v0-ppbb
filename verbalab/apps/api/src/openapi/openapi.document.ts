@@ -3463,6 +3463,94 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/prompt-marketplace/engine': {
+      get: {
+        summary: 'Prompt Marketplace engine catalog',
+        operationId: 'getPromptMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Prompt marketplace capabilities, Stripe honesty, prompt-mesh / auto-prompt research denials',
+          },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/products': {
+      get: {
+        summary: 'Prompt Marketplace products (alias of engine)',
+        operationId: 'listPromptMarketplaceProducts',
+        responses: { '200': { description: 'Prompt marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings': {
+      get: {
+        summary: 'List prompt marketplace listings',
+        operationId: 'listPromptMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine prompt listings' } },
+      },
+      post: {
+        summary: 'Publish managed prompts as a marketplace listing',
+        operationId: 'publishPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/test': {
+      post: {
+        summary: 'Dry-run validate a prompt listing snapshot',
+        operationId: 'testPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Dry-run test results' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a prompt listing into the buyer workspace',
+        operationId: 'installPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Prompt versions installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List prompt listing reviews',
+        operationId: 'listPromptMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a prompt listing review',
+        operationId: 'reviewPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/prompt-marketplace/sales': {
+      get: {
+        summary: 'Prompt marketplace publisher sales',
+        operationId: 'listPromptMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/analytics': {
+      get: {
+        summary: 'Prompt marketplace analytics',
+        operationId: 'getPromptMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/prompt-marketplace/monitoring': {
+      get: {
+        summary: 'Prompt marketplace monitoring',
+        operationId: 'getPromptMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
