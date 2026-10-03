@@ -95,7 +95,7 @@ export class AiKernelService {
         vaiosOs: false,
         regeneratesVolumes1to7: false,
       },
-      note: 'Kernel monitoring snapshot (VL-214+). Runtimes through Policy (VL-215–222) partial; Production Audit VL-223 next.',
+      note: 'Kernel monitoring snapshot (VL-214–223). Volume 8 closed via Production Audit evidence pack; Foundation Model Cloud is Volume 9 when scheduled.',
     };
   }
 }

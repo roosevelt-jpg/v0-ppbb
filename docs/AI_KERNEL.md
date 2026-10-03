@@ -1,7 +1,7 @@
 # VerbaLab AI Kernel
 
-**Status:** Foundation shipped (VL-214 / library Phase 81); Volume 8 continues through VL-223  
-**Rule:** The AI Kernel is the **internal** execution layer — **not** a customer-facing product. Extends Inference Cloud + existing Memory/Prompt/Context/Reasoning/Orchestration modules. Do **not** regenerate Volumes 1–7 or invent a Linux/VAIOS rewrite. Roadmap: [`docs/roadmap/volume8-ai-kernel/`](./roadmap/volume8-ai-kernel/).
+**Status:** Volume complete through Production Audit (VL-214–223 / library Phases 81–90)  
+**Rule:** The AI Kernel is the **internal** execution layer — **not** a customer-facing product. Extends Inference Cloud + existing Memory/Prompt/Context/Reasoning/Orchestration modules. Do **not** regenerate Volumes 1–7 or invent a Linux/VAIOS rewrite. Roadmap: [`docs/roadmap/volume8-ai-kernel/`](./roadmap/volume8-ai-kernel/). Audit pack: [`docs/ai-kernel-audit/`](./ai-kernel-audit/).
 
 Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Knowledge, and Inference. They execute through Nest + Gateway today — this volume layers a discoverable **kernel hub** for future runtimes without cloning those products.
 
@@ -20,7 +20,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Workflow Runtime | **Partial** — Phase 87 / VL-220 ([`WORKFLOW_RUNTIME.md`](./WORKFLOW_RUNTIME.md); sandbox + hard permission allowlists; extends `/workflows`) |
 | Plugin Runtime | **Partial** — Phase 88 / VL-221 ([`PLUGIN_RUNTIME.md`](./PLUGIN_RUNTIME.md); sandbox + hard permission allowlists; extends marketplace) |
 | Policy Runtime | **Partial** — Phase 89 / VL-222 ([`POLICY_RUNTIME.md`](./POLICY_RUNTIME.md); hard-gate wired into Agent/Workflow/Plugin) |
-| Production Audit | Phase 90 / VL-223 |
+| Production Audit | **Done** — **VL-223** evidence pack under [`ai-kernel-audit/`](./ai-kernel-audit/) |
 | DDD / CQRS / Hexagonal | Bounded catalog CQRS slice — `hexagonalRewrite: false` |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
 
