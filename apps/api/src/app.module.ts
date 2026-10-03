@@ -58,6 +58,7 @@ import { VoiceStudioModule } from './voice-studio/voice-studio.module';
 import { VoiceEnhancementModule } from './voice-enhancement/voice-enhancement.module';
 import { VoiceBiometricsModule } from './voice-biometrics/voice-biometrics.module';
 import { VoiceMarketplaceModule } from './voice-marketplace/voice-marketplace.module';
+import { VoiceAnalyticsModule } from './voice-analytics/voice-analytics.module';
 import { SpeechRecognitionModule } from './speech-recognition/speech-recognition.module';
 import { SpeakerIntelligenceModule } from './speaker-intelligence/speaker-intelligence.module';
 import { EmotionIntelligenceModule } from './emotion-intelligence/emotion-intelligence.module';
@@ -98,6 +99,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceEnhancementModule,
     VoiceBiometricsModule,
     VoiceMarketplaceModule,
+    VoiceAnalyticsModule,
     SpeechRecognitionModule,
     SpeakerIntelligenceModule,
     EmotionIntelligenceModule,

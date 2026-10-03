@@ -53,6 +53,7 @@ const links = [
   { href: '/locales', label: 'Locales' },
   { href: '/glossary', label: 'Glossary' },
   { href: '/voice-marketplace', label: 'Voice market' },
+  { href: '/voice-analytics', label: 'Voice Analytics' },
   { href: '/marketplace', label: 'Marketplace' },
   { href: '/tm', label: 'TM' },
   { href: '/reviews', label: 'Reviews' },

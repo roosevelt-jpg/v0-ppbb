@@ -207,6 +207,7 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | VL-175 | Voice Enhancement Platform (Phase 32) | Done | `/v1/voice-enhancement/*` profiles + enhance/stream/upscale; ADR-0086. Extends VL-155; echo AEC/spectral ML deferred. |
 | VL-176 | Voice Biometrics (Phase 33) | Done | `/v1/voice-biometrics/*` encrypt/delete/authenticate + heuristic anti-spoof/liveness/risk; ADR-0087. Extends VL-152; not NIST/PAD. |
 | VL-177 | Voice Marketplace (Phase 34) | Done | `/v1/voice-marketplace/*` listings/install/reviews/packs; ADR-0088. Distinct from VL-090; celebrity without rights forbidden. |
+| VL-178 | Voice Analytics (Phase 35) | Done | `/v1/voice-analytics/*` usage/voices/revenue/quality; ADR-0089. Distinct from VL-159; BI dashboard deferred. |
 
 ---
 
@@ -298,3 +299,4 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | 2026-10-03 | VL-175 Done: Voice Enhancement Platform (Phase 32) — profiles over VL-155; ADR-0086. Not Krisp/Adobe Enhance; AEC deferred. |
 | 2026-10-03 | VL-176 Done: Voice Biometrics (Phase 33) — encrypted templates + auth/risk/anti-spoof/liveness; ADR-0087. Not NIST/PAD certified. |
 | 2026-10-03 | VL-177 Done: Voice Marketplace (Phase 34) — voice SKU listings/licenses/ratings; ADR-0088. ≠ localization marketplace; celebrity blocked. |
+| 2026-10-03 | VL-178 Done: Voice Analytics (Phase 35) — TTS/voice audit aggregates + marketplace revenue; ADR-0089. ≠ Speech Analytics; BI deferred. |

@@ -1236,6 +1236,56 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-marketplace/language-packs', { method: 'GET' });
   }
 
+  async voiceAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      regeneratesSpeechAnalytics: boolean;
+      biDashboardProduct: boolean;
+      fullHttpLatencyP95: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/voice-analytics/engine', { method: 'GET' });
+  }
+
+  async voiceAnalyticsOverview(params?: { from?: string; to?: string }): Promise<{
+    periodStart: string;
+    periodEnd: string;
+    estimatedCostUsd: number;
+    usage: { tts: { requests: number; characters: number } };
+    revenueCents: number;
+    note: string;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const qs = q.toString();
+    return this.requestJson(`/v1/voice-analytics/overview${qs ? `?${qs}` : ''}`, {
+      method: 'GET',
+    });
+  }
+
+  async voiceAnalyticsReport(params?: { from?: string; to?: string }): Promise<{
+    product: string;
+    generatedAt: string;
+    note: string;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const qs = q.toString();
+    return this.requestJson(`/v1/voice-analytics/report${qs ? `?${qs}` : ''}`, {
+      method: 'GET',
+    });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

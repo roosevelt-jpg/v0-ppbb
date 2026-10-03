@@ -21,7 +21,7 @@
 | Voice Biometrics / Authentication | **Partial** — **VL-176** `/voice-biometrics` over VL-152; heuristic anti-spoof/liveness; not NIST/PAD |
 | Voice Profiles | **Partial** — speaker profiles (VL-152) |
 | Voice Marketplace | **Partial** — **VL-177** `/voice-marketplace` (≠ localization `/marketplace`) |
-| Voice Analytics | **Deferred** — Phase 35 |
+| Voice Analytics | **Partial** — **VL-178** `/voice-analytics` (≠ Speech Analytics) |
 | Production Audit | Phase 36 (VL-179) |
 | GraphQL / CQRS | Bounded Voice Cloud slice (products query + catalog port) |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |

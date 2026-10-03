@@ -3077,6 +3077,69 @@ export const openApiDocument = {
         responses: { '200': { description: 'Aggregates' } },
       },
     },
+    '/v1/voice-analytics/engine': {
+      get: {
+        summary: 'Voice Analytics engine catalog',
+        operationId: 'getVoiceAnalyticsEngine',
+        responses: { '200': { description: 'Voice analytics capabilities' } },
+      },
+    },
+    '/v1/voice-analytics/overview': {
+      get: {
+        summary: 'Voice Analytics overview',
+        operationId: 'getVoiceAnalyticsOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Usage + revenue snapshot' } },
+      },
+    },
+    '/v1/voice-analytics/usage': {
+      get: {
+        summary: 'Voice TTS usage',
+        operationId: 'getVoiceAnalyticsUsage',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'TTS + voice audit aggregates' } },
+      },
+    },
+    '/v1/voice-analytics/voices': {
+      get: {
+        summary: 'Voice id frequency + clones',
+        operationId: 'getVoiceAnalyticsVoices',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Voice breakdown' } },
+      },
+    },
+    '/v1/voice-analytics/revenue': {
+      get: {
+        summary: 'Voice Marketplace revenue',
+        operationId: 'getVoiceAnalyticsRevenue',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Publisher sale aggregates' } },
+      },
+    },
+    '/v1/voice-analytics/marketplace': {
+      get: {
+        summary: 'Voice Marketplace analytics slice',
+        operationId: 'getVoiceAnalyticsMarketplace',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Marketplace aggregates' } },
+      },
+    },
+    '/v1/voice-analytics/report': {
+      get: {
+        summary: 'Bundled Voice Analytics report',
+        operationId: 'getVoiceAnalyticsReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Enterprise voice report JSON' } },
+      },
+    },
+    '/v1/voice-analytics/monitoring': {
+      get: {
+        summary: 'Voice Analytics monitoring snapshot',
+        operationId: 'getVoiceAnalyticsMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

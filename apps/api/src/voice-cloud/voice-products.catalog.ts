@@ -142,6 +142,15 @@ export function voiceProductCatalog(): VoiceProductRow[] {
         'Voice SKU publish/license/ratings (VL-177). Distinct from localization /marketplace. Celebrity without rights forbidden; cross-tenant clone synthesis deferred.',
     },
     {
+      id: 'voice-analytics',
+      name: 'Voice Analytics',
+      status: 'partial',
+      api: 'GET /v1/voice-analytics/engine',
+      console: '/voice-analytics',
+      notes:
+        'Usage/voices/revenue/latency/quality aggregates (VL-178). Distinct from Speech Analytics; BI dashboard deferred.',
+    },
+    {
       id: 'voice-faq',
       name: 'Voice agents (FAQ)',
       status: 'partial',

@@ -676,6 +676,45 @@ export class GqlVoiceMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlVoiceAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field()
+  capabilityCount!: number;
+
+  @Field()
+  shippedCount!: number;
+
+  @Field()
+  regeneratesSpeechAnalytics!: boolean;
+
+  @Field()
+  biDashboardProduct!: boolean;
+}
+
+@ObjectType()
+export class GqlVoiceAnalyticsOverview {
+  @Field()
+  periodStart!: string;
+
+  @Field()
+  periodEnd!: string;
+
+  @Field()
+  estimatedCostUsd!: number;
+
+  @Field()
+  ttsRequests!: number;
+
+  @Field()
+  revenueCents!: number;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

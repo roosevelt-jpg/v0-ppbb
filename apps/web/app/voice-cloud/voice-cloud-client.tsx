@@ -154,6 +154,9 @@ export function VoiceCloudClient() {
             <Link href={data.links.voiceMarketplace ?? '/voice-marketplace'} style={secondary}>
               Voice market
             </Link>
+            <Link href={data.links.voiceAnalytics ?? '/voice-analytics'} style={secondary}>
+              Voice Analytics
+            </Link>
             <Link href={data.links.usage} style={secondary}>
               Usage
             </Link>

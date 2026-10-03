@@ -374,3 +374,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Voice Enhancement Platform partial (VL-175 / Phase 32). See VOICE_ENHANCEMENT + ADR-0086. Profile pipelines over VL-155; echo AEC / spectral ML deferred.
 - Voice Biometrics partial (VL-176 / Phase 33). See VOICE_BIOMETRICS + ADR-0087. Encrypted templates + deletion + heuristic anti-spoof/liveness over VL-152; not NIST/PAD certified.
 - Voice Marketplace partial (VL-177 / Phase 34). See VOICE_MARKETPLACE + ADR-0088. Distinct from localization Marketplace; celebrity without rights forbidden.
+- Voice Analytics partial (VL-178 / Phase 35). See VOICE_ANALYTICS + ADR-0089. Distinct from Speech Analytics; BI dashboard deferred.
