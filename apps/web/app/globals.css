@@ -607,7 +607,8 @@ html[data-theme='light'] .vl-mkt-atmosphere {
 .vl-mkt-bullets {
   margin: 0.75rem 0 0;
   padding-left: 1.1rem;
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
+  opacity: 0.85;
   font-size: 0.88rem;
   display: grid;
   gap: 0.25rem;
@@ -940,7 +941,7 @@ html[data-theme='dark'] .vl-mkt-strip {
   border: 1px solid var(--mkt-line);
   border-radius: 18px;
   background: var(--mkt-elev);
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
   display: grid;
   gap: 0.55rem;
 }
@@ -953,17 +954,25 @@ html[data-theme='dark'] .vl-mkt-strip {
   align-items: center;
   padding: 1.5rem clamp(1rem, 3vw, 2rem) 2.5rem;
   border-top: 1px solid var(--mkt-line);
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
+  background: #dfe2e7;
   font-size: 0.9rem;
+}
+
+html[data-theme='dark'] .vl-mkt-footer {
+  background: transparent;
+  color: var(--mkt-muted);
 }
 
 .vl-mkt-footer a {
   margin-left: 0.85rem;
   text-decoration: none;
+  color: var(--mkt-ink);
+  font-weight: 600;
 }
 
 .vl-mkt-footer a:hover {
-  color: var(--mkt-ink);
+  text-decoration: underline;
 }
 
 @media (max-width: 900px) {
