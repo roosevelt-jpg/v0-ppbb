@@ -1,27 +1,32 @@
 # VerbaLab Model Runtime
 
-Local Own AI runtime, African quality eval, and enterprise production unlocks.
+Local Own AI runtime (all modalities), African quality eval, neural weight deploy path, and enterprise production unlocks.
 
 ## What's honest to say out loud
 
-1. **Local Own AI runs in-process** — African linguistic engine serves MT without rented OpenAI / ElevenLabs / Google.
-2. **African quality is measured** — `GET /v1/model-runtime/eval` reports exact-match Own AI vs a weak English-centric vendor baseline stub on lexicon packs.
-3. **Gov / bank / hospital unlocks are gated** — production stays locked until residency, audit, DPA/BAA, and sector safety checklist items are met.
-4. **Neural weights are deploy artifacts** — set `VERBALAB_WEIGHTS_URL` or `VERBALAB_MODEL_BASE_URL`; binaries are not claimed as git-shipped SOTA.
+1. **Local Own AI runs in-process** — MT / STT / TTS / chat / embed / OCR / detect / clone without rented OpenAI / ElevenLabs / Google.
+2. **African quality is measured** — `GET /v1/model-runtime/eval` reports exact-match Own AI vs a weak English-centric vendor baseline stub on forward + reverse lexicon packs.
+3. **Gov / bank / hospital unlocks are gated** — checklist defaults locked; wired into Enterprise Nation Platform + Government Intelligence.
+4. **Neural weights are deploy artifacts** — `VERBALAB_WEIGHTS_URL` (+ `manifest.json`) probed at runtime; unreachable URL keeps local lexicon active. Not git-shipped SOTA.
 
 ## APIs
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/v1/model-runtime/engine` | Runtime + deploy + African engine |
-| GET | `/v1/model-runtime/deploy` | Deploy shape / env |
-| GET | `/v1/model-runtime/packs` | Lexicon packs |
+| GET | `/v1/model-runtime/engine` | Runtime + deploy + weights probe + African engine |
+| GET | `/v1/model-runtime/deploy` | Deploy shape / env / weights |
+| GET | `/v1/model-runtime/packs` | Lexicon packs (forward + reverse) |
 | GET | `/v1/model-runtime/eval` | African quality report |
+| GET | `/v1/model-runtime/modalities/smoke` | Live smoke across all modalities |
 | GET | `/v1/model-runtime/unlocks` | All sector unlock states |
 | GET | `/v1/model-runtime/unlocks/:sector` | `government` \| `banking` \| `hospital` |
 | POST | `/v1/model-runtime/unlocks/:sector/assert` | Operator assert checklist (auth) |
-| POST | `/v1/model-runtime/translate` | Direct local African MT |
+| POST | `/v1/model-runtime/translate` | Direct African lexicon MT |
+| POST | `/v1/model-runtime/gateway/translate` | Gateway Own AI MT path |
+| POST | `/v1/model-runtime/gateway/chat` | Gateway Own AI chat path |
+| POST | `/v1/model-runtime/gateway/detect` | Gateway Own AI detect path |
 | GET | `/v1/model-runtime/overview` | Auth overview + honest claims |
+| GET | `/v1/model-runtime/monitoring` | Monitoring snapshot |
 
 ## Env
 
@@ -30,7 +35,8 @@ Local Own AI runtime, African quality eval, and enterprise production unlocks.
 VERBALAB_LOCAL_MODEL_RUNTIME=1
 
 # Optional neural / pod upgrade (same API surface)
-VERBALAB_WEIGHTS_URL=
+VERBALAB_WEIGHTS_URL=https://models.your-domain.com/weights/translate-fm
+# expects GET $VERBALAB_WEIGHTS_URL/manifest.json and optional POST .../translate
 VERBALAB_MODEL_BASE_URL=
 VERBALAB_MODEL_API_KEY=
 
@@ -47,4 +53,11 @@ VERBALAB_HEALTH_BAA=1
 
 ## Console
 
-`/model-runtime` under **Own models**.
+`/model-runtime` under **Own models** — try MT, modality smoke, eval-by-pair, unlock assert.
+
+## Related
+
+- ADR-0325
+- Enterprise Nation: `/enterprise-nation-platform`
+- Government Intelligence: `/government-intelligence`
+- Credentials: `/credentials-readiness`

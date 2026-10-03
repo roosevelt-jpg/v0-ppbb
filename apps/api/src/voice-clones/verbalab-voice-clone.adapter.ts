@@ -22,7 +22,11 @@ export class VerbalabVoiceCloneAdapter {
   readonly name = 'verbalab_own_clone';
 
   isConfigured(): boolean {
-    return Boolean(cloneUrl()) || process.env.VERBALAB_OWN_AI_FIXTURE === '1';
+    return (
+      Boolean(cloneUrl()) ||
+      process.env.VERBALAB_OWN_AI_FIXTURE === '1' ||
+      process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0'
+    );
   }
 
   async createClone(input: {
@@ -30,7 +34,11 @@ export class VerbalabVoiceCloneAdapter {
     description: string;
     samples: VoiceCloneSample[];
   }): Promise<VoiceCloneCreateResult> {
-    if (process.env.VERBALAB_OWN_AI_FIXTURE === '1' || process.env.VOICE_CLONE_FIXTURE === '1') {
+    if (
+      process.env.VERBALAB_OWN_AI_FIXTURE === '1' ||
+      process.env.VOICE_CLONE_FIXTURE === '1' ||
+      (!cloneUrl() && process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0')
+    ) {
       return {
         providerVoiceId: `vl_clone_${Buffer.from(input.name).toString('hex').slice(0, 12)}`,
         provider: this.name,
@@ -96,7 +104,12 @@ export class VerbalabVoiceCloneAdapter {
       style: number;
     };
   }): Promise<TtsOutput> {
-    if (process.env.VERBALAB_OWN_AI_FIXTURE === '1' || process.env.VOICE_CLONE_FIXTURE === '1') {
+    const url = cloneUrl();
+    if (
+      process.env.VERBALAB_OWN_AI_FIXTURE === '1' ||
+      process.env.VOICE_CLONE_FIXTURE === '1' ||
+      (!url && process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0')
+    ) {
       const styleTag = input.voiceSettings ? `:style=${input.voiceSettings.style}` : '';
       return {
         audio: Buffer.from(`VL_CLONE:${input.providerVoiceId}:${input.text}${styleTag}`, 'utf8'),
@@ -108,7 +121,6 @@ export class VerbalabVoiceCloneAdapter {
         latencyMs: 1,
       };
     }
-    const url = cloneUrl();
     if (!url) {
       throw new ApiException(
         'provider_not_configured',

@@ -32,6 +32,11 @@ export class ModelRuntimeController {
     return this.service.eval();
   }
 
+  @Get('modalities/smoke')
+  modalitiesSmoke() {
+    return this.service.modalitiesSmoke();
+  }
+
   @Get('unlocks')
   unlocks() {
     return this.service.unlocks();
@@ -80,6 +85,38 @@ export class ModelRuntimeController {
       target: body.target,
       accent: body.accent,
     });
+  }
+
+  @Post('gateway/translate')
+  gatewayTranslate(@Body() body: { text?: string; source?: string; target?: string }) {
+    if (!body.text?.trim() || !body.source?.trim() || !body.target?.trim()) {
+      throw new ApiException(
+        'validation_error',
+        'text, source, and target are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.service.gatewayTranslate({
+      text: body.text,
+      source: body.source,
+      target: body.target,
+    });
+  }
+
+  @Post('gateway/chat')
+  gatewayChat(@Body() body: { message?: string }) {
+    if (!body.message?.trim()) {
+      throw new ApiException('validation_error', 'message is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.service.gatewayChat({ message: body.message });
+  }
+
+  @Post('gateway/detect')
+  gatewayDetect(@Body() body: { text?: string }) {
+    if (!body.text?.trim()) {
+      throw new ApiException('validation_error', 'text is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.service.gatewayDetect({ text: body.text });
   }
 
   @Get('overview')

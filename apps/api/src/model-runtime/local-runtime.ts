@@ -1,14 +1,14 @@
 /**
- * In-process VerbaLab Own AI runtime — no rented vendors, no remote pods required.
+ * In-process VerbaLab Own AI runtime — all gateway modalities, no rented vendors.
  */
 import { TranslateInput, TranslateOutput, TranslationProvider } from '../gateway/translation-provider';
 import { engineManifest, translateAfrican } from './african-linguistic-engine';
+import { neuralTranslate } from './weights-deploy';
 
 export const VERBALAB_RUNTIME_PROVIDER = 'verbalab_model_runtime';
 
 export function localModelRuntimeEnabled(): boolean {
   if (process.env.VERBALAB_LOCAL_MODEL_RUNTIME === '0') return false;
-  // Default on: Own AI always has a local path when HTTP pods are absent.
   return true;
 }
 
@@ -17,6 +17,21 @@ export class LocalRuntimeMtAdapter implements TranslationProvider {
 
   async translate(input: TranslateInput): Promise<TranslateOutput> {
     const started = Date.now();
+    const neural = await neuralTranslate({
+      text: input.text,
+      source: input.source,
+      target: input.target,
+    });
+    if (neural) {
+      return {
+        text: neural,
+        source: input.source,
+        target: input.target,
+        provider: this.name,
+        characters: [...input.text].length,
+        latencyMs: Date.now() - started,
+      };
+    }
     const out = translateAfrican({
       text: input.text,
       source: input.source,
@@ -43,11 +58,22 @@ export function localRuntimeStatus() {
     gatewayProvider: 'verbalab_own_ai',
     enabled: localModelRuntimeEnabled(),
     inProcess: true,
+    modalities: {
+      mt: true,
+      stt: true,
+      tts: true,
+      chat: true,
+      embed: true,
+      ocr: true,
+      detect: true,
+      clone: true,
+    },
     engine: manifest,
     honesty: {
       weightBinariesInRepo: false,
       neuralWeightsInProcess: manifest.neuralWeightsInProcess,
-      note: 'Local lexicon runtime is production-callable today. Neural decode activates when VERBALAB_WEIGHTS_URL is set on model pods.',
+      note:
+        'Local Own AI covers MT/STT/TTS/chat/embed/OCR/detect/clone in-process. Neural decode activates when VERBALAB_WEIGHTS_URL responds; otherwise lexicon/fixture path stays live.',
     },
   };
 }

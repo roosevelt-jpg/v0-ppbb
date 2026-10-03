@@ -136,6 +136,26 @@ export const BEHAVIOR_NOTES = [
   { id: 'communal', note: 'Family/community references often preferred over purely individual framing.' },
 ];
 
+function withReversePacks(forward: Record<string, LexEntry[]>): Record<string, LexEntry[]> {
+  const out: Record<string, LexEntry[]> = { ...forward };
+  for (const [pair, entries] of Object.entries(forward)) {
+    const [source, target] = pair.split('-');
+    if (!source || !target) continue;
+    const rev = `${target}-${source}`;
+    if (out[rev]?.length) continue;
+    out[rev] = entries.map((e) => ({
+      source: e.target.toLowerCase(),
+      target: e.source,
+      domain: e.domain,
+      slang: e.slang,
+      culturalNote: e.culturalNote,
+    }));
+  }
+  return out;
+}
+
+const ACTIVE_PACKS = withReversePacks(PACKS);
+
 function packKey(source: string, target: string) {
   return `${source.toLowerCase()}-${target.toLowerCase()}`;
 }
@@ -154,7 +174,7 @@ export function translateAfrican(input: {
   culturalNotes: string[];
 } {
   const key = packKey(input.source, input.target);
-  const pack = PACKS[key] ?? [];
+  const pack = ACTIVE_PACKS[key] ?? [];
   const normalized = input.text.trim().toLowerCase().replace(/\s+/g, ' ');
   const hit = pack.find((e) => e.source === normalized);
   const domains: string[] = [];
@@ -182,8 +202,8 @@ export function translateAfrican(input: {
 }
 
 export function engineManifest() {
-  const pairs = Object.keys(PACKS);
-  const entryCount = pairs.reduce((n, k) => n + PACKS[k]!.length, 0);
+  const pairs = Object.keys(ACTIVE_PACKS);
+  const entryCount = pairs.reduce((n, k) => n + ACTIVE_PACKS[k]!.length, 0);
   return {
     id: 'verbalab-african-linguistic-engine',
     ownedModels: true,
@@ -200,7 +220,7 @@ export function engineManifest() {
 }
 
 export function listPacks() {
-  return Object.entries(PACKS).map(([pair, entries]) => ({
+  return Object.entries(ACTIVE_PACKS).map(([pair, entries]) => ({
     pair,
     count: entries.length,
     slang: entries.filter((e) => e.slang).length,
@@ -209,7 +229,7 @@ export function listPacks() {
 }
 
 export function allEvalCases() {
-  return Object.entries(PACKS).flatMap(([pair, entries]) => {
+  return Object.entries(ACTIVE_PACKS).flatMap(([pair, entries]) => {
     const [source, target] = pair.split('-') as [string, string];
     return entries.map((e) => ({
       source,

@@ -4,11 +4,12 @@ export function modelRuntimeHonesty() {
     vendorRentalDefault: false,
     weightBinariesInRepo: false,
     localLexiconRuntime: true,
+    localMultimodalRuntime: true,
     neuralWeightsOptional: true,
     sotaClaimsForbidden: true,
     enterpriseDefaultLocked: true,
     note:
-      'In-process African linguistic runtime ships today. Neural weight binaries deploy via VERBALAB_WEIGHTS_URL / model pods — not committed to git.',
+      'In-process Own AI runtime covers MT/STT/TTS/chat/embed/OCR/detect/clone. Neural weight binaries deploy via VERBALAB_WEIGHTS_URL / model pods — not committed to git.',
   };
 }
 
@@ -17,7 +18,7 @@ export function modelRuntimeCatalog() {
     id: 'verbalab-model-runtime',
     title: 'VerbaLab Model Runtime',
     blurb:
-      'Local Own AI runtime: African linguistic engine in-process, deployable neural weights, quality eval vs baselines, and gov/bank/hospital production unlocks.',
+      'Local Own AI runtime (all modalities), deployable neural weights, African quality eval vs baselines, and gov/bank/hospital production unlocks.',
     honesty: modelRuntimeHonesty(),
     docs: '/docs/MODEL_RUNTIME.md',
     adr: '/docs/adr/0325-verbalab-model-runtime.md',
@@ -39,6 +40,10 @@ export function deployShape() {
       VERBALAB_OWN_AI_FIXTURE: process.env.VERBALAB_OWN_AI_FIXTURE ?? null,
       VERBALAB_ALLOW_VENDOR_FALLBACK: process.env.VERBALAB_ALLOW_VENDOR_FALLBACK ?? null,
       VERBALAB_REGION: process.env.VERBALAB_REGION || null,
+      VERBALAB_ENTERPRISE_DPA: process.env.VERBALAB_ENTERPRISE_DPA || null,
+      VERBALAB_CLINICAL_SAFETY_SIGNED: process.env.VERBALAB_CLINICAL_SAFETY_SIGNED || null,
+      VERBALAB_HEALTH_BAA: process.env.VERBALAB_HEALTH_BAA || null,
+      VERBALAB_PCI_SCOPE_DOCUMENTED: process.env.VERBALAB_PCI_SCOPE_DOCUMENTED || null,
     },
     pods: [
       { modality: 'mt', path: '/translate', family: 'translate-fm' },
@@ -48,8 +53,9 @@ export function deployShape() {
       { modality: 'embed', path: '/embeddings', family: 'vector-fm' },
       { modality: 'ocr', path: '/ocr', family: 'vision-fm' },
       { modality: 'clone', path: '/voice-clones', family: 'voice-fm' },
+      { modality: 'weights', path: '/manifest.json', family: 'all' },
     ],
     upgrade:
-      'Point VERBALAB_MODEL_BASE_URL at model-serving pods, or VERBALAB_WEIGHTS_URL at a weight bundle. API surface stays identical.',
+      'Point VERBALAB_MODEL_BASE_URL at model-serving pods, or VERBALAB_WEIGHTS_URL at a weight bundle (+ manifest.json). API surface stays identical; local runtime remains the fallback.',
   };
 }

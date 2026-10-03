@@ -1,10 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { evaluateSectorUnlock } from '../model-runtime/enterprise-unlocks';
 import { governmentIntelligenceEngineCatalog } from './government-intelligence.catalog';
 
 @Injectable()
 export class GovernmentIntelligenceService {
+  private unlockOverlay() {
+    const government = evaluateSectorUnlock('government');
+    return {
+      productionUnlock: {
+        sector: 'government' as const,
+        productionReady: government.productionReady,
+        unlockedAt: government.unlockedAt,
+        missing: government.missing,
+        honesty: government.honesty,
+      },
+      modelRuntime: '/model-runtime',
+    };
+  }
+
   engine() {
-    return governmentIntelligenceEngineCatalog();
+    const catalog = governmentIntelligenceEngineCatalog();
+    const overlay = this.unlockOverlay();
+    return {
+      ...catalog,
+      ...overlay,
+      honesty: {
+        ...catalog.honesty,
+        productionGovernment: overlay.productionUnlock.productionReady,
+        unlockGates: true,
+        note: overlay.productionUnlock.productionReady
+          ? 'Government production unlocked via Model Runtime checklist (ADR-0325).'
+          : catalog.honesty?.note ??
+            'Government intelligence stays non-production until Model Runtime unlock checklist passes.',
+      },
+    };
   }
 
   terms(query?: string) {
@@ -23,6 +52,7 @@ export class GovernmentIntelligenceService {
       count: terms.length,
       honesty: catalog.honesty,
       safety: catalog.safety,
+      productionUnlock: catalog.productionUnlock,
       note: catalog.note,
       docs: catalog.docs,
     };
@@ -40,7 +70,8 @@ export class GovernmentIntelligenceService {
       termCount: catalog.terms.length,
       honesty: catalog.honesty,
       safety: catalog.safety,
-      note: 'Government Intelligence monitoring snapshot (VL-264).',
+      productionUnlock: catalog.productionUnlock,
+      note: 'Government Intelligence monitoring snapshot (VL-264) + Model Runtime unlock.',
     };
   }
 }

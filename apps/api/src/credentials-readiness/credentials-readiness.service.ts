@@ -39,10 +39,13 @@ export class CredentialsReadinessService {
       verbalabModels: {
         ready:
           present(['VERBALAB_MODEL_BASE_URL', 'VERBALAB_MT_URL', 'VERBALAB_TTS_URL']) ||
-          process.env.VERBALAB_OWN_AI_FIXTURE === '1',
+          process.env.VERBALAB_OWN_AI_FIXTURE === '1' ||
+          process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0',
         env: [
           'VERBALAB_MODEL_BASE_URL',
           'VERBALAB_MODEL_API_KEY',
+          'VERBALAB_LOCAL_MODEL_RUNTIME',
+          'VERBALAB_WEIGHTS_URL',
           'VERBALAB_MT_URL',
           'VERBALAB_STT_URL',
           'VERBALAB_TTS_URL',
@@ -52,7 +55,23 @@ export class CredentialsReadinessService {
           'VERBALAB_CLONE_URL',
         ],
         fixture: process.env.VERBALAB_OWN_AI_FIXTURE === '1',
-        howToGet: 'Deploy your model services; set BASE_URL + key from /model-keys',
+        localRuntime: process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0',
+        howToGet:
+          'Local runtime is on by default (/model-runtime). Deploy model pods + VERBALAB_WEIGHTS_URL for neural; mint keys at /model-keys',
+      },
+      enterpriseUnlocks: {
+        ready: present(['VERBALAB_REGION', 'VERBALAB_DATA_RESIDENCY']) && present(['VERBALAB_ENTERPRISE_DPA']),
+        env: [
+          'VERBALAB_REGION',
+          'VERBALAB_DATA_RESIDENCY',
+          'VERBALAB_ENTERPRISE_DPA',
+          'VERBALAB_PCI_SCOPE_DOCUMENTED',
+          'VERBALAB_CLINICAL_SAFETY_SIGNED',
+          'VERBALAB_HEALTH_BAA',
+        ],
+        console: '/model-runtime',
+        note: 'Gov/bank/hospital production unlock checklist (ADR-0325).',
+        howToGet: 'docs/MODEL_RUNTIME.md — set residency + DPA/BAA/clinical flags',
       },
       fly: {
         ready: present(['FLY_API_TOKEN']),

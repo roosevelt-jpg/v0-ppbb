@@ -592,8 +592,12 @@ export class FixtureVerbalabDetectAdapter implements LanguageDetectProvider {
     let language = 'en';
     if (/[\u1200-\u137F]/.test(sample)) language = 'am';
     else if (/[\u0600-\u06FF]/.test(sample)) language = 'ar';
-    else if (/\b(na|ya|wa|ni|kwa)\b/.test(sample)) language = 'sw';
-    else if (/\b(ati|fun|won)\b/.test(sample)) language = 'yo';
+    else if (/\b(habari|asante|karibu|tafadhali|sannu|sawubona|ngiyabonga)\b/.test(sample)) {
+      if (/\bsawubona|ngiyabonga\b/.test(sample)) language = 'zu';
+      else if (/\bsannu\b/.test(sample)) language = 'ha';
+      else language = 'sw';
+    } else if (/\b(na|ya|wa|ni|kwa)\b/.test(sample)) language = 'sw';
+    else if (/\b(ati|fun|won|báwo|bawo)\b/.test(sample)) language = 'yo';
     return { language, confidence: 0.82, provider: this.name };
   }
 }
@@ -633,6 +637,7 @@ export class HttpVerbalabDetectAdapter implements LanguageDetectProvider {
 }
 
 export function createVerbalabMt(): TranslationProvider {
+  // Remote pods when configured; otherwise in-process Own AI local runtime.
   if (resolveUrl(process.env.VERBALAB_MT_URL, '/translate') && !ownAiFixtureEnabled()) {
     return new HttpVerbalabMtAdapter();
   }
@@ -643,42 +648,64 @@ export function createVerbalabMt(): TranslationProvider {
 }
 
 export function createVerbalabStt(): SttProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabSttAdapter();
-  if (resolveUrl(process.env.VERBALAB_STT_URL, '/audio/transcriptions')) return new HttpVerbalabSttAdapter();
+  if (resolveUrl(process.env.VERBALAB_STT_URL, '/audio/transcriptions') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabSttAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabSttAdapter();
+  }
   return new UnconfiguredVerbalabSttAdapter();
 }
 
 export function createVerbalabTts(): TtsProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabTtsAdapter();
-  if (resolveUrl(process.env.VERBALAB_TTS_URL, '/audio/speech')) return new HttpVerbalabTtsAdapter();
+  if (resolveUrl(process.env.VERBALAB_TTS_URL, '/audio/speech') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabTtsAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabTtsAdapter();
+  }
   return new UnconfiguredVerbalabTtsAdapter();
 }
 
 export function createVerbalabChat(): ChatProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabChatAdapter();
-  if (resolveUrl(process.env.VERBALAB_CHAT_URL, '/chat/completions')) return new HttpVerbalabChatAdapter();
+  if (resolveUrl(process.env.VERBALAB_CHAT_URL, '/chat/completions') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabChatAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabChatAdapter();
+  }
   return new UnconfiguredVerbalabChatAdapter();
 }
 
 export function createVerbalabEmbed(): EmbeddingProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabEmbedAdapter();
-  if (resolveUrl(process.env.VERBALAB_EMBED_URL, '/embeddings')) return new HttpVerbalabEmbedAdapter();
+  if (resolveUrl(process.env.VERBALAB_EMBED_URL, '/embeddings') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabEmbedAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabEmbedAdapter();
+  }
   return new UnconfiguredVerbalabEmbedAdapter();
 }
 
 export function createVerbalabOcr(): OcrProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabOcrAdapter();
-  if (resolveUrl(process.env.VERBALAB_OCR_URL, '/ocr')) return new HttpVerbalabOcrAdapter();
+  if (resolveUrl(process.env.VERBALAB_OCR_URL, '/ocr') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabOcrAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabOcrAdapter();
+  }
   return new UnconfiguredVerbalabOcrAdapter();
 }
 
 export function createVerbalabDetect(): LanguageDetectProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabDetectAdapter();
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabDetectAdapter();
+  }
   return new HttpVerbalabDetectAdapter();
 }
 
 export function ownAiStackSummary() {
-  const localMt = localModelRuntimeEnabled() || ownAiFixtureEnabled();
+  const local = localModelRuntimeEnabled() || ownAiFixtureEnabled();
   return {
     provider: VERBALAB_OWN_PROVIDER,
     ownedModels: true,
@@ -689,14 +716,14 @@ export function ownAiStackSummary() {
     baseUrl: baseUrl() || null,
     weightsUrl: process.env.VERBALAB_WEIGHTS_URL?.trim() || null,
     modalities: {
-      mt:
-        Boolean(resolveUrl(process.env.VERBALAB_MT_URL, '/translate')) || localMt,
-      stt: Boolean(resolveUrl(process.env.VERBALAB_STT_URL, '/audio/transcriptions')) || ownAiFixtureEnabled(),
-      tts: Boolean(resolveUrl(process.env.VERBALAB_TTS_URL, '/audio/speech')) || ownAiFixtureEnabled(),
-      chat: Boolean(resolveUrl(process.env.VERBALAB_CHAT_URL, '/chat/completions')) || ownAiFixtureEnabled(),
-      embed: Boolean(resolveUrl(process.env.VERBALAB_EMBED_URL, '/embeddings')) || ownAiFixtureEnabled(),
-      ocr: Boolean(resolveUrl(process.env.VERBALAB_OCR_URL, '/ocr')) || ownAiFixtureEnabled(),
-      clone: Boolean(resolveUrl(process.env.VERBALAB_CLONE_URL, '/voice-clones')) || ownAiFixtureEnabled(),
+      mt: Boolean(resolveUrl(process.env.VERBALAB_MT_URL, '/translate')) || local,
+      stt: Boolean(resolveUrl(process.env.VERBALAB_STT_URL, '/audio/transcriptions')) || local,
+      tts: Boolean(resolveUrl(process.env.VERBALAB_TTS_URL, '/audio/speech')) || local,
+      chat: Boolean(resolveUrl(process.env.VERBALAB_CHAT_URL, '/chat/completions')) || local,
+      embed: Boolean(resolveUrl(process.env.VERBALAB_EMBED_URL, '/embeddings')) || local,
+      ocr: Boolean(resolveUrl(process.env.VERBALAB_OCR_URL, '/ocr')) || local,
+      detect: local,
+      clone: Boolean(resolveUrl(process.env.VERBALAB_CLONE_URL, '/voice-clones')) || local,
     },
     families: [
       'atlas',
