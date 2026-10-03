@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
+Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 closed)
 
 ---
 
@@ -288,7 +288,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-256 | Connector Marketplace (Phase 123) | Done | `/connector-marketplace` entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS. |
 | VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS. |
 | VL-258 | Creator Economy (Phase 125) | Done | `/creator-economy` over VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
-| VL-259 | Ecosystem Production Audit (Phase 126) | Not Started | Hardening pass — review, don't add features. |
+| VL-259 | Ecosystem Production Audit (Phase 126) | Done | Audit pack under `docs/ecosystem-cloud-audit/`; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence → Volume 12. |
 
 ---
 
@@ -452,3 +452,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-256 Done: Connector Marketplace (Phase 123) — entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS / live outbound. |
 | 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS / celebrity without rights. |
 | 2026-10-03 | VL-258 Done: Creator Economy (Phase 125) — royalty math + profiles/invoices over VL-092 Connect; hand-checked scenarios; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
+| 2026-10-03 | VL-259 Done: Ecosystem Production Audit (Phase 126) — evidence pack; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence deferred to Volume 12. |

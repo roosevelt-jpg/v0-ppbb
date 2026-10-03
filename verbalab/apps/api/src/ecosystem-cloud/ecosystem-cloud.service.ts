@@ -113,7 +113,7 @@ export class EcosystemCloudService {
       },
       docs: '/docs/ECOSYSTEM_CLOUD.md',
       note:
-        'Ecosystem Foundation (VL-249). Discovery hub over marketplaces VL-250–257 + Creator Economy VL-258; Production Audit VL-259 remains.',
+        'Ecosystem Cloud (VL-249–259). Discovery hub over marketplaces + Creator Economy; Production Audit closed — see docs/ecosystem-cloud-audit/.',
     };
   }
 
