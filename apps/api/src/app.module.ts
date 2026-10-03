@@ -68,6 +68,7 @@ import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
 import { ReasoningRuntimeModule } from './reasoning-runtime/reasoning-runtime.module';
 import { AgentRuntimeModule } from './agent-runtime/agent-runtime.module';
+import { WorkflowRuntimeModule } from './workflow-runtime/workflow-runtime.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -146,6 +147,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ContextRuntimeModule,
     ReasoningRuntimeModule,
     AgentRuntimeModule,
+    WorkflowRuntimeModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

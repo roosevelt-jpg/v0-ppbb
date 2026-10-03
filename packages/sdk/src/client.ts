@@ -1461,6 +1461,100 @@ export class VerbaLab {
     });
   }
 
+  async workflowRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    permissions: Array<{ id: string }>;
+    deniedActions: Array<{ id: string }>;
+    ceilings: {
+      maxWorkflowsPerWorkspace: number;
+      maxStepsPerRun: number;
+      maxRetries: number;
+      mode: string;
+      liveStepExecution: boolean;
+    };
+    mode: string;
+    honesty: {
+      openToolExecution: boolean;
+      liveStepExecution: boolean;
+      temporalOs: boolean;
+      airflowOs: boolean;
+      distributedWorkflowOs: boolean;
+      regeneratesVolumes1to7: boolean;
+      regeneratesWorkflowsProduct: boolean;
+      extendsWorkflowsProduct: boolean;
+      scopedPermissionsRequired: boolean;
+      sandboxRequired: boolean;
+      policyHardGateRequired: boolean;
+      policyRuntimeWired: boolean;
+      localPermissionHardGate: boolean;
+      orgWorkspaceScoped: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/workflow-runtime/engine', { method: 'GET' });
+  }
+
+  async workflowRuntimeCreate(body: {
+    name: string;
+    permissions?: string[];
+    mode?: string;
+    steps?: Array<{ action: string; input?: Record<string, unknown> }>;
+    requiresApproval?: boolean;
+  }): Promise<{
+    workflow: {
+      id: string;
+      name: string;
+      status: string;
+      version: number;
+      permissions: string[];
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/workflow-runtime/workflows', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async workflowRuntimeLifecycle(
+    id: string,
+    body: { status: string },
+  ): Promise<{ workflow: { id: string; status: string }; note?: string }> {
+    return this.requestJson(`/v1/workflow-runtime/workflows/${encodeURIComponent(id)}/lifecycle`, {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async workflowRuntimeRun(body: {
+    workflowId: string;
+    approved?: boolean;
+    forceFailAction?: string;
+  }): Promise<{
+    run: {
+      id: string;
+      workflowId: string;
+      status: string;
+      sandbox: boolean;
+      liveStepExecution: boolean;
+      steps: Array<{ action: string; allowed: boolean; simulated: boolean; attempt: number }>;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/workflow-runtime/run', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

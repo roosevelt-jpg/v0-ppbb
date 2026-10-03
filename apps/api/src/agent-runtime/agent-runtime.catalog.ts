@@ -111,7 +111,7 @@ export function agentRuntimeCatalog() {
         name: 'Agent Workflows',
         status: 'partial',
         api: 'POST /v1/agent-runtime/run',
-        notes: 'Sandbox step plans; dedicated Workflow Runtime is VL-220.',
+        notes: 'Sandbox step plans; dedicated Workflow Runtime is VL-220 (/workflow-runtime).',
       },
       {
         id: 'agent-lifecycle',

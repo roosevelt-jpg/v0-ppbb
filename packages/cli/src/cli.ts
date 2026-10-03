@@ -30,6 +30,9 @@ function usage(): never {
   verbalab agent-runtime-engine
   verbalab agent-runtime-create --name <name> [--permission <id>]... [--goal <text>]
   verbalab agent-runtime-run --agent <id> [--goal <text>] [--action <permission>]
+  verbalab workflow-runtime-engine
+  verbalab workflow-runtime-create --name <name> [--permission <id>]... [--mode sequential|parallel]
+  verbalab workflow-runtime-run --workflow <id> [--approved]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -315,6 +318,51 @@ async function main() {
           agentId,
           goal: argValue(rest, '--goal') ?? undefined,
           actions: action ? [{ action }] : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'workflow-runtime-engine') {
+    console.log(JSON.stringify(await vl.workflowRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'workflow-runtime-create') {
+    const name = argValue(rest, '--name');
+    if (!name) usage();
+    const permissions: string[] = [];
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--permission' && rest[i + 1]) {
+        permissions.push(rest[i + 1]!);
+        i++;
+      }
+    }
+    console.log(
+      JSON.stringify(
+        await vl.workflowRuntimeCreate({
+          name,
+          permissions: permissions.length ? permissions : undefined,
+          mode: argValue(rest, '--mode') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'workflow-runtime-run') {
+    const workflowId = argValue(rest, '--workflow');
+    if (!workflowId) usage();
+    console.log(
+      JSON.stringify(
+        await vl.workflowRuntimeRun({
+          workflowId,
+          approved: rest.includes('--approved'),
         }),
         null,
         2,

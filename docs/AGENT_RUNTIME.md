@@ -25,7 +25,7 @@ Part of the internal [AI Kernel](./AI_KERNEL.md) (Volume 8). Roadmap: [`docs/roa
 | Agent Scheduling | **Partial** — record `runAt` (not cron fleet) |
 | Agent Memory | **Shipped** — Memory Runtime `scope=agent` |
 | Agent Permissions | **Shipped** — hard allowlist gate |
-| Agent Workflows | **Partial** — sandbox step plans; VL-220 next |
+| Agent Workflows | **Partial** — sandbox step plans; dedicated Workflow Runtime VL-220 |
 | Agent Lifecycle | **Shipped** — draft/active/paused/archived |
 | Marketplace Integration | **Partial** — listing counts when kind=agent exists |
 | Realtime APIs | **Deferred** |

@@ -17,7 +17,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Context Runtime | **Partial** — Phase 84 / VL-217 ([`CONTEXT_RUNTIME.md`](./CONTEXT_RUNTIME.md); extends Context Engine) |
 | Reasoning Runtime | **Partial** — Phase 85 / VL-218 ([`REASONING_RUNTIME.md`](./REASONING_RUNTIME.md); extends Reasoning Cloud) |
 | Agent Runtime | **Partial** — Phase 86 / VL-219 ([`AGENT_RUNTIME.md`](./AGENT_RUNTIME.md); sandbox + hard permission allowlists) |
-| Workflow Runtime | **Deferred** — Phase 87 / VL-220 (must sandbox + scope permissions) |
+| Workflow Runtime | **Partial** — Phase 87 / VL-220 ([`WORKFLOW_RUNTIME.md`](./WORKFLOW_RUNTIME.md); sandbox + hard permission allowlists; extends `/workflows`) |
 | Plugin Runtime | **Deferred** — Phase 88 / VL-221 (must sandbox + scope permissions) |
 | Policy Runtime | **Deferred** — Phase 89 / VL-222 (must **hard-gate**, not log-only) |
 | Production Audit | Phase 90 / VL-223 |
@@ -36,6 +36,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Context Runtime | `/context-runtime` + `GET /v1/context-runtime/engine` |
 | Reasoning Runtime | `/reasoning-runtime` + `GET /v1/reasoning-runtime/engine` |
 | Agent Runtime | `/agent-runtime` + `GET /v1/agent-runtime/engine` |
+| Workflow Runtime | `/workflow-runtime` + `GET /v1/workflow-runtime/engine` |
 | REST catalog | `GET /v1/ai-kernel/products` (public) |
 | REST engine | `GET /v1/ai-kernel/engine` |
 | REST overview | `GET /v1/ai-kernel/overview` (Clerk session) |

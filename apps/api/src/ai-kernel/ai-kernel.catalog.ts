@@ -69,11 +69,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'workflow-runtime',
       name: 'Workflow Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/workflow-runtime/engine',
+      console: '/workflow-runtime',
       notes:
-        'Multi-step workflows (Phase 87 / VL-220). Must have scoped permissions + sandbox.',
+        'Sandbox multi-step workflows with hard permission allowlists (VL-220). Extends /v1/workflows; not Temporal/Airflow OS.',
     },
     {
       id: 'plugin-runtime',

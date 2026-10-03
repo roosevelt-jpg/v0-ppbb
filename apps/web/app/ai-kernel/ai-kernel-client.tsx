@@ -124,6 +124,9 @@ export function AiKernelClient() {
               <Link href={data.links.agentRuntime ?? '/agent-runtime'} style={secondary}>
                 Agent Runtime
               </Link>
+              <Link href={data.links.workflowRuntime ?? '/workflow-runtime'} style={secondary}>
+                Workflow Runtime
+              </Link>
               <Link href={data.links.inferenceCloud ?? '/inference-cloud'} style={secondary}>
                 Inference Cloud
               </Link>

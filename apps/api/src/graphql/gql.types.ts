@@ -757,6 +757,81 @@ export class GqlAgentRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlWorkflowRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlWorkflowRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlWorkflowRuntimeCapability])
+  capabilities!: GqlWorkflowRuntimeCapability[];
+
+  @Field()
+  openToolExecution!: boolean;
+
+  @Field()
+  liveStepExecution!: boolean;
+
+  @Field()
+  temporalOs!: boolean;
+
+  @Field()
+  airflowOs!: boolean;
+
+  @Field()
+  distributedWorkflowOs!: boolean;
+
+  @Field()
+  extendsWorkflowsProduct!: boolean;
+
+  @Field()
+  regeneratesWorkflowsProduct!: boolean;
+
+  @Field()
+  scopedPermissionsRequired!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  policyHardGateRequired!: boolean;
+
+  @Field()
+  policyRuntimeWired!: boolean;
+
+  @Field()
+  localPermissionHardGate!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxWorkflowsPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

@@ -3241,6 +3241,117 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + safety' } },
       },
     },
+    '/v1/workflow-runtime/engine': {
+      get: {
+        summary: 'Workflow Runtime catalog',
+        operationId: 'getWorkflowRuntimeEngine',
+        responses: { '200': { description: 'Catalog + honesty + ceilings' } },
+      },
+    },
+    '/v1/workflow-runtime/permissions': {
+      get: {
+        summary: 'Workflow Runtime grantable/denied permissions',
+        operationId: 'listWorkflowRuntimePermissions',
+        responses: { '200': { description: 'Permission lists' } },
+      },
+    },
+    '/v1/workflow-runtime/workflows': {
+      get: {
+        summary: 'List kernel workflows',
+        operationId: 'listWorkflowRuntimeWorkflows',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workflows' } },
+      },
+      post: {
+        summary: 'Create kernel workflow',
+        operationId: 'createWorkflowRuntimeWorkflow',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created' } },
+      },
+    },
+    '/v1/workflow-runtime/workflows/{id}': {
+      get: {
+        summary: 'Get kernel workflow',
+        operationId: 'getWorkflowRuntimeWorkflow',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Workflow' } },
+      },
+    },
+    '/v1/workflow-runtime/workflows/{id}/lifecycle': {
+      post: {
+        summary: 'Update workflow lifecycle',
+        operationId: 'lifecycleWorkflowRuntimeWorkflow',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Updated' } },
+      },
+    },
+    '/v1/workflow-runtime/workflows/{id}/version': {
+      post: {
+        summary: 'Bump workflow version',
+        operationId: 'versionWorkflowRuntimeWorkflow',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Versioned' } },
+      },
+    },
+    '/v1/workflow-runtime/run': {
+      post: {
+        summary: 'Run sandbox workflow',
+        operationId: 'runWorkflowRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sandbox run result' } },
+      },
+    },
+    '/v1/workflow-runtime/approve': {
+      post: {
+        summary: 'Record sandbox human approval',
+        operationId: 'approveWorkflowRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Approval' } },
+      },
+    },
+    '/v1/workflow-runtime/schedule': {
+      post: {
+        summary: 'Schedule sandbox workflow',
+        operationId: 'scheduleWorkflowRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Schedule' } },
+      },
+    },
+    '/v1/workflow-runtime/rollback': {
+      post: {
+        summary: 'Rollback sandbox workflow run',
+        operationId: 'rollbackWorkflowRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Rolled back' } },
+      },
+    },
+    '/v1/workflow-runtime/replay': {
+      post: {
+        summary: 'Replay sandbox workflow run',
+        operationId: 'replayWorkflowRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Replay' } },
+      },
+    },
+    '/v1/workflow-runtime/analytics': {
+      get: {
+        summary: 'Workflow Runtime analytics',
+        operationId: 'getWorkflowRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/workflow-runtime/monitoring': {
+      get: {
+        summary: 'Workflow Runtime monitoring',
+        operationId: 'getWorkflowRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + safety' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',
