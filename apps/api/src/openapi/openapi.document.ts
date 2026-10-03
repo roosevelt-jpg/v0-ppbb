@@ -2618,6 +2618,121 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/tts/engine': {
+      get: {
+        summary: 'Neural TTS engine catalog',
+        operationId: 'getNeuralTtsEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, engines, and architecture honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/tts/engine/analytics': {
+      get: {
+        summary: 'Neural TTS usage analytics',
+        operationId: 'getNeuralTtsAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'TTS character usage for the billing period' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/tts/voices': {
+      get: {
+        summary: 'Enriched Neural TTS voice catalog',
+        operationId: 'listNeuralTtsVoices',
+        parameters: [
+          { name: 'gender', in: 'query', schema: { type: 'string' } },
+          { name: 'language', in: 'query', schema: { type: 'string' } },
+          { name: 'personality', in: 'query', schema: { type: 'string' } },
+          { name: 'category', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': {
+            description: 'Voices with gender, personality, dialect/accent tags',
+          },
+        },
+      },
+    },
+    '/v1/tts/voices/workspace': {
+      get: {
+        summary: 'Neural TTS voices including approved workspace clones',
+        operationId: 'listNeuralTtsWorkspaceVoices',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Stock + own + approved clone voices' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/tts/synthesize': {
+      post: {
+        summary: 'Batch neural text-to-speech',
+        operationId: 'synthesizeNeuralTts',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['text', 'voice'],
+                properties: {
+                  text: { type: 'string' },
+                  voice: { type: 'string' },
+                  language: { type: 'string' },
+                  format: { type: 'string', enum: ['mp3', 'wav', 'opus', 'aac', 'flac'] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Raw audio bytes',
+            content: { 'audio/mpeg': { schema: { type: 'string', format: 'binary' } } },
+          },
+        },
+      },
+    },
+    '/v1/tts/stream': {
+      post: {
+        summary: 'Streaming neural TTS (chunk SSE after synthesis)',
+        operationId: 'streamNeuralTts',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['text', 'voice'],
+                properties: {
+                  text: { type: 'string' },
+                  voice: { type: 'string' },
+                  language: { type: 'string' },
+                  format: { type: 'string', enum: ['mp3', 'wav', 'opus', 'aac', 'flac'] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'text/event-stream with meta/audio/done events',
+          },
+        },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

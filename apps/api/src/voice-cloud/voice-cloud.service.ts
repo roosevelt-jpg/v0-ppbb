@@ -50,7 +50,7 @@ export class VoiceCloudService {
       products: voiceProductCatalog(),
       architecture: voiceArchitectureNotes(),
       deferred: {
-        neuralTtsProductization: true,
+        neuralTtsProductization: false,
         streamingTts: true,
         professionalVoiceCloning: true,
         emotionVoiceSynthesis: true,
@@ -66,6 +66,7 @@ export class VoiceCloudService {
       },
       links: {
         voiceCloud: '/voice-cloud',
+        neuralTts: '/neural-tts',
         audio: '/audio',
         voiceClones: '/audio',
         speakers: '/speaker-intelligence',

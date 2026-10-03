@@ -15,6 +15,8 @@ function usage(): never {
   verbalab languages
   verbalab speech-products
   verbalab voice-products
+  verbalab neural-tts-engine
+  verbalab neural-tts-voices
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -69,6 +71,26 @@ async function main() {
 
   if (command === 'voice-products') {
     console.log(JSON.stringify(await vl.voiceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'neural-tts-engine') {
+    console.log(JSON.stringify(await vl.neuralTtsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'neural-tts-voices') {
+    console.log(
+      JSON.stringify(
+        await vl.neuralTtsVoices({
+          gender: argValue(argv, '--gender'),
+          language: argValue(argv, '--language'),
+          category: argValue(argv, '--category'),
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

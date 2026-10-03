@@ -370,6 +370,69 @@ export class GqlSpeechEngine {
 }
 
 @ObjectType()
+export class GqlNeuralTtsCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlNeuralTtsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlNeuralTtsCapability])
+  capabilities!: GqlNeuralTtsCapability[];
+}
+
+@ObjectType()
+export class GqlNeuralTtsVoice {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  gender!: string;
+
+  @Field(() => [String])
+  languages!: string[];
+
+  @Field()
+  provider!: string;
+
+  @Field()
+  personality!: string;
+
+  @Field()
+  ageGroup!: string;
+
+  @Field(() => String, { nullable: true })
+  dialect!: string | null;
+
+  @Field(() => String, { nullable: true })
+  accent!: string | null;
+
+  @Field()
+  category!: string;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

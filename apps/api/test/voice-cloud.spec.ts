@@ -79,7 +79,7 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(res.body.architecture.terraform).toBe(true);
     expect(res.body.architecture.kubernetes).toBe(true);
     expect(res.body.architecture.batch).toBe(true);
-    expect(res.body.architecture.streaming).toBe(false);
+    expect(res.body.architecture.streaming).toBe(true);
     expect(res.body.architecture.billing).toBe(true);
     expect(res.body.architecture.monitoring).toBe(true);
     expect(res.body.architecture.consentAndAudit).toBe(true);
@@ -103,7 +103,7 @@ describe('Voice Cloud Foundation (VL-170)', () => {
 
     const tts = res.body.products.find((p: { id: string }) => p.id === 'neural-tts');
     expect(tts.status).toBe('shipped');
-    expect(tts.api).toContain('/v1/audio/speech');
+    expect(tts.api).toContain('/v1/tts/engine');
 
     const studio = res.body.products.find((p: { id: string }) => p.id === 'voice-studio');
     expect(studio.status).toBe('shipped');
@@ -136,8 +136,10 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(overview.usage.tts).toBeDefined();
     expect(overview.workspace.voiceClones).toBeGreaterThanOrEqual(0);
     expect(overview.workspace.speakerProfiles).toBeGreaterThanOrEqual(0);
+    expect(overview.deferred.neuralTtsProductization).toBe(false);
     expect(overview.deferred.streamingTts).toBe(true);
     expect(overview.deferred.emotionVoiceSynthesis).toBe(true);
+    expect(overview.links.neuralTts).toBe('/neural-tts');
     expect(overview.deferred.voiceMarketplace).toBe(true);
     expect(overview.deferred.nistVoiceBiometrics).toBe(true);
     expect(overview.links.audio).toBe('/audio');

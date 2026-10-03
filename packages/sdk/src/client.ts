@@ -1048,6 +1048,48 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-cloud/products', { method: 'GET' });
   }
 
+  async neuralTtsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/tts/engine', { method: 'GET' });
+  }
+
+  async neuralTtsVoices(params?: {
+    gender?: string;
+    language?: string;
+    personality?: string;
+    category?: string;
+  }): Promise<{
+    data: Array<{
+      id: string;
+      name: string;
+      gender: string;
+      languages: string[];
+      provider: string;
+      personality: string;
+      ageGroup: string;
+      dialect: string | null;
+      accent: string | null;
+      category: string;
+    }>;
+  }> {
+    const qs = new URLSearchParams();
+    if (params?.gender) qs.set('gender', params.gender);
+    if (params?.language) qs.set('language', params.language);
+    if (params?.personality) qs.set('personality', params.personality);
+    if (params?.category) qs.set('category', params.category);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    return this.requestJson(`/v1/tts/voices${suffix}`, { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

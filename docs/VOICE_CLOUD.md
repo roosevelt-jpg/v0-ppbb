@@ -10,8 +10,8 @@
 | Library ask | VerbaLab reality |
 | --- | --- |
 | Voice Cloud Foundation | **VL-170** — `/voice-cloud` + product catalog / overview |
-| Neural TTS | **VL-042 / VL-121** — `POST /v1/audio/speech`, `GET /v1/audio/voices` |
-| Streaming / Batch TTS productization | **Deferred** — Phase 28 (VL-171) |
+| Neural TTS | **VL-171** — `GET /v1/tts/engine`, `POST /v1/tts/synthesize` (+ legacy VL-042/121) |
+| Streaming / Batch TTS productization | **Partial streaming** — chunk SSE `POST /v1/tts/stream`; batch shipped |
 | Voice Cloning / Instant Cloning | **Partial** — **VL-064** ElevenLabs + consent + review + watermark |
 | Professional Voice Studio | **VL-120** — `/audio` African studio UX |
 | Emotion Voice | **Deferred** — Phase 30 (VL-173). VL-154 is speech emotion *detection*, not synthesis |

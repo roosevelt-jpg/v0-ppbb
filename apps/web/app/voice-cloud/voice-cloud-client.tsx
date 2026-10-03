@@ -118,7 +118,10 @@ export function VoiceCloudClient() {
           </section>
 
           <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <Link href={data.links.audio} style={primary}>
+            <Link href={data.links.neuralTts ?? '/neural-tts'} style={primary}>
+              Neural TTS
+            </Link>
+            <Link href={data.links.audio} style={secondary}>
               Voice Studio
             </Link>
             <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>

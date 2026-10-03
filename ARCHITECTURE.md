@@ -367,3 +367,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Speech Cloud volume complete through Production Audit (VL-150–160). See SPEECH_CLOUD + `docs/speech-cloud-audit/` and ADR-0069–0079. Competitor-parity claims rejected.
 - **VerbaLab Cloud Blueprint (12 layers)** accepted (ADR-0080 / `docs/CLOUD_BLUEPRINT.md`). Future clouds map Foundation → Production Audit without regenerating Identity/Gateway/Billing.
 - Voice Cloud Foundation shipped (VL-170 / Phase 27). See VOICE_CLOUD + ADR-0081. Extends TTS/clones/studio; does not regenerate Speech Cloud.
+- Neural Text-to-Speech shipped (VL-171 / Phase 28). See NEURAL_TTS + ADR-0082. Batch + chunk SSE; children voices deferred.
