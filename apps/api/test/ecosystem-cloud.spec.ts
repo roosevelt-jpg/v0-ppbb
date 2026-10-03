@@ -152,6 +152,13 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(workflow.status).toBe('shipped');
     expect(workflow.console).toBe('/workflow-marketplace');
     expect(workflow.notes).toMatch(/sandbox|Policy|Zapier|Temporal/i);
+
+    const connector = res.body.products.find(
+      (p: { id: string }) => p.id === 'connector-marketplace',
+    );
+    expect(connector.status).toBe('shipped');
+    expect(connector.console).toBe('/connector-marketplace');
+    expect(connector.notes).toMatch(/iPaaS|Zapier|Stripe|Slack/i);
   });
 
   it('exposes routing table and org overview', async () => {
@@ -177,7 +184,7 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(overview.deferred.promptMarketplace).toBe(false);
     expect(overview.deferred.agentMarketplace).toBe(false);
     expect(overview.deferred.workflowMarketplace).toBe(false);
-    expect(overview.deferred.connectorMarketplace).toBe(true);
+    expect(overview.deferred.connectorMarketplace).toBe(false);
     expect(overview.deferred.creatorEconomyExpansion).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to10).toBe(false);
     expect(overview.deferred.paymentProcessorOs).toBe(false);

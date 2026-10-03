@@ -101,10 +101,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'connector-marketplace',
       name: 'Connector Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'VL-256 / Phase 123. Buy/sell connectors — not a full iPaaS OS.',
+      status: 'shipped',
+      api: 'GET /v1/connector-marketplace/engine',
+      console: '/connector-marketplace',
+      notes:
+        'VL-256 / Phase 123. Entitlement SKUs over connector catalog + Slack (ADR-0026); FabricPolicyGate + Stripe honesty. Not Zapier/iPaaS OS.',
     },
     {
       id: 'voice-language-marketplace',
@@ -240,6 +241,11 @@ export function ecosystemRoutingTable() {
       surface: 'workflow-marketplace',
       path: '/workflow-marketplace',
       api: '/v1/workflow-marketplace/engine',
+    },
+    {
+      surface: 'connector-marketplace',
+      path: '/connector-marketplace',
+      api: '/v1/connector-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },
