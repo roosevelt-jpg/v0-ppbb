@@ -8,6 +8,7 @@ import { LanguageCloudApplicationModule } from '../language-cloud/application/la
 import { SpeechCloudApplicationModule } from '../speech-cloud/application/speech-cloud-application.module';
 import { VoiceCloudApplicationModule } from '../voice-cloud/application/voice-cloud-application.module';
 import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/application/intelligence-cloud-application.module';
+import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/knowledge-cloud-application.module';
 import { EmbeddingCloudModule } from '../embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from '../vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from '../memory-cloud/memory-cloud.module';
@@ -44,6 +45,7 @@ import { LanguageCloudGraphqlResolver } from './language-cloud.resolver';
 import { SpeechCloudGraphqlResolver } from './speech-cloud.resolver';
 import { VoiceCloudGraphqlResolver } from './voice-cloud.resolver';
 import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver';
+import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { EmbeddingCloudGraphqlResolver } from './embedding-cloud.resolver';
 import { VectorCloudGraphqlResolver } from './vector-cloud.resolver';
 import { MemoryCloudGraphqlResolver } from './memory-cloud.resolver';
@@ -100,6 +102,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SpeechCloudApplicationModule,
     VoiceCloudApplicationModule,
     IntelligenceCloudApplicationModule,
+    KnowledgeCloudApplicationModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
@@ -144,6 +147,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SpeechCloudGraphqlResolver,
     VoiceCloudGraphqlResolver,
     IntelligenceCloudGraphqlResolver,
+    KnowledgeCloudGraphqlResolver,
     EmbeddingCloudGraphqlResolver,
     VectorCloudGraphqlResolver,
     MemoryCloudGraphqlResolver,

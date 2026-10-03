@@ -1,0 +1,153 @@
+export type KnowledgeProductStatus = 'shipped' | 'partial' | 'deferred';
+
+export type KnowledgeProductRow = {
+  id: string;
+  name: string;
+  status: KnowledgeProductStatus;
+  api: string | null;
+  console: string | null;
+  notes: string;
+};
+
+/** Library Phase 60 product map (VL-193). Hub only — maps onto VL-062 RAG + Intelligence surfaces. */
+export function knowledgeProductCatalog(): KnowledgeProductRow[] {
+  return [
+    {
+      id: 'knowledge-cloud',
+      name: 'VerbaLab Knowledge Cloud',
+      status: 'shipped',
+      api: 'GET /v1/knowledge-cloud/products',
+      console: '/knowledge-cloud',
+      notes:
+        'Knowledge Cloud parent hub (VL-193). Enterprise knowledge products over VL-062 RAG + Intelligence — not a Confluence/SharePoint OS or Neo4j knowledge-graph platform.',
+    },
+    {
+      id: 'enterprise-knowledge-base',
+      name: 'Enterprise Knowledge Base',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Document/content ingestion & storage (Phase 61 / VL-194). Must be org/workspace-scoped from day one.',
+    },
+    {
+      id: 'enterprise-search',
+      name: 'Enterprise Search',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Search across ingested knowledge (Phase 62 / VL-195). Not Elastic/OpenSearch OS parity.',
+    },
+    {
+      id: 'ontology-platform',
+      name: 'Ontology Platform',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Formal concept/relationship modeling (Phase 63 / VL-196). Not OWL/Protege OS.',
+    },
+    {
+      id: 'taxonomy-platform',
+      name: 'Taxonomy Platform',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Classification/categorization structures (Phase 64 / VL-197).',
+    },
+    {
+      id: 'enterprise-rag',
+      name: 'Enterprise RAG Platform',
+      status: 'partial',
+      api: 'POST /v1/knowledge/query',
+      console: '/knowledge',
+      notes:
+        'Maps onto VL-062 pgvector RAG (+ Vector/Context engines). Full Enterprise RAG product is Phase 65 / VL-198 — hand-verify retrieval on real docs.',
+    },
+    {
+      id: 'knowledge-memory',
+      name: 'Knowledge Memory',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Persistent knowledge-layer memory (Phase 66 / VL-199). Distinct from Intelligence Memory Cloud (VL-183).',
+    },
+    {
+      id: 'knowledge-intelligence',
+      name: 'Knowledge Intelligence',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Combined knowledge analysis/insight (Phase 67 / VL-200).',
+    },
+    {
+      id: 'enterprise-knowledge-apis',
+      name: 'Enterprise Knowledge APIs',
+      status: 'partial',
+      api: 'GET /v1/knowledge/documents',
+      console: '/knowledge',
+      notes:
+        'Existing `/v1/knowledge/*` surfaces (VL-062). Public Knowledge Cloud API pack is Phase 68 / VL-201.',
+    },
+    {
+      id: 'knowledge-analytics',
+      name: 'Knowledge Analytics',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Usage/quality analytics (Phase 69 / VL-202). ≠ Language/Speech/Voice/Intelligence analytics.',
+    },
+    {
+      id: 'knowledge-graph-bridge',
+      name: 'Knowledge Graph (Intelligence)',
+      status: 'partial',
+      api: 'GET /v1/knowledge-graph/engine',
+      console: '/knowledge-graph',
+      notes:
+        'Bounded ER from VL-184 — linked here, not regenerated. Prefer RAG; Neo4j OS deferred.',
+    },
+    {
+      id: 'document-intelligence',
+      name: 'Document Intelligence',
+      status: 'partial',
+      api: 'POST /v1/knowledge/documents',
+      console: '/knowledge',
+      notes: 'Upload/chunk/embed via VL-062. Deep doc-AI (OCR/layout/tables) deferred with KB phases.',
+    },
+  ];
+}
+
+export function knowledgeArchitectureNotes() {
+  return {
+    style: 'nest_modular_monolith',
+    ddd: 'bounded_knowledge_cloud_hub',
+    cqrs: true,
+    hexagonalRewrite: false,
+    repositoryPattern: 'prisma_via_existing_modules',
+    eventDriven: 'audit_and_jobs_only',
+    rest: true,
+    graphql: true,
+    realtime: true,
+    streaming: true,
+    batch: true,
+    enterpriseApis: true,
+    sdk: '@verbalab/sdk',
+    cli: '@verbalab/cli',
+    docker: true,
+    terraform: true,
+    kubernetes: true,
+    primaryRegion: 'af-south-1',
+    deployment: 'Fly default; optional EKS af-south-1 (shared platform)',
+    billing: true,
+    monitoring: true,
+    enterpriseKnowledgeOs: false,
+    ontologyOs: false,
+    regeneratesVl062: false,
+    extendsVl062: true,
+    extendsIntelligenceCloud: true,
+    tenantScopedKnowledge: true,
+    pgvector: true,
+    neo4jParity: false,
+  };
+}

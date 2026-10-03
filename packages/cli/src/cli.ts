@@ -16,6 +16,7 @@ function usage(): never {
   verbalab speech-products
   verbalab voice-products
   verbalab intelligence-products
+  verbalab knowledge-products
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -113,6 +114,11 @@ async function main() {
 
   if (command === 'intelligence-products') {
     console.log(JSON.stringify(await vl.intelligenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-products') {
+    console.log(JSON.stringify(await vl.knowledgeProducts(), null, 2));
     return;
   }
 

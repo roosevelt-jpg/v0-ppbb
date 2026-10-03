@@ -32,5 +32,6 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | Speech | VL-150 → VL-160 |
 | Voice | VL-170 → VL-179 |
 | Intelligence | VL-180 → VL-192 |
+| Knowledge | VL-193 → VL-203 |
 
 Vision / Media / … remain **unscheduled** until ROADMAP executable phases exist.

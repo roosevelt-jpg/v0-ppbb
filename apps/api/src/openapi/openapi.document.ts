@@ -2645,6 +2645,33 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-cloud/products': {
+      get: {
+        summary: 'Knowledge Cloud product catalog',
+        operationId: 'listKnowledgeProducts',
+        responses: {
+          '200': {
+            description: 'Knowledge products and architecture honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/knowledge-cloud/overview': {
+      get: {
+        summary: 'Knowledge Cloud org overview',
+        operationId: 'getKnowledgeOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session knowledge doc/chunk counts, products, deferred flags, and console links',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',
