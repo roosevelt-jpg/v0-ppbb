@@ -45,6 +45,7 @@ export const FABRIC_BUSES = [
   'policy-fabric',
   'plugin-marketplace',
   'model-marketplace',
+  'dataset-marketplace',
 ] as const;
 
 /**

@@ -649,6 +649,48 @@ export class GqlModelMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlDatasetMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlDatasetMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlDatasetMarketplaceCapability])
+  capabilities!: GqlDatasetMarketplaceCapability[];
+
+  @Field()
+  labelStudioOs!: boolean;
+
+  @Field()
+  datasetCloudOs!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

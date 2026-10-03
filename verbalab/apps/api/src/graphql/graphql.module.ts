@@ -28,6 +28,7 @@ import { PolicyFabricApplicationModule } from '../policy-fabric/application/poli
 import { EcosystemCloudApplicationModule } from '../ecosystem-cloud/application/ecosystem-cloud-application.module';
 import { PluginMarketplaceApplicationModule } from '../plugin-marketplace/application/plugin-marketplace-application.module';
 import { ModelMarketplaceApplicationModule } from '../model-marketplace/application/model-marketplace-application.module';
+import { DatasetMarketplaceApplicationModule } from '../dataset-marketplace/application/dataset-marketplace-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -109,6 +110,7 @@ import { PolicyFabricGraphqlResolver } from './policy-fabric.resolver';
 import { EcosystemCloudGraphqlResolver } from './ecosystem-cloud.resolver';
 import { PluginMarketplaceGraphqlResolver } from './plugin-marketplace.resolver';
 import { ModelMarketplaceGraphqlResolver } from './model-marketplace.resolver';
+import { DatasetMarketplaceGraphqlResolver } from './dataset-marketplace.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -210,6 +212,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EcosystemCloudApplicationModule,
     PluginMarketplaceApplicationModule,
     ModelMarketplaceApplicationModule,
+    DatasetMarketplaceApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -299,6 +302,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EcosystemCloudGraphqlResolver,
     PluginMarketplaceGraphqlResolver,
     ModelMarketplaceGraphqlResolver,
+    DatasetMarketplaceGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

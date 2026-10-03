@@ -281,7 +281,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-249 | Ecosystem Foundation (Phase 116) | Done | `/ecosystem-cloud` hub + product catalog; ADR-0151. Extends VL-090+/voice marketplace. Not payment OS; Stripe + sandbox safety from day one. |
 | VL-250 | Plugin Marketplace (Phase 117) | Done | `/plugin-marketplace` publish/install/run/reviews; FabricPolicyGate + PluginPolicyGate + sandbox invoke; ADR-0152. liveCodeExecution=false. |
 | VL-251 | Model Marketplace (Phase 118) | Done | `/model-marketplace` license SKUs over Model Registry; FabricPolicyGate + Stripe honesty; ADR-0153. Not HF/weight CDN OS. |
-| VL-252 | Dataset Marketplace (Phase 119) | Not Started | Extends content-marketplace dataset kind. |
+| VL-252 | Dataset Marketplace (Phase 119) | Done | `/dataset-marketplace` over dataset kind + VL-101; FabricPolicyGate + Stripe honesty; ADR-0154. Not Label Studio / Dataset Cloud OS. |
 | VL-253 | Prompt Marketplace (Phase 120) | Not Started | Extends content-marketplace prompt kind + Prompt Fabric. |
 | VL-254 | Agent Marketplace (Phase 121) | Not Started | Buy/sell/publish agents; enforce Agent Runtime sandbox + Policy Fabric. |
 | VL-255 | Workflow Marketplace (Phase 122) | Not Started | Buy/sell/publish workflows. |
@@ -445,3 +445,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-249 Done: Ecosystem Foundation (Phase 116) — `/ecosystem-cloud` hub/catalog; ADR-0151. Extends VL-090+/voice marketplace; Stripe + sandbox safety; not payment-processor OS. |
 | 2026-10-03 | VL-250 Done: Plugin Marketplace (Phase 117) — publish/install/run/reviews over Plugin Runtime; FabricPolicyGate + PluginPolicyGate; ADR-0152. Not extension store OS / live code. |
 | 2026-10-03 | VL-251 Done: Model Marketplace (Phase 118) — license SKUs over Model Registry; FabricPolicyGate + Stripe honesty; ADR-0153. Not Hugging Face / weight CDN OS. |
+| 2026-10-03 | VL-252 Done: Dataset Marketplace (Phase 119) — hub over dataset kind + VL-101; FabricPolicyGate + Stripe honesty; ADR-0154. Not Label Studio / Dataset Cloud OS. |

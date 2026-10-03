@@ -80,6 +80,7 @@ import { PolicyFabricModule } from './policy-fabric/policy-fabric.module';
 import { EcosystemCloudModule } from './ecosystem-cloud/ecosystem-cloud.module';
 import { PluginMarketplaceModule } from './plugin-marketplace/plugin-marketplace.module';
 import { ModelMarketplaceModule } from './model-marketplace/model-marketplace.module';
+import { DatasetMarketplaceModule } from './dataset-marketplace/dataset-marketplace.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -178,6 +179,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     EcosystemCloudModule,
     PluginMarketplaceModule,
     ModelMarketplaceModule,
+    DatasetMarketplaceModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

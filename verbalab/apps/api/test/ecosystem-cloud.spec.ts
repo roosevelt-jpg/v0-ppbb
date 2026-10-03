@@ -132,6 +132,11 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(model.status).toBe('shipped');
     expect(model.console).toBe('/model-marketplace');
     expect(model.notes).toMatch(/Hugging Face|registry|Stripe/i);
+
+    const dataset = res.body.products.find((p: { id: string }) => p.id === 'dataset-marketplace');
+    expect(dataset.status).toBe('shipped');
+    expect(dataset.console).toBe('/dataset-marketplace');
+    expect(dataset.notes).toMatch(/Label Studio|Dataset Cloud|Stripe/i);
   });
 
   it('exposes routing table and org overview', async () => {
@@ -153,6 +158,7 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     });
     expect(overview.deferred.pluginMarketplace).toBe(false);
     expect(overview.deferred.modelMarketplace).toBe(false);
+    expect(overview.deferred.datasetMarketplace).toBe(false);
     expect(overview.deferred.agentMarketplace).toBe(true);
     expect(overview.deferred.creatorEconomyExpansion).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to10).toBe(false);

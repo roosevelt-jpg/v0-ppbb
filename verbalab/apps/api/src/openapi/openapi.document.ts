@@ -3383,6 +3383,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/dataset-marketplace/engine': {
+      get: {
+        summary: 'Dataset Marketplace engine catalog',
+        operationId: 'getDatasetMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Dataset marketplace capabilities, Stripe honesty, Label Studio / Dataset Cloud denials',
+          },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/products': {
+      get: {
+        summary: 'Dataset Marketplace products (alias of engine)',
+        operationId: 'listDatasetMarketplaceProducts',
+        responses: { '200': { description: 'Dataset marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings': {
+      get: {
+        summary: 'List dataset marketplace listings',
+        operationId: 'listDatasetMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine dataset listings' } },
+      },
+      post: {
+        summary: 'Publish a TM corpus or DatasetAsset as a marketplace listing',
+        operationId: 'publishDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a dataset listing (TM copy or asset entitlement)',
+        operationId: 'installDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Dataset installed / entitlement granted' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List dataset listing reviews',
+        operationId: 'listDatasetMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a dataset listing review',
+        operationId: 'reviewDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/dataset-marketplace/sales': {
+      get: {
+        summary: 'Dataset marketplace publisher sales',
+        operationId: 'listDatasetMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/analytics': {
+      get: {
+        summary: 'Dataset marketplace analytics',
+        operationId: 'getDatasetMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/dataset-marketplace/monitoring': {
+      get: {
+        summary: 'Dataset marketplace monitoring',
+        operationId: 'getDatasetMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
