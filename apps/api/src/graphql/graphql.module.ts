@@ -11,6 +11,7 @@ import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/applic
 import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/knowledge-cloud-application.module';
 import { InferenceCloudApplicationModule } from '../inference-cloud/application/inference-cloud-application.module';
 import { AiKernelApplicationModule } from '../ai-kernel/application/ai-kernel-application.module';
+import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { GpuPlatformModule } from '../gpu-platform/gpu-platform.module';
 import { ModelServingModule } from '../model-serving/model-serving.module';
 import { AiRouterModule } from '../ai-router/ai-router.module';
@@ -67,6 +68,7 @@ import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver'
 import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { InferenceCloudGraphqlResolver } from './inference-cloud.resolver';
 import { AiKernelGraphqlResolver } from './ai-kernel.resolver';
+import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { GpuPlatformGraphqlResolver } from './gpu-platform.resolver';
 import { ModelServingGraphqlResolver } from './model-serving.resolver';
 import { AiRouterGraphqlResolver } from './ai-router.resolver';
@@ -143,6 +145,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeCloudApplicationModule,
     InferenceCloudApplicationModule,
     AiKernelApplicationModule,
+    MemoryRuntimeModule,
     GpuPlatformModule,
     ModelServingModule,
     AiRouterModule,
@@ -207,6 +210,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeCloudGraphqlResolver,
     InferenceCloudGraphqlResolver,
     AiKernelGraphqlResolver,
+    MemoryRuntimeGraphqlResolver,
     GpuPlatformGraphqlResolver,
     ModelServingGraphqlResolver,
     AiRouterGraphqlResolver,

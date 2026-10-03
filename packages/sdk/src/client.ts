@@ -1111,6 +1111,66 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-kernel/products', { method: 'GET' });
   }
 
+  async memoryRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    mode: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    ceilings: {
+      maxEntriesPerWorkspace: number;
+      defaultShortTermTtlSec: number;
+      mode: string;
+    };
+    honesty: {
+      mem0Os: boolean;
+      infinitePersonalizationOs: boolean;
+      replicationOs: boolean;
+      encryptionKmsOs: boolean;
+      regeneratesMemoryCloud: boolean;
+      regeneratesKnowledgeMemory: boolean;
+      extendsMemoryCloud: boolean;
+      orgWorkspaceScoped: boolean;
+      kernelLayerOnly: boolean;
+      vectorSemanticOs: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/memory-runtime/engine', { method: 'GET' });
+  }
+
+  async memoryRuntimePut(body: {
+    scope?: string;
+    kind?: string;
+    content: string;
+    key?: string;
+    conversationId?: string;
+    agentId?: string;
+    subjectUserId?: string;
+    ttlSec?: number;
+    encrypt?: boolean;
+    metadata?: Record<string, unknown>;
+  }): Promise<{
+    memory: {
+      id: string;
+      scope: string;
+      kind: string;
+      content: string;
+      version: number;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/memory-runtime/put', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async gpuPlatformEngine(): Promise<{
     product: string;
     note: string;

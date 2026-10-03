@@ -424,6 +424,72 @@ export class GqlAiKernelRuntime {
 }
 
 @ObjectType()
+export class GqlMemoryRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlMemoryRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlMemoryRuntimeCapability])
+  capabilities!: GqlMemoryRuntimeCapability[];
+
+  @Field()
+  mem0Os!: boolean;
+
+  @Field()
+  infinitePersonalizationOs!: boolean;
+
+  @Field()
+  replicationOs!: boolean;
+
+  @Field()
+  encryptionKmsOs!: boolean;
+
+  @Field()
+  regeneratesMemoryCloud!: boolean;
+
+  @Field()
+  regeneratesKnowledgeMemory!: boolean;
+
+  @Field()
+  extendsMemoryCloud!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  kernelLayerOnly!: boolean;
+
+  @Field()
+  vectorSemanticOs!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxEntriesPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

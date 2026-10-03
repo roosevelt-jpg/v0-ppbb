@@ -40,7 +40,7 @@ export class AiKernelService {
       architecture: aiKernelArchitectureNotes(),
       safety: aiKernelSafetyNotes(),
       deferred: {
-        memoryRuntime: true,
+        memoryRuntime: false,
         promptRuntime: true,
         contextRuntime: true,
         reasoningRuntime: true,
@@ -54,6 +54,7 @@ export class AiKernelService {
       },
       links: {
         aiKernel: '/ai-kernel',
+        memoryRuntime: '/memory-runtime',
         inferenceCloud: '/inference-cloud',
         gateway: '/gateway',
         memoryCloud: '/memory-cloud',
@@ -87,7 +88,7 @@ export class AiKernelService {
         vaiosOs: false,
         regeneratesVolumes1to7: false,
       },
-      note: 'Kernel foundation monitoring snapshot (VL-214). Runtime telemetry expands with VL-215–222.',
+      note: 'Kernel monitoring snapshot (VL-214+). Memory Runtime (VL-215) partial; further runtimes VL-216–222.',
     };
   }
 }

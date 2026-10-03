@@ -63,6 +63,7 @@ import { IntelligentCacheModule } from './intelligent-cache/intelligent-cache.mo
 import { CostOptimizationModule } from './cost-optimization/cost-optimization.module';
 import { AiRuntimeAnalyticsModule } from './ai-runtime-analytics/ai-runtime-analytics.module';
 import { AiKernelModule } from './ai-kernel/ai-kernel.module';
+import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -136,6 +137,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     CostOptimizationModule,
     AiRuntimeAnalyticsModule,
     AiKernelModule,
+    MemoryRuntimeModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

@@ -109,6 +109,9 @@ export function AiKernelClient() {
           <section>
             <h2 style={label}>Links</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+              <Link href={data.links.memoryRuntime ?? '/memory-runtime'} style={secondary}>
+                Memory Runtime
+              </Link>
               <Link href={data.links.inferenceCloud ?? '/inference-cloud'} style={secondary}>
                 Inference Cloud
               </Link>

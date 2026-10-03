@@ -15,6 +15,7 @@ const links = [
   { href: '/knowledge-cloud', label: 'Knowledge Cloud' },
   { href: '/inference-cloud', label: 'Inference Cloud' },
   { href: '/ai-kernel', label: 'AI Kernel' },
+  { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/gpu-platform', label: 'GPU Platform' },
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },

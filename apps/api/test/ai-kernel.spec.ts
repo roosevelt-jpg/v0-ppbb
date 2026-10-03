@@ -132,13 +132,19 @@ describe('AI Kernel Foundation (VL-214)', () => {
       role: 'owner',
     });
     expect(overview.usage.chat).toBeDefined();
+    expect(overview.deferred.memoryRuntime).toBe(false);
     expect(overview.deferred.agentRuntime).toBe(true);
     expect(overview.deferred.policyRuntime).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to7).toBe(false);
     expect(overview.safety.policyMustHardGate).toBe(true);
     expect(overview.links.aiKernel).toBe('/ai-kernel');
+    expect(overview.links.memoryRuntime).toBe('/memory-runtime');
     expect(overview.links.inferenceCloud).toBe('/inference-cloud');
     expect(overview.architecture.extendsInferenceCloud).toBe(true);
+
+    const memory = overview.products.find((p: { id: string }) => p.id === 'memory-runtime');
+    expect(memory?.status).toBe('partial');
+    expect(memory?.console).toBe('/memory-runtime');
   });
 
   it('exposes aiKernelRuntimes via GraphQL CQRS façade', async () => {

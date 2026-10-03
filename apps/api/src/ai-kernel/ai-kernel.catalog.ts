@@ -24,11 +24,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'memory-runtime',
       name: 'Memory Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/memory-runtime/engine',
+      console: '/memory-runtime',
       notes:
-        'Low-level kernel memory primitives (Phase 82 / VL-215). Extends Memory Cloud / Knowledge Memory — does not regenerate them.',
+        'Kernel memory over VL-183 MemoryRecord (VL-215). Extends Memory Cloud — not Mem0/replication OS.',
     },
     {
       id: 'prompt-runtime',

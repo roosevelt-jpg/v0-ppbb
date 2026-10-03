@@ -12,7 +12,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Library ask | VerbaLab reality |
 | --- | --- |
 | AI Kernel Foundation | **VL-214** — `/ai-kernel` + runtime catalog / overview |
-| Memory Runtime | **Deferred** — Phase 82 / VL-215 (extends Memory Cloud) |
+| Memory Runtime | **Partial** — Phase 82 / VL-215 ([`MEMORY_RUNTIME.md`](./MEMORY_RUNTIME.md); extends Memory Cloud) |
 | Prompt Runtime | **Deferred** — Phase 83 / VL-216 |
 | Context Runtime | **Deferred** — Phase 84 / VL-217 |
 | Reasoning Runtime | **Deferred** — Phase 85 / VL-218 |
@@ -31,6 +31,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Surface | Path |
 | --- | --- |
 | Console (internal) | `/ai-kernel` |
+| Memory Runtime | `/memory-runtime` + `GET /v1/memory-runtime/engine` |
 | REST catalog | `GET /v1/ai-kernel/products` (public) |
 | REST engine | `GET /v1/ai-kernel/engine` |
 | REST overview | `GET /v1/ai-kernel/overview` (Clerk session) |

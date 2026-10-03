@@ -2728,6 +2728,118 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/memory-runtime/engine': {
+      get: {
+        summary: 'Memory Runtime catalog',
+        operationId: 'getMemoryRuntimeEngine',
+        responses: {
+          '200': { description: 'Kernel memory capabilities and honesty' },
+        },
+      },
+    },
+    '/v1/memory-runtime/scopes': {
+      get: {
+        summary: 'Memory Runtime scopes/kinds',
+        operationId: 'listMemoryRuntimeScopes',
+        responses: { '200': { description: 'Kernel scopes and kinds' } },
+      },
+    },
+    '/v1/memory-runtime/ceilings': {
+      get: {
+        summary: 'Memory Runtime entry ceilings',
+        operationId: 'getMemoryRuntimeCeilings',
+        responses: { '200': { description: 'maxEntriesPerWorkspace' } },
+      },
+    },
+    '/v1/memory-runtime/memories': {
+      get: {
+        summary: 'List kernel memories',
+        operationId: 'listMemoryRuntimeMemories',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Kernel-layer MemoryRecords' } },
+      },
+    },
+    '/v1/memory-runtime/put': {
+      post: {
+        summary: 'Put kernel memory',
+        operationId: 'putMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Memory stored' },
+          '402': { description: 'Hard entry ceiling exceeded' },
+        },
+      },
+    },
+    '/v1/memory-runtime/search': {
+      post: {
+        summary: 'Search kernel memories',
+        operationId: 'searchMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Text search results' } },
+      },
+    },
+    '/v1/memory-runtime/revise': {
+      post: {
+        summary: 'Revise kernel memory (version bump)',
+        operationId: 'reviseMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Revised memory' } },
+      },
+    },
+    '/v1/memory-runtime/compress': {
+      post: {
+        summary: 'Heuristic compress kernel memory',
+        operationId: 'compressMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Compressed memory' } },
+      },
+    },
+    '/v1/memory-runtime/evict': {
+      post: {
+        summary: 'Evict kernel memories (TTL + ceiling)',
+        operationId: 'evictMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Eviction counts' } },
+      },
+    },
+    '/v1/memory-runtime/sync': {
+      post: {
+        summary: 'Sandbox sync stamp',
+        operationId: 'syncMemoryRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sync stamp applied' } },
+      },
+    },
+    '/v1/memory-runtime/snapshots': {
+      get: {
+        summary: 'List kernel memory snapshots',
+        operationId: 'listMemoryRuntimeSnapshots',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Snapshots' } },
+      },
+      post: {
+        summary: 'Create kernel memory snapshot',
+        operationId: 'createMemoryRuntimeSnapshot',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Snapshot created' } },
+      },
+    },
+    '/v1/memory-runtime/analytics': {
+      get: {
+        summary: 'Memory Runtime analytics',
+        operationId: 'getMemoryRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/memory-runtime/monitoring': {
+      get: {
+        summary: 'Memory Runtime monitoring',
+        operationId: 'getMemoryRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

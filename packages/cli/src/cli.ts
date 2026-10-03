@@ -19,6 +19,8 @@ function usage(): never {
   verbalab knowledge-products
   verbalab inference-products
   verbalab ai-kernel-products
+  verbalab memory-runtime-engine
+  verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -169,6 +171,28 @@ async function main() {
 
   if (command === 'ai-kernel-products') {
     console.log(JSON.stringify(await vl.aiKernelProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'memory-runtime-engine') {
+    console.log(JSON.stringify(await vl.memoryRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'memory-runtime-put') {
+    const content = argValue(rest, '--content');
+    if (!content) usage();
+    console.log(
+      JSON.stringify(
+        await vl.memoryRuntimePut({
+          content,
+          scope: argValue(rest, '--scope') ?? undefined,
+          kind: argValue(rest, '--kind') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

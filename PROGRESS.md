@@ -244,7 +244,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-212 | AI Runtime Analytics (Phase 79) | Done | `/v1/ai-runtime-analytics/*` Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
 | VL-213 | Inference Cloud Production Audit (Phase 80) | Done | Audit gate + reports under `docs/inference-cloud-audit/`; ADR-0124. Rejects GPU hyperscaler / AI Kernel here. Spend-safety verified. |
 | VL-214 | AI Kernel Foundation (Phase 81) | Done | `/ai-kernel` internal hub + catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety notes for VL-219–222. |
-| VL-215 | Memory Runtime (Phase 82) | Not Started | Extends Memory Cloud; sandbox primitives. |
+| VL-215 | Memory Runtime (Phase 82) | Done | `/memory-runtime` + kernel layer over VL-183; ADR-0126. Not Mem0/replication OS. |
 | VL-216 | Prompt Runtime (Phase 83) | Not Started | |
 | VL-217 | Context Runtime (Phase 84) | Not Started | |
 | VL-218 | Reasoning Runtime (Phase 85) | Not Started | |
@@ -381,3 +381,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-212 Done: AI Runtime Analytics (Phase 79) — Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
 | 2026-10-03 | VL-213 Done: Inference Cloud Production Audit (Phase 80) — checklist/tests/reports; ADR-0124. Volume closed. Spend-safety verified; AI Kernel rejected here. |
 | 2026-10-03 | VL-214 Done: AI Kernel Foundation (Phase 81) — internal hub/catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety constraints for Agent/Workflow/Plugin/Policy. |
+| 2026-10-03 | VL-215 Done: Memory Runtime (Phase 82) — kernel-layer over VL-183 MemoryRecord; ADR-0126. Ceilings/eviction/versioning; not Mem0/replication OS. |
