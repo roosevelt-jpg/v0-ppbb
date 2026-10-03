@@ -490,6 +490,24 @@ export class GqlModelEvaluationSuite {
 }
 
 @ObjectType()
+export class GqlModelRegistryCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

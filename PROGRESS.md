@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-236 Done — Model Evaluation Platform)
+Last updated: 2026-10-03 (VL-237 Done — Model Registry hub)
 
 ---
 
@@ -266,7 +266,7 @@ Last updated: 2026-10-03 (VL-236 Done — Model Evaluation Platform)
 | VL-234 | Translate FM (Phase 101) | Not Started | Deferred scaffold. |
 | VL-235 | Model Training Platform (Phase 102) | Done | `/model-training-platform` orchestration over VL-111; ADR-0136. LoRA/instruction handoff; RLHF/DPO/distributed deferred. |
 | VL-236 | Model Evaluation Platform (Phase 103) | Done | `/model-evaluation-platform` over VL-100 + sandbox bias/safety/latency; ADR-0137. MMLU/HumanEval deferred; no SOTA claims. |
-| VL-237 | Model Registry (Phase 104) | Not Started | High-value MLOps track. |
+| VL-237 | Model Registry (Phase 104) | Done | `/model-registry` over VL-110; ADR-0138. Cards/versions/approvals/deploy plans; not MLflow/traffic-mesh. |
 | VL-238 | FMC Production Audit (Phase 105) | Not Started | |
 
 ---
@@ -408,3 +408,4 @@ Last updated: 2026-10-03 (VL-236 Done — Model Evaluation Platform)
 | 2026-10-03 | VL-224 Done: Foundation Model Cloud Foundation (Phase 91) — hub/catalog/overview; ADR-0135. No trained competitive weights; MLOps track preferred next. |
 | 2026-10-03 | VL-235 Done: Model Training Platform (Phase 102) — experiment plans + LoRA/instruction handoff to VL-111; ADR-0136. Not distributed/RLHF lab. |
 | 2026-10-03 | VL-236 Done: Model Evaluation Platform (Phase 103) — VL-100 handoff + sandbox suites/leaderboard/reports; ADR-0137. No MMLU OS / SOTA claims. |
+| 2026-10-03 | VL-237 Done: Model Registry hub (Phase 104) — cards/versions/approvals/canary plans over VL-110; ADR-0138. Not MLflow/mesh OS. |

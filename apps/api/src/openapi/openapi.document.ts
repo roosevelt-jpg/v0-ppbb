@@ -2954,6 +2954,116 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/model-registry/engine': {
+      get: {
+        summary: 'Model Registry hub engine',
+        operationId: 'getModelRegistryEngine',
+        responses: {
+          '200': {
+            description:
+              'Cards/versions/deploy capabilities + VL-110 live summary (not MLflow/mesh OS)',
+          },
+        },
+      },
+    },
+    '/v1/model-registry/capabilities': {
+      get: {
+        summary: 'Model Registry capabilities',
+        operationId: 'listModelRegistryCapabilities',
+        responses: {
+          '200': { description: 'Registry governance capabilities + honesty' },
+        },
+      },
+    },
+    '/v1/model-registry/cards': {
+      get: {
+        summary: 'Model cards from VL-110 entries',
+        operationId: 'listModelRegistryCards',
+        responses: {
+          '200': { description: 'Lightweight cards derived from registry metadata' },
+        },
+      },
+    },
+    '/v1/model-registry/overview': {
+      get: {
+        summary: 'Model Registry org overview',
+        operationId: 'getModelRegistryOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, versions, deployments' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-registry/versions': {
+      get: {
+        summary: 'List sandbox model versions',
+        operationId: 'listModelRegistryVersions',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Org-scoped sandbox versions' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create sandbox model version',
+        operationId: 'createModelRegistryVersion',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Version created' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-registry/deployments': {
+      get: {
+        summary: 'List sandbox deployment plans',
+        operationId: 'listModelRegistryDeployments',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Org-scoped deploy plans' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create sandbox deployment plan',
+        operationId: 'createModelRegistryDeployment',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Deploy plan + Model Serving handoff' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-registry/monitoring': {
+      get: {
+        summary: 'Model Registry monitoring',
+        operationId: 'getModelRegistryMonitoring',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Version/deploy status snapshot + honesty' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

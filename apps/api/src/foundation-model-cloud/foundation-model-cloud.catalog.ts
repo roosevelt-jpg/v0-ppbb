@@ -140,11 +140,12 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
     {
       id: 'model-registry',
       name: 'Model Registry',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/model-registry/engine',
+      console: '/model-registry',
       modality: 'mlops',
-      notes: 'Model versioning/catalog (Phase 104 / VL-237).',
+      notes:
+        'Registry governance over VL-110 (Phase 104 / VL-237). Cards/versions/approvals/deploy plans — not MLflow/traffic-mesh OS.',
     },
   ];
 }
@@ -188,6 +189,7 @@ export function foundationModelCloudHonesty() {
     mLOpsPlatformShipped: false,
     modelTrainingPlatformPartial: true,
     modelEvaluationPlatformPartial: true,
+    modelRegistryPartial: true,
     hexagonalRewrite: false,
     linuxOsRewrite: false,
   };

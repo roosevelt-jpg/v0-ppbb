@@ -18,6 +18,7 @@ const links = [
   { href: '/foundation-model-cloud', label: 'Foundation Models' },
   { href: '/model-training-platform', label: 'Training Platform' },
   { href: '/model-evaluation-platform', label: 'Evaluation Platform' },
+  { href: '/model-registry', label: 'Model Registry' },
   { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },

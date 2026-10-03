@@ -166,6 +166,10 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     );
     expect(evaluation.status).toBe('partial');
     expect(evaluation.console).toBe('/model-evaluation-platform');
+
+    const registry = res.body.products.find((p: { id: string }) => p.id === 'model-registry');
+    expect(registry.status).toBe('partial');
+    expect(registry.console).toBe('/model-registry');
   });
 
   it('returns org overview with deferred families', async () => {
@@ -182,7 +186,7 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     expect(overview.deferred.baobab).toBe(true);
     expect(overview.deferred.modelTrainingPlatform).toBe(false);
     expect(overview.deferred.modelEvaluationPlatform).toBe(false);
-    expect(overview.deferred.modelRegistry).toBe(true);
+    expect(overview.deferred.modelRegistry).toBe(false);
     expect(overview.deferred.regeneratesVolumes1to8).toBe(false);
     expect(overview.honesty.trainsCompetitiveFoundationWeights).toBe(false);
     expect(overview.links.foundationModelCloud).toBe('/foundation-model-cloud');
