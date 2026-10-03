@@ -280,8 +280,18 @@ export class GovernanceService {
   }) {
     this.assertOwnerOrAdmin(input.role);
 
-    const [org, workspace, glossaryTerms, tmEntries, reviews, knowledgeDocs, datasetAssets, apiKeys, usageEvents] =
-      await Promise.all([
+    const [
+      org,
+      workspace,
+      glossaryTerms,
+      tmEntries,
+      reviews,
+      knowledgeDocs,
+      datasetAssets,
+      apiKeys,
+      usageEvents,
+      memoryRecords,
+    ] = await Promise.all([
         this.prisma.organization.findUniqueOrThrow({
           where: { id: input.organizationId },
           select: {
@@ -362,6 +372,14 @@ export class GovernanceService {
           orderBy: { createdAt: 'desc' },
           take: 1000,
         }),
+        this.prisma.memoryRecord.findMany({
+          where: {
+            organizationId: input.organizationId,
+            workspaceId: input.workspaceId,
+            deletedAt: null,
+          },
+          orderBy: { createdAt: 'asc' },
+        }),
       ]);
 
     if (!workspace) {
@@ -400,6 +418,7 @@ export class GovernanceService {
       datasetAssets,
       apiKeys,
       usageEvents,
+      memoryRecords,
     };
   }
 

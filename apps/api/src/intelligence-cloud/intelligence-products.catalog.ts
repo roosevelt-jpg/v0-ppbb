@@ -42,10 +42,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'memory',
       name: 'Memory Cloud',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Persistent cross-session memory + GDPR delete/export — VL-183. Not shipped.',
+      status: 'partial',
+      api: 'GET /v1/memory-cloud/engine',
+      console: '/memory-cloud',
+      notes:
+        'Persistent memory + GDPR export/erase (VL-183). Vector semantic memory + retention sweeper deferred.',
     },
     {
       id: 'knowledge-graph',

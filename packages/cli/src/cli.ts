@@ -20,6 +20,8 @@ function usage(): never {
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
   verbalab vector-cloud-search --query <text> [--k <n>]
+  verbalab memory-cloud-engine
+  verbalab memory-cloud-export [--subject <userId>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -121,6 +123,24 @@ async function main() {
         await vl.vectorCloudSearch({
           query,
           k: kRaw ? Number(kRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'memory-cloud-engine') {
+    console.log(JSON.stringify(await vl.memoryCloudEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'memory-cloud-export') {
+    console.log(
+      JSON.stringify(
+        await vl.memoryCloudExport({
+          subjectUserId: argValue(rest, '--subject'),
         }),
         null,
         2,

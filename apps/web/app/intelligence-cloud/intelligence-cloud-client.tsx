@@ -97,6 +97,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.vectorCloud ?? '/vector-cloud'} style={secondary}>
                 Vector Cloud
               </Link>
+              <Link href={data.links.memoryCloud ?? '/memory-cloud'} style={secondary}>
+                Memory Cloud
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

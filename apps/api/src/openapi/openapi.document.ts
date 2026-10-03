@@ -2752,6 +2752,74 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/memory-cloud/engine': {
+      get: {
+        summary: 'Memory Cloud engine catalog',
+        operationId: 'getMemoryCloudEngine',
+        responses: { '200': { description: 'Memory capabilities and GDPR honesty notes' } },
+      },
+    },
+    '/v1/memory-cloud/scopes': {
+      get: {
+        summary: 'Memory scopes and kinds',
+        operationId: 'listMemoryCloudScopes',
+        responses: { '200': { description: 'Supported scopes/kinds' } },
+      },
+    },
+    '/v1/memory-cloud/memories': {
+      get: {
+        summary: 'List memory records',
+        operationId: 'listMemoryCloudMemories',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Active memories' } },
+      },
+      post: {
+        summary: 'Create memory record',
+        operationId: 'createMemoryCloudMemory',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created memory' } },
+      },
+    },
+    '/v1/memory-cloud/search': {
+      post: {
+        summary: 'Search memories',
+        operationId: 'searchMemoryCloud',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Text search hits' } },
+      },
+    },
+    '/v1/memory-cloud/export': {
+      post: {
+        summary: 'GDPR export memories',
+        operationId: 'exportMemoryCloud',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Subject/workspace memory export' } },
+      },
+    },
+    '/v1/memory-cloud/erase': {
+      post: {
+        summary: 'GDPR erase memories',
+        operationId: 'eraseMemoryCloud',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Erased memory count' } },
+      },
+    },
+    '/v1/memory-cloud/analytics': {
+      get: {
+        summary: 'Memory Cloud analytics',
+        operationId: 'getMemoryCloudAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Counts and audit aggregates' } },
+      },
+    },
+    '/v1/memory-cloud/monitoring': {
+      get: {
+        summary: 'Memory Cloud monitoring snapshot',
+        operationId: 'getMemoryCloudMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

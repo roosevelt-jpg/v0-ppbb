@@ -436,6 +436,45 @@ export class GqlVectorCloudEngine {
 }
 
 @ObjectType()
+export class GqlMemoryCloudCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlMemoryCloudEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlMemoryCloudCapability])
+  capabilities!: GqlMemoryCloudCapability[];
+
+  @Field()
+  infinitePersonalizationOs!: boolean;
+
+  @Field()
+  gdprExport!: boolean;
+
+  @Field()
+  gdprErase!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

@@ -1143,6 +1143,51 @@ export class VerbaLab {
     });
   }
 
+  async memoryCloudEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      infinitePersonalizationOs: boolean;
+      vectorSemanticMemory: boolean;
+      agentOs: boolean;
+      automatedRetentionSweeper: boolean;
+      gdprExport: boolean;
+      gdprErase: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/memory-cloud/engine', { method: 'GET' });
+  }
+
+  async memoryCloudExport(body?: { subjectUserId?: string }): Promise<{
+    exportedAt: string;
+    count: number;
+    memories: Array<{ id: string; content: string; scope: string; kind: string }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/memory-cloud/export', {
+      method: 'POST',
+      body: body ?? {},
+    });
+  }
+
+  async memoryCloudErase(body: {
+    subjectUserId?: string;
+    confirm: boolean;
+    hard?: boolean;
+  }): Promise<{ erased: boolean; count: number; note: string }> {
+    return this.requestJson('/v1/memory-cloud/erase', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;
