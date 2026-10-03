@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-363 Done — VCOS Production Audit; Volume 21 closed)
+Last updated: 2026-10-03 (VL-373 Done — VGAS Production Audit; Volume 22 closed)
 
 ---
 
@@ -393,6 +393,16 @@ Last updated: 2026-10-03 (VL-363 Done — VCOS Production Audit; Volume 21 close
 | VL-361 | Executive Intelligence Platform (Phase 228) | Done | Exec/board KPI cockpits; ADR-0263. |
 | VL-362 | Corporate Risk Platform (Phase 229) | Done | Risk register; ADR-0264. |
 | VL-363 | VCOS Production Audit (Phase 230) | Done | Audit pack + Digital Constitution; ADR-0265. Volume 21 closed. |
+| VL-364 | Global AI Standards Foundation (Phase 231) | Done | `/global-ai-standards`; ADR-0266. `internationalStandardAdoption=false`. |
+| VL-365 | AI Certification Platform (Phase 232) | Done | Courses/exams/VerbaLab certificates + verify API; `thirdPartyAccreditation=false`; ADR-0267. |
+| VL-366 | AI Compliance Framework (Phase 233) | Done | Self-assessment/gap analysis; ADR-0268. |
+| VL-367 | Reference Architectures (Phase 234) | Done | Industry blueprints; ADR-0269. |
+| VL-368 | Best Practices Library (Phase 235) | Done | Pattern catalog; ADR-0270. |
+| VL-369 | Enterprise Assessment Platform (Phase 236) | Done | Maturity assessments; ADR-0271. |
+| VL-370 | Standards Repository (Phase 237) | Done | Versioned standards content; ADR-0272. |
+| VL-371 | Global Partner Program (Phase 238) | Done | Partner portal records; ADR-0273. |
+| VL-372 | Standards Analytics (Phase 239) | Done | Adoption analytics; ADR-0274. |
+| VL-373 | VGAS Production Audit (Phase 240) | Done | Audit pack + certification guide; ADR-0275. Volume 22 closed. |
 
 ---
 
@@ -577,4 +587,5 @@ Last updated: 2026-10-03 (VL-363 Done — VCOS Production Audit; Volume 21 close
 | 2026-10-03 | VL-353 Done: EES Production Audit (Phase 220) — evidence pack; ADR-0255. Volume 20 closed. Architecture Knowledge Base / mass ADR factory deferred past Volume 20. |
 | 2026-10-03 | VL-354–362 Done: VCOS hubs (Phases 221–229) — foundation through Corporate Risk; ADR-0256–0264. Internal business software; realCorporateGovernance=false. |
 | 2026-10-03 | VL-363 Done: VCOS Production Audit (Phase 230) — audit pack + Digital Constitution; ADR-0265. Volume 21 closed. Ask for Volume 22 when ready. |
-
+| 2026-10-03 | VL-364-372 Done: VGAS hubs (Phases 231-239); ADR-0266-0274. internationalStandardAdoption/thirdPartyAccreditation=false. |
+| 2026-10-03 | VL-373 Done: VGAS Production Audit (Phase 240); ADR-0275. Volume 22 closed. Ask for Volume 23 when ready. |

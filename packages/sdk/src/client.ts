@@ -5404,6 +5404,47 @@ export class VerbaLab {
     return this.requestJson('/v1/corporate-operating-system/constitution', { method: 'GET' });
   }
 
+
+  async globalAiStandardsProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-standards/products', { method: 'GET' });
+  }
+
+  async aiCertificationPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-certification-platform/engine', { method: 'GET' });
+  }
+
+  async aiComplianceFrameworkEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-compliance-framework/engine', { method: 'GET' });
+  }
+
+  async referenceArchitecturesEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/reference-architectures/engine', { method: 'GET' });
+  }
+
+  async bestPracticesLibraryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/best-practices-library/engine', { method: 'GET' });
+  }
+
+  async enterpriseAssessmentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-assessment-platform/engine', { method: 'GET' });
+  }
+
+  async standardsRepositoryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/standards-repository/engine', { method: 'GET' });
+  }
+
+  async globalPartnerProgramEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-partner-program/engine', { method: 'GET' });
+  }
+
+  async standardsAnalyticsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/standards-analytics/engine', { method: 'GET' });
+  }
+
+  async globalAiStandardsVerify(code: string): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/global-ai-standards/verify/${code}`, { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

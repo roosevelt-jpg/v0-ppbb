@@ -125,6 +125,16 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab global-ai-standards-products
+  verbalab ai-certification-platform-engine
+  verbalab ai-compliance-framework-engine
+  verbalab reference-architectures-engine
+  verbalab best-practices-library-engine
+  verbalab enterprise-assessment-platform-engine
+  verbalab standards-repository-engine
+  verbalab global-partner-program-engine
+  verbalab standards-analytics-engine
+  verbalab global-ai-standards-verify
   verbalab corporate-operating-system-products
   verbalab corporate-governance-platform-engine
   verbalab strategic-planning-platform-engine
@@ -949,6 +959,57 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'global-ai-standards-products') {
+    console.log(JSON.stringify(await vl.globalAiStandardsProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-certification-platform-engine') {
+    console.log(JSON.stringify(await vl.aiCertificationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-compliance-framework-engine') {
+    console.log(JSON.stringify(await vl.aiComplianceFrameworkEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reference-architectures-engine') {
+    console.log(JSON.stringify(await vl.referenceArchitecturesEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'best-practices-library-engine') {
+    console.log(JSON.stringify(await vl.bestPracticesLibraryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-assessment-platform-engine') {
+    console.log(JSON.stringify(await vl.enterpriseAssessmentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'standards-repository-engine') {
+    console.log(JSON.stringify(await vl.standardsRepositoryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-partner-program-engine') {
+    console.log(JSON.stringify(await vl.globalPartnerProgramEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'standards-analytics-engine') {
+    console.log(JSON.stringify(await vl.standardsAnalyticsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'global-ai-standards-verify') {
+    const code = args[1] || 'VGAS-DEMO-ENGINEER-001';
+    console.log(JSON.stringify(await vl.globalAiStandardsVerify(code), null, 2));
+    return;
+  }
+
   if (command === 'corporate-operating-system-products') {
     console.log(JSON.stringify(await vl.corporateOperatingSystemProducts(), null, 2));
     return;

@@ -12720,6 +12720,336 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/global-ai-standards/engine': {
+      get: {
+        summary: 'Global AI Standards engine',
+        operationId: 'getGlobalAiStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/products': {
+      get: {
+        summary: 'Global AI Standards products',
+        operationId: 'listGlobalAiStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/monitoring': {
+      get: {
+        summary: 'Global AI Standards monitoring',
+        operationId: 'getGlobalAiStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/records': {
+      get: {
+        summary: 'Global AI Standards records',
+        operationId: 'listGlobalAiStandardsRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/routing': {
+      get: {
+        summary: 'VGAS routing',
+        operationId: 'getGlobalAiStandardsRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/overview': {
+      get: {
+        summary: 'VGAS overview',
+        operationId: 'getGlobalAiStandardsOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/verify/{code}': {
+      get: {
+        summary: 'Verify certificate',
+        operationId: 'verifyGlobalAiStandardsCertificate',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/engine': {
+      get: {
+        summary: 'AI Certification Platform engine',
+        operationId: 'getAiCertificationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/products': {
+      get: {
+        summary: 'AI Certification Platform products',
+        operationId: 'listAiCertificationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/monitoring': {
+      get: {
+        summary: 'AI Certification Platform monitoring',
+        operationId: 'getAiCertificationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/records': {
+      get: {
+        summary: 'AI Certification Platform records',
+        operationId: 'listAiCertificationPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/routes': {
+      get: {
+        summary: 'AI Certification Platform routes',
+        operationId: 'listAiCertificationPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/engine': {
+      get: {
+        summary: 'AI Compliance Framework engine',
+        operationId: 'getAiComplianceFrameworkEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/products': {
+      get: {
+        summary: 'AI Compliance Framework products',
+        operationId: 'listAiComplianceFrameworkProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/monitoring': {
+      get: {
+        summary: 'AI Compliance Framework monitoring',
+        operationId: 'getAiComplianceFrameworkMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/records': {
+      get: {
+        summary: 'AI Compliance Framework records',
+        operationId: 'listAiComplianceFrameworkRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/routes': {
+      get: {
+        summary: 'AI Compliance Framework routes',
+        operationId: 'listAiComplianceFrameworkRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/engine': {
+      get: {
+        summary: 'Reference Architectures engine',
+        operationId: 'getReferenceArchitecturesEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/products': {
+      get: {
+        summary: 'Reference Architectures products',
+        operationId: 'listReferenceArchitecturesProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/monitoring': {
+      get: {
+        summary: 'Reference Architectures monitoring',
+        operationId: 'getReferenceArchitecturesMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/records': {
+      get: {
+        summary: 'Reference Architectures records',
+        operationId: 'listReferenceArchitecturesRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/routes': {
+      get: {
+        summary: 'Reference Architectures routes',
+        operationId: 'listReferenceArchitecturesRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/engine': {
+      get: {
+        summary: 'Best Practices Library engine',
+        operationId: 'getBestPracticesLibraryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/products': {
+      get: {
+        summary: 'Best Practices Library products',
+        operationId: 'listBestPracticesLibraryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/monitoring': {
+      get: {
+        summary: 'Best Practices Library monitoring',
+        operationId: 'getBestPracticesLibraryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/records': {
+      get: {
+        summary: 'Best Practices Library records',
+        operationId: 'listBestPracticesLibraryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/routes': {
+      get: {
+        summary: 'Best Practices Library routes',
+        operationId: 'listBestPracticesLibraryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/engine': {
+      get: {
+        summary: 'Enterprise Assessment Platform engine',
+        operationId: 'getEnterpriseAssessmentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/products': {
+      get: {
+        summary: 'Enterprise Assessment Platform products',
+        operationId: 'listEnterpriseAssessmentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/monitoring': {
+      get: {
+        summary: 'Enterprise Assessment Platform monitoring',
+        operationId: 'getEnterpriseAssessmentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/records': {
+      get: {
+        summary: 'Enterprise Assessment Platform records',
+        operationId: 'listEnterpriseAssessmentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/routes': {
+      get: {
+        summary: 'Enterprise Assessment Platform routes',
+        operationId: 'listEnterpriseAssessmentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/engine': {
+      get: {
+        summary: 'Standards Repository engine',
+        operationId: 'getStandardsRepositoryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/products': {
+      get: {
+        summary: 'Standards Repository products',
+        operationId: 'listStandardsRepositoryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/monitoring': {
+      get: {
+        summary: 'Standards Repository monitoring',
+        operationId: 'getStandardsRepositoryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/records': {
+      get: {
+        summary: 'Standards Repository records',
+        operationId: 'listStandardsRepositoryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/routes': {
+      get: {
+        summary: 'Standards Repository routes',
+        operationId: 'listStandardsRepositoryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/engine': {
+      get: {
+        summary: 'Global Partner Program engine',
+        operationId: 'getGlobalPartnerProgramEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/products': {
+      get: {
+        summary: 'Global Partner Program products',
+        operationId: 'listGlobalPartnerProgramProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/monitoring': {
+      get: {
+        summary: 'Global Partner Program monitoring',
+        operationId: 'getGlobalPartnerProgramMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/records': {
+      get: {
+        summary: 'Global Partner Program records',
+        operationId: 'listGlobalPartnerProgramRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/routes': {
+      get: {
+        summary: 'Global Partner Program routes',
+        operationId: 'listGlobalPartnerProgramRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/engine': {
+      get: {
+        summary: 'Standards Analytics engine',
+        operationId: 'getStandardsAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/products': {
+      get: {
+        summary: 'Standards Analytics products',
+        operationId: 'listStandardsAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/monitoring': {
+      get: {
+        summary: 'Standards Analytics monitoring',
+        operationId: 'getStandardsAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/records': {
+      get: {
+        summary: 'Standards Analytics records',
+        operationId: 'listStandardsAnalyticsRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/routes': {
+      get: {
+        summary: 'Standards Analytics routes',
+        operationId: 'listStandardsAnalyticsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

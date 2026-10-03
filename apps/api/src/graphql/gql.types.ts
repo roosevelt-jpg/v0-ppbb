@@ -6065,3 +6065,192 @@ export class GqlCorporateRiskPlatformEngine {
   legalCounselOs!: boolean;
 }
 
+@ObjectType()
+export class GqlGlobalAiStandardsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlAiCertificationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlAiComplianceFrameworkEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlReferenceArchitecturesEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlBestPracticesLibraryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseAssessmentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlStandardsRepositoryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlGlobalPartnerProgramEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+
+@ObjectType()
+export class GqlStandardsAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalStandardsPlatform!: boolean;
+
+  @Field(() => Boolean)
+  internationalStandardAdoption!: boolean;
+
+  @Field(() => Boolean)
+  isoIeeeW3cRecognition!: boolean;
+
+  @Field(() => Boolean)
+  thirdPartyAccreditation!: boolean;
+}
+

@@ -165,6 +165,15 @@ import { EnterpriseArchitectureRepositoryModule } from './enterprise-architectur
 import { CorporateKnowledgeSystemModule } from './corporate-knowledge-system/corporate-knowledge-system.module';
 import { ExecutiveIntelligencePlatformModule } from './executive-intelligence-platform/executive-intelligence-platform.module';
 import { CorporateRiskPlatformModule } from './corporate-risk-platform/corporate-risk-platform.module';
+import { GlobalAiStandardsModule } from './global-ai-standards/global-ai-standards.module';
+import { AiCertificationPlatformModule } from './ai-certification-platform/ai-certification-platform.module';
+import { AiComplianceFrameworkModule } from './ai-compliance-framework/ai-compliance-framework.module';
+import { ReferenceArchitecturesModule } from './reference-architectures/reference-architectures.module';
+import { BestPracticesLibraryModule } from './best-practices-library/best-practices-library.module';
+import { EnterpriseAssessmentPlatformModule } from './enterprise-assessment-platform/enterprise-assessment-platform.module';
+import { StandardsRepositoryModule } from './standards-repository/standards-repository.module';
+import { GlobalPartnerProgramModule } from './global-partner-program/global-partner-program.module';
+import { StandardsAnalyticsModule } from './standards-analytics/standards-analytics.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -364,6 +373,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     CorporateKnowledgeSystemModule,
     ExecutiveIntelligencePlatformModule,
     CorporateRiskPlatformModule,
+    GlobalAiStandardsModule,
+    AiCertificationPlatformModule,
+    AiComplianceFrameworkModule,
+    ReferenceArchitecturesModule,
+    BestPracticesLibraryModule,
+    EnterpriseAssessmentPlatformModule,
+    StandardsRepositoryModule,
+    GlobalPartnerProgramModule,
+    StandardsAnalyticsModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,
