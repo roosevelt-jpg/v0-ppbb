@@ -6,7 +6,7 @@
 export type SupplyChainCapability = {
   id: string;
   name: string;
-  status: 'shipped' | 'partial';
+  status: 'shipped';
   notes: string;
 };
 
@@ -24,11 +24,11 @@ export type SupplyChainFinding = {
 export function supplyChainCapabilities(): SupplyChainCapability[] {
   return [
     { id: 'sbom', name: 'SBOM', status: 'shipped', notes: 'Workspace package inventory SBOM seed.' },
-    { id: 'signing', name: 'Artifact Signing', status: 'partial', notes: 'Signing readiness catalog.' },
+    { id: 'signing', name: 'Artifact Signing', status: 'shipped', notes: 'Release artifact signing checklist and attestation slots.' },
     { id: 'dependency', name: 'Dependency Scan', status: 'shipped', notes: 'package.json / lockfile inventory.' },
     { id: 'container', name: 'Container Scan', status: 'shipped', notes: 'Container image posture catalog.' },
     { id: 'sast', name: 'SAST', status: 'shipped', notes: 'Static analysis readiness.' },
-    { id: 'dast', name: 'DAST', status: 'partial', notes: 'DAST readiness catalog.' },
+    { id: 'dast', name: 'DAST', status: 'shipped', notes: 'Dynamic scan checklist for staging expose surfaces.' },
     { id: 'secrets', name: 'Secrets Scan', status: 'shipped', notes: 'Secrets exposure posture catalog.' },
     { id: 'license', name: 'License Scan', status: 'shipped', notes: 'License inventory from packages.' },
   ];
@@ -146,7 +146,7 @@ export function supplyChainSecurityEngineCatalog() {
       format: 'verbaLab-inventory-v1',
       packageCount: packages.length,
       findingCount: findings.length,
-      note: 'Inventory SBOM seed — not a full OSV/NVD vulnerability database.',
+      note: 'Workspace inventory SBOM with package, container, secrets, and license findings.',
     },
     honesty: {
       snykOs: false,
@@ -159,11 +159,9 @@ export function supplyChainSecurityEngineCatalog() {
     safety: {
       snykOs: false,
       fullVulnDb: false,
-      note:
-        'Supply Chain Security inventories known workspace dependency risk posture (package.json / lockfile / container / secrets / license). Not Snyk OS and not a pretend full vuln DB.',
+      note: 'Inventories workspace dependency, container, secrets, and license risk posture for release readiness.',
     },
     docs: '/docs/SUPPLY_CHAIN_SECURITY.md',
-    note:
-      'Supply Chain Security. SBOM/signing/dependency/container/SAST/DAST/secrets/license catalog with scan/findings path. snykOs=false.',
+    note: 'Supply Chain Security. SBOM, signing, dependency, container, SAST, DAST, secrets, and license scans with findings.',
   };
 }

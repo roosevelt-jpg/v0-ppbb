@@ -74,9 +74,9 @@ export function engineeringQualityPlatformEngineCatalog() {
       customerFacingProductCloud: false,
       architectureKnowledgeBaseOs: false,
       adrFactoryOs: false,
-      note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
+      note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot.',
     },
     docs: '/docs/ENGINEERING_QUALITY_PLATFORM.md',
-    note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot. sonarqubeOs=false.',
+    note: 'Engineering Quality Platform. Static analysis/complexity/deps/security/performance/tech-debt/coverage/mutation catalog + quality dashboard snapshot.',
   };
 }

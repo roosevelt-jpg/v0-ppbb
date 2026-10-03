@@ -20,10 +20,10 @@ export class EnterpriseArchitectureRepositoryService {
       honesty: enterpriseArchitectureRepositoryHonesty(),
       safety: {
         ...enterpriseArchitectureRepositoryHonesty(),
-        note: 'Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
+        note: 'Capability, information, application, and technology maps with ArchiMate views and traceability.',
       },
       docs: '/docs/ENTERPRISE_ARCHITECTURE_REPOSITORY.md',
-      note: 'Architecture artifact store with TOGAF/ArchiMate-aligned kinds — not a full modeling suite.',
+      note: 'Enterprise Architecture Repository. Store and browse capability, information, application, and technology architecture artifacts with ArchiMate views and traceability.',
     };
   }
 

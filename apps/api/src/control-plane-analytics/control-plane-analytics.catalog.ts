@@ -27,11 +27,9 @@ export function controlPlaneAnalyticsEngineCatalog() {
     safety: {
       aggregatesSiblingHubs: true,
       executesInference: false,
-      note:
-        'Control Plane Analytics aggregates sibling CP hubs — does not execute inference or invent Data Plane.',
+      note: 'Control Plane Analytics aggregates sibling CP hubs — does not execute inference or invent Data Plane.',
     },
     docs: '/docs/CONTROL_PLANE_ANALYTICS.md',
-    note:
-      'Control Plane Analytics. Aggregates orgs/deployments/policies/regions/traffic/costs/config/health from siblings.',
+    note: 'Control Plane Analytics. Aggregates orgs/deployments/policies/regions/traffic/costs/config/health from siblings.',
   };
 }

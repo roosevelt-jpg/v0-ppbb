@@ -1,39 +1,26 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
-import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
 
 type Engine = {
-  product: string;
+  product?: string;
   note: string;
-  honesty: Record<string, boolean | string>;
+  honesty?: Record<string, unknown>;
   safety?: { note?: string } & Record<string, unknown>;
-  capabilities?: Array<Record<string, unknown>>;
-  products?: Array<Record<string, unknown>>;
-  investmentMode?: string;
-};
-
-type RecordRow = {
-  id: string;
-  domain: string;
-  kind: string;
-  title: string;
-  status: string;
-  summary: string;
-  ownerLabel?: string | null;
+  products?: CatalogRow[];
+  capabilities?: CatalogRow[];
+  findings?: CatalogRow[];
+  packages?: CatalogRow[];
+  records?: CatalogRow[];
+  routesTo?: Array<Record<string, unknown>>;
 };
 
 export function ResearchFundingPlatformClient() {
-  const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Engine | null>(null);
-  const [records, setRecords] = useState<RecordRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [kind, setKind] = useState('grant');
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     void apiFetch<Engine>('/v1/research-funding-platform/engine')
@@ -41,42 +28,12 @@ export function ResearchFundingPlatformClient() {
       .catch((err: Error) => setError(err.message));
   }, []);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    void (async () => {
-      try {
-        const token = await resolveApiToken(getToken);
-        if (!token) return;
-        const res = await apiFetch<{ records: RecordRow[] }>('/v1/research-funding-platform/records', { token });
-        setRecords(res.records ?? []);
-      } catch {
-        /* public engine still useful without auth */
-      }
-    })();
-  }, [isLoaded, getToken]);
-
-  async function onCreate(event: FormEvent) {
-    event.preventDefault();
-    if (!title.trim()) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const token = await resolveApiToken(getToken);
-      if (!token) throw new Error('Not signed in — use /dev-login');
-      await apiFetch('/v1/research-funding-platform/records', {
-        token,
-        method: 'POST',
-        body: JSON.stringify({ kind, title, summary: 'Created from AIE console' }),
-      });
-      const res = await apiFetch<{ records: RecordRow[] }>('/v1/research-funding-platform/records', { token });
-      setRecords(res.records ?? []);
-      setTitle('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Create failed');
-    } finally {
-      setBusy(false);
-    }
-  }
+  const routeRows: CatalogRow[] = (data?.routesTo ?? []).map((r, i) => ({
+    id: String(r.module ?? r.path ?? i),
+    name: String(r.role ?? r.module ?? r.path ?? 'Route'),
+    notes: String(r.path ?? ''),
+    console: typeof r.path === 'string' && String(r.path).startsWith('/') ? String(r.path) : null,
+  }));
 
   return (
     <AppShell>
@@ -89,50 +46,30 @@ export function ResearchFundingPlatformClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
-        <div style={{ display: 'grid', gap: '1.25rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{data.note}</p>
-          {data.safety?.note ? (
-            <p style={{ margin: 0, borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem', color: 'var(--muted)' }}>
-              {String(data.safety.note)}
-            </p>
-          ) : null}
-          {data.investmentMode ? (
-            <p style={{ margin: 0, borderLeft: '3px solid #b45309', paddingLeft: '0.85rem' }}>
-              Mode: {data.investmentMode} — fundingPortalOs=false, securitiesOfferingOs=false.
-            </p>
-          ) : null}
-          <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty, capabilities: data.capabilities, products: data.products }, null, 2)}
-          </pre>
-          <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1rem' }}>Records</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
-              {records.map((r) => (
-                <li key={r.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
-                  <strong>{r.title}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-                    {r.kind} · {r.status}
-                  </span>
-                  {r.summary ? <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>{r.summary}</p> : null}
-                </li>
-              ))}
-              {!records.length ? <li style={{ color: 'var(--muted)' }}>Sign in via /dev-login to load seeded AIE records.</li> : null}
-            </ul>
-            <form onSubmit={onCreate} style={{ display: 'grid', gap: '0.55rem', marginTop: '0.5rem' }}>
-              <label className="vl-label">
-                Kind
-                <input className="vl-field" value={kind} onChange={(e) => setKind(e.target.value)} />
-              </label>
-              <label className="vl-label">
-                Title
-                <input className="vl-field" value={title} onChange={(e) => setTitle(e.target.value)} required />
-              </label>
-              <button type="submit" className="vl-btn vl-btn-primary" disabled={busy} style={{ justifySelf: 'start' }}>
-                {busy ? 'Saving…' : 'Add record'}
-              </button>
-            </form>
-          </section>
-        </div>
+        <CatalogConsole
+          note={data.note}
+          safetyNote={data.safety?.note ? String(data.safety.note) : undefined}
+          honesty={data.honesty}
+          sections={[
+            { title: 'Products', rows: data.products ?? [] },
+            { title: 'Capabilities', rows: data.capabilities ?? [] },
+            { title: 'Findings', rows: (data.findings ?? []).map((f) => ({
+              ...f,
+              name: String(f.packageName ?? f.name ?? f.id),
+              status: String(f.severity ?? f.status ?? ''),
+              notes: String(f.summary ?? f.notes ?? ''),
+            })) },
+            { title: 'Packages', rows: (data.packages ?? []).map((p) => ({
+              ...p,
+              id: String(p.name ?? p.id),
+              name: String(p.name ?? p.id),
+              notes: String(p.path ?? p.notes ?? ''),
+            })) },
+            { title: 'Routes', rows: routeRows },
+          ]}
+          backHref="/ai-economy"
+          backLabel="AI Economy"
+        />
       ) : null}
     </AppShell>
   );

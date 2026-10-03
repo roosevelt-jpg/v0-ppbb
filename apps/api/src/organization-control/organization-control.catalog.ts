@@ -123,11 +123,9 @@ export function organizationControlEngineCatalog() {
     safety: {
       leastPrivilegeRequired: true,
       controlPlaneAdminNotDefault: true,
-      note:
-        'Organization Control extends identity/org surfaces. Role catalog: admin vs operator vs viewer. Control Plane Admin is not the default engineer role.',
+      note: 'Organization Control extends identity/org surfaces. Role catalog: admin vs operator vs viewer. Control Plane Admin is not the default engineer role.',
     },
     docs: '/docs/ORGANIZATION_CONTROL.md',
-    note:
-      'Organization Control. Orgs/BUs/departments/teams/projects/environments/quotas/policies with least-privilege roles. Does not regenerate Clerk.',
+    note: 'Organization Control. Orgs/BUs/departments/teams/projects/environments/quotas/policies with least-privilege roles. Does not regenerate Clerk.',
   };
 }

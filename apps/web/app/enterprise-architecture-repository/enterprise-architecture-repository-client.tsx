@@ -5,14 +5,14 @@ import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
 
 type Engine = {
   product: string;
   note: string;
-  honesty: Record<string, boolean | string>;
+  honesty: Record<string, unknown>;
   safety?: { note?: string } & Record<string, unknown>;
-  capabilities?: Array<Record<string, unknown>>;
-  products?: Array<Record<string, unknown>>;
+  capabilities?: CatalogRow[];
 };
 
 type RecordRow = {
@@ -46,7 +46,10 @@ export function EnterpriseArchitectureRepositoryClient() {
       try {
         const token = await resolveApiToken(getToken);
         if (!token) return;
-        const res = await apiFetch<{ records: RecordRow[] }>('/v1/enterprise-architecture-repository/records', { token });
+        const res = await apiFetch<{ records: RecordRow[] }>(
+          '/v1/enterprise-architecture-repository/records',
+          { token },
+        );
         setRecords(res.records ?? []);
       } catch {
         /* public engine still useful without auth */
@@ -61,13 +64,16 @@ export function EnterpriseArchitectureRepositoryClient() {
     setError(null);
     try {
       const token = await resolveApiToken(getToken);
-      if (!token) throw new Error('Not signed in — use /dev-login');
+      if (!token) throw new Error('Sign in to add architecture records');
       await apiFetch('/v1/enterprise-architecture-repository/records', {
         token,
         method: 'POST',
-        body: JSON.stringify({ kind, title, summary: 'Created from VCOS console' }),
+        body: JSON.stringify({ kind, title, summary: 'Created from architecture repository console' }),
       });
-      const res = await apiFetch<{ records: RecordRow[] }>('/v1/enterprise-architecture-repository/records', { token });
+      const res = await apiFetch<{ records: RecordRow[] }>(
+        '/v1/enterprise-architecture-repository/records',
+        { token },
+      );
       setRecords(res.records ?? []);
       setTitle('');
     } catch (err) {
@@ -83,45 +89,46 @@ export function EnterpriseArchitectureRepositoryClient() {
         Enterprise Architecture Repository
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VerbaLab VCOS console. Internal business tooling; not a substitute for a real board or counsel.
+        Capability, information, application, and technology architecture artifacts with ArchiMate views.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
         <div style={{ display: 'grid', gap: '1.25rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{data.note}</p>
-          {data.safety?.note ? (
-            <p style={{ margin: 0, borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem', color: 'var(--muted)' }}>
-              {String(data.safety.note)}
-            </p>
-          ) : null}
-          <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty, capabilities: data.capabilities, products: data.products }, null, 2)}
-          </pre>
-          <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1rem' }}>Records</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
-              {records.map((r) => (
-                <li key={r.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
-                  <strong>{r.title}</strong> 
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-                    {r.kind} · {r.status}
-                  </span>
-                  {r.summary ? <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>{r.summary}</p> : null}
-                </li>
-              ))}
-              {!records.length ? <li style={{ color: 'var(--muted)' }}>Sign in via /dev-login to load seeded VCOS records.</li> : null}
-            </ul>
-            <form onSubmit={onCreate} style={{ display: 'grid', gap: '0.55rem', marginTop: '0.5rem' }}>
-              <label className="vl-label">
+          <CatalogConsole
+            note={data.note}
+            safetyNote={data.safety?.note ? String(data.safety.note) : undefined}
+            honesty={data.honesty}
+            sections={[
+              { title: 'Capabilities', rows: data.capabilities ?? [] },
+              {
+                title: 'Records',
+                rows: records.map((r) => ({
+                  id: r.id,
+                  name: r.title,
+                  status: r.status,
+                  kind: r.kind,
+                  notes: r.summary,
+                })),
+              },
+            ]}
+            backHref="/corporate-operating-system"
+            backLabel="Corporate Operating System"
+          />
+          <section style={{ display: 'grid', gap: '0.75rem' }}>
+            <h2 style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--muted)' }}>
+              Add record
+            </h2>
+            <form onSubmit={onCreate} style={{ display: 'grid', gap: '0.55rem' }}>
+              <label style={{ display: 'grid', gap: '0.35rem', fontSize: '0.9rem' }}>
                 Kind
-                <input className="vl-field" value={kind} onChange={(e) => setKind(e.target.value)} />
+                <input value={kind} onChange={(e) => setKind(e.target.value)} style={{ padding: '0.55rem 0.7rem' }} />
               </label>
-              <label className="vl-label">
+              <label style={{ display: 'grid', gap: '0.35rem', fontSize: '0.9rem' }}>
                 Title
-                <input className="vl-field" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                <input value={title} onChange={(e) => setTitle(e.target.value)} required style={{ padding: '0.55rem 0.7rem' }} />
               </label>
-              <button type="submit" className="vl-btn vl-btn-primary" disabled={busy} style={{ justifySelf: 'start' }}>
+              <button type="submit" disabled={busy} style={{ justifySelf: 'start', padding: '0.55rem 0.9rem' }}>
                 {busy ? 'Saving…' : 'Add record'}
               </button>
             </form>

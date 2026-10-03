@@ -137,7 +137,7 @@ export function secretsCertificatePlatformEngineCatalog() {
       { id: 'secrets', name: 'Secrets', status: 'shipped', notes: 'Metadata only.' },
       { id: 'certificates', name: 'Certificates', status: 'shipped', notes: 'Shipped.' },
       { id: 'kms', name: 'KMS', status: 'shipped', notes: 'Envelope DEK wrap.' },
-      { id: 'vault_pattern', name: 'Vault Pattern', status: 'shipped', notes: 'hashicorpVaultOs=false.' },
+      { id: 'vault_pattern', name: 'Vault Pattern', status: 'shipped', notes: 'Vault-pattern secret metadata without plaintext values.' },
       { id: 'rotation', name: 'Rotation', status: 'shipped', notes: 'Shipped.' },
       { id: 'expiration', name: 'Expiration', status: 'shipped', notes: 'Shipped.' },
       { id: 'audit', name: 'Access Audit', status: 'shipped', notes: 'accessAuditing=true.' },
@@ -164,11 +164,9 @@ export function secretsCertificatePlatformEngineCatalog() {
       envelopeEncryptionPattern: true,
       accessAuditing: true,
       hashicorpVaultOs: false,
-      note:
-        'Envelope-encryption + access-audit catalog over platform secrets. APIs expose secret metadata only (name, version, rotatedAt) — never plaintext secret values. Not HashiCorp Vault OS.',
+      note: 'Envelope-encryption + access-audit catalog over platform secrets. APIs expose secret metadata only (name, version, rotatedAt) — never plaintext secret values. Not HashiCorp Vault OS.',
     },
     docs: '/docs/SECRETS_CERTIFICATE_PLATFORM.md',
-    note:
-      'Secrets & Certificate Platform. Envelope encryption + audit. Metadata-only APIs. hashicorpVaultOs=false.',
+    note: 'Secrets & Certificate Platform. Envelope encryption + audit. Metadata-only APIs.',
   };
 }

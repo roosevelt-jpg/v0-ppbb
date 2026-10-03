@@ -46,20 +46,26 @@ export function CatalogConsole({
   backHref,
   backLabel,
 }: CatalogConsoleProps) {
-  const honestyForDisplay = honesty
-    ? Object.fromEntries(
-        Object.entries(honesty).filter(([k]) => k !== 'note'),
-      )
-    : null;
+  // End users see product copy only — never honesty JSON dumps or denial flags.
   const honestyNote =
-    typeof honesty?.note === 'string' ? hidePhaseIds(honesty.note) : null;
+    typeof honesty?.note === 'string' ? hidePhaseIds(String(honesty.note)) : null;
+  const cleanedNote = note ? hidePhaseIds(note) : null;
+  const cleanedSafety = safetyNote ? hidePhaseIds(safetyNote) : null;
+  const displaySafety =
+    cleanedSafety && cleanedSafety !== cleanedNote && cleanedSafety !== honestyNote
+      ? cleanedSafety
+      : null;
+  const displayHonesty =
+    honestyNote && honestyNote !== cleanedNote && honestyNote !== displaySafety
+      ? honestyNote
+      : null;
 
   return (
     <div style={{ display: 'grid', gap: '1.25rem' }}>
-      {note ? (
-        <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(note)}</p>
+      {cleanedNote ? (
+        <p style={{ margin: 0, color: 'var(--muted)' }}>{cleanedNote}</p>
       ) : null}
-      {safetyNote ? (
+      {displaySafety ? (
         <p
           style={{
             margin: 0,
@@ -68,10 +74,10 @@ export function CatalogConsole({
             color: 'var(--muted)',
           }}
         >
-          {hidePhaseIds(safetyNote)}
+          {displaySafety}
         </p>
       ) : null}
-      {honestyNote ? (
+      {displayHonesty ? (
         <p
           style={{
             margin: 0,
@@ -80,7 +86,7 @@ export function CatalogConsole({
             color: 'var(--muted)',
           }}
         >
-          {honestyNote}
+          {displayHonesty}
         </p>
       ) : null}
       {statusChips.length ? (
@@ -117,6 +123,7 @@ export function CatalogConsole({
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.85rem' }}>
               {section.rows.map((row) => {
                 const href = typeof row.console === 'string' ? row.console : null;
+                const rowNotes = row.notes ? hidePhaseIds(String(row.notes)) : '';
                 return (
                   <li
                     key={row.id}
@@ -140,9 +147,9 @@ export function CatalogConsole({
                         <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{String(row.stage)}</span>
                       ) : null}
                     </div>
-                    {row.notes ? (
+                    {rowNotes ? (
                       <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-                        {hidePhaseIds(String(row.notes))}
+                        {rowNotes}
                       </p>
                     ) : null}
                   </li>
@@ -152,19 +159,6 @@ export function CatalogConsole({
           </section>
         ) : null,
       )}
-      {honestyForDisplay ? (
-        <pre
-          style={{
-            margin: 0,
-            padding: '1rem',
-            background: 'var(--surface)',
-            overflow: 'auto',
-            fontSize: '0.78rem',
-          }}
-        >
-          {JSON.stringify({ honesty: honestyForDisplay }, null, 2)}
-        </pre>
-      ) : null}
       {backHref && backLabel ? <Link href={backHref}>← {backLabel}</Link> : null}
     </div>
   );

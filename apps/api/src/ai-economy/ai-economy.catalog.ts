@@ -57,7 +57,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/research-funding-platform/engine',
       console: '/research-funding-platform',
-      notes: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+      notes: 'Grant/scholarship/innovation funding tracking— not autonomous grant disbursement.',
     },
     {
       id: 'global-community-platform',
@@ -73,7 +73,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-investment-platform/engine',
       console: '/ai-investment-platform',
-      notes: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+      notes: 'Investment dashboard and reporting views.',
     },
     {
       id: 'economic-intelligence',
@@ -89,7 +89,7 @@ export function aiEconomyProductCatalog(): AieProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/ai-investment-platform/engine',
       console: '/ai-investment-platform',
-      notes: 'fundingPortalOs=false; securitiesOfferingOs=false; reporting only.',
+      notes: 'Investment reporting dashboard.',
     }
   ];
 }

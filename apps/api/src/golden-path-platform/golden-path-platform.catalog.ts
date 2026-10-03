@@ -20,49 +20,49 @@ export function goldenPathPlatformEngineCatalog() {
         name: 'service',
         kind: 'service',
         status: 'shipped',
-        notes: 'Nest hub: catalog+service+controller+CQRS',
+        notes: 'Nest hub: catalog+service+controller+CQRS.',
       },
       {
         id: 'gp-ms',
         name: 'microservice',
         kind: 'microservice',
         status: 'shipped',
-        notes: 'Microservice layout with OpenAPI+GraphQL',
+        notes: 'Microservice layout with OpenAPI+GraphQL.',
       },
       {
         id: 'gp-cloud',
         name: 'cloud-hub',
         kind: 'cloud',
         status: 'shipped',
-        notes: 'Volume cloud foundation hub pattern',
+        notes: 'Volume cloud foundation hub pattern.',
       },
       {
         id: 'gp-sdk',
         name: 'sdk-method',
         kind: 'sdk',
         status: 'shipped',
-        notes: 'SDK client method + CLI command',
+        notes: 'SDK client method + CLI command.',
       },
       {
         id: 'gp-repo',
         name: 'repo',
         kind: 'repo',
         status: 'shipped',
-        notes: 'pnpm workspace package scaffold',
+        notes: 'pnpm workspace package scaffold.',
       },
       {
         id: 'gp-ci',
         name: 'ci',
         kind: 'ci',
         status: 'shipped',
-        notes: 'Vitest + lint CI path',
+        notes: 'Vitest + lint CI path.',
       },
       {
         id: 'gp-sec',
         name: 'security',
         kind: 'security',
         status: 'shipped',
-        notes: 'Auth smoke + honesty flags template',
+        notes: 'Auth smoke + honesty flags template.',
       }
     ],
     honesty: {
@@ -73,9 +73,9 @@ export function goldenPathPlatformEngineCatalog() {
     },
     safety: {
       scaffoldingOs: false,
-      note: 'Golden Path Platform. Service/microservice/cloud/SDK/repo/CI/security templates catalog. scaffoldingOs=false.',
+      note: 'Golden Path Platform. Service/microservice/cloud/SDK/repo/CI/security templates catalog.',
     },
     docs: '/docs/GOLDEN_PATH_PLATFORM.md',
-    note: 'Golden Path Platform. Service/microservice/cloud/SDK/repo/CI/security templates catalog. scaffoldingOs=false.',
+    note: 'Golden Path Platform. Service/microservice/cloud/SDK/repo/CI/security templates catalog.',
   };
 }

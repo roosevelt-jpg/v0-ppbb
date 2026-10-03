@@ -26,7 +26,7 @@ export class CorporateOperatingSystemService {
         note: 'Tooling for how the company runs — not a real board or legal counsel.',
       },
       docs: '/docs/CORPORATE_OPERATING_SYSTEM.md',
-      note: 'Corporate Operating System Foundation. internalBusinessSoftware=true; realCorporateGovernance=false.',
+      note: 'Corporate Operating System Foundation.',
     };
   }
 

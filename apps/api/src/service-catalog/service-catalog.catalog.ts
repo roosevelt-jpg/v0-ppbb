@@ -21,49 +21,49 @@ export function serviceCatalogEngineCatalog() {
         name: 'api',
         kind: 'api',
         status: 'shipped',
-        notes: 'NestJS API — apps/api',
+        notes: 'NestJS API — apps/api.',
       },
       {
         id: 'svc-web',
         name: 'web',
         kind: 'web',
         status: 'shipped',
-        notes: 'Next.js console — apps/web',
+        notes: 'Next.js console — apps/web.',
       },
       {
         id: 'svc-sdk',
         name: 'sdk',
         kind: 'sdk',
         status: 'shipped',
-        notes: 'TypeScript SDK — packages/sdk',
+        notes: 'TypeScript SDK — packages/sdk.',
       },
       {
         id: 'svc-cli',
         name: 'cli',
         kind: 'cli',
         status: 'shipped',
-        notes: 'CLI — packages/cli',
+        notes: 'CLI — packages/cli.',
       },
       {
         id: 'svc-postgres',
         name: 'postgres',
         kind: 'database',
         status: 'shipped',
-        notes: 'Primary Postgres via Prisma',
+        notes: 'Primary Postgres via Prisma.',
       },
       {
         id: 'svc-redis',
         name: 'redis',
         kind: 'queue',
         status: 'shipped',
-        notes: 'Redis Streams / cache (Event Fabric)',
+        notes: 'Redis Streams / cache (Event Fabric).',
       },
       {
         id: 'svc-fly',
         name: 'fly',
         kind: 'infra',
         status: 'shipped',
-        notes: 'Fly.io shared platform deploy path',
+        notes: 'Fly.io shared platform deploy path.',
       }
     ],
     honesty: {
@@ -74,9 +74,9 @@ export function serviceCatalogEngineCatalog() {
     },
     safety: {
       serviceMeshOs: false,
-      note: 'Service Catalog. Seed catalog of VerbaLab services (api, web, SDK, CLI) with ownership/deps. serviceMeshOs=false.',
+      note: 'Service Catalog. Seed catalog of VerbaLab services (api, web, SDK, CLI) with ownership/deps.',
     },
     docs: '/docs/SERVICE_CATALOG.md',
-    note: 'Service Catalog. Seed catalog of VerbaLab services (api, web, SDK, CLI) with ownership/deps. serviceMeshOs=false.',
+    note: 'Service Catalog. Seed catalog of VerbaLab services (api, web, SDK, CLI) with ownership/deps.',
   };
 }

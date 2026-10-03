@@ -76,8 +76,7 @@ export function aiEngineeringStandardsEngineCatalog() {
         target: 'ecosystem-cloud / creator-economy / Stripe surfaces',
         checkedAgainstStandards: true,
         finding: 'pass',
-        notes:
-          'Volume 11 payments use Stripe honesty + sandbox safety; not payment-processor OS. Matches AI/API security standards: no invented PCI certification.',
+        notes: 'Volume 11 payments use Stripe honesty + sandbox safety; not payment-processor OS. Matches AI/API security standards: no invented PCI certification.',
       },
       {
         id: 'vol12-healthcare',
@@ -86,8 +85,7 @@ export function aiEngineeringStandardsEngineCatalog() {
         target: 'healthcare-intelligence',
         checkedAgainstStandards: true,
         finding: 'pass',
-        notes:
-          'Healthcare intelligence ships with medical/consent honesty gates; not clinical decision OS. No fake HIPAA certification claimed.',
+        notes: 'Healthcare intelligence ships with medical/consent honesty gates; not clinical decision OS. No fake HIPAA certification claimed.',
       },
       {
         id: 'vol12-financial',
@@ -96,8 +94,7 @@ export function aiEngineeringStandardsEngineCatalog() {
         target: 'financial-intelligence',
         checkedAgainstStandards: true,
         finding: 'pass',
-        notes:
-          'Financial intelligence catalogs with finance honesty; not banking OS. No invented regulatory certification.',
+        notes: 'Financial intelligence catalogs with finance honesty; not banking OS. No invented regulatory certification.',
       },
       {
         id: 'vol12-consent',
@@ -106,8 +103,7 @@ export function aiEngineeringStandardsEngineCatalog() {
         target: 'cultural-intelligence / african-intelligence-cloud',
         checkedAgainstStandards: true,
         finding: 'pass',
-        notes:
-          'Consent honesty surfaces present for cultural/domain packs; aligns with AI safety + privacy standards catalog.',
+        notes: 'Consent honesty surfaces present for cultural/domain packs; aligns with AI safety + privacy standards catalog.',
       },
       {
         id: 'vol17-secrets',
@@ -116,8 +112,7 @@ export function aiEngineeringStandardsEngineCatalog() {
         target: 'secrets-certificate-platform',
         checkedAgainstStandards: true,
         finding: 'pass',
-        notes:
-          'Control Plane secrets use envelope/metadata pattern; plaintext not listed via APIs. Matches infrastructure + AI security standards.',
+        notes: 'Control Plane secrets use envelope/metadata pattern; plaintext not listed via APIs. Matches infrastructure + AI security standards.',
       },
     ],
 

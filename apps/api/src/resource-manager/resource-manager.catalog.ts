@@ -69,9 +69,9 @@ export function resourceManagerEngineCatalog() {
       notKubernetes: true,
       literalOsKernel: false,
       enterpriseEngineeringSystemOs: false,
-      note: 'Resource Manager. GPU/CPU/RAM/storage/networking/vector/context-window allocation catalog over gpu-platform/gpu-runtime + FinOps budget honesty — not K8s resource OS.',
+      note: 'Resource Manager. GPU/CPU/RAM/storage/networking/vector/context-window allocation catalog over gpu-platform/gpu-runtime + FinOps budget honesty.',
     },
     docs: '/docs/RESOURCE_MANAGER.md',
-    note: 'Resource Manager. GPU/CPU/RAM/storage/networking/vector/context-window allocation catalog over gpu-platform/gpu-runtime + FinOps budget honesty — not K8s resource OS.',
+    note: 'Resource Manager. GPU/CPU/RAM/storage/networking/vector/context-window allocation catalog over gpu-platform/gpu-runtime + FinOps budget honesty.',
   };
 }

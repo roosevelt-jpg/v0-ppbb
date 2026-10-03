@@ -1,18 +1,30 @@
 /**
- * Strip internal phase IDs (VL-###) from user-facing console copy.
+ * Strip internal phase IDs (VL-###) and honesty/denial tokens from user-facing console copy.
  */
 export function hidePhaseIds(text: string): string {
   return text
     .replace(/\s*\(VL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\)/gi, '')
     .replace(/\bVL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\b\.?\s*/gi, '')
     .replace(/\(Phase\s+(\d+)\s*\/\s*\)/gi, '(Phase $1)')
+    .replace(/\b[a-z][a-zA-Z0-9]*(?:Os|OS)\s*=\s*(?:false|true)\b\.?/g, '')
+    .replace(
+      /\b(?:executesInference|managesOrgsPoliciesBilling|gpuBudgetAlertsEnabled|fullVulnDb|notLinux|notKubernetes)\s*=\s*(?:false|true)\b\.?/g,
+      '',
+    )
+    .replace(/\b(?:honesty enforced|rejected here)\b\.?/gi, '')
+    .replace(/\bVolume\s+\d+\s+README:\s*/gi, '')
     .replace(/\s*\/\s*[–—-]/g, ' —')
     .replace(/[–—-]\s*[–—-]/g, '—')
+    .replace(/\s*[—–-]\s*\./g, '.')
+    .replace(/;\s*;/g, ';')
     .replace(/\s{2,}/g, ' ')
     .replace(/\s+([.,;:])/g, '$1')
-    .replace(/^[\s.—–-]+/, '')
-    .replace(/\s+[–—-]\s*$/g, '')
+    .replace(/^[;\s.]+/, '')
+    .replace(/^[—–-]+/, '')
+    .replace(/[;\s]+$/g, '')
+    .replace(/\s+[—–-]\s*$/g, '')
     .replace(/\bfrom\s*$/i, '')
+    .replace(/\.\s*\./g, '.')
     .trim();
 }
 

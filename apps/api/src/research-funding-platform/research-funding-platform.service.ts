@@ -20,10 +20,10 @@ export class ResearchFundingPlatformService {
       honesty: researchFundingPlatformHonesty(),
       safety: {
         ...researchFundingPlatformHonesty(),
-        note: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+        note: 'Grant/scholarship/innovation funding tracking— not autonomous grant disbursement.',
       },
       docs: '/docs/RESEARCH_FUNDING_PLATFORM.md',
-      note: 'Grant/scholarship/innovation funding *tracking* — not autonomous grant disbursement.',
+      note: 'Grant/scholarship/innovation funding tracking— not autonomous grant disbursement.',
     };
   }
 

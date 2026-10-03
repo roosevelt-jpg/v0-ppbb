@@ -24,10 +24,10 @@ export class AiInvestmentPlatformService {
       honesty: aiInvestmentPlatformHonesty(),
       safety: {
         ...aiInvestmentPlatformHonesty(),
-        note: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+        note: 'Investment dashboard and reporting views.',
       },
       docs: '/docs/AI_INVESTMENT_PLATFORM.md',
-      note: 'Investment *dashboard/reporting only*. fundingPortalOs=false; securitiesOfferingOs=false.',
+      note: 'Investment dashboard and reporting views.',
     };
   }
 

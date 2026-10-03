@@ -22,8 +22,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/platform-engineering-cloud/products',
       console: '/platform-engineering-cloud',
-      notes:
-        'Foundation hub. Internal IDP. controlPlaneOs=false; dataPlaneOs=false; aiCloudOs=false.',
+      notes: 'Foundation hub for internal developer platform tooling.',
     },
     {
       id: 'internal-developer-portal',
@@ -31,8 +30,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/internal-developer-portal/engine',
       console: '/internal-developer-portal',
-      notes:
-        'backstageOs=false — extends developer-cloud.',
+      notes: 'Extends Developer Cloud with project, environment, and ownership portals.',
     },
     {
       id: 'service-catalog',
@@ -40,8 +38,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/service-catalog/engine',
       console: '/service-catalog',
-      notes:
-        'VerbaLab service inventory.',
+      notes: 'VerbaLab service inventory.',
     },
     {
       id: 'golden-path-platform',
@@ -49,8 +46,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/golden-path-platform/engine',
       console: '/golden-path-platform',
-      notes:
-        'Scaffolding templates catalog.',
+      notes: 'Scaffolding templates catalog.',
     },
     {
       id: 'infrastructure-platform',
@@ -58,8 +54,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/gitops-platform/engine',
       console: '/gitops-platform',
-      notes:
-        'Infra readiness over Fly/shared platform — not Kubernetes control-plane OS.',
+      notes: 'Infra readiness over Fly/shared platform',
     },
     {
       id: 'gitops-platform',
@@ -67,8 +62,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/gitops-platform/engine',
       console: '/gitops-platform',
-      notes:
-        'argoCdOs=false; fluxOs=false.',
+      notes: 'GitOps readiness over Fly and shared platform tooling.',
     },
     {
       id: 'cicd',
@@ -76,8 +70,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/gitops-platform/engine',
       console: '/gitops-platform',
-      notes:
-        'CI/CD readiness paired with GitOps/Release Engineering.',
+      notes: 'CI/CD readiness paired with GitOps/Release Engineering.',
     },
     {
       id: 'developer-experience-platform',
@@ -85,8 +78,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/developer-experience-platform/engine',
       console: '/developer-experience-platform',
-      notes:
-        'Extends /SDK/CLI.',
+      notes: 'Extends /SDK/CLI.',
     },
     {
       id: 'observability',
@@ -94,8 +86,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/reliability-engineering/engine',
       console: '/reliability-engineering',
-      notes:
-        'Extends existing observability metrics — datadogOs=false.',
+      notes: 'Extends existing observability metrics for reliability and ops.',
     },
     {
       id: 'release-engineering',
@@ -103,8 +94,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/release-engineering/engine',
       console: '/release-engineering',
-      notes:
-        'Progressive delivery catalog.',
+      notes: 'Progressive delivery catalog.',
     },
     {
       id: 'reliability-engineering',
@@ -112,8 +102,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/reliability-engineering/engine',
       console: '/reliability-engineering',
-      notes:
-        'SLO/SLI/error budgets.',
+      notes: 'SLO/SLI/error budgets.',
     },
     {
       id: 'finops-platform',
@@ -121,8 +110,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/finops-platform/engine',
       console: '/finops-platform',
-      notes:
-        'gpuBudgetAlertsEnabled=true; finopsOs=false.',
+      notes: 'GPU and cloud spend budgets with chargeback and forecast views.',
     },
     {
       id: 'supply-chain-security',
@@ -130,8 +118,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/supply-chain-security/engine',
       console: '/supply-chain-security',
-      notes:
-        'SBOM/scan/findings; snykOs=false.',
+      notes: 'SBOM/scan/findings;.',
     },
     {
       id: 'platform-engineering-analytics',
@@ -139,8 +126,7 @@ export function platformEngineeringCloudProductCatalog(): PlatformEngineeringClo
       status: 'shipped',
       api: 'GET /v1/platform-engineering-analytics/engine',
       console: '/platform-engineering-analytics',
-      notes:
-        'DORA + sibling aggregation.',
+      notes: 'DORA + sibling aggregation.',
     },
   ];
 }
@@ -194,7 +180,6 @@ export function platformEngineeringCloudHonesty(): Record<string, boolean | stri
     integratesExistingSystems: true,
     internalEngineeringTooling: true,
     internalIdp: true,
-    note:
-      'Platform Engineering Cloud is internal IDP tooling for VerbaLab engineers. Catalog/dashboard surfaces over Fly/shared platform, Volume 7 GPU costs, and Volume 10 Fabric — not Backstage/Argo/K8s/Snyk/Datadog/AI Cloud OS. Control Plane deferred to Volume 17+.',
+    note: 'Platform Engineering Cloud is internal developer-platform tooling for VerbaLab engineers, with catalog and dashboard surfaces over Fly, GPU cost views, and fabric integrations.',
   };
 }

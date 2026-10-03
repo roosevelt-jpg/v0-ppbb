@@ -61,7 +61,7 @@ export class SupplyChainSecurityService {
         info: findings.filter((f) => f.severity === 'info').length,
       },
       honesty: this.engine().honesty,
-      note: 'Findings from workspace inventory posture — snykOs=false.',
+      note: 'Findings from workspace inventory posture.',
       docs: '/docs/SUPPLY_CHAIN_SECURITY.md',
     };
   }

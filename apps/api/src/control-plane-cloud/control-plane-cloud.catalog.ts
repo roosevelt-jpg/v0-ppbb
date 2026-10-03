@@ -22,8 +22,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/control-plane-cloud/products',
       console: '/control-plane-cloud',
-      notes:
-        'Foundation hub. executesInference=false; dataPlaneOs=false.',
+      notes: 'Foundation hub for org, policy, routing, and deployment control.',
     },
     {
       id: 'organization-control',
@@ -31,8 +30,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/organization-control/engine',
       console: '/organization-control',
-      notes:
-        'leastPrivilegeRequired; controlPlaneAdminNotDefault.',
+      notes: 'leastPrivilegeRequired; controlPlaneAdminNotDefault.',
     },
     {
       id: 'global-configuration-platform',
@@ -40,8 +38,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-configuration-platform/engine',
       console: '/global-configuration-platform',
-      notes:
-        'Secrets refs only.',
+      notes: 'Secrets refs only.',
     },
     {
       id: 'global-policy-engine',
@@ -49,8 +46,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-policy-engine/engine',
       console: '/global-policy-engine',
-      notes:
-        'policyRuntimeIntegrated=true.',
+      notes: 'policyRuntimeIntegrated=true.',
     },
     {
       id: 'global-deployment-controller',
@@ -58,8 +54,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-deployment-controller/engine',
       console: '/global-deployment-controller',
-      notes:
-        'productionDeployRequiresAuthorization; rollbackPath.',
+      notes: 'productionDeployRequiresAuthorization; rollbackPath.',
     },
     {
       id: 'global-routing-controller',
@@ -67,8 +62,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-routing-controller/engine',
       console: '/global-routing-controller',
-      notes:
-        'istioOs=false.',
+      notes: 'Global routing and traffic policy catalog.',
     },
     {
       id: 'secrets-certificate-platform',
@@ -76,8 +70,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/secrets-certificate-platform/engine',
       console: '/secrets-certificate-platform',
-      notes:
-        'Envelope encryption + audit; metadata only.',
+      notes: 'Envelope encryption + audit; metadata only.',
     },
     {
       id: 'global-scheduler',
@@ -85,8 +78,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-scheduler/engine',
       console: '/global-scheduler',
-      notes:
-        'Scheduling control; executesInference=false.',
+      notes: 'Scheduling control',
     },
     {
       id: 'control-plane-analytics',
@@ -94,8 +86,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/control-plane-analytics/engine',
       console: '/control-plane-analytics',
-      notes:
-        'Sibling aggregation.',
+      notes: 'Sibling aggregation.',
     },
     {
       id: 'identity',
@@ -103,8 +94,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/organization-control/engine',
       console: '/organization-control',
-      notes:
-        'Identity surfaces via Organization Control over Clerk — not a second IdP.',
+      notes: 'Identity surfaces via Organization Control over Clerk — not a second IdP.',
     },
     {
       id: 'billing',
@@ -112,8 +102,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/global-policy-engine/engine',
       console: '/global-policy-engine',
-      notes:
-        'Billing policies via Global Policy Engine over existing billing.',
+      notes: 'Billing policies via Global Policy Engine over existing billing.',
     },
     {
       id: 'monitoring',
@@ -121,8 +110,7 @@ export function controlPlaneCloudProductCatalog(): ControlPlaneCloudProductRow[]
       status: 'shipped',
       api: 'GET /v1/control-plane-cloud/monitoring',
       console: '/control-plane-cloud',
-      notes:
-        'Foundation monitoring snapshot.',
+      notes: 'Foundation monitoring snapshot.',
     },
   ];
 }
@@ -183,7 +171,6 @@ export function controlPlaneCloudHonesty(): Record<string, boolean | string> {
     neverLogPlaintextSecrets: true,
     envelopeEncryptionPattern: true,
     accessAuditing: true,
-    note:
-      'Control Plane Cloud manages orgs/projects/regions/policies/routing/billing/identity/deployment/configuration/monitoring. Never executes inference. Wires over Policy Runtime / Trust / Identity / Platform Engineering — not a second policy OS or IdP. Data Plane deferred to Volume 18+.',
+    note: 'Control Plane Cloud manages orgs, projects, regions, policies, routing, billing, identity, deployment, configuration, and monitoring. It does not execute inference.',
   };
 }

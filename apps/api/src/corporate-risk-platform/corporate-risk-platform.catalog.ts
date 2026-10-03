@@ -8,8 +8,7 @@ export function corporateRiskPlatformHonesty() {
     jiraOs: false,
     togafModelingSuiteOs: false,
     executiveJudgmentOs: false,
-    note:
-      'Volume 21 README: tooling that supports governance/strategy processes — not a substitute for a real board, counsel, or executives.',
+    note: 'Tooling that supports governance and strategy processes for corporate teams.',
   };
 }
 

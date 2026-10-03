@@ -19,42 +19,42 @@ export function internalDeveloperPortalEngineCatalog() {
         name: 'api',
         kind: 'template',
         status: 'shipped',
-        notes: 'Create Nest API project from golden path',
+        notes: 'Create Nest API project from golden path.',
       },
       {
         id: 'idp-env-staging',
         name: 'staging',
         kind: 'environment',
         status: 'shipped',
-        notes: 'Provision staging workspace env',
+        notes: 'Provision staging workspace env.',
       },
       {
         id: 'idp-team-platform',
         name: 'platform',
         kind: 'team',
         status: 'shipped',
-        notes: 'Platform engineering team ownership',
+        notes: 'Platform engineering team ownership.',
       },
       {
         id: 'idp-tpl-microservice',
         name: 'microservice',
         kind: 'template',
         status: 'shipped',
-        notes: 'Microservice starter template',
+        notes: 'Microservice starter template.',
       },
       {
         id: 'idp-own-web',
         name: 'web',
         kind: 'ownership',
         status: 'shipped',
-        notes: 'apps/web ownership dashboard',
+        notes: 'apps/web ownership dashboard.',
       },
       {
         id: 'idp-dash-dx',
         name: 'dx',
         kind: 'dashboard',
         status: 'shipped',
-        notes: 'Developer experience dashboard',
+        notes: 'Developer experience dashboard.',
       }
     ],
     honesty: {
@@ -65,9 +65,9 @@ export function internalDeveloperPortalEngineCatalog() {
     },
     safety: {
       backstageOs: false,
-      note: 'Internal Developer Portal. Project/env/team/templates/ownership catalog over developer-cloud. backstageOs=false.',
+      note: 'Internal Developer Portal. Project/env/team/templates/ownership catalog over developer-cloud.',
     },
     docs: '/docs/INTERNAL_DEVELOPER_PORTAL.md',
-    note: 'Internal Developer Portal. Project/env/team/templates/ownership catalog over developer-cloud. backstageOs=false.',
+    note: 'Internal Developer Portal. Project/env/team/templates/ownership catalog over developer-cloud.',
   };
 }

@@ -22,8 +22,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/data-plane-cloud/products',
       console: '/data-plane-cloud',
-      notes:
-        'Foundation hub. managesOrgsPoliciesBilling=false; serviceMeshOs=false.',
+      notes: 'Foundation hub that routes workloads to product runtimes.',
     },
     {
       id: 'translation-runtime',
@@ -31,8 +30,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/translation-runtime/engine',
       console: '/translation-runtime',
-      notes:
-        'Thin over translate; thinExecutionLayer=true.',
+      notes: 'Thin over translate; thinExecutionLayer=true.',
     },
     {
       id: 'speech-runtime',
@@ -40,8 +38,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/speech-runtime/engine',
       console: '/speech-runtime',
-      notes:
-        'Thin over speech-cloud / speech-recognition.',
+      notes: 'Thin over speech-cloud / speech-recognition.',
     },
     {
       id: 'voice-runtime',
@@ -49,8 +46,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/voice-runtime/engine',
       console: '/voice-runtime',
-      notes:
-        'Thin over voice-cloud / voice.',
+      notes: 'Thin over voice-cloud / voice.',
     },
     {
       id: 'vision-runtime',
@@ -58,8 +54,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/vision-runtime/engine',
       console: '/vision-runtime',
-      notes:
-        'Thin over ocr / documents.',
+      notes: 'Thin over ocr / documents.',
     },
     {
       id: 'knowledge-runtime',
@@ -67,8 +62,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/knowledge-runtime/engine',
       console: '/knowledge-runtime',
-      notes:
-        'Thin over knowledge-cloud / knowledge / knowledge-fabric.',
+      notes: 'Thin over knowledge-cloud / knowledge / knowledge-fabric.',
     },
     {
       id: 'embedding-runtime',
@@ -76,8 +70,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/embedding-runtime/engine',
       console: '/embedding-runtime',
-      notes:
-        'Thin over embeddings / embedding-cloud.',
+      notes: 'Thin over embeddings / embedding-cloud.',
     },
     {
       id: 'data-plane-streaming',
@@ -85,8 +78,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/data-plane-streaming/engine',
       console: '/data-plane-streaming',
-      notes:
-        'Façade over streaming-runtime; extendsStreamingRuntime=true.',
+      notes: 'Façade over streaming-runtime; extendsStreamingRuntime=true.',
     },
     {
       id: 'gpu-runtime',
@@ -94,8 +86,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/gpu-runtime/engine',
       console: '/gpu-runtime',
-      notes:
-        'Thin over gpu-platform; gpuBudgetLimitsRequired=true.',
+      notes: 'Thin over gpu-platform; gpuBudgetLimitsRequired=true.',
     },
     {
       id: 'api-runtime',
@@ -103,8 +94,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/data-plane-cloud/routing',
       console: '/data-plane-cloud',
-      notes:
-        'Ingress path into data-plane runtimes (foundation routing).',
+      notes: 'Ingress path into data-plane runtimes (foundation routing).',
     },
     {
       id: 'monitoring',
@@ -112,8 +102,7 @@ export function dataPlaneCloudProductCatalog(): DataPlaneCloudProductRow[] {
       status: 'shipped',
       api: 'GET /v1/data-plane-cloud/monitoring',
       console: '/data-plane-cloud',
-      notes:
-        'Foundation monitoring snapshot.',
+      notes: 'Foundation monitoring snapshot.',
     },
   ];
 }
@@ -225,7 +214,6 @@ export function dataPlaneCloudHonesty(): Record<string, boolean | string> {
     regeneratesVolumes1to17: false,
     integratesExistingSystems: true,
     gpuBudgetLimitsRequired: true,
-    note:
-      'Data Plane Cloud executes workloads via thin runtime hubs that route to existing product logic. Never manages orgs/policies/billing. Service Mesh / VAIOS rejected in this volume.',
+    note: 'Data Plane Cloud executes workloads via thin runtime hubs that route to existing product logic. Organizations, policies, and billing stay in Control Plane.',
   };
 }

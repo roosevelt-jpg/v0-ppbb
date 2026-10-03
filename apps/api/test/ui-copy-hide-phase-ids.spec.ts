@@ -69,6 +69,18 @@ describe('hidePhaseIds — console copy', () => {
     );
   });
 
+  it('strips honesty denial tokens from console copy', () => {
+    expect(hidePhaseIds('GitOps readiness. argoCdOs=false; fluxOs=false.')).toBe(
+      'GitOps readiness.',
+    );
+    expect(
+      hidePhaseIds('Architecture artifact store — not a full modeling suite (VL-359).'),
+    ).toBe('Architecture artifact store — not a full modeling suite.');
+    expect(hidePhaseIds('Control Plane rejected here (Volume 17+).')).toBe(
+      'Control Plane (Volume 17+).',
+    );
+  });
+
   it('scrubs note/notes fields in nested objects', () => {
     const scrubbed = hidePhaseIdsInCopyFields({
       note: 'Hub (VL-260). Extends clouds.',

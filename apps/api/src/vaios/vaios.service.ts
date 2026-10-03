@@ -29,12 +29,10 @@ export class VaiosService {
         notKubernetes: true,
         literalOsKernel: false,
         enterpriseEngineeringSystemOs: false,
-        note:
-          'Volume 19 README: VAIOS is the unifying orchestration layer ON TOP OF AI Kernel and AI Fabric — not a third reimplementation. Not Linux / not Kubernetes.',
+        note: 'VAIOS is the unifying orchestration layer over AI Kernel and AI Fabric.',
       },
       docs: '/docs/VAIOS.md',
-      note:
-        'VAIOS Foundation. Unifying orchestration over Kernel + Fabric + Data Plane. notLinux/notKubernetes; enterpriseEngineeringSystemOs=false.',
+      note: 'VAIOS Foundation. Unifying orchestration over Kernel, Fabric, and Data Plane.',
     };
   }
 
@@ -77,8 +75,7 @@ export class VaiosService {
         duplicatesKernelOrFabric: false,
         notLinux: true,
         notKubernetes: true,
-        note:
-          'VAIOS honesty enforced. Routes to Kernel/Fabric/Data Plane. Enterprise Engineering System rejected here.',
+        note: 'VAIOS routes orchestration to Kernel, Fabric, and Data Plane surfaces.',
       },
       deferred: {
         enterpriseEngineeringSystemOs: true,
@@ -100,8 +97,7 @@ export class VaiosService {
         dataPlaneCloud: '/data-plane-cloud',
       },
       docs: '/docs/VAIOS.md',
-      note:
-        'VAIOS. Discovery hub over unifying orchestration façades; Production Audit closes the volume.',
+      note: 'VAIOS. Discovery hub over unifying orchestration façades; Production Audit closes the volume.',
     };
   }
 

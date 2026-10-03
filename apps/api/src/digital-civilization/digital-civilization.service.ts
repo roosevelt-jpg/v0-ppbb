@@ -28,7 +28,7 @@ export class DigitalCivilizationService {
         note: 'Platform products for demos/licensing — not civilization infrastructure already running nations.',
       },
       docs: '/docs/DIGITAL_CIVILIZATION.md',
-      note: 'Digital Civilization Foundation. civilizationInfrastructureOs=false.',
+      note: 'Digital Civilization Foundation.',
     };
   }
 
@@ -55,7 +55,7 @@ export class DigitalCivilizationService {
         'Federated/cross-border AI requires security review before data movement.',
       ],
       docs: '/docs/dciv-audit/PRODUCTION_READINESS.md',
-      note: 'Volume 24 high-stakes domain honesty guards.',
+      note: 'Digital Civilization platforms with safeguards for high-stakes national and civic domains.',
     };
   }
 

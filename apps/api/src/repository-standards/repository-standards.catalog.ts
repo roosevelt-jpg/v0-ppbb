@@ -79,9 +79,9 @@ export function repositoryStandardsEngineCatalog() {
       customerFacingProductCloud: false,
       architectureKnowledgeBaseOs: false,
       adrFactoryOs: false,
-      note: 'Repository Standards. Monorepo/polyrepo/templates/naming/folder/branch/git/commit/versioning catalog matching VerbaLab monorepo reality (pnpm/turbo apps/* packages/*).',
+      note: 'Repository Standards. Monorepo/polyrepo/templates/naming/folder/branch/git/commit/versioning catalog matching VerbaLab monorepo reality (pnpm/turbo apps/packages/).',
     },
     docs: '/docs/REPOSITORY_STANDARDS.md',
-    note: 'Repository Standards. Monorepo/polyrepo/templates/naming/folder/branch/git/commit/versioning catalog matching VerbaLab monorepo reality (pnpm/turbo apps/* packages/*).',
+    note: 'Repository Standards. Monorepo/polyrepo/templates/naming/folder/branch/git/commit/versioning catalog matching VerbaLab monorepo reality (pnpm/turbo apps/packages/).',
   };
 }

@@ -53,7 +53,7 @@ export class AiEconomyService {
         'Tax/1099 and securities structuring require human finance/legal — not this code.',
       ],
       docs: '/docs/aie-audit/PRODUCTION_READINESS.md',
-      note: 'Volume 23 money/securities honesty guards.',
+      note: 'AI Economy reporting and licensing surfaces with money and securities safeguards.',
     };
   }
 

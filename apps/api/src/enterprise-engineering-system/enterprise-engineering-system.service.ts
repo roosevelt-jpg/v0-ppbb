@@ -30,12 +30,10 @@ export class EnterpriseEngineeringSystemService {
         jiraOs: false,
         confluenceOs: false,
         sonarqubeOs: false,
-        note:
-          'Volume 20 README: standards/templates/governance — not new product features. architectureKnowledgeBaseOs and adrFactoryOs deferred past Volume 20.',
+        note: 'Standards, templates, and governance for engineering workflows — not a new product cloud.',
       },
       docs: '/docs/ENTERPRISE_ENGINEERING_SYSTEM.md',
-      note:
-        'Enterprise Engineering System Foundation. Engineering OS for humans+Cursor. architectureKnowledgeBaseOs=false; adrFactoryOs=false.',
+      note: 'Enterprise Engineering System Foundation. Engineering standards for humans and Cursor.',
     };
   }
 
@@ -78,8 +76,7 @@ export class EnterpriseEngineeringSystemService {
         customerFacingProductCloud: false,
         architectureKnowledgeBaseOs: false,
         adrFactoryOs: false,
-        note:
-          'EES honesty enforced. Extends PE/DX/Trust/ADR. Architecture Knowledge Base OS and ADR factory rejected here.',
+        note: 'Extends Platform Engineering, DevEx, Trust, and ADR workflows with engineering standards.',
       },
       deferred: {
         architectureKnowledgeBaseOs: true,
@@ -101,8 +98,7 @@ export class EnterpriseEngineeringSystemService {
         aiGovernancePlatform: '/ai-governance-platform',
       },
       docs: '/docs/ENTERPRISE_ENGINEERING_SYSTEM.md',
-      note:
-        'Enterprise Engineering System. Discovery hub for standards/governance catalogs; Production Audit closes the volume.',
+      note: 'Enterprise Engineering System. Discovery hub for standards/governance catalogs; Production Audit closes the volume.',
     };
   }
 

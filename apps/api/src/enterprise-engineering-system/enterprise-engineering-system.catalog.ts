@@ -22,8 +22,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/enterprise-engineering-system/products',
       console: '/enterprise-engineering-system',
-      notes:
-        'Engineering OS for humans+Cursor; architectureKnowledgeBaseOs=false; adrFactoryOs=false.',
+      notes: 'Engineering operating standards for humans and Cursor workflows.',
     },
     {
       id: 'engineering-governance',
@@ -31,8 +30,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/engineering-governance/engine',
       console: '/engineering-governance',
-      notes:
-        'Councils + CAB/TSC; humanSignOffRequired; extends AI Governance.',
+      notes: 'Councils + CAB/TSC; humanSignOffRequired; extends AI Governance.',
     },
     {
       id: 'architecture-governance',
@@ -40,8 +38,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/architecture-governance/engine',
       console: '/architecture-governance',
-      notes:
-        'ADR/RFC workflows pointing at docs/adr; adrFactoryOs=false.',
+      notes: 'ADR and RFC workflows pointing at docs/adr.',
     },
     {
       id: 'repository-standards',
@@ -49,8 +46,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/repository-standards/engine',
       console: '/repository-standards',
-      notes:
-        'Monorepo/polyrepo/naming/branch/git standards matching reality.',
+      notes: 'Monorepo/polyrepo/naming/branch/git standards matching reality.',
     },
     {
       id: 'engineering-quality-platform',
@@ -58,8 +54,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/engineering-quality-platform/engine',
       console: '/engineering-quality-platform',
-      notes:
-        'Quality catalog + dashboard snapshot; sonarqubeOs=false.',
+      notes: 'Quality catalog with dashboard snapshot for engineering health.',
     },
     {
       id: 'ai-engineering-standards',
@@ -67,8 +62,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/ai-engineering-standards/engine',
       console: '/ai-engineering-standards',
-      notes:
-        'AI standards + retroactiveChecks (Vol 11/12/17).',
+      notes: 'AI standards + retroactiveChecks (Vol 11/12/17).',
     },
     {
       id: 'api-engineering-standards',
@@ -76,8 +70,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/api-engineering-standards/engine',
       console: '/api-engineering-standards',
-      notes:
-        'REST/GraphQL/gRPC/SDK standards reflecting OpenAPI/SDK.',
+      notes: 'REST/GraphQL/gRPC/SDK standards reflecting OpenAPI/SDK.',
     },
     {
       id: 'database-engineering-standards',
@@ -85,8 +78,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/database-engineering-standards/engine',
       console: '/database-engineering-standards',
-      notes:
-        'Postgres/Redis/ES/vector/KG standards; databaseOs=false.',
+      notes: 'Postgres, Redis, Elasticsearch, vector, and knowledge-graph standards.',
     },
     {
       id: 'infrastructure-engineering-standards',
@@ -94,8 +86,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/infrastructure-engineering-standards/engine',
       console: '/infrastructure-engineering-standards',
-      notes:
-        'IaC/deploy/GPU standards; kubernetesOs=false; FinOps+secrets honesty.',
+      notes: 'Infrastructure-as-code, deploy, and GPU standards with FinOps and secrets guidance.',
     },
     {
       id: 'platform-engineering-cloud',
@@ -103,8 +94,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/platform-engineering-cloud/products',
       console: '/platform-engineering-cloud',
-      notes:
-        'Volume 16 surface extended by EES.',
+      notes: 'Volume 16 surface extended by EES.',
     },
     {
       id: 'developer-experience-platform',
@@ -112,8 +102,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/developer-experience-platform/engine',
       console: '/developer-experience-platform',
-      notes:
-        'Volume 16 DX surface extended by EES.',
+      notes: 'Volume 16 DX surface extended by EES.',
     },
     {
       id: 'ai-governance-platform',
@@ -121,8 +110,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/ai-governance-platform/engine',
       console: '/ai-governance-platform',
-      notes:
-        'Volume 15 Trust surface extended by EES.',
+      notes: 'Volume 15 Trust surface extended by EES.',
     },
     {
       id: 'monitoring',
@@ -130,8 +118,7 @@ export function enterpriseEngineeringSystemProductCatalog(): EnterpriseEngineeri
       status: 'shipped',
       api: 'GET /v1/enterprise-engineering-system/monitoring',
       console: '/enterprise-engineering-system',
-      notes:
-        'Foundation monitoring snapshot.',
+      notes: 'Foundation monitoring snapshot.',
     },
   ];
 }
@@ -322,7 +309,6 @@ export function enterpriseEngineeringSystemHonesty(): Record<string, boolean | s
     sonarqubeOs: false,
     integratesExistingSystems: true,
     existingAdrCountAtShip: 246,
-    note:
-      'Enterprise Engineering System is standards/governance for humans+Cursor. Extends Platform Engineering, DX, Trust AI Governance, and existing docs/adr. architectureKnowledgeBaseOs=false; adrFactoryOs=false. Not Jira/Confluence/SonarQube OS.',
+    note: 'Enterprise Engineering System is standards/governance for humans+Cursor. Extends Platform Engineering, DX, Trust AI Governance, and existing docs/adr.',
   };
 }

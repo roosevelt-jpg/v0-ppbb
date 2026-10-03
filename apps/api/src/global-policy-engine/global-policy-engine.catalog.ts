@@ -87,11 +87,9 @@ export function globalPolicyEngineCatalog() {
     safety: {
       policyRuntimeIntegrated: true,
       leastPrivilegeRequired: true,
-      note:
-        'Global Policy Engine extends Policy Runtime / Policy Fabric / Trust — not a second policy OS. Policy changes require least-privilege CP admin.',
+      note: 'Global Policy Engine extends Policy Runtime / Policy Fabric / Trust — not a second policy OS. Policy changes require least-privilege CP admin.',
     },
     docs: '/docs/GLOBAL_POLICY_ENGINE.md',
-    note:
-      'Global Policy Engine. Security/AI/billing/compliance/routing/regional/data-residency. policyRuntimeIntegrated=true.',
+    note: 'Global Policy Engine. Security/AI/billing/compliance/routing/regional/data-residency. policyRuntimeIntegrated=true.',
   };
 }

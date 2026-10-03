@@ -96,9 +96,9 @@ export function architectureGovernanceEngineCatalog() {
       customerFacingProductCloud: false,
       architectureKnowledgeBaseOs: false,
       adrFactoryOs: false,
-      note: 'Architecture Governance. ADR/RFC/design-review/tech-radar/dependency/compliance catalogs pointing at existing docs/adr — adrFactoryOs=false; no mass ADR generation.',
+      note: 'Architecture Governance. ADR/RFC/design-review/tech-radar/dependency/compliance catalogs pointing at existing docs/adr —; no mass ADR generation.',
     },
     docs: '/docs/ARCHITECTURE_GOVERNANCE.md',
-    note: 'Architecture Governance. ADR/RFC/design-review/tech-radar/dependency/compliance catalogs pointing at existing docs/adr — adrFactoryOs=false; no mass ADR generation.',
+    note: 'Architecture Governance. ADR/RFC/design-review/tech-radar/dependency/compliance catalogs pointing at existing docs/adr —; no mass ADR generation.',
   };
 }

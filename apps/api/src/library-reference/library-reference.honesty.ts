@@ -12,7 +12,6 @@ export function libraryReferenceHonesty() {
     missionControlOs: false,
     sixRepoSplitExecuted: false,
     visionMarkedDoneWithoutSpec: false,
-    note:
-      'Reference pack: master index + risk notes + raw vision. AI Internet feature names are not shipped phases.',
+    note: 'Reference pack with master index, risk notes, and forward-looking vision names for roadmap planning.',
   };
 }

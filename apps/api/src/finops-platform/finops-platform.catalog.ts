@@ -89,7 +89,7 @@ export function seedFinOpsAlerts(): FinOpsAlert[] {
       severity: 'high',
       message: 'GPU spend crossed 80% of monthly budget',
       enabled: true,
-      notes: 'gpuBudgetAlertsEnabled=true — Volume 7 pairing.',
+      notes: 'Volume 7 pairing.',
     },
     {
       id: 'alert-gpu-critical',
@@ -168,11 +168,9 @@ export function finopsPlatformEngineCatalog() {
     safety: {
       finopsOs: false,
       gpuBudgetAlertsEnabled: true,
-      note:
-        'FinOps is a catalog/dashboard over Volume 7 GPU/inference costs and shared platform spend — not a cloud-billing OS. GPU budget alerts are enabled.',
+      note: 'FinOps is a catalog/dashboard over Volume 7 GPU/inference costs and shared platform spend — not a cloud-billing OS. GPU budget alerts are enabled.',
     },
     docs: '/docs/FINOPS_PLATFORM.md',
-    note:
-      'FinOps Platform. Cloud/GPU/model/storage/bandwidth + chargeback/showback/forecast/budgets. gpuBudgetAlertsEnabled=true; finopsOs=false.',
+    note: 'FinOps Platform. Cloud/GPU/model/storage/bandwidth + chargeback/showback/forecast/budgets.',
   };
 }

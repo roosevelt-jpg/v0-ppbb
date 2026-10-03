@@ -19,42 +19,42 @@ export function globalSchedulerEngineCatalog() {
         name: 'cleanup-job',
         kind: 'job',
         status: 'shipped',
-        notes: 'Nightly cleanup job schedule',
+        notes: 'Nightly cleanup job schedule.',
       },
       {
         id: 'sch-cron-usage',
         name: 'usage-rollup',
         kind: 'cron',
         status: 'shipped',
-        notes: 'Hourly usage rollup cron',
+        notes: 'Hourly usage rollup cron.',
       },
       {
         id: 'sch-dist-batch',
         name: 'distributed-batch',
         kind: 'distributed',
         status: 'shipped',
-        notes: 'Distributed batch schedule catalog',
+        notes: 'Distributed batch schedule catalog.',
       },
       {
         id: 'sch-wf-deploy',
         name: 'deploy-workflow',
         kind: 'workflow',
         status: 'shipped',
-        notes: 'Deployment workflow schedule',
+        notes: 'Deployment workflow schedule.',
       },
       {
         id: 'sch-train-nightly',
         name: 'training-nightly',
         kind: 'training',
         status: 'shipped',
-        notes: 'Training job schedule (control only)',
+        notes: 'Training job schedule (control only).',
       },
       {
         id: 'sch-inf-window',
         name: 'inference-window',
         kind: 'inference',
         status: 'shipped',
-        notes: 'Inference window schedule — does not execute inference',
+        notes: 'Inference window schedule — does not execute inference.',
       }
     ],
     honesty: {
@@ -70,9 +70,9 @@ export function globalSchedulerEngineCatalog() {
     safety: {
       executesInference: false,
       executesInference: false,
-      note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
+      note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference.',
     },
     docs: '/docs/GLOBAL_SCHEDULER.md',
-    note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference. executesInference=false.',
+    note: 'Global Scheduler. Jobs/cron/distributed/workflow/training/inference scheduling control — does not run inference.',
   };
 }

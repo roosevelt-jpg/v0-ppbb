@@ -17,7 +17,7 @@ export function digitalCivilizationProductCatalog(): DcivProductRow[] {
       status: 'shipped' as const,
       api: 'GET /v1/digital-civilization/products',
       console: '/digital-civilization',
-      notes: 'DCIV foundation. civilizationInfrastructureOs=false; product platforms only.',
+      notes: 'Digital Civilization foundation over product platforms.',
     },
     {
       id: 'national-ai-platform',

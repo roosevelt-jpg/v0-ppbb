@@ -15,7 +15,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-operating-system/products',
       console: '/corporate-operating-system',
-      notes: 'foundation. internalBusinessSoftware=true; realCorporateGovernance=false.',
+      notes: 'foundation.',
     },
     {
       id: 'corporate-governance-platform',
@@ -55,7 +55,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/enterprise-architecture-repository/engine',
       console: '/enterprise-architecture-repository',
-      notes: 'architecture artifact store; togafModelingSuiteOs=false.',
+      notes: 'architecture artifact store;.',
     },
     {
       id: 'corporate-knowledge-system',
@@ -63,7 +63,7 @@ export function corporateOperatingSystemProductCatalog(): VcosProductRow[] {
       status: 'shipped',
       api: 'GET /v1/corporate-knowledge-system/engine',
       console: '/corporate-knowledge-system',
-      notes: 'knowledge portal; confluenceOs=false.',
+      notes: 'Corporate knowledge portal for policies and operating docs.',
     },
     {
       id: 'executive-intelligence-platform',

@@ -27,11 +27,9 @@ export function platformEngineeringAnalyticsEngineCatalog() {
     },
     safety: {
       devopsIntelligenceOs: false,
-      note:
-        'Platform Engineering Analytics aggregates sibling PE hubs — not a DevOps intelligence OS or Control Plane.',
+      note: 'Platform Engineering Analytics aggregates sibling PE hubs — not a DevOps intelligence OS or Control Plane.',
     },
     docs: '/docs/PLATFORM_ENGINEERING_ANALYTICS.md',
-    note:
-      'Platform Engineering Analytics. DORA metrics + velocity/adoption/cost/reliability from siblings.',
+    note: 'Platform Engineering Analytics. DORA metrics + velocity/adoption/cost/reliability from siblings.',
   };
 }

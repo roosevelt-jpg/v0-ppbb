@@ -106,9 +106,9 @@ export function infrastructureEngineeringStandardsEngineCatalog() {
       customerFacingProductCloud: false,
       architectureKnowledgeBaseOs: false,
       adrFactoryOs: false,
-      note: 'Infrastructure Engineering Standards. AWS/Cloudflare/Terraform/Helm/K8s/Docker/networking/storage/GPU standards. Fly default + GPU budget + secrets envelope honesty. kubernetesOs=false.',
+      note: 'Infrastructure Engineering Standards. AWS/Cloudflare/Terraform/Helm/K8s/Docker/networking/storage/GPU standards. Fly default + GPU budget + secrets envelope honesty.',
     },
     docs: '/docs/INFRASTRUCTURE_ENGINEERING_STANDARDS.md',
-    note: 'Infrastructure Engineering Standards. AWS/Cloudflare/Terraform/Helm/K8s/Docker/networking/storage/GPU standards. Fly default + GPU budget + secrets envelope honesty. kubernetesOs=false.',
+    note: 'Infrastructure Engineering Standards. AWS/Cloudflare/Terraform/Helm/K8s/Docker/networking/storage/GPU standards. Fly default + GPU budget + secrets envelope honesty.',
   };
 }

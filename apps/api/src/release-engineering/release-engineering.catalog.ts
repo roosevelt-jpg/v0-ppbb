@@ -20,42 +20,42 @@ export function releaseEngineeringEngineCatalog() {
         name: 'api@0.241.0',
         kind: 'rolling',
         status: 'shipped',
-        notes: 'Rolling deploy via Fly shared platform',
+        notes: 'Rolling deploy via Fly shared platform.',
       },
       {
         id: 'rel-web-118',
         name: 'web@0.118.0',
         kind: 'canary',
         status: 'shipped',
-        notes: 'Canary web console slice',
+        notes: 'Canary web console slice.',
       },
       {
         id: 'rel-sdk-77',
         name: 'sdk@0.77.0',
         kind: 'approval',
         status: 'shipped',
-        notes: 'SDK publish with approval gate',
+        notes: 'SDK publish with approval gate.',
       },
       {
         id: 'rel-ff-trust',
         name: 'ff-trust-cloud',
         kind: 'feature_flag',
         status: 'shipped',
-        notes: 'Feature flag for Trust Cloud consoles',
+        notes: 'Feature flag for Trust Cloud consoles.',
       },
       {
         id: 'rel-rb-gpu',
         name: 'rollback-gpu-budget',
         kind: 'rollback',
         status: 'shipped',
-        notes: 'Rollback path for GPU budget alert change',
+        notes: 'Rollback path for GPU budget alert change.',
       },
       {
         id: 'rel-bg-cli',
         name: 'cli@0.55.0',
         kind: 'blue_green',
         status: 'shipped',
-        notes: 'Blue-green CLI package cut',
+        notes: 'Blue-green CLI package cut.',
       }
     ],
     honesty: {
@@ -66,9 +66,9 @@ export function releaseEngineeringEngineCatalog() {
     },
     safety: {
       spinnakerOs: false,
-      note: 'Release Engineering. Blue-green/canary/rolling/feature-flags/rollback/approval/progressive delivery catalog + seed releases. spinnakerOs=false.',
+      note: 'Release Engineering. Blue-green/canary/rolling/feature-flags/rollback/approval/progressive delivery catalog + seed releases.',
     },
     docs: '/docs/RELEASE_ENGINEERING.md',
-    note: 'Release Engineering. Blue-green/canary/rolling/feature-flags/rollback/approval/progressive delivery catalog + seed releases. spinnakerOs=false.',
+    note: 'Release Engineering. Blue-green/canary/rolling/feature-flags/rollback/approval/progressive delivery catalog + seed releases.',
   };
 }

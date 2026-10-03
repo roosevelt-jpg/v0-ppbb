@@ -26,12 +26,10 @@ export class ControlPlaneCloudService {
         hashicorpVaultOs: false,
         secondPolicyOs: false,
         secondIdp: false,
-        note:
-          'Volume 17 README: highest-privilege management layer. Secrets use envelope encryption + audit; production deploys require authorization with rollback; least-privilege admin roles. Data Plane rejected here (Volume 18+).',
+        note: 'Highest-privilege management layer with envelope-encrypted secrets, audited production deploys, rollback, and least-privilege admin roles.',
       },
       docs: '/docs/CONTROL_PLANE_CLOUD.md',
-      note:
-        'Control Plane Foundation. Manages the platform — never executes inference. Not Kubernetes/Istio/Vault/Data Plane OS.',
+      note: 'Control Plane Foundation. Manages orgs, policies, routing, billing, identity, and deployments — does not execute inference.',
     };
   }
 
@@ -68,8 +66,7 @@ export class ControlPlaneCloudService {
       safety: {
         executesInference: false,
         dataPlaneOs: false,
-        note:
-          'Control Plane honesty enforced. Inference execution and Data Plane deferred/rejected here.',
+        note: 'Control Plane manages organizations, policies, routing, billing, identity, and deployments.',
       },
       deferred: {
         dataPlaneOs: true,
@@ -91,8 +88,7 @@ export class ControlPlaneCloudService {
         policyFabric: '/policy-fabric',
       },
       docs: '/docs/CONTROL_PLANE_CLOUD.md',
-      note:
-        'Control Plane Cloud. Discovery hub over org/config/policy/deploy/routing/secrets/scheduler/analytics; Production Audit closes the volume.',
+      note: 'Control Plane Cloud. Discovery hub over org/config/policy/deploy/routing/secrets/scheduler/analytics; Production Audit closes the volume.',
     };
   }
 

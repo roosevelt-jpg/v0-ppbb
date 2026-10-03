@@ -28,12 +28,10 @@ export class PlatformEngineeringCloudService {
         snykOs: false,
         datadogOs: false,
         finopsOs: false,
-        note:
-          'Volume 16 README: internal engineering tooling. FinOps pairs Volume 7 GPU budgets; Supply Chain inventories workspace deps; GitOps is readiness over Fly — not Argo/Flux OS. Control Plane rejected here (Volume 17+).',
+        note: 'Internal engineering tooling for FinOps budgets, supply-chain inventories, and GitOps readiness over Fly.',
       },
       docs: '/docs/PLATFORM_ENGINEERING_CLOUD.md',
-      note:
-        'Platform Engineering Foundation. Internal IDP over existing systems. Not Backstage/Argo/K8s/Snyk/Datadog/AI Cloud OS.',
+      note: 'Platform Engineering Foundation. Internal developer platform over existing systems.',
     };
   }
 
@@ -71,8 +69,7 @@ export class PlatformEngineeringCloudService {
         controlPlaneOs: false,
         dataPlaneOs: false,
         aiCloudOs: false,
-        note:
-          'Internal IDP honesty enforced. Control Plane / Data Plane / AI Cloud OS deferred to Volume 17+.',
+        note: 'Internal developer platform hub over portal, catalog, golden paths, GitOps, release, reliability, FinOps, supply chain, and DevEx.',
       },
       deferred: {
         controlPlaneOs: true,
@@ -97,8 +94,7 @@ export class PlatformEngineeringCloudService {
         observability: '/v1/metrics/translate',
       },
       docs: '/docs/PLATFORM_ENGINEERING_CLOUD.md',
-      note:
-        'Platform Engineering Cloud. Discovery hub over portal/catalog/golden-paths/gitops/release/reliability/finops/supply-chain/devex/analytics; Production Audit closes the volume.',
+      note: 'Platform Engineering Cloud. Discovery hub over portal/catalog/golden-paths/gitops/release/reliability/finops/supply-chain/devex/analytics; Production Audit closes the volume.',
     };
   }
 

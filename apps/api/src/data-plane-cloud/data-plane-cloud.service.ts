@@ -25,12 +25,10 @@ export class DataPlaneCloudService {
         serviceMeshOs: false,
         thinExecutionLayer: true,
         duplicatesProductLogic: false,
-        note:
-          'Volume 18 README: Data Plane executes workloads. Thin hubs route to Volumes 1–7 product logic. Service Mesh / VAIOS deferred past Volume 18.',
+        note: 'Data Plane executes workloads through thin runtime hubs that route to existing product logic.',
       },
       docs: '/docs/DATA_PLANE_CLOUD.md',
-      note:
-        'Data Plane Foundation. Executes via thin runtimes — never manages orgs/policies/billing. Not Service Mesh OS.',
+      note: 'Data Plane Foundation. Executes via thin runtimes — organizations, policies, and billing stay in Control Plane.',
     };
   }
 
@@ -69,8 +67,7 @@ export class DataPlaneCloudService {
       safety: {
         managesOrgsPoliciesBilling: false,
         serviceMeshOs: false,
-        note:
-          'Data Plane honesty enforced. Orgs/policies/billing stay in Control Plane. Service Mesh rejected here.',
+        note: 'Data Plane routes workloads; organizations, policies, and billing stay in Control Plane.',
       },
       deferred: {
         serviceMeshOs: true,
@@ -93,8 +90,7 @@ export class DataPlaneCloudService {
         gpuPlatform: '/gpu-platform',
       },
       docs: '/docs/DATA_PLANE_CLOUD.md',
-      note:
-        'Data Plane Cloud. Discovery hub over thin execution runtimes; Production Audit closes the volume.',
+      note: 'Data Plane Cloud. Discovery hub over thin execution runtimes; Production Audit closes the volume.',
     };
   }
 

@@ -85,11 +85,9 @@ export function globalDeploymentControllerEngineCatalog() {
     safety: {
       productionDeployRequiresAuthorization: true,
       rollbackPath: true,
-      note:
-        'Global Deployment Controller can push changes across clouds. Production promote/deploy requires explicit authorization. Rollback catalog is always exposed. Extends release-engineering — not Spinnaker OS.',
+      note: 'Global Deployment Controller can push changes across clouds. Production promote/deploy requires explicit authorization. Rollback catalog is always exposed. Extends release-engineering — not Spinnaker OS.',
     },
     docs: '/docs/GLOBAL_DEPLOYMENT_CONTROLLER.md',
-    note:
-      'Global Deployment Controller. Multi-region/blue-green/canary/progressive/rollback/scheduling/approvals. productionDeployRequiresAuthorization=true; rollbackPath=true.',
+    note: 'Global Deployment Controller. Multi-region/blue-green/canary/progressive/rollback/scheduling/approvals. productionDeployRequiresAuthorization=true; rollbackPath=true.',
   };
 }
