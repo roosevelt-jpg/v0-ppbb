@@ -19,7 +19,7 @@
 | Recommendation Engine | **Partial** — **VL-187** `/recommendation-engine` light rankers; not retail recommender OS |
 | Prompt Intelligence | **Partial** — **VL-188** `/prompt-intelligence` over VL-086; not auto-prompt research lab |
 | AI Decision Engine | **Partial** — **VL-189** `/decision-engine` light rules; not Drools/Pega BRMS |
-| AI Orchestration | **Partial** — VL-060 chat/gateway; product VL-190 |
+| AI Orchestration | **Partial** — **VL-190** `/ai-orchestration` e2e pipelines; not multi-cloud agent OS |
 | Intelligence Analytics | **Deferred** — VL-191 |
 | Production Audit | Phase 59 (VL-192) |
 | GraphQL / CQRS | Bounded Intelligence Cloud catalog slice |
@@ -43,4 +43,4 @@
 
 ## Honesty
 
-Intelligence Cloud is **not** a custom AI kernel, LangGraph OS, or enterprise knowledge-graph platform. It is a **bounded hub** that makes embeddings/RAG/chat discoverable and schedules later memory/orchestration products with GDPR and load-bearing orchestration constraints. See ADR-0091.
+Intelligence Cloud is **not** a custom AI kernel, LangGraph OS, or enterprise knowledge-graph platform. It is a **bounded hub** that makes embeddings/RAG/chat discoverable and schedules later memory/orchestration products with GDPR and load-bearing orchestration constraints. It maps onto existing **VL-060** chat/gateway, **VL-062** knowledge/RAG (pgvector), and **VL-063** embeddings — it does not regenerate those surfaces. See ADR-0091.

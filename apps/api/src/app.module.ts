@@ -61,6 +61,7 @@ import { ReasoningCloudModule } from './reasoning-cloud/reasoning-cloud.module';
 import { RecommendationEngineModule } from './recommendation-engine/recommendation-engine.module';
 import { PromptIntelligenceModule } from './prompt-intelligence/prompt-intelligence.module';
 import { DecisionEngineModule } from './decision-engine/decision-engine.module';
+import { AiOrchestrationModule } from './ai-orchestration/ai-orchestration.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -112,6 +113,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     RecommendationEngineModule,
     PromptIntelligenceModule,
     DecisionEngineModule,
+    AiOrchestrationModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,

@@ -1448,6 +1448,46 @@ export class VerbaLab {
     });
   }
 
+  async aiOrchestrationEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      multiCloudAgentOs: boolean;
+      langGraphOs: boolean;
+      distributedAiFabric: boolean;
+      loadBearingE2e: boolean;
+      executesRealRequests: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/ai-orchestration/engine', { method: 'GET' });
+  }
+
+  async aiOrchestrationRun(body: {
+    pipeline: string;
+    text: string;
+    source?: string;
+    target?: string;
+    ops?: string[];
+    model?: string;
+  }): Promise<{
+    pipeline: string;
+    steps: Array<{ id: string; op: string; ok: boolean; durationMs: number }>;
+    result: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ai-orchestration/run', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

@@ -709,6 +709,45 @@ export class GqlDecisionEngine {
 }
 
 @ObjectType()
+export class GqlAiOrchestrationCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAiOrchestration {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAiOrchestrationCapability])
+  capabilities!: GqlAiOrchestrationCapability[];
+
+  @Field()
+  multiCloudAgentOs!: boolean;
+
+  @Field()
+  langGraphOs!: boolean;
+
+  @Field()
+  loadBearingE2e!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

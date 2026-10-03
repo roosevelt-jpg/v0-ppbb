@@ -118,6 +118,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.decisionEngine ?? '/decision-engine'} style={secondary}>
                 Decision Engine
               </Link>
+              <Link href={data.links.aiOrchestration ?? '/ai-orchestration'} style={secondary}>
+                Orchestration
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

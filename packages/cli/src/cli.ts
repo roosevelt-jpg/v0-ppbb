@@ -34,6 +34,8 @@ function usage(): never {
   verbalab prompt-intelligence-evaluate --key <chat|rag|voice_faq> [--body <text>]
   verbalab decision-engine
   verbalab decide --kind <routing|policy|model_selection|...> [--query <text>]
+  verbalab ai-orchestration
+  verbalab ai-orchestration-run --pipeline <detect_translate|...> --text <text> [--target <lang>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -281,6 +283,30 @@ async function main() {
           query: argValue(rest, '--query'),
           family: argValue(rest, '--family'),
           quality: argValue(rest, '--quality'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'ai-orchestration') {
+    console.log(JSON.stringify(await vl.aiOrchestrationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-orchestration-run') {
+    const pipeline = argValue(rest, '--pipeline');
+    const text = argValue(rest, '--text');
+    if (!pipeline || !text) usage();
+    console.log(
+      JSON.stringify(
+        await vl.aiOrchestrationRun({
+          pipeline,
+          text,
+          target: argValue(rest, '--target'),
+          source: argValue(rest, '--source'),
         }),
         null,
         2,

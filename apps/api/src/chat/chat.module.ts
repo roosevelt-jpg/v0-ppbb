@@ -22,5 +22,6 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
   ],
   controllers: [ChatController],
   providers: [ChatService, TranslateAuthGuard],
+  exports: [ChatService],
 })
 export class ChatModule {}

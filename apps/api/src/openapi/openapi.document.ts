@@ -3100,6 +3100,44 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/ai-orchestration/engine': {
+      get: {
+        summary: 'AI Orchestration catalog',
+        operationId: 'getAiOrchestrationEngine',
+        responses: { '200': { description: 'Pipelines and multi-cloud-agent honesty notes' } },
+      },
+    },
+    '/v1/ai-orchestration/pipelines': {
+      get: {
+        summary: 'Orchestration pipelines',
+        operationId: 'listAiOrchestrationPipelines',
+        responses: { '200': { description: 'Named e2e pipelines' } },
+      },
+    },
+    '/v1/ai-orchestration/run': {
+      post: {
+        summary: 'Run an orchestration pipeline',
+        operationId: 'runAiOrchestration',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Step results from real gateway/engine calls' } },
+      },
+    },
+    '/v1/ai-orchestration/analytics': {
+      get: {
+        summary: 'AI Orchestration analytics',
+        operationId: 'getAiOrchestrationAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Run audit aggregates' } },
+      },
+    },
+    '/v1/ai-orchestration/monitoring': {
+      get: {
+        summary: 'AI Orchestration monitoring snapshot',
+        operationId: 'getAiOrchestrationMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

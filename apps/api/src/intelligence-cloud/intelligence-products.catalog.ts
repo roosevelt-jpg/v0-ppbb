@@ -106,10 +106,10 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       id: 'orchestration',
       name: 'AI Orchestration',
       status: 'partial',
-      api: 'POST /v1/chat/completions',
-      console: '/chat',
+      api: 'GET /v1/ai-orchestration/engine',
+      console: '/ai-orchestration',
       notes:
-        'Gateway-backed chat/compose paths today (VL-060). Load-bearing orchestration product — VL-190.',
+        'Load-bearing e2e pipelines over gateway/engines (VL-190). Not a multi-cloud agent OS.',
     },
     {
       id: 'agent-intelligence',

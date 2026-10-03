@@ -22,4 +22,4 @@ ROADMAP VL-189: bounded decision helpers (policy/routing) over LLM + rules — n
 ## Consequences
 
 - Intelligence Cloud marks decision-engine `partial` with hub links.  
-- AI Orchestration (VL-190) is next and must coordinate real e2e gateway requests, not invent a multi-cloud agent OS.
+- AI Orchestration (VL-190) coordinates real e2e gateway requests (ADR-0101), not a multi-cloud agent OS.
