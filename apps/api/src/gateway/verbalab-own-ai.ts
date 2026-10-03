@@ -22,6 +22,7 @@ import { EmbedInput, EmbedOutput, EmbeddingProvider } from './embedding-provider
 import { OcrInput, OcrOutput, OcrProvider } from './ocr-provider';
 import { DetectInput, DetectOutput, LanguageDetectProvider } from './detect-provider';
 import { OWN_TTS_VOICES } from './own-tts.adapter';
+import { LocalRuntimeMtAdapter, localModelRuntimeEnabled } from '../model-runtime/local-runtime';
 
 export const VERBALAB_OWN_PROVIDER = 'verbalab_own_ai';
 
@@ -87,20 +88,13 @@ function tinyWav(seed: string): Buffer {
   return buffer;
 }
 
-/** Deterministic African-language MT fixture — not a rented third-party translator. */
+/** Deterministic African-language MT — local Own AI runtime (not a rented translator). */
 export class FixtureVerbalabMtAdapter implements TranslationProvider {
   readonly name = VERBALAB_OWN_PROVIDER;
+  private readonly local = new LocalRuntimeMtAdapter();
 
   async translate(input: TranslateInput): Promise<TranslateOutput> {
-    const started = Date.now();
-    return {
-      text: `[vl:${input.source}→${input.target}] ${input.text}`,
-      source: input.source,
-      target: input.target,
-      provider: this.name,
-      characters: [...input.text].length,
-      latencyMs: Date.now() - started,
-    };
+    return this.local.translate(input);
   }
 }
 
@@ -639,8 +633,12 @@ export class HttpVerbalabDetectAdapter implements LanguageDetectProvider {
 }
 
 export function createVerbalabMt(): TranslationProvider {
-  if (ownAiFixtureEnabled()) return new FixtureVerbalabMtAdapter();
-  if (resolveUrl(process.env.VERBALAB_MT_URL, '/translate')) return new HttpVerbalabMtAdapter();
+  if (resolveUrl(process.env.VERBALAB_MT_URL, '/translate') && !ownAiFixtureEnabled()) {
+    return new HttpVerbalabMtAdapter();
+  }
+  if (ownAiFixtureEnabled() || localModelRuntimeEnabled()) {
+    return new FixtureVerbalabMtAdapter();
+  }
   return new UnconfiguredVerbalabMtAdapter();
 }
 
@@ -680,15 +678,19 @@ export function createVerbalabDetect(): LanguageDetectProvider {
 }
 
 export function ownAiStackSummary() {
+  const localMt = localModelRuntimeEnabled() || ownAiFixtureEnabled();
   return {
     provider: VERBALAB_OWN_PROVIDER,
     ownedModels: true,
     vendorRentalDefault: false,
     allowVendorFallback: allowVendorFallback(),
     fixture: ownAiFixtureEnabled(),
+    localModelRuntime: localModelRuntimeEnabled(),
     baseUrl: baseUrl() || null,
+    weightsUrl: process.env.VERBALAB_WEIGHTS_URL?.trim() || null,
     modalities: {
-      mt: Boolean(resolveUrl(process.env.VERBALAB_MT_URL, '/translate')) || ownAiFixtureEnabled(),
+      mt:
+        Boolean(resolveUrl(process.env.VERBALAB_MT_URL, '/translate')) || localMt,
       stt: Boolean(resolveUrl(process.env.VERBALAB_STT_URL, '/audio/transcriptions')) || ownAiFixtureEnabled(),
       tts: Boolean(resolveUrl(process.env.VERBALAB_TTS_URL, '/audio/speech')) || ownAiFixtureEnabled(),
       chat: Boolean(resolveUrl(process.env.VERBALAB_CHAT_URL, '/chat/completions')) || ownAiFixtureEnabled(),

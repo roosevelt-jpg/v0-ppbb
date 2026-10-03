@@ -20,10 +20,16 @@ These authenticate your Own AI model services.
 ```bash
 VERBALAB_MODEL_API_KEY=vmod_root_…
 VERBALAB_MODEL_BASE_URL=https://models.your-domain.com/v1
+# Local Own AI runtime is on by default (African linguistic engine).
+# VERBALAB_LOCAL_MODEL_RUNTIME=1
+# Optional neural weight bundle on model pods:
+# VERBALAB_WEIGHTS_URL=https://models.your-domain.com/weights/translate-fm
 # optional per modality:
 # VERBALAB_MT_URL= VERBALAB_STT_URL= VERBALAB_TTS_URL=
 # VERBALAB_CHAT_URL= VERBALAB_EMBED_URL= VERBALAB_OCR_URL= VERBALAB_CLONE_URL=
 ```
+
+See also **Model Runtime** (`/model-runtime`, `docs/MODEL_RUNTIME.md`) for African eval and gov/bank/hospital unlocks.
 
 4. Put the **same** `VERBALAB_MODEL_API_KEY` on your model-serving pods so the API can call them.
 

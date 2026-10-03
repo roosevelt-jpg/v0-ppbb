@@ -57,6 +57,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/edge', label: 'Edge' },
       { href: '/fusion', label: 'Fusion' },
       { href: '/translate-fm', label: 'Translate FM' },
+      { href: '/model-runtime', label: 'Model Runtime' },
       { href: '/speech-depth', label: 'Speech Depth' },
       { href: '/video-voice', label: 'Video Voice' },
       { href: '/ai-internet', label: 'AI Internet' },

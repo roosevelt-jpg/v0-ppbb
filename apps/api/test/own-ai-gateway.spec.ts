@@ -36,7 +36,7 @@ describe('VerbaLab Own AI gateway', () => {
     const mt = new FixtureVerbalabMtAdapter();
     const out = await mt.translate({ text: 'hello', source: 'en', target: 'sw' });
     expect(out.provider).toBe('verbalab_own_ai');
-    expect(out.text).toContain('en→sw');
+    expect(out.text).toBe('habari');
   });
 
   it('transcribes via Echo fixture', async () => {

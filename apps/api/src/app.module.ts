@@ -70,6 +70,7 @@ import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model
 import { ModelRegistryModule } from './model-registry/model-registry.module';
 import { AtlasModule } from './atlas/atlas.module';
 import { ModelKeysModule } from './model-keys/model-keys.module';
+import { ModelRuntimeModule } from './model-runtime/model-runtime.module';
 import { AiInternetAuditModule } from './ai-internet-audit/ai-internet-audit.module';
 import { CredentialsReadinessModule } from './credentials-readiness/credentials-readiness.module';
 import { VerbalabGlobalOsModule } from './verbalab-global-os/verbalab-global-os.module';
@@ -326,6 +327,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelRegistryModule,
     AtlasModule,
     ModelKeysModule,
+    ModelRuntimeModule,
     AiInternetAuditModule,
     CredentialsReadinessModule,
     VerbalabGlobalOsModule,

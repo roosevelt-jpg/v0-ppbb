@@ -639,3 +639,4 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | VL-409 | AI Internet Production Audit (Phase 276) | Done | Audit pack; Volume 25 closed — AI Internet 261–300 packaged. |
 
 | 2026-10-03 | Model keys: `vmod_live_`/`vmod_test_`/`vmod_root_` mint in `/model-keys`; docs/CREDENTIALS.md for Stripe/Clerk/Fly. ADR-0324. |
+| 2026-10-03 | Model Runtime honesty closeout: local African Own AI runtime, quality eval vs baseline stub, gov/bank/hospital unlocks; `/model-runtime`; ADR-0325. |
