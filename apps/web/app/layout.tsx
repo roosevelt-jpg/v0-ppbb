@@ -4,6 +4,7 @@ import { DM_Sans, Syne } from 'next/font/google';
 import './globals.css';
 import { isClerkConfigured } from '@/lib/clerk-config';
 import { SentryInit } from '@/components/sentry-init';
+import { Providers } from '@/components/providers';
 
 const display = Syne({
   subsets: ['latin'],
@@ -19,15 +20,17 @@ const body = DM_Sans({
 
 export const metadata: Metadata = {
   title: 'VerbaLab',
-  description: 'Enterprise language intelligence',
+  description: "Africa's voice intelligence platform — speak, translate, and reason across African languages.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <body>
         <SentryInit />
-        {isClerkConfigured() ? <ClerkProvider>{children}</ClerkProvider> : children}
+        <Providers>
+          {isClerkConfigured() ? <ClerkProvider>{children}</ClerkProvider> : children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
-:root {
+:root,
+html[data-theme='light'] {
   --bg: #ffffff;
   --bg-soft: #f7f7f8;
   --bg-elevated: #ffffff;
@@ -19,6 +20,35 @@
   --radius-lg: 22px;
   --font-display: var(--font-display), 'Avenir Next', sans-serif;
   --font-body: var(--font-body), 'Avenir Next', sans-serif;
+  --mkt-bg: #f4f7f5;
+  --mkt-elev: #ffffff;
+  --mkt-line: rgba(10, 20, 14, 0.1);
+  --mkt-ink: #0a0a0a;
+  --mkt-muted: #5c675f;
+  --mkt-accent: #1a6b52;
+}
+
+html[data-theme='dark'] {
+  --bg: #0b0d0c;
+  --bg-soft: #151917;
+  --bg-elevated: #121614;
+  --ink: #f4f7f5;
+  --muted: #9aa59e;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --accent: #f4f7f5;
+  --accent-fg: #0a0a0a;
+  --brand: #6fcf9c;
+  --brand-soft: rgba(111, 207, 156, 0.12);
+  --ok: #6fcf9c;
+  --bad: #ff8d80;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 50px rgba(0, 0, 0, 0.35);
+  --mkt-bg: #070907;
+  --mkt-elev: #101411;
+  --mkt-line: rgba(255, 255, 255, 0.08);
+  --mkt-ink: #f4f7f5;
+  --mkt-muted: #9aa59e;
+  --mkt-accent: #6fcf9c;
 }
 
 * {
@@ -38,6 +68,24 @@ body {
     radial-gradient(ellipse 70% 45% at 50% -20%, rgba(26, 107, 82, 0.07), transparent 55%),
     var(--bg);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.vl-theme-switch {
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vl-mkt .vl-theme-switch {
+  border-color: var(--mkt-line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mkt-ink);
 }
 
 a {
@@ -494,17 +542,68 @@ textarea {
 
 /* —— Marketing (ElevenLabs-style product patterns, VerbaLab brand) —— */
 .vl-mkt {
-  --mkt-bg: #070907;
-  --mkt-elev: #101411;
-  --mkt-line: rgba(255, 255, 255, 0.08);
-  --mkt-ink: #f4f7f5;
-  --mkt-muted: #9aa59e;
+  position: relative;
   min-height: 100vh;
   color: var(--mkt-ink);
   background:
     radial-gradient(900px 480px at 70% -10%, rgba(47, 154, 118, 0.22), transparent 55%),
     radial-gradient(700px 420px at 0% 20%, rgba(26, 107, 82, 0.16), transparent 50%),
     var(--mkt-bg);
+  overflow: hidden;
+}
+
+.vl-mkt-atmosphere {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: min(92vh, 920px);
+  object-fit: cover;
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vl-mkt > *:not(.vl-mkt-atmosphere) {
+  position: relative;
+  z-index: 1;
+}
+
+.vl-mkt-headline {
+  margin: 0.65rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.vl-mkt-card-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--mkt-line);
+}
+
+.vl-mkt-bullets {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--mkt-muted);
+  font-size: 0.88rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.vl-mkt-code {
+  margin: 0;
+  padding: 1.15rem;
+  border-radius: 18px;
+  border: 1px solid var(--mkt-line);
+  background: var(--mkt-elev);
+  color: var(--mkt-ink);
+  overflow: auto;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .vl-mkt a {

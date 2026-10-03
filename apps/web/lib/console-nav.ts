@@ -57,6 +57,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/data', label: 'Data & residency' },
       { href: '/audit', label: 'Audit' },
       { href: '/admin', label: 'Admin' },
+      { href: '/cms', label: 'Marketing CMS', keywords: ['content', 'blocks', 'assets', 'theme'] },
       { href: '/docs', label: 'Docs' },
     ],
   },

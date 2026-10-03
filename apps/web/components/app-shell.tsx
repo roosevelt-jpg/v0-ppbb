@@ -6,6 +6,7 @@ import { UserButton } from '@clerk/nextjs';
 import { useEffect, useMemo, useState } from 'react';
 import { isClerkConfigured } from '@/lib/clerk-config';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
+import { ThemeSwitcher } from '@/components/theme-provider';
 import {
   CONSOLE_NAV,
   filterNav,
@@ -128,7 +129,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="vl-sidebar-foot">
           <WorkspaceSwitcher />
-          {isClerkConfigured() ? <UserButton afterSignOutUrl="/" /> : null}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+            <ThemeSwitcher />
+            {isClerkConfigured() ? <UserButton afterSignOutUrl="/" /> : null}
+          </div>
         </div>
       </aside>
 
