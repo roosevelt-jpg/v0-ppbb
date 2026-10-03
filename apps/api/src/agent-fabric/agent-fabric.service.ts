@@ -3,17 +3,16 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsageService } from '../usage/usage.service';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
-import { ReasoningRuntimeService } from '../reasoning-runtime/reasoning-runtime.service';
-import { IntelligentCacheService } from '../intelligent-cache/intelligent-cache.service';
+import { AgentRuntimeService } from '../agent-runtime/agent-runtime.service';
 import { EventFabricBus } from '../event-fabric/event-fabric.bus';
 import {
-  reasoningFabricArchitectureNotes,
-  reasoningFabricCapabilityCatalog,
-  reasoningFabricHonesty,
-  reasoningFabricPipelines,
-  reasoningFabricRoutingTable,
-  reasoningFabricVersions,
-} from './reasoning-fabric.catalog';
+  agentFabricArchitectureNotes,
+  agentFabricCapabilityCatalog,
+  agentFabricHonesty,
+  agentFabricPipelines,
+  agentFabricRoutingTable,
+  agentFabricVersions,
+} from './agent-fabric.catalog';
 
 type AuthCtx = {
   organizationId: string;
@@ -34,20 +33,21 @@ type DistRecord = {
 };
 
 @Injectable()
-export class ReasoningFabricService {
+export class AgentFabricService {
   private routePlans = 0;
   private pipelines = 0;
-  private distributions = 0;
+  private discoveries = 0;
+  private collaborations = 0;
+  private schedules = 0;
   private federations = 0;
-  private replays = 0;
+  private distributions = 0;
   private eventPublishes = 0;
   private readonly distLog: DistRecord[] = [];
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly usage: UsageService,
-    private readonly reasoningRuntime: ReasoningRuntimeService,
-    private readonly intelligentCache: IntelligentCacheService,
+    private readonly agentRuntime: AgentRuntimeService,
     private readonly eventBus: EventFabricBus,
   ) {}
 
@@ -55,53 +55,53 @@ export class ReasoningFabricService {
   resetCounters() {
     this.routePlans = 0;
     this.pipelines = 0;
-    this.distributions = 0;
+    this.discoveries = 0;
+    this.collaborations = 0;
+    this.schedules = 0;
     this.federations = 0;
-    this.replays = 0;
+    this.distributions = 0;
     this.eventPublishes = 0;
     this.distLog.length = 0;
   }
 
   products() {
-    const cacheEngine = this.intelligentCache.engine();
     return {
-      product: 'VerbaLab Reasoning Fabric',
-      products: reasoningFabricCapabilityCatalog(),
-      routes: reasoningFabricRoutingTable(),
-      pipelines: reasoningFabricPipelines(),
-      versions: reasoningFabricVersions(),
-      reasoningRuntime: this.reasoningRuntime.engine(),
-      intelligentCache: {
-        product: cacheEngine.product,
-        honesty: cacheEngine.honesty,
-        console: '/intelligent-cache',
-      },
-      architecture: reasoningFabricArchitectureNotes(),
-      honesty: reasoningFabricHonesty(),
+      product: 'VerbaLab Agent Fabric',
+      products: agentFabricCapabilityCatalog(),
+      routes: agentFabricRoutingTable(),
+      pipelines: agentFabricPipelines(),
+      versions: agentFabricVersions(),
+      agentRuntime: this.agentRuntime.engine(),
+      architecture: agentFabricArchitectureNotes(),
+      honesty: agentFabricHonesty(),
       safety: {
+        sandboxed: true,
+        policyRuntimeHardGate: true,
+        openToolExecution: false,
+        liveToolExecution: false,
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must hard-gate across fabric buses when shipped — not log-only.',
+          'Agent actions stay sandboxed. Policy Runtime hard-gates Agent Runtime today; Policy Fabric (VL-247) must hard-gate fabric-wide when shipped — not log-only.',
       },
-      docs: '/docs/REASONING_FABRIC.md',
+      docs: '/docs/AGENT_FABRIC.md',
       note:
-        'Reasoning Fabric (VL-244). Cross-cloud reasoning router over Reasoning Runtime. Not a custom reasoner OS.',
+        'Agent Fabric (VL-246). Cross-cloud agent router over Agent Runtime. Sandboxed + Policy-gated. Not LangGraph/AutoGPT OS.',
     };
   }
 
   routes() {
     return {
-      routes: reasoningFabricRoutingTable(),
-      honesty: reasoningFabricHonesty(),
-      docs: '/docs/REASONING_FABRIC.md',
-      note: 'Static reasoning-intent → Runtime/Cloud handoff catalog.',
+      routes: agentFabricRoutingTable(),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Static agent-intent → Runtime/Policy handoff catalog.',
     };
   }
 
   route(input: { kinds?: string[] }) {
     this.routePlans += 1;
-    const table = reasoningFabricRoutingTable();
+    const table = agentFabricRoutingTable();
     const kinds = input.kinds?.length
       ? input.kinds.map((k) => k.toLowerCase())
       : table.map((r) => r.kind);
@@ -110,14 +110,14 @@ export class ReasoningFabricService {
     return {
       plan: selected,
       missing,
-      honesty: reasoningFabricHonesty(),
-      note: 'Reasoning Router plan — does not execute reasoning steps.',
+      honesty: agentFabricHonesty(),
+      note: 'Agent Router plan — does not execute agent steps itself.',
     };
   }
 
   pipeline(input: { pipelineId?: string; steps?: string[] }) {
     this.pipelines += 1;
-    const catalog = reasoningFabricPipelines();
+    const catalog = agentFabricPipelines();
     const chosen =
       catalog.find((p) => p.id === input.pipelineId) ??
       (input.steps?.length
@@ -134,36 +134,17 @@ export class ReasoningFabricService {
       pipeline: chosen,
       plan: routed.plan,
       missing: routed.missing,
-      honesty: reasoningFabricHonesty(),
-      note: 'Pipeline is an ordered handoff plan — each step runs via Reasoning Runtime APIs.',
+      honesty: agentFabricHonesty(),
+      note: 'Pipeline is an ordered handoff plan — each step runs via Agent Runtime APIs under Policy gate.',
     };
   }
 
   versions() {
     return {
-      versions: reasoningFabricVersions(),
-      honesty: reasoningFabricHonesty(),
-      docs: '/docs/REASONING_FABRIC.md',
-      note: 'Fabric strategy/pipeline versions — Runtime owns run payloads.',
-    };
-  }
-
-  cacheHandoff() {
-    const engine = this.intelligentCache.engine();
-    return {
-      cache: {
-        target: 'intelligent-cache',
-        api: 'GET /v1/intelligent-cache/engine',
-        product: engine.product,
-        honesty: engine.honesty,
-      },
-      fabric: {
-        status: 'partial',
-        note:
-          'Reasoning Fabric does not auto-cache every reason() call. Opt into Intelligent Cache namespaces explicitly.',
-      },
-      honesty: reasoningFabricHonesty(),
-      docs: '/docs/REASONING_FABRIC.md',
+      versions: agentFabricVersions(),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Fabric router/pipeline versions — Runtime owns agent payloads.',
     };
   }
 
@@ -175,30 +156,52 @@ export class ReasoningFabricService {
         kind: r.kind,
         target: r.target,
         api: r.api,
-        mode: r.kind === 'cloud' ? 'catalog' : 'handoff',
+        mode: r.kind === 'policy' ? 'hard_gate' : 'handoff',
       })),
       missing: plan.missing,
-      honesty: reasoningFabricHonesty(),
-      note: 'Federation is a product-handoff catalog — not cross-tenant reasoner mesh.',
+      honesty: agentFabricHonesty(),
+      note: 'Federation is a product-handoff catalog — not cross-tenant agent mesh.',
     };
   }
 
-  async history(auth: AuthCtx, limit?: number) {
+  async discover(auth: AuthCtx) {
+    this.discoveries += 1;
     return {
-      ...(await this.reasoningRuntime.history({ ...auth, limit })),
-      honesty: reasoningFabricHonesty(),
-      docs: '/docs/REASONING_FABRIC.md',
-      note: 'History façade over Reasoning Runtime.',
+      ...(await this.agentRuntime.listAgents(auth)),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Discovery façade over Agent Runtime — workspace-scoped only.',
     };
   }
 
-  async replay(auth: AuthCtx, id: string) {
-    this.replays += 1;
+  async collaborate(
+    auth: AuthCtx & { agentIds?: string[]; topic?: string; message?: string },
+  ) {
+    this.collaborations += 1;
     return {
-      ...(await this.reasoningRuntime.replay({ ...auth, id })),
-      honesty: reasoningFabricHonesty(),
-      docs: '/docs/REASONING_FABRIC.md',
-      note: 'Replay façade over Reasoning Runtime MemoryRecords.',
+      ...(await this.agentRuntime.collaborate(auth)),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Collaborate façade over Agent Runtime sandbox — Policy-gated.',
+    };
+  }
+
+  async schedule(auth: AuthCtx & { agentId?: string; goal?: string; runAt?: string }) {
+    this.schedules += 1;
+    return {
+      ...(await this.agentRuntime.schedule(auth)),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Schedule façade over Agent Runtime stubs — not cron fleet OS.',
+    };
+  }
+
+  async marketplace(auth: AuthCtx) {
+    return {
+      ...(await this.agentRuntime.marketplace(auth)),
+      honesty: agentFabricHonesty(),
+      docs: '/docs/AGENT_FABRIC.md',
+      note: 'Marketplace integration façade — listing counts only.',
     };
   }
 
@@ -211,7 +214,9 @@ export class ReasoningFabricService {
     topic?: string;
   }) {
     this.distributions += 1;
-    const plan = this.route({ kinds: input.kinds ?? ['plan', 'reason', 'history'] });
+    const plan = this.route({
+      kinds: input.kinds ?? ['discover', 'collaborate', 'schedule'],
+    });
     const peers = await this.peerWorkspaces(input.organizationId, input.workspaceId);
     const targets =
       input.targetWorkspaceIds?.length
@@ -232,9 +237,9 @@ export class ReasoningFabricService {
     if (input.publishEvent === true) {
       this.eventPublishes += 1;
       event = await this.eventBus.publish({
-        topic: input.topic ?? 'reasoning-fabric',
-        type: 'com.verbalab.reasoning.distributed',
-        source: '/verbalab/reasoning-fabric',
+        topic: input.topic ?? 'agent-fabric',
+        type: 'com.verbalab.agent.distributed',
+        source: '/verbalab/agent-fabric',
         eventVersion: '1',
         data: {
           distributionId: record.id,
@@ -253,8 +258,25 @@ export class ReasoningFabricService {
       plan: plan.plan,
       peers: targets,
       event,
-      honesty: reasoningFabricHonesty(),
-      note: 'Distribution plan for same-org workspaces — does not replicate reasoning runs automatically.',
+      honesty: agentFabricHonesty(),
+      note: 'Distribution plan for same-org workspaces — does not spawn remote agents automatically.',
+    };
+  }
+
+  streamSnapshot() {
+    return {
+      ts: new Date().toISOString(),
+      product: 'VerbaLab Agent Fabric',
+      counters: {
+        routePlans: this.routePlans,
+        discoveries: this.discoveries,
+        collaborations: this.collaborations,
+        schedules: this.schedules,
+        eventPublishes: this.eventPublishes,
+      },
+      routes: agentFabricRoutingTable().length,
+      honesty: agentFabricHonesty(),
+      note: 'SSE realtime tick — not WebSocket OS.',
     };
   }
 
@@ -269,22 +291,24 @@ export class ReasoningFabricService {
 
   monitoring() {
     return {
-      mode: 'reasoning_fabric',
+      mode: 'agent_fabric',
       counters: {
         routePlans: this.routePlans,
         pipelines: this.pipelines,
-        distributions: this.distributions,
+        discoveries: this.discoveries,
+        collaborations: this.collaborations,
+        schedules: this.schedules,
         federations: this.federations,
-        replays: this.replays,
+        distributions: this.distributions,
         eventPublishes: this.eventPublishes,
       },
       recent: { distributions: this.distLog.slice(-10) },
-      products: reasoningFabricCapabilityCatalog().map((p) => ({
+      products: agentFabricCapabilityCatalog().map((p) => ({
         id: p.id,
         status: p.status,
       })),
-      honesty: reasoningFabricHonesty(),
-      note: 'Reasoning Fabric monitoring (VL-244).',
+      honesty: agentFabricHonesty(),
+      note: 'Agent Fabric monitoring (VL-246).',
     };
   }
 
@@ -303,49 +327,51 @@ export class ReasoningFabricService {
         embeddings: usageSummary.embeddings,
       },
       workspace: { peerWorkspaces: peers.length },
-      products: reasoningFabricCapabilityCatalog(),
-      routes: reasoningFabricRoutingTable(),
-      pipelines: reasoningFabricPipelines(),
-      architecture: reasoningFabricArchitectureNotes(),
-      honesty: reasoningFabricHonesty(),
+      products: agentFabricCapabilityCatalog(),
+      routes: agentFabricRoutingTable(),
+      pipelines: agentFabricPipelines(),
+      architecture: agentFabricArchitectureNotes(),
+      honesty: agentFabricHonesty(),
       counters: {
         routePlans: this.routePlans,
         pipelines: this.pipelines,
-        distributions: this.distributions,
+        discoveries: this.discoveries,
+        collaborations: this.collaborations,
+        schedules: this.schedules,
         federations: this.federations,
-        replays: this.replays,
+        distributions: this.distributions,
         eventPublishes: this.eventPublishes,
       },
       safety: {
+        sandboxed: true,
+        policyRuntimeHardGate: true,
+        openToolExecution: false,
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
           'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
-        memoryFabric: false,
-        agentFabric: false,
         policyFabric: true,
-        customReasonerOs: true,
-        symbolicReasonerOs: true,
+        langGraphOs: true,
+        autoGptOs: true,
+        openToolExecution: true,
         crossOrgDataPlane: true,
         regeneratesVolumes1to9: false,
       },
       links: {
-        reasoningFabric: '/reasoning-fabric',
+        agentFabric: '/agent-fabric',
+        agentRuntime: '/agent-runtime',
+        policyRuntime: '/policy-runtime',
         memoryFabric: '/memory-fabric',
-        reasoningRuntime: '/reasoning-runtime',
-        promptFabric: '/prompt-fabric',
-        contextFabric: '/context-fabric',
-        knowledgeFabric: '/knowledge-fabric',
+        reasoningFabric: '/reasoning-fabric',
         eventFabric: '/event-fabric',
         aiFabric: '/ai-fabric',
-        intelligentCache: '/intelligent-cache',
-        policyRuntime: '/policy-runtime',
+        marketplace: '/marketplace',
       },
-      docs: '/docs/REASONING_FABRIC.md',
+      docs: '/docs/AGENT_FABRIC.md',
       note:
-        'Reasoning Fabric (VL-244). Router + pipelines + replay over Reasoning Runtime; same-org distribute plans.',
+        'Agent Fabric (VL-246). Router + discovery/collaborate/schedule over Agent Runtime; sandboxed + Policy-gated.',
     };
   }
 }

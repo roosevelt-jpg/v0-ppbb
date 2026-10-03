@@ -82,10 +82,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'agent-fabric',
       name: 'Agent Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Agent coordination (Phase 113 / VL-246). Must stay sandboxed + Policy-gated.',
+      status: 'shipped',
+      api: 'GET /v1/agent-fabric/products',
+      console: '/agent-fabric',
+      notes:
+        'Agent router over Agent Runtime (VL-246). Sandboxed + Policy-gated; not LangGraph/AutoGPT OS.',
     },
     {
       id: 'policy-fabric',

@@ -18,7 +18,7 @@ Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/N
 | Prompt Fabric | **Shipped** — VL-243 — router over Prompt Runtime |
 | Reasoning Fabric | **Shipped** — VL-244 — router over Reasoning Runtime |
 | Memory Fabric | **Shipped** — VL-245 — router over Memory Runtime |
-| Agent Fabric | **Deferred** — VL-246; must stay sandboxed + Policy-gated |
+| Agent Fabric | **Shipped** — VL-246 — sandboxed + Policy-gated router over Agent Runtime |
 | Policy Fabric | **Deferred** — VL-247; hard-gate required when shipped |
 | Service Discovery | **Partial** — static routing catalog |
 | Identity Propagation | **Partial** — Clerk session + request IDs |

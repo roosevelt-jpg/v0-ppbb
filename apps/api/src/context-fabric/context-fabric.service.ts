@@ -244,7 +244,7 @@ export class ContextFabricService {
         promptFabric: false,
         reasoningFabric: false,
         memoryFabric: false,
-        agentFabric: true,
+        agentFabric: false,
         policyFabric: true,
         websocketOs: true,
         infiniteContextWindow: true,

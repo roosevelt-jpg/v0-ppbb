@@ -366,7 +366,7 @@ export class PromptFabricService {
       deferred: {
         reasoningFabric: false,
         memoryFabric: false,
-        agentFabric: true,
+        agentFabric: false,
         policyFabric: true,
         promptMeshOs: true,
         autoPromptResearchLab: true,

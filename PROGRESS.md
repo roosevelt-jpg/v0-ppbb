@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-245 Done — Memory Fabric)
+Last updated: 2026-10-03 (VL-246 Done — Agent Fabric)
 
 ---
 
@@ -275,7 +275,7 @@ Last updated: 2026-10-03 (VL-245 Done — Memory Fabric)
 | VL-243 | Prompt Fabric (Phase 110) | Done | Router over Prompt Runtime; versioning/validate/same-org sync; Policy Runtime handoff; ADR-0145. Not prompt mesh/research lab. |
 | VL-244 | Reasoning Fabric (Phase 111) | Done | Router/pipelines/replay over Reasoning Runtime; same-org distribute; ADR-0146. Not custom reasoner OS. |
 | VL-245 | Memory Fabric (Phase 112) | Done | Router/sync/distribute over Memory Runtime; same-org replicate plans; ADR-0147. Not Mem0 / multi-region replication OS. |
-| VL-246 | Agent Fabric (Phase 113) | Not Started | Must stay sandboxed + Policy-gated. |
+| VL-246 | Agent Fabric (Phase 113) | Done | Router/discovery/collaborate/schedule over Agent Runtime; SSE ticks; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |
 | VL-247 | Policy Fabric (Phase 114) | Not Started | Must hard-gate fabric-wide (not log-only). |
 | VL-248 | AI Fabric Production Audit (Phase 115) | Not Started | |
 
@@ -428,3 +428,4 @@ Last updated: 2026-10-03 (VL-245 Done — Memory Fabric)
 | 2026-10-03 | VL-243 Done: Prompt Fabric (Phase 110) — router over Prompt Runtime; validate/version/same-org sync; ADR-0145. Not prompt mesh/research lab OS. |
 | 2026-10-03 | VL-244 Done: Reasoning Fabric (Phase 111) — router/pipelines/replay over Reasoning Runtime; ADR-0146. Not custom reasoner OS. |
 | 2026-10-03 | VL-245 Done: Memory Fabric (Phase 112) — router/sync/distribute over Memory Runtime; ADR-0147. Not Mem0 / multi-region replication OS. |
+| 2026-10-03 | VL-246 Done: Agent Fabric (Phase 113) — router/discovery/collaborate/schedule over Agent Runtime; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |

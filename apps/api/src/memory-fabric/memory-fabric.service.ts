@@ -392,7 +392,7 @@ export class MemoryFabricService {
           'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
-        agentFabric: true,
+        agentFabric: false,
         policyFabric: true,
         mem0Os: true,
         multiRegionReplicationOs: true,
@@ -401,6 +401,7 @@ export class MemoryFabricService {
       },
       links: {
         memoryFabric: '/memory-fabric',
+        agentFabric: '/agent-fabric',
         memoryRuntime: '/memory-runtime',
         memoryCloud: '/memory-cloud',
         reasoningFabric: '/reasoning-fabric',

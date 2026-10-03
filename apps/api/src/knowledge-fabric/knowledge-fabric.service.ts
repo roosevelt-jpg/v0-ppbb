@@ -331,7 +331,7 @@ export class KnowledgeFabricService {
         promptFabric: false,
         reasoningFabric: false,
         memoryFabric: false,
-        agentFabric: true,
+        agentFabric: false,
         policyFabric: true,
         confluenceSharepointOs: true,
         neo4jFederationOs: true,

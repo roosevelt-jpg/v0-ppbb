@@ -3680,6 +3680,158 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + honesty' } },
       },
     },
+    '/v1/agent-fabric/products': {
+      get: {
+        summary: 'Agent Fabric capability catalog',
+        operationId: 'listAgentFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Agent router capabilities, pipelines, Runtime handoff honesty',
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/engine': {
+      get: {
+        summary: 'Agent Fabric engine (alias of products)',
+        operationId: 'getAgentFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/agent-fabric/routes': {
+      get: {
+        summary: 'Agent Fabric routing table',
+        operationId: 'listAgentFabricRoutes',
+        responses: { '200': { description: 'kind → Runtime/Policy handoffs' } },
+      },
+    },
+    '/v1/agent-fabric/route': {
+      post: {
+        summary: 'Plan agent routing for selected kinds',
+        operationId: 'planAgentFabricRoute',
+        responses: { '200': { description: 'Router plan' } },
+      },
+    },
+    '/v1/agent-fabric/pipeline': {
+      post: {
+        summary: 'Plan an agent pipeline (ordered Runtime handoffs)',
+        operationId: 'planAgentFabricPipeline',
+        responses: { '200': { description: 'Pipeline + routed steps' } },
+      },
+    },
+    '/v1/agent-fabric/versions': {
+      get: {
+        summary: 'Agent Fabric version catalog',
+        operationId: 'listAgentFabricVersions',
+        responses: { '200': { description: 'Router/pipeline/sandbox versions' } },
+      },
+    },
+    '/v1/agent-fabric/federate': {
+      post: {
+        summary: 'List agent federation handoff targets',
+        operationId: 'federateAgentFabric',
+        responses: { '200': { description: 'Federation handoff catalog' } },
+      },
+    },
+    '/v1/agent-fabric/discover': {
+      get: {
+        summary: 'Discover workspace agents via Agent Runtime',
+        operationId: 'discoverAgentFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Agent list' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/collaborate': {
+      post: {
+        summary: 'Sandbox agent collaboration via Agent Runtime',
+        operationId: 'collaborateAgentFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Collaboration session' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/schedule': {
+      post: {
+        summary: 'Schedule stub via Agent Runtime',
+        operationId: 'scheduleAgentFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Schedule record' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/marketplace': {
+      get: {
+        summary: 'Agent marketplace listing counts',
+        operationId: 'marketplaceAgentFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Listing counts' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/distribute': {
+      post: {
+        summary: 'Plan agent distribution to same-org workspaces',
+        operationId: 'distributeAgentFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/stream': {
+      get: {
+        summary: 'Agent Fabric SSE realtime ticks',
+        operationId: 'streamAgentFabric',
+        responses: { '200': { description: 'text/event-stream ticks' } },
+      },
+    },
+    '/v1/agent-fabric/overview': {
+      get: {
+        summary: 'Agent Fabric org overview',
+        operationId: 'getAgentFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + pipelines + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/agent-fabric/monitoring': {
+      get: {
+        summary: 'Agent Fabric monitoring',
+        operationId: 'getAgentFabricMonitoring',
+        responses: { '200': { description: 'Counters + honesty' } },
+      },
+    },
     '/v1/memory-fabric/products': {
       get: {
         summary: 'Memory Fabric capability catalog',
