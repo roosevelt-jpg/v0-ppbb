@@ -39,16 +39,16 @@ export function styleIntelligenceCatalog() {
       {
         id: 'legal',
         name: 'Legal',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/style/rewrite profile=legal',
-        notes: 'Tone only — not legal advice or contract drafting.',
+        notes: 'Tone e2e — not legal advice or contract drafting.',
       },
       {
         id: 'medical',
         name: 'Medical',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/style/rewrite profile=medical',
-        notes: 'Tone only — not clinical documentation or medical advice.',
+        notes: 'Tone e2e — not clinical documentation or medical advice.',
       },
       {
         id: 'business',
@@ -60,9 +60,9 @@ export function styleIntelligenceCatalog() {
       {
         id: 'marketing',
         name: 'Marketing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/style/rewrite profile=marketing',
-        notes: 'Light persuasive tone — not a campaign/copywriting OS.',
+        notes: 'Light persuasive tone e2e — not a campaign/copywriting OS.',
       },
       {
         id: 'technical',
@@ -74,9 +74,9 @@ export function styleIntelligenceCatalog() {
       {
         id: 'government',
         name: 'Government',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/style/rewrite profile=government',
-        notes: 'Plain formal tone — not policy/compliance certification.',
+        notes: 'Plain formal tone e2e — not policy/compliance certification.',
       },
       {
         id: 'casual',
@@ -102,9 +102,37 @@ export function styleIntelligenceCatalog() {
       {
         id: 'style_transfer',
         name: 'Style transfer',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/style/transfer',
-        notes: 'Detect source tone then rewrite to target profile — not author cloning.',
+        notes: 'Detect source tone then rewrite to target profile e2e — not author cloning.',
+      },
+      {
+        id: 'african_public_sector',
+        name: 'African public sector',
+        status: 'shipped',
+        api: 'POST /v1/style/rewrite profile=african_public_sector',
+        notes: 'Plain formal citizen-services tone for African public-sector copy.',
+      },
+      {
+        id: 'african_plain',
+        name: 'African plain language',
+        status: 'shipped',
+        api: 'POST /v1/style/rewrite profile=african_plain',
+        notes: 'Simpler wording for multilingual African product UI / SMS-adjacent copy.',
+      },
+      {
+        id: 'east_african_formal',
+        name: 'East African formal',
+        status: 'shipped',
+        api: 'POST /v1/style/rewrite profile=east_african_formal',
+        notes: 'Respectful formal register cues for East African bilingual contexts.',
+      },
+      {
+        id: 'west_african_business',
+        name: 'West African business',
+        status: 'shipped',
+        api: 'POST /v1/style/rewrite profile=west_african_business',
+        notes: 'Clear business tone for West African English/French bridge contexts.',
       },
     ] satisfies StyleCapability[],
     engines: {
@@ -113,7 +141,7 @@ export function styleIntelligenceCatalog() {
       graphql: { status: 'shipped', notes: 'styleIntelligence + detectTone + transformTone + transferStyle' },
       sdk: { status: 'shipped', package: '@verbalab/sdk' },
       analytics: { status: 'shipped', api: 'GET /v1/style/analytics' },
-      monitoring: { status: 'partial', api: 'GET /v1/metrics/translate', notes: 'Shared observability stack' },
+      monitoring: { status: 'shipped', api: 'GET /v1/metrics/translate', notes: 'Shared observability stack' },
     },
     links: {
       dashboard: '/style-intelligence',

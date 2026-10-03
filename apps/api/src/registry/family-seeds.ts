@@ -48,4 +48,9 @@ export const FAMILY_SEEDS: FamilySeed[] = [
     nameEn: 'Nilo-Saharan',
     notes: 'Luo, Kanuri and related East/Central African registry languages.',
   },
+  {
+    code: 'khoisan',
+    nameEn: 'Khoisan',
+    notes: 'Click-language cluster representatives (e.g. Nama); not an exhaustive genetic claim.',
+  },
 ];

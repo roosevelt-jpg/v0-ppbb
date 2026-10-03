@@ -119,7 +119,7 @@ export function GlossaryClient() {
       setMessage(`Installed ${result.termsInstalled} starter terms into this workspace.`);
       await Promise.all([loadTerms(token), loadPacks(token)]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Install failed (Pro plan required)');
+      setError(err instanceof Error ? err.message : 'Install failed');
     } finally {
       setLoading(false);
     }
@@ -165,7 +165,7 @@ export function GlossaryClient() {
                   disabled={loading || pack.installed}
                   onClick={() => void installPack(pack.id)}
                 >
-                  {pack.installed ? 'Installed' : 'Install (Pro)'}
+                  {pack.installed ? 'Installed' : 'Install'}
                 </button>
               </div>
               <p style={{ color: 'var(--muted)', margin: 0, fontSize: '0.9rem' }}>{pack.description}</p>

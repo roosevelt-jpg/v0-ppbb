@@ -24,8 +24,11 @@ describe('Country packs (VL-135)', () => {
 
   it('GET /v1/country-packs lists curated packs', async () => {
     const res = await request(app.getHttpServer()).get('/v1/country-packs').expect(200);
-    expect(res.body.data.length).toBeGreaterThanOrEqual(8);
+    expect(res.body.data.length).toBeGreaterThanOrEqual(54);
     expect(res.body.data.some((p: { code: string }) => p.code === 'KE')).toBe(true);
+    expect(res.body.data.some((p: { code: string }) => p.code === 'GH')).toBe(true);
+    expect(res.body.data.some((p: { code: string }) => p.code === 'ZA')).toBe(true);
+    expect(res.body.data.some((p: { code: string }) => p.code === 'EG')).toBe(true);
   });
 
   it('GET /v1/country-packs?region= filters', async () => {

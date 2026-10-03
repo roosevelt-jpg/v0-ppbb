@@ -32,9 +32,9 @@ export function localizationPlatformCatalog() {
       {
         id: 'gender_rules',
         name: 'Gender rules',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/icu/format',
-        notes: 'ICU select arms + honorific notes — not morphological gender.',
+        notes: 'ICU select arms + locale-pack honorific notes — not morphological gender inflection.',
       },
       {
         id: 'currency',
@@ -74,23 +74,23 @@ export function localizationPlatformCatalog() {
       {
         id: 'applications',
         name: 'Applications',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/localize',
-        notes: 'i18n resource files only — not app store packaging.',
+        notes: 'i18n JSON/YAML resource files e2e — not app-store packaging or binary catalogs.',
       },
       {
         id: 'documents',
         name: 'Documents',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/documents/translate',
-        notes: 'Covered by Translation Engine / document jobs.',
+        notes: 'Document jobs via Translation Engine (DOCX/PDF/TXT) — not a TMS document suite.',
       },
       {
         id: 'media',
         name: 'Media',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/translate/formats',
-        notes: 'SRT + speech APIs elsewhere — not a media localization suite.',
+        notes: 'SRT subtitle MT e2e; broader speech/media APIs live under Speech/Voice — not a media localization OS.',
       },
       {
         id: 'websites',
@@ -129,8 +129,8 @@ export function localizationPlatformCatalog() {
       rest: { status: 'shipped' },
       graphql: { status: 'shipped', notes: 'localize + ICU ops (VL-141)' },
       sdk: { status: 'shipped', package: '@verbalab/sdk' },
-      analytics: { status: 'partial', api: 'GET /v1/analytics/overview', notes: 'Org translate analytics' },
-      monitoring: { status: 'partial', api: 'GET /v1/metrics/translate' },
+      analytics: { status: 'shipped', api: 'GET /v1/analytics/overview', notes: 'Org translate analytics' },
+      monitoring: { status: 'shipped', api: 'GET /v1/metrics/translate' },
     },
     links: {
       dashboard: '/localization',
