@@ -871,6 +871,54 @@ export class GqlConnectorMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlVoiceLanguageMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceLanguageMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceLanguageMarketplaceCapability])
+  capabilities!: GqlVoiceLanguageMarketplaceCapability[];
+
+  @Field()
+  elevenLabsOs!: boolean;
+
+  @Field()
+  voiceCdnOs!: boolean;
+
+  @Field()
+  celebrityWithoutRights!: boolean;
+
+  @Field()
+  crossTenantCloneSynthesis!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

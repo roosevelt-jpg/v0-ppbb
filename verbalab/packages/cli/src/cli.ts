@@ -55,6 +55,7 @@ function usage(): never {
   verbalab agent-marketplace-engine
   verbalab workflow-marketplace-engine
   verbalab connector-marketplace-engine
+  verbalab voice-language-marketplace-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -504,6 +505,11 @@ async function main() {
 
   if (command === 'connector-marketplace-engine') {
     console.log(JSON.stringify(await vl.connectorMarketplaceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-language-marketplace-engine') {
+    console.log(JSON.stringify(await vl.voiceLanguageMarketplaceEngine(), null, 2));
     return;
   }
 

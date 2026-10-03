@@ -28,6 +28,7 @@ const links = [
   { href: '/agent-marketplace', label: 'Agent market' },
   { href: '/workflow-marketplace', label: 'Workflow market' },
   { href: '/connector-marketplace', label: 'Connector market' },
+  { href: '/voice-language-marketplace', label: 'Voice/Lang market' },
   { href: '/ai-fabric', label: 'AI Fabric' },
   { href: '/event-fabric', label: 'Event Fabric' },
   { href: '/context-fabric', label: 'Context Fabric' },

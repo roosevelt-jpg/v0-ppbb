@@ -3813,6 +3813,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/voice-language-marketplace/engine': {
+      get: {
+        summary: 'Voice & Language Marketplace engine catalog',
+        operationId: 'getVoiceLanguageMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Voice/language pack capabilities, Stripe honesty, ElevenLabs / celebrity / CDN denials',
+          },
+        },
+      },
+    },
+    '/v1/voice-language-marketplace/products': {
+      get: {
+        summary: 'Voice & Language Marketplace products (alias of engine)',
+        operationId: 'listVoiceLanguageMarketplaceProducts',
+        responses: { '200': { description: 'Voice/language marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/voice-language-marketplace/listings': {
+      get: {
+        summary: 'List voice/language marketplace listings',
+        operationId: 'listVoiceLanguageMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine pack listings' } },
+      },
+      post: {
+        summary: 'Publish a voice/language pack catalog key as a marketplace listing',
+        operationId: 'publishVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/voice-language-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a voice/language pack listing entitlement',
+        operationId: 'installVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Pack entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/voice-language-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List voice/language listing reviews',
+        operationId: 'listVoiceLanguageMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a voice/language listing review',
+        operationId: 'reviewVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/voice-language-marketplace/sales': {
+      get: {
+        summary: 'Voice/language marketplace publisher sales',
+        operationId: 'listVoiceLanguageMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/voice-language-marketplace/analytics': {
+      get: {
+        summary: 'Voice/language marketplace analytics',
+        operationId: 'getVoiceLanguageMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/voice-language-marketplace/monitoring': {
+      get: {
+        summary: 'Voice/language marketplace monitoring',
+        operationId: 'getVoiceLanguageMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

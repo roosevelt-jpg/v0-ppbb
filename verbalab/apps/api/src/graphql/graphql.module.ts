@@ -33,6 +33,7 @@ import { PromptMarketplaceApplicationModule } from '../prompt-marketplace/applic
 import { AgentMarketplaceApplicationModule } from '../agent-marketplace/application/agent-marketplace-application.module';
 import { WorkflowMarketplaceApplicationModule } from '../workflow-marketplace/application/workflow-marketplace-application.module';
 import { ConnectorMarketplaceApplicationModule } from '../connector-marketplace/application/connector-marketplace-application.module';
+import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-marketplace/application/voice-language-marketplace-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -119,6 +120,7 @@ import { PromptMarketplaceGraphqlResolver } from './prompt-marketplace.resolver'
 import { AgentMarketplaceGraphqlResolver } from './agent-marketplace.resolver';
 import { WorkflowMarketplaceGraphqlResolver } from './workflow-marketplace.resolver';
 import { ConnectorMarketplaceGraphqlResolver } from './connector-marketplace.resolver';
+import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-marketplace.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -225,6 +227,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AgentMarketplaceApplicationModule,
     WorkflowMarketplaceApplicationModule,
     ConnectorMarketplaceApplicationModule,
+    VoiceLanguageMarketplaceApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -319,6 +322,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AgentMarketplaceGraphqlResolver,
     WorkflowMarketplaceGraphqlResolver,
     ConnectorMarketplaceGraphqlResolver,
+    VoiceLanguageMarketplaceGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,
