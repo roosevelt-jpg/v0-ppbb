@@ -36,6 +36,15 @@ import { ConnectorMarketplaceApplicationModule } from '../connector-marketplace/
 import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-marketplace/application/voice-language-marketplace-application.module';
 import { CreatorEconomyApplicationModule } from '../creator-economy/application/creator-economy-application.module';
 import { TourismHeritageIntelligenceApplicationModule } from '../tourism-heritage-intelligence/application/tourism-heritage-intelligence-application.module';
+import { ResearchAnalyticsApplicationModule } from '../research-analytics/application/research-analytics-application.module';
+import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
+import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
+import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
+import { EvaluationPlatformApplicationModule } from '../evaluation-platform/application/evaluation-platform-application.module';
+import { BenchmarkPlatformApplicationModule } from '../benchmark-platform/application/benchmark-platform-application.module';
+import { SyntheticDataPlatformApplicationModule } from '../synthetic-data-platform/application/synthetic-data-platform-application.module';
+import { ExperimentPlatformApplicationModule } from '../experiment-platform/application/experiment-platform-application.module';
+import { ResearchCloudApplicationModule } from '../research-cloud/application/research-cloud-application.module';
 import { AgriculturalIntelligenceApplicationModule } from '../agricultural-intelligence/application/agricultural-intelligence-application.module';
 import { EducationIntelligenceApplicationModule } from '../education-intelligence/application/education-intelligence-application.module';
 import { FinancialIntelligenceApplicationModule } from '../financial-intelligence/application/financial-intelligence-application.module';
@@ -134,6 +143,15 @@ import { ConnectorMarketplaceGraphqlResolver } from './connector-marketplace.res
 import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-marketplace.resolver';
 import { CreatorEconomyGraphqlResolver } from './creator-economy.resolver';
 import { TourismHeritageIntelligenceGraphqlResolver } from './tourism-heritage-intelligence.resolver';
+import { ResearchAnalyticsGraphqlResolver } from './research-analytics.resolver';
+import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
+import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
+import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
+import { EvaluationPlatformGraphqlResolver } from './evaluation-platform.resolver';
+import { BenchmarkPlatformGraphqlResolver } from './benchmark-platform.resolver';
+import { SyntheticDataPlatformGraphqlResolver } from './synthetic-data-platform.resolver';
+import { ExperimentPlatformGraphqlResolver } from './experiment-platform.resolver';
+import { ResearchCloudGraphqlResolver } from './research-cloud.resolver';
 import { AgriculturalIntelligenceGraphqlResolver } from './agricultural-intelligence.resolver';
 import { EducationIntelligenceGraphqlResolver } from './education-intelligence.resolver';
 import { FinancialIntelligenceGraphqlResolver } from './financial-intelligence.resolver';
@@ -252,6 +270,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     VoiceLanguageMarketplaceApplicationModule,
     CreatorEconomyApplicationModule,
     TourismHeritageIntelligenceApplicationModule,
+    ResearchAnalyticsApplicationModule,
+    OpenSciencePlatformApplicationModule,
+    PatentInnovationPlatformApplicationModule,
+    AiPublicationPlatformApplicationModule,
+    EvaluationPlatformApplicationModule,
+    BenchmarkPlatformApplicationModule,
+    SyntheticDataPlatformApplicationModule,
+    ExperimentPlatformApplicationModule,
+    ResearchCloudApplicationModule,
     AgriculturalIntelligenceApplicationModule,
     EducationIntelligenceApplicationModule,
     FinancialIntelligenceApplicationModule,
@@ -358,6 +385,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     VoiceLanguageMarketplaceGraphqlResolver,
     CreatorEconomyGraphqlResolver,
     TourismHeritageIntelligenceGraphqlResolver,
+    ResearchAnalyticsGraphqlResolver,
+    OpenSciencePlatformGraphqlResolver,
+    PatentInnovationPlatformGraphqlResolver,
+    AiPublicationPlatformGraphqlResolver,
+    EvaluationPlatformGraphqlResolver,
+    BenchmarkPlatformGraphqlResolver,
+    SyntheticDataPlatformGraphqlResolver,
+    ExperimentPlatformGraphqlResolver,
+    ResearchCloudGraphqlResolver,
     AgriculturalIntelligenceGraphqlResolver,
     EducationIntelligenceGraphqlResolver,
     FinancialIntelligenceGraphqlResolver,

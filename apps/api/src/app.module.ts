@@ -88,6 +88,15 @@ import { ConnectorMarketplaceModule } from './connector-marketplace/connector-ma
 import { VoiceLanguageMarketplaceModule } from './voice-language-marketplace/voice-language-marketplace.module';
 import { CreatorEconomyModule } from './creator-economy/creator-economy.module';
 import { TourismHeritageIntelligenceModule } from './tourism-heritage-intelligence/tourism-heritage-intelligence.module';
+import { ResearchAnalyticsModule } from './research-analytics/research-analytics.module';
+import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
+import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
+import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
+import { EvaluationPlatformModule } from './evaluation-platform/evaluation-platform.module';
+import { BenchmarkPlatformModule } from './benchmark-platform/benchmark-platform.module';
+import { SyntheticDataPlatformModule } from './synthetic-data-platform/synthetic-data-platform.module';
+import { ExperimentPlatformModule } from './experiment-platform/experiment-platform.module';
+import { ResearchCloudModule } from './research-cloud/research-cloud.module';
 import { AgriculturalIntelligenceModule } from './agricultural-intelligence/agricultural-intelligence.module';
 import { EducationIntelligenceModule } from './education-intelligence/education-intelligence.module';
 import { FinancialIntelligenceModule } from './financial-intelligence/financial-intelligence.module';
@@ -203,6 +212,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceLanguageMarketplaceModule,
     CreatorEconomyModule,
     TourismHeritageIntelligenceModule,
+    ResearchAnalyticsModule,
+    OpenSciencePlatformModule,
+    PatentInnovationPlatformModule,
+    AiPublicationPlatformModule,
+    EvaluationPlatformModule,
+    BenchmarkPlatformModule,
+    SyntheticDataPlatformModule,
+    ExperimentPlatformModule,
+    ResearchCloudModule,
     AgriculturalIntelligenceModule,
     EducationIntelligenceModule,
     FinancialIntelligenceModule,

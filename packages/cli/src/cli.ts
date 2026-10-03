@@ -67,6 +67,15 @@ function usage(): never {
   verbalab education-intelligence-engine
   verbalab agricultural-intelligence-engine
   verbalab tourism-heritage-intelligence-engine
+  verbalab research-cloud-products
+  verbalab experiment-platform-engine
+  verbalab synthetic-data-platform-engine
+  verbalab benchmark-platform-engine
+  verbalab evaluation-platform-engine
+  verbalab ai-publication-platform-engine
+  verbalab patent-innovation-platform-engine
+  verbalab open-science-platform-engine
+  verbalab research-analytics-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -576,6 +585,51 @@ async function main() {
 
   if (command === 'tourism-heritage-intelligence-engine') {
     console.log(JSON.stringify(await vl.tourismHeritageIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-cloud-products') {
+    console.log(JSON.stringify(await vl.researchCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'experiment-platform-engine') {
+    console.log(JSON.stringify(await vl.experimentPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'synthetic-data-platform-engine') {
+    console.log(JSON.stringify(await vl.syntheticDataPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'benchmark-platform-engine') {
+    console.log(JSON.stringify(await vl.benchmarkPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'evaluation-platform-engine') {
+    console.log(JSON.stringify(await vl.evaluationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-publication-platform-engine') {
+    console.log(JSON.stringify(await vl.aiPublicationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'patent-innovation-platform-engine') {
+    console.log(JSON.stringify(await vl.patentInnovationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'open-science-platform-engine') {
+    console.log(JSON.stringify(await vl.openSciencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'research-analytics-engine') {
+    console.log(JSON.stringify(await vl.researchAnalyticsEngine(), null, 2));
     return;
   }
 

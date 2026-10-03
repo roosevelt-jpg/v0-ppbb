@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-270 Done — African Intelligence Production Audit; Volume 12 closed)
+Last updated: 2026-10-03 (VL-280 Done — Research Cloud Production Audit; Volume 13 closed)
 
 ---
 
@@ -300,6 +300,16 @@ Last updated: 2026-10-03 (VL-270 Done — African Intelligence Production Audit;
 | VL-268 | Agricultural Intelligence (Phase 135) | Done | `/agricultural-intelligence`; ADR-0170. Vocabulary catalog — not farm-management OS. |
 | VL-269 | Tourism & Heritage Intelligence (Phase 136) | Done | `/tourism-heritage-intelligence`; ADR-0171. Heritage consent posture. |
 | VL-270 | African Intelligence Production Audit (Phase 137) | Done | Audit pack under `docs/african-intelligence-cloud-audit/`; ADR-0172. Volume 12 closed. Research/Global Intelligence → Volume 13+. |
+| VL-271 | Research Cloud Foundation (Phase 138) | Done | `/research-cloud` hub + research areas catalog; ADR-0173. Extends Intelligence/Knowledge/Foundation Model clouds. `aiSovereigntyOs=false`. |
+| VL-272 | Experiment Platform (Phase 139) | Done | `/experiment-platform` runs/lineage seed; ADR-0174. Not W&B/MLflow OS. |
+| VL-273 | Synthetic Data Platform (Phase 140) | Done | `/synthetic-data-platform`; ADR-0175. `syntheticLabelRequired=true`; `isSynthetic=true`. |
+| VL-274 | Benchmark Platform (Phase 141) | Done | `/benchmark-platform` suites + leaderboard seed; ADR-0176. Not public leaderboard OS. |
+| VL-275 | Evaluation Platform (Phase 142) | Done | `/evaluation-platform`; ADR-0177. Extends model-evaluation-platform — does not regenerate. |
+| VL-276 | AI Publication Platform (Phase 143) | Done | `/ai-publication-platform`; ADR-0178. `doiRegistryOs=false`. |
+| VL-277 | Patent & Innovation Platform (Phase 144) | Done | `/patent-innovation-platform`; ADR-0179. `usptoOs=false`. |
+| VL-278 | Open Science Platform (Phase 145) | Done | `/open-science-platform`; ADR-0180. Consent gate blocks restricted/unverified TK. |
+| VL-279 | Research Analytics (Phase 146) | Done | `/research-analytics` sibling aggregation; ADR-0181. |
+| VL-280 | Research Cloud Production Audit (Phase 147) | Done | Audit pack under `docs/research-cloud-audit/`; ADR-0182. Volume 13 closed. AI Sovereignty → Volume 14+. |
 
 ---
 
@@ -466,3 +476,5 @@ Last updated: 2026-10-03 (VL-270 Done — African Intelligence Production Audit;
 | 2026-10-03 | VL-259 Done: Ecosystem Production Audit (Phase 126) — evidence pack; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence deferred to Volume 12. |
 | 2026-10-03 | VL-260–269 Done: African Intelligence Cloud hubs (Phases 127–136) — foundation, language registry, cultural intelligence, knowledge graph, six domain engines; ADR-0162–0171. Honesty for consent/medical/finance/government. |
 | 2026-10-03 | VL-270 Done: African Intelligence Production Audit (Phase 137) — evidence pack; ADR-0172. Volume 12 closed. Research / Global Intelligence → Volume 13+. |
+| 2026-10-03 | VL-271–279 Done: Research Cloud hubs (Phases 138–146) — foundation through research analytics; ADR-0173–0181. Synthetic labeling + open-science consent honesty. |
+| 2026-10-03 | VL-280 Done: Research Cloud Production Audit (Phase 147) — evidence pack; ADR-0182. Volume 13 closed. AI Sovereignty / MLOps → Volume 14+. |

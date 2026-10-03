@@ -4361,6 +4361,345 @@ export const openApiDocument = {
         responses: { '200': { description: 'Filtered domain terms' } },
       },
     },
+    '/v1/research-cloud/engine': {
+      get: {
+        summary: 'Research Cloud engine catalog',
+        operationId: 'getResearchCloudEngine',
+        responses: { '200': { description: 'Research Cloud catalog + honesty' } },
+      },
+    },
+    '/v1/research-cloud/products': {
+      get: {
+        summary: 'Research Cloud products',
+        operationId: 'listResearchCloudProducts',
+        responses: { '200': { description: 'Research Cloud products' } },
+      },
+    },
+    '/v1/research-cloud/monitoring': {
+      get: {
+        summary: 'Research Cloud monitoring',
+        operationId: 'getResearchCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/research-cloud/routing': {
+      get: {
+        summary: 'Research Cloud routing table',
+        operationId: 'getResearchCloudRouting',
+        responses: { '200': { description: 'Static routing catalog' } },
+      },
+    },
+    '/v1/research-cloud/overview': {
+      get: {
+        summary: 'Research Cloud org overview',
+        operationId: 'getResearchCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage + product catalog' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/experiment-platform/engine': {
+      get: {
+        summary: 'Experiment Platform engine catalog',
+        operationId: 'getExperimentPlatformEngine',
+        responses: { '200': { description: 'Experiment Platform catalog + honesty' } },
+      },
+    },
+    '/v1/experiment-platform/products': {
+      get: {
+        summary: 'Experiment Platform products',
+        operationId: 'listExperimentPlatformProducts',
+        responses: { '200': { description: 'Experiment Platform products' } },
+      },
+    },
+    '/v1/experiment-platform/monitoring': {
+      get: {
+        summary: 'Experiment Platform monitoring',
+        operationId: 'getExperimentPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/experiment-platform/runs': {
+      get: {
+        summary: 'List experiment runs',
+        operationId: 'listExperimentPlatformRuns',
+        responses: { '200': { description: 'List experiment runs' } },
+      },
+    },
+    '/v1/experiment-platform/query': {
+      get: {
+        summary: 'Query Experiment Platform',
+        operationId: 'queryExperimentPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/synthetic-data-platform/engine': {
+      get: {
+        summary: 'Synthetic Data Platform engine catalog',
+        operationId: 'getSyntheticDataPlatformEngine',
+        responses: { '200': { description: 'Synthetic Data Platform catalog + honesty' } },
+      },
+    },
+    '/v1/synthetic-data-platform/products': {
+      get: {
+        summary: 'Synthetic Data Platform products',
+        operationId: 'listSyntheticDataPlatformProducts',
+        responses: { '200': { description: 'Synthetic Data Platform products' } },
+      },
+    },
+    '/v1/synthetic-data-platform/monitoring': {
+      get: {
+        summary: 'Synthetic Data Platform monitoring',
+        operationId: 'getSyntheticDataPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/synthetic-data-platform/artifacts': {
+      get: {
+        summary: 'List synthetic artifacts',
+        operationId: 'listSyntheticDataPlatformArtifacts',
+        responses: { '200': { description: 'List synthetic artifacts' } },
+      },
+    },
+    '/v1/synthetic-data-platform/query': {
+      get: {
+        summary: 'Query Synthetic Data Platform',
+        operationId: 'querySyntheticDataPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/benchmark-platform/engine': {
+      get: {
+        summary: 'Benchmark Platform engine catalog',
+        operationId: 'getBenchmarkPlatformEngine',
+        responses: { '200': { description: 'Benchmark Platform catalog + honesty' } },
+      },
+    },
+    '/v1/benchmark-platform/products': {
+      get: {
+        summary: 'Benchmark Platform products',
+        operationId: 'listBenchmarkPlatformProducts',
+        responses: { '200': { description: 'Benchmark Platform products' } },
+      },
+    },
+    '/v1/benchmark-platform/monitoring': {
+      get: {
+        summary: 'Benchmark Platform monitoring',
+        operationId: 'getBenchmarkPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/benchmark-platform/leaderboard': {
+      get: {
+        summary: 'List benchmark leaderboard rows',
+        operationId: 'listBenchmarkPlatformLeaderboard',
+        responses: { '200': { description: 'List benchmark leaderboard rows' } },
+      },
+    },
+    '/v1/benchmark-platform/query': {
+      get: {
+        summary: 'Query Benchmark Platform',
+        operationId: 'queryBenchmarkPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/evaluation-platform/engine': {
+      get: {
+        summary: 'Evaluation Platform engine catalog',
+        operationId: 'getEvaluationPlatformEngine',
+        responses: { '200': { description: 'Evaluation Platform catalog + honesty' } },
+      },
+    },
+    '/v1/evaluation-platform/products': {
+      get: {
+        summary: 'Evaluation Platform products',
+        operationId: 'listEvaluationPlatformProducts',
+        responses: { '200': { description: 'Evaluation Platform products' } },
+      },
+    },
+    '/v1/evaluation-platform/monitoring': {
+      get: {
+        summary: 'Evaluation Platform monitoring',
+        operationId: 'getEvaluationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/evaluation-platform/capabilities': {
+      get: {
+        summary: 'List evaluation capabilities',
+        operationId: 'listEvaluationPlatformCapabilities',
+        responses: { '200': { description: 'List evaluation capabilities' } },
+      },
+    },
+    '/v1/evaluation-platform/query': {
+      get: {
+        summary: 'Query Evaluation Platform',
+        operationId: 'queryEvaluationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-publication-platform/engine': {
+      get: {
+        summary: 'AI Publication Platform engine catalog',
+        operationId: 'getAiPublicationPlatformEngine',
+        responses: { '200': { description: 'AI Publication Platform catalog + honesty' } },
+      },
+    },
+    '/v1/ai-publication-platform/products': {
+      get: {
+        summary: 'AI Publication Platform products',
+        operationId: 'listAiPublicationPlatformProducts',
+        responses: { '200': { description: 'AI Publication Platform products' } },
+      },
+    },
+    '/v1/ai-publication-platform/monitoring': {
+      get: {
+        summary: 'AI Publication Platform monitoring',
+        operationId: 'getAiPublicationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-publication-platform/publications': {
+      get: {
+        summary: 'List publications',
+        operationId: 'listAiPublicationPlatformPublications',
+        responses: { '200': { description: 'List publications' } },
+      },
+    },
+    '/v1/ai-publication-platform/query': {
+      get: {
+        summary: 'Query AI Publication Platform',
+        operationId: 'queryAiPublicationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/patent-innovation-platform/engine': {
+      get: {
+        summary: 'Patent & Innovation Platform engine catalog',
+        operationId: 'getPatentInnovationPlatformEngine',
+        responses: { '200': { description: 'Patent & Innovation Platform catalog + honesty' } },
+      },
+    },
+    '/v1/patent-innovation-platform/products': {
+      get: {
+        summary: 'Patent & Innovation Platform products',
+        operationId: 'listPatentInnovationPlatformProducts',
+        responses: { '200': { description: 'Patent & Innovation Platform products' } },
+      },
+    },
+    '/v1/patent-innovation-platform/monitoring': {
+      get: {
+        summary: 'Patent & Innovation Platform monitoring',
+        operationId: 'getPatentInnovationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/patent-innovation-platform/portfolio': {
+      get: {
+        summary: 'List IP portfolio items',
+        operationId: 'listPatentInnovationPlatformPortfolio',
+        responses: { '200': { description: 'List IP portfolio items' } },
+      },
+    },
+    '/v1/patent-innovation-platform/query': {
+      get: {
+        summary: 'Query Patent & Innovation Platform',
+        operationId: 'queryPatentInnovationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/open-science-platform/engine': {
+      get: {
+        summary: 'Open Science Platform engine catalog',
+        operationId: 'getOpenSciencePlatformEngine',
+        responses: { '200': { description: 'Open Science Platform catalog + honesty' } },
+      },
+    },
+    '/v1/open-science-platform/products': {
+      get: {
+        summary: 'Open Science Platform products',
+        operationId: 'listOpenSciencePlatformProducts',
+        responses: { '200': { description: 'Open Science Platform products' } },
+      },
+    },
+    '/v1/open-science-platform/monitoring': {
+      get: {
+        summary: 'Open Science Platform monitoring',
+        operationId: 'getOpenSciencePlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/open-science-platform/releases': {
+      get: {
+        summary: 'List open-science release candidates',
+        operationId: 'listOpenSciencePlatformReleases',
+        responses: { '200': { description: 'List open-science release candidates' } },
+      },
+    },
+    '/v1/open-science-platform/query': {
+      get: {
+        summary: 'Query Open Science Platform',
+        operationId: 'queryOpenSciencePlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/open-science-platform/check': {
+      get: {
+        summary: 'Check open-science release consent gate',
+        operationId: 'checkOpenScienceRelease',
+        responses: { '200': { description: 'allowed + reason' } },
+      },
+    },
+    '/v1/open-science-platform/release': {
+      get: {
+        summary: 'Attempt open-science release (consent gated)',
+        operationId: 'releaseOpenScienceCandidate',
+        responses: {
+          '200': { description: 'Released' },
+          '400': { description: 'Blocked by consent gate' },
+        },
+      },
+    },
+    '/v1/research-analytics/engine': {
+      get: {
+        summary: 'Research Analytics engine catalog',
+        operationId: 'getResearchAnalyticsEngine',
+        responses: { '200': { description: 'Research Analytics catalog + honesty' } },
+      },
+    },
+    '/v1/research-analytics/products': {
+      get: {
+        summary: 'Research Analytics products',
+        operationId: 'listResearchAnalyticsProducts',
+        responses: { '200': { description: 'Research Analytics products' } },
+      },
+    },
+    '/v1/research-analytics/monitoring': {
+      get: {
+        summary: 'Research Analytics monitoring',
+        operationId: 'getResearchAnalyticsMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/research-analytics/snapshot': {
+      get: {
+        summary: 'Research analytics snapshot',
+        operationId: 'listResearchAnalyticsSnapshot',
+        responses: { '200': { description: 'Research analytics snapshot' } },
+      },
+    },
+    '/v1/research-analytics/query': {
+      get: {
+        summary: 'Query Research Analytics',
+        operationId: 'queryResearchAnalytics',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

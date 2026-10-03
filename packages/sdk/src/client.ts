@@ -2005,6 +2005,106 @@ export class VerbaLab {
     return this.requestJson('/v1/agricultural-intelligence/engine', { method: 'GET' });
   }
 
+
+  async researchCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/research-cloud/products', { method: 'GET' });
+  }
+
+  async experimentPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/experiment-platform/engine', { method: 'GET' });
+  }
+
+  async syntheticDataPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/synthetic-data-platform/engine', { method: 'GET' });
+  }
+
+  async benchmarkPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/benchmark-platform/engine', { method: 'GET' });
+  }
+
+  async evaluationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/evaluation-platform/engine', { method: 'GET' });
+  }
+
+  async aiPublicationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-publication-platform/engine', { method: 'GET' });
+  }
+
+  async patentInnovationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/patent-innovation-platform/engine', { method: 'GET' });
+  }
+
+  async openSciencePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/open-science-platform/engine', { method: 'GET' });
+  }
+
+  async researchAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/research-analytics/engine', { method: 'GET' });
+  }
+
   async tourismHeritageIntelligenceEngine(): Promise<{
     product: string;
     note: string;

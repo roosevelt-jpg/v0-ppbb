@@ -4539,3 +4539,128 @@ export class GqlTourismHeritageIntelligenceEngine {
   traditionalKnowledgeConsentRequired!: boolean;
 }
 
+@ObjectType()
+export class GqlResearchCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlExperimentPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  weightsAndBiasesOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSyntheticDataPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  syntheticLabelRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlBenchmarkPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  publicLeaderboardOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEvaluationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  regeneratesModelEvaluationPlatform!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiPublicationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  doiRegistryOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPatentInnovationPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  usptoOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlOpenSciencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlResearchAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  aiSovereigntyOs!: boolean;
+}
+
