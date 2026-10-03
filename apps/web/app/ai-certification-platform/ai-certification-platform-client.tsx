@@ -12,7 +12,14 @@ type Engine = {
   honesty: Record<string, boolean | string>;
   safety?: { note?: string } & Record<string, unknown>;
   capabilities?: Array<Record<string, unknown>>;
-  products?: Array<Record<string, unknown>>;
+  scheme?: {
+    schemeId: string;
+    title: string;
+    accreditationStatus: string;
+    disclaimer: string;
+    elements: Array<{ id: string; title: string; status: string }>;
+    certificateLifecycle: string[];
+  };
 };
 
 type RecordRow = {
@@ -31,8 +38,10 @@ export function AiCertificationPlatformClient() {
   const [records, setRecords] = useState<RecordRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
-  const [kind, setKind] = useState('enterprise_risk');
+  const [kind, setKind] = useState('certificate');
   const [busy, setBusy] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('VGAS-DEMO-ENGINEER-001');
+  const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     void apiFetch<Engine>('/v1/ai-certification-platform/engine')
@@ -77,13 +86,26 @@ export function AiCertificationPlatformClient() {
     }
   }
 
+  async function onVerify(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    try {
+      const res = await apiFetch<Record<string, unknown>>(
+        `/v1/global-ai-standards/verify/${encodeURIComponent(verifyCode.trim())}`,
+      );
+      setVerifyResult(res);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verify failed');
+    }
+  }
+
   return (
     <AppShell>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.85rem', fontWeight: 720, letterSpacing: '-0.03em', margin: '0 0 0.35rem' }}>
         AI Certification Platform
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-365 — VerbaLab VGAS console. Internal business tooling; not external industry recognition or third-party accreditation.
+        VL-365 — VerbaLab personnel certificates under ISO-aligned scheme VGAS-PCS-001. Not third-party accredited.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
@@ -95,15 +117,60 @@ export function AiCertificationPlatformClient() {
               {String(data.safety.note)}
             </p>
           ) : null}
+
+          {data.scheme ? (
+            <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1rem' }}>
+                Scheme {data.scheme.schemeId}
+              </h2>
+              <p style={{ margin: 0, color: 'var(--muted)' }}>{data.scheme.title}</p>
+              <p style={{ margin: 0, fontSize: '0.88rem' }}>
+                accreditationStatus=<strong>{data.scheme.accreditationStatus}</strong>
+              </p>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.4rem' }}>
+                {data.scheme.elements.map((el) => (
+                  <li key={el.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.4rem', fontSize: '0.9rem' }}>
+                    {el.title} <span style={{ color: 'var(--muted)' }}>({el.status})</span>
+                  </li>
+                ))}
+              </ul>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--muted)' }}>
+                Lifecycle: {data.scheme.certificateLifecycle.join(' → ')}
+              </p>
+              <p style={{ margin: 0, borderLeft: '3px solid #b45309', paddingLeft: '0.75rem', fontSize: '0.88rem' }}>
+                {data.scheme.disclaimer}
+              </p>
+            </section>
+          ) : null}
+
+          <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1rem' }}>Verify certificate</h2>
+            <form onSubmit={onVerify} style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap', alignItems: 'end' }}>
+              <label className="vl-label" style={{ flex: '1 1 16rem' }}>
+                Code
+                <input className="vl-field" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+              </label>
+              <button type="submit" className="vl-btn vl-btn-primary">
+                Verify
+              </button>
+            </form>
+            {verifyResult ? (
+              <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
+                {JSON.stringify(verifyResult, null, 2)}
+              </pre>
+            ) : null}
+          </section>
+
           <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty, capabilities: data.capabilities, products: data.products }, null, 2)}
+            {JSON.stringify({ honesty: data.honesty, capabilities: data.capabilities }, null, 2)}
           </pre>
+
           <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
             <h2 style={{ margin: 0, fontSize: '1rem' }}>Records</h2>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
               {records.map((r) => (
                 <li key={r.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
-                  <strong>{r.title}</strong> 
+                  <strong>{r.title}</strong>{' '}
                   <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
                     {r.kind} · {r.status}
                   </span>

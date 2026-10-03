@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { UsageService } from '../usage/usage.service';
 import { VgasStoreService } from '../vgas-store/vgas-store.service';
+import { vgasIsoProcessBundle } from '../vgas-store/vgas-iso-process';
 import {
   globalAiStandardsHonesty,
   globalAiStandardsLibrary,
@@ -73,6 +74,10 @@ export class GlobalAiStandardsService {
 
   verify(code: string) {
     return this.store.verify(code);
+  }
+
+  isoProcess() {
+    return vgasIsoProcessBundle();
   }
 
   monitoring() {

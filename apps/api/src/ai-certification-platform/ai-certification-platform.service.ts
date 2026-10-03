@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { VgasStoreService } from '../vgas-store/vgas-store.service';
+import { vgasCertificationScheme } from '../vgas-store/vgas-iso-process';
 import {
   aiCertificationPlatformCapabilities,
   aiCertificationPlatformHonesty,
@@ -17,13 +18,23 @@ export class AiCertificationPlatformService {
       domain: 'certification',
       capabilities: aiCertificationPlatformCapabilities(),
       routesTo: aiCertificationPlatformRoutesTo(),
+      scheme: vgasCertificationScheme(),
       honesty: aiCertificationPlatformHonesty(),
       safety: {
         ...aiCertificationPlatformHonesty(),
-        note: 'VL-365 VerbaLab-issued certificates. thirdPartyAccreditation=false.',
+        note: 'VL-365 VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
       },
       docs: '/docs/AI_CERTIFICATION_PLATFORM.md',
-      note: 'VL-365 VerbaLab-issued certificates. thirdPartyAccreditation=false.',
+      note: 'VL-365 VerbaLab-issued certificates under ISO-aligned scheme. thirdPartyAccreditation=false.',
+    };
+  }
+
+  scheme() {
+    return {
+      scheme: vgasCertificationScheme(),
+      honesty: aiCertificationPlatformHonesty(),
+      docs: '/docs/vgas-audit/CERTIFICATION_GUIDE.md',
+      note: 'Personnel certification scheme inspired by ISO/IEC 17024 principles — not an accredited CB.',
     };
   }
 

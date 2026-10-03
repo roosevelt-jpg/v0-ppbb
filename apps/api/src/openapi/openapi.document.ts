@@ -12769,6 +12769,13 @@ export const openApiDocument = {
         responses: { '200': { description: 'OK' } },
       },
     },
+    '/v1/global-ai-standards/iso-process': {
+      get: {
+        summary: 'VGAS ISO process maturity and recognition pathway',
+        operationId: 'getGlobalAiStandardsIsoProcess',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
     '/v1/ai-certification-platform/engine': {
       get: {
         summary: 'AI Certification Platform engine',
@@ -12801,6 +12808,13 @@ export const openApiDocument = {
       get: {
         summary: 'AI Certification Platform routes',
         operationId: 'listAiCertificationPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/scheme': {
+      get: {
+        summary: 'AI Certification Platform ISO-aligned scheme',
+        operationId: 'getAiCertificationPlatformScheme',
         responses: { '200': { description: 'OK' } },
       },
     },

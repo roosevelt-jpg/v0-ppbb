@@ -5409,8 +5409,16 @@ export class VerbaLab {
     return this.requestJson('/v1/global-ai-standards/products', { method: 'GET' });
   }
 
+  async globalAiStandardsIsoProcess(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-standards/iso-process', { method: 'GET' });
+  }
+
   async aiCertificationPlatformEngine(): Promise<Record<string, unknown>> {
     return this.requestJson('/v1/ai-certification-platform/engine', { method: 'GET' });
+  }
+
+  async aiCertificationPlatformScheme(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-certification-platform/scheme', { method: 'GET' });
   }
 
   async aiComplianceFrameworkEngine(): Promise<Record<string, unknown>> {

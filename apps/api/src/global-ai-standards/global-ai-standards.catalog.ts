@@ -1,3 +1,5 @@
+import { vgasHonesty } from '../vgas-store/vgas-honesty';
+
 export type VgasProductRow = {
   id: string;
   name: string;
@@ -88,19 +90,20 @@ export function globalAiStandardsProductCatalog(): VgasProductRow[] {
       api: 'GET /v1/global-ai-standards/verify/:code',
       console: '/ai-certification-platform',
       notes: 'Public verify API for VerbaLab-issued certificates. thirdPartyAccreditation=false.',
-    }
+    },
+    {
+      id: 'iso-process-maturity',
+      name: 'ISO Process Maturity',
+      status: 'shipped' as const,
+      api: 'GET /v1/global-ai-standards/iso-process',
+      console: '/global-ai-standards',
+      notes: 'ISO-aligned document control + recognition pathway. isoProcessMaturity=true; isoIeeeW3cRecognition=false.',
+    },
   ];
 }
 
 export function globalAiStandardsHonesty() {
-  return {
-    internalStandardsPlatform: true,
-    internationalStandardAdoption: false,
-    isoIeeeW3cRecognition: false,
-    thirdPartyAccreditation: false,
-    confluenceOs: false,
-    lmsMarketplaceOs: false,
-  };
+  return vgasHonesty();
 }
 
 export function globalAiStandardsLibrary() {
@@ -116,6 +119,7 @@ export function globalAiStandardsLibrary() {
 export function globalAiStandardsRoutingTable() {
   return [
     { id: 'products', path: '/v1/global-ai-standards/products', purpose: 'VGAS product catalog' },
+    { id: 'iso-process', path: '/v1/global-ai-standards/iso-process', purpose: 'ISO-aligned process maturity + recognition pathway' },
     { id: 'verify', path: '/v1/global-ai-standards/verify/:code', purpose: 'Certificate verification' },
     { id: 'overview', path: '/v1/global-ai-standards/overview', purpose: 'Authenticated overview' },
     { id: 'records', path: '/v1/global-ai-standards/records', purpose: 'All VGAS records' },

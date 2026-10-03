@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { vgasHonesty } from './vgas-honesty';
+import { vgasCertificationScheme } from './vgas-iso-process';
 import { vgasDefaultSeeds } from './vgas-store.seed';
 
 const DEMO_ORG = 'org_verbalab_demo';
@@ -22,26 +24,41 @@ export class VgasStoreService implements OnModuleInit {
   async ensureSeeded(organizationId: string) {
     const count = await this.prisma.vgasRecord.count({ where: { organizationId } });
     if (count > 0) {
-      // Backfill demo verify codes if an earlier seed omitted them.
+      // Backfill demo verify codes and any newer default seeds.
       for (const seed of vgasDefaultSeeds()) {
-        if (!seed.verifyCode) continue;
         const existing = await this.prisma.vgasRecord.findFirst({
           where: {
             organizationId,
             domain: seed.domain,
             kind: seed.kind,
             title: seed.title,
-            verifyCode: null,
           },
         });
-        if (existing) {
+        if (!existing) {
+          await this.prisma.vgasRecord.create({
+            data: {
+              organizationId,
+              domain: seed.domain,
+              kind: seed.kind,
+              title: seed.title,
+              status: seed.status,
+              summary: seed.summary,
+              ownerLabel: seed.ownerLabel,
+              verifyCode: seed.verifyCode,
+              content: seed.content as Prisma.InputJsonValue,
+            },
+          });
+          continue;
+        }
+        if (seed.verifyCode && !existing.verifyCode) {
           await this.prisma.vgasRecord.update({
             where: { id: existing.id },
             data: { verifyCode: seed.verifyCode },
           });
         }
       }
-      return { seeded: false, count };
+      const next = await this.prisma.vgasRecord.count({ where: { organizationId } });
+      return { seeded: false, count: next };
     }
     for (const seed of vgasDefaultSeeds()) {
       await this.prisma.vgasRecord.create({
@@ -103,17 +120,44 @@ export class VgasStoreService implements OnModuleInit {
 
   async verify(code: string) {
     await this.ensureSeeded(DEMO_ORG);
+    const scheme = vgasCertificationScheme();
+    const honesty = vgasHonesty();
     const row = await this.prisma.vgasRecord.findFirst({
       where: { verifyCode: code, domain: 'certification', kind: 'certificate' },
     });
     if (!row) {
-      return { valid: false, thirdPartyAccreditation: false, note: 'No VerbaLab-issued certificate found for this code.' };
+      return {
+        valid: false,
+        issuer: 'VerbaLab',
+        schemeId: scheme.schemeId,
+        isoProcessMaturity: true,
+        thirdPartyAccreditation: false,
+        isoIeeeW3cRecognition: false,
+        honesty,
+        note: 'No VerbaLab-issued certificate found for this code.',
+      };
     }
     return {
       valid: true,
+      issuer: 'VerbaLab',
+      schemeId: scheme.schemeId,
+      schemeTitle: scheme.title,
+      accreditationStatus: scheme.accreditationStatus,
+      isoProcessMaturity: true,
       thirdPartyAccreditation: false,
-      certificate: { id: row.id, title: row.title, status: row.status, summary: row.summary, issuedBy: 'VerbaLab', verifyCode: row.verifyCode, content: row.content },
-      note: 'VerbaLab-issued credential only - not third-party accredited.',
+      isoIeeeW3cRecognition: false,
+      internationalStandardAdoption: false,
+      honesty,
+      certificate: {
+        id: row.id,
+        title: row.title,
+        status: row.status,
+        summary: row.summary,
+        issuedBy: 'VerbaLab',
+        verifyCode: row.verifyCode,
+        content: row.content,
+      },
+      note: 'VerbaLab-issued credential under an ISO-aligned certification scheme — not ISO/IEEE/W3C recognition or third-party accreditation.',
     };
   }
 
@@ -130,8 +174,7 @@ export class VgasStoreService implements OnModuleInit {
       byDomain,
       certificates: rows.filter((r) => r.domain === 'certification' && r.kind === 'certificate').length,
       partners: rows.filter((r) => r.domain === 'partner').length,
-      thirdPartyAccreditation: false,
-      internationalStandardAdoption: false,
+      ...vgasHonesty(),
     };
   }
 }

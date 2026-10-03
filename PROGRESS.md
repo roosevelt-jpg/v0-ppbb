@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-373 Done — VGAS Production Audit; Volume 22 closed)
+Last updated: 2026-10-03 (VGAS ISO process maturity — ADR-0276; recognition flags still false)
 
 ---
 
@@ -393,8 +393,8 @@ Last updated: 2026-10-03 (VL-373 Done — VGAS Production Audit; Volume 22 close
 | VL-361 | Executive Intelligence Platform (Phase 228) | Done | Exec/board KPI cockpits; ADR-0263. |
 | VL-362 | Corporate Risk Platform (Phase 229) | Done | Risk register; ADR-0264. |
 | VL-363 | VCOS Production Audit (Phase 230) | Done | Audit pack + Digital Constitution; ADR-0265. Volume 21 closed. |
-| VL-364 | Global AI Standards Foundation (Phase 231) | Done | `/global-ai-standards`; ADR-0266. `internationalStandardAdoption=false`. |
-| VL-365 | AI Certification Platform (Phase 232) | Done | Courses/exams/VerbaLab certificates + verify API; `thirdPartyAccreditation=false`; ADR-0267. |
+| VL-364 | Global AI Standards Foundation (Phase 231) | Done | `/global-ai-standards` + `/iso-process`; ADR-0266/0276. `isoProcessMaturity=true`; recognition=false. |
+| VL-365 | AI Certification Platform (Phase 232) | Done | Scheme VGAS-PCS-001 + verify API; `thirdPartyAccreditation=false`; ADR-0267/0276. |
 | VL-366 | AI Compliance Framework (Phase 233) | Done | Self-assessment/gap analysis; ADR-0268. |
 | VL-367 | Reference Architectures (Phase 234) | Done | Industry blueprints; ADR-0269. |
 | VL-368 | Best Practices Library (Phase 235) | Done | Pattern catalog; ADR-0270. |
@@ -589,3 +589,4 @@ Last updated: 2026-10-03 (VL-373 Done — VGAS Production Audit; Volume 22 close
 | 2026-10-03 | VL-363 Done: VCOS Production Audit (Phase 230) — audit pack + Digital Constitution; ADR-0265. Volume 21 closed. Ask for Volume 22 when ready. |
 | 2026-10-03 | VL-364-372 Done: VGAS hubs (Phases 231-239); ADR-0266-0274. internationalStandardAdoption/thirdPartyAccreditation=false. |
 | 2026-10-03 | VL-373 Done: VGAS Production Audit (Phase 240); ADR-0275. Volume 22 closed. Ask for Volume 23 when ready. |
+| 2026-10-03 | VGAS ISO process maturity: document control + 17024-inspired scheme + recognition pathway; ADR-0276. `isoProcessMaturity=true`; isoIeeeW3cRecognition/thirdPartyAccreditation remain false. |

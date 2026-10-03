@@ -15,6 +15,17 @@ type Engine = {
   products?: Array<Record<string, unknown>>;
 };
 
+type IsoProcess = {
+  note: string;
+  honesty: Record<string, boolean>;
+  documentStages: Array<{ id: string; label: string; isoAnalogy: string; description: string }>;
+  certificationScheme: { schemeId: string; title: string; accreditationStatus: string; disclaimer: string };
+  recognitionPathway: {
+    note: string;
+    whatRequiresExternalBodies: Array<{ step: string; note: string }>;
+  };
+};
+
 type RecordRow = {
   id: string;
   domain: string;
@@ -28,16 +39,22 @@ type RecordRow = {
 export function GlobalAiStandardsClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Engine | null>(null);
+  const [iso, setIso] = useState<IsoProcess | null>(null);
   const [records, setRecords] = useState<RecordRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [kind, setKind] = useState('note');
   const [busy, setBusy] = useState(false);
+  const [verifyCode, setVerifyCode] = useState('VGAS-DEMO-ENGINEER-001');
+  const [verifyResult, setVerifyResult] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     void apiFetch<Engine>('/v1/global-ai-standards/products')
       .then(setData)
       .catch((err: Error) => setError(err.message));
+    void apiFetch<IsoProcess>('/v1/global-ai-standards/iso-process')
+      .then(setIso)
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -65,7 +82,7 @@ export function GlobalAiStandardsClient() {
       await apiFetch('/v1/global-ai-standards/records', {
         token,
         method: 'POST',
-        body: JSON.stringify({ kind, title, summary: 'Created from VGAS console' }),
+        body: JSON.stringify({ domain: 'foundation', kind, title, summary: 'Created from VGAS console' }),
       });
       const res = await apiFetch<{ records: RecordRow[] }>('/v1/global-ai-standards/records', { token });
       setRecords(res.records ?? []);
@@ -77,13 +94,26 @@ export function GlobalAiStandardsClient() {
     }
   }
 
+  async function onVerify(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    try {
+      const res = await apiFetch<Record<string, unknown>>(
+        `/v1/global-ai-standards/verify/${encodeURIComponent(verifyCode.trim())}`,
+      );
+      setVerifyResult(res);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verify failed');
+    }
+  }
+
   return (
     <AppShell>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.85rem', fontWeight: 720, letterSpacing: '-0.03em', margin: '0 0 0.35rem' }}>
         Global AI Standards
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-364 — VerbaLab VGAS console. Internal business tooling; not external industry recognition or third-party accreditation.
+        VL-364 — ISO-aligned process maturity for VerbaLab standards. Not ISO/IEEE/W3C recognition or third-party accreditation.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
@@ -95,15 +125,58 @@ export function GlobalAiStandardsClient() {
               {String(data.safety.note)}
             </p>
           ) : null}
+
+          {iso ? (
+            <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.85rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1rem' }}>ISO process maturity</h2>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{iso.note}</p>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.45rem' }}>
+                {iso.documentStages.map((stage) => (
+                  <li key={stage.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.45rem' }}>
+                    <strong>{stage.label}</strong>{' '}
+                    <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>({stage.isoAnalogy})</span>
+                    <p style={{ margin: '0.2rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>{stage.description}</p>
+                  </li>
+                ))}
+              </ul>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--muted)' }}>
+                Scheme {iso.certificationScheme.schemeId}: {iso.certificationScheme.title} — accreditationStatus=
+                {iso.certificationScheme.accreditationStatus}.
+              </p>
+              <p style={{ margin: 0, fontSize: '0.88rem', borderLeft: '3px solid #b45309', paddingLeft: '0.75rem' }}>
+                External recognition still required: {iso.recognitionPathway.whatRequiresExternalBodies.map((s) => s.step).join('; ')}.
+              </p>
+            </section>
+          ) : null}
+
+          <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
+            <h2 style={{ margin: 0, fontSize: '1rem' }}>Verify certificate</h2>
+            <form onSubmit={onVerify} style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap', alignItems: 'end' }}>
+              <label className="vl-label" style={{ flex: '1 1 16rem' }}>
+                Code
+                <input className="vl-field" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+              </label>
+              <button type="submit" className="vl-btn vl-btn-primary">
+                Verify
+              </button>
+            </form>
+            {verifyResult ? (
+              <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
+                {JSON.stringify(verifyResult, null, 2)}
+              </pre>
+            ) : null}
+          </section>
+
           <pre style={{ margin: 0, padding: '1rem', background: 'var(--surface)', overflow: 'auto', fontSize: '0.78rem' }}>
-            {JSON.stringify({ honesty: data.honesty, capabilities: data.capabilities, products: data.products }, null, 2)}
+            {JSON.stringify({ honesty: data.honesty, products: data.products }, null, 2)}
           </pre>
+
           <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
             <h2 style={{ margin: 0, fontSize: '1rem' }}>Records</h2>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
               {records.map((r) => (
                 <li key={r.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
-                  <strong>{r.title}</strong> 
+                  <strong>{r.title}</strong>{' '}
                   <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
                     {r.kind} · {r.status}
                   </span>

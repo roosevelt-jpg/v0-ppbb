@@ -19,6 +19,9 @@ export class GlobalAiStandardsController {
   @Get('verify/:code')
   verify(@Param('code') code: string) { return this.vgas.verify(code); }
 
+  @Get('iso-process')
+  isoProcess() { return this.vgas.isoProcess(); }
+
   @Get('overview')
   @UseGuards(ClerkAuthGuard)
   overview(@CurrentSession() session: SessionContext) { return this.vgas.overview(session); }

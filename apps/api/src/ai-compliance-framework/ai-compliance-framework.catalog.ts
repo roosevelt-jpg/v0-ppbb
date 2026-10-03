@@ -1,14 +1,7 @@
+import { vgasHonesty } from '../vgas-store/vgas-honesty';
+
 export function aiComplianceFrameworkHonesty() {
-  return {
-    internalStandardsPlatform: true,
-    internationalStandardAdoption: false,
-    isoIeeeW3cRecognition: false,
-    thirdPartyAccreditation: false,
-    confluenceOs: false,
-    lmsMarketplaceOs: false,
-    note:
-      'Volume 22 README: VerbaLab standards/certification software - not external industry-standard adoption or third-party accreditation.',
-  };
+  return vgasHonesty();
 }
 
 export function aiComplianceFrameworkCapabilities() {

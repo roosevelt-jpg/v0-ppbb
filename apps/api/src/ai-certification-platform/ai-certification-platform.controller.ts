@@ -27,6 +27,11 @@ export class AiCertificationPlatformController {
     return this.service.routes();
   }
 
+  @Get('scheme')
+  scheme() {
+    return this.service.scheme();
+  }
+
   @Get('records')
   @UseGuards(ClerkAuthGuard)
   records(@CurrentSession() session: SessionContext) {

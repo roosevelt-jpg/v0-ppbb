@@ -126,7 +126,9 @@ function usage(): never {
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
   verbalab global-ai-standards-products
+  verbalab global-ai-standards-iso-process
   verbalab ai-certification-platform-engine
+  verbalab ai-certification-platform-scheme
   verbalab ai-compliance-framework-engine
   verbalab reference-architectures-engine
   verbalab best-practices-library-engine
@@ -964,8 +966,18 @@ async function main() {
     return;
   }
 
+  if (command === 'global-ai-standards-iso-process') {
+    console.log(JSON.stringify(await vl.globalAiStandardsIsoProcess(), null, 2));
+    return;
+  }
+
   if (command === 'ai-certification-platform-engine') {
     console.log(JSON.stringify(await vl.aiCertificationPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-certification-platform-scheme') {
+    console.log(JSON.stringify(await vl.aiCertificationPlatformScheme(), null, 2));
     return;
   }
 
