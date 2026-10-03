@@ -433,6 +433,42 @@ export class GqlNeuralTtsVoice {
 }
 
 @ObjectType()
+export class GqlVoiceCloningCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceCloningEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceCloningCapability])
+  capabilities!: GqlVoiceCloningCapability[];
+
+  @Field()
+  consentRequired!: boolean;
+
+  @Field()
+  watermarkRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

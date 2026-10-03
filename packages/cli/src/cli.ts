@@ -17,6 +17,8 @@ function usage(): never {
   verbalab voice-products
   verbalab neural-tts-engine
   verbalab neural-tts-voices
+  verbalab voice-cloning-engine
+  verbalab voice-cloning-consent
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -91,6 +93,16 @@ async function main() {
         2,
       ),
     );
+    return;
+  }
+
+  if (command === 'voice-cloning-engine') {
+    console.log(JSON.stringify(await vl.voiceCloningEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-cloning-consent') {
+    console.log(JSON.stringify(await vl.voiceCloningConsentPolicy(), null, 2));
     return;
   }
 

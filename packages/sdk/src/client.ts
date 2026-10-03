@@ -1090,6 +1090,34 @@ export class VerbaLab {
     return this.requestJson(`/v1/tts/voices${suffix}`, { method: 'GET' });
   }
 
+  async voiceCloningEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    trust: {
+      consentRequired: boolean;
+      ownershipAttestation: boolean;
+      abuseReview: boolean;
+      watermarkRequired: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/voice-cloning/engine', { method: 'GET' });
+  }
+
+  async voiceCloningConsentPolicy(): Promise<{
+    product: string;
+    required: Record<string, unknown>;
+    forbidden: string[];
+  }> {
+    return this.requestJson('/v1/voice-cloning/consent/policy', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

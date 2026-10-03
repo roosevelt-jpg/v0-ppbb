@@ -887,10 +887,23 @@ model VoiceClone {
   workspaceId        String    @map("workspace_id")
   name               String
   status             String    @default("pending_review")
+  /// instant = ElevenLabs IVC (VL-064/171); professional = stricter enrollment (same vendor path today)
+  cloneMode          String    @default("instant") @map("clone_mode")
   consentAttested    Boolean   @map("consent_attested")
   consentNotes       String    @map("consent_notes")
   consentAttestedAt  DateTime  @map("consent_attested_at")
   consentAttestedBy  String?   @map("consent_attested_by")
+  /// Explicit ownership attestation (who owns the voice rights) — separate from speaker consent.
+  ownershipAttested  Boolean   @default(false) @map("ownership_attested")
+  ownershipNotes     String    @default("") @map("ownership_notes")
+  ownerUserId        String?   @map("owner_user_id")
+  licenseType        String    @default("internal") @map("license_type")
+  licenseNotes       String    @default("") @map("license_notes")
+  /// { canSynthesize, canShare, canExport, allowedRoles: string[] }
+  permissions        Json      @default("{\"canSynthesize\":true,\"canShare\":false,\"canExport\":false,\"allowedRoles\":[\"owner\",\"admin\"]}")
+  enrollmentVerified Boolean   @default(false) @map("enrollment_verified")
+  enrollmentVerifiedAt DateTime? @map("enrollment_verified_at")
+  enrollmentVerifyNotes String? @map("enrollment_verify_notes")
   watermarkRequired  Boolean   @default(true) @map("watermark_required")
   sampleStorageKeys  Json      @map("sample_storage_keys")
   sampleCount        Int       @default(0) @map("sample_count")
@@ -908,6 +921,7 @@ model VoiceClone {
   workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, workspaceId, status])
+  @@index([organizationId, workspaceId, cloneMode])
   @@map("voice_clones")
 }
 

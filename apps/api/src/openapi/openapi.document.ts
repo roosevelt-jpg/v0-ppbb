@@ -2733,6 +2733,44 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/voice-cloning/engine': {
+      get: {
+        summary: 'Voice Cloning engine catalog',
+        operationId: 'getVoiceCloningEngine',
+        responses: { '200': { description: 'Capabilities, trust gates, architecture notes' } },
+      },
+    },
+    '/v1/voice-cloning/consent/policy': {
+      get: {
+        summary: 'Voice cloning consent policy',
+        operationId: 'getVoiceCloningConsentPolicy',
+        responses: { '200': { description: 'Required consent/ownership/review rules' } },
+      },
+    },
+    '/v1/voice-cloning/library': {
+      get: {
+        summary: 'Enterprise voice clone library',
+        operationId: 'listVoiceCloningLibrary',
+        security: [{ ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace clones with governance metadata' } },
+      },
+    },
+    '/v1/voice-cloning/enroll': {
+      post: {
+        summary: 'Enroll a voice clone (instant or professional)',
+        operationId: 'enrollVoiceClone',
+        security: [{ ClerkAuth: [] }],
+        responses: { '201': { description: 'Clone pending abuse review' } },
+      },
+    },
+    '/v1/voice-cloning/enroll/stream': {
+      post: {
+        summary: 'Enroll with SSE progress events',
+        operationId: 'enrollVoiceCloneStream',
+        security: [{ ClerkAuth: [] }],
+        responses: { '200': { description: 'text/event-stream enrollment progress' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

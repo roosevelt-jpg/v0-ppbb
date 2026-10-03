@@ -42,19 +42,19 @@ export function voiceProductCatalog(): VoiceProductRow[] {
     {
       id: 'voice-cloning',
       name: 'Voice Cloning Platform',
-      status: 'partial',
-      api: '/v1/voice-clones',
-      console: '/audio',
+      status: 'shipped',
+      api: 'GET /v1/voice-cloning/engine',
+      console: '/voice-cloning',
       notes:
-        'ElevenLabs Instant Voice Cloning with explicit consent, abuse review, watermark (VL-064). Professional multi-hour cloning deferred to Phase 29.',
+        'Enterprise cloning hub (VL-172): consent, ownership, licensing, permissions, enrollment verify + watermark (extends VL-064).',
     },
     {
       id: 'instant-voice-cloning',
       name: 'Instant Voice Cloning',
-      status: 'partial',
-      api: 'POST /v1/voice-clones',
-      console: '/audio',
-      notes: 'Consent-gated instant clone enrollment (VL-064). Speak via clone:{id} on speech endpoint.',
+      status: 'shipped',
+      api: 'POST /v1/voice-cloning/enroll',
+      console: '/voice-cloning',
+      notes: 'Consent-gated instant enrollment (VL-064/172). Speak via clone:{id}.',
     },
     {
       id: 'voice-studio',

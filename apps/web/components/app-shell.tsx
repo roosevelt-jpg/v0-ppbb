@@ -12,6 +12,7 @@ const links = [
   { href: '/speech', label: 'Speech' },
   { href: '/voice-cloud', label: 'Voice' },
   { href: '/neural-tts', label: 'Neural TTS' },
+  { href: '/voice-cloning', label: 'Cloning' },
   { href: '/speech-recognition', label: 'STT Engine' },
   { href: '/speaker-intelligence', label: 'Speakers' },
   { href: '/accent-intelligence', label: 'Accent AI' },

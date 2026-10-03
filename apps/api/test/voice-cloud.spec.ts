@@ -109,8 +109,8 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(studio.status).toBe('shipped');
 
     const cloning = res.body.products.find((p: { id: string }) => p.id === 'voice-cloning');
-    expect(cloning.status).toBe('partial');
-    expect(cloning.api).toContain('/v1/voice-clones');
+    expect(cloning.status).toBe('shipped');
+    expect(cloning.api).toContain('/v1/voice-cloning/engine');
 
     const emotion = res.body.products.find((p: { id: string }) => p.id === 'emotion-voice');
     expect(emotion.status).toBe('deferred');

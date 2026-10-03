@@ -121,6 +121,9 @@ export function VoiceCloudClient() {
             <Link href={data.links.neuralTts ?? '/neural-tts'} style={primary}>
               Neural TTS
             </Link>
+            <Link href={data.links.voiceCloning ?? '/voice-cloning'} style={secondary}>
+              Cloning
+            </Link>
             <Link href={data.links.audio} style={secondary}>
               Voice Studio
             </Link>

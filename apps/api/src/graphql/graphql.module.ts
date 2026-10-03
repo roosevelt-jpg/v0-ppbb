@@ -8,6 +8,7 @@ import { LanguageCloudApplicationModule } from '../language-cloud/application/la
 import { SpeechCloudApplicationModule } from '../speech-cloud/application/speech-cloud-application.module';
 import { VoiceCloudApplicationModule } from '../voice-cloud/application/voice-cloud-application.module';
 import { NeuralTtsModule } from '../neural-tts/neural-tts.module';
+import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { SpeechRecognitionModule } from '../speech-recognition/speech-recognition.module';
 import { SpeakerIntelligenceModule } from '../speaker-intelligence/speaker-intelligence.module';
 import { AccentsModule } from '../accents/accents.module';
@@ -25,6 +26,7 @@ import { LanguageCloudGraphqlResolver } from './language-cloud.resolver';
 import { SpeechCloudGraphqlResolver } from './speech-cloud.resolver';
 import { VoiceCloudGraphqlResolver } from './voice-cloud.resolver';
 import { NeuralTtsGraphqlResolver } from './neural-tts.resolver';
+import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { SpeechRecognitionGraphqlResolver } from './speech-recognition.resolver';
 import { SpeakerIntelligenceGraphqlResolver } from './speaker-intelligence.resolver';
 import { AccentIntelligenceGraphqlResolver } from './accent-intelligence.resolver';
@@ -62,6 +64,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SpeechCloudApplicationModule,
     VoiceCloudApplicationModule,
     NeuralTtsModule,
+    VoiceCloningModule,
     SpeechRecognitionModule,
     SpeakerIntelligenceModule,
     AccentsModule,
@@ -87,6 +90,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     SpeechCloudGraphqlResolver,
     VoiceCloudGraphqlResolver,
     NeuralTtsGraphqlResolver,
+    VoiceCloningGraphqlResolver,
     SpeechRecognitionGraphqlResolver,
     SpeakerIntelligenceGraphqlResolver,
     AccentIntelligenceGraphqlResolver,

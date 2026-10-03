@@ -54,9 +54,19 @@ export class VoiceClonesService {
     id: string;
     name: string;
     status: string;
+    cloneMode?: string;
     consentAttested: boolean;
     consentNotes: string;
     consentAttestedAt: Date;
+    ownershipAttested?: boolean;
+    ownershipNotes?: string;
+    ownerUserId?: string | null;
+    licenseType?: string;
+    licenseNotes?: string;
+    permissions?: Prisma.JsonValue;
+    enrollmentVerified?: boolean;
+    enrollmentVerifiedAt?: Date | null;
+    enrollmentVerifyNotes?: string | null;
     watermarkRequired: boolean;
     sampleCount: number;
     provider: string;
@@ -64,6 +74,7 @@ export class VoiceClonesService {
     reviewNotes: string | null;
     reviewedAt: Date | null;
     disabledReason: string | null;
+    createdByUserId?: string | null;
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -72,9 +83,19 @@ export class VoiceClonesService {
       voice: `${VOICE_CLONE_PREFIX}${row.id}`,
       name: row.name,
       status: row.status,
+      cloneMode: row.cloneMode ?? 'instant',
       consentAttested: row.consentAttested,
       consentNotes: row.consentNotes,
       consentAttestedAt: row.consentAttestedAt,
+      ownershipAttested: row.ownershipAttested ?? false,
+      ownershipNotes: row.ownershipNotes ?? '',
+      ownerUserId: row.ownerUserId ?? row.createdByUserId ?? null,
+      licenseType: row.licenseType ?? 'internal',
+      licenseNotes: row.licenseNotes ?? '',
+      permissions: normalizePermissions(row.permissions),
+      enrollmentVerified: row.enrollmentVerified ?? false,
+      enrollmentVerifiedAt: row.enrollmentVerifiedAt ?? null,
+      enrollmentVerifyNotes: row.enrollmentVerifyNotes ?? null,
       watermarkRequired: row.watermarkRequired,
       sampleCount: row.sampleCount,
       provider: row.provider,
@@ -117,6 +138,13 @@ export class VoiceClonesService {
     consentNotes: string;
     files: Express.Multer.File[];
     ip?: string;
+    cloneMode?: 'instant' | 'professional';
+    ownershipAttested?: boolean;
+    ownershipNotes?: string;
+    licenseType?: 'internal' | 'commercial' | 'restricted';
+    licenseNotes?: string;
+    permissions?: Partial<VoiceClonePermissions>;
+    route?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
     await this.billing.assertPro(input.organizationId);
@@ -148,6 +176,31 @@ export class VoiceClonesService {
       );
     }
 
+    const cloneMode = input.cloneMode === 'professional' ? 'professional' : 'instant';
+    const minSamples = cloneMode === 'professional' ? 3 : 1;
+    if (input.files.length < minSamples) {
+      throw new ApiException(
+        'validation_error',
+        `${cloneMode} cloning requires at least ${minSamples} sample recording(s)`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const ownershipAttested = Boolean(input.ownershipAttested);
+    const ownershipNotes = input.ownershipNotes?.trim() ?? '';
+    if (cloneMode === 'professional') {
+      if (!ownershipAttested || ownershipNotes.length < 8) {
+        throw new ApiException(
+          'validation_error',
+          'Professional cloning requires ownershipAttested=true and ownershipNotes (min 8 chars)',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
+    const licenseType = normalizeLicenseType(input.licenseType);
+    const permissions = normalizePermissions(input.permissions);
+
     const keys: string[] = [];
     for (const file of input.files) {
       const key = `voices/${input.organizationId}/${randomUUID()}-${file.originalname}`;
@@ -161,10 +214,17 @@ export class VoiceClonesService {
         workspaceId: input.workspaceId,
         name,
         status: 'pending_review',
+        cloneMode,
         consentAttested: true,
         consentNotes: notes,
         consentAttestedAt: new Date(),
         consentAttestedBy: input.userId,
+        ownershipAttested,
+        ownershipNotes,
+        ownerUserId: input.userId,
+        licenseType,
+        licenseNotes: input.licenseNotes?.trim() ?? '',
+        permissions: permissions as unknown as Prisma.InputJsonValue,
         watermarkRequired: true,
         sampleStorageKeys: keys as Prisma.InputJsonValue,
         sampleCount: keys.length,
@@ -177,12 +237,181 @@ export class VoiceClonesService {
       organizationId: input.organizationId,
       userId: input.userId,
       action: 'voice_clone.created',
-      route: 'POST /v1/voice-clones',
+      route: input.route ?? 'POST /v1/voice-clones',
       ip: input.ip,
-      metadata: { voiceCloneId: row.id, sampleCount: keys.length, status: row.status },
+      metadata: {
+        voiceCloneId: row.id,
+        sampleCount: keys.length,
+        status: row.status,
+        cloneMode,
+        licenseType,
+        ownershipAttested,
+      },
     });
 
     return this.serialize(row);
+  }
+
+  async updateOwnership(input: {
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    role: string;
+    id: string;
+    ownershipAttested: boolean;
+    ownershipNotes: string;
+    ownerUserId?: string;
+    ip?: string;
+  }) {
+    this.assertOwnerOrAdmin(input.role);
+    const row = await this.requireClone(input.organizationId, input.workspaceId, input.id);
+    const notes = input.ownershipNotes?.trim() ?? '';
+    if (input.ownershipAttested && notes.length < 8) {
+      throw new ApiException(
+        'validation_error',
+        'ownershipNotes must describe ownership basis (min 8 chars)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const updated = await this.prisma.voiceClone.update({
+      where: { id: row.id },
+      data: {
+        ownershipAttested: input.ownershipAttested,
+        ownershipNotes: notes,
+        ownerUserId: input.ownerUserId ?? input.userId ?? row.ownerUserId,
+      },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'voice_clone.ownership_updated',
+      route: `PATCH /v1/voice-cloning/clones/${row.id}/ownership`,
+      ip: input.ip,
+      metadata: { voiceCloneId: row.id, ownershipAttested: input.ownershipAttested },
+    });
+    return this.serialize(updated);
+  }
+
+  async updateLicense(input: {
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    role: string;
+    id: string;
+    licenseType: string;
+    licenseNotes?: string;
+    ip?: string;
+  }) {
+    this.assertOwnerOrAdmin(input.role);
+    const row = await this.requireClone(input.organizationId, input.workspaceId, input.id);
+    const licenseType = normalizeLicenseType(input.licenseType);
+    const updated = await this.prisma.voiceClone.update({
+      where: { id: row.id },
+      data: {
+        licenseType,
+        licenseNotes: input.licenseNotes?.trim() ?? row.licenseNotes,
+      },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'voice_clone.license_updated',
+      route: `PATCH /v1/voice-cloning/clones/${row.id}/license`,
+      ip: input.ip,
+      metadata: { voiceCloneId: row.id, licenseType },
+    });
+    return this.serialize(updated);
+  }
+
+  async updatePermissions(input: {
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    role: string;
+    id: string;
+    permissions: Partial<VoiceClonePermissions>;
+    ip?: string;
+  }) {
+    this.assertOwnerOrAdmin(input.role);
+    const row = await this.requireClone(input.organizationId, input.workspaceId, input.id);
+    const permissions = {
+      ...normalizePermissions(row.permissions),
+      ...normalizePermissions(input.permissions),
+    };
+    const updated = await this.prisma.voiceClone.update({
+      where: { id: row.id },
+      data: { permissions: permissions as unknown as Prisma.InputJsonValue },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'voice_clone.permissions_updated',
+      route: `PATCH /v1/voice-cloning/clones/${row.id}/permissions`,
+      ip: input.ip,
+      metadata: { voiceCloneId: row.id, permissions },
+    });
+    return this.serialize(updated);
+  }
+
+  async verifyEnrollment(input: {
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    role: string;
+    id: string;
+    notes?: string;
+    ip?: string;
+  }) {
+    this.assertOwnerOrAdmin(input.role);
+    const row = await this.requireClone(input.organizationId, input.workspaceId, input.id);
+    const minSamples = row.cloneMode === 'professional' ? 3 : 1;
+    if (row.sampleCount < minSamples) {
+      throw new ApiException(
+        'validation_error',
+        `Enrollment verification requires at least ${minSamples} samples for ${row.cloneMode} mode`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (!row.consentAttested) {
+      throw new ApiException(
+        'validation_error',
+        'Cannot verify enrollment without consent attestation',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const updated = await this.prisma.voiceClone.update({
+      where: { id: row.id },
+      data: {
+        enrollmentVerified: true,
+        enrollmentVerifiedAt: new Date(),
+        enrollmentVerifyNotes:
+          input.notes?.trim() ||
+          `Sample count ${row.sampleCount} meets ${row.cloneMode} enrollment bar; consent present`,
+      },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'voice_clone.enrollment_verified',
+      route: `POST /v1/voice-cloning/clones/${row.id}/verify-enrollment`,
+      ip: input.ip,
+      metadata: {
+        voiceCloneId: row.id,
+        cloneMode: row.cloneMode,
+        sampleCount: row.sampleCount,
+      },
+    });
+    return this.serialize(updated);
+  }
+
+  private async requireClone(organizationId: string, workspaceId: string, id: string) {
+    const row = await this.prisma.voiceClone.findFirst({
+      where: { id, organizationId, workspaceId },
+    });
+    if (!row) {
+      throw new ApiException('not_found', 'Voice clone not found', HttpStatus.NOT_FOUND);
+    }
+    return row;
   }
 
   async review(input: {
@@ -378,4 +607,39 @@ export class VoiceClonesService {
       format: input.format ?? 'mp3',
     });
   }
+}
+
+export type VoiceClonePermissions = {
+  canSynthesize: boolean;
+  canShare: boolean;
+  canExport: boolean;
+  allowedRoles: string[];
+};
+
+const DEFAULT_PERMISSIONS: VoiceClonePermissions = {
+  canSynthesize: true,
+  canShare: false,
+  canExport: false,
+  allowedRoles: ['owner', 'admin'],
+};
+
+export function normalizePermissions(value: unknown): VoiceClonePermissions {
+  const raw =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  const roles = Array.isArray(raw.allowedRoles)
+    ? raw.allowedRoles.filter((r): r is string => typeof r === 'string')
+    : DEFAULT_PERMISSIONS.allowedRoles;
+  return {
+    canSynthesize: raw.canSynthesize === undefined ? true : Boolean(raw.canSynthesize),
+    canShare: Boolean(raw.canShare),
+    canExport: Boolean(raw.canExport),
+    allowedRoles: roles.length ? roles : DEFAULT_PERMISSIONS.allowedRoles,
+  };
+}
+
+function normalizeLicenseType(value?: string): 'internal' | 'commercial' | 'restricted' {
+  if (value === 'commercial' || value === 'restricted' || value === 'internal') return value;
+  return 'internal';
 }
