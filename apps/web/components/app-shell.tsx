@@ -15,6 +15,7 @@ const links = [
   { href: '/knowledge-cloud', label: 'Knowledge Cloud' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
+  { href: '/ontology', label: 'Ontology' },
   { href: '/embedding-cloud', label: 'Embeddings' },
   { href: '/vector-cloud', label: 'Vectors' },
   { href: '/memory-cloud', label: 'Memory' },

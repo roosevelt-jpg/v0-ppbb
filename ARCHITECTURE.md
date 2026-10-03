@@ -380,4 +380,5 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Knowledge Cloud Foundation shipped (VL-193 / Phase 60). See KNOWLEDGE_CLOUD + ADR-0104. Hub over VL-062 RAG + Intelligence; enterprise knowledge / ontology OS deferred (VL-194–203).
 - Enterprise Knowledge Base partial (VL-194 / Phase 61). See ENTERPRISE_KNOWLEDGE_BASE + ADR-0105. Extends VL-062 with collections/tags/content kinds + MD/HTML; org/workspace-scoped get/remove hardened; Confluence/media/approval deferred.
 - Enterprise Search partial (VL-195 / Phase 62). See ENTERPRISE_SEARCH + ADR-0106. Keyword + semantic + light hybrid RRF over VL-062/Vector Cloud; Elastic/BM25/image/voice deferred.
+- Ontology Platform partial (VL-196 / Phase 63). See ONTOLOGY_PLATFORM + ADR-0107. Concepts/hierarchies/synonyms over VL-184 KG; OWL/Protegé/certified vertical packs deferred.
 - Embedding Cloud partial (VL-181 / Phase 48). See EMBEDDING_CLOUD + ADR-0092. Text/document/code over VL-063; multimodal deferred.

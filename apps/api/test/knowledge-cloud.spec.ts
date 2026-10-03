@@ -124,6 +124,11 @@ describe('Knowledge Cloud Foundation (VL-193)', () => {
     expect(search.api).toContain('/v1/enterprise-search/engine');
     expect(search.console).toBe('/enterprise-search');
 
+    const ontology = res.body.products.find((p: { id: string }) => p.id === 'ontology-platform');
+    expect(ontology.status).toBe('partial');
+    expect(ontology.api).toContain('/v1/ontology/engine');
+    expect(ontology.console).toBe('/ontology');
+
     const rag = res.body.products.find((p: { id: string }) => p.id === 'enterprise-rag');
     expect(rag.status).toBe('partial');
     expect(rag.api).toContain('/v1/knowledge/query');
@@ -155,7 +160,8 @@ describe('Knowledge Cloud Foundation (VL-193)', () => {
     expect(overview.links.knowledgeBase).toBe('/knowledge-base');
     expect(overview.deferred.enterpriseSearch).toBe(false);
     expect(overview.links.enterpriseSearch).toBe('/enterprise-search');
-    expect(overview.deferred.ontologyPlatform).toBe(true);
+    expect(overview.deferred.ontologyPlatform).toBe(false);
+    expect(overview.links.ontology).toBe('/ontology');
     expect(overview.deferred.taxonomyPlatform).toBe(true);
     expect(overview.deferred.enterpriseRagProduct).toBe(true);
     expect(overview.deferred.knowledgeMemory).toBe(true);

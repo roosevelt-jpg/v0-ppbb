@@ -46,9 +46,9 @@ export function knowledgeGraphCatalog() {
       {
         id: 'ontologies',
         name: 'Ontologies',
-        status: 'deferred',
-        api: null,
-        notes: 'Ontology platform out of scope (vision backlog).',
+        status: 'partial',
+        api: 'GET /v1/ontology/engine',
+        notes: 'Bounded Ontology Platform (VL-196) over this KG. Not OWL/Protege OS.',
       },
       {
         id: 'taxonomies',
@@ -116,7 +116,8 @@ export function knowledgeGraphCatalog() {
     ] satisfies KgCapability[],
     honesty: {
       neo4jParity: false,
-      ontologyPlatform: false,
+      ontologyPlatform: true,
+      ontologyOs: false,
       taxonomyPlatform: false,
       preferRag: true,
       verticalDomainPacks: false,
@@ -124,6 +125,7 @@ export function knowledgeGraphCatalog() {
     links: {
       console: '/knowledge-graph',
       hub: '/intelligence-cloud',
+      ontology: '/ontology',
       knowledge: '/knowledge',
       vectorCloud: '/vector-cloud',
       rag: 'POST /v1/knowledge/query',

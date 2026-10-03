@@ -1156,6 +1156,29 @@ export class VerbaLab {
     });
   }
 
+  async ontologyEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      owlOs: boolean;
+      protegeParity: boolean;
+      rdfTripleStore: boolean;
+      certifiedVerticalOntologies: boolean;
+      orgWorkspaceScoped: boolean;
+      extendsKnowledgeGraph: boolean;
+      extendsVl184: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/ontology/engine', { method: 'GET' });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

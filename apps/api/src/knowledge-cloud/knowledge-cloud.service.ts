@@ -53,7 +53,7 @@ export class KnowledgeCloudService {
       deferred: {
         enterpriseKnowledgeBase: false,
         enterpriseSearch: false,
-        ontologyPlatform: true,
+        ontologyPlatform: false,
         taxonomyPlatform: true,
         enterpriseRagProduct: true,
         knowledgeMemory: true,
@@ -69,6 +69,7 @@ export class KnowledgeCloudService {
         knowledgeCloud: '/knowledge-cloud',
         knowledgeBase: '/knowledge-base',
         enterpriseSearch: '/enterprise-search',
+        ontology: '/ontology',
         knowledge: '/knowledge',
         knowledgeGraph: '/knowledge-graph',
         vectorCloud: '/vector-cloud',

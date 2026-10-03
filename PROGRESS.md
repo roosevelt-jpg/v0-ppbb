@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-195 Done — Enterprise Search)
+Last updated: 2026-10-03 (VL-196 Done — Ontology Platform)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-196 Ontology Platform (Phase 63) |
+| Next up | VL-197 Taxonomy Platform (Phase 64) |
 
 ---
 
@@ -225,6 +225,7 @@ Last updated: 2026-10-03 (VL-195 Done — Enterprise Search)
 | VL-193 | Knowledge Cloud Foundation (Phase 60) | Done | `/knowledge-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0104. Maps onto VL-062 + Intelligence; enterprise knowledge OS deferred. |
 | VL-194 | Enterprise Knowledge Base (Phase 61) | Done | `/v1/knowledge-base/*` over VL-062; collections/tags/MD/HTML; workspace-hardened get/remove; ADR-0105. Not Confluence OS. |
 | VL-195 | Enterprise Search (Phase 62) | Done | `/v1/enterprise-search/*` keyword/semantic/light hybrid RRF; ADR-0106. Not Elastic/BM25 OS; image/voice deferred. |
+| VL-196 | Ontology Platform (Phase 63) | Done | `/v1/ontology/*` concepts/hierarchies/synonyms over VL-184; ADR-0107. Not OWL/Protege OS. |
 
 ---
 
@@ -334,3 +335,4 @@ Last updated: 2026-10-03 (VL-195 Done — Enterprise Search)
 | 2026-10-03 | VL-193 Done: Knowledge Cloud Foundation (Phase 60) — hub/catalog/overview; ADR-0104. Extends VL-062 + Intelligence; no enterprise knowledge OS. |
 | 2026-10-03 | VL-194 Done: Enterprise Knowledge Base (Phase 61) — hub over VL-062 + collections/tags/MD/HTML; ADR-0105. Tenant-scoped; Confluence OS deferred. |
 | 2026-10-03 | VL-195 Done: Enterprise Search (Phase 62) — keyword/semantic/light hybrid over VL-062; ADR-0106. Not Elastic/BM25 OS. |
+| 2026-10-03 | VL-196 Done: Ontology Platform (Phase 63) — concepts/is_a/synonyms over VL-184 KG; ADR-0107. Not OWL/Protege OS. |

@@ -20,6 +20,7 @@ function usage(): never {
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
+  verbalab ontology-engine
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -142,6 +143,11 @@ async function main() {
     console.log(
       JSON.stringify(await vl.enterpriseSearch({ query, mode }), null, 2),
     );
+    return;
+  }
+
+  if (command === 'ontology-engine') {
+    console.log(JSON.stringify(await vl.ontologyEngine(), null, 2));
     return;
   }
 

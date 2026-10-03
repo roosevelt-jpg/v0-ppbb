@@ -68,14 +68,16 @@ describe('Knowledge Graph Cloud (VL-184)', () => {
     expect(text).not.toMatch(/neo4j parity shipped/i);
   });
 
-  it('exposes engine with neo4jParity=false and deferred ontologies', async () => {
+  it('exposes engine with neo4jParity=false and linked Ontology Platform', async () => {
     const res = await request(app.getHttpServer()).get('/v1/knowledge-graph/engine').expect(200);
     expect(res.body.product).toContain('Knowledge Graph');
     expect(res.body.honesty.neo4jParity).toBe(false);
-    expect(res.body.honesty.ontologyPlatform).toBe(false);
+    expect(res.body.honesty.ontologyPlatform).toBe(true);
+    expect(res.body.honesty.ontologyOs).toBe(false);
     expect(res.body.honesty.preferRag).toBe(true);
     const ont = res.body.capabilities.find((c: { id: string }) => c.id === 'ontologies');
-    expect(ont.status).toBe('deferred');
+    expect(ont.status).toBe('partial');
+    expect(ont.api).toContain('/v1/ontology/engine');
     const medical = res.body.capabilities.find((c: { id: string }) => c.id === 'medical-graph');
     expect(medical.status).toBe('deferred');
 

@@ -1,6 +1,6 @@
 # VerbaLab Knowledge Cloud
 
-**Status:** Foundation + EKB + Search partial (VL-193–195 / library Phases 60–62); Volume 6 continues through VL-203  
+**Status:** Foundation through Ontology partial (VL-193–196 / library Phases 60–63); Volume 6 continues through VL-203  
 **Rule:** Enterprise knowledge layer over VL-062 RAG and Intelligence Cloud (embeddings, vectors, knowledge graph, context). Extend existing Knowledge / Vector / Graph modules. Do **not** regenerate Intelligence Cloud or invent a Confluence/SharePoint/ontology OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume6-knowledge-cloud/`](./roadmap/volume6-knowledge-cloud/).
 
 ---
@@ -12,7 +12,7 @@
 | Knowledge Cloud Foundation | **VL-193** — `/knowledge-cloud` + product catalog / overview |
 | Enterprise Knowledge Base | **Partial** — **VL-194** `/knowledge-base` over VL-062; org/workspace-scoped; media/approval deferred |
 | Enterprise Search | **Partial** — **VL-195** `/enterprise-search`; keyword/semantic/light hybrid; not Elastic OS |
-| Ontology Platform | **Deferred** — Phase 63 / VL-196 (not OWL/Protege OS) |
+| Ontology Platform | **Partial** — **VL-196** `/ontology` over VL-184 KG; not OWL/Protege OS |
 | Taxonomy Platform | **Deferred** — Phase 64 / VL-197 |
 | Enterprise RAG Platform | **Partial** — VL-062 `/knowledge` + Vector/Context; full product Phase 65 / VL-198 |
 | Knowledge Memory | **Deferred** — Phase 66 / VL-199 (≠ Intelligence Memory Cloud VL-183) |
@@ -40,6 +40,7 @@
 | Existing RAG | `/knowledge` · `POST /v1/knowledge/query` (VL-062) |
 | Knowledge Base | `/knowledge-base` · `GET /v1/knowledge-base/engine` (VL-194) |
 | Enterprise Search | `/enterprise-search` · `POST /v1/enterprise-search/search` (VL-195) |
+| Ontology | `/ontology` · `GET /v1/ontology/engine` (VL-196) |
 
 ---
 

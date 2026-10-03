@@ -42,10 +42,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'ontology-platform',
       name: 'Ontology Platform',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Formal concept/relationship modeling (Phase 63 / VL-196). Not OWL/Protege OS.',
+      status: 'partial',
+      api: 'GET /v1/ontology/engine',
+      console: '/ontology',
+      notes:
+        'Concepts/hierarchies/synonyms over VL-184 KG (VL-196). Not OWL/Protege OS; vertical packs are domain tags.',
     },
     {
       id: 'taxonomy-platform',

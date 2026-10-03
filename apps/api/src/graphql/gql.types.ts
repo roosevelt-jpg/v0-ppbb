@@ -460,6 +460,45 @@ export class GqlEnterpriseSearchEngine {
 }
 
 @ObjectType()
+export class GqlOntologyCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlOntologyEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlOntologyCapability])
+  capabilities!: GqlOntologyCapability[];
+
+  @Field()
+  owlOs!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsVl184!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

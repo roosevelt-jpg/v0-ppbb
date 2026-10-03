@@ -2812,6 +2812,74 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ontology/engine': {
+      get: {
+        summary: 'Ontology Platform engine catalog',
+        operationId: 'getOntologyEngine',
+        responses: { '200': { description: 'Ontology capabilities and honesty flags' } },
+      },
+    },
+    '/v1/ontology/domains': {
+      get: {
+        summary: 'Ontology domains',
+        operationId: 'listOntologyDomains',
+        responses: { '200': { description: 'General + deferred vertical domain tags' } },
+      },
+    },
+    '/v1/ontology/concepts': {
+      get: {
+        summary: 'List ontology concepts',
+        operationId: 'listOntologyConcepts',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace-scoped concepts' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create ontology concept',
+        operationId: 'createOntologyConcept',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Created concept' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ontology/hierarchies': {
+      post: {
+        summary: 'Create is_a hierarchy edge',
+        operationId: 'createOntologyHierarchy',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Created hierarchy edge' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ontology/synonyms': {
+      post: {
+        summary: 'Add synonym alias or synonym_of edge',
+        operationId: 'createOntologySynonym',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Updated concept / edge' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',
