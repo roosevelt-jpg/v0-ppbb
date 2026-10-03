@@ -49,6 +49,7 @@ function usage(): never {
   verbalab policy-fabric-pipeline [--id <pipelineId>]
   verbalab ecosystem-cloud-products
   verbalab plugin-marketplace-engine
+  verbalab model-marketplace-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -468,6 +469,11 @@ async function main() {
 
   if (command === 'plugin-marketplace-engine') {
     console.log(JSON.stringify(await vl.pluginMarketplaceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'model-marketplace-engine') {
+    console.log(JSON.stringify(await vl.modelMarketplaceEngine(), null, 2));
     return;
   }
 

@@ -3303,6 +3303,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/model-marketplace/engine': {
+      get: {
+        summary: 'Model Marketplace engine catalog',
+        operationId: 'getModelMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Model marketplace capabilities, Stripe honesty, Hugging Face / weight-hosting denials',
+          },
+        },
+      },
+    },
+    '/v1/model-marketplace/products': {
+      get: {
+        summary: 'Model Marketplace products (alias of engine)',
+        operationId: 'listModelMarketplaceProducts',
+        responses: { '200': { description: 'Model marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/model-marketplace/listings': {
+      get: {
+        summary: 'List model marketplace listings',
+        operationId: 'listModelMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine model listings' } },
+      },
+      post: {
+        summary: 'Publish a Model Registry card as a marketplace listing',
+        operationId: 'publishModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a model listing license entitlement',
+        operationId: 'installModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'License entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List model listing reviews',
+        operationId: 'listModelMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a model listing review',
+        operationId: 'reviewModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/model-marketplace/sales': {
+      get: {
+        summary: 'Model marketplace publisher sales',
+        operationId: 'listModelMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/model-marketplace/analytics': {
+      get: {
+        summary: 'Model marketplace analytics',
+        operationId: 'getModelMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/model-marketplace/monitoring': {
+      get: {
+        summary: 'Model marketplace monitoring',
+        operationId: 'getModelMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

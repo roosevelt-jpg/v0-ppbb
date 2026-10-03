@@ -127,6 +127,11 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(plugin.status).toBe('shipped');
     expect(plugin.console).toBe('/plugin-marketplace');
     expect(plugin.notes).toMatch(/sandbox|Policy/i);
+
+    const model = res.body.products.find((p: { id: string }) => p.id === 'model-marketplace');
+    expect(model.status).toBe('shipped');
+    expect(model.console).toBe('/model-marketplace');
+    expect(model.notes).toMatch(/Hugging Face|registry|Stripe/i);
   });
 
   it('exposes routing table and org overview', async () => {
@@ -147,6 +152,7 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
       role: 'owner',
     });
     expect(overview.deferred.pluginMarketplace).toBe(false);
+    expect(overview.deferred.modelMarketplace).toBe(false);
     expect(overview.deferred.agentMarketplace).toBe(true);
     expect(overview.deferred.creatorEconomyExpansion).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to10).toBe(false);

@@ -22,6 +22,7 @@ const links = [
   { href: '/atlas', label: 'Atlas' },
   { href: '/ecosystem-cloud', label: 'Ecosystem' },
   { href: '/plugin-marketplace', label: 'Plugin market' },
+  { href: '/model-marketplace', label: 'Model market' },
   { href: '/ai-fabric', label: 'AI Fabric' },
   { href: '/event-fabric', label: 'Event Fabric' },
   { href: '/context-fabric', label: 'Context Fabric' },
