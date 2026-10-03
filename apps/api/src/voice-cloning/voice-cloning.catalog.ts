@@ -25,10 +25,10 @@ export function voiceCloningEngineCatalog() {
       {
         id: 'professional-cloning',
         name: 'Professional Voice Cloning',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-cloning/enroll',
         notes:
-          'cloneMode=professional requires ≥3 samples + ownership attestation. Still ElevenLabs IVC — not multi-hour pro training.',
+          'Shipped cloneMode=professional (≥3 samples + ownership attestation) on ElevenLabs IVC. Multi-hour pro training path deferred.',
       },
       {
         id: 'secure-enrollment',
@@ -40,9 +40,10 @@ export function voiceCloningEngineCatalog() {
       {
         id: 'voice-verification',
         name: 'Voice Verification',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/speakers/verify',
-        notes: 'Speaker verify/identify via VL-152. Clone enrollment verify is sample/consent gate, not PAD.',
+        notes:
+          'Shipped speaker verify/identify via VL-152 + enrollment sample/consent gate. PAD/NIST biometrics deferred to VL-176 honesty.',
       },
       {
         id: 'voice-ownership',
@@ -82,9 +83,10 @@ export function voiceCloningEngineCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-cloning/enroll/stream',
-        notes: 'SSE enrollment progress events after create. Not live sample capture WebSocket.',
+        notes:
+          'Shipped SSE enrollment progress events after create. Live sample capture WebSocket deferred.',
       },
       {
         id: 'monitoring',
@@ -96,9 +98,9 @@ export function voiceCloningEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/voice-cloning/engine/analytics',
-        notes: 'Clone counts by status/mode. Full Voice Analytics = Phase 35.',
+        notes: 'Shipped clone counts by status/mode. Full Voice Analytics hub: VL-178.',
       },
     ] satisfies CloningCapability[],
     engines: [

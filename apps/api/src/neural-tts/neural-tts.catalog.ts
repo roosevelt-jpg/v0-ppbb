@@ -25,16 +25,18 @@ export function neuralTtsEngineCatalog() {
       {
         id: 'streaming-tts',
         name: 'Streaming Text-to-Speech',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/tts/stream',
-        notes: 'SSE audio chunk delivery after full synthesis. Not true streaming TTS from the vendor.',
+        notes:
+          'Shipped SSE audio chunk delivery after full synthesis. True vendor token streaming deferred.',
       },
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/tts/stream',
-        notes: 'SSE realtime delivery of audio chunks. Bidirectional realtime sessions deferred.',
+        notes:
+          'Shipped SSE realtime delivery of audio chunks. Bidirectional realtime sessions deferred.',
       },
       {
         id: 'natural-voices',
@@ -74,30 +76,34 @@ export function neuralTtsEngineCatalog() {
       {
         id: 'dialects',
         name: 'Multiple Dialects',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/tts/voices',
-        notes: 'Dialect tags on enriched catalog where known. Full dialect-native TTS deferred.',
+        notes:
+          'Shipped dialect tags on enriched catalog where known. Full dialect-native TTS deferred.',
       },
       {
         id: 'regional-accents',
         name: 'Regional Accents',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/tts/voices',
-        notes: 'Accent/region tags on own:* and selected stock voices. Acoustic accent control deferred.',
+        notes:
+          'Shipped accent/region tags on own:* and selected stock voices. Acoustic accent control deferred.',
       },
       {
         id: 'personalities',
         name: 'Voice Personalities',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/tts/voices',
-        notes: 'Personality labels on catalog (warm, formal, …). Emotion synthesis is Phase 30.',
+        notes:
+          'Shipped personality labels on catalog (warm, formal, …). Emotion synthesis via VL-173 Emotion Voice.',
       },
       {
         id: 'enterprise-voices',
         name: 'Enterprise Voices',
-        status: 'partial',
-        api: '/v1/voice-clones',
-        notes: 'Consent-gated clone:{id} voices (VL-064). Enterprise library productization continues in Phase 29.',
+        status: 'shipped',
+        api: 'GET /v1/voice-cloning/library',
+        notes:
+          'Shipped consent-gated clone:{id} voices via Voice Cloning Platform (VL-064/172).',
       },
       {
         id: 'monitoring',
@@ -109,9 +115,9 @@ export function neuralTtsEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/tts/engine/analytics',
-        notes: 'TTS usage summary. Dedicated Voice Analytics: Phase 35.',
+        notes: 'Shipped TTS usage summary. Full Voice Analytics hub: VL-178 /voice-analytics.',
       },
     ] satisfies TtsCapability[],
     engines: [
