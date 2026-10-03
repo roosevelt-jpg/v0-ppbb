@@ -33,10 +33,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'enterprise-search',
       name: 'Enterprise Search',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Search across ingested knowledge (Phase 62 / VL-195). Not Elastic/OpenSearch OS parity.',
+      status: 'partial',
+      api: 'GET /v1/enterprise-search/engine',
+      console: '/enterprise-search',
+      notes:
+        'Keyword + semantic + light hybrid RRF (VL-195). Extends VL-062/Vector Cloud. Not Elastic/BM25 OS; image/voice deferred.',
     },
     {
       id: 'ontology-platform',

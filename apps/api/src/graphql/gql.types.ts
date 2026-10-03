@@ -421,6 +421,45 @@ export class GqlKnowledgeBaseEngine {
 }
 
 @ObjectType()
+export class GqlEnterpriseSearchCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEnterpriseSearchEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlEnterpriseSearchCapability])
+  capabilities!: GqlEnterpriseSearchCapability[];
+
+  @Field()
+  elasticOs!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsVl062!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

@@ -2742,6 +2742,76 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/enterprise-search/engine': {
+      get: {
+        summary: 'Enterprise Search engine catalog',
+        operationId: 'getEnterpriseSearchEngine',
+        responses: { '200': { description: 'Search capabilities and honesty flags' } },
+      },
+    },
+    '/v1/enterprise-search/modes': {
+      get: {
+        summary: 'Enterprise Search modes',
+        operationId: 'listEnterpriseSearchModes',
+        responses: { '200': { description: 'keyword / semantic / hybrid' } },
+      },
+    },
+    '/v1/enterprise-search/search': {
+      post: {
+        summary: 'Search knowledge chunks',
+        operationId: 'enterpriseSearch',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Ranked hits for the authenticated workspace' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-search/suggest': {
+      get: {
+        summary: 'Search suggestions',
+        operationId: 'enterpriseSearchSuggest',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Filename/tag/collection suggestions' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-search/analytics': {
+      get: {
+        summary: 'Enterprise Search analytics',
+        operationId: 'getEnterpriseSearchAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace search counts' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-search/monitoring': {
+      get: {
+        summary: 'Enterprise Search monitoring',
+        operationId: 'getEnterpriseSearchMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Analytics + honesty + deferred ids' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

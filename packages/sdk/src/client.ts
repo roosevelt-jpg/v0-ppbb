@@ -1102,6 +1102,60 @@ export class VerbaLab {
     return this.requestJson('/v1/knowledge-base/engine', { method: 'GET' });
   }
 
+  async enterpriseSearchEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      elasticOs: boolean;
+      openSearchParity: boolean;
+      bm25Parity: boolean;
+      imageSearch: boolean;
+      voiceSearch: boolean;
+      orgWorkspaceScoped: boolean;
+      extendsVl062: boolean;
+      extendsVectorCloud: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/enterprise-search/engine', { method: 'GET' });
+  }
+
+  async enterpriseSearch(body: {
+    query: string;
+    mode?: 'keyword' | 'semantic' | 'hybrid';
+    k?: number;
+    collection?: string;
+    tag?: string;
+    contentKind?: string;
+    documentId?: string;
+    minScore?: number;
+  }): Promise<{
+    query: string;
+    mode: string;
+    hits: Array<{
+      rank: number;
+      id: string;
+      documentId: string;
+      filename: string;
+      ordinal: number;
+      score: number;
+      content: string;
+      source: string;
+    }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/enterprise-search/search', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

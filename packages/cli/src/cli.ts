@@ -18,6 +18,8 @@ function usage(): never {
   verbalab intelligence-products
   verbalab knowledge-products
   verbalab knowledge-base-engine
+  verbalab enterprise-search-engine
+  verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -125,6 +127,21 @@ async function main() {
 
   if (command === 'knowledge-base-engine') {
     console.log(JSON.stringify(await vl.knowledgeBaseEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-search-engine') {
+    console.log(JSON.stringify(await vl.enterpriseSearchEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-search') {
+    const query = argValue(rest, '--query');
+    if (!query) usage();
+    const mode = argValue(rest, '--mode') as 'keyword' | 'semantic' | 'hybrid' | undefined;
+    console.log(
+      JSON.stringify(await vl.enterpriseSearch({ query, mode }), null, 2),
+    );
     return;
   }
 
