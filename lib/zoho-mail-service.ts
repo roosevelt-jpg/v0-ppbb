@@ -30,6 +30,11 @@ function normalizePort(raw: unknown): 465 | 587 {
   return Number(raw) === 587 ? 587 : 465
 }
 
+/** Zoho shows app passwords in groups. SMTP auth fails if those spaces are kept. */
+function normalizeAppPassword(raw: string): string {
+  return raw.replace(/\s+/g, '')
+}
+
 /**
  * Load Zoho SMTP credentials from Integrations vault (decrypted)
  * with optional env fallback (ZOHO_SMTP_*).
@@ -42,7 +47,7 @@ export async function getZohoSmtpConfig(): Promise<ZohoSmtpConfig | null> {
     if (email && password) {
       return {
         email,
-        password,
+        password: normalizeAppPassword(password),
         fromName: integration?.credentials?.fromName?.trim() || 'Passive Blessings',
         host: normalizeHost(integration?.credentials?.smtpHost),
         port: normalizePort(integration?.credentials?.smtpPort),
@@ -60,7 +65,7 @@ export async function getZohoSmtpConfig(): Promise<ZohoSmtpConfig | null> {
   if (envEmail && envPassword) {
     return {
       email: envEmail,
-      password: envPassword,
+      password: normalizeAppPassword(envPassword),
       fromName: process.env.ZOHO_FROM_NAME?.trim() || 'Passive Blessings',
       host: normalizeHost(process.env.ZOHO_SMTP_HOST),
       port: normalizePort(process.env.ZOHO_SMTP_PORT),
@@ -80,5 +85,10 @@ export function createZohoTransporter(config: ZohoSmtpConfig) {
       user: config.email,
       pass: config.password,
     },
+    // Prefer IPv4. Some hosts hang on Zoho's IPv6 address and the login request times out.
+    family: 4,
+    connectionTimeout: 20_000,
+    greetingTimeout: 20_000,
+    socketTimeout: 30_000,
   })
 }

@@ -1,4 +1,5 @@
 import { Anthropic } from '@anthropic-ai/sdk'
+import { DEFAULT_ANTHROPIC_SONNET_MODEL } from '@/lib/resolve-anthropic-key'
 import { SYSTEM_PROMPTS } from './constants'
 
 const client = new Anthropic({
@@ -19,7 +20,7 @@ export async function generateChatResponse(
   const systemPrompt = await getSystemPrompt(userRole)
 
   const response = await client.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+    model: DEFAULT_ANTHROPIC_SONNET_MODEL,
     max_tokens: 1024,
     system: systemPrompt,
     messages: messages,
@@ -40,7 +41,7 @@ export async function streamChatResponse(
   const systemPrompt = await getSystemPrompt(userRole)
 
   const stream = await client.messages.stream({
-    model: 'claude-3-5-sonnet-20241022',
+    model: DEFAULT_ANTHROPIC_SONNET_MODEL,
     max_tokens: 1024,
     system: systemPrompt,
     messages: messages,

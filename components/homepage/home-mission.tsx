@@ -27,12 +27,9 @@ function MissionImage({ imageURL }: { imageURL: string | null }) {
 
   return (
     <div
-      className={`${MISSION_IMAGE_FRAME} bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center`}
-    >
-      <p className="text-sm text-muted-foreground font-body px-6 text-center">
-        Mission image — upload from Admin → CMS → Homepage
-      </p>
-    </div>
+      className={`${MISSION_IMAGE_FRAME} bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700`}
+      aria-hidden
+    />
   )
 }
 

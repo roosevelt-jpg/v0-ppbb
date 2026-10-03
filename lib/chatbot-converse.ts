@@ -1,5 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { resolveAnthropicApiKey, resolveAnthropicModel } from '@/lib/resolve-anthropic-key'
+import {
+  DEFAULT_ANTHROPIC_CHAT_MODEL,
+  resolveAnthropicApiKey,
+  resolveAnthropicModel,
+} from '@/lib/resolve-anthropic-key'
 import {
   scoreKnowledgeMatch,
   type ChatbotKnowledgeItem,
@@ -74,7 +78,7 @@ export async function generateConversationalSupportReply(input: {
 }): Promise<ConverseResult> {
   const apiKey = await resolveAnthropicApiKey()
   if (!apiKey) return { ok: false, reason: 'no_api_key' }
-  const model = (await resolveAnthropicModel()) || 'claude-3-5-haiku-20241022'
+  const model = (await resolveAnthropicModel()) || DEFAULT_ANTHROPIC_CHAT_MODEL
 
   const lastUser = [...input.messages].reverse().find((m) => m.role === 'user')
   const userMessage = String(lastUser?.content || '').trim()

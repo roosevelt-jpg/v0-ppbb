@@ -3,7 +3,10 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import { normalizeKnowledgeDoc } from '@/lib/chatbot-knowledge'
-import { resolveAnthropicModel } from '@/lib/resolve-anthropic-key'
+import {
+  DEFAULT_ANTHROPIC_CHAT_MODEL,
+  resolveAnthropicModel,
+} from '@/lib/resolve-anthropic-key'
 
 export type AnthropicKeySource = 'vault' | 'env' | 'none'
 
@@ -129,6 +132,7 @@ function buildRecommendation(input: {
   configured: boolean
   keyLooksValid: boolean
   probeOk: boolean | null
+  probeError: string | null
   faqUsable: number
   knowledgeActive: number
 }): string {
@@ -139,7 +143,10 @@ function buildRecommendation(input: {
     return 'An Anthropic key is stored but does not look like a valid sk-ant- key. Re-save the key from console.anthropic.com.'
   }
   if (input.probeOk === false) {
-    return 'Anthropic is configured but the live API probe failed. Check the key, model ID, billing, and INTEGRATION_ENCRYPTION_KEY (must match the key used when the credential was saved).'
+    if (input.probeError && /not_found_error|model:/i.test(input.probeError)) {
+      return 'The saved Claude model id was retired by Anthropic (404). The chatbot now uses claude-haiku-4-5-20251001. Clear the Chat model field under Integrations if an old id is still saved, then test again.'
+    }
+    return 'Anthropic is configured but the live API probe failed. Check the key, billing, and INTEGRATION_ENCRYPTION_KEY (must match the key used when the credential was saved).'
   }
   if (input.faqUsable === 0 && input.knowledgeActive === 0) {
     return 'Claude can connect, but FAQs and knowledge docs are empty — add training content under Chatbot → Knowledge and FAQs so answers stay accurate.'
@@ -161,7 +168,7 @@ export async function getChatbotDiagnostics(options?: {
     countKnowledge(),
   ])
 
-  const model = modelOverride || 'claude-3-5-haiku-20241022'
+  const model = modelOverride || DEFAULT_ANTHROPIC_CHAT_MODEL
   const configured = Boolean(key)
   const keyLooksValid = configured ? looksLikeAnthropicKey(key!) : false
 
@@ -186,6 +193,7 @@ export async function getChatbotDiagnostics(options?: {
       configured,
       keyLooksValid,
       probeOk: probe ? probe.ok : null,
+      probeError: probe?.error || null,
       faqUsable: faqs.usable,
       knowledgeActive: knowledge.active,
     }),

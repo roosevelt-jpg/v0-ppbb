@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { resolveAnthropicApiKey } from '@/lib/resolve-anthropic-key'
+import {
+  DEFAULT_ANTHROPIC_SONNET_MODEL,
+  resolveAnthropicApiKey,
+} from '@/lib/resolve-anthropic-key'
 import { loadNewsletterBrandContext } from '@/lib/newsletter-templates'
 import { requireAdminFromRequest, unauthorizedResponse } from '@/lib/admin-api-auth'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
@@ -65,7 +68,7 @@ ${contextLines ? `\nExisting form context:\n${contextLines}` : ''}`
 
     const client = new Anthropic({ apiKey })
     const result = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: DEFAULT_ANTHROPIC_SONNET_MODEL,
       max_tokens: field === 'content' ? 800 : 200,
       system,
       messages: [{ role: 'user', content: userMessage }],

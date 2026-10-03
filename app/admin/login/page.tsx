@@ -195,7 +195,8 @@ function AdminLoginForm() {
         setAdminMfaSession(credential.user.uid)
         completeLoginAudit(profile)
         setInfo(
-          'Signed in without email code (Gmail SMTP not configured). Add Gmail under Admin → Integrations.'
+          String(otpJson.message || '') ||
+            'Signed in without an email code because Zoho Mail did not send it. Check Admin → Integrations → Zoho Mail SMTP.'
         )
         router.replace(safeReturnUrl)
         setLoading(false)

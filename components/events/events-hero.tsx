@@ -125,10 +125,7 @@ export function EventsHero({ fallbackGalleryURLs = [] }: Props) {
               ) : null}
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-muted-foreground">
-              Previous event photos appear here. Upload them in Admin → CMS → Volunteer &amp; Ads
-              (Events gallery).
-            </div>
+            <div className="absolute inset-0 bg-neutral-100" aria-hidden />
           )}
         </div>
       </div>

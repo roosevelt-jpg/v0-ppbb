@@ -71,11 +71,7 @@ export function AboutMissionVision() {
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center border border-neutral-200">
-                <p className="text-sm text-muted-foreground px-6 text-center break-words">
-                  Mission / Vision image — upload from Admin → CMS → About
-                </p>
-              </div>
+              <div className="absolute inset-0 bg-neutral-100" aria-hidden />
             )}
           </div>
         </div>

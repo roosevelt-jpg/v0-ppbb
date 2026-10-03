@@ -63,7 +63,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     content:
-      'Add your privacy policy here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
+      'Our privacy policy will be published here.',
   },
   {
     slug: 'terms-of-service',
@@ -74,7 +74,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     content:
-      'Add your terms and conditions here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
+      'Our terms and conditions will be published here.',
   },
   {
     slug: 'code-of-conduct',
@@ -85,7 +85,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     content:
-      'Add your community code of conduct here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
+      'Our community code of conduct will be published here.',
   },
   {
     slug: 'data-protection',
@@ -96,7 +96,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     content:
-      'Add your UAE data protection policy here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
+      'Our UAE data protection policy will be published here.',
   },
   {
     slug: 'community-guidelines',
@@ -109,6 +109,6 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     headerSection: '/communities',
     description: 'Our community standards help everyone participate respectfully.',
     content:
-      'Welcome to the Passive Blessings community.\n\n1. Be respectful\nTreat every member with kindness. Disagreement is fine; personal attacks are not.\n\n2. Keep it safe\nDo not share private information about others without consent. Report harmful content to moderators.\n\n3. Stay on topic\nUse groups and threads for their intended purpose. Spam, scams, and off-topic promotions are not allowed.\n\n4. Follow the law\nDo not post illegal content or encourage illegal activity.\n\n5. Support one another\nEncourage constructive participation. When in doubt, ask an organizer before posting.\n\nEditors can expand these guidelines in Admin → Pages.',
+      'Welcome to the Passive Blessings community.\n\n1. Be respectful\nTreat every member with kindness. Disagreement is fine; personal attacks are not.\n\n2. Keep it safe\nDo not share private information about others without consent. Report harmful content to moderators.\n\n3. Stay on topic\nUse groups and threads for their intended purpose. Spam, scams, and off-topic promotions are not allowed.\n\n4. Follow the law\nDo not post illegal content or encourage illegal activity.\n\n5. Support one another\nEncourage constructive participation. When in doubt, ask an organizer before posting.',
   },
 ]

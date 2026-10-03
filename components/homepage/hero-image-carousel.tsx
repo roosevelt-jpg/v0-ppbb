@@ -67,11 +67,10 @@ export function HeroImageCarousel({
 
   if (images.length === 0) {
     return (
-      <div className={`${FRAME_CLASS} flex items-center justify-center border border-neutral-200 dark:border-neutral-700`}>
-        <p className="text-sm text-muted-foreground font-body px-6 text-center">
-          Hero images — upload from Admin → CMS → Homepage
-        </p>
-      </div>
+      <div
+        className={`${FRAME_CLASS} border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800`}
+        aria-hidden
+      />
     )
   }
 

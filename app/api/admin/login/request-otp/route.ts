@@ -76,7 +76,9 @@ export async function POST(request: NextRequest) {
       expiresAt: result.expiresAt,
       emailSkipped: Boolean(result.emailSkipped),
       message: result.emailSkipped
-        ? 'Email SMTP is not configured — login code skipped. Configure Admin → Integrations → Zoho Mail SMTP.'
+        ? result.error
+          ? `Login code was not emailed (${result.error}). You were signed in so the admin panel is not locked. Check Admin → Integrations → Zoho Mail SMTP, and Email activity for this send.`
+          : 'Zoho Mail SMTP is not configured — login code skipped. Configure Admin → Integrations → Zoho Mail SMTP.'
         : 'Login code sent to your email',
     })
   } catch (error) {

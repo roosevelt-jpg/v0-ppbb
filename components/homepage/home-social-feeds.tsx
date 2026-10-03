@@ -143,7 +143,7 @@ export function HomeSocialFeeds() {
           <PlaceholderBlock
             icon={Camera}
             heading={socialFeeds.instagram.heading}
-            message="Coming soon — Instagram feed will appear here once credentials are configured."
+            message="Coming soon — Instagram feed will appear here."
           />
         )}
       </div>

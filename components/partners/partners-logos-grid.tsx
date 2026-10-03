@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Building2 } from 'lucide-react'
 import { subscribeToActivePartners, type Partner } from '@/lib/partners'
 
 export function PartnersLogosGrid({
@@ -38,13 +37,7 @@ export function PartnersLogosGrid({
           ))}
         </div>
       ) : partners.length === 0 ? (
-        <div className="text-center py-10 sm:py-12 px-4 border border-dashed border-[#e4e1da] rounded-lg">
-          <Building2 className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
-          <p className="font-headline text-lg font-bold text-foreground mb-1">No partners listed yet</p>
-          <p className="font-body text-sm text-muted-foreground max-w-sm mx-auto">
-            When partners are added in Admin → Partners &amp; Logos, they appear here in real time.
-          </p>
-        </div>
+        null
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
           {partners.map((partner) => {

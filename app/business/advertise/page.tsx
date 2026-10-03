@@ -117,7 +117,7 @@ function AdvertiseInner() {
         setSaving(false)
         return
       }
-      throw new Error('Card checkout is not available. Check Stripe in Admin → Integrations.')
+      throw new Error('Card checkout is not available right now. Please try again later.')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Request failed')
       setSaving(false)

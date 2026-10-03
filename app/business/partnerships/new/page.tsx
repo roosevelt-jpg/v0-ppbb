@@ -171,9 +171,6 @@ export default function BusinessPartnershipNewPage() {
               </div>
             ) : linkedFormHref ? (
               <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  This category opens the form linked in Admin → CMS → Partners.
-                </p>
                 <button
                   type="button"
                   onClick={openLinkedOrCharity}

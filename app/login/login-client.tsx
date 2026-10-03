@@ -186,7 +186,7 @@ function LoginPageContent() {
     setError('')
     if (!authProviders.google.enabled) {
       setError(
-        'Google Sign-In is not enabled. Add credentials under Admin → Integrations → Google Sign-In, set status to Active, and enable Google in Firebase Authentication.'
+        'Google Sign-In is not available right now. Use email and password, or try again later.'
       )
       return
     }

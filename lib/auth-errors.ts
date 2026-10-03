@@ -96,7 +96,7 @@ export function formatAuthError(error: unknown): string {
     return 'This domain is not authorized for Google Sign-In. Ask an admin to add it in Firebase Authentication → Settings → Authorized domains.'
   }
   if (haystack.includes('auth/internal-error')) {
-    return 'Google Sign-In failed due to a configuration issue. Ask an admin to check Google Sign-In under Admin → Integrations and Firebase Authentication.'
+    return 'Google Sign-In is not available right now. Use email and password, or try again later.'
   }
 
   if (message.includes('Firebase:')) {
