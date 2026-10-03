@@ -823,6 +823,54 @@ export class GqlWorkflowMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlConnectorMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlConnectorMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlConnectorMarketplaceCapability])
+  capabilities!: GqlConnectorMarketplaceCapability[];
+
+  @Field()
+  liveConnectorExecution!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  fabricPolicyHardGateRequired!: boolean;
+
+  @Field()
+  ipaasOs!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

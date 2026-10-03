@@ -3733,6 +3733,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/connector-marketplace/engine': {
+      get: {
+        summary: 'Connector Marketplace engine catalog',
+        operationId: 'getConnectorMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Connector marketplace capabilities, Stripe honesty, iPaaS / live-outbound denials',
+          },
+        },
+      },
+    },
+    '/v1/connector-marketplace/products': {
+      get: {
+        summary: 'Connector Marketplace products (alias of engine)',
+        operationId: 'listConnectorMarketplaceProducts',
+        responses: { '200': { description: 'Connector marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/connector-marketplace/listings': {
+      get: {
+        summary: 'List connector marketplace listings',
+        operationId: 'listConnectorMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine connector listings' } },
+      },
+      post: {
+        summary: 'Publish a connector catalog key as a marketplace listing',
+        operationId: 'publishConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/connector-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a connector listing entitlement',
+        operationId: 'installConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Connector entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/connector-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List connector listing reviews',
+        operationId: 'listConnectorMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a connector listing review',
+        operationId: 'reviewConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/connector-marketplace/sales': {
+      get: {
+        summary: 'Connector marketplace publisher sales',
+        operationId: 'listConnectorMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/connector-marketplace/analytics': {
+      get: {
+        summary: 'Connector marketplace analytics',
+        operationId: 'getConnectorMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/connector-marketplace/monitoring': {
+      get: {
+        summary: 'Connector marketplace monitoring',
+        operationId: 'getConnectorMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

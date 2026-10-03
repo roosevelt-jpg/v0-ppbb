@@ -285,7 +285,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-253 | Prompt Marketplace (Phase 120) | Done | `/prompt-marketplace` over prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty; ADR-0155. Not prompt mesh OS. |
 | VL-254 | Agent Marketplace (Phase 121) | Done | `/agent-marketplace` over Agent Runtime; FabricPolicyGate + AgentPolicyGate sandbox run; ADR-0156. Not LangGraph/AutoGPT OS. |
 | VL-255 | Workflow Marketplace (Phase 122) | Done | `/workflow-marketplace` over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate sandbox run; ADR-0157. Not Zapier/Temporal OS. |
-| VL-256 | Connector Marketplace (Phase 123) | Not Started | Buy/sell/publish connectors. |
+| VL-256 | Connector Marketplace (Phase 123) | Done | `/connector-marketplace` entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS. |
 | VL-257 | Voice & Language Marketplace (Phase 124) | Not Started | Extends voice marketplace + Volume 1 language packs. |
 | VL-258 | Creator Economy (Phase 125) | Not Started | Revenue sharing/payouts expansion over VL-092; hand-check payout math; tax/dispute honesty. |
 | VL-259 | Ecosystem Production Audit (Phase 126) | Not Started | Hardening pass — review, don't add features. |
@@ -449,3 +449,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-253 Done: Prompt Marketplace (Phase 120) — hub over prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty; ADR-0155. Not prompt mesh / auto-prompt research OS. |
 | 2026-10-03 | VL-254 Done: Agent Marketplace (Phase 121) — publish/install/run over Agent Runtime; FabricPolicyGate + AgentPolicyGate; ADR-0156. Not LangGraph/AutoGPT OS / live tools. |
 | 2026-10-03 | VL-255 Done: Workflow Marketplace (Phase 122) — publish/install/run over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate; ADR-0157. Not Zapier/Temporal OS / live steps. |
+| 2026-10-03 | VL-256 Done: Connector Marketplace (Phase 123) — entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS / live outbound. |
