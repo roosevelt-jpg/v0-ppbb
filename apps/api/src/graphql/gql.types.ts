@@ -604,6 +604,42 @@ export class GqlVoiceEnhancementProfile {
 }
 
 @ObjectType()
+export class GqlVoiceBiometricsCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceBiometricsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceBiometricsCapability])
+  capabilities!: GqlVoiceBiometricsCapability[];
+
+  @Field()
+  nistCertified!: boolean;
+
+  @Field()
+  padCertified!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

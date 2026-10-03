@@ -15,6 +15,7 @@ const links = [
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },
   { href: '/speech-recognition', label: 'STT Engine' },
+  { href: '/voice-biometrics', label: 'Biometrics' },
   { href: '/speaker-intelligence', label: 'Speakers' },
   { href: '/accent-intelligence', label: 'Accent AI' },
   { href: '/emotion-intelligence', label: 'Emotion AI' },

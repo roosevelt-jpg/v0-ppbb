@@ -127,6 +127,7 @@ describe('Voice Cloud Foundation (VL-170)', () => {
 
     const biometrics = res.body.products.find((p: { id: string }) => p.id === 'voice-biometrics');
     expect(biometrics.status).toBe('partial');
+    expect(biometrics.api).toContain('/v1/voice-biometrics/engine');
   });
 
   it('returns org voice overview with TTS usage + deferred flags', async () => {
@@ -153,8 +154,11 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(overview.links.neuralTts).toBe('/neural-tts');
     expect(overview.links.voiceStudio).toBe('/voice-studio');
     expect(overview.links.voiceEnhancement).toBe('/voice-enhancement');
+    expect(overview.links.voiceBiometrics).toBe('/voice-biometrics');
     expect(overview.deferred.voiceRestoration).toBe(false);
     expect(overview.deferred.liveAec).toBe(true);
+    expect(overview.deferred.antiSpoofLiveness).toBe(false);
+    expect(overview.deferred.certifiedPad).toBe(true);
     expect(overview.deferred.voiceMarketplace).toBe(true);
     expect(overview.deferred.nistVoiceBiometrics).toBe(true);
     expect(overview.links.audio).toBe('/audio');

@@ -25,6 +25,8 @@ function usage(): never {
   verbalab voice-studio-library
   verbalab voice-enhancement-engine
   verbalab voice-enhancement-profiles
+  verbalab voice-biometrics-engine
+  verbalab voice-biometrics-encryption
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -139,6 +141,16 @@ async function main() {
 
   if (command === 'voice-enhancement-profiles') {
     console.log(JSON.stringify(await vl.voiceEnhancementProfiles(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-biometrics-engine') {
+    console.log(JSON.stringify(await vl.voiceBiometricsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-biometrics-encryption') {
+    console.log(JSON.stringify(await vl.voiceBiometricsEncryption(), null, 2));
     return;
   }
 

@@ -205,6 +205,7 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | VL-173 | Emotion Voice Engine (Phase 30) | Done | `/v1/emotion-voice/*` profiles + synthesize/stream; ADR-0084. Soft prosody + clone style settings; not trained expressive TTS; ≠ VL-154 detect. |
 | VL-174 | Voice Studio (Phase 31) | Done | `/v1/voice-studio/*` library/SSML lite/lexicon/timeline/compare + `/voice-studio`; ADR-0085. Extends VL-120 `/audio`; not a DAW. |
 | VL-175 | Voice Enhancement Platform (Phase 32) | Done | `/v1/voice-enhancement/*` profiles + enhance/stream/upscale; ADR-0086. Extends VL-155; echo AEC/spectral ML deferred. |
+| VL-176 | Voice Biometrics (Phase 33) | Done | `/v1/voice-biometrics/*` encrypt/delete/authenticate + heuristic anti-spoof/liveness/risk; ADR-0087. Extends VL-152; not NIST/PAD. |
 
 ---
 
@@ -294,3 +295,4 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | 2026-10-03 | VL-173 Done: Emotion Voice Engine (Phase 30) — profiles + synthesize/stream; ADR-0084. Soft prosody façade; trained expressive TTS not claimed. |
 | 2026-10-03 | VL-174 Done: Voice Studio (Phase 31) — `/voice-studio` + SSML lite/lexicon/linear timeline/compare; ADR-0085. Not a nonlinear DAW. |
 | 2026-10-03 | VL-175 Done: Voice Enhancement Platform (Phase 32) — profiles over VL-155; ADR-0086. Not Krisp/Adobe Enhance; AEC deferred. |
+| 2026-10-03 | VL-176 Done: Voice Biometrics (Phase 33) — encrypted templates + auth/risk/anti-spoof/liveness; ADR-0087. Not NIST/PAD certified. |

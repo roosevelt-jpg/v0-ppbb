@@ -1029,6 +1029,11 @@ model SpeakerProfile {
   externalRef      String?   @map("external_ref")
   status           String    @default("active")
   fingerprintJson  Json?     @map("fingerprint_json")
+  /// VL-176: fingerprint JSON stored AES-256-GCM encrypted at rest
+  fingerprintEncrypted Boolean @default(false) @map("fingerprint_encrypted")
+  /// VL-176: opted-in as soft voice auth factor (not certified MFA alone)
+  authFactorEnabled Boolean  @default(false) @map("auth_factor_enabled")
+  deletedAt        DateTime? @map("deleted_at")
   enrolledAt       DateTime? @map("enrolled_at")
   enrollmentCount  Int       @default(0) @map("enrollment_count")
   createdAt        DateTime  @default(now()) @map("created_at")

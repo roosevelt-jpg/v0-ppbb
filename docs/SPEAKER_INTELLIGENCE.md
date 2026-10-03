@@ -27,4 +27,6 @@
 Speaker Intelligence is **not** pyannote + Nuance + Amazon Voice ID + Microsoft Speaker Recognition combined.  
 Voice clones (`/v1/voice-clones`) remain TTS consent clones — not verification.
 
+Enterprise auth governance (encryption-at-rest, deletion, heuristic anti-spoof/liveness) ships under Voice Biometrics (**VL-176** / [`VOICE_BIOMETRICS.md`](./VOICE_BIOMETRICS.md)).
+
 See ADR-0071.

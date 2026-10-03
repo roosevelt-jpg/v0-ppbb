@@ -1192,6 +1192,29 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-enhancement/profiles', { method: 'GET' });
   }
 
+  async voiceBiometricsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: { nistCertified: boolean; padCertified: boolean };
+  }> {
+    return this.requestJson('/v1/voice-biometrics/engine', { method: 'GET' });
+  }
+
+  async voiceBiometricsEncryption(): Promise<{
+    algorithm: string;
+    keyConfigured: boolean;
+    keySource: string;
+  }> {
+    return this.requestJson('/v1/voice-biometrics/encryption', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

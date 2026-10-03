@@ -18,7 +18,7 @@
 | Voice Conversion | **Deferred** |
 | Voice Enhancement | **Partial** — **VL-175** `/voice-enhancement` profiles over VL-155 heuristics |
 | Voice Restoration / Audio Mastering | **Partial** — restore + broadcast soft-limit profiles; LUFS/ML deferred |
-| Voice Biometrics / Authentication | **Partial** — Speaker Intelligence verify/identify (VL-152); NIST/anti-spoof Phase 33 |
+| Voice Biometrics / Authentication | **Partial** — **VL-176** `/voice-biometrics` over VL-152; heuristic anti-spoof/liveness; not NIST/PAD |
 | Voice Profiles | **Partial** — speaker profiles (VL-152) |
 | Voice Marketplace | **Deferred** — Phase 34 (existing Marketplace ≠ voice SKUs) |
 | Voice Analytics | **Deferred** — Phase 35 |

@@ -133,8 +133,11 @@ export function VoiceCloudClient() {
             <Link href={data.links.audio} style={secondary}>
               African studio
             </Link>
+            <Link href={data.links.voiceBiometrics ?? '/voice-biometrics'} style={secondary}>
+              Biometrics
+            </Link>
             <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>
-              Speakers / biometrics
+              Speakers
             </Link>
             <Link href={data.links.voiceEnhancement ?? '/voice-enhancement'} style={secondary}>
               Enhancement

@@ -372,3 +372,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Emotion Voice Engine partial (VL-173 / Phase 30). See EMOTION_VOICE + ADR-0084. Soft prosody + clone style settings; distinct from VL-154 detection.
 - Voice Studio shipped (VL-174 / Phase 31). See VOICE_STUDIO + ADR-0085. SSML lite + linear timeline + pronunciation lexicon over Neural TTS; not a nonlinear DAW.
 - Voice Enhancement Platform partial (VL-175 / Phase 32). See VOICE_ENHANCEMENT + ADR-0086. Profile pipelines over VL-155; echo AEC / spectral ML deferred.
+- Voice Biometrics partial (VL-176 / Phase 33). See VOICE_BIOMETRICS + ADR-0087. Encrypted templates + deletion + heuristic anti-spoof/liveness over VL-152; not NIST/PAD certified.

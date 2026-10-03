@@ -30,6 +30,6 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | --- | --- |
 | Language | VL-130 → VL-147 |
 | Speech | VL-150 → VL-160 |
-| Voice | VL-170 → *(in progress; VL-170–175)* |
+| Voice | VL-170 → *(in progress; VL-170–176)* |
 
 Vision / Media / … remain **unscheduled** until ROADMAP executable phases exist.

@@ -13,6 +13,11 @@ import {
   diarizeSegmentsByGaps,
   VoiceFingerprint,
 } from './fingerprint';
+import {
+  encryptFingerprint,
+  isEncryptedFingerprint,
+  resolveFingerprint,
+} from '../voice-biometrics/fingerprint-crypto';
 
 const DEFAULT_VERIFY_THRESHOLD = 0.82;
 const DEFAULT_IDENTIFY_THRESHOLD = 0.78;
@@ -106,6 +111,8 @@ export class SpeakerIntelligenceService {
     file: Express.Multer.File;
     userId?: string;
     ip?: string;
+    /** VL-176: store fingerprint AES-GCM encrypted at rest. */
+    encryptAtRest?: boolean;
   }) {
     this.audio.assertAllowedAudio(input.file);
     const profile = await this.requireProfile(
@@ -114,18 +121,23 @@ export class SpeakerIntelligenceService {
       input.profileId,
     );
     const fp = computeVoiceFingerprint(input.file.buffer);
-    const existing = profile.fingerprintJson as VoiceFingerprint | null;
-    const merged = existing?.vector?.length
-      ? averageFingerprints(existing, fp)
+    const existingPlain = resolveFingerprint(profile.fingerprintJson);
+    const merged = existingPlain?.vector?.length
+      ? averageFingerprints(existingPlain, fp)
       : fp;
+    const storeEncrypted =
+      input.encryptAtRest === true || isEncryptedFingerprint(profile.fingerprintJson);
+    const stored = storeEncrypted ? encryptFingerprint(merged) : merged;
 
     const updated = await this.prisma.speakerProfile.update({
       where: { id: profile.id },
       data: {
-        fingerprintJson: merged as unknown as Prisma.InputJsonValue,
+        fingerprintJson: stored as unknown as Prisma.InputJsonValue,
         enrolledAt: new Date(),
         enrollmentCount: { increment: 1 },
         status: 'enrolled',
+        ...(storeEncrypted ? { fingerprintEncrypted: true } : {}),
+        deletedAt: null,
       },
     });
 
@@ -153,7 +165,10 @@ export class SpeakerIntelligenceService {
         durationSeconds: merged.durationSeconds,
         enrolled: true,
       },
-      note: 'Local envelope fingerprint stored — not a commercial biometric template.',
+      fingerprintEncrypted: storeEncrypted,
+      note: storeEncrypted
+        ? 'Local envelope fingerprint encrypted at rest (AES-256-GCM) — not a commercial biometric template.'
+        : 'Local envelope fingerprint stored — not a commercial biometric template.',
     };
   }
 
@@ -172,7 +187,14 @@ export class SpeakerIntelligenceService {
       input.workspaceId,
       input.profileId,
     );
-    const enrolled = profile.fingerprintJson as VoiceFingerprint | null;
+    if (profile.deletedAt) {
+      throw new ApiException(
+        'validation_error',
+        'Biometric profile has been deleted',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const enrolled = resolveFingerprint(profile.fingerprintJson);
     if (!enrolled?.vector?.length) {
       throw new ApiException(
         'validation_error',
@@ -232,6 +254,7 @@ export class SpeakerIntelligenceService {
         workspaceId: input.workspaceId,
         fingerprintJson: { not: Prisma.DbNull },
         status: { in: ['enrolled', 'active'] },
+        deletedAt: null,
       },
     });
     const probe = computeVoiceFingerprint(input.file.buffer);
@@ -240,7 +263,7 @@ export class SpeakerIntelligenceService {
 
     const candidates = profiles
       .map((p) => {
-        const fp = p.fingerprintJson as VoiceFingerprint | null;
+        const fp = resolveFingerprint(p.fingerprintJson);
         if (!fp?.vector?.length) return null;
         return {
           profileId: p.id,
@@ -429,6 +452,80 @@ export class SpeakerIntelligenceService {
     };
   }
 
+  async purgeBiometric(input: {
+    organizationId: string;
+    workspaceId: string;
+    profileId: string;
+    userId?: string;
+    ip?: string;
+  }) {
+    const profile = await this.requireProfile(
+      input.organizationId,
+      input.workspaceId,
+      input.profileId,
+    );
+    const updated = await this.prisma.speakerProfile.update({
+      where: { id: profile.id },
+      data: {
+        fingerprintJson: Prisma.DbNull,
+        fingerprintEncrypted: false,
+        authFactorEnabled: false,
+        status: 'deleted',
+        deletedAt: new Date(),
+        enrollmentCount: 0,
+        enrolledAt: null,
+      },
+    });
+    await this.recordEvent({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      profileId: profile.id,
+      action: 'biometric_deleted',
+      metadata: {},
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'speaker.biometric_deleted',
+      route: 'DELETE /v1/voice-biometrics/profiles/:id',
+      ip: input.ip,
+      metadata: { profileId: profile.id },
+    });
+    return this.profileDto(updated);
+  }
+
+  async setAuthFactor(input: {
+    organizationId: string;
+    workspaceId: string;
+    profileId: string;
+    enabled: boolean;
+  }) {
+    const profile = await this.requireProfile(
+      input.organizationId,
+      input.workspaceId,
+      input.profileId,
+    );
+    if (profile.deletedAt) {
+      throw new ApiException(
+        'validation_error',
+        'Cannot enable auth on a deleted biometric profile',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (input.enabled && !resolveFingerprint(profile.fingerprintJson)) {
+      throw new ApiException(
+        'validation_error',
+        'Enroll a fingerprint before enabling auth factor',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const updated = await this.prisma.speakerProfile.update({
+      where: { id: profile.id },
+      data: { authFactorEnabled: input.enabled },
+    });
+    return this.profileDto(updated);
+  }
+
   private async requireProfile(organizationId: string, workspaceId: string, id: string) {
     const row = await this.prisma.speakerProfile.findFirst({
       where: { id, organizationId, workspaceId },
@@ -449,8 +546,12 @@ export class SpeakerIntelligenceService {
     enrollmentCount: number;
     createdAt: Date;
     updatedAt: Date;
+    fingerprintEncrypted?: boolean;
+    authFactorEnabled?: boolean;
+    deletedAt?: Date | null;
   }) {
-    const fp = row.fingerprintJson as VoiceFingerprint | null;
+    const fp = resolveFingerprint(row.fingerprintJson);
+    const encrypted = Boolean(row.fingerprintEncrypted || isEncryptedFingerprint(row.fingerprintJson));
     return {
       id: row.id,
       displayName: row.displayName,
@@ -459,7 +560,10 @@ export class SpeakerIntelligenceService {
       enrolled: Boolean(fp?.vector?.length),
       enrollmentCount: row.enrollmentCount,
       enrolledAt: row.enrolledAt?.toISOString() ?? null,
-      fingerprintDims: fp?.dims ?? null,
+      fingerprintDims: fp?.dims ?? (isEncryptedFingerprint(row.fingerprintJson) ? row.fingerprintJson.dims : null),
+      fingerprintEncrypted: encrypted,
+      authFactorEnabled: Boolean(row.authFactorEnabled),
+      deletedAt: row.deletedAt?.toISOString() ?? null,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };

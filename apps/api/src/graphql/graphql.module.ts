@@ -12,6 +12,7 @@ import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from '../emotion-voice/emotion-voice.module';
 import { VoiceStudioModule } from '../voice-studio/voice-studio.module';
 import { VoiceEnhancementModule } from '../voice-enhancement/voice-enhancement.module';
+import { VoiceBiometricsModule } from '../voice-biometrics/voice-biometrics.module';
 import { SpeechRecognitionModule } from '../speech-recognition/speech-recognition.module';
 import { SpeakerIntelligenceModule } from '../speaker-intelligence/speaker-intelligence.module';
 import { AccentsModule } from '../accents/accents.module';
@@ -33,6 +34,7 @@ import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { EmotionVoiceGraphqlResolver } from './emotion-voice.resolver';
 import { VoiceStudioGraphqlResolver } from './voice-studio.resolver';
 import { VoiceEnhancementGraphqlResolver } from './voice-enhancement.resolver';
+import { VoiceBiometricsGraphqlResolver } from './voice-biometrics.resolver';
 import { SpeechRecognitionGraphqlResolver } from './speech-recognition.resolver';
 import { SpeakerIntelligenceGraphqlResolver } from './speaker-intelligence.resolver';
 import { AccentIntelligenceGraphqlResolver } from './accent-intelligence.resolver';
@@ -74,6 +76,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmotionVoiceModule,
     VoiceStudioModule,
     VoiceEnhancementModule,
+    VoiceBiometricsModule,
     SpeechRecognitionModule,
     SpeakerIntelligenceModule,
     AccentsModule,
@@ -103,6 +106,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmotionVoiceGraphqlResolver,
     VoiceStudioGraphqlResolver,
     VoiceEnhancementGraphqlResolver,
+    VoiceBiometricsGraphqlResolver,
     SpeechRecognitionGraphqlResolver,
     SpeakerIntelligenceGraphqlResolver,
     AccentIntelligenceGraphqlResolver,

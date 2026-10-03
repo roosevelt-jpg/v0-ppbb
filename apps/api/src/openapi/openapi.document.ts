@@ -2950,6 +2950,76 @@ export const openApiDocument = {
         responses: { '200': { description: 'text/event-stream' } },
       },
     },
+    '/v1/voice-biometrics/engine': {
+      get: {
+        summary: 'Voice Biometrics engine catalog',
+        operationId: 'getVoiceBiometricsEngine',
+        responses: { '200': { description: 'Capabilities and honesty notes' } },
+      },
+    },
+    '/v1/voice-biometrics/encryption': {
+      get: {
+        summary: 'Fingerprint encryption-at-rest status',
+        operationId: 'getVoiceBiometricsEncryption',
+        responses: { '200': { description: 'AES-GCM key configuration status' } },
+      },
+    },
+    '/v1/voice-biometrics/enroll': {
+      post: {
+        summary: 'Enroll encrypted voice biometric template',
+        operationId: 'enrollVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Encrypted enrollment result' } },
+      },
+    },
+    '/v1/voice-biometrics/verify': {
+      post: {
+        summary: '1:1 voice biometric verify',
+        operationId: 'verifyVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Verify score' } },
+      },
+    },
+    '/v1/voice-biometrics/identify': {
+      post: {
+        summary: '1:N voice biometric identify',
+        operationId: 'identifyVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Identify candidates' } },
+      },
+    },
+    '/v1/voice-biometrics/authenticate': {
+      post: {
+        summary: 'Composite voice authentication decision',
+        operationId: 'authenticateVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'accept / step_up / reject' } },
+      },
+    },
+    '/v1/voice-biometrics/anti-spoof': {
+      post: {
+        summary: 'Heuristic anti-spoof assessment',
+        operationId: 'antiSpoofVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Spoof risk (not NIST PAD)' } },
+      },
+    },
+    '/v1/voice-biometrics/liveness': {
+      post: {
+        summary: 'Heuristic liveness check',
+        operationId: 'livenessVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Liveness result (not certified PAD)' } },
+      },
+    },
+    '/v1/voice-biometrics/risk': {
+      get: {
+        summary: 'Workspace / profile fraud risk score',
+        operationId: 'riskVoiceBiometric',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Heuristic risk' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',
