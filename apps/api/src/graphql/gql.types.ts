@@ -691,6 +691,48 @@ export class GqlDatasetMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlPromptMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPromptMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPromptMarketplaceCapability])
+  capabilities!: GqlPromptMarketplaceCapability[];
+
+  @Field()
+  promptMeshOs!: boolean;
+
+  @Field()
+  autoPromptResearchOs!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

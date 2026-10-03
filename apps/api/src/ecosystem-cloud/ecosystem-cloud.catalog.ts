@@ -74,11 +74,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'prompt-marketplace',
       name: 'Prompt Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/prompt-marketplace/engine',
+      console: '/prompt-marketplace',
       notes:
-        'VL-253 / Phase 120. Extends content-marketplace prompt kind + Prompt Fabric — not a prompt mesh OS.',
+        'VL-253 / Phase 120. Extends prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty. Not a prompt mesh OS.',
     },
     {
       id: 'agent-marketplace',
@@ -224,6 +224,11 @@ export function ecosystemRoutingTable() {
       surface: 'dataset-marketplace',
       path: '/dataset-marketplace',
       api: '/v1/dataset-marketplace/engine',
+    },
+    {
+      surface: 'prompt-marketplace',
+      path: '/prompt-marketplace',
+      api: '/v1/prompt-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },
