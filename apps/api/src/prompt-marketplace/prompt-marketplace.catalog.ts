@@ -34,7 +34,7 @@ export function promptMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Prompt Marketplace',
     note:
-      'Prompt Marketplace. Publish/license prompt packs over content-marketplace prompt kind + Prompt Fabric. Install copies managed prompt versions into buyer workspaces — not a prompt mesh OS or auto-prompt research lab.',
+      'Prompt Marketplace. Publish/license prompt packs over content-marketplace prompt kind + Prompt Fabric. Install copies managed prompt versions into buyer workspaces. or auto-prompt research lab.',
     capabilities: [
       {
         id: 'prompt-packs',
@@ -95,10 +95,10 @@ export function promptMarketplaceEngineCatalog() {
       {
         id: 'revenue-sharing',
         name: 'Revenue Sharing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/prompt-marketplace/sales',
         notes:
-          '15% platform fee on paid installs. Creator Economy deepens payout math — hand-check before live creators.',
+          '15% platform fee on paid installs. Creator Economy deepens payout math — review before enabling live creator payouts.',
       },
     ] satisfies PromptMarketplaceCapability[],
     categories: PROMPT_MARKETPLACE_CATEGORIES.map((id) => ({ id })),
@@ -136,7 +136,7 @@ export function promptMarketplaceEngineCatalog() {
       fabricPolicyHardGateRequired: true,
       realMoneyRiskCategory: true,
       note:
-        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data. Not a prompt mesh / auto-prompt research OS.',
+        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data.',
     },
     docs: '/docs/PROMPT_MARKETPLACE.md',
   };

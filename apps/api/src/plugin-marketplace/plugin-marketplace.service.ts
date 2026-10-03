@@ -600,7 +600,7 @@ export class PluginMarketplaceService {
         ...result.honesty,
       },
       note:
-        'Marketplace run completed via Plugin Runtime sandbox + PluginPolicyGate. Not live code execution.',
+        'Marketplace run completed via Plugin Runtime sandbox + PluginPolicyGate.',
     };
   }
 
@@ -800,7 +800,7 @@ export class PluginMarketplaceService {
       sales,
       runs,
       honesty: this.engine().honesty,
-      note: 'Plugin marketplace aggregates. Commerce depth deferred to Creator Economy.',
+      note: 'Plugin marketplace aggregates. Commerce aggregates available; deeper payout math lives in Creator Economy.',
     };
   }
 

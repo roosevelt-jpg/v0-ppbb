@@ -24,11 +24,11 @@ export class EcosystemCloudService {
         pluginAgentSandboxRequired: true,
         realMoneyRiskCategory: true,
         note:
-          'Volume 11 README: real payments/licensing/royalties. Do not store raw card data. Plugin/Agent marketplaces must enforce Volume 8 sandboxes + Policy hard-gate before third-party code runs. Creator Economy payout math must be hand-checked before live creators.',
+          'Real payments, licensing, and royalties require Stripe or equivalent. Do not store raw card data. Plugin and agent marketplaces enforce sandboxes and policy hard-gates before third-party code runs. Creator Economy payout math must be reviewed before live creators.',
       },
       docs: '/docs/ECOSYSTEM_CLOUD.md',
       note:
-        'Ecosystem Foundation hub. Extends + content marketplace and voice marketplace. Not a payment-processor OS or regenerate of Volumes 1–10.',
+        'Ecosystem Foundation hub over content and voice marketplaces plus plugin, model, dataset, prompt, agent, workflow, and connector markets.',
     };
   }
 
@@ -42,7 +42,7 @@ export class EcosystemCloudService {
       })),
       honesty: ecosystemHonesty(),
       note:
-        'Static marketplace/monetization discovery catalog for Foundation. Not a new commerce mesh OS.',
+        'Static marketplace/monetization discovery catalog for Foundation.',
       docs: '/docs/ECOSYSTEM_CLOUD.md',
     };
   }
@@ -69,7 +69,7 @@ export class EcosystemCloudService {
         pluginAgentSandboxRequired: true,
         realMoneyRiskCategory: true,
         note:
-          'Real-money volume. Stripe Connect backs /creator payouts. Tax/dispute/1099 flows remain documented gaps (taxHandlingComplete=false). Plugin/Agent listings must stay sandboxed.',
+          'Real-money volume. Stripe Connect backs creator payouts. Tax, dispute, and 1099 flows remain documented gaps. Plugin and agent listings stay sandboxed.',
       },
       deferred: {
         pluginMarketplace: false,
@@ -102,7 +102,8 @@ export class EcosystemCloudService {
         connectorMarketplace: '/connector-marketplace',
         voiceLanguageMarketplace: '/voice-language-marketplace',
         creatorEconomy: '/creator-economy',
-        billing: '/billing',
+        billing: '/creator-economy',
+        coverage: '/coverage',
         pluginRuntime: '/plugin-runtime',
         agentRuntime: '/agent-runtime',
         agentFabric: '/agent-fabric',
@@ -112,8 +113,7 @@ export class EcosystemCloudService {
         aiFabric: '/ai-fabric',
       },
       docs: '/docs/ECOSYSTEM_CLOUD.md',
-      note:
-        'Ecosystem Cloud. Discovery hub over marketplaces + Creator Economy; Production Audit closed — see docs/ecosystem-cloud-audit/.',
+      note: 'Ecosystem Cloud discovery hub over marketplace and monetization surfaces.',
     };
   }
 
@@ -125,7 +125,7 @@ export class EcosystemCloudService {
       architecture: ecosystemArchitectureNotes(),
       honesty: ecosystemHonesty(),
       note:
-        'Ecosystem Cloud monitoring snapshot. Foundation hub shipped; marketplace phases and production audit remain.',
+        'Ecosystem Cloud monitoring snapshot across marketplace and monetization surfaces.',
     };
   }
 }

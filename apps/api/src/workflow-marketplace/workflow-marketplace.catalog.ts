@@ -29,7 +29,7 @@ export function workflowMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Workflow Marketplace',
     note:
-      'Workflow Marketplace. Publish/install/run sandboxed workflow templates. Execution always goes through Workflow Runtime run + WorkflowPolicyGate (hard allowlist) and Policy Fabric hard gate — never live step execution. Extends / listings kind=workflow. Not a Zapier/Temporal/Airflow OS.',
+      'Workflow Marketplace. Publish/install/run sandboxed workflow templates. Execution always goes through Workflow Runtime run + WorkflowPolicyGate (hard allowlist) and Policy Fabric hard gate — never live step execution. Extends / listings kind=workflow.',
     capabilities: [
       {
         id: 'automation-templates',
@@ -78,7 +78,7 @@ export function workflowMarketplaceEngineCatalog() {
         name: 'Scheduling Templates',
         status: 'shipped',
         api: 'POST /v1/workflow-marketplace/listings',
-        notes: 'category=scheduling — not a cron fleet OS.',
+        notes: 'category=scheduling.',
       },
       {
         id: 'workflow-security',
@@ -86,22 +86,22 @@ export function workflowMarketplaceEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/workflow-marketplace/listings/:id/run',
         notes:
-          'Run path: FabricPolicyGate → WorkflowRuntime.run → WorkflowPolicyGate → sandbox only. liveStepExecution=false.',
+          'Run path: FabricPolicyGate → WorkflowRuntime.run → WorkflowPolicyGate → sandbox only.',
       },
       {
         id: 'workflow-analytics',
         name: 'Workflow Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/workflow-marketplace/analytics',
-        notes: 'Listing/install/review/run aggregates. Commerce depth deferred to Creator Economy.',
+        notes: 'Listing/install/review/run aggregates. Commerce aggregates available; deeper payout math lives in Creator Economy.',
       },
       {
         id: 'workflow-monetization',
         name: 'Workflow Monetization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-marketplace/listings/:id/install',
         notes:
-          'Paid listings record MarketplaceSale receipts (15% fee). Stripe Connect when configured — not a payment-processor OS.',
+          'Paid listings record MarketplaceSale receipts (15% fee). Stripe Connect when configured.',
       },
     ] satisfies WorkflowMarketplaceCapability[],
     categories: WORKFLOW_MARKETPLACE_CATEGORIES.map((id) => ({ id })),

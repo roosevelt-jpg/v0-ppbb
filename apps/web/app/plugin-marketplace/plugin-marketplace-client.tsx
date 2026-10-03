@@ -1,35 +1,35 @@
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Listing = {
   id: string;
-  title: string;
-  pluginVersion: number;
-  verified: boolean;
-  sandboxOnly: boolean;
-  liveCodeExecution: boolean;
-  priceCents: number;
-  ratingAverage: number | null;
-  ratingCount: number;
-  publisherName: string | null;
+  title?: string;
+  name?: string;
+  status?: string;
+  verified?: boolean;
+  sandboxOnly?: boolean;
+  priceCents?: number;
+  ratingAverage?: number | null;
+  ratingCount?: number;
+  publisherName?: string | null;
+  pluginVersion?: number;
+  category?: string;
 };
 
 type Engine = {
-  product: string;
+  product?: string;
   note: string;
-  safety: { note: string; sandboxRequired: boolean; liveCodeExecutionForbidden: boolean };
-  honesty: {
-    liveCodeExecution: boolean;
-    sandboxRequired: boolean;
-    pluginPolicyHardGateRequired: boolean;
-  };
-  capabilities: Array<{ id: string; name: string; status: string; notes: string }>;
+  honesty?: Record<string, unknown>;
+  safety?: { note?: string } & Record<string, unknown>;
+  capabilities?: CatalogRow[];
+  products?: CatalogRow[];
 };
 
 export function PluginMarketplaceClient() {
@@ -38,119 +38,66 @@ export function PluginMarketplaceClient() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const token = await resolveApiToken(getToken);
-    if (!token) throw new Error('Not signed in');
-    const [eng, list] = await Promise.all([
-      apiFetch<Engine>('/v1/plugin-marketplace/engine', { token }),
-      apiFetch<{ listings: Listing[] }>('/v1/plugin-marketplace/listings', { token }),
-    ]);
-    setEngine(eng);
-    setListings(list.listings);
-  }, [getToken]);
-
   useEffect(() => {
     if (!isLoaded) return;
-    void load().catch((err: Error) => setError(err.message));
-  }, [isLoaded, load]);
+    void (async () => {
+      try {
+        const token = await resolveApiToken(getToken);
+        if (!token) throw new Error('Not signed in');
+        const [eng, list] = await Promise.all([
+          apiFetch<Engine>('/v1/plugin-marketplace/engine', { token }),
+          apiFetch<{ listings: Listing[] }>('/v1/plugin-marketplace/listings', { token }).catch(() => ({ listings: [] as Listing[] })),
+        ]);
+        setEngine(eng);
+        setListings(list.listings ?? []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load');
+      }
+    })();
+  }, [isLoaded, getToken]);
+
+  const listingRows: CatalogRow[] = listings.map((l) => ({
+    id: l.id,
+    name: String(l.title ?? l.name ?? l.id),
+    status: String(l.status ?? (l.verified ? 'verified' : 'published')),
+    notes: hidePhaseIds(
+      [
+        l.publisherName ? `Publisher: ${l.publisherName}` : '',
+        l.pluginVersion != null ? `v${l.pluginVersion}` : '',
+        l.sandboxOnly ? 'sandbox' : '',
+        l.priceCents != null ? `${(l.priceCents / 100).toFixed(2)} USD` : '',
+        l.ratingAverage != null ? `${l.ratingAverage}★ (${l.ratingCount ?? 0})` : '',
+        l.category ?? '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    ),
+  }));
 
   return (
     <AppShell>
-      <h1
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: '1.85rem',
-          fontWeight: 720,
-          letterSpacing: '-0.03em',
-          margin: '0 0 0.35rem',
-        }}
-      >
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.85rem', fontWeight: 720, letterSpacing: '-0.03em', margin: '0 0 0.35rem' }}>
         Plugin Marketplace
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Buy and sell sandboxed plugins — execution always Policy-gated through Plugin Runtime.
+        Buy and sell sandboxed plugins executed through Plugin Runtime.
       </p>
-
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!engine && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
-
       {engine ? (
-        <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.note}</p>
-
-          <section style={{ borderLeft: '3px solid #b45309', paddingLeft: '0.85rem' }}>
-            <h2 style={label}>Sandbox safety</h2>
-            <p style={{ margin: 0, maxWidth: '44rem', color: 'var(--muted)' }}>
-              {engine.safety.note}
-            </p>
-            <ul style={{ margin: '0.5rem 0 0', color: 'var(--muted)' }}>
-              <li>sandboxRequired: {String(engine.honesty.sandboxRequired)}</li>
-              <li>liveCodeExecution: {String(engine.honesty.liveCodeExecution)}</li>
-              <li>
-                pluginPolicyHardGateRequired:{' '}
-                {String(engine.honesty.pluginPolicyHardGateRequired)}
-              </li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 style={label}>Links</h2>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
-              <Link href="/plugin-runtime" style={secondary}>
-                Plugin Runtime
-              </Link>
-              <Link href="/ecosystem-cloud" style={secondary}>
-                Ecosystem Cloud
-              </Link>
-              <Link href="/policy-fabric" style={secondary}>
-                Policy Fabric
-              </Link>
-            </div>
-          </section>
-
-          <section>
-            <h2 style={label}>Listings</h2>
-            {listings.length === 0 ? (
-              <p style={{ margin: 0, color: 'var(--muted)' }}>
-                No published plugin listings yet. Register a plugin in Plugin Runtime, then publish
-                it here.
-              </p>
-            ) : (
-              <ul style={{ margin: 0, paddingLeft: '1.1rem', lineHeight: 1.7 }}>
-                {listings.map((l) => (
-                  <li key={l.id}>
-                    <strong>{l.title}</strong> v{l.pluginVersion}
-                    {l.verified ? ' · verified' : ''}
-                    {l.sandboxOnly ? ' · sandbox' : ''} —{' '}
-                    {l.publisherName ?? 'publisher'}
-                    {l.ratingAverage != null
-                      ? ` · ${l.ratingAverage}★ (${l.ratingCount})`
-                      : ''}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </div>
+        <CatalogConsole
+          note={hidePhaseIds(engine.note)}
+          safetyNote={engine.safety?.note ? hidePhaseIds(String(engine.safety.note)) : undefined}
+          honesty={engine.honesty}
+          sections={[
+            { title: 'Capabilities', rows: engine.capabilities ?? [] },
+            { title: 'Products', rows: engine.products ?? [] },
+            { title: 'Listings', rows: listingRows },
+          ]}
+          backHref="/plugin-runtime"
+          backLabel="Plugin Runtime"
+        />
       ) : null}
     </AppShell>
   );
 }
-
-const label: CSSProperties = {
-  fontSize: '0.75rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  margin: '0 0 0.5rem',
-  color: 'var(--muted)',
-};
-
-const secondary: CSSProperties = {
-  display: 'inline-block',
-  padding: '0.35rem 0.7rem',
-  border: '1px solid var(--border, #ddd)',
-  borderRadius: 4,
-  textDecoration: 'none',
-  color: 'inherit',
-  fontSize: '0.9rem',
-};

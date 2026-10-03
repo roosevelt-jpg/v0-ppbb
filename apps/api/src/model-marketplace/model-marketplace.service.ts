@@ -206,7 +206,7 @@ export class ModelMarketplaceService {
         storesRawCardData: false,
         creatorPayoutMathVerifiedLive: false,
       },
-      note: 'Recorded receipts only. Creator Economy expands payout math — hand-check before live creators.',
+      note: 'Recorded receipts only. Creator Economy expands payout math — review before enabling live creator payouts.',
     };
   }
 
@@ -316,7 +316,7 @@ export class ModelMarketplaceService {
       listing: this.serialize(listing),
       honesty: this.engine().honesty,
       note:
-        'Model listing published as a license SKU over registry metadata. Install grants entitlement — not weight hosting.',
+        'Model listing published as a license SKU over registry metadata. Install grants entitlement.',
     };
   }
 
@@ -506,7 +506,7 @@ export class ModelMarketplaceService {
       },
       sale,
       honesty: this.engine().honesty,
-      note: 'Installed model license entitlement. Not a weight download or Hugging Face clone.',
+      note: 'Installed model license entitlement.',
     };
   }
 

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Overview = {
   session: { role: string };
@@ -72,7 +73,6 @@ export function EnterpriseClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '40rem' }}>
         Derived controls for this organization — governance, security, billing quotas, and residency.
-        Not a policy engine or Trust Center product.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

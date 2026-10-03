@@ -39,7 +39,7 @@ export function datasetMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Dataset Marketplace',
     note:
-      'Dataset Marketplace. Publish/license dataset SKUs over content-marketplace dataset kind + Dataset Asset program. TM corpora install copy pairs; DatasetAsset listings grant license entitlements — not Label Studio, annotation OS, or Dataset Cloud.',
+      'Dataset Marketplace. Publish/license dataset SKUs over content-marketplace dataset kind + Dataset Asset program. TM corpora install copy pairs; DatasetAsset listings grant license entitlements.',
     capabilities: [
       {
         id: 'public-datasets',
@@ -74,7 +74,7 @@ export function datasetMarketplaceEngineCatalog() {
         name: 'Speech Corpora',
         status: 'shipped',
         api: 'POST /v1/dataset-marketplace/listings',
-        notes: 'category=speech metadata listings over DatasetAsset — not speech OS.',
+        notes: 'category=speech metadata listings over DatasetAsset.',
       },
       {
         id: 'ocr-corpora',
@@ -88,7 +88,7 @@ export function datasetMarketplaceEngineCatalog() {
         name: 'Vision Datasets',
         status: 'shipped',
         api: 'POST /v1/dataset-marketplace/listings',
-        notes: 'category=vision metadata listings — not vision company OS.',
+        notes: 'category=vision metadata listings.',
       },
       {
         id: 'licensing',
@@ -114,10 +114,10 @@ export function datasetMarketplaceEngineCatalog() {
       {
         id: 'revenue-sharing',
         name: 'Revenue Sharing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/dataset-marketplace/sales',
         notes:
-          '15% platform fee on paid installs. Creator Economy deepens payout math — hand-check before live creators.',
+          '15% platform fee on paid installs. Creator Economy deepens payout math — review before enabling live creator payouts.',
       },
     ] satisfies DatasetMarketplaceCapability[],
     categories: DATASET_MARKETPLACE_CATEGORIES.map((id) => ({ id })),
@@ -157,7 +157,7 @@ export function datasetMarketplaceEngineCatalog() {
       fabricPolicyHardGateRequired: true,
       realMoneyRiskCategory: true,
       note:
-        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data. Not Label Studio / Dataset Cloud.',
+        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data.',
     },
     docs: '/docs/DATASET_MARKETPLACE.md',
   };

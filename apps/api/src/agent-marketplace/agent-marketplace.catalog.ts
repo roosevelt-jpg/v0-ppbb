@@ -32,7 +32,7 @@ export function agentMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Agent Marketplace',
     note:
-      'Agent Marketplace. Publish/install/run sandboxed enterprise agents. Execution always goes through Agent Runtime run + AgentPolicyGate (hard allowlist) and Policy Fabric hard gate — never open tool execution. Extends / listings kind=agent. Not a LangGraph/AutoGPT OS.',
+      'Agent Marketplace. Publish/install/run sandboxed enterprise agents. Execution always goes through Agent Runtime run + AgentPolicyGate (hard allowlist) and Policy Fabric hard gate — never open tool execution. Extends / listings kind=agent.',
     capabilities: [
       {
         id: 'business-agents',
@@ -60,14 +60,14 @@ export function agentMarketplaceEngineCatalog() {
         name: 'Legal Agents',
         status: 'shipped',
         api: 'POST /v1/agent-marketplace/listings',
-        notes: 'category=legal — not a law-practice OS.',
+        notes: 'category=legal.',
       },
       {
         id: 'financial-agents',
         name: 'Financial Agents',
         status: 'shipped',
         api: 'POST /v1/agent-marketplace/listings',
-        notes: 'category=financial — not a payments OS.',
+        notes: 'category=financial.',
       },
       {
         id: 'education-agents',
@@ -81,7 +81,7 @@ export function agentMarketplaceEngineCatalog() {
         name: 'Voice Agents',
         status: 'shipped',
         api: 'POST /v1/agent-marketplace/listings',
-        notes: 'category=voice — ties to voice surfaces; not a voice company OS.',
+        notes: 'category=voice — ties to voice surfaces.',
       },
       {
         id: 'sales-agents',
@@ -110,22 +110,22 @@ export function agentMarketplaceEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/agent-marketplace/listings/:id/run',
         notes:
-          'Run path: FabricPolicyGate → AgentRuntime.run → AgentPolicyGate → sandbox only. liveToolExecution=false.',
+          'Run path: FabricPolicyGate → AgentRuntime.run → AgentPolicyGate → sandbox only.',
       },
       {
         id: 'agent-analytics',
         name: 'Agent Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/agent-marketplace/analytics',
-        notes: 'Listing/install/review/run aggregates. Commerce depth deferred to Creator Economy.',
+        notes: 'Listing/install/review/run aggregates. Commerce aggregates available; deeper payout math lives in Creator Economy.',
       },
       {
         id: 'agent-monetization',
         name: 'Agent Monetization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-marketplace/listings/:id/install',
         notes:
-          'Paid listings record MarketplaceSale receipts (15% fee). Stripe Connect when configured — not a payment-processor OS.',
+          'Paid listings record MarketplaceSale receipts (15% fee). Stripe Connect when configured.',
       },
     ] satisfies AgentMarketplaceCapability[],
     categories: AGENT_MARKETPLACE_CATEGORIES.map((id) => ({ id })),

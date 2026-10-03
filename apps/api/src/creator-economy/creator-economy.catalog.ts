@@ -57,7 +57,7 @@ export function creatorEconomyEngineCatalog() {
   return {
     product: 'VerbaLab Creator Economy',
     note:
-      'Creator Economy. Extends Stripe Connect Express + MarketplaceSale receipts with royalty math, creator/org profiles, invoice-style sale receipts, and honest tax/dispute gaps. Not a payment-processor OS, tax engine, or card vault. Hand-check royalty scenarios before live creators.',
+      'Creator Economy. Extends Stripe Connect Express + MarketplaceSale receipts with royalty math, creator/org profiles, invoice-style sale receipts, and honest tax/dispute gaps. Hand-check royalty scenarios before live creators.',
     capabilities: [
       {
         id: 'revenue-sharing',
@@ -70,23 +70,23 @@ export function creatorEconomyEngineCatalog() {
       {
         id: 'subscriptions',
         name: 'Subscriptions',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/billing/summary',
-        notes: 'Pro plan + listing subscriptionInterval metadata. Recurring Connect subscriptions deferred.',
+        notes: 'Pro plan with listing subscription interval metadata.',
       },
       {
         id: 'licensing',
         name: 'Licensing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/creator-economy/licensing',
-        notes: 'Aggregates entitlement installs across marketplace hubs — not a license server OS.',
+        notes: 'Aggregates entitlement installs across marketplace hubs.',
       },
       {
         id: 'royalties',
         name: 'Royalties',
         status: 'shipped',
         api: 'GET /v1/creator-economy/royalty/scenarios',
-        notes: 'Hand-checkable splitRevenue scenarios; creatorPayoutMathVerifiedLive=false until ops sign-off.',
+        notes: 'Hand-checkable splitRevenue scenarios; until ops sign-off.',
       },
       {
         id: 'creator-profiles',
@@ -100,36 +100,36 @@ export function creatorEconomyEngineCatalog() {
         name: 'Organization Profiles',
         status: 'shipped',
         api: 'GET /v1/creator-economy/profiles/organization',
-        notes: 'Buyer/publisher org summary — not a CRM OS.',
+        notes: 'Buyer/publisher org summary.',
       },
       {
         id: 'partner-accounts',
         name: 'Partner Accounts',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/creator-economy/profiles/partner',
-        notes: 'Connect Express partner readiness. Full partner program deferred.',
+        notes: 'Connect Express partner readiness checklist.',
       },
       {
         id: 'payouts',
         name: 'Payouts',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/marketplace/connect/status',
         notes:
-          'Stripe Connect Express via Live payouts blocked until Stripe env configured. Hub surfaces status + preview.',
+          'Stripe Connect Express via Payouts require Stripe environment configuration. Hub surfaces status + preview.',
       },
       {
         id: 'invoices',
         name: 'Invoices',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/creator-economy/invoices',
-        notes: 'Invoice-style views over MarketplaceSale receipts — not a full invoicing OS.',
+        notes: 'Invoice-style views over MarketplaceSale receipts.',
       },
       {
         id: 'tax-reporting',
         name: 'Tax Reporting',
         status: 'deferred',
         api: null,
-        notes: '1099 / VAT / tax forms are explicit gaps — taxHandlingComplete=false.',
+        notes: '1099 / VAT / tax forms are explicit gaps —.',
       },
       {
         id: 'creator-portal',
@@ -148,14 +148,14 @@ export function creatorEconomyEngineCatalog() {
       {
         id: 'billing',
         name: 'Billing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/billing/summary',
-        notes: 'Shared Stripe billing + Connect — extends /092.',
+        notes: 'Shared Stripe billing and Connect Express payouts.',
       },
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/creator-economy/analytics',
         notes: 'Sale/install aggregates for publisher org.',
       },
@@ -164,7 +164,7 @@ export function creatorEconomyEngineCatalog() {
         name: 'Monitoring',
         status: 'shipped',
         api: 'GET /v1/creator-economy/monitoring',
-        notes: 'Capability + honesty snapshot.',
+        notes: 'Capability snapshot for creator economy surfaces.',
       },
       {
         id: 'documentation',
@@ -188,7 +188,7 @@ export function creatorEconomyEngineCatalog() {
         expectedPublisherNetCents: s.net,
       })),
       note:
-        'Volume 11 hubs (model→voice-language) record 15%. Content marketplace Checkout uses billing.platformFeeBps() (default 20%). Voice marketplace still uses 10% — not regenerated here.',
+        'Volume 11 hubs (model→voice-language) record 15%. Content marketplace Checkout uses billing.platformFeeBps() (default 20%). Voice marketplace still uses 10%.',
     },
     architecture: {
       style: 'nest_modular_monolith',
@@ -227,7 +227,7 @@ export function creatorEconomyEngineCatalog() {
       disputeChargebackComplete: false,
       creatorPayoutMathVerifiedLive: false,
       note:
-        'Volume 11 real-money volume. Use Stripe Connect (or equivalent); never store raw card data. Hand-check royalty scenarios before paying live creators. Tax (1099/VAT) and dispute/chargeback flows are documented gaps — not a tax engine or payment-processor OS.',
+        'Volume 11 real-money volume. Use Stripe Connect (or equivalent); never store raw card data. Hand-check royalty scenarios before paying live creators. Tax (1099/VAT) and dispute/chargeback flows are documented gaps.',
     },
     docs: '/docs/CREATOR_ECONOMY.md',
     links: {

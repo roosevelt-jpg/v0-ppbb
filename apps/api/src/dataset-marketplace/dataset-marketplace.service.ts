@@ -408,7 +408,7 @@ export class DatasetMarketplaceService {
       listing: this.serialize(listing),
       honesty: this.engine().honesty,
       note:
-        'Dataset listing published under content-marketplace dataset kind with Dataset Marketplace hub marker. Not Label Studio OS.',
+        'Dataset listing published under content-marketplace dataset kind with Dataset Marketplace hub marker.',
     };
   }
 
@@ -665,7 +665,7 @@ export class DatasetMarketplaceService {
       },
       sale,
       honesty: this.engine().honesty,
-      note: 'Dataset marketplace install completed. Not Label Studio / Dataset Cloud OS.',
+      note: 'Dataset marketplace install completed.',
     };
   }
 

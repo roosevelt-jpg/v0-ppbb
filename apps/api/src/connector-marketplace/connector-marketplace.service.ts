@@ -219,7 +219,7 @@ export class ConnectorMarketplaceService {
         liveConnectorExecution: false,
         ipaasOs: false,
       },
-      note: 'Recorded receipts only. Creator Economy expands payout math — hand-check before live creators.',
+      note: 'Recorded receipts only. Creator Economy expands payout math — review before enabling live creator payouts.',
     };
   }
 
@@ -343,7 +343,7 @@ export class ConnectorMarketplaceService {
       listing: this.serialize(listing),
       honesty: this.engine().honesty,
       note:
-        'Connector listing published as an entitlement SKU over the built-in catalog. Install grants entitlement — not live arbitrary outbound or iPaaS.',
+        'Connector listing published as an entitlement SKU over the built-in catalog. Install grants entitlement.',
     };
   }
 
@@ -545,7 +545,7 @@ export class ConnectorMarketplaceService {
       },
       sale,
       honesty: this.engine().honesty,
-      note: 'Installed connector entitlement. Not Zapier/iPaaS or live arbitrary outbound.',
+      note: 'Installed connector entitlement.',
     };
   }
 

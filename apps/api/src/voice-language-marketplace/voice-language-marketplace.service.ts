@@ -221,7 +221,7 @@ export class VoiceLanguageMarketplaceService {
         celebrityWithoutRights: false,
         voiceCdnHosted: false,
       },
-      note: 'Recorded receipts only. Creator Economy expands payout math — hand-check before live creators.',
+      note: 'Recorded receipts only. Creator Economy expands payout math — review before enabling live creator payouts.',
     };
   }
 
@@ -351,7 +351,7 @@ export class VoiceLanguageMarketplaceService {
       listing: this.serialize(listing),
       honesty: this.engine().honesty,
       note:
-        'Voice/language pack listing published as an entitlement SKU over + Volume 1 surfaces. Install grants entitlement — not voice CDN hosting.',
+        'Voice/language pack listing published as an entitlement SKU over + Volume 1 surfaces. Install grants entitlement.',
     };
   }
 
@@ -556,7 +556,7 @@ export class VoiceLanguageMarketplaceService {
       },
       sale,
       honesty: this.engine().honesty,
-      note: 'Installed voice/language pack entitlement. Not ElevenLabs OS or voice CDN hosting.',
+      note: 'Installed voice/language pack entitlement.',
     };
   }
 

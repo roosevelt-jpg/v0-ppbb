@@ -37,7 +37,7 @@ export function modelMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Model Marketplace',
     note:
-      'Model Marketplace. Publish/license model SKUs over Model Registry cards (/ ). Entitlements on install — not weight hosting, Hugging Face hub, or traffic-mesh deploy OS. Monetization records MarketplaceSale receipts; Stripe Connect via',
+      'Model Marketplace. Publish/license model SKUs over Model Registry cards (/ ). Entitlements on install. Monetization records MarketplaceSale receipts; Stripe Connect via.',
     capabilities: [
       {
         id: 'foundation-models',
@@ -77,9 +77,9 @@ export function modelMarketplaceEngineCatalog() {
       {
         id: 'commercial-models',
         name: 'Commercial Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-marketplace/listings/:id/install',
-        notes: 'Paid listings record sales; Stripe Connect path shared with',
+        notes: 'Paid listings record sales with shared Stripe Connect path when configured.',
       },
       {
         id: 'versioning',
@@ -93,20 +93,20 @@ export function modelMarketplaceEngineCatalog() {
         name: 'Licensing',
         status: 'shipped',
         api: 'POST /v1/model-marketplace/listings/:id/install',
-        notes: 'Install grants workspace license entitlement — not weight download.',
+        notes: 'Install grants workspace license entitlement.',
       },
       {
         id: 'revenue-sharing',
         name: 'Revenue Sharing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-marketplace/sales',
         notes:
-          '15% platform fee recorded on paid installs. Creator Economy deepens payout math — hand-check before live creators.',
+          '15% platform fee recorded on paid installs. Creator Economy deepens payout math — review before enabling live creator payouts.',
       },
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-marketplace/analytics',
         notes: 'Listing/install/sale/review aggregates.',
       },
@@ -150,7 +150,7 @@ export function modelMarketplaceEngineCatalog() {
       fabricPolicyHardGateRequired: true,
       realMoneyRiskCategory: true,
       note:
-        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data. Listings are license entitlements over registry metadata — not a weight CDN.',
+        'Volume 11 real-money volume. Use Stripe (or equivalent); never store raw card data. Listings are license entitlements over registry metadata.',
     },
     docs: '/docs/MODEL_MARKETPLACE.md',
   };

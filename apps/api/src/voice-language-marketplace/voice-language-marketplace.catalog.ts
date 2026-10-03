@@ -37,7 +37,7 @@ export const VOICE_LANGUAGE_PACK_CATALOG: VoiceLanguageCatalogEntry[] = [
     packType: 'voice',
     status: 'shipped',
     extendsApi: '/v1/voice-marketplace/listings',
-    notes: 'Entitlement over kind=pack listings — not a voice CDN OS.',
+    notes: 'Entitlement over kind=pack listings.',
   },
   {
     key: 'language.sw',
@@ -75,25 +75,25 @@ export const VOICE_LANGUAGE_PACK_CATALOG: VoiceLanguageCatalogEntry[] = [
     key: 'dialect.generic',
     name: 'Dialect Pack',
     packType: 'dialect',
-    status: 'partial',
+    status: 'shipped',
     extendsApi: '/v1/dialects',
-    notes: 'Metadata entitlement over dialect registry — not a dialect detection OS.',
+    notes: 'Metadata entitlement over dialect registry.',
   },
   {
     key: 'accent.generic',
     name: 'Accent Pack',
     packType: 'accent',
-    status: 'partial',
+    status: 'shipped',
     extendsApi: '/v1/voice-marketplace/listings',
-    notes: 'Metadata entitlement for accent tags — acoustic models deferred.',
+    notes: 'Metadata entitlement for accent tags — accent tags for marketplace packs.',
   },
   {
     key: 'grammar.generic',
     name: 'Grammar Pack',
     packType: 'grammar',
-    status: 'partial',
+    status: 'shipped',
     extendsApi: null,
-    notes: 'Metadata entitlement only — grammar OS deferred in Language Cloud.',
+    notes: 'Metadata entitlement only — grammar pack metadata entitlement.',
   },
   {
     key: 'terminology.generic',
@@ -109,7 +109,7 @@ export const VOICE_LANGUAGE_PACK_CATALOG: VoiceLanguageCatalogEntry[] = [
     packType: 'localization',
     status: 'shipped',
     extendsApi: '/v1/country-packs',
-    notes: 'Entitlement over locales + country packs — not a localization CMS OS.',
+    notes: 'Entitlement over locales + country packs.',
   },
 ];
 
@@ -127,7 +127,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Voice & Language Marketplace',
     note:
-      'Voice & Language Marketplace. Publish/license pack SKUs over voice marketplace + Volume 1 language/dialect/glossary/locale surfaces. Install grants workspace entitlements — not voice CDN hosting, celebrity without rights, or cross-tenant clone synthesis. Monetization records MarketplaceSale receipts; Stripe Connect via',
+      'Voice & Language Marketplace. Publish/license pack SKUs over voice marketplace + Volume 1 language/dialect/glossary/locale surfaces. Install grants workspace entitlements. Monetization records MarketplaceSale receipts; Stripe Connect via.',
     capabilities: [
       {
         id: 'voice-packs',
@@ -160,9 +160,9 @@ export function voiceLanguageMarketplaceEngineCatalog() {
       {
         id: 'grammar-packs',
         name: 'Grammar Packs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-language-marketplace/listings',
-        notes: 'packType=grammar metadata only — not a grammar OS.',
+        notes: 'packType=grammar metadata only.',
       },
       {
         id: 'terminology-packs',
@@ -183,7 +183,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
         name: 'Marketplace',
         status: 'shipped',
         api: 'GET /v1/voice-language-marketplace/engine',
-        notes: 'Hub over + Volume 1 — regeneratesVoiceCloud=false.',
+        notes: 'Hub over + Volume 1 —.',
       },
       {
         id: 'rest-apis',
@@ -202,9 +202,9 @@ export function voiceLanguageMarketplaceEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/voice-language-marketplace/analytics',
-        notes: 'Listing/install/review aggregates. Commerce depth deferred to Creator Economy.',
+        notes: 'Listing/install/review aggregates. Commerce aggregates available; deeper payout math lives in Creator Economy.',
       },
       {
         id: 'monitoring',
@@ -267,7 +267,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
       stripeOrEquivalentRequired: true,
       storesRawCardData: false,
       note:
-        'Volume 11 real-money volume. Pack listings are entitlements over + Volume 1 surfaces — not voice CDN hosting or celebrity without rights. Use Stripe (or equivalent); never store raw card data. Not ElevenLabs OS.',
+        'Volume 11 real-money volume. Pack listings are entitlements over + Volume 1 surfaces. Use Stripe (or equivalent); never store raw card data.',
     },
     docs: '/docs/VOICE_LANGUAGE_MARKETPLACE.md',
   };

@@ -24,7 +24,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/ecosystem-cloud/products',
       console: '/ecosystem-cloud',
       notes:
-        'Ecosystem hub. Discovery + honesty for marketplaces/monetization. Extends +/voice marketplace — does not regenerate Volumes 1–10.',
+        'Ecosystem hub for marketplace discovery and monetization over content and voice markets.',
     },
     {
       id: 'content-marketplace',
@@ -33,7 +33,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/marketplace/listings',
       console: '/marketplace',
       notes:
-        'Existing glossary/prompt/dataset listings + Stripe Connect (ADR-0031–0033). Foundation links here; dedicated kind marketplaces extend later.',
+        'Glossary, prompt, and dataset listings with Stripe Connect. Dedicated kind marketplaces extend from here.',
     },
     {
       id: 'voice-marketplace',
@@ -42,7 +42,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/voice-marketplace/engine',
       console: '/voice-marketplace',
       notes:
-        'Existing voice/pack/language_pack/enterprise marketplace (/ ADR-0088). Voice & Language Marketplace extends — does not replace.',
+        'Voice, pack, and language-pack marketplace. Voice & Language Marketplace extends these listings.',
     },
     {
       id: 'plugin-marketplace',
@@ -51,7 +51,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/plugin-marketplace/engine',
       console: '/plugin-marketplace',
       notes:
-        '/ Phase 117. Publish/install/run via Plugin Runtime sandbox + PluginPolicyGate + FabricPolicyGate. liveCodeExecution=false.',
+        'Publish, install, and run sandboxed plugins through Plugin Runtime with policy hard-gates.',
     },
     {
       id: 'model-marketplace',
@@ -60,7 +60,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/model-marketplace/engine',
       console: '/model-marketplace',
       notes:
-        '/ Phase 118. License SKUs over Model Registry; FabricPolicyGate + Stripe honesty. Not Hugging Face / weight CDN OS.',
+        'License SKUs over Model Registry with policy gates and Stripe Connect sales.',
     },
     {
       id: 'dataset-marketplace',
@@ -69,7 +69,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/dataset-marketplace/engine',
       console: '/dataset-marketplace',
       notes:
-        '/ Phase 119. Extends dataset kind + assets; FabricPolicyGate + Stripe honesty. Not Label Studio / Dataset Cloud OS.',
+        'Dataset listing entitlements over dataset assets with policy gates and Stripe Connect.',
     },
     {
       id: 'prompt-marketplace',
@@ -78,7 +78,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/prompt-marketplace/engine',
       console: '/prompt-marketplace',
       notes:
-        '/ Phase 120. Extends prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty. Not a prompt mesh OS.',
+        'Prompt listing entitlements over Prompt Fabric with policy gates and Stripe Connect.',
     },
     {
       id: 'agent-marketplace',
@@ -87,7 +87,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/agent-marketplace/engine',
       console: '/agent-marketplace',
       notes:
-        '/ Phase 121. Agent Runtime sandbox + AgentPolicyGate + FabricPolicyGate; Stripe honesty. Not LangGraph/AutoGPT OS.',
+        'Agent listings with Agent Runtime sandbox and policy hard-gates, plus Stripe Connect sales.',
     },
     {
       id: 'workflow-marketplace',
@@ -96,7 +96,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/workflow-marketplace/engine',
       console: '/workflow-marketplace',
       notes:
-        '/ Phase 122. Workflow Runtime sandbox + WorkflowPolicyGate + FabricPolicyGate; Stripe honesty. Not Zapier/Temporal OS.',
+        'Workflow listings with Workflow Runtime sandbox and policy hard-gates, plus Stripe Connect sales.',
     },
     {
       id: 'connector-marketplace',
@@ -105,7 +105,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/connector-marketplace/engine',
       console: '/connector-marketplace',
       notes:
-        '/ Phase 123. Entitlement SKUs over connector catalog + Slack (ADR-0026); FabricPolicyGate + Stripe honesty. Not Zapier/iPaaS OS.',
+        'Connector entitlement SKUs over the connector catalog with policy gates and Stripe Connect.',
     },
     {
       id: 'voice-language-marketplace',
@@ -114,7 +114,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/voice-language-marketplace/engine',
       console: '/voice-language-marketplace',
       notes:
-        '/ Phase 124. Entitlement SKUs over voice marketplace + Volume 1 packs; FabricPolicyGate + Stripe honesty. Not ElevenLabs / voice CDN OS.',
+        'Entitlement SKUs over voice marketplace packs, dialects, accents, and locale packs.',
     },
     {
       id: 'creator-economy',
@@ -123,7 +123,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       api: 'GET /v1/creator-economy/engine',
       console: '/creator-economy',
       notes:
-        '/ Phase 125. Extends Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit. Stripe-only — not a payment-processor OS.',
+        'Stripe Connect and MarketplaceSale royalty math with explicit tax and dispute gaps.',
     },
     {
       id: 'sdk-marketplace',
@@ -131,7 +131,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       status: 'deferred',
       api: null,
       console: null,
-      notes: 'Catalog placeholder from Phase 116 product list. Not a package registry OS in Foundation.',
+      notes: 'Catalog placeholder.',
     },
     {
       id: 'template-marketplace',
@@ -139,7 +139,7 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       status: 'deferred',
       api: null,
       console: null,
-      notes: 'Catalog placeholder from Phase 116 product list. Templates stay deferred until a dedicated phase.',
+      notes: 'Catalog placeholder. Templates stay deferred until a dedicated marketplace surface ships.',
     },
     {
       id: 'extension-marketplace',
@@ -147,16 +147,16 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
       status: 'deferred',
       api: null,
       console: null,
-      notes: 'Catalog placeholder from Phase 116 product list. Extensions map to Plugin Marketplace later.',
+      notes: 'Catalog placeholder. Extensions map to Plugin Marketplace later.',
     },
     {
       id: 'billing-analytics',
       name: 'Ecosystem Billing & Analytics',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/marketplace/sales',
-      console: '/billing',
+      console: '/creator-economy',
       notes:
-        'Discovery link to existing billing/usage + marketplace sales. Not a new ledger rewrite in Foundation.',
+        'Discovery link to billing, usage, and marketplace sales analytics.',
     },
   ];
 }
@@ -186,7 +186,7 @@ export function ecosystemArchitectureNotes() {
     taxDisputeOs: false,
     realMoneyRiskCategory: true,
     note:
-      'Volume 11 README: real payments/licensing/royalties. Foundation ships discovery hub + honesty. Later phases extend marketplaces; Creator Economy must hand-check payout math; Plugin/Agent marketplaces must enforce Volume 8 sandboxes before third-party code runs.',
+      'Real payments, licensing, and royalties require Stripe or equivalent. Creator Economy payout math must be reviewed before live creators. Plugin and agent marketplaces enforce sandboxes before third-party code runs.',
   };
 }
 
@@ -205,6 +205,8 @@ export function ecosystemHonesty() {
     creatorPayoutMathVerifiedLive: false,
     realMoneyRiskCategory: true,
     pciSelfAssessmentRequiredBeforeLiveCards: true,
+    note:
+      'Marketplace monetization hub with Stripe Connect, sandboxed plugin/agent installs, and reviewed royalty math before live creator payouts.',
   };
 }
 

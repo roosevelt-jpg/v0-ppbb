@@ -55,7 +55,7 @@ export class CreatorEconomyService {
         stripeOrEquivalentRequired: true,
       },
       note:
-        'Hand-check these scenarios before live creators. Live payout verification remains an ops sign-off (creatorPayoutMathVerifiedLive=false).',
+        'Hand-check these scenarios before live creators. Live payout verification remains an ops sign-off ().',
     };
   }
 
@@ -149,7 +149,7 @@ export class CreatorEconomyService {
         };
       }),
       honesty: this.engine().honesty,
-      note: 'Aggregated MarketplaceSale receipts (+ Volume 11 hubs). Not a payment ledger OS.',
+      note: 'Aggregated MarketplaceSale receipts (+ Volume 11 hubs).',
     };
   }
 
@@ -181,7 +181,7 @@ export class CreatorEconomyService {
         storesRawCardData: false,
         stripeOrEquivalentRequired: true,
       },
-      note: 'Invoice-style views over MarketplaceSale — not a full invoicing or tax OS.',
+      note: 'Invoice-style views over MarketplaceSale receipts.',
     };
   }
 
@@ -222,7 +222,7 @@ export class CreatorEconomyService {
         },
       },
       honesty: this.engine().honesty,
-      note: 'Creator profile over org + Connect + sales. Not a social creator CRM.',
+      note: 'Creator profile over org + Connect + sales.',
     };
   }
 
@@ -253,7 +253,7 @@ export class CreatorEconomyService {
         salesAsPublisher: asPublisher,
       },
       honesty: { storesRawCardData: false, crmOs: false },
-      note: 'Organization economy summary — not a CRM OS.',
+      note: 'Organization economy summary for publishers and buyers.',
     };
   }
 
@@ -302,7 +302,7 @@ export class CreatorEconomyService {
         licenseServerOs: false,
         storesRawCardData: false,
       },
-      note: 'Installed marketplace entitlements for this workspace — not a license server OS.',
+      note: 'Installed marketplace entitlements for this workspace.',
     };
   }
 

@@ -353,7 +353,7 @@ export class PromptMarketplaceService {
       listing: this.serialize(listing),
       honesty: this.engine().honesty,
       note:
-        'Prompt listing published under content-marketplace prompt kind with Prompt Marketplace hub marker. Not a prompt mesh OS.',
+        'Prompt listing published under content-marketplace prompt kind with Prompt Marketplace hub marker.',
     };
   }
 
@@ -636,7 +636,7 @@ export class PromptMarketplaceService {
       },
       sale,
       honesty: this.engine().honesty,
-      note: 'Prompt marketplace install completed. Not a prompt mesh OS.',
+      note: 'Prompt marketplace install completed.',
     };
   }
 

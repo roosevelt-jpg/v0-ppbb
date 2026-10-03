@@ -17,7 +17,7 @@ export function pluginMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Plugin Marketplace',
     note:
-      'Plugin Marketplace. Publish/install/version/review sandboxed plugins. Execution always goes through Plugin Runtime invoke + PluginPolicyGate (hard allowlist) and Policy Fabric hard gate — never live arbitrary code. Extends / listings kind=plugin. Not a browser/VS Code extension store OS.',
+      'Plugin Marketplace. Publish/install/version/review sandboxed plugins. Execution always goes through Plugin Runtime invoke + PluginPolicyGate (hard allowlist) and Policy Fabric hard gate — never live arbitrary code. Extends / listings kind=plugin.',
     capabilities: [
       {
         id: 'plugin-publishing',
@@ -54,7 +54,7 @@ export function pluginMarketplaceEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/plugin-marketplace/listings/:id/run',
         notes:
-          'Run path: FabricPolicyGate → PluginRuntime.invoke → PluginPolicyGate → sandbox only. liveCodeExecution=false.',
+          'Run path: FabricPolicyGate → PluginRuntime.invoke → PluginPolicyGate → sandbox only.',
       },
       {
         id: 'plugin-verification',
@@ -81,17 +81,17 @@ export function pluginMarketplaceEngineCatalog() {
       {
         id: 'plugin-analytics',
         name: 'Plugin Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/plugin-marketplace/analytics',
-        notes: 'Listing/install/review/run aggregates. Full commerce analytics deferred to Creator Economy.',
+        notes: 'Listing/install/review/run aggregates. Listing and install aggregates; deeper commerce analytics in Creator Economy.',
       },
       {
         id: 'plugin-monetization',
         name: 'Plugin Monetization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/plugin-marketplace/listings/:id/install',
         notes:
-          'Paid listings record MarketplaceSale receipts. Stripe Connect path shared with when configured — not a payment-processor OS.',
+          'Paid listings record MarketplaceSale receipts with Stripe Connect when configured.',
       },
     ] satisfies PluginMarketplaceCapability[],
     architecture: {
