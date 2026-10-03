@@ -19,6 +19,7 @@ function usage(): never {
   verbalab knowledge-products
   verbalab inference-products
   verbalab ai-kernel-products
+  verbalab foundation-model-cloud-products
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -189,6 +190,11 @@ async function main() {
 
   if (command === 'ai-kernel-products') {
     console.log(JSON.stringify(await vl.aiKernelProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'foundation-model-cloud-products') {
+    console.log(JSON.stringify(await vl.foundationModelCloudProducts(), null, 2));
     return;
   }
 

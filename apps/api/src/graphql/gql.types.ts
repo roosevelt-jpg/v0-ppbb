@@ -424,6 +424,30 @@ export class GqlAiKernelRuntime {
 }
 
 @ObjectType()
+export class GqlFoundationModelCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  modality!: string;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

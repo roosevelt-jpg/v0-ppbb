@@ -2728,6 +2728,52 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/foundation-model-cloud/products': {
+      get: {
+        summary: 'Foundation Model Cloud product catalog',
+        operationId: 'listFoundationModelCloudProducts',
+        responses: {
+          '200': {
+            description:
+              'Model-family catalog, architecture, and honesty (no trained competitive weights)',
+          },
+        },
+      },
+    },
+    '/v1/foundation-model-cloud/engine': {
+      get: {
+        summary: 'Foundation Model Cloud engine (alias of products)',
+        operationId: 'getFoundationModelCloudEngine',
+        responses: {
+          '200': { description: 'FMC catalog + honesty' },
+        },
+      },
+    },
+    '/v1/foundation-model-cloud/overview': {
+      get: {
+        summary: 'Foundation Model Cloud org overview',
+        operationId: 'getFoundationModelCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session usage, deferred model families, honesty notes',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/foundation-model-cloud/monitoring': {
+      get: {
+        summary: 'Foundation Model Cloud foundation monitoring',
+        operationId: 'getFoundationModelCloudMonitoring',
+        responses: {
+          '200': { description: 'Product status snapshot + honesty' },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

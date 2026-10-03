@@ -11,6 +11,7 @@ import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/applic
 import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/knowledge-cloud-application.module';
 import { InferenceCloudApplicationModule } from '../inference-cloud/application/inference-cloud-application.module';
 import { AiKernelApplicationModule } from '../ai-kernel/application/ai-kernel-application.module';
+import { FoundationModelCloudApplicationModule } from '../foundation-model-cloud/application/foundation-model-cloud-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -75,6 +76,7 @@ import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver'
 import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { InferenceCloudGraphqlResolver } from './inference-cloud.resolver';
 import { AiKernelGraphqlResolver } from './ai-kernel.resolver';
+import { FoundationModelCloudGraphqlResolver } from './foundation-model-cloud.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -159,6 +161,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeCloudApplicationModule,
     InferenceCloudApplicationModule,
     AiKernelApplicationModule,
+    FoundationModelCloudApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -231,6 +234,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeCloudGraphqlResolver,
     InferenceCloudGraphqlResolver,
     AiKernelGraphqlResolver,
+    FoundationModelCloudGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

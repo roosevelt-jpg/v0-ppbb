@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
+Last updated: 2026-10-03 (VL-224 Done — Foundation Model Cloud Foundation)
 
 ---
 
@@ -248,11 +248,26 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-216 | Prompt Runtime (Phase 83) | Done | `/prompt-runtime` over VL-086/188; ADR-0127. Execute=render/validate; not research lab/mesh. |
 | VL-217 | Context Runtime (Phase 84) | Done | `/context-runtime` over VL-185; ADR-0128. Prioritize/compress/retrieve; not infinite-context OS. |
 | VL-218 | Reasoning Runtime (Phase 85) | Done | `/reasoning-runtime` over VL-186; ADR-0129. Plan/reflect/eval/history; no tool execution. |
-| VL-219 | Agent Runtime (Phase 86) | Not Started | Must sandbox + scoped permissions. |
-| VL-220 | Workflow Runtime (Phase 87) | Not Started | Must sandbox + scoped permissions. |
-| VL-221 | Plugin Runtime (Phase 88) | Not Started | Must sandbox + scoped permissions. |
-| VL-222 | Policy Runtime (Phase 89) | Not Started | Must hard-gate Agent/Workflow/Plugin. |
-| VL-223 | Kernel Production Audit (Phase 90) | Not Started | |
+| VL-219 | Agent Runtime (Phase 86) | Done | `/agent-runtime` sandbox + scoped permissions; ADR-0130. |
+| VL-220 | Workflow Runtime (Phase 87) | Done | `/workflow-runtime` sandbox + scoped permissions; ADR-0131. |
+| VL-221 | Plugin Runtime (Phase 88) | Done | `/plugin-runtime` sandbox + scoped permissions; ADR-0132. |
+| VL-222 | Policy Runtime (Phase 89) | Done | `/policy-runtime` hard-gate into Agent/Workflow/Plugin; ADR-0133. |
+| VL-223 | Kernel Production Audit (Phase 90) | Done | Audit pack under `docs/ai-kernel-audit/`; ADR-0134. |
+| VL-224 | Foundation Model Cloud Foundation (Phase 91) | Done | `/foundation-model-cloud` hub + catalog; ADR-0135. Scaffolds only — no trained competitive weights. |
+| VL-225 | Atlas (Phase 92) | Not Started | Deferred scaffold — not trained weights. |
+| VL-226 | Baobab (Phase 93) | Not Started | Deferred scaffold. |
+| VL-227 | Echo (Phase 94) | Not Started | Deferred scaffold. |
+| VL-228 | Voice FM (Phase 95) | Not Started | Deferred scaffold. |
+| VL-229 | Vision FM (Phase 96) | Not Started | Deferred scaffold. |
+| VL-230 | Vector FM (Phase 97) | Not Started | Deferred scaffold. |
+| VL-231 | Reason FM (Phase 98) | Not Started | Deferred scaffold. |
+| VL-232 | Edge (Phase 99) | Not Started | Deferred scaffold. |
+| VL-233 | Fusion (Phase 100) | Not Started | Deferred scaffold. |
+| VL-234 | Translate FM (Phase 101) | Not Started | Deferred scaffold. |
+| VL-235 | Model Training Platform (Phase 102) | Not Started | High-value MLOps track per Volume 9 README. |
+| VL-236 | Model Evaluation Platform (Phase 103) | Not Started | High-value MLOps track. |
+| VL-237 | Model Registry (Phase 104) | Not Started | High-value MLOps track. |
+| VL-238 | FMC Production Audit (Phase 105) | Not Started | |
 
 ---
 
@@ -385,3 +400,9 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-216 Done: Prompt Runtime (Phase 83) — execute/render/validate over VL-086/188; ADR-0127. IC prompt cache; not research lab/mesh OS. |
 | 2026-10-03 | VL-217 Done: Context Runtime (Phase 84) — assemble/prioritize/compress over VL-185; ADR-0128. IC context cache; not infinite-context OS. |
 | 2026-10-03 | VL-218 Done: Reasoning Runtime (Phase 85) — plan/reflect/eval/history over VL-186; ADR-0129. Tool selection without execution; not custom reasoner OS. |
+| 2026-10-03 | VL-219 Done: Agent Runtime (Phase 86) — sandbox + scoped permissions; ADR-0130. |
+| 2026-10-03 | VL-220 Done: Workflow Runtime (Phase 87) — sandbox + scoped permissions; ADR-0131. |
+| 2026-10-03 | VL-221 Done: Plugin Runtime (Phase 88) — sandbox + scoped permissions; ADR-0132. |
+| 2026-10-03 | VL-222 Done: Policy Runtime (Phase 89) — hard-gate into Agent/Workflow/Plugin; ADR-0133. |
+| 2026-10-03 | VL-223 Done: AI Kernel Production Audit (Phase 90) — evidence pack; ADR-0134. Volume 8 closed. |
+| 2026-10-03 | VL-224 Done: Foundation Model Cloud Foundation (Phase 91) — hub/catalog/overview; ADR-0135. No trained competitive weights; MLOps track preferred next. |

@@ -63,6 +63,7 @@ import { IntelligentCacheModule } from './intelligent-cache/intelligent-cache.mo
 import { CostOptimizationModule } from './cost-optimization/cost-optimization.module';
 import { AiRuntimeAnalyticsModule } from './ai-runtime-analytics/ai-runtime-analytics.module';
 import { AiKernelModule } from './ai-kernel/ai-kernel.module';
+import { FoundationModelCloudModule } from './foundation-model-cloud/foundation-model-cloud.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -144,6 +145,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     CostOptimizationModule,
     AiRuntimeAnalyticsModule,
     AiKernelModule,
+    FoundationModelCloudModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

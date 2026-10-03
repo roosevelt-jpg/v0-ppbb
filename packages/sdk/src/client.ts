@@ -1111,6 +1111,26 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-kernel/products', { method: 'GET' });
   }
 
+  async foundationModelCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      modality: string;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/foundation-model-cloud/products', { method: 'GET' });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;
