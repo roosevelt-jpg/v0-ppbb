@@ -1,9 +1,9 @@
 # VerbaLab AI Fabric
 
-**Status:** Foundation hub shipped (VL-239 / library Phase 106)  
+**Status:** Volume closed (VL-239–248 / library Phases 106–115) — audit pack under [`docs/ai-fabric-audit/`](./ai-fabric-audit/)  
 **Rule:** AI Fabric is the **internal** communication layer connecting VerbaLab clouds — **not** a customer-facing product, Kafka hyperscaler, or service-mesh OS. Extends AI Kernel + Inference Cloud. Do **not** regenerate Volumes 1–9. Roadmap: [`docs/roadmap/volume10-ai-fabric/`](./roadmap/volume10-ai-fabric/).
 
-Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/NATS/RabbitMQ/Redis Streams/CloudEvents named for Event Fabric). Policy Fabric must be a **hard gate**, not log-only.
+Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/NATS/RabbitMQ/Redis Streams/CloudEvents named for Event Fabric). Policy Fabric is a **hard gate**, not log-only (VL-247 verified).
 
 ---
 
@@ -20,6 +20,7 @@ Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/N
 | Memory Fabric | **Shipped** — VL-245 — router over Memory Runtime |
 | Agent Fabric | **Shipped** — VL-246 — sandboxed + Policy-gated router over Agent Runtime |
 | Policy Fabric | **Shipped** — VL-247 — fabric-wide hard gate (403 on deny; not log-only) |
+| Production Audit | **Shipped** — VL-248 — [`docs/ai-fabric-audit/`](./ai-fabric-audit/) |
 | Service Discovery | **Partial** — static routing catalog |
 | Identity Propagation | **Partial** — Clerk session + request IDs |
 | Observability / Telemetry | **Partial** — existing platform logs/metrics |
