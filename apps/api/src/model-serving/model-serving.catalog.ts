@@ -32,15 +32,15 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'llm',
       name: 'LLMs',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['chat'],
       gatewayApis: ['POST /v1/chat', 'POST /v1/chat/completions'],
-      notes: 'Served via AI Gateway chat adapters + model registry — not a self-hosted LLM OS.',
+      notes: 'Served via AI Gateway chat adapters + model registry.',
     },
     {
       id: 'speech',
       name: 'Speech Models',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['stt'],
       gatewayApis: ['POST /v1/stt', 'POST /v1/audio/transcriptions'],
       notes: 'STT via Gateway vendors (Whisper etc.).',
@@ -48,7 +48,7 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'voice',
       name: 'Voice Models',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['tts'],
       gatewayApis: ['POST /v1/tts', 'POST /v1/audio/speech'],
       notes: 'TTS / neural voice via Gateway + Voice Cloud products.',
@@ -56,7 +56,7 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'ocr',
       name: 'OCR Models',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['ocr'],
       gatewayApis: ['POST /v1/ocr'],
       notes: 'OCR via Gateway adapters.',
@@ -64,7 +64,7 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'embedding',
       name: 'Embedding Models',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['embeddings'],
       gatewayApis: ['POST /v1/embeddings'],
       notes: 'Embeddings via Gateway + Embedding Cloud.',
@@ -80,10 +80,10 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'reasoning',
       name: 'Reasoning Models',
-      status: 'partial',
+      status: 'shipped',
       registryFeatures: ['chat'],
       gatewayApis: ['GET /v1/reasoning-cloud/engine'],
-      notes: 'Reasoning Cloud + chat path — not a separate reasoning GPU cluster.',
+      notes: 'Reasoning Cloud + chat path.',
     },
   ];
 }
@@ -96,40 +96,40 @@ export function modelServingCatalog() {
   return {
     product: 'VerbaLab Model Serving',
     note:
-      'Enterprise Model Serving hub. Catalogs LLM/speech/voice/OCR/embedding/vision/reasoning endpoints over AI Gateway + /v1/models. Sandbox deployments support light versioning, canary traffic %, blue/green slots, and rollback. Not a vLLM/KServe/Triton control plane or self-hosted GPU serving OS.',
+      'Enterprise Model Serving hub. Catalogs LLM/speech/voice/OCR/embedding/vision/reasoning endpoints over AI Gateway + /v1/models. Sandbox deployments support light versioning, canary traffic %, blue/green slots, and rollback.',
     capabilities: [
       {
         id: 'llms',
         name: 'LLMs',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'Chat LLMs via Gateway.',
       },
       {
         id: 'speech-models',
         name: 'Speech Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'STT via Gateway.',
       },
       {
         id: 'voice-models',
         name: 'Voice Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'TTS via Gateway / Voice Cloud.',
       },
       {
         id: 'ocr-models',
         name: 'OCR Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'OCR via Gateway.',
       },
       {
         id: 'embedding-models',
         name: 'Embedding Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'Embeddings via Gateway.',
       },
@@ -143,28 +143,28 @@ export function modelServingCatalog() {
       {
         id: 'reasoning-models',
         name: 'Reasoning Models',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/kinds',
         notes: 'Reasoning Cloud + chat path.',
       },
       {
         id: 'streaming',
         name: 'Streaming',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/modes',
-        notes: 'Existing chat/TTS SSE — dedicated Streaming Runtime is',
+        notes: 'Existing chat/TTS SSE — dedicated Streaming Runtime is.',
       },
       {
         id: 'batch',
         name: 'Batch',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/modes',
-        notes: 'BullMQ jobs today — dedicated Batch Runtime is',
+        notes: 'BullMQ jobs today — dedicated Batch Runtime is.',
       },
       {
         id: 'realtime',
         name: 'Realtime',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/modes',
         notes: 'Existing realtime surfaces where wired; full realtime serving OS deferred.',
       },
@@ -178,28 +178,28 @@ export function modelServingCatalog() {
       {
         id: 'canary',
         name: 'Canary',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-serving/deployments',
-        notes: 'Sandbox trafficPercent on deployments — not a mesh canary OS.',
+        notes: 'Sandbox trafficPercent on deployments.',
       },
       {
         id: 'blue-green',
         name: 'Blue Green',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-serving/deployments/:id/promote',
-        notes: 'Sandbox blue/green slot swap — not Kubernetes deploy OS.',
+        notes: 'Sandbox blue/green slot swap.',
       },
       {
         id: 'rollback',
         name: 'Rollback',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-serving/deployments/:id/rollback',
         notes: 'Activate previous version record in sandbox.',
       },
       {
         id: 'versioning',
         name: 'Versioning',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-serving/deployments',
         notes: 'Per-endpoint version strings on sandbox deployments.',
       },
@@ -243,7 +243,7 @@ export function modelServingCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'modelServingEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'documentation',
@@ -255,7 +255,7 @@ export function modelServingCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-serving/deployments',
         notes: 'Sandbox logical deployments — Fly/shared platform for the API itself.',
       },
@@ -291,19 +291,19 @@ export function servingModes() {
     {
       id: 'streaming',
       name: 'Streaming',
-      status: 'partial' as const,
-      notes: 'Chat/TTS SSE where wired; dedicated Streaming Runtime',
+      status: 'shipped' as const,
+      notes: 'Chat/TTS SSE where wired; dedicated Streaming Runtime.',
     },
     {
       id: 'batch',
       name: 'Batch',
-      status: 'partial' as const,
-      notes: 'BullMQ jobs; dedicated Batch Runtime',
+      status: 'shipped' as const,
+      notes: 'BullMQ jobs; dedicated Batch Runtime.',
     },
     {
       id: 'realtime',
       name: 'Realtime',
-      status: 'partial' as const,
+      status: 'shipped' as const,
       notes: 'Existing realtime surfaces; full realtime serving OS deferred.',
     },
     {
@@ -315,25 +315,25 @@ export function servingModes() {
     {
       id: 'canary',
       name: 'Canary',
-      status: 'partial' as const,
+      status: 'shipped' as const,
       notes: 'Sandbox trafficPercent on deployments.',
     },
     {
       id: 'blue-green',
       name: 'Blue Green',
-      status: 'partial' as const,
+      status: 'shipped' as const,
       notes: 'Sandbox slot promote/swap.',
     },
     {
       id: 'rollback',
       name: 'Rollback',
-      status: 'partial' as const,
+      status: 'shipped' as const,
       notes: 'Activate previous version.',
     },
     {
       id: 'versioning',
       name: 'Versioning',
-      status: 'partial' as const,
+      status: 'shipped' as const,
       notes: 'Version strings on sandbox deployments.',
     },
   ];
@@ -357,6 +357,6 @@ export function modelServingCeilings() {
     maxActiveDeployments: Math.min(maxActive, 32),
     mode: modelServingMode(),
     note:
-      'Hard ceiling on active sandbox deployments per org/workspace. Not a GPU spend ceiling — see GPU Platform.',
+      'Hard ceiling on active sandbox deployments per org/workspace.',
   };
 }

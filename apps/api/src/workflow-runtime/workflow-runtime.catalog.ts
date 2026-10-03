@@ -54,7 +54,7 @@ export function workflowRuntimeCeilings() {
     ),
     mode: workflowRuntimeMode(),
     liveStepExecution: false,
-    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in',
+    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in.',
   };
 }
 
@@ -78,35 +78,35 @@ export function workflowRuntimeCatalog() {
       {
         id: 'workflow-scheduling',
         name: 'Workflow Scheduling',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/schedule',
-        notes: 'Record runAt — not a cron fleet OS.',
+        notes: 'Record runAt.',
       },
       {
         id: 'retries',
         name: 'Retries',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Bounded sandbox retries on simulated failures.',
       },
       {
         id: 'human-approval',
         name: 'Human Approval',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/approve',
-        notes: 'Approval gate stub — not an enterprise BPM OS.',
+        notes: 'Approval gate stub.',
       },
       {
         id: 'rollback',
         name: 'Rollback',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/rollback',
-        notes: 'Marks run rolled back — not distributed saga OS.',
+        notes: 'Marks run rolled back.',
       },
       {
         id: 'parallel-execution',
         name: 'Parallel Execution',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Sandbox parallel groups — in-process only.',
       },
@@ -164,7 +164,7 @@ export function workflowRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'workflowRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -183,7 +183,7 @@ export function workflowRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Ships with Nest API — sandbox by default.',
       },

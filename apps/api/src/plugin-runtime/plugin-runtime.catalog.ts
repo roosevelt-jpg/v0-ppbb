@@ -50,7 +50,7 @@ export function pluginRuntimeCeilings() {
     ),
     mode: pluginRuntimeMode(),
     liveCodeExecution: false,
-    note: 'Sandbox plugin runtime. Live arbitrary code / network plugin execution is forbidden in',
+    note: 'Sandbox plugin runtime. Live arbitrary code / network plugin execution is forbidden in.',
   };
 }
 
@@ -62,7 +62,7 @@ export function pluginRuntimeCatalog() {
   return {
     product: 'VerbaLab Plugin Runtime',
     note:
-      'Plugin Runtime. Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only — not arbitrary JS/WASM or live network plugins. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime is wired as a hard gate via PluginPolicyGate.',
+      'Plugin Runtime. Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime is wired as a hard gate via PluginPolicyGate.',
     capabilities: [
       {
         id: 'plugin-registry',
@@ -103,9 +103,9 @@ export function pluginRuntimeCatalog() {
       {
         id: 'plugin-dependencies',
         name: 'Plugin Dependencies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/plugin-runtime/plugins',
-        notes: 'Declares dependency plugin ids — not a package manager OS.',
+        notes: 'Declares dependency plugin ids.',
       },
       {
         id: 'plugin-permissions',
@@ -140,7 +140,7 @@ export function pluginRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'pluginRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'dashboard',
@@ -166,7 +166,7 @@ export function pluginRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/plugin-runtime/invoke',
         notes: 'Ships with Nest API — sandbox by default.',
       },

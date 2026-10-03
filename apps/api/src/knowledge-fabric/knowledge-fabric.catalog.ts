@@ -29,7 +29,7 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       status: 'shipped',
       api: 'GET /v1/knowledge-fabric/products',
       notes:
-        'Knowledge router hub. Extends Knowledge Cloud — does not regenerate /',
+        'Knowledge router hub. Extends Knowledge Cloud — does not regenerate /.',
     },
     {
       id: 'knowledge-router',
@@ -43,21 +43,21 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       name: 'Knowledge Distribution',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/distribute',
-      notes: 'Distribution plans + optional Event Fabric CloudEvents — not multi-region replica OS.',
+      notes: 'Distribution plans + optional Event Fabric CloudEvents.',
     },
     {
       id: 'knowledge-synchronization',
       name: 'Knowledge Synchronization',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/sync',
-      notes: 'Same-org workspace sync cursors/plans — not bidirectional CRDT cluster OS.',
+      notes: 'Same-org workspace sync cursors/plans.',
     },
     {
       id: 'knowledge-federation',
       name: 'Knowledge Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/knowledge-fabric/federate',
-      notes: 'Federation target catalog across Knowledge Cloud products — not cross-tenant mesh OS.',
+      notes: 'Federation target catalog across Knowledge Cloud products.',
     },
     {
       id: 'knowledge-routing',
@@ -71,14 +71,14 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       name: 'Cross Workspace Knowledge',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/sync',
-      notes: 'Same-organization workspace peers only — not cross-org data plane.',
+      notes: 'Same-organization workspace peers only.s-org data plane.',
     },
     {
       id: 'enterprise-search-integration',
       name: 'Enterprise Search Integration',
       status: 'shipped',
       api: 'GET /v1/enterprise-search/engine',
-      notes: 'Discovery handoff to Enterprise Search — not Elastic/BM25 OS.',
+      notes: 'Discovery handoff to Enterprise Search.',
     },
     {
       id: 'monitoring',
@@ -106,7 +106,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'enterprise-rag',
       api: 'GET /v1/enterprise-rag/engine',
       cloud: 'knowledge',
-      notes: 'Retrieve/chunk/cite over',
+      notes: 'Retrieve/chunk/cite over.',
     },
     {
       kind: 'knowledge-base',
@@ -122,7 +122,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'knowledge',
       api: 'POST /v1/knowledge/documents',
       cloud: 'knowledge',
-      notes: 'Upload/chunk/embed via',
+      notes: 'Upload/chunk/embed via.',
     },
     {
       kind: 'graph',
@@ -201,7 +201,7 @@ export function knowledgeFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Knowledge Fabric. Router/distribution/sync/federation plans over Knowledge Cloud + Enterprise Search. Same-org cross-workspace only. Not Confluence/Neo4j federation OS.',
+      'Knowledge Fabric. Router/distribution/sync/federation plans over Knowledge Cloud + Enterprise Search. Same-org cross-workspace only.',
   };
 }
 

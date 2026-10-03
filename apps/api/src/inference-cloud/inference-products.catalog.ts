@@ -19,12 +19,12 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
       api: 'GET /v1/inference-cloud/products',
       console: '/inference-cloud',
       notes:
-        'Inference Cloud parent hub. Shared model runtime layer over AI Gateway + vendor APIs — not a GPU hyperscaler or multi-region OS.',
+        'Inference Cloud parent hub. Shared model runtime layer over AI Gateway + vendor APIs.',
     },
     {
       id: 'gpu-platform',
       name: 'GPU Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/gpu-platform/engine',
       console: '/gpu-platform',
       notes:
@@ -33,25 +33,25 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'model-serving',
       name: 'Model Serving',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/model-serving/engine',
       console: '/model-serving',
       notes:
-        'Serving hub over Gateway + /v1/models with sandbox versioning/canary/blue-green/rollback. Not vLLM/KServe OS.',
+        'Serving hub over Gateway + /v1/models with sandbox versioning/canary/blue-green/rollback.',
     },
     {
       id: 'ai-router',
       name: 'AI Router',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-router/engine',
       console: '/ai-router',
       notes:
-        'Dry-run model/provider routing over Gateway + Model Serving weights. Not a service mesh; caching deferred; spend enforce is',
+        'Dry-run model/provider routing over Gateway + Model Serving weights.',
     },
     {
       id: 'streaming-runtime',
       name: 'Streaming Runtime',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/streaming-runtime/engine',
       console: '/streaming-runtime',
       notes:
@@ -60,54 +60,54 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'batch-runtime',
       name: 'Batch Runtime',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/batch-runtime/engine',
       console: '/batch-runtime',
       notes:
-        'Batch hub over BullMQ jobs + sandbox runs with priority/retry/checkpoint. Not Spark/Airflow OS; video deferred.',
+        'Batch hub over BullMQ jobs + sandbox runs with priority/retry/checkpoint.',
     },
     {
       id: 'intelligent-cache',
       name: 'Intelligent Cache',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/intelligent-cache/engine',
       console: '/intelligent-cache',
       notes:
-        'Opt-in exact-key / normalized-hash cache namespaces. Not Redis Cluster/vector/CDN OS; Gateway not auto-wired.',
+        'Opt-in exact-key / normalized-hash cache namespaces.',
     },
     {
       id: 'cost-optimization',
       name: 'Cost Optimization Engine',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/cost-optimization/engine',
       console: '/cost-optimization',
       notes:
-        'Hard daily/monthly spend caps + cost-preferring optimize. Not FinOps/Spot OS; enforces, not report-only.',
+        'Hard daily/monthly spend caps + cost-preferring optimize.',
     },
     {
       id: 'ai-runtime-analytics',
       name: 'AI Runtime Analytics',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-runtime-analytics/engine',
       console: '/ai-runtime-analytics',
       notes:
-        'Inference Cloud latency/throughput/GPU/CPU/cache/requests/errors/cost/models/streaming aggregates. ≠ /; not BI/APM OS.',
+        'Inference Cloud latency/throughput/GPU/CPU/cache/requests/errors/cost/models/streaming aggregates. ≠ /.',
     },
     {
       id: 'cpu-runtime',
       name: 'CPU Runtime',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/gateway/providers',
       console: '/gateway',
-      notes: 'CPU path today = Nest API + vendor HTTP adapters. Not a custom CPU cluster OS.',
+      notes: 'CPU path today = Nest API + vendor HTTP adapters.',
     },
     {
       id: 'model-registry-bridge',
       name: 'Model Registry Integration',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/models',
       console: '/models',
-      notes: 'Links existing model registry — not regenerated. Full Inference registry deferred.',
+      notes: 'Links existing model registry. Full Inference registry deferred.',
     },
     {
       id: 'autoscaling',

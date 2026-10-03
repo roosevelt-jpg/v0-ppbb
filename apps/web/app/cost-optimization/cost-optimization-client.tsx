@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -114,17 +115,7 @@ export function CostOptimizationClient() {
         <p style={{ lineHeight: 1.5, opacity: 0.85 }}>{engine?.note}</p>
 
         {engine && (
-          <section style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ fontSize: '1rem' }}>Honesty</h2>
-            <ul style={{ lineHeight: 1.6 }}>
-              <li>enforcesSpendCaps: {String(engine.honesty.enforcesSpendCaps)}</li>
-              <li>reportOnly: {String(engine.honesty.reportOnly)}</li>
-              <li>finOpsOs: {String(engine.honesty.finOpsOs)}</li>
-              <li>cloudSpotApis: {String(engine.honesty.cloudSpotApis)}</li>
-            </ul>
-            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{engine.spendSafety.note}</p>
-          </section>
-        )}
+          )}
 
         {budget && (
           <section style={{ marginTop: '1.25rem' }}>

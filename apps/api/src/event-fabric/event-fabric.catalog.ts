@@ -28,7 +28,7 @@ export function eventFabricCapabilityCatalog(): EventFabricCapability[] {
       name: 'Event Platform',
       status: 'shipped',
       api: 'GET /v1/event-fabric/products',
-      notes: 'Internal event bus hub. Extends AI Fabric — not a Kafka hyperscaler OS.',
+      notes: 'Internal event bus hub. Extends AI Fabric.',
     },
     {
       id: 'redis-streams',
@@ -77,7 +77,7 @@ export function eventFabricCapabilityCatalog(): EventFabricCapability[] {
       name: 'Snapshots',
       status: 'shipped',
       api: 'GET /v1/event-fabric/snapshots',
-      notes: 'Consumer-group cursor snapshots for ops/debug — not full cluster backup OS.',
+      notes: 'Consumer-group cursor snapshots for ops/debug.',
     },
     {
       id: 'kafka',
@@ -112,7 +112,7 @@ export function eventFabricCapabilityCatalog(): EventFabricCapability[] {
       name: 'Analytics',
       status: 'shipped',
       api: 'GET /v1/event-fabric/analytics',
-      notes: 'Per-topic publish/fail counts — not a warehouse OS.',
+      notes: 'Per-topic publish/fail counts.',
     },
   ];
 }
@@ -178,7 +178,7 @@ export function eventFabricArchitectureNotes() {
     natsAdapterDeferred: false,
     rabbitmqAdapterDeferred: false,
     note:
-      'Event Fabric. Real Redis Streams publish/consume with CloudEvents, versioning, DLQ, retries, replay, snapshots. Kafka/NATS/RabbitMQ remain deferred adapters — not fake-ready clusters.',
+      'Event Fabric. Real Redis Streams publish/consume with CloudEvents, versioning, DLQ, retries, replay, snapshots. Kafka/NATS/RabbitMQ remain deferred adapters.',
   };
 }
 

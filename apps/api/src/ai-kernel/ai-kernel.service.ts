@@ -19,7 +19,7 @@ export class AiKernelService {
       safety: aiKernelSafetyNotes(),
       docs: '/docs/AI_KERNEL.md',
       note:
-        'Internal operating-system hub for VerbaLab runtimes. Not a customer-facing product. Does not regenerate Volumes 1–7 or invent a Linux/VAIOS rewrite.',
+        'Internal operating-system hub for VerbaLab runtimes.',
     };
   }
 
@@ -95,7 +95,7 @@ export class AiKernelService {
         vaiosOs: false,
         regeneratesVolumes1to7: false,
       },
-      note: 'Kernel monitoring snapshot. Volume 8 closed via Production Audit evidence pack; Foundation Model Cloud is Volume 9 when scheduled.',
+      note: 'Kernel monitoring snapshot across runtime surfaces.',
     };
   }
 }

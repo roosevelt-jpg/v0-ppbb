@@ -74,7 +74,7 @@ export class AtlasService {
       },
       docs: '/docs/ATLAS.md',
       note:
-        'Atlas scaffold. Capability map + MLOps handoffs — not trained competitive weights.',
+        'Atlas scaffold. Capability map + MLOps handoffs.',
     };
   }
 

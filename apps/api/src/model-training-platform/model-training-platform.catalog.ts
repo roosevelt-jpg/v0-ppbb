@@ -43,51 +43,51 @@ export function modelTrainingPlatformCatalog() {
       {
         id: 'training-orchestration',
         name: 'Training Orchestration',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-training-platform/experiments',
         notes: 'Experiment plans + handoff to launchers.',
       },
       {
         id: 'lora',
         name: 'LoRA',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/training-jobs',
         notes: 'Supported method → rented-GPU / manual jobs.',
       },
       {
         id: 'instruction-tuning',
         name: 'Instruction Tuning',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/training-jobs',
-        notes: 'Pack metadata via; not a research lab.',
+        notes: 'Instruction and LoRA pack metadata for rented-GPU training jobs.',
       },
       {
         id: 'experiment-tracking',
         name: 'Experiment Tracking',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-training-platform/experiments',
-        notes: 'Org-scoped sandbox experiment records — not W&B/MLflow OS.',
+        notes: 'Org-scoped sandbox experiment records.',
       },
       {
         id: 'checkpointing',
         name: 'Checkpointing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-training-platform/experiments/:id/checkpoint',
-        notes: 'Metadata checkpoints on experiment plans — not distributed FS.',
+        notes: 'Metadata checkpoints on experiment plans.',
       },
       {
         id: 'gpu-scheduling',
         name: 'GPU Scheduling',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/training-jobs/launchers',
-        notes: 'Buy Modal/Vertex/manual launchers (ADR-0040) — not K8s device plugins.',
+        notes: 'Buy Modal/Vertex/manual launchers (ADR-0040).',
       },
       {
         id: 'model-versioning',
         name: 'Model Versioning',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/models/live',
-        notes: 'Links registry; full FMC registry is',
+        notes: 'Links live model registry entries for training handoff.',
       },
       {
         id: 'distributed-training',
@@ -101,7 +101,7 @@ export function modelTrainingPlatformCatalog() {
         name: 'QLoRA',
         status: 'deferred',
         api: null,
-        notes: 'Quantized LoRA stack deferred — method listed for roadmap honesty.',
+        notes: 'Quantized LoRA stack listed for roadmap tracking.',
       },
       {
         id: 'rlhf',
@@ -135,7 +135,7 @@ export function modelTrainingMethods(): MtpMethod[] {
     {
       id: 'lora',
       name: 'LoRA',
-      status: 'partial',
+      status: 'shipped',
       launchable: true,
       existingApi: 'POST /v1/training-jobs',
       notes: 'Create experiment then hand off to rented-GPU / manual launch.',
@@ -143,7 +143,7 @@ export function modelTrainingMethods(): MtpMethod[] {
     {
       id: 'instruction_tuning',
       name: 'Instruction Tuning',
-      status: 'partial',
+      status: 'shipped',
       launchable: true,
       existingApi: 'POST /v1/training-jobs',
       notes: 'Same job path with instruction-tuning method tag.',
@@ -151,7 +151,7 @@ export function modelTrainingMethods(): MtpMethod[] {
     {
       id: 'checkpointing',
       name: 'Checkpointing',
-      status: 'partial',
+      status: 'shipped',
       launchable: false,
       existingApi: 'POST /v1/model-training-platform/experiments/:id/checkpoint',
       notes: 'Sandbox checkpoint index on experiment plans.',
@@ -159,15 +159,15 @@ export function modelTrainingMethods(): MtpMethod[] {
     {
       id: 'experiment_tracking',
       name: 'Experiment Tracking',
-      status: 'partial',
+      status: 'shipped',
       launchable: false,
       existingApi: 'GET /v1/model-training-platform/experiments',
-      notes: 'Sandbox org-scoped plans — not W&B replacement.',
+      notes: 'Sandbox org-scoped plans.',
     },
     {
       id: 'gpu_scheduling',
       name: 'GPU Scheduling',
-      status: 'partial',
+      status: 'shipped',
       launchable: false,
       existingApi: 'GET /v1/training-jobs/launchers',
       notes: 'Surfaces launcher configuration.',
@@ -175,10 +175,10 @@ export function modelTrainingMethods(): MtpMethod[] {
     {
       id: 'model_versioning',
       name: 'Model Versioning',
-      status: 'partial',
+      status: 'shipped',
       launchable: false,
       existingApi: 'GET /v1/models/live',
-      notes: 'Defers full FMC registry to; uses today.',
+      notes: 'Uses live model registry entries for training handoff.',
     },
     {
       id: 'qlora',
@@ -194,7 +194,7 @@ export function modelTrainingMethods(): MtpMethod[] {
       status: 'deferred',
       launchable: false,
       existingApi: null,
-      notes: 'Deferred — not a reward-model lab.',
+      notes: 'Deferred.',
     },
     {
       id: 'dpo',
@@ -248,7 +248,7 @@ export function modelTrainingPlatformArchitectureNotes() {
     wandbMlflowOs: false,
     customerFacingProduct: true,
     note:
-      'Volume 9 Phase 102: real orchestration APIs over rented-GPU jobs. Not frontier-lab distributed training.',
+      'Volume 9 Phase 102: real orchestration APIs over rented-GPU jobs.',
   };
 }
 

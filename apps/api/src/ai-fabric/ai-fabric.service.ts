@@ -22,11 +22,11 @@ export class AiFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Volume 10 README: Policy Fabric must hard-gate across buses when shipped — not log-only decoration.',
+          'Policy Fabric must hard-gate across buses when shipped.',
       },
       docs: '/docs/AI_FABRIC.md',
       note:
-        'AI Fabric hub. Internal communication layer connecting VerbaLab clouds. Not a Kafka hyperscaler or customer-facing mesh product. Event Fabric provides Redis Streams + CloudEvents.',
+        'AI Fabric hub. Internal communication layer connecting VerbaLab clouds. Event Fabric provides Redis Streams + CloudEvents.',
     };
   }
 
@@ -40,7 +40,7 @@ export class AiFabricService {
       })),
       honesty: aiFabricHonesty(),
       note:
-        'Static service-discovery catalog for Foundation. Not Consul/etcd. Identity propagates via existing Clerk session + request IDs.',
+        'Static service-discovery catalog for Foundation. Identity propagates via existing Clerk session + request IDs.',
       docs: '/docs/AI_FABRIC.md',
     };
   }

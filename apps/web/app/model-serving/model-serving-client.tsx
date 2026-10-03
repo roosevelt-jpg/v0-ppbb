@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -112,24 +113,7 @@ export function ModelServingClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        <section
-          style={{
-            borderLeft: '3px solid #0f766e',
-            paddingLeft: '0.85rem',
-            marginBottom: '1.75rem',
-            maxWidth: '44rem',
-          }}
-        >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            maxActive={engine.ceilings.maxActiveDeployments} · mode={engine.ceilings.mode} ·
-            vllmOs={String(engine.honesty.vllmOs)} · extendsGateway=
-            {String(engine.honesty.extendsAiGateway)} · sandbox=
-            {String(engine.honesty.sandboxDeploymentsOnly)}
-          </p>
-        </section>
-      ) : null}
+        ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Model kinds</h2>

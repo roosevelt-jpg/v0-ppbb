@@ -291,7 +291,7 @@ export class ModelServingService {
     });
     return {
       deployment: this.serialize(updated),
-      note: 'Sandbox traffic percent updated — not a service-mesh canary.',
+      note: 'Sandbox traffic percent updated.',
     };
   }
 
@@ -360,7 +360,7 @@ export class ModelServingService {
 
     return {
       deployment: this.serialize(updated),
-      note: 'Promoted sandbox deployment to active@100% — not a Kubernetes blue/green controller.',
+      note: 'Promoted sandbox deployment to active@100%.',
     };
   }
 
@@ -531,7 +531,7 @@ export class ModelServingService {
       activeDeployments: active,
       ceilings: modelServingCeilings(),
       kindsReady: servingModelKinds().filter((k) => k.status !== 'deferred').length,
-      note: 'Sandbox health — not vendor serving telemetry.',
+      note: 'Sandbox health.',
       honesty: modelServingCatalog().honesty,
     };
   }

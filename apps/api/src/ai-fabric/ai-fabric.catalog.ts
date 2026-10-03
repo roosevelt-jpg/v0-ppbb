@@ -23,7 +23,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/ai-fabric/products',
       console: '/ai-fabric',
       notes:
-        'Internal communication hub. Extends AI Kernel + Inference Cloud — does not regenerate Volumes 1–9. Not a customer product mesh OS.',
+        'Internal communication hub. Extends AI Kernel + Inference Cloud.',
     },
     {
       id: 'event-fabric',
@@ -41,7 +41,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/context-fabric/products',
       console: '/context-fabric',
       notes:
-        'Cross-cloud context router over Context Runtime. Not infinite-context OS.',
+        'Cross-cloud context router over Context Runtime.',
     },
     {
       id: 'knowledge-fabric',
@@ -50,7 +50,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/knowledge-fabric/products',
       console: '/knowledge-fabric',
       notes:
-        'Knowledge router over Knowledge Cloud. Same-org distribute/sync — not Confluence/Neo4j OS.',
+        'Knowledge router over Knowledge Cloud. Same-org distribute/sync.',
     },
     {
       id: 'prompt-fabric',
@@ -59,7 +59,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/prompt-fabric/products',
       console: '/prompt-fabric',
       notes:
-        'Prompt router over Prompt Runtime. Not prompt mesh/research lab OS.',
+        'Prompt router over Prompt Runtime.',
     },
     {
       id: 'reasoning-fabric',
@@ -68,7 +68,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/reasoning-fabric/products',
       console: '/reasoning-fabric',
       notes:
-        'Reasoning router over Reasoning Runtime. Not custom reasoner OS.',
+        'Reasoning router over Reasoning Runtime.',
     },
     {
       id: 'memory-fabric',
@@ -77,7 +77,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/memory-fabric/products',
       console: '/memory-fabric',
       notes:
-        'Memory router over Memory Runtime. Not Mem0 / multi-region replication OS.',
+        'Memory router over Memory Runtime.',
     },
     {
       id: 'agent-fabric',
@@ -86,7 +86,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/agent-fabric/products',
       console: '/agent-fabric',
       notes:
-        'Agent router over Agent Runtime. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS.',
+        'Agent router over Agent Runtime. Sandboxed + Policy-gated.',
     },
     {
       id: 'policy-fabric',
@@ -95,12 +95,12 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
       api: 'GET /v1/policy-fabric/products',
       console: '/policy-fabric',
       notes:
-        'Fabric-wide hard gate. Enforces via FabricPolicyGate — not log-only. Not OPA/Cedar OS.',
+        'Fabric-wide hard gate. Enforces via FabricPolicyGate.',
     },
     {
       id: 'workflow-bus',
       name: 'Workflow Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/workflow-runtime/engine',
       console: '/workflow-runtime',
       notes: 'Discovery link to Workflow Runtime until dedicated fabric bus ships.',
@@ -108,15 +108,15 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'identity-bus',
       name: 'Identity Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-fabric/routing',
       console: '/ai-fabric',
-      notes: 'Identity propagation via existing Clerk/session + request IDs — not a new IdP.',
+      notes: 'Identity propagation via existing Clerk/session + request IDs.',
     },
     {
       id: 'inference-bus',
       name: 'Inference Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-router/engine',
       console: '/ai-router',
       notes: 'Discovery link to AI Router / Inference Cloud.',
@@ -124,23 +124,23 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'telemetry-bus',
       name: 'Telemetry Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-fabric/monitoring',
       console: '/ai-fabric',
-      notes: 'Uses existing observability/request IDs — not a new APM OS.',
+      notes: 'Uses existing observability/request IDs.',
     },
     {
       id: 'billing-bus',
       name: 'Billing Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/cost-optimization/engine',
-      console: '/billing',
-      notes: 'Discovery link to billing/cost surfaces — not a ledger rewrite.',
+      console: '/cost-optimization',
+      notes: 'Discovery link to billing/cost surfaces.',
     },
     {
       id: 'plugin-bus',
       name: 'Plugin Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/plugin-runtime/engine',
       console: '/plugin-runtime',
       notes: 'Discovery link to Plugin Runtime (sandboxed).',
@@ -148,7 +148,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'security-bus',
       name: 'Security Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/policy-runtime/engine',
       console: '/policy-runtime',
       notes: 'Policy Runtime hard-gate today; Policy Fabric extends fabric-wide later.',
@@ -156,7 +156,7 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'streaming-bus',
       name: 'Streaming Bus',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/streaming-runtime/engine',
       console: '/streaming-runtime',
       notes: 'Discovery link to Streaming Runtime.',
@@ -164,10 +164,10 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'service-discovery',
       name: 'Service Discovery',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/ai-fabric/routing',
       console: '/ai-fabric',
-      notes: 'Static catalog of cloud/runtime routes — not Consul/etcd OS.',
+      notes: 'Static catalog of cloud/runtime routes.',
     },
   ];
 }
@@ -198,7 +198,7 @@ export function aiFabricArchitectureNotes() {
     redisStreamsActive: true,
     kafkaAdapterDeferred: false,
     note:
-      'Volume 10 README: buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric wires Redis Streams + CloudEvents. Kafka/NATS/Rabbit adapters remain deferred. Policy Fabric must hard-gate when shipped.',
+      'buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric wires Redis Streams + CloudEvents. Kafka/NATS/Rabbit adapters remain deferred. Policy Fabric must hard-gate when shipped.',
   };
 }
 

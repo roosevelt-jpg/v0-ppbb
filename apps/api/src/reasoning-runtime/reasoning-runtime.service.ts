@@ -116,7 +116,7 @@ export class ReasoningRuntimeService {
         ...result.honesty,
         ...reasoningRuntimeCatalog().honesty,
       },
-      note: 'Kernel reason over Reasoning Cloud — not a custom reasoner OS.',
+      note: 'Kernel reason over Reasoning Cloud.',
     };
   }
 
@@ -162,7 +162,7 @@ export class ReasoningRuntimeService {
         answer,
         historyId,
         honesty: { sandboxPlanOnly: true, customReasonerKernel: false },
-        note: 'Sandbox plan stub — not a planner OS. Set sandboxOnly=false to use Reasoning Cloud.',
+        note: 'Sandbox plan stub. Set sandboxOnly=false to use Reasoning Cloud.',
       };
     }
 
@@ -228,7 +228,7 @@ export class ReasoningRuntimeService {
       evaluation,
       historyId,
       honesty: { llmAsJudgeEvalLab: false, heuristicOnly: true },
-      note: 'Heuristic reflection — not a reflective agent OS.',
+      note: 'Heuristic reflection.',
     };
   }
 
@@ -306,7 +306,7 @@ export class ReasoningRuntimeService {
         },
         chain: (resolved.chain ?? []).slice(0, 5),
         honesty: { modelMeshOs: false, extendsAiRouter: true },
-        note: 'Model selection via AI Router resolve — not a model mesh OS.',
+        note: 'Model selection via AI Router resolve.',
       };
     } catch {
       return {
@@ -375,7 +375,7 @@ export class ReasoningRuntimeService {
       reasons: decided.reasons,
       tree,
       honesty: { droolsPegaBrms: false, extendsDecisionEngine: true },
-      note: 'Sandbox decision tree over Decision Engine — not enterprise BRMS OS.',
+      note: 'Sandbox decision tree over Decision Engine.',
     };
   }
 
@@ -411,7 +411,7 @@ export class ReasoningRuntimeService {
       answer,
       evaluation,
       honesty: { llmAsJudgeEvalLab: false, heuristicOnly: true },
-      note: 'Heuristic self-evaluation — not an LLM-as-judge lab.',
+      note: 'Heuristic self-evaluation.',
     };
   }
 
@@ -442,7 +442,7 @@ export class ReasoningRuntimeService {
       evaluation: evaluation.evaluation,
       decisionConfidence: decided.confidence,
       honesty: { calibratedConfidenceOs: false },
-      note: 'Blended heuristic confidence — not a calibrated uncertainty OS.',
+      note: 'Blended heuristic confidence.',
     };
   }
 
@@ -497,7 +497,7 @@ export class ReasoningRuntimeService {
       run,
       createdAt: row.createdAt.toISOString(),
       honesty: { distributedReplayOs: false },
-      note: 'Sandbox replay of stored payload — not a distributed replay OS.',
+      note: 'Sandbox replay of stored payload.',
     };
   }
 

@@ -79,7 +79,7 @@ export class InferenceCloudService {
       },
       docs: '/docs/INFERENCE_CLOUD.md',
       note:
-        'Hub over AI Gateway + vendor model APIs. Not a GPU hyperscaler / multi-region Inference OS. Volumes 1–6 product clouds call Gateway today — this volume layers a shared runtime without regenerating them.',
+        'Hub over AI Gateway + vendor model APIs. Volumes 1–6 product clouds call Gateway today — this volume layers a shared runtime without regenerating them.',
     };
   }
 }

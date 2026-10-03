@@ -144,7 +144,7 @@ export class AiRuntimeAnalyticsService {
           p95Ms: percentile(s, 0.95),
         };
       }),
-      note: 'Latency proxies from audit metadata + batch duration — not APM/tracing OS.',
+      note: 'Latency proxies from audit metadata + batch duration.',
       honesty: { apmOs: false, aggregatesOnly: true },
     };
   }
@@ -216,7 +216,7 @@ export class AiRuntimeAnalyticsService {
       activeCount: active.length,
       byVendor,
       withinSpendCeiling: hourlyUsd <= ceilings.maxSpendUsd,
-      note: 'Sandbox GpuAllocation aggregates — not cloud GPU telemetry OS.',
+      note: 'Sandbox GpuAllocation aggregates.',
       honesty: { cloudGpuTelemetryOs: false },
     };
   }
@@ -242,7 +242,7 @@ export class AiRuntimeAnalyticsService {
         rssMb: Math.round(mem.rss / (1024 * 1024)),
         heapUsedMb: Math.round(mem.heapUsed / (1024 * 1024)),
       },
-      note: 'Nest host/process snapshot for CPU runtime path — not cluster APM OS.',
+      note: 'Nest host/process snapshot for CPU runtime path.',
       honesty: { apmOs: false, aggregatesOnly: true },
     };
   }
@@ -370,7 +370,7 @@ export class AiRuntimeAnalyticsService {
       failedStreamingSessions: failedStreaming,
       auditFailureLike: auditFails,
       total: failedBatch + failedStreaming + auditFails,
-      note: 'Error proxies from batch/streaming status + audit action names — not Sentry/APM OS.',
+      note: 'Error proxies from batch/streaming status + audit action names.',
       honesty: { apmOs: false },
     };
   }
@@ -457,7 +457,7 @@ export class AiRuntimeAnalyticsService {
       workspaceCount: workspaces,
       activeWorkspacesInPeriod: activeWorkspaces.length,
       currentWorkspaceDecisions: decisions,
-      note: 'Org/workspace activity counts — not a CRM or multi-tenant billing customer OS.',
+      note: 'Org/workspace activity counts.',
       honesty: { crmOs: false, biDashboardOs: false },
     };
   }
@@ -538,7 +538,7 @@ export class AiRuntimeAnalyticsService {
       chunks,
       byKind: Object.entries(byKind).map(([kind, count]) => ({ kind, count })),
       byStatus: Object.entries(byStatus).map(([status, count]) => ({ status, count })),
-      note: 'Streaming Runtime session aggregates — not WebSocket/video OS.',
+      note: 'Streaming Runtime session aggregates.',
     };
   }
 
@@ -586,7 +586,7 @@ export class AiRuntimeAnalyticsService {
       models,
       streaming,
       honesty: aiRuntimeAnalyticsCatalog().honesty,
-      note: 'Bundled Inference Cloud runtime report — not enterprise BI/PDF suite.',
+      note: 'Bundled Inference Cloud runtime report.',
     };
   }
 

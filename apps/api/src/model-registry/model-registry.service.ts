@@ -69,7 +69,7 @@ export class ModelRegistryService {
       liveSummary: {
         asOf: live.asOf,
         featureCount: live.features.length,
-        note: 'Live matrix from — not regenerated here.',
+        note: 'Live matrix from.',
       },
       safety: {
         noFakeConfiguredFlags: true,
@@ -123,7 +123,7 @@ export class ModelRegistryService {
       },
       docs: '/docs/MODEL_REGISTRY.md',
       note:
-        'Model Registry. Cards/versions/approvals over — not MLflow or traffic-mesh canary OS.',
+        'Model Registry. Cards/versions/approvals over.',
     };
   }
 

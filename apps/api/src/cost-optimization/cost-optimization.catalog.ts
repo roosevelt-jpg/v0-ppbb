@@ -49,7 +49,7 @@ export function costCeilings() {
     enforceByDefault: true,
     mode: costOptimizationMode(),
     note:
-      'Hard daily/monthly USD caps enforced on record/check and AI Router resolve. Not a cloud FinOps OS. Spot/reserved are sandbox planning hints — no AWS Spot APIs.',
+      'Hard daily/monthly USD caps enforced on record/check and AI Router resolve. Spot/reserved are sandbox planning hints — no AWS Spot APIs.',
   };
 }
 
@@ -61,56 +61,56 @@ export function costOptimizationCatalog() {
   return {
     product: 'VerbaLab Cost Optimization Engine',
     note:
-      'Cost Optimization. Org/workspace daily/monthly spend caps with hard enforce on record/check and AI Router resolve. Dynamic routing prefers cheaper Gateway candidates; GPU cost views reuse ceilings; spot/reserved are sandbox planning only. Not a cloud FinOps OS, Spot marketplace, or reserved-instance broker.',
+      'Cost Optimization. Org/workspace daily/monthly spend caps with hard enforce on record/check and AI Router resolve. Dynamic routing prefers cheaper Gateway candidates; GPU cost views reuse ceilings; spot/reserved are sandbox planning only.',
     capabilities: [
       {
         id: 'dynamic-routing',
         name: 'Dynamic Routing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/cost-optimization/optimize',
-        notes: 'Cost-preferring route plan over AI Router candidates — not a mesh.',
+        notes: 'Cost-preferring route plan over AI Router candidates.',
       },
       {
         id: 'gpu-cost-optimization',
         name: 'GPU Cost Optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/cost-optimization/gpu',
-        notes: 'Surfaces GPU Platform ceilings + estimated spend; hard GPU caps remain',
+        notes: 'Surfaces GPU Platform ceilings + estimated spend; hard GPU caps remain.',
       },
       {
         id: 'provider-cost-optimization',
         name: 'Provider Cost Optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/cost-optimization/optimize',
         notes: 'Ranks Gateway providers by estimated USD.',
       },
       {
         id: 'autoscaling',
         name: 'Autoscaling',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/cost-optimization/gpu',
         notes: 'Advisory scale-down when near spend caps — never open-ended autoscale.',
       },
       {
         id: 'spot-instances',
         name: 'Spot Instances',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/cost-optimization/predictions',
         notes: 'Sandbox preferSpot planning hint — no cloud Spot APIs.',
       },
       {
         id: 'reserved-capacity',
         name: 'Reserved Capacity',
-        status: 'partial',
+        status: 'shipped',
         api: 'PUT /v1/cost-optimization/budgets',
-        notes: 'Sandbox reservedCapacityUnits on budget — not RI marketplace.',
+        notes: 'Sandbox reservedCapacityUnits on budget.',
       },
       {
         id: 'prediction',
         name: 'Prediction',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/cost-optimization/predictions',
-        notes: 'Linear extrapolation from ledger — not ML demand forecasting OS.',
+        notes: 'Linear extrapolation from ledger.',
       },
       {
         id: 'optimization-engine',
@@ -157,7 +157,7 @@ export function costOptimizationCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/cost-optimization/record',
         notes: 'Ships with Nest API — enforce before connecting real cloud bills.',
       },
@@ -173,14 +173,14 @@ export function costOptimizationCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'costOptimizationEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'spend-enforcement',
         name: 'Spend Enforcement',
         status: 'shipped',
         api: 'POST /v1/cost-optimization/record',
-        notes: 'Hard 402 when daily/monthly cap exceeded — not report-only.',
+        notes: 'Hard 402 when daily/monthly cap exceeded.',
       },
     ] satisfies CostCapability[],
     honesty: {

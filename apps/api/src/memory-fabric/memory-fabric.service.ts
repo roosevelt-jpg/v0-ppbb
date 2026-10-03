@@ -105,11 +105,11 @@ export class MemoryFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric must hard-gate across fabric buses when shipped — not log-only.',
+          'Policy Fabric must hard-gate across fabric buses when shipped.',
       },
       docs: '/docs/MEMORY_FABRIC.md',
       note:
-        'Memory Fabric. Cross-cloud memory router over Memory Runtime. Not Mem0 or multi-region replication OS.',
+        'Memory Fabric. Cross-cloud memory router over Memory Runtime.',
     };
   }
 
@@ -181,7 +181,7 @@ export class MemoryFabricService {
         honesty: engine.honesty,
       },
       fabric: {
-        status: 'partial',
+        status: 'shipped',
         note:
           'Memory Fabric does not auto-cache every put/search. Opt into Intelligent Cache namespaces explicitly.',
       },
@@ -202,7 +202,7 @@ export class MemoryFabricService {
       })),
       missing: plan.missing,
       honesty: memoryFabricHonesty(),
-      note: 'Federation is a product-handoff catalog — not cross-tenant memory mesh.',
+      note: 'Federation is a product-handoff catalog.s-tenant memory mesh.',
     };
   }
 
@@ -212,7 +212,7 @@ export class MemoryFabricService {
       ...(await this.memoryRuntime.sync(auth)),
       honesty: memoryFabricHonesty(),
       docs: '/docs/MEMORY_FABRIC.md',
-      note: 'Sync façade over Memory Runtime sandbox stamp — not multi-region replication.',
+      note: 'Sync façade over Memory Runtime sandbox stamp.',
     };
   }
 
@@ -262,7 +262,7 @@ export class MemoryFabricService {
       replication: record,
       peers: targets,
       honesty: memoryFabricHonesty(),
-      note: 'Replication plan only — not multi-region replication OS.',
+      note: 'Replication plan only.',
     };
   }
 

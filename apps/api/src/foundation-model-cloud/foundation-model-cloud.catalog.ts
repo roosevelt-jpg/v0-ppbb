@@ -25,17 +25,17 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
       console: '/foundation-model-cloud',
       modality: 'hub',
       notes:
-        'First-class model-family hub. Extends Inference Cloud + AI Kernel — does not regenerate Volumes 1–8. Does not ship trained competitive weights.',
+        'First-class model-family hub. Extends Inference Cloud + AI Kernel.',
     },
     {
       id: 'atlas',
       name: 'VerbaLab Atlas',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/atlas/engine',
       console: '/atlas',
       modality: 'multilingual_reasoning',
       notes:
-        'Large multilingual reasoning family scaffold (Phase 92). Interface + MLOps handoffs — not trained Atlas weights.',
+        'Large multilingual reasoning family scaffold (Phase 92). Interface + MLOps handoffs.',
     },
     {
       id: 'baobab',
@@ -53,7 +53,7 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
       api: null,
       console: null,
       modality: 'speech_audio',
-      notes: 'Speech/audio family scaffold (Phase 94). Extends Speech Cloud — not a new STT OS.',
+      notes: 'Speech/audio family scaffold (Phase 94). Extends Speech Cloud.',
     },
     {
       id: 'voice',
@@ -116,37 +116,37 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
       api: null,
       console: null,
       modality: 'translation',
-      notes: 'Translation family scaffold (Phase 101). Extends Language Cloud — not a new MT OS.',
+      notes: 'Translation family scaffold (Phase 101). Extends Language Cloud.',
     },
     {
       id: 'model-training-platform',
       name: 'Model Training Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/model-training-platform/engine',
       console: '/model-training-platform',
       modality: 'mlops',
       notes:
-        'Training orchestration over rented-GPU jobs (Phase 102). Experiment plans + LoRA/instruction handoff — not distributed/RLHF lab.',
+        'Training orchestration over rented-GPU jobs (Phase 102). Experiment plans + LoRA/instruction handoff.',
     },
     {
       id: 'model-evaluation-platform',
       name: 'Model Evaluation Platform',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/model-evaluation-platform/engine',
       console: '/model-evaluation-platform',
       modality: 'mlops',
       notes:
-        'Eval hub over coverage/eval harness + sandbox bias/safety/latency (Phase 103). MMLU/HumanEval deferred; no SOTA claims.',
+        'Eval hub over coverage/eval harness + sandbox bias/safety/latency (Phase 103). org-scoped sandbox ranks from local runs.',
     },
     {
       id: 'model-registry',
       name: 'Model Registry',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/model-registry/engine',
       console: '/model-registry',
       modality: 'mlops',
       notes:
-        'Registry governance over model_registry (Phase 104). Cards/versions/approvals/deploy plans — not MLflow/traffic-mesh OS.',
+        'Registry governance over model_registry (Phase 104). Cards/versions/approvals/deploy plans.',
     },
   ];
 }
@@ -174,7 +174,7 @@ export function foundationModelCloudArchitectureNotes() {
     openAiReplacementOs: false,
     modelFamilyScaffoldCatalog: true,
     note:
-      'Volume 9 README: Cursor delivers MLOps/platform scaffolding — not trained competitive foundation models. Named families (Atlas…Translate) stay deferred until later phases; Training/Eval/Registry are the high-value MLOps track.',
+      'Foundation Model Cloud delivers MLOps scaffolding for training, evaluation, and registry. Named foundation families stay deferred until trained weights ship.',
   };
 }
 

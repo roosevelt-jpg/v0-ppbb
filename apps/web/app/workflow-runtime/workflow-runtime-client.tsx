@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -109,7 +110,7 @@ export function WorkflowRuntimeClient() {
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Workflow Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
           Sandbox multi-step workflows with hard permission allowlists. Extends product{' '}
-          <Link href="/workflows">/workflows</Link> — not Temporal/Airflow OS.
+          <Link href="/workflows">/workflows</Link>.
         </p>
 
         {error ? (
@@ -120,9 +121,6 @@ export function WorkflowRuntimeClient() {
 
         {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: 0 }}>
-              Mode: {engine.mode} · max workflows: {engine.ceilings.maxWorkflowsPerWorkspace}
-            </p>
             <ul style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
               <li>openToolExecution: {String(engine.honesty.openToolExecution)}</li>
               <li>liveStepExecution: {String(engine.honesty.liveStepExecution)}</li>
@@ -131,7 +129,7 @@ export function WorkflowRuntimeClient() {
               <li>localPermissionHardGate: {String(engine.honesty.localPermissionHardGate)}</li>
               <li>extendsWorkflowsProduct: {String(engine.honesty.extendsWorkflowsProduct)}</li>
             </ul>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.safety.note}</p>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           </section>
         ) : null}
 

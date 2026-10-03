@@ -70,7 +70,7 @@ export class PluginRuntimeService {
         liveCodeExecutionForbidden: true,
         policyMustHardGate: true,
         note:
-          'Every plugin action passes PluginPolicyGate (local hard allowlist). Policy Runtime will harden further. Not a browser/VS Code extension OS.',
+          'Every plugin action passes PluginPolicyGate (local hard allowlist). Policy Runtime will harden further.',
       },
     };
   }

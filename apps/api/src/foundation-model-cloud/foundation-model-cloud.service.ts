@@ -25,7 +25,7 @@ export class FoundationModelCloudService {
       },
       docs: '/docs/FOUNDATION_MODEL_CLOUD.md',
       note:
-        'Foundation Model Cloud hub. Model-family catalog + MLOps roadmap. Not trained competitive weights. Extends Inference Cloud + AI Kernel without regenerating Volumes 1–8.',
+        'Foundation Model Cloud hub. Model-family catalog + MLOps roadmap. Extends Inference Cloud + AI Kernel without regenerating Volumes 1–8.',
     };
   }
 
@@ -93,7 +93,7 @@ export class FoundationModelCloudService {
       },
       docs: '/docs/FOUNDATION_MODEL_CLOUD.md',
       note:
-        'Foundation Model Cloud hub. Model-family catalog + MLOps roadmap. Not trained competitive weights. Extends Inference Cloud + AI Kernel without regenerating Volumes 1–8.',
+        'Foundation Model Cloud hub. Model-family catalog + MLOps roadmap. Extends Inference Cloud + AI Kernel without regenerating Volumes 1–8.',
     };
   }
 

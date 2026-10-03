@@ -348,7 +348,7 @@ export class BatchRuntimeService {
     });
     return {
       run: this.serialize(updated),
-      note: 'Sandbox checkpoint cursor updated — not a distributed snapshot.',
+      note: 'Sandbox checkpoint cursor updated.',
     };
   }
 
@@ -403,7 +403,7 @@ export class BatchRuntimeService {
     return {
       run: this.serialize(updated),
       honesty: batchRuntimeCatalog().honesty,
-      note: 'Retry within hard budget — not open-ended.',
+      note: 'Retry within hard budget.',
     };
   }
 

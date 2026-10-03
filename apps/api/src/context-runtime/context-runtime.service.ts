@@ -214,7 +214,7 @@ export class ContextRuntimeService {
       },
       cache: useCache ? ('miss' as const) : ('skipped' as const),
       honesty: contextRuntimeCatalog().honesty,
-      note: 'Kernel assemble over Context Engine — not infinite context / LLM summarization OS.',
+      note: 'Kernel assemble over Context Engine.',
     };
 
     if (useCache) {
@@ -341,7 +341,7 @@ export class ContextRuntimeService {
       truncated: compressed.truncated,
       maxChars,
       honesty: { llmSummarization: false },
-      note: 'Char-budget truncation — not LLM summarization OS.',
+      note: 'Char-budget truncation.',
     };
   }
 
@@ -378,7 +378,7 @@ export class ContextRuntimeService {
       honesty: engine.honesty,
       safety: {
         agentActionBoundariesRequired: true,
-        note: 'Context Runtime assembles text only; Agent/Workflow action gates remain',
+        note: 'Context Runtime assembles text only; Agent/Workflow action gates remain.',
       },
     };
   }

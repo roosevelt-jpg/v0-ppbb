@@ -175,7 +175,7 @@ export class MemoryRuntimeService {
       query: q,
       results: rows.map((r) => this.serialize(r)),
       honesty: { vectorSemanticOs: false },
-      note: 'Text contains search — not embedding ANN semantic OS.',
+      note: 'Text contains search.',
     };
   }
 
@@ -236,7 +236,7 @@ export class MemoryRuntimeService {
       memory: revised,
       beforeChars: raw.length,
       afterChars: compressed.length,
-      note: 'Heuristic truncation — not ML context-compression OS.',
+      note: 'Heuristic truncation.',
     };
   }
 
@@ -281,7 +281,7 @@ export class MemoryRuntimeService {
       purgedExpired: purged,
       deletedForCeiling,
       ceilings,
-      note: 'Eviction applied (TTL + ceiling). Not a distributed cache OS.',
+      note: 'Eviction applied (TTL + ceiling).',
     };
   }
 
@@ -307,7 +307,7 @@ export class MemoryRuntimeService {
       synced: updated,
       stamp,
       honesty: { replicationOs: false },
-      note: 'Sandbox sync stamp — not multi-region replication OS.',
+      note: 'Sandbox sync stamp.',
     };
   }
 
@@ -342,7 +342,7 @@ export class MemoryRuntimeService {
     });
     return {
       snapshot: { id: created.id, label: payload.label, count: payload.count },
-      note: 'Sandbox snapshot stored as kernel MemoryRecord — not backup appliance OS.',
+      note: 'Sandbox snapshot stored as kernel MemoryRecord.',
     };
   }
 

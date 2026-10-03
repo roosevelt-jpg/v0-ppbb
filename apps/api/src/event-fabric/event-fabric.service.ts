@@ -28,11 +28,11 @@ export class EventFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric must hard-gate across fabric buses when shipped — not log-only.',
+          'Policy Fabric must hard-gate across fabric buses when shipped.',
       },
       docs: '/docs/EVENT_FABRIC.md',
       note:
-        'Event Fabric. Redis Streams + CloudEvents active; Kafka/NATS/RabbitMQ adapters deferred. Not a message-broker hyperscaler OS.',
+        'Event Fabric. Redis Streams + CloudEvents active; Kafka/NATS/RabbitMQ adapters deferred.',
     };
   }
 
@@ -85,7 +85,7 @@ export class EventFabricService {
     return {
       snapshots: this.bus.listSnapshots(),
       backend: this.bus.activeBackend(),
-      note: 'Consumer-group cursor snapshots — not full cluster backup OS.',
+      note: 'Consumer-group cursor snapshots.',
     };
   }
 

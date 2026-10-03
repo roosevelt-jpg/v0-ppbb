@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -142,18 +143,12 @@ export function ContextRuntimeClient() {
 
       {engine ? (
         <>
-          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{engine.note}</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-            Mode: {engine.mode} · infiniteContextWindow=
-            {String(engine.honesty.infiniteContextWindow)} · llmSummarization=
-            {String(engine.honesty.llmSummarization)} · extendsContextEngine=
-            {String(engine.honesty.extendsContextEngine)}
-          </p>
+          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
                 <strong>{c.name}</strong> · {c.status}
-                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
+                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{hidePhaseIds(String(c.notes ?? ""))}</div>
               </li>
             ))}
           </ul>

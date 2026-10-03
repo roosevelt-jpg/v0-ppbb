@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -114,7 +115,7 @@ export function PluginRuntimeClient() {
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Plugin Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
           Sandbox plugin registry with hard permission allowlists. Extends{' '}
-          <Link href="/marketplace">marketplace</Link> — not a browser/VS Code extension OS.
+          <Link href="/marketplace">marketplace</Link>.
         </p>
 
         {error ? (
@@ -125,9 +126,6 @@ export function PluginRuntimeClient() {
 
         {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: 0 }}>
-              Mode: {engine.mode} · max plugins: {engine.ceilings.maxPluginsPerWorkspace}
-            </p>
             <ul style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
               <li>openToolExecution: {String(engine.honesty.openToolExecution)}</li>
               <li>liveCodeExecution: {String(engine.honesty.liveCodeExecution)}</li>
@@ -136,7 +134,7 @@ export function PluginRuntimeClient() {
               <li>localPermissionHardGate: {String(engine.honesty.localPermissionHardGate)}</li>
               <li>extendsMarketplace: {String(engine.honesty.extendsMarketplace)}</li>
             </ul>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.safety.note}</p>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           </section>
         ) : null}
 

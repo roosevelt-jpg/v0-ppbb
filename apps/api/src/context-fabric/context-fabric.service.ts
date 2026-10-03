@@ -48,11 +48,11 @@ export class ContextFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric must hard-gate across fabric buses when shipped — not log-only.',
+          'Policy Fabric must hard-gate across fabric buses when shipped.',
       },
       docs: '/docs/CONTEXT_FABRIC.md',
       note:
-        'Context Fabric. Cross-cloud context router over Context Runtime. Not infinite-context or WebSocket OS.',
+        'Context Fabric. Cross-cloud context router over Context Runtime.',
     };
   }
 
@@ -190,7 +190,7 @@ export class ContextFabricService {
       },
       routes: contextFabricRoutingTable().length,
       honesty: contextFabricHonesty(),
-      note: 'SSE realtime tick — not WebSocket OS.',
+      note: 'SSE realtime tick.',
     };
   }
 

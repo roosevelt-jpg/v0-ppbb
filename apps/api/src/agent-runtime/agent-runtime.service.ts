@@ -351,7 +351,7 @@ export class AgentRuntimeService {
     return {
       session,
       honesty: { multiAgentOs: false, sandboxOnly: true },
-      note: 'Sandbox collaboration transcript — not a distributed multi-agent OS.',
+      note: 'Sandbox collaboration transcript.',
     };
   }
 
@@ -389,7 +389,7 @@ export class AgentRuntimeService {
     return {
       schedule: row,
       honesty: { cronFleetOs: false },
-      note: 'Schedule recorded — not an autonomous cron fleet OS. Execute later via /run.',
+      note: 'Schedule recorded. Execute later via /run.',
     };
   }
 

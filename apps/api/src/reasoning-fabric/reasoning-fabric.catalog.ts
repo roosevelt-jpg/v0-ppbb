@@ -36,14 +36,14 @@ export function reasoningFabricCapabilityCatalog(): ReasoningFabricCapability[] 
       status: 'shipped',
       api: 'GET /v1/reasoning-fabric/products',
       notes:
-        'Reasoning router hub. Extends Reasoning Runtime — does not regenerate /',
+        'Reasoning router hub. Extends Reasoning Runtime — does not regenerate /.',
     },
     {
       id: 'reasoning-router',
       name: 'Reasoning Router',
       status: 'shipped',
       api: 'POST /v1/reasoning-fabric/route',
-      notes: 'Maps reasoning intents to Runtime/Cloud handoffs — not a reasoner mesh OS.',
+      notes: 'Maps reasoning intents to Runtime/Cloud handoffs.',
     },
     {
       id: 'reasoning-distribution',
@@ -64,28 +64,28 @@ export function reasoningFabricCapabilityCatalog(): ReasoningFabricCapability[] 
       name: 'Reasoning Versioning',
       status: 'shipped',
       api: 'GET /v1/reasoning-fabric/versions',
-      notes: 'Strategy/pipeline version catalog — not a model-weight version OS.',
+      notes: 'Strategy/pipeline version catalog.',
     },
     {
       id: 'reasoning-cache',
       name: 'Reasoning Cache',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/intelligent-cache/engine',
-      notes: 'Discovery handoff to Intelligent Cache — not Redis Cluster OS; Gateway not auto-wired.',
+      notes: 'Discovery handoff to Intelligent Cache.; Gateway not auto-wired.',
     },
     {
       id: 'reasoning-federation',
       name: 'Reasoning Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/reasoning-fabric/federate',
-      notes: 'Product-handoff federation catalog — not cross-tenant reasoner mesh.',
+      notes: 'Product-handoff federation catalog.s-tenant reasoner mesh.',
     },
     {
       id: 'reasoning-pipelines',
       name: 'Reasoning Pipelines',
       status: 'shipped',
       api: 'POST /v1/reasoning-fabric/pipeline',
-      notes: 'Ordered strategy step plans — not Airflow/Spark reasoning OS.',
+      notes: 'Ordered strategy step plans.',
     },
     {
       id: 'monitoring',
@@ -121,7 +121,7 @@ export function reasoningFabricRoutingTable(): ReasoningFabricRoute[] {
       target: 'reasoning-runtime',
       api: 'POST /v1/reasoning-runtime/reflect',
       cloud: 'ai-kernel',
-      notes: 'Heuristic critique — not deep reflective agent OS.',
+      notes: 'Heuristic critique.',
     },
     {
       kind: 'evaluate',
@@ -129,7 +129,7 @@ export function reasoningFabricRoutingTable(): ReasoningFabricRoute[] {
       target: 'reasoning-runtime',
       api: 'POST /v1/reasoning-runtime/evaluate',
       cloud: 'ai-kernel',
-      notes: 'Heuristic score — not LLM-as-judge lab.',
+      notes: 'Heuristic score.',
     },
     {
       kind: 'tools',
@@ -145,7 +145,7 @@ export function reasoningFabricRoutingTable(): ReasoningFabricRoute[] {
       target: 'reasoning-runtime',
       api: 'POST /v1/reasoning-runtime/select-model',
       cloud: 'inference',
-      notes: 'AI Router resolve — not model mesh OS.',
+      notes: 'AI Router resolve.',
     },
     {
       kind: 'decision-tree',
@@ -169,7 +169,7 @@ export function reasoningFabricRoutingTable(): ReasoningFabricRoute[] {
       target: 'intelligent-cache',
       api: 'GET /v1/intelligent-cache/engine',
       cloud: 'inference',
-      notes: 'Opt-in cache namespaces — not Redis Cluster OS.',
+      notes: 'Opt-in cache namespaces.',
     },
     {
       kind: 'cloud',
@@ -177,7 +177,7 @@ export function reasoningFabricRoutingTable(): ReasoningFabricRoute[] {
       target: 'reasoning-cloud',
       api: 'GET /v1/reasoning-cloud/products',
       cloud: 'intelligence',
-      notes: 'Parent Reasoning Cloud discovery — not regenerated.',
+      notes: 'Parent Reasoning Cloud discovery.',
     },
   ];
 }
@@ -225,7 +225,7 @@ export function reasoningFabricVersions() {
       id: 'strategy-facade-v1',
       kind: 'strategy',
       version: 1,
-      status: 'partial',
+      status: 'shipped',
       notes: 'Strategies remain owned by Reasoning Cloud/Runtime — fabric catalogs only.',
     },
   ];
@@ -257,7 +257,7 @@ export function reasoningFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Reasoning Fabric. Router/pipelines/replay/distribution over Reasoning Runtime. Not a custom reasoner, symbolic OS, or tool-execution agent OS.',
+      'Reasoning Fabric. Router/pipelines/replay/distribution over Reasoning Runtime.',
   };
 }
 

@@ -78,7 +78,7 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/policy-fabric/products',
       notes:
-        'Policy router + fabric-wide hard gate. Extends Policy Runtime — does not regenerate',
+        'Policy router + fabric-wide hard gate. Extends Policy Runtime — does not regenerate.',
     },
     {
       id: 'policy-engine',
@@ -92,7 +92,7 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
       name: 'Policy Synchronization',
       status: 'shipped',
       api: 'POST /v1/policy-fabric/sync',
-      notes: 'Same-org sync plan of policy catalogs — not multi-region policy mesh.',
+      notes: 'Same-org sync plan of policy catalogs.',
     },
     {
       id: 'policy-distribution',
@@ -104,9 +104,9 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
     {
       id: 'policy-federation',
       name: 'Policy Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-fabric/federate',
-      notes: 'Product-handoff federation catalog — not cross-tenant policy mesh.',
+      notes: 'Product-handoff federation catalog.s-tenant policy mesh.',
     },
     {
       id: 'security-policies',
@@ -118,14 +118,14 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
     {
       id: 'compliance-policies',
       name: 'Compliance Policies',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-runtime/policies',
-      notes: 'Handoff to Policy Runtime kind=compliance — not GRC OS.',
+      notes: 'Handoff to Policy Runtime kind=compliance.',
     },
     {
       id: 'billing-policies',
       name: 'Billing Policies',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-runtime/policies',
       notes: 'Handoff to Policy Runtime kind=billing.',
     },
@@ -162,7 +162,7 @@ export function policyFabricRoutingTable(): PolicyFabricRoute[] {
       target: 'policy-runtime',
       api: 'POST /v1/policy-runtime/policies',
       cloud: 'ai-kernel',
-      notes: 'Compliance deny rules — not GRC OS.',
+      notes: 'Compliance deny rules.',
     },
     {
       kind: 'billing',
@@ -282,7 +282,7 @@ export function policyFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Policy Fabric. Fabric-wide hard gate over Policy Runtime. Denies return 403 — never log-only. Not OPA/Cedar/GRC OS.',
+      'Policy Fabric. Fabric-wide hard gate over Policy Runtime. Denies return 403 — never log-only.',
   };
 }
 

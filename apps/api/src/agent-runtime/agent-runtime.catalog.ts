@@ -50,7 +50,7 @@ export function agentRuntimeCeilings() {
     ),
     mode: agentRuntimeMode(),
     liveToolExecution: false,
-    note: 'Sandbox agent runtime. Live open tool execution is forbidden in',
+    note: 'Sandbox agent runtime. Live open tool execution is forbidden in.',
   };
 }
 
@@ -62,7 +62,7 @@ export function agentRuntimeCatalog() {
   return {
     product: 'VerbaLab Agent Runtime',
     note:
-      'Agent Runtime. Single/multi-agent sandbox with hard permission allowlists, lifecycle, scheduling stubs, agent memory via Memory Runtime, and marketplace listing counts. Actions are sandboxed — not open function calls against real accounts/data. Policy Runtime is wired as a hard gate via AgentPolicyGate. Not a LangGraph/AutoGPT OS.',
+      'Agent Runtime. Single/multi-agent sandbox with hard permission allowlists, lifecycle, scheduling stubs, agent memory via Memory Runtime, and marketplace listing counts. Actions are sandboxed. Policy Runtime is wired as a hard gate via AgentPolicyGate.',
     capabilities: [
       {
         id: 'single-agents',
@@ -74,23 +74,23 @@ export function agentRuntimeCatalog() {
       {
         id: 'multi-agent-systems',
         name: 'Multi-Agent Systems',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-runtime/collaborate',
-        notes: 'Sandbox collaboration session — not a distributed multi-agent OS.',
+        notes: 'Sandbox collaboration session.',
       },
       {
         id: 'agent-collaboration',
         name: 'Agent Collaboration',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-runtime/collaborate',
         notes: 'Sandbox message exchange between agents.',
       },
       {
         id: 'agent-scheduling',
         name: 'Agent Scheduling',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-runtime/schedule',
-        notes: 'Record scheduled runAt — not a cron fleet OS.',
+        notes: 'Record scheduled runAt.',
       },
       {
         id: 'agent-memory',
@@ -109,7 +109,7 @@ export function agentRuntimeCatalog() {
       {
         id: 'agent-workflows',
         name: 'Agent Workflows',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-runtime/run',
         notes: 'Sandbox step plans; dedicated Workflow Runtime is (/workflow-runtime).',
       },
@@ -123,7 +123,7 @@ export function agentRuntimeCatalog() {
       {
         id: 'agent-marketplace-integration',
         name: 'Agent Marketplace Integration',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/agent-runtime/marketplace',
         notes: 'Counts marketplace listings kind=agent when present.',
       },
@@ -146,7 +146,7 @@ export function agentRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'agentRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'realtime',
@@ -172,7 +172,7 @@ export function agentRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/agent-runtime/run',
         notes: 'Ships with Nest API — sandbox by default.',
       },

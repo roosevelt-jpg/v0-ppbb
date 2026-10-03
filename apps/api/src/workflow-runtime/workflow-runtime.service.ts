@@ -73,7 +73,7 @@ export class WorkflowRuntimeService {
         liveStepExecutionForbidden: true,
         policyMustHardGate: true,
         note:
-          'Every workflow step passes WorkflowPolicyGate (local hard allowlist). Policy Runtime will harden further. Extends /v1/workflows — not Temporal/Airflow.',
+          'Every workflow step passes WorkflowPolicyGate (local hard allowlist). Policy Runtime will harden further. Extends /v1/workflows.',
       },
     };
   }
@@ -358,7 +358,7 @@ export class WorkflowRuntimeService {
     return {
       approval,
       honesty: { bpmOs: false },
-      note: 'Sandbox approval recorded — not an enterprise BPM OS. Pass approved:true on /run.',
+      note: 'Sandbox approval recorded. Pass approved:true on /run.',
     };
   }
 
@@ -395,7 +395,7 @@ export class WorkflowRuntimeService {
     return {
       schedule: row,
       honesty: { cronFleetOs: false },
-      note: 'Schedule recorded — not an autonomous cron fleet OS. Execute later via /run.',
+      note: 'Schedule recorded. Execute later via /run.',
     };
   }
 
@@ -448,7 +448,7 @@ export class WorkflowRuntimeService {
     return {
       run: rolled,
       honesty: { distributedSagaOs: false },
-      note: 'Sandbox rollback marker — not a distributed saga/compensation OS.',
+      note: 'Sandbox rollback marker.',
     };
   }
 
@@ -493,7 +493,7 @@ export class WorkflowRuntimeService {
     return {
       replay,
       honesty: { eventSourcingOs: false },
-      note: 'Sandbox replay of recorded steps — not an event-sourcing OS.',
+      note: 'Sandbox replay of recorded steps.',
     };
   }
 
@@ -673,7 +673,7 @@ export class WorkflowRuntimeService {
       case 'workflow.approve':
         return this.approve({ ...input, workflowId: workflow.id, note: String(payload.note ?? '') });
       case 'workflow.rollback':
-        return { action: 'workflow.rollback', simulated: true, note: 'Use POST /rollback with runId' };
+        return { action: 'workflow.rollback', simulated: true, note: 'Use POST /rollback with runId.' };
       case 'workflow.notify':
         return {
           channel: String(payload.channel ?? 'sandbox'),

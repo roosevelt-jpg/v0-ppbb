@@ -51,7 +51,7 @@ export class ModelEvaluationPlatformService {
         sotaClaimsForbidden: true,
         noFakeMmluScores: true,
         note:
-          'Leaderboards are org-scoped from local runs. Translation scores come from reference metrics — not market leadership.',
+          'Leaderboards are org-scoped from local runs. Translation scores come from reference metrics.',
       },
     };
   }
@@ -100,7 +100,7 @@ export class ModelEvaluationPlatformService {
       },
       docs: '/docs/MODEL_EVALUATION_PLATFORM.md',
       note:
-        'Model Evaluation Platform. Translation via; sandbox bias/safety/latency. Not a global LLM leaderboard.',
+        'Model Evaluation Platform with translation harness plus sandbox bias, safety, and latency suites.',
     };
   }
 
@@ -205,7 +205,7 @@ export class ModelEvaluationPlatformService {
           api: 'POST /v1/eval/run',
           modes: ['fixture', 'live', 'reference_oracle'],
           coverage: 'GET /v1/coverage',
-          note: 'Live mode requires EVAL_LIVE=1. Scores are reference metrics on tiny goldens — not SOTA.',
+          note: 'Live mode requires EVAL_LIVE=1. Scores are reference metrics on tiny goldens.',
         },
         honesty: modelEvaluationPlatformHonesty(),
       };
@@ -221,7 +221,7 @@ export class ModelEvaluationPlatformService {
     return {
       run,
       honesty: modelEvaluationPlatformHonesty(),
-      note: 'Sandbox suite score only — not a research-grade benchmark.',
+      note: 'Sandbox suite score only.',
     };
   }
 
@@ -297,7 +297,7 @@ export class ModelEvaluationPlatformService {
       entries,
       honesty: modelEvaluationPlatformHonesty(),
       note:
-        'Org-scoped sandbox leaderboard from local runs only — not a public LMSYS/HELM board.',
+        'Org-scoped sandbox leaderboard from local runs only.',
     };
   }
 

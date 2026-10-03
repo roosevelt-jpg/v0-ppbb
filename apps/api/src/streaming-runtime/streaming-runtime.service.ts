@@ -205,7 +205,7 @@ export class StreamingRuntimeService {
       surfaceApi: surface?.api ?? null,
       existingSurface: surface?.existing ?? false,
       honesty: streamingRuntimeCatalog().honesty,
-      note: 'Sandbox SSE — not WebSocket/gRPC/video OS.',
+      note: 'Sandbox SSE.',
     });
 
     if (kind === 'video') {

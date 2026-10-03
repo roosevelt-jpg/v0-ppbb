@@ -77,7 +77,7 @@ export class AiRouterService {
     }
     return {
       providers: [...byProvider.values()],
-      note: 'Gateway provider IDs — not a new vendor mesh.',
+      note: 'Gateway provider IDs.',
       honesty: aiRouterCatalog().honesty,
     };
   }
@@ -323,7 +323,7 @@ export class AiRouterService {
       },
       loadBalancing: {
         strategy: 'weighted_static',
-        note: 'Weights from catalog + Model Serving trafficPercent — not live L7 LB.',
+        note: 'Weights from catalog + Model Serving trafficPercent.',
       },
       regional: {
         preferRegion,
@@ -332,7 +332,7 @@ export class AiRouterService {
       },
       dryRun: input.dryRun !== false,
       honesty: aiRouterCatalog().honesty,
-      note: 'Dry-run route plan — does not invoke the provider. Call Gateway APIs to execute. Spend caps enforced via',
+      note: 'Dry-run route plan — does not invoke the provider. Call Gateway APIs to execute. Spend caps enforced via.',
     };
 
     const row = await this.prisma.aiRouterDecision.create({

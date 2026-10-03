@@ -53,7 +53,7 @@ export class GpuPlatformService {
       : all;
     return {
       pools: filtered,
-      note: 'Sandbox pool catalog — not live cloud inventory.',
+      note: 'Sandbox pool catalog.',
       honesty: { callsCloudGpuApis: false },
     };
   }
@@ -318,7 +318,7 @@ export class GpuPlatformService {
       estimatedHourlyUsd: Number(inv.hourlyUsd.toFixed(4)),
       ceilings,
       poolsHealthy: gpuPools().filter((p) => p.status === 'sandbox_available').length,
-      note: 'Sandbox health — not vendor GPU telemetry.',
+      note: 'Sandbox health.',
       honesty: { callsCloudGpuApis: false },
     };
   }
@@ -333,7 +333,7 @@ export class GpuPlatformService {
       maxSpendUsd: ceilings.maxSpendUsd,
       withinSpendCeiling: inv.hourlyUsd <= ceilings.maxSpendUsd,
       currency: 'USD' as const,
-      note: 'Estimated from sandbox hourly rates — not cloud invoices.',
+      note: 'Estimated from sandbox hourly rates.',
       honesty: { callsCloudGpuApis: false },
     };
   }

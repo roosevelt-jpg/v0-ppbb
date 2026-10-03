@@ -110,7 +110,7 @@ export class ModelTrainingPlatformService {
       },
       docs: '/docs/MODEL_TRAINING_PLATFORM.md',
       note:
-        'Model Training Platform. Orchestrates experiment plans over — not a distributed training OS.',
+        'Model Training Platform. Orchestrates experiment plans over.',
     };
   }
 
@@ -253,7 +253,7 @@ export class ModelTrainingPlatformService {
     this.experiments.set(experiment.id, experiment);
     return {
       experiment,
-      note: 'Sandbox checkpoint metadata only — not a distributed checkpoint filesystem.',
+      note: 'Sandbox checkpoint metadata only.',
     };
   }
 

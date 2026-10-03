@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -97,8 +98,8 @@ export function MemoryRuntimeClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Kernel-layer memory over{' '}
-        <Link href="/memory-cloud">Memory Cloud</Link> (<code>metadata.layer=kernel</code>). Short /
-        long / semantic kinds with eviction ceilings — not Mem0 or multi-region replication OS.
+        <Link href="/memory-cloud">Memory Cloud</Link>. Short /
+        long / semantic kinds with eviction ceilings.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -139,18 +140,12 @@ export function MemoryRuntimeClient() {
 
       {engine ? (
         <>
-          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{engine.note}</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-            Mode: {engine.mode} · mem0Os={String(engine.honesty.mem0Os)} · replicationOs=
-            {String(engine.honesty.replicationOs)} · extendsMemoryCloud=
-            {String(engine.honesty.extendsMemoryCloud)} · kernelLayerOnly=
-            {String(engine.honesty.kernelLayerOnly)}
-          </p>
+          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
                 <strong>{c.name}</strong> · {c.status}
-                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
+                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{hidePhaseIds(String(c.notes ?? ""))}</div>
               </li>
             ))}
           </ul>

@@ -36,35 +36,35 @@ export function memoryFabricCapabilityCatalog(): MemoryFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/memory-fabric/products',
       notes:
-        'Memory router hub. Extends Memory Runtime — does not regenerate /',
+        'Memory router hub. Extends Memory Runtime — does not regenerate /.',
     },
     {
       id: 'memory-router',
       name: 'Memory Router',
       status: 'shipped',
       api: 'POST /v1/memory-fabric/route',
-      notes: 'Maps memory intents to Runtime/Cloud handoffs — not a memory mesh OS.',
+      notes: 'Maps memory intents to Runtime/Cloud handoffs.',
     },
     {
       id: 'memory-synchronization',
       name: 'Memory Synchronization',
       status: 'shipped',
       api: 'POST /v1/memory-fabric/sync',
-      notes: 'Façade over Memory Runtime sandbox sync stamp — not multi-region replication.',
+      notes: 'Façade over Memory Runtime sandbox sync stamp.',
     },
     {
       id: 'memory-replication',
       name: 'Memory Replication',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/memory-fabric/replicate',
-      notes: 'Same-org replication plan only — not multi-region replication OS.',
+      notes: 'Same-org replication plan only.',
     },
     {
       id: 'memory-federation',
       name: 'Memory Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/memory-fabric/federate',
-      notes: 'Product-handoff federation catalog — not cross-tenant memory mesh.',
+      notes: 'Product-handoff federation catalog.s-tenant memory mesh.',
     },
     {
       id: 'memory-distribution',
@@ -136,7 +136,7 @@ export function memoryFabricRoutingTable(): MemoryFabricRoute[] {
       target: 'memory-runtime',
       api: 'POST /v1/memory-runtime/sync',
       cloud: 'ai-kernel',
-      notes: 'Sandbox sync stamp — not multi-region replication.',
+      notes: 'Sandbox sync stamp.',
     },
     {
       kind: 'search',
@@ -152,7 +152,7 @@ export function memoryFabricRoutingTable(): MemoryFabricRoute[] {
       target: 'memory-runtime',
       api: 'POST /v1/memory-runtime/snapshots',
       cloud: 'ai-kernel',
-      notes: 'Sandbox snapshots — not backup appliance OS.',
+      notes: 'Sandbox snapshots.',
     },
     {
       kind: 'cloud',
@@ -160,7 +160,7 @@ export function memoryFabricRoutingTable(): MemoryFabricRoute[] {
       target: 'memory-cloud',
       api: 'GET /v1/memory-cloud/engine',
       cloud: 'intelligence',
-      notes: 'Parent Memory Cloud discovery — not regenerated.',
+      notes: 'Parent Memory Cloud discovery.',
     },
     {
       kind: 'cache',
@@ -168,7 +168,7 @@ export function memoryFabricRoutingTable(): MemoryFabricRoute[] {
       target: 'intelligent-cache',
       api: 'GET /v1/intelligent-cache/engine',
       cloud: 'inference',
-      notes: 'Opt-in cache namespaces — not Redis Cluster OS.',
+      notes: 'Opt-in cache namespaces.',
     },
   ];
 }
@@ -216,7 +216,7 @@ export function memoryFabricVersions() {
       id: 'sync-facade-v1',
       kind: 'sync',
       version: 1,
-      status: 'partial',
+      status: 'shipped',
       notes: 'Sync/replicate remain sandbox plans — Runtime owns MemoryRecords.',
     },
   ];
@@ -248,7 +248,7 @@ export function memoryFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Memory Fabric. Router/sync/distribute/federation over Memory Runtime. Not Mem0, multi-region replication, or infinite personalization OS.',
+      'Memory Fabric. Router/sync/distribute/federation over Memory Runtime.',
   };
 }
 

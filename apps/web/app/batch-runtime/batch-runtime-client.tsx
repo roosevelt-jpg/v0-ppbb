@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -104,24 +105,7 @@ export function BatchRuntimeClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        <section
-          style={{
-            borderLeft: '3px solid #b45309',
-            paddingLeft: '0.85rem',
-            marginBottom: '1.75rem',
-            maxWidth: '44rem',
-          }}
-        >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            maxItems={engine.ceilings.maxItemsPerRun} · maxRetries={engine.ceilings.maxRetries} ·
-            spark={String(engine.honesty.sparkOs)} · regeneratesJobs=
-            {String(engine.honesty.regeneratesJobsApi)} · extendsBullMQ=
-            {String(engine.honesty.extendsBullMqJobs)}
-          </p>
-        </section>
-      ) : null}
+        ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Kinds</h2>
