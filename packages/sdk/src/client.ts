@@ -1353,6 +1353,60 @@ export class VerbaLab {
     });
   }
 
+  async promptIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      autoPromptResearchLab: boolean;
+      trainsPromptOptimizers: boolean;
+      llmAsJudgeEvalLab: boolean;
+      redTeamHarnessOs: boolean;
+      extendsVersionedPrompts: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/prompt-intelligence/engine', { method: 'GET' });
+  }
+
+  async promptIntelligencePreview(body: {
+    key: string;
+    body?: string;
+    version?: number;
+  }): Promise<{
+    key: string;
+    source: string;
+    body: string;
+    chars: number;
+    note: string;
+  }> {
+    return this.requestJson('/v1/prompt-intelligence/preview', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async promptIntelligenceEvaluate(body: {
+    key: string;
+    body?: string;
+    version?: number;
+  }): Promise<{
+    key: string;
+    score: number;
+    findings: Array<{ id: string; severity: string; message: string }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/prompt-intelligence/evaluate', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

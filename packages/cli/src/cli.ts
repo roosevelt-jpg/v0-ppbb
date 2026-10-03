@@ -29,6 +29,9 @@ function usage(): never {
   verbalab reasoning-cloud-reason --problem <text> [--strategy <id>]
   verbalab recommendation-engine
   verbalab recommend --kind <language|voice|content|...> [--query <text>]
+  verbalab prompt-intelligence
+  verbalab prompt-intelligence-preview --key <chat|rag|voice_faq> [--body <text>]
+  verbalab prompt-intelligence-evaluate --key <chat|rag|voice_faq> [--body <text>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -216,6 +219,43 @@ async function main() {
           kind,
           query: argValue(rest, '--query'),
           language: argValue(rest, '--language'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'prompt-intelligence') {
+    console.log(JSON.stringify(await vl.promptIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'prompt-intelligence-preview') {
+    const key = argValue(rest, '--key');
+    if (!key) usage();
+    console.log(
+      JSON.stringify(
+        await vl.promptIntelligencePreview({
+          key,
+          body: argValue(rest, '--body'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'prompt-intelligence-evaluate') {
+    const key = argValue(rest, '--key');
+    if (!key) usage();
+    console.log(
+      JSON.stringify(
+        await vl.promptIntelligenceEvaluate({
+          key,
+          body: argValue(rest, '--body'),
         }),
         null,
         2,

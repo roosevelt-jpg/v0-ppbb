@@ -631,6 +631,45 @@ export class GqlRecommendationEngine {
 }
 
 @ObjectType()
+export class GqlPromptIntelligenceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPromptIntelligence {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPromptIntelligenceCapability])
+  capabilities!: GqlPromptIntelligenceCapability[];
+
+  @Field()
+  autoPromptResearchLab!: boolean;
+
+  @Field()
+  trainsPromptOptimizers!: boolean;
+
+  @Field()
+  extendsVersionedPrompts!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

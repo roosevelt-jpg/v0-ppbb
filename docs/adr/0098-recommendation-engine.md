@@ -21,4 +21,4 @@ ROADMAP VL-187: recommendations over embeddings/memory for workspace content/voi
 ## Consequences
 
 - Intelligence Cloud marks recommendations `partial` with hub links.  
-- Prompt Intelligence (VL-188) is next and should extend existing prompt versioning, not invent an auto-prompt research lab.
+- Prompt Intelligence (VL-188) extends existing prompt versioning (ADR-0099), not an auto-prompt research lab.

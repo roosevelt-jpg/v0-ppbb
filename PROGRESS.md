@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-187 Done — Recommendation Engine)
+Last updated: 2026-10-03 (VL-188 Done — Prompt Intelligence)
 
 ---
 
@@ -217,6 +217,7 @@ Last updated: 2026-10-03 (VL-187 Done — Recommendation Engine)
 | VL-185 | Context Engine (Phase 52) | Done | `/v1/context-engine/*` assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; infinite window deferred. |
 | VL-186 | Reasoning Cloud (Phase 53) | Done | `/v1/reasoning-cloud/*` LLM strategies + reason; ADR-0097. Not custom reasoner kernel; shallow ToT. |
 | VL-187 | Recommendation Engine (Phase 54) | Done | `/v1/recommendation-engine/*` light rankers; ADR-0098. Not retail recommender OS; enterprise deferred. |
+| VL-188 | Prompt Intelligence (Phase 55) | Done | `/v1/prompt-intelligence/*` hub over VL-086; ADR-0099. Heuristic eval/security; not auto-prompt research lab. |
 
 ---
 
@@ -318,3 +319,4 @@ Last updated: 2026-10-03 (VL-187 Done — Recommendation Engine)
 | 2026-10-03 | VL-185 Done: Context Engine (Phase 52) — assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; not infinite context. |
 | 2026-10-03 | VL-186 Done: Reasoning Cloud (Phase 53) — LLM-gateway strategies + reason API; ADR-0097. Not custom reasoner kernel. |
 | 2026-10-03 | VL-187 Done: Recommendation Engine (Phase 54) — light rankers over langs/voices/knowledge; ADR-0098. Not retail recommender OS. |
+| 2026-10-03 | VL-188 Done: Prompt Intelligence (Phase 55) — hub over VL-086 versioned prompts; ADR-0099. Not auto-prompt research lab. |

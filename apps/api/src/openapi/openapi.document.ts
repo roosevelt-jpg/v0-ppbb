@@ -2992,6 +2992,76 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/prompt-intelligence/engine': {
+      get: {
+        summary: 'Prompt Intelligence catalog',
+        operationId: 'getPromptIntelligenceEngine',
+        responses: { '200': { description: 'Capabilities and auto-prompt-lab honesty notes' } },
+      },
+    },
+    '/v1/prompt-intelligence/keys': {
+      get: {
+        summary: 'Managed prompt keys',
+        operationId: 'listPromptIntelligenceKeys',
+        responses: { '200': { description: 'chat/rag/voice_faq keys' } },
+      },
+    },
+    '/v1/prompt-intelligence/registry': {
+      get: {
+        summary: 'Workspace prompt registry',
+        operationId: 'getPromptIntelligenceRegistry',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Active/fallback status per key' } },
+      },
+    },
+    '/v1/prompt-intelligence/preview': {
+      post: {
+        summary: 'Preview/resolve a prompt body',
+        operationId: 'previewPromptIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Resolved body without LLM call' } },
+      },
+    },
+    '/v1/prompt-intelligence/evaluate': {
+      post: {
+        summary: 'Heuristic prompt evaluation',
+        operationId: 'evaluatePromptIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Score + findings (not LLM-as-judge)' } },
+      },
+    },
+    '/v1/prompt-intelligence/security-scan': {
+      post: {
+        summary: 'Prompt security pattern scan',
+        operationId: 'securityScanPromptIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Injection/secret pattern findings' } },
+      },
+    },
+    '/v1/prompt-intelligence/marketplace': {
+      get: {
+        summary: 'Prompt marketplace listing counts',
+        operationId: 'getPromptIntelligenceMarketplace',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Publisher prompt listing counts' } },
+      },
+    },
+    '/v1/prompt-intelligence/analytics': {
+      get: {
+        summary: 'Prompt Intelligence analytics',
+        operationId: 'getPromptIntelligenceAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Prompt audit aggregates' } },
+      },
+    },
+    '/v1/prompt-intelligence/monitoring': {
+      get: {
+        summary: 'Prompt Intelligence monitoring snapshot',
+        operationId: 'getPromptIntelligenceMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

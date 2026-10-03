@@ -112,6 +112,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.recommendationEngine ?? '/recommendation-engine'} style={secondary}>
                 Recommendations
               </Link>
+              <Link href={data.links.promptIntelligence ?? '/prompt-intelligence'} style={secondary}>
+                Prompt Intelligence
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

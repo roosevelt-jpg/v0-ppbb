@@ -88,9 +88,10 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       id: 'prompt-intelligence',
       name: 'Prompt Intelligence',
       status: 'partial',
-      api: null,
-      console: null,
-      notes: 'Versioned prompts exist for chat/RAG (platform). Product hub VL-188.',
+      api: 'GET /v1/prompt-intelligence/engine',
+      console: '/prompt-intelligence',
+      notes:
+        'Hub over VL-086 versioned prompts (VL-188). Heuristic eval/security; not an auto-prompt research lab.',
     },
     {
       id: 'decision-engine',
