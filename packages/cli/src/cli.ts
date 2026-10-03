@@ -125,6 +125,10 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab library-reference-products
+  verbalab library-reference-index
+  verbalab library-reference-risks
+  verbalab library-reference-vision
   verbalab digital-civilization-products
   verbalab national-ai-platform-engine
   verbalab smart-city-platform-engine
@@ -981,6 +985,27 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'library-reference-products') {
+    console.log(JSON.stringify(await vl.libraryReferenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-index') {
+    const volume = args[1] ? Number(args[1]) : undefined;
+    console.log(JSON.stringify(await vl.libraryReferenceIndex(Number.isFinite(volume) ? volume : undefined), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-risks') {
+    console.log(JSON.stringify(await vl.libraryReferenceRisks(), null, 2));
+    return;
+  }
+
+  if (command === 'library-reference-vision') {
+    console.log(JSON.stringify(await vl.libraryReferenceVision(), null, 2));
+    return;
+  }
+
   if (command === 'digital-civilization-products') {
     console.log(JSON.stringify(await vl.digitalCivilizationProducts(), null, 2));
     return;

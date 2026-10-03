@@ -5535,6 +5535,24 @@ export class VerbaLab {
     return this.requestJson('/v1/digital-civilization/guards', { method: 'GET' });
   }
 
+
+  async libraryReferenceProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/products', { method: 'GET' });
+  }
+
+  async libraryReferenceIndex(volume?: number): Promise<Record<string, unknown>> {
+    const q = volume == null ? '' : `?volume=${volume}`;
+    return this.requestJson(`/v1/library-reference/index${q}`, { method: 'GET' });
+  }
+
+  async libraryReferenceRisks(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/risks', { method: 'GET' });
+  }
+
+  async libraryReferenceVision(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/vision', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

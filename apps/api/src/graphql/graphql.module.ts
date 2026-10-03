@@ -123,6 +123,7 @@ import { GlobalCommunityPlatformApplicationModule } from '../global-community-pl
 import { AiInvestmentPlatformApplicationModule } from '../ai-investment-platform/application/ai-investment-platform-application.module';
 import { EconomicIntelligenceApplicationModule } from '../economic-intelligence/application/economic-intelligence-application.module';
 import { DigitalCivilizationApplicationModule } from '../digital-civilization/application/digital-civilization-application.module';
+import { LibraryReferenceApplicationModule } from '../library-reference/application/library-reference-application.module';
 import { NationalAiPlatformApplicationModule } from '../national-ai-platform/application/national-ai-platform-application.module';
 import { SmartCityPlatformApplicationModule } from '../smart-city-platform/application/smart-city-platform-application.module';
 import { EnterpriseNationPlatformApplicationModule } from '../enterprise-nation-platform/application/enterprise-nation-platform-application.module';
@@ -332,6 +333,7 @@ import { GlobalCommunityPlatformGraphqlResolver } from './global-community-platf
 import { AiInvestmentPlatformGraphqlResolver } from './ai-investment-platform.resolver';
 import { EconomicIntelligenceGraphqlResolver } from './economic-intelligence.resolver';
 import { DigitalCivilizationGraphqlResolver } from './digital-civilization.resolver';
+import { LibraryReferenceGraphqlResolver } from './library-reference.resolver';
 import { NationalAiPlatformGraphqlResolver } from './national-ai-platform.resolver';
 import { SmartCityPlatformGraphqlResolver } from './smart-city-platform.resolver';
 import { EnterpriseNationPlatformGraphqlResolver } from './enterprise-nation-platform.resolver';
@@ -561,6 +563,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiInvestmentPlatformApplicationModule,
     EconomicIntelligenceApplicationModule,
     DigitalCivilizationApplicationModule,
+    LibraryReferenceApplicationModule,
     NationalAiPlatformApplicationModule,
     SmartCityPlatformApplicationModule,
     EnterpriseNationPlatformApplicationModule,
@@ -778,6 +781,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AiInvestmentPlatformGraphqlResolver,
     EconomicIntelligenceGraphqlResolver,
     DigitalCivilizationGraphqlResolver,
+    LibraryReferenceGraphqlResolver,
     NationalAiPlatformGraphqlResolver,
     SmartCityPlatformGraphqlResolver,
     EnterpriseNationPlatformGraphqlResolver,

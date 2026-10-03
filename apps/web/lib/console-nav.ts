@@ -256,6 +256,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/global-knowledge-network', label: 'Knowledge Net' },
       { href: '/global-ai-federation', label: 'AI Federation' },
       { href: '/civilization-intelligence-dashboard', label: 'Civ Intel' },
+      { href: '/library-reference', label: 'Library Ref' },
     ],
   },
   {

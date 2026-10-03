@@ -13724,6 +13724,56 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/library-reference/products': {
+      get: {
+        summary: 'Library reference products',
+        operationId: 'listLibraryReferenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/engine': {
+      get: {
+        summary: 'Library reference engine',
+        operationId: 'getLibraryReferenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/index': {
+      get: {
+        summary: 'Master phase index',
+        operationId: 'getLibraryReferenceIndex',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/risks': {
+      get: {
+        summary: 'Deeper risk notes summary',
+        operationId: 'getLibraryReferenceRisks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/vision': {
+      get: {
+        summary: 'AI Internet vision (non-executable)',
+        operationId: 'getLibraryReferenceVision',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/documents/{slug}': {
+      get: {
+        summary: 'Library reference markdown document',
+        operationId: 'getLibraryReferenceDocument',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/monitoring': {
+      get: {
+        summary: 'Library reference monitoring',
+        operationId: 'getLibraryReferenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-393 Done — DCIV Production Audit; Volume 24 closed — v2.0 phase roadmap complete)
+Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Internet remains non-executable)
 
 ---
 

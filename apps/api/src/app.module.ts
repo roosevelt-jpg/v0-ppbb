@@ -176,6 +176,7 @@ import { GlobalCommunityPlatformModule } from './global-community-platform/globa
 import { AiInvestmentPlatformModule } from './ai-investment-platform/ai-investment-platform.module';
 import { EconomicIntelligenceModule } from './economic-intelligence/economic-intelligence.module';
 import { DigitalCivilizationModule } from './digital-civilization/digital-civilization.module';
+import { LibraryReferenceModule } from './library-reference/library-reference.module';
 import { NationalAiPlatformModule } from './national-ai-platform/national-ai-platform.module';
 import { SmartCityPlatformModule } from './smart-city-platform/smart-city-platform.module';
 import { EnterpriseNationPlatformModule } from './enterprise-nation-platform/enterprise-nation-platform.module';
@@ -402,6 +403,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiInvestmentPlatformModule,
     EconomicIntelligenceModule,
     DigitalCivilizationModule,
+    LibraryReferenceModule,
     NationalAiPlatformModule,
     SmartCityPlatformModule,
     EnterpriseNationPlatformModule,

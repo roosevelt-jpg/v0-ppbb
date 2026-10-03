@@ -6794,3 +6794,27 @@ export class GqlCivilizationIntelligenceDashboardEngine {
   civilizationInfrastructureOs!: boolean;
 }
 
+@ObjectType()
+export class GqlLibraryReferenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  libraryIndexOnly!: boolean;
+
+  @Field(() => Boolean)
+  executableRoadmapCompleteThroughPhase260!: boolean;
+
+  @Field(() => Boolean)
+  aiInternetExecutablePhases!: boolean;
+
+  @Field(() => Boolean)
+  missionControlOs!: boolean;
+
+  @Field(() => Boolean)
+  visionMarkedDoneWithoutSpec!: boolean;
+}
+
