@@ -74,7 +74,7 @@ export class EcosystemCloudService {
       deferred: {
         pluginMarketplace: false,
         modelMarketplace: false,
-        datasetMarketplace: true,
+        datasetMarketplace: false,
         promptMarketplace: true,
         agentMarketplace: true,
         workflowMarketplace: true,
@@ -95,6 +95,7 @@ export class EcosystemCloudService {
         voiceMarketplace: '/voice-marketplace',
         pluginMarketplace: '/plugin-marketplace',
         modelMarketplace: '/model-marketplace',
+        datasetMarketplace: '/dataset-marketplace',
         billing: '/billing',
         pluginRuntime: '/plugin-runtime',
         agentRuntime: '/agent-runtime',

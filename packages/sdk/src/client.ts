@@ -1797,6 +1797,24 @@ export class VerbaLab {
     return this.requestJson('/v1/model-marketplace/engine', { method: 'GET' });
   }
 
+  async datasetMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/dataset-marketplace/engine', { method: 'GET' });
+  }
+
   async policyFabricRoute(body?: { kinds?: string[] }): Promise<{
     plan: Array<Record<string, unknown>>;
     missing: string[];

@@ -65,11 +65,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'dataset-marketplace',
       name: 'Dataset Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/dataset-marketplace/engine',
+      console: '/dataset-marketplace',
       notes:
-        'VL-252 / Phase 119. Extends content-marketplace dataset kind — not Label Studio / Dataset Cloud OS.',
+        'VL-252 / Phase 119. Extends dataset kind + VL-101 assets; FabricPolicyGate + Stripe honesty. Not Label Studio / Dataset Cloud OS.',
     },
     {
       id: 'prompt-marketplace',
@@ -219,6 +219,11 @@ export function ecosystemRoutingTable() {
       surface: 'model-marketplace',
       path: '/model-marketplace',
       api: '/v1/model-marketplace/engine',
+    },
+    {
+      surface: 'dataset-marketplace',
+      path: '/dataset-marketplace',
+      api: '/v1/dataset-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },
