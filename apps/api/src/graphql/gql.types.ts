@@ -778,6 +778,51 @@ export class GqlAgentMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlWorkflowMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlWorkflowMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlWorkflowMarketplaceCapability])
+  capabilities!: GqlWorkflowMarketplaceCapability[];
+
+  @Field()
+  liveStepExecution!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  workflowPolicyHardGateRequired!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

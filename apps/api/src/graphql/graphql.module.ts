@@ -31,6 +31,7 @@ import { ModelMarketplaceApplicationModule } from '../model-marketplace/applicat
 import { DatasetMarketplaceApplicationModule } from '../dataset-marketplace/application/dataset-marketplace-application.module';
 import { PromptMarketplaceApplicationModule } from '../prompt-marketplace/application/prompt-marketplace-application.module';
 import { AgentMarketplaceApplicationModule } from '../agent-marketplace/application/agent-marketplace-application.module';
+import { WorkflowMarketplaceApplicationModule } from '../workflow-marketplace/application/workflow-marketplace-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -115,6 +116,7 @@ import { ModelMarketplaceGraphqlResolver } from './model-marketplace.resolver';
 import { DatasetMarketplaceGraphqlResolver } from './dataset-marketplace.resolver';
 import { PromptMarketplaceGraphqlResolver } from './prompt-marketplace.resolver';
 import { AgentMarketplaceGraphqlResolver } from './agent-marketplace.resolver';
+import { WorkflowMarketplaceGraphqlResolver } from './workflow-marketplace.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -219,6 +221,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     DatasetMarketplaceApplicationModule,
     PromptMarketplaceApplicationModule,
     AgentMarketplaceApplicationModule,
+    WorkflowMarketplaceApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -311,6 +314,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     DatasetMarketplaceGraphqlResolver,
     PromptMarketplaceGraphqlResolver,
     AgentMarketplaceGraphqlResolver,
+    WorkflowMarketplaceGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

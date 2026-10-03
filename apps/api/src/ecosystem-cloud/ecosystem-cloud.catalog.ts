@@ -92,10 +92,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'workflow-marketplace',
       name: 'Workflow Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'VL-255 / Phase 122. Publish/share Workflow Runtime definitions — not Zapier OS.',
+      status: 'shipped',
+      api: 'GET /v1/workflow-marketplace/engine',
+      console: '/workflow-marketplace',
+      notes:
+        'VL-255 / Phase 122. Workflow Runtime sandbox + WorkflowPolicyGate + FabricPolicyGate; Stripe honesty. Not Zapier/Temporal OS.',
     },
     {
       id: 'connector-marketplace',
@@ -234,6 +235,11 @@ export function ecosystemRoutingTable() {
       surface: 'agent-marketplace',
       path: '/agent-marketplace',
       api: '/v1/agent-marketplace/engine',
+    },
+    {
+      surface: 'workflow-marketplace',
+      path: '/workflow-marketplace',
+      api: '/v1/workflow-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },

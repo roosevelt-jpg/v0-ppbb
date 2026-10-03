@@ -83,6 +83,7 @@ import { ModelMarketplaceModule } from './model-marketplace/model-marketplace.mo
 import { DatasetMarketplaceModule } from './dataset-marketplace/dataset-marketplace.module';
 import { PromptMarketplaceModule } from './prompt-marketplace/prompt-marketplace.module';
 import { AgentMarketplaceModule } from './agent-marketplace/agent-marketplace.module';
+import { WorkflowMarketplaceModule } from './workflow-marketplace/workflow-marketplace.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -184,6 +185,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     DatasetMarketplaceModule,
     PromptMarketplaceModule,
     AgentMarketplaceModule,
+    WorkflowMarketplaceModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
