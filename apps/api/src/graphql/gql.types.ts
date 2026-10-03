@@ -700,6 +700,45 @@ export class GqlPromptFabricRoute {
 }
 
 @ObjectType()
+export class GqlReasoningFabricCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlReasoningFabricRoute {
+  @Field()
+  kind!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  target!: string;
+
+  @Field()
+  api!: string;
+
+  @Field()
+  cloud!: string;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

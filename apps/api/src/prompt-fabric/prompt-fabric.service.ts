@@ -364,7 +364,7 @@ export class PromptFabricService {
           'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
-        reasoningFabric: true,
+        reasoningFabric: false,
         memoryFabric: true,
         agentFabric: true,
         policyFabric: true,
@@ -379,6 +379,7 @@ export class PromptFabricService {
         policyRuntime: '/policy-runtime',
         contextFabric: '/context-fabric',
         knowledgeFabric: '/knowledge-fabric',
+        reasoningFabric: '/reasoning-fabric',
         eventFabric: '/event-fabric',
         aiFabric: '/ai-fabric',
       },

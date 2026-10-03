@@ -329,7 +329,7 @@ export class KnowledgeFabricService {
       },
       deferred: {
         promptFabric: false,
-        reasoningFabric: true,
+        reasoningFabric: false,
         memoryFabric: true,
         agentFabric: true,
         policyFabric: true,

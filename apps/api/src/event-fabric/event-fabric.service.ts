@@ -142,7 +142,7 @@ export class EventFabricService {
         contextFabric: false,
         knowledgeFabric: false,
         promptFabric: false,
-        reasoningFabric: true,
+        reasoningFabric: false,
         memoryFabric: true,
         agentFabric: true,
         policyFabric: true,

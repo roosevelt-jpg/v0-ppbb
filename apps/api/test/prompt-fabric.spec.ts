@@ -212,7 +212,7 @@ describe('Prompt Fabric (VL-243)', () => {
       clerkUserId: 'clerk_pf',
       role: 'owner',
     });
-    expect(overview.deferred.reasoningFabric).toBe(true);
+    expect(overview.deferred.reasoningFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.links.promptFabric).toBe('/prompt-fabric');
     expect(overview.honesty.extendsPromptRuntime).toBe(true);

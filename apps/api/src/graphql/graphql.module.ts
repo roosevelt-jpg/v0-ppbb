@@ -21,6 +21,7 @@ import { EventFabricApplicationModule } from '../event-fabric/application/event-
 import { ContextFabricApplicationModule } from '../context-fabric/application/context-fabric-application.module';
 import { KnowledgeFabricApplicationModule } from '../knowledge-fabric/application/knowledge-fabric-application.module';
 import { PromptFabricApplicationModule } from '../prompt-fabric/application/prompt-fabric-application.module';
+import { ReasoningFabricApplicationModule } from '../reasoning-fabric/application/reasoning-fabric-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -95,6 +96,7 @@ import { EventFabricGraphqlResolver } from './event-fabric.resolver';
 import { ContextFabricGraphqlResolver } from './context-fabric.resolver';
 import { KnowledgeFabricGraphqlResolver } from './knowledge-fabric.resolver';
 import { PromptFabricGraphqlResolver } from './prompt-fabric.resolver';
+import { ReasoningFabricGraphqlResolver } from './reasoning-fabric.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -189,6 +191,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ContextFabricApplicationModule,
     KnowledgeFabricApplicationModule,
     PromptFabricApplicationModule,
+    ReasoningFabricApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -271,6 +274,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ContextFabricGraphqlResolver,
     KnowledgeFabricGraphqlResolver,
     PromptFabricGraphqlResolver,
+    ReasoningFabricGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

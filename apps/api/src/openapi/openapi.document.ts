@@ -3553,6 +3553,133 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + recent plans + honesty' } },
       },
     },
+    '/v1/reasoning-fabric/products': {
+      get: {
+        summary: 'Reasoning Fabric capability catalog',
+        operationId: 'listReasoningFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Reasoning router capabilities, pipelines, Runtime handoff honesty',
+          },
+        },
+      },
+    },
+    '/v1/reasoning-fabric/engine': {
+      get: {
+        summary: 'Reasoning Fabric engine (alias of products)',
+        operationId: 'getReasoningFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/reasoning-fabric/routes': {
+      get: {
+        summary: 'Reasoning Fabric routing table',
+        operationId: 'listReasoningFabricRoutes',
+        responses: { '200': { description: 'kind → Runtime/Cloud handoffs' } },
+      },
+    },
+    '/v1/reasoning-fabric/route': {
+      post: {
+        summary: 'Plan reasoning routing for selected kinds',
+        operationId: 'planReasoningFabricRoute',
+        responses: { '200': { description: 'Router plan' } },
+      },
+    },
+    '/v1/reasoning-fabric/pipeline': {
+      post: {
+        summary: 'Plan a reasoning pipeline (ordered Runtime handoffs)',
+        operationId: 'planReasoningFabricPipeline',
+        responses: { '200': { description: 'Pipeline + routed steps' } },
+      },
+    },
+    '/v1/reasoning-fabric/versions': {
+      get: {
+        summary: 'Reasoning Fabric version catalog',
+        operationId: 'listReasoningFabricVersions',
+        responses: { '200': { description: 'Pipeline/router/strategy versions' } },
+      },
+    },
+    '/v1/reasoning-fabric/cache': {
+      get: {
+        summary: 'Reasoning cache handoff (Intelligent Cache)',
+        operationId: 'getReasoningFabricCache',
+        responses: { '200': { description: 'Intelligent Cache discovery' } },
+      },
+    },
+    '/v1/reasoning-fabric/federate': {
+      post: {
+        summary: 'List reasoning federation handoff targets',
+        operationId: 'federateReasoningFabric',
+        responses: { '200': { description: 'Federation handoff catalog' } },
+      },
+    },
+    '/v1/reasoning-fabric/history': {
+      get: {
+        summary: 'Reasoning history via Reasoning Runtime',
+        operationId: 'listReasoningFabricHistory',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'History runs' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/reasoning-fabric/replay/{id}': {
+      get: {
+        summary: 'Replay a reasoning run via Reasoning Runtime',
+        operationId: 'replayReasoningFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'Replayed run' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/reasoning-fabric/distribute': {
+      post: {
+        summary: 'Plan reasoning distribution to same-org workspaces',
+        operationId: 'distributeReasoningFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/reasoning-fabric/overview': {
+      get: {
+        summary: 'Reasoning Fabric org overview',
+        operationId: 'getReasoningFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + pipelines + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/reasoning-fabric/monitoring': {
+      get: {
+        summary: 'Reasoning Fabric monitoring',
+        operationId: 'getReasoningFabricMonitoring',
+        responses: { '200': { description: 'Counters + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

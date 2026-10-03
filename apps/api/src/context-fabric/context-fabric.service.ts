@@ -242,7 +242,7 @@ export class ContextFabricService {
       deferred: {
         knowledgeFabric: false,
         promptFabric: false,
-        reasoningFabric: true,
+        reasoningFabric: false,
         memoryFabric: true,
         agentFabric: true,
         policyFabric: true,

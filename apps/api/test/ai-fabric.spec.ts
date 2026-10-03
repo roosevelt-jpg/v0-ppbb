@@ -139,6 +139,7 @@ describe('AI Fabric Foundation (VL-239)', () => {
     expect(overview.deferred.contextFabric).toBe(false);
     expect(overview.deferred.knowledgeFabric).toBe(false);
     expect(overview.deferred.promptFabric).toBe(false);
+    expect(overview.deferred.reasoningFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to9).toBe(false);
     expect(overview.links.aiFabric).toBe('/ai-fabric');

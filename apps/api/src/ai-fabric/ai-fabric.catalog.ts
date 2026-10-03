@@ -64,10 +64,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'reasoning-fabric',
       name: 'Reasoning Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Reasoning routing (Phase 111 / VL-244). Extends Reasoning Runtime.',
+      status: 'shipped',
+      api: 'GET /v1/reasoning-fabric/products',
+      console: '/reasoning-fabric',
+      notes:
+        'Reasoning router over Reasoning Runtime (VL-244). Not custom reasoner OS.',
     },
     {
       id: 'memory-fabric',

@@ -185,6 +185,7 @@ describe('Context Fabric (VL-241)', () => {
     });
     expect(overview.deferred.knowledgeFabric).toBe(false);
     expect(overview.deferred.promptFabric).toBe(false);
+    expect(overview.deferred.reasoningFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.links.contextFabric).toBe('/context-fabric');
     expect(overview.honesty.extendsContextRuntime).toBe(true);

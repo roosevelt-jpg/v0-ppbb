@@ -35,6 +35,9 @@ function usage(): never {
   verbalab knowledge-fabric-federate [--kind <kind>]...
   verbalab prompt-fabric-products
   verbalab prompt-fabric-route [--feature <feature>] [--kind <kind>]...
+  verbalab reasoning-fabric-products
+  verbalab reasoning-fabric-route [--kind <kind>]...
+  verbalab reasoning-fabric-pipeline [--id <pipelineId>]
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -342,6 +345,37 @@ async function main() {
           ...(kinds.length ? { kinds } : {}),
           ...(feature ? { feature } : {}),
         }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'reasoning-fabric-products') {
+    console.log(JSON.stringify(await vl.reasoningFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'reasoning-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.reasoningFabricRoute(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'reasoning-fabric-pipeline') {
+    const pipelineId = argValue(rest, '--id') ?? undefined;
+    console.log(
+      JSON.stringify(
+        await vl.reasoningFabricPipeline(pipelineId ? { pipelineId } : {}),
         null,
         2,
       ),

@@ -1492,6 +1492,79 @@ export class VerbaLab {
     });
   }
 
+  async reasoningFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    routes: Array<{
+      kind: string;
+      name: string;
+      target: string;
+      api: string;
+      cloud: string;
+      notes: string;
+    }>;
+    pipelines: Array<{
+      id: string;
+      name: string;
+      steps: string[];
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/reasoning-fabric/products', { method: 'GET' });
+  }
+
+  async reasoningFabricRoute(body?: { kinds?: string[] }): Promise<{
+    plan: Array<Record<string, unknown>>;
+    missing: string[];
+  }> {
+    return this.requestJson('/v1/reasoning-fabric/route', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async reasoningFabricPipeline(body?: {
+    pipelineId?: string;
+    steps?: string[];
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/reasoning-fabric/pipeline', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async reasoningFabricFederate(body?: { kinds?: string[] }): Promise<{
+    federation: Array<Record<string, unknown>>;
+    missing: string[];
+  }> {
+    return this.requestJson('/v1/reasoning-fabric/federate', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async reasoningFabricDistribute(body?: {
+    kinds?: string[];
+    targetWorkspaceIds?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/reasoning-fabric/distribute', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;
