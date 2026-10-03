@@ -73,10 +73,29 @@ export class MarketingCmsService implements OnModuleInit {
           title: 'VerbaLab',
           description: "Africa's own AI voice, speech, and language platform.",
           reviewStatus: 'pending_review',
+          kind: 'marketing_home',
         } as Prisma.InputJsonValue,
       },
       update: {},
     });
+
+    // Backfill review metadata on home when older seeds omitted it.
+    const homeSeo = (home.seo ?? {}) as Record<string, unknown>;
+    if (!homeSeo.reviewStatus) {
+      await this.prisma.cmsPage.update({
+        where: { id: home.id },
+        data: {
+          seo: {
+            ...homeSeo,
+            title: homeSeo.title ?? 'VerbaLab',
+            description:
+              homeSeo.description ?? "Africa's own AI voice, speech, and language platform.",
+            reviewStatus: 'pending_review',
+            kind: 'marketing_home',
+          } as Prisma.InputJsonValue,
+        },
+      });
+    }
 
     await this.seedPageBlocks(
       home.id,

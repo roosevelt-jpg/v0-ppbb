@@ -33,6 +33,29 @@ type HomePayload = {
   settings: Settings;
 };
 
+type PrefillEditor = {
+  pageSlug: string;
+  blockId: string;
+  type: string;
+  contentJson: string;
+};
+
+const PRODUCT_PREVIEW: Record<string, string> = {
+  'product-translate': '/translate',
+  'product-voice': '/voice-studio',
+  'product-speech': '/speech',
+  'product-dashboard': '/dashboard',
+  'product-playground': '/playground',
+  'product-chat': '/chat',
+};
+
+function previewHrefForSlug(slug: string): string | null {
+  if (slug === 'home') return '/';
+  if (PRODUCT_PREVIEW[slug]) return PRODUCT_PREVIEW[slug];
+  if (slug.startsWith('use-case-')) return `/use-cases/${slug.slice('use-case-'.length)}`;
+  return null;
+}
+
 export function CmsAdminClient() {
   const { getToken, isLoaded } = useAuth();
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -41,6 +64,7 @@ export function CmsAdminClient() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [editor, setEditor] = useState<PrefillEditor | null>(null);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -121,6 +145,73 @@ export function CmsAdminClient() {
       setStatus(`Marked ${slug} as ${reviewStatus.replace('_', ' ')}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Review update failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openPrefillEditor(slug: string) {
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const data = await apiFetch<{
+        page: { blocks: Array<{ id: string; type: string; content: Record<string, unknown> }> };
+      }>(`/v1/cms/pages/${slug}`, { token });
+      const block =
+        data.page.blocks.find((b) => b.type === 'product_prefill' || b.type === 'sample_panel') ??
+        data.page.blocks[0];
+      if (!block) throw new Error('No editable blocks on this page');
+      setEditor({
+        pageSlug: slug,
+        blockId: block.id,
+        type: block.type,
+        contentJson: JSON.stringify(block.content, null, 2),
+      });
+      setStatus(`Editing ${slug} (${block.type}) for review.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load page content');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function savePrefillEditor() {
+    if (!editor) return;
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      let content: Record<string, unknown>;
+      try {
+        content = JSON.parse(editor.contentJson) as Record<string, unknown>;
+      } catch {
+        throw new Error('Content must be valid JSON');
+      }
+      await apiFetch('/v1/cms/blocks', {
+        token,
+        method: 'POST',
+        body: JSON.stringify({
+          pageSlug: editor.pageSlug,
+          blockId: editor.blockId,
+          type: editor.type,
+          content,
+          published: true,
+        }),
+      });
+      await apiFetch(`/v1/cms/pages/${editor.pageSlug}/review`, {
+        token,
+        method: 'POST',
+        body: JSON.stringify({ reviewStatus: 'pending_review' }),
+      });
+      await load();
+      setStatus(`Saved ${editor.pageSlug} — left as pending review.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
     } finally {
       setBusy(false);
     }
@@ -219,18 +310,8 @@ export function CmsAdminClient() {
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.75rem' }}>
               {pages.map((p) => {
                 const review = p.seo?.reviewStatus ?? 'pending_review';
-                const publicPath = p.slug.startsWith('use-case-')
-                  ? `/use-cases/${p.slug.replace('use-case-', '').replace('public-speech', 'public-speech')}`
-                  : p.slug === 'home'
-                    ? '/'
-                    : null;
-                // map use-case-public-speech -> public-speech already handled by replace once
-                const href =
-                  p.slug === 'use-case-public-speech'
-                    ? '/use-cases/public-speech'
-                    : p.slug === 'use-case-customer-experience'
-                      ? '/use-cases/customer-experience'
-                      : publicPath;
+                const href = previewHrefForSlug(p.slug);
+                const canEditPrefill = p.slug.startsWith('product-') || p.slug.startsWith('use-case-');
                 return (
                   <li
                     key={p.id}
@@ -256,6 +337,17 @@ export function CmsAdminClient() {
                           Preview
                         </a>
                       ) : null}
+                      {canEditPrefill ? (
+                        <button
+                          type="button"
+                          className="vl-btn vl-btn-secondary"
+                          style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                          disabled={busy}
+                          onClick={() => void openPrefillEditor(p.slug)}
+                        >
+                          Edit content
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         className="vl-btn vl-btn-secondary"
@@ -280,6 +372,31 @@ export function CmsAdminClient() {
               })}
             </ul>
           </section>
+
+          {editor ? (
+            <section className="vl-panel" style={{ padding: '1.2rem', display: 'grid', gap: '0.75rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1rem' }}>Review content · {editor.pageSlug}</h2>
+              <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.88rem' }}>
+                Edit the JSON block (sample text, CTAs, product prefills). Saving keeps the page in pending review until
+                you approve it.
+              </p>
+              <textarea
+                className="vl-field vl-code"
+                rows={14}
+                value={editor.contentJson}
+                onChange={(e) => setEditor({ ...editor, contentJson: e.target.value })}
+                spellCheck={false}
+              />
+              <div style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap' }}>
+                <button type="button" className="vl-btn vl-btn-primary" disabled={busy} onClick={() => void savePrefillEditor()}>
+                  Save for later review
+                </button>
+                <button type="button" className="vl-btn vl-btn-secondary" disabled={busy} onClick={() => setEditor(null)}>
+                  Close editor
+                </button>
+              </div>
+            </section>
+          ) : null}
 
           {home ? (
             <>

@@ -25,12 +25,27 @@ export function ChatClient() {
   const [translateReplyTo, setTranslateReplyTo] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prefillNote, setPrefillNote] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     void apiFetch<{ data: Language[] }>('/v1/languages')
       .then((res) => setLanguages(res.data))
       .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    void apiFetch<{
+      prefill: { text?: string; translateReplyTo?: string; note?: string };
+    }>('/v1/cms/prefills/chat')
+      .then((res) => {
+        if (res.prefill.text) setInput(res.prefill.text);
+        if (res.prefill.translateReplyTo) setTranslateReplyTo(res.prefill.translateReplyTo);
+        setPrefillNote(res.prefill.note ?? 'CMS prefill loaded for review.');
+      })
+      .catch(() => {
+        /* keep empty defaults if CMS unavailable */
+      });
   }, []);
 
   useEffect(() => {
@@ -82,12 +97,13 @@ export function ChatClient() {
     <AppShell>
       <h1 style={titleStyle}>Chat</h1>
       <p style={ledeStyle}>Language-intelligence assistant. Optional: translate the reply into another language.</p>
+      {prefillNote ? <p style={{ ...ledeStyle, fontSize: '0.85rem' }}>{prefillNote}</p> : null}
 
       <div className="vl-panel" style={{ marginTop: '1.5rem', padding: '1.25rem', display: 'grid', gap: '1rem', minHeight: '28rem' }}>
         <div style={{ display: 'grid', gap: '0.85rem', flex: 1, maxHeight: '22rem', overflowY: 'auto' }}>
           {messages.length === 0 ? (
             <p style={{ color: 'var(--muted)', margin: 0 }}>
-              Ask about glossaries, localization, or how to translate a phrase.
+              A use-case starter is prefilled below — send it, or replace with your own prompt.
             </p>
           ) : (
             messages.map((msg, i) => (

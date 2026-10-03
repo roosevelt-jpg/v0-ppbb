@@ -29,6 +29,17 @@ export const PRODUCT_PREFILLS = {
     welcome: 'Your African voice workspace is ready. Start with Translate, Voice, or Speech — samples are prefilled for common use cases.',
     note: 'Dashboard intro copy — review in CMS page slug product-dashboard.',
   },
+  playground: {
+    source: 'en',
+    target: 'yo',
+    text: 'Good morning. We are ready to ship samples from Lagos to Ibadan this week.',
+    note: 'Public API playground sample — review in CMS page slug product-playground.',
+  },
+  chat: {
+    text: 'Explain how VerbaLab helps a Nairobi call center support callers who switch between English and Swahili.',
+    translateReplyTo: 'sw',
+    note: 'Chat starter prompt — review in CMS page slug product-chat.',
+  },
 } as const;
 
 function articleBlocks(input: {
@@ -308,6 +319,50 @@ export const DEFAULT_CONTENT_PAGES: SeedPage[] = [
         content: {
           paragraphs: [
             'Dashboard welcome text orients new admins toward prefilled product hubs and CMS review.',
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: 'product-playground',
+    title: 'Playground product copy',
+    description: 'Default translate sample for the public API playground.',
+    reviewStatus: 'pending_review',
+    blocks: [
+      {
+        type: 'product_prefill',
+        sortOrder: 10,
+        content: { surface: 'playground', ...PRODUCT_PREFILLS.playground },
+      },
+      {
+        type: 'rich_text',
+        sortOrder: 20,
+        content: {
+          paragraphs: [
+            'Playground opens with an English→Yoruba logistics line so developers see African market copy before they paste a key.',
+          ],
+        },
+      },
+    ],
+  },
+  {
+    slug: 'product-chat',
+    title: 'Chat product copy',
+    description: 'Default starter prompt for Chat hub.',
+    reviewStatus: 'pending_review',
+    blocks: [
+      {
+        type: 'product_prefill',
+        sortOrder: 10,
+        content: { surface: 'chat', ...PRODUCT_PREFILLS.chat },
+      },
+      {
+        type: 'rich_text',
+        sortOrder: 20,
+        content: {
+          paragraphs: [
+            'Chat prefills a CX scenario prompt and optional reply language so reviewers can send once and evaluate tone.',
           ],
         },
       },
