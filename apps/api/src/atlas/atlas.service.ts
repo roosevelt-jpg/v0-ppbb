@@ -21,7 +21,7 @@ export class AtlasService {
         noFakeTrainedWeights: true,
         scaffoldNotModel: true,
         note:
-          'Atlas is a family scaffold. Inference continues through Gateway vendors until trained weights exist.',
+          'Atlas is a VerbaLab-owned model family. Inference uses VerbaLab Own AI endpoints (VERBALAB_CHAT_URL / MODEL_BASE_URL).',
       },
     };
   }

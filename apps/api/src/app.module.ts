@@ -69,6 +69,18 @@ import { ModelTrainingPlatformModule } from './model-training-platform/model-tra
 import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model-evaluation-platform.module';
 import { ModelRegistryModule } from './model-registry/model-registry.module';
 import { AtlasModule } from './atlas/atlas.module';
+import { AiInternetModule } from './ai-internet/ai-internet.module';
+import { VideoVoiceModule } from './video-voice/video-voice.module';
+import { SpeechDepthModule } from './speech-depth/speech-depth.module';
+import { TranslateFmModule } from './translate-fm/translate-fm.module';
+import { FusionModule } from './fusion/fusion.module';
+import { EdgeModule } from './edge/edge.module';
+import { ReasonFmModule } from './reason-fm/reason-fm.module';
+import { VectorFmModule } from './vector-fm/vector-fm.module';
+import { VisionFmModule } from './vision-fm/vision-fm.module';
+import { VoiceFmModule } from './voice-fm/voice-fm.module';
+import { EchoModule } from './echo/echo.module';
+import { BaobabModule } from './baobab/baobab.module';
 import { AiFabricModule } from './ai-fabric/ai-fabric.module';
 import { EventFabricModule } from './event-fabric/event-fabric.module';
 import { ContextFabricModule } from './context-fabric/context-fabric.module';
@@ -296,6 +308,18 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelEvaluationPlatformModule,
     ModelRegistryModule,
     AtlasModule,
+    AiInternetModule,
+    VideoVoiceModule,
+    SpeechDepthModule,
+    TranslateFmModule,
+    FusionModule,
+    EdgeModule,
+    ReasonFmModule,
+    VectorFmModule,
+    VisionFmModule,
+    VoiceFmModule,
+    EchoModule,
+    BaobabModule,
     AiFabricModule,
     EventFabricModule,
     ContextFabricModule,

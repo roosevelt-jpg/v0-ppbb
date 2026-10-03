@@ -43,4 +43,9 @@ export const FAMILY_SEEDS: FamilySeed[] = [
     code: 'austronesian',
     nameEn: 'Austronesian',
   },
+  {
+    code: 'nilo_saharan',
+    nameEn: 'Nilo-Saharan',
+    notes: 'Luo, Kanuri and related East/Central African registry languages.',
+  },
 ];

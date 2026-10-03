@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { TtsInput, TtsOutput, TtsProvider, TtsVoice } from './tts-provider';
 
-/** Catalog of African-focused voices served by a rented open-weight TTS endpoint (VL-121). */
+/** Catalog of African-focused voices served by VerbaLab Voice FM (owned TTS; VL-121/228). */
 export const OWN_TTS_VOICES: TtsVoice[] = [
   {
     id: 'own:sw-aisha',
@@ -30,6 +30,76 @@ export const OWN_TTS_VOICES: TtsVoice[] = [
     name: 'Kofi (EN-Africa)',
     gender: 'male',
     languages: ['en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ha-amina',
+    name: 'Amina (Hausa)',
+    gender: 'female',
+    languages: ['ha', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:zu-thandi',
+    name: 'Thandi (Zulu)',
+    gender: 'female',
+    languages: ['zu', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ig-chidi',
+    name: 'Chidi (Igbo)',
+    gender: 'male',
+    languages: ['ig', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:rw-keza',
+    name: 'Keza (Kinyarwanda)',
+    gender: 'female',
+    languages: ['rw', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:xh-luvuyo',
+    name: 'Luvuyo (Xhosa)',
+    gender: 'male',
+    languages: ['xh', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:so-hodan',
+    name: 'Hodan (Somali)',
+    gender: 'female',
+    languages: ['so', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:fr-aida',
+    name: 'Aïda (FR-West Africa)',
+    gender: 'female',
+    languages: ['fr', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ar-nour',
+    name: 'Nour (Arabic-Africa)',
+    gender: 'female',
+    languages: ['ar', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ti-senait',
+    name: 'Senait (Tigrinya)',
+    gender: 'female',
+    languages: ['ti', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:om-lema',
+    name: 'Lema (Oromo)',
+    gender: 'female',
+    languages: ['om', 'en'],
     provider: 'own_tts',
   },
 ];
@@ -104,7 +174,7 @@ export class FixtureOwnTtsAdapter implements TtsProvider {
 }
 
 /**
- * HTTP client for a rented GPU TTS endpoint (Modal/vLLM/XTTS/etc.).
+ * HTTP client for VerbaLab-owned Voice FM TTS endpoint.
  * Contract: POST JSON { text, voice, language?, format? } → audio bytes or { audioBase64, mimeType? }.
  */
 export class HttpOwnTtsAdapter implements TtsProvider {

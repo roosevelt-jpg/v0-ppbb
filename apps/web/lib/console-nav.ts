@@ -18,6 +18,26 @@ export type NavGroup = {
 
 /** Product-first IA. Full volume inventory stays available under Platform / Clouds. */
 export const CONSOLE_NAV: NavGroup[] = [
+
+  {
+    id: 'own-models',
+    label: 'Own models',
+    collapsible: true,
+    items: [
+      { href: '/baobab', label: 'Baobab' },
+      { href: '/echo', label: 'Echo' },
+      { href: '/voice-fm', label: 'Voice FM' },
+      { href: '/vision-fm', label: 'Vision FM' },
+      { href: '/vector-fm', label: 'Vector FM' },
+      { href: '/reason-fm', label: 'Reason FM' },
+      { href: '/edge', label: 'Edge' },
+      { href: '/fusion', label: 'Fusion' },
+      { href: '/translate-fm', label: 'Translate FM' },
+      { href: '/speech-depth', label: 'Speech Depth' },
+      { href: '/video-voice', label: 'Video Voice' },
+      { href: '/ai-internet', label: 'AI Internet' },
+    ],
+  },
   {
     id: 'home',
     label: 'Home',

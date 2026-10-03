@@ -2,7 +2,7 @@ import type { GlossarySnapshotTerm } from '../glossary/glossary-snapshot-install
 
 export type VerticalGlossaryPack = {
   id: string;
-  vertical: 'public-sector' | 'healthcare' | 'banking';
+  vertical: 'public-sector' | 'healthcare' | 'banking' | 'education' | 'agriculture' | 'legal';
   title: string;
   description: string;
   sourceLang: string;

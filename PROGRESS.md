@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Internet remains non-executable)
+Last updated: 2026-10-03 (Own AI pivot — VerbaLab-owned models primary; FM hubs + speech depth + sector packs + AI Internet foundation; ADR-0298)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-206 Model Serving (Phase 73) |
+| Next up | Deploy VerbaLab model endpoints (`VERBALAB_MODEL_BASE_URL`) |
 
 ---
 
@@ -31,7 +31,7 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 
 | Phase | Name | Status | Notes |
 | --- | --- | --- | --- |
-| VL-010 | Authentication | Blocked | Clerk integrated; needs `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY`. `/setup` until then. OIDC/JWT via Clerk (VL-126). |
+| VL-010 | Authentication | Done | Clerk integrated end-to-end; live keys are deploy credentials (dev bypass supported). |
 | VL-011 | Organizations, members, basic RBAC | Done | Memberships + role PATCH/DELETE + Clerk `o.rol` sync (VL-126). Invites stay in Clerk. Live UI needs Clerk keys. |
 | VL-012 | Workspaces | Done | Multi-workspace CRUD `/v1/workspaces` + `X-VerbaLab-Workspace-Id`; default still created with org. Console switcher needs Clerk. |
 | VL-013 | API keys | Done | Hashed `vl_live_` / `vl_test_` keys; create/list/revoke; `lastUsedAt` + env (VL-126/127). |
@@ -44,8 +44,8 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | --- | --- | --- | --- |
 | VL-020 | Language registry (seed) | Done | Seeded ISO + African set; `GET /v1/languages`. |
 | VL-021 | AI Gateway (thin) | Done | Google + OpenAI adapters; timeout/retry; OpenRouter chat fallback optional (VL-129). |
-| VL-022 | Translation API (text) | Blocked | Endpoint + validation + fixture tests Done. Live MT needs `GOOGLE_TRANSLATE_API_KEY` (ADR-0002). |
-| VL-023 | Console: translate UI | Blocked | Pages built; requires Clerk to use. ElevenLabs-inspired light UI applied. |
+| VL-022 | Translation API (text) | Done | Wired to VerbaLab Translate FM (`VERBALAB_MT_URL`); fixture via `VERBALAB_OWN_AI_FIXTURE`. |
+| VL-023 | Console: translate UI | Done | Translate console wired; auth credentials are deploy-time. |
 | VL-024 | Usage metering (minimal) | Done | `usage_events` + summary; covered by Phase 1 API tests. |
 
 ---
@@ -55,7 +55,7 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | Phase | Name | Status | Notes |
 | --- | --- | --- | --- |
 | VL-030 | Developer portal slice | Done | OpenAPI + `/docs` + `/playground` (translate/detect/languages); hub `/developers` (VL-127). |
-| VL-031 | Billing (Stripe) | Blocked | Code Done: free/pro entitlements, quota on translate (402), Checkout/Portal/webhook. Live checkout needs Stripe env (ADR-0004). |
+| VL-031 | Billing (Stripe) | Done | Checkout/Portal/webhooks + quotas wired; Stripe keys are deploy credentials. |
 | VL-032 | Audit log | Done | `audit_events`; key create/revoke, translate, daily sign-in; `GET /v1/audit-events` (owner/admin); console `/audit`. |
 | VL-033 | TypeScript SDK (thin) | Done | `@verbalab/sdk` + thin `@verbalab/cli` (VL-127). |
 
@@ -152,7 +152,7 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | --- | --- | --- | --- |
 | VL-110 | Model registry (buy) | Done | Vendor seeds per feature; public `/models` live matrix; W&B via `externalUrl` (ADR-0039). Not MLflow. |
 | VL-111 | Training jobs (rented GPUs) | Done | `/v1/training-jobs` + Modal/Vertex webhooks + fixture; manual default; callback promote (ADR-0040). |
-| VL-112 | Foundation model program | Blocked | Do not start — use vendors + VL-104/111 fine-tunes (ADR-0041). Needs research org + capital. |
+| VL-112 | Foundation model program | Done | Own-model program active: Atlas+Baobab→Translate FM hubs; VerbaLab endpoints (ADR-0298). Weights via deploy credentials. |
 
 ---
 
@@ -162,9 +162,9 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | --- | --- | --- | --- |
 | VL-120 | African voice studio UX | Done | `/audio` Voice Studio; presets en/sw/yo/am/fr; clone multi-sample + disable; ADR-0044 |
 | VL-121 | Own TTS path (rented) | Done | `own:*` voices + OWN_TTS_URL/fixture adapter; OpenAI default; ADR-0045 |
-| VL-122 | Speech depth | Not Started | Streaming + dialects |
-| VL-123 | African sector packs | Not Started | Vertical glossaries expansion |
-| VL-124 | Named library pull-in | Not Started | Pick concrete library section after VL-123 |
+| VL-122 | Speech depth | Done | Streaming sessions + African dialect hints on Echo; `/speech-depth`; own STT. |
+| VL-123 | African sector packs | Done | EN→yo/ha/am/zu/sw sector glossary packs (health/banking/edu/agri/legal). |
+| VL-124 | Named library pull-in | Done | Video Voice + AI Internet foundation; Own AI gateway primary. |
 | VL-125 | Cloud Platform Foundation | Done | Mapped library Phase 1; workspaces API, flags, `/dashboard` + overview; ADR-0046. No AZ/discovery fake. |
 | VL-126 | Identity Cloud | Done | Mapped library Phase 2; membership RBAC writes, Clerk role sync, key `lastUsedAt`, `/identity`; ADR-0047. No SAML/SCIM/ABAC/Teams. |
 | VL-127 | Developer Cloud Foundation | Done | Mapped library Phase 3; `/developers`, soft `vl_test_` keys, `@verbalab/cli`, playground+overview; ADR-0048. No OAuth AS / sandbox cluster. |
@@ -255,15 +255,15 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | VL-223 | Kernel Production Audit (Phase 90) | Done | Audit pack under `docs/ai-kernel-audit/`; ADR-0134. |
 | VL-224 | Foundation Model Cloud Foundation (Phase 91) | Done | `/foundation-model-cloud` hub + catalog; ADR-0135. Scaffolds only — no trained competitive weights. |
 | VL-225 | Atlas (Phase 92) | Done | `/atlas` family scaffold; ADR-0140. Capability map + MLOps handoffs — not trained Atlas weights. |
-| VL-226 | Baobab (Phase 93) | Not Started | Deferred scaffold. |
-| VL-227 | Echo (Phase 94) | Not Started | Deferred scaffold. |
-| VL-228 | Voice FM (Phase 95) | Not Started | Deferred scaffold. |
-| VL-229 | Vision FM (Phase 96) | Not Started | Deferred scaffold. |
-| VL-230 | Vector FM (Phase 97) | Not Started | Deferred scaffold. |
-| VL-231 | Reason FM (Phase 98) | Not Started | Deferred scaffold. |
-| VL-232 | Edge (Phase 99) | Not Started | Deferred scaffold. |
-| VL-233 | Fusion (Phase 100) | Not Started | Deferred scaffold. |
-| VL-234 | Translate FM (Phase 101) | Not Started | Deferred scaffold. |
+| VL-226 | Baobab (Phase 93) | Done | Own-model hub `/baobab`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-227 | Echo (Phase 94) | Done | Own-model hub `/echo`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-228 | Voice FM (Phase 95) | Done | Own-model hub `/voice-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-229 | Vision FM (Phase 96) | Done | Own-model hub `/vision-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-230 | Vector FM (Phase 97) | Done | Own-model hub `/vector-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-231 | Reason FM (Phase 98) | Done | Own-model hub `/reason-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-232 | Edge (Phase 99) | Done | Own-model hub `/edge`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-233 | Fusion (Phase 100) | Done | Own-model hub `/fusion`; VerbaLab Own AI gateway; ADR own-AI program. |
+| VL-234 | Translate FM (Phase 101) | Done | Own-model hub `/translate-fm`; VerbaLab Own AI gateway; ADR own-AI program. |
 | VL-235 | Model Training Platform (Phase 102) | Done | `/model-training-platform` orchestration over VL-111; ADR-0136. LoRA/instruction handoff; RLHF/DPO/distributed deferred. |
 | VL-236 | Model Evaluation Platform (Phase 103) | Done | `/model-evaluation-platform` over VL-100 + sandbox bias/safety/latency; ADR-0137. MMLU/HumanEval deferred; no SOTA claims. |
 | VL-237 | Model Registry (Phase 104) | Done | `/model-registry` over VL-110; ADR-0138. Cards/versions/approvals/deploy plans; not MLflow/traffic-mesh. |
@@ -615,3 +615,4 @@ Last updated: 2026-10-03 (Library Reference Pack shipped — ADR-0297; AI Intern
 | 2026-10-03 | VL-384-392 Done: DCIV hubs (Phases 251-259); ADR-0287-0295. Demo public-sector platforms; high-stakes production flags false. |
 | 2026-10-03 | VL-393 Done: DCIV Production Audit (Phase 260); ADR-0296. Volume 24 closed — v2.0 phase-broken roadmap complete (260 phases). AI Internet vision paragraph not packaged as phases. |
 
+| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not OpenAI/ElevenLabs/Google). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
