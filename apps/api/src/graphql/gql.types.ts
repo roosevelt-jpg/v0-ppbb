@@ -646,6 +646,69 @@ export class GqlStreamingRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlBatchRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlBatchRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlBatchRuntimeCapability])
+  capabilities!: GqlBatchRuntimeCapability[];
+
+  @Field()
+  sparkOs!: boolean;
+
+  @Field()
+  airflowOs!: boolean;
+
+  @Field()
+  celeryOs!: boolean;
+
+  @Field()
+  distributedBatchOs!: boolean;
+
+  @Field()
+  regeneratesJobsApi!: boolean;
+
+  @Field()
+  extendsBullMqJobs!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  sandboxRunsForNonTranslate!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxItemsPerRun!: number;
+
+  @Field()
+  maxRetries!: number;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

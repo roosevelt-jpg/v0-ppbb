@@ -121,6 +121,9 @@ export function InferenceCloudClient() {
               <Link href={data.links.streamingRuntime ?? '/streaming-runtime'} style={secondary}>
                 Streaming
               </Link>
+              <Link href={data.links.batchRuntime ?? '/batch-runtime'} style={secondary}>
+                Batch
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

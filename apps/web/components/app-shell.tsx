@@ -18,6 +18,7 @@ const links = [
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },
   { href: '/streaming-runtime', label: 'Streaming Runtime' },
+  { href: '/batch-runtime', label: 'Batch Runtime' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },

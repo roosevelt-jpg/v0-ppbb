@@ -136,6 +136,11 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(streaming.api).toContain('/v1/streaming-runtime/engine');
     expect(streaming.console).toBe('/streaming-runtime');
 
+    const batch = res.body.products.find((p: { id: string }) => p.id === 'batch-runtime');
+    expect(batch.status).toBe('partial');
+    expect(batch.api).toContain('/v1/batch-runtime/engine');
+    expect(batch.console).toBe('/batch-runtime');
+
     const cost = res.body.products.find((p: { id: string }) => p.id === 'cost-optimization');
     expect(cost.status).toBe('deferred');
     expect(cost.notes).toMatch(/enforce/i);
@@ -162,6 +167,8 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(overview.links.aiRouter).toBe('/ai-router');
     expect(overview.deferred.streamingRuntimeProduct).toBe(false);
     expect(overview.links.streamingRuntime).toBe('/streaming-runtime');
+    expect(overview.deferred.batchRuntimeProduct).toBe(false);
+    expect(overview.links.batchRuntime).toBe('/batch-runtime');
     expect(overview.deferred.costOptimization).toBe(true);
     expect(overview.deferred.gpuHyperscalerOs).toBe(true);
     expect(overview.deferred.regeneratesAiGateway).toBe(false);

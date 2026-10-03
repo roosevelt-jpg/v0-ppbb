@@ -1331,6 +1331,44 @@ export class VerbaLab {
     });
   }
 
+  async batchRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      sparkOs: boolean;
+      airflowOs: boolean;
+      regeneratesJobsApi: boolean;
+      extendsBullMqJobs: boolean;
+      distributedBatchOs: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/batch-runtime/engine', { method: 'GET' });
+  }
+
+  async batchRuntimeCreateRun(input: {
+    kind: string;
+    items: unknown[];
+    priority?: string;
+    source?: string;
+    target?: string;
+    label?: string;
+    maxRetries?: number;
+    runAt?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/batch-runtime/runs', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

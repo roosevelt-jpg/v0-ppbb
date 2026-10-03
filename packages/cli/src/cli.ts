@@ -29,6 +29,8 @@ function usage(): never {
   verbalab ai-router-resolve [--feature chat|translate|stt|tts|ocr|embeddings|detect] [--optimize latency|cost|balanced|quality]
   verbalab streaming-runtime-engine
   verbalab streaming-runtime-surfaces [--kind speech|voice|translation|llm|video|realtime]
+  verbalab batch-runtime-engine
+  verbalab batch-runtime-run --kind <kind> --item <text> [--priority low|normal|high]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -257,6 +259,29 @@ async function main() {
       JSON.stringify(
         await vl.streamingRuntimeSurfaces({
           kind: argValue(rest, '--kind') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'batch-runtime-engine') {
+    console.log(JSON.stringify(await vl.batchRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'batch-runtime-run') {
+    const kind = argValue(rest, '--kind');
+    const item = argValue(rest, '--item');
+    if (!kind || !item) usage();
+    console.log(
+      JSON.stringify(
+        await vl.batchRuntimeCreateRun({
+          kind,
+          items: [item],
+          priority: argValue(rest, '--priority') ?? undefined,
         }),
         null,
         2,

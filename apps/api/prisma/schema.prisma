@@ -91,6 +91,7 @@ model Organization {
   aiRouterPolicies             AiRouterPolicy[]
   aiRouterDecisions            AiRouterDecision[]
   streamingSessions            StreamingSession[]
+  batchRuns                    BatchRun[]
 
   @@map("organizations")
 }
@@ -174,6 +175,7 @@ model Workspace {
   aiRouterPolicies       AiRouterPolicy[]
   aiRouterDecisions      AiRouterDecision[]
   streamingSessions      StreamingSession[]
+  batchRuns              BatchRun[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1516,6 +1518,39 @@ model StreamingSession {
   @@index([organizationId, workspaceId, status])
   @@index([workspaceId, kind])
   @@map("streaming_sessions")
+}
+
+/// Batch Runtime run (VL-209). Translation may delegate to Job; other kinds are sandbox.
+model BatchRun {
+  id               String    @id @default(cuid())
+  organizationId   String    @map("organization_id")
+  workspaceId      String    @map("workspace_id")
+  /// translation | speech | ocr | embedding | training | video
+  kind             String
+  /// low | normal | high
+  priority         String    @default("normal")
+  priorityWeight   Int       @default(15) @map("priority_weight")
+  /// queued | scheduled | running | completed | failed
+  status           String    @default("queued")
+  label            String    @default("")
+  itemCount        Int       @default(0) @map("item_count")
+  checkpointIndex  Int       @default(0) @map("checkpoint_index")
+  attempts         Int       @default(0)
+  maxRetries       Int       @default(2) @map("max_retries")
+  jobId            String?   @map("job_id")
+  runAt            DateTime? @map("run_at")
+  error            String?
+  result           Json      @default("{}")
+  metadata         Json      @default("{}")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@index([workspaceId, kind, priorityWeight])
+  @@map("batch_runs")
 }
 
 

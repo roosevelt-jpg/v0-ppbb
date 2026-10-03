@@ -61,9 +61,10 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
       id: 'batch-runtime',
       name: 'Batch Runtime',
       status: 'partial',
-      api: null,
-      console: null,
-      notes: 'Batch inference (Phase 76 / VL-209). Partial via BullMQ jobs; dedicated batch runtime deferred.',
+      api: 'GET /v1/batch-runtime/engine',
+      console: '/batch-runtime',
+      notes:
+        'Batch hub over BullMQ jobs + sandbox runs with priority/retry/checkpoint (VL-209). Not Spark/Airflow OS; video deferred.',
     },
     {
       id: 'intelligent-cache',

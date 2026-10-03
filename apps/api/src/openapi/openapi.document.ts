@@ -3107,6 +3107,108 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/batch-runtime/engine': {
+      get: {
+        summary: 'Batch Runtime catalog',
+        operationId: 'getBatchRuntimeEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, ceilings, and honesty flags',
+          },
+        },
+      },
+    },
+    '/v1/batch-runtime/kinds': {
+      get: {
+        summary: 'Batch job kinds',
+        operationId: 'listBatchRuntimeKinds',
+        responses: {
+          '200': {
+            description: 'Translation/speech/OCR/embedding/training/video map',
+          },
+        },
+      },
+    },
+    '/v1/batch-runtime/runs': {
+      get: {
+        summary: 'List batch runs',
+        operationId: 'listBatchRuns',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace runs (priority-ordered)' } },
+      },
+      post: {
+        summary: 'Create batch run',
+        operationId: 'createBatchRun',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Run created (translation may delegate to BullMQ)' },
+          '402': { description: 'Hard item ceiling exceeded' },
+        },
+      },
+    },
+    '/v1/batch-runtime/runs/{id}': {
+      get: {
+        summary: 'Get batch run',
+        operationId: 'getBatchRun',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Run detail' } },
+      },
+    },
+    '/v1/batch-runtime/runs/{id}/start': {
+      post: {
+        summary: 'Start a scheduled batch run',
+        operationId: 'startBatchRun',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Scheduled run started' } },
+      },
+    },
+    '/v1/batch-runtime/runs/{id}/checkpoint': {
+      post: {
+        summary: 'Update sandbox checkpoint cursor',
+        operationId: 'checkpointBatchRun',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Checkpoint updated' } },
+      },
+    },
+    '/v1/batch-runtime/runs/{id}/retry': {
+      post: {
+        summary: 'Retry batch run within hard budget',
+        operationId: 'retryBatchRun',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'Retried' },
+          '402': { description: 'Retry budget exhausted' },
+        },
+      },
+    },
+    '/v1/batch-runtime/analytics': {
+      get: {
+        summary: 'Batch Runtime analytics',
+        operationId: 'getBatchRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Run aggregates' } },
+      },
+    },
+    '/v1/batch-runtime/monitoring': {
+      get: {
+        summary: 'Batch Runtime monitoring',
+        operationId: 'getBatchRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',
