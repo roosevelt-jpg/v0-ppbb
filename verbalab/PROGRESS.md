@@ -283,7 +283,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-251 | Model Marketplace (Phase 118) | Done | `/model-marketplace` license SKUs over Model Registry; FabricPolicyGate + Stripe honesty; ADR-0153. Not HF/weight CDN OS. |
 | VL-252 | Dataset Marketplace (Phase 119) | Done | `/dataset-marketplace` over dataset kind + VL-101; FabricPolicyGate + Stripe honesty; ADR-0154. Not Label Studio / Dataset Cloud OS. |
 | VL-253 | Prompt Marketplace (Phase 120) | Done | `/prompt-marketplace` over prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty; ADR-0155. Not prompt mesh OS. |
-| VL-254 | Agent Marketplace (Phase 121) | Not Started | Buy/sell/publish agents; enforce Agent Runtime sandbox + Policy Fabric. |
+| VL-254 | Agent Marketplace (Phase 121) | Done | `/agent-marketplace` over Agent Runtime; FabricPolicyGate + AgentPolicyGate sandbox run; ADR-0156. Not LangGraph/AutoGPT OS. |
 | VL-255 | Workflow Marketplace (Phase 122) | Not Started | Buy/sell/publish workflows. |
 | VL-256 | Connector Marketplace (Phase 123) | Not Started | Buy/sell/publish connectors. |
 | VL-257 | Voice & Language Marketplace (Phase 124) | Not Started | Extends voice marketplace + Volume 1 language packs. |
@@ -447,3 +447,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-251 Done: Model Marketplace (Phase 118) — license SKUs over Model Registry; FabricPolicyGate + Stripe honesty; ADR-0153. Not Hugging Face / weight CDN OS. |
 | 2026-10-03 | VL-252 Done: Dataset Marketplace (Phase 119) — hub over dataset kind + VL-101; FabricPolicyGate + Stripe honesty; ADR-0154. Not Label Studio / Dataset Cloud OS. |
 | 2026-10-03 | VL-253 Done: Prompt Marketplace (Phase 120) — hub over prompt kind + Prompt Fabric; FabricPolicyGate + Stripe honesty; ADR-0155. Not prompt mesh / auto-prompt research OS. |
+| 2026-10-03 | VL-254 Done: Agent Marketplace (Phase 121) — publish/install/run over Agent Runtime; FabricPolicyGate + AgentPolicyGate; ADR-0156. Not LangGraph/AutoGPT OS / live tools. |

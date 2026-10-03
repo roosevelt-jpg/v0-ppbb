@@ -733,6 +733,51 @@ export class GqlPromptMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlAgentMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAgentMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAgentMarketplaceCapability])
+  capabilities!: GqlAgentMarketplaceCapability[];
+
+  @Field()
+  liveToolExecution!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  agentPolicyHardGateRequired!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;
