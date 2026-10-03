@@ -28,6 +28,8 @@ function usage(): never {
   verbalab knowledge-memory-engine
   verbalab knowledge-intelligence-engine
   verbalab knowledge-intelligence-discover --query <text>
+  verbalab knowledge-apis-engine
+  verbalab knowledge-apis-surfaces
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -204,6 +206,16 @@ async function main() {
     console.log(
       JSON.stringify(await vl.knowledgeIntelligenceDiscover({ query }), null, 2),
     );
+    return;
+  }
+
+  if (command === 'knowledge-apis-engine') {
+    console.log(JSON.stringify(await vl.knowledgeApisEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-apis-surfaces') {
+    console.log(JSON.stringify(await vl.knowledgeApisSurfaces(), null, 2));
     return;
   }
 

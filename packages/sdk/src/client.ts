@@ -1414,6 +1414,42 @@ export class VerbaLab {
     return this.requestJson('/v1/knowledge-intelligence/insight', { method: 'GET' });
   }
 
+  async knowledgeApisEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      grpcOs: boolean;
+      kafkaEventStreamingOs: boolean;
+      sdkGeneratorOs: boolean;
+      regeneratesDeveloperCloud: boolean;
+      regeneratesVl062: boolean;
+      extendsExistingKnowledgeApis: boolean;
+      orgWorkspaceScoped: boolean;
+      openapiSharedDocument: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-apis/engine', { method: 'GET' });
+  }
+
+  async knowledgeApisSurfaces(): Promise<{
+    surfaces: Array<{
+      product: string;
+      rest: string[];
+      graphql: string[];
+      console: string | null;
+    }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/knowledge-apis/surfaces', { method: 'GET' });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

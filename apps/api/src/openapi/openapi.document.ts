@@ -3247,6 +3247,104 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-apis/engine': {
+      get: {
+        summary: 'Enterprise Knowledge APIs pack catalog',
+        operationId: 'getKnowledgeApisEngine',
+        responses: { '200': { description: 'API pack capabilities and honesty flags' } },
+      },
+    },
+    '/v1/knowledge-apis/surfaces': {
+      get: {
+        summary: 'Knowledge Cloud REST/GraphQL surfaces',
+        operationId: 'listKnowledgeApisSurfaces',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Surface catalog' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-apis/graphql': {
+      get: {
+        summary: 'Knowledge Cloud GraphQL query catalog',
+        operationId: 'listKnowledgeApisGraphql',
+        responses: { '200': { description: 'GraphQL engine queries' } },
+      },
+    },
+    '/v1/knowledge-apis/openapi': {
+      get: {
+        summary: 'Knowledge OpenAPI path index',
+        operationId: 'getKnowledgeApisOpenapi',
+        responses: { '200': { description: 'OpenAPI pointer + knowledge paths' } },
+      },
+    },
+    '/v1/knowledge-apis/sdk': {
+      get: {
+        summary: 'Knowledge SDK method catalog',
+        operationId: 'getKnowledgeApisSdk',
+        responses: { '200': { description: 'SDK install + methods' } },
+      },
+    },
+    '/v1/knowledge-apis/cli': {
+      get: {
+        summary: 'Knowledge CLI command catalog',
+        operationId: 'getKnowledgeApisCli',
+        responses: { '200': { description: 'CLI commands' } },
+      },
+    },
+    '/v1/knowledge-apis/webhooks': {
+      get: {
+        summary: 'Knowledge webhook event catalog',
+        operationId: 'getKnowledgeApisWebhooks',
+        responses: { '200': { description: 'Webhook events + signing' } },
+      },
+    },
+    '/v1/knowledge-apis/events/stream': {
+      get: {
+        summary: 'SSE knowledge audit event tail',
+        operationId: 'streamKnowledgeApisEvents',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'text/event-stream' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-apis/analytics': {
+      get: {
+        summary: 'Knowledge APIs pack analytics',
+        operationId: 'getKnowledgeApisAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Pack analytics' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-apis/monitoring': {
+      get: {
+        summary: 'Knowledge APIs pack monitoring',
+        operationId: 'getKnowledgeApisMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Honesty + deferred flags' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

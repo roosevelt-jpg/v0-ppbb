@@ -88,10 +88,10 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
       id: 'enterprise-knowledge-apis',
       name: 'Enterprise Knowledge APIs',
       status: 'partial',
-      api: 'GET /v1/knowledge/documents',
-      console: '/knowledge',
+      api: 'GET /v1/knowledge-apis/engine',
+      console: '/knowledge-apis',
       notes:
-        'Existing `/v1/knowledge/*` surfaces (VL-062). Public Knowledge Cloud API pack is Phase 68 / VL-201.',
+        'Public API pack (VL-201): REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE. Not gRPC/Kafka/SDK-generator OS.',
     },
     {
       id: 'knowledge-analytics',

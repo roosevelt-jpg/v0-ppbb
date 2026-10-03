@@ -670,6 +670,51 @@ export class GqlKnowledgeIntelligenceEngine {
 }
 
 @ObjectType()
+export class GqlKnowledgeApisCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeApisEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeApisCapability])
+  capabilities!: GqlKnowledgeApisCapability[];
+
+  @Field()
+  grpcOs!: boolean;
+
+  @Field()
+  kafkaEventStreamingOs!: boolean;
+
+  @Field()
+  sdkGeneratorOs!: boolean;
+
+  @Field()
+  extendsExistingKnowledgeApis!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

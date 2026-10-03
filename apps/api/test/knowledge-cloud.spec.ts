@@ -153,7 +153,8 @@ describe('Knowledge Cloud Foundation (VL-193)', () => {
       (p: { id: string }) => p.id === 'enterprise-knowledge-apis',
     );
     expect(apis.status).toBe('partial');
-    expect(apis.api).toContain('/v1/knowledge/');
+    expect(apis.api).toContain('/v1/knowledge-apis/engine');
+    expect(apis.console).toBe('/knowledge-apis');
   });
 
   it('returns org knowledge overview with doc/chunk counts + deferred flags', async () => {
@@ -185,6 +186,8 @@ describe('Knowledge Cloud Foundation (VL-193)', () => {
     expect(overview.links.knowledgeMemory).toBe('/knowledge-memory');
     expect(overview.deferred.knowledgeIntelligence).toBe(false);
     expect(overview.links.knowledgeIntelligence).toBe('/knowledge-intelligence');
+    expect(overview.deferred.enterpriseKnowledgeApisPack).toBe(false);
+    expect(overview.links.knowledgeApis).toBe('/knowledge-apis');
     expect(overview.deferred.enterpriseKnowledgeOs).toBe(true);
     expect(overview.deferred.ontologyOs).toBe(true);
     expect(overview.deferred.neo4jKnowledgeOs).toBe(true);
