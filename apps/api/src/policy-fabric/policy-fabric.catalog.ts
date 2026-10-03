@@ -52,6 +52,12 @@ export const FABRIC_BUSES = [
   'connector-marketplace',
   'voice-language-marketplace',
   'creator-economy',
+  'african-intelligence-cloud',
+  'cultural-intelligence',
+  'african-knowledge-graph',
+  'government-intelligence',
+  'healthcare-intelligence',
+  'financial-intelligence',
 ] as const;
 
 /**

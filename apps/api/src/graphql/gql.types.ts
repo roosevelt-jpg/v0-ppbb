@@ -4400,3 +4400,142 @@ export class GqlEnterpriseAnalyticsReport {
   @Field()
   note!: string;
 }
+
+@ObjectType()
+export class GqlAfricanIntelligenceCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlAfricanLanguageRegistryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  coverageComplete!: boolean;
+}
+
+
+@ObjectType()
+export class GqlCulturalIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAfricanKnowledgeGraphEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  neo4jOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGovernmentIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  officialGuidanceMustBeSourced!: boolean;
+}
+
+
+@ObjectType()
+export class GqlHealthcareIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  notMedicalAdvice!: boolean;
+}
+
+
+@ObjectType()
+export class GqlFinancialIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  notInvestmentAdvice!: boolean;
+}
+
+
+@ObjectType()
+export class GqlEducationIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  verticalOperationsOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgriculturalIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  verticalOperationsOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTourismHeritageIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  traditionalKnowledgeConsentRequired!: boolean;
+}
+

@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 closed)
+Last updated: 2026-10-03 (VL-270 Done — African Intelligence Production Audit; Volume 12 closed)
 
 ---
 
@@ -289,6 +289,17 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS. |
 | VL-258 | Creator Economy (Phase 125) | Done | `/creator-economy` over VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | VL-259 | Ecosystem Production Audit (Phase 126) | Done | Audit pack under `docs/ecosystem-cloud-audit/`; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence → Volume 12. |
+| VL-260 | African Intelligence Cloud Foundation (Phase 127) | Done | `/african-intelligence-cloud` hub + catalog; ADR-0162. Extends Language/Knowledge/Intelligence clouds. Not Neo4j/Digital Twin/Global Intelligence OS. |
+| VL-261 | African Language Registry (Phase 128) | Done | `/african-language-registry` seed + families; ADR-0163. `coverageComplete=false`. |
+| VL-262 | Cultural Intelligence (Phase 129) | Done | `/cultural-intelligence` provenance/consent; ADR-0164. `traditionalKnowledgeConsentRequired=true`. |
+| VL-263 | African Knowledge Graph (Phase 130) | Done | `/african-knowledge-graph` in-process graph; ADR-0165. `neo4jOs=false`. |
+| VL-264 | Government Intelligence (Phase 131) | Done | `/government-intelligence`; ADR-0166. `officialGuidanceMustBeSourced` + stale-guidance risk. |
+| VL-265 | Healthcare Intelligence (Phase 132) | Done | `/healthcare-intelligence`; ADR-0167. `notMedicalAdvice=true`; consult-professional framing. |
+| VL-266 | Financial Intelligence (Phase 133) | Done | `/financial-intelligence`; ADR-0168. `notInvestmentAdvice=true`; fair-lending flagged. |
+| VL-267 | Education Intelligence (Phase 134) | Done | `/education-intelligence`; ADR-0169. Vocabulary catalog — not national education OS. |
+| VL-268 | Agricultural Intelligence (Phase 135) | Done | `/agricultural-intelligence`; ADR-0170. Vocabulary catalog — not farm-management OS. |
+| VL-269 | Tourism & Heritage Intelligence (Phase 136) | Done | `/tourism-heritage-intelligence`; ADR-0171. Heritage consent posture. |
+| VL-270 | African Intelligence Production Audit (Phase 137) | Done | Audit pack under `docs/african-intelligence-cloud-audit/`; ADR-0172. Volume 12 closed. Research/Global Intelligence → Volume 13+. |
 
 ---
 
@@ -453,3 +464,5 @@ Last updated: 2026-10-03 (VL-259 Done — Ecosystem Production Audit; Volume 11 
 | 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS / celebrity without rights. |
 | 2026-10-03 | VL-258 Done: Creator Economy (Phase 125) — royalty math + profiles/invoices over VL-092 Connect; hand-checked scenarios; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | 2026-10-03 | VL-259 Done: Ecosystem Production Audit (Phase 126) — evidence pack; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence deferred to Volume 12. |
+| 2026-10-03 | VL-260–269 Done: African Intelligence Cloud hubs (Phases 127–136) — foundation, language registry, cultural intelligence, knowledge graph, six domain engines; ADR-0162–0171. Honesty for consent/medical/finance/government. |
+| 2026-10-03 | VL-270 Done: African Intelligence Production Audit (Phase 137) — evidence pack; ADR-0172. Volume 12 closed. Research / Global Intelligence → Volume 13+. |

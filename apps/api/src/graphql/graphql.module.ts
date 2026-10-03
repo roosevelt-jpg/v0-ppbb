@@ -35,6 +35,16 @@ import { WorkflowMarketplaceApplicationModule } from '../workflow-marketplace/ap
 import { ConnectorMarketplaceApplicationModule } from '../connector-marketplace/application/connector-marketplace-application.module';
 import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-marketplace/application/voice-language-marketplace-application.module';
 import { CreatorEconomyApplicationModule } from '../creator-economy/application/creator-economy-application.module';
+import { TourismHeritageIntelligenceApplicationModule } from '../tourism-heritage-intelligence/application/tourism-heritage-intelligence-application.module';
+import { AgriculturalIntelligenceApplicationModule } from '../agricultural-intelligence/application/agricultural-intelligence-application.module';
+import { EducationIntelligenceApplicationModule } from '../education-intelligence/application/education-intelligence-application.module';
+import { FinancialIntelligenceApplicationModule } from '../financial-intelligence/application/financial-intelligence-application.module';
+import { HealthcareIntelligenceApplicationModule } from '../healthcare-intelligence/application/healthcare-intelligence-application.module';
+import { GovernmentIntelligenceApplicationModule } from '../government-intelligence/application/government-intelligence-application.module';
+import { AfricanKnowledgeGraphApplicationModule } from '../african-knowledge-graph/application/african-knowledge-graph-application.module';
+import { CulturalIntelligenceApplicationModule } from '../cultural-intelligence/application/cultural-intelligence-application.module';
+import { AfricanLanguageRegistryApplicationModule } from '../african-language-registry/application/african-language-registry-application.module';
+import { AfricanIntelligenceCloudApplicationModule } from '../african-intelligence-cloud/application/african-intelligence-cloud-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -123,6 +133,16 @@ import { WorkflowMarketplaceGraphqlResolver } from './workflow-marketplace.resol
 import { ConnectorMarketplaceGraphqlResolver } from './connector-marketplace.resolver';
 import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-marketplace.resolver';
 import { CreatorEconomyGraphqlResolver } from './creator-economy.resolver';
+import { TourismHeritageIntelligenceGraphqlResolver } from './tourism-heritage-intelligence.resolver';
+import { AgriculturalIntelligenceGraphqlResolver } from './agricultural-intelligence.resolver';
+import { EducationIntelligenceGraphqlResolver } from './education-intelligence.resolver';
+import { FinancialIntelligenceGraphqlResolver } from './financial-intelligence.resolver';
+import { HealthcareIntelligenceGraphqlResolver } from './healthcare-intelligence.resolver';
+import { GovernmentIntelligenceGraphqlResolver } from './government-intelligence.resolver';
+import { AfricanKnowledgeGraphGraphqlResolver } from './african-knowledge-graph.resolver';
+import { CulturalIntelligenceGraphqlResolver } from './cultural-intelligence.resolver';
+import { AfricanLanguageRegistryGraphqlResolver } from './african-language-registry.resolver';
+import { AfricanIntelligenceCloudGraphqlResolver } from './african-intelligence-cloud.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -231,6 +251,16 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ConnectorMarketplaceApplicationModule,
     VoiceLanguageMarketplaceApplicationModule,
     CreatorEconomyApplicationModule,
+    TourismHeritageIntelligenceApplicationModule,
+    AgriculturalIntelligenceApplicationModule,
+    EducationIntelligenceApplicationModule,
+    FinancialIntelligenceApplicationModule,
+    HealthcareIntelligenceApplicationModule,
+    GovernmentIntelligenceApplicationModule,
+    AfricanKnowledgeGraphApplicationModule,
+    CulturalIntelligenceApplicationModule,
+    AfricanLanguageRegistryApplicationModule,
+    AfricanIntelligenceCloudApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -327,6 +357,16 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ConnectorMarketplaceGraphqlResolver,
     VoiceLanguageMarketplaceGraphqlResolver,
     CreatorEconomyGraphqlResolver,
+    TourismHeritageIntelligenceGraphqlResolver,
+    AgriculturalIntelligenceGraphqlResolver,
+    EducationIntelligenceGraphqlResolver,
+    FinancialIntelligenceGraphqlResolver,
+    HealthcareIntelligenceGraphqlResolver,
+    GovernmentIntelligenceGraphqlResolver,
+    AfricanKnowledgeGraphGraphqlResolver,
+    CulturalIntelligenceGraphqlResolver,
+    AfricanLanguageRegistryGraphqlResolver,
+    AfricanIntelligenceCloudGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

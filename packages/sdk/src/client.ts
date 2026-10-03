@@ -1905,6 +1905,116 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-language-marketplace/engine', { method: 'GET' });
   }
 
+
+  async africanIntelligenceCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/african-intelligence-cloud/products', { method: 'GET' });
+  }
+
+  async africanLanguageRegistryEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/african-language-registry/engine', { method: 'GET' });
+  }
+
+  async culturalIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/cultural-intelligence/engine', { method: 'GET' });
+  }
+
+  async africanKnowledgeGraphEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/african-knowledge-graph/engine', { method: 'GET' });
+  }
+
+  async governmentIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/government-intelligence/engine', { method: 'GET' });
+  }
+
+  async healthcareIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/healthcare-intelligence/engine', { method: 'GET' });
+  }
+
+  async financialIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/financial-intelligence/engine', { method: 'GET' });
+  }
+
+  async educationIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/education-intelligence/engine', { method: 'GET' });
+  }
+
+  async agriculturalIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agricultural-intelligence/engine', { method: 'GET' });
+  }
+
+  async tourismHeritageIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/tourism-heritage-intelligence/engine', { method: 'GET' });
+  }
+
   async creatorEconomyEngine(): Promise<{
     product: string;
     note: string;

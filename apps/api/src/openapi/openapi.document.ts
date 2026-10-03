@@ -4004,6 +4004,363 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability + hand-check snapshot' } },
       },
     },
+    '/v1/african-intelligence-cloud/engine': {
+      get: {
+        summary: 'African Intelligence Cloud engine catalog',
+        operationId: 'getAfricanIntelligenceCloudEngine',
+        responses: { '200': { description: 'African Intelligence Cloud catalog + honesty' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/products': {
+      get: {
+        summary: 'African Intelligence Cloud products',
+        operationId: 'listAfricanIntelligenceCloudProducts',
+        responses: { '200': { description: 'African Intelligence Cloud products' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/monitoring': {
+      get: {
+        summary: 'African Intelligence Cloud monitoring',
+        operationId: 'getAfricanIntelligenceCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/routing': {
+      get: {
+        summary: 'African Intelligence routing table',
+        operationId: 'getAfricanIntelligenceCloudRouting',
+        responses: { '200': { description: 'Static routing catalog' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/overview': {
+      get: {
+        summary: 'African Intelligence Cloud org overview',
+        operationId: 'getAfricanIntelligenceCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage + product catalog' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/african-language-registry/engine': {
+      get: {
+        summary: 'African Language Registry engine catalog',
+        operationId: 'getAfricanLanguageRegistryEngine',
+        responses: { '200': { description: 'African Language Registry catalog + honesty' } },
+      },
+    },
+    '/v1/african-language-registry/products': {
+      get: {
+        summary: 'African Language Registry products',
+        operationId: 'listAfricanLanguageRegistryProducts',
+        responses: { '200': { description: 'African Language Registry products' } },
+      },
+    },
+    '/v1/african-language-registry/monitoring': {
+      get: {
+        summary: 'African Language Registry monitoring',
+        operationId: 'getAfricanLanguageRegistryMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-language-registry/languages': {
+      get: {
+        summary: 'List African language registry entries',
+        operationId: 'listAfricanLanguageRegistryLanguages',
+        responses: { '200': { description: 'Language seed entries' } },
+      },
+    },
+    '/v1/african-language-registry/families': {
+      get: {
+        summary: 'List language families',
+        operationId: 'listAfricanLanguageRegistryFamilies',
+        responses: { '200': { description: 'Family metadata' } },
+      },
+    },
+    '/v1/cultural-intelligence/engine': {
+      get: {
+        summary: 'Cultural Intelligence engine catalog',
+        operationId: 'getCulturalIntelligenceEngine',
+        responses: { '200': { description: 'Cultural Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/cultural-intelligence/products': {
+      get: {
+        summary: 'Cultural Intelligence products',
+        operationId: 'listCulturalIntelligenceProducts',
+        responses: { '200': { description: 'Cultural Intelligence products' } },
+      },
+    },
+    '/v1/cultural-intelligence/monitoring': {
+      get: {
+        summary: 'Cultural Intelligence monitoring',
+        operationId: 'getCulturalIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/cultural-intelligence/entries': {
+      get: {
+        summary: 'List cultural intelligence entries',
+        operationId: 'listCulturalIntelligenceEntries',
+        responses: { '200': { description: 'Cultural entries with consent fields' } },
+      },
+    },
+    '/v1/african-knowledge-graph/engine': {
+      get: {
+        summary: 'African Knowledge Graph engine catalog',
+        operationId: 'getAfricanKnowledgeGraphEngine',
+        responses: { '200': { description: 'African Knowledge Graph catalog + honesty' } },
+      },
+    },
+    '/v1/african-knowledge-graph/products': {
+      get: {
+        summary: 'African Knowledge Graph products',
+        operationId: 'listAfricanKnowledgeGraphProducts',
+        responses: { '200': { description: 'African Knowledge Graph products' } },
+      },
+    },
+    '/v1/african-knowledge-graph/monitoring': {
+      get: {
+        summary: 'African Knowledge Graph monitoring',
+        operationId: 'getAfricanKnowledgeGraphMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-knowledge-graph/nodes': {
+      get: {
+        summary: 'List African knowledge graph nodes',
+        operationId: 'listAfricanKnowledgeGraphNodes',
+        responses: { '200': { description: 'Graph nodes' } },
+      },
+    },
+    '/v1/african-knowledge-graph/edges': {
+      get: {
+        summary: 'List African knowledge graph edges',
+        operationId: 'listAfricanKnowledgeGraphEdges',
+        responses: { '200': { description: 'Graph edges' } },
+      },
+    },
+    '/v1/african-knowledge-graph/query': {
+      get: {
+        summary: 'Query African knowledge graph',
+        operationId: 'queryAfricanKnowledgeGraph',
+        responses: { '200': { description: 'Filtered nodes/edges' } },
+      },
+    },
+    '/v1/government-intelligence/engine': {
+      get: {
+        summary: 'Government Intelligence engine catalog',
+        operationId: 'getGovernmentIntelligenceEngine',
+        responses: { '200': { description: 'Government Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/government-intelligence/products': {
+      get: {
+        summary: 'Government Intelligence products',
+        operationId: 'listGovernmentIntelligenceProducts',
+        responses: { '200': { description: 'Government Intelligence products' } },
+      },
+    },
+    '/v1/government-intelligence/monitoring': {
+      get: {
+        summary: 'Government Intelligence monitoring',
+        operationId: 'getGovernmentIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/government-intelligence/terms': {
+      get: {
+        summary: 'List Government Intelligence terms',
+        operationId: 'listGovernmentIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/government-intelligence/query': {
+      get: {
+        summary: 'Query Government Intelligence terms',
+        operationId: 'queryGovernmentIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/healthcare-intelligence/engine': {
+      get: {
+        summary: 'Healthcare Intelligence engine catalog',
+        operationId: 'getHealthcareIntelligenceEngine',
+        responses: { '200': { description: 'Healthcare Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/healthcare-intelligence/products': {
+      get: {
+        summary: 'Healthcare Intelligence products',
+        operationId: 'listHealthcareIntelligenceProducts',
+        responses: { '200': { description: 'Healthcare Intelligence products' } },
+      },
+    },
+    '/v1/healthcare-intelligence/monitoring': {
+      get: {
+        summary: 'Healthcare Intelligence monitoring',
+        operationId: 'getHealthcareIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/healthcare-intelligence/terms': {
+      get: {
+        summary: 'List Healthcare Intelligence terms',
+        operationId: 'listHealthcareIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/healthcare-intelligence/query': {
+      get: {
+        summary: 'Query Healthcare Intelligence terms',
+        operationId: 'queryHealthcareIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/financial-intelligence/engine': {
+      get: {
+        summary: 'Financial Intelligence engine catalog',
+        operationId: 'getFinancialIntelligenceEngine',
+        responses: { '200': { description: 'Financial Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/financial-intelligence/products': {
+      get: {
+        summary: 'Financial Intelligence products',
+        operationId: 'listFinancialIntelligenceProducts',
+        responses: { '200': { description: 'Financial Intelligence products' } },
+      },
+    },
+    '/v1/financial-intelligence/monitoring': {
+      get: {
+        summary: 'Financial Intelligence monitoring',
+        operationId: 'getFinancialIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/financial-intelligence/terms': {
+      get: {
+        summary: 'List Financial Intelligence terms',
+        operationId: 'listFinancialIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/financial-intelligence/query': {
+      get: {
+        summary: 'Query Financial Intelligence terms',
+        operationId: 'queryFinancialIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/education-intelligence/engine': {
+      get: {
+        summary: 'Education Intelligence engine catalog',
+        operationId: 'getEducationIntelligenceEngine',
+        responses: { '200': { description: 'Education Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/education-intelligence/products': {
+      get: {
+        summary: 'Education Intelligence products',
+        operationId: 'listEducationIntelligenceProducts',
+        responses: { '200': { description: 'Education Intelligence products' } },
+      },
+    },
+    '/v1/education-intelligence/monitoring': {
+      get: {
+        summary: 'Education Intelligence monitoring',
+        operationId: 'getEducationIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/education-intelligence/terms': {
+      get: {
+        summary: 'List Education Intelligence terms',
+        operationId: 'listEducationIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/education-intelligence/query': {
+      get: {
+        summary: 'Query Education Intelligence terms',
+        operationId: 'queryEducationIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/agricultural-intelligence/engine': {
+      get: {
+        summary: 'Agricultural Intelligence engine catalog',
+        operationId: 'getAgriculturalIntelligenceEngine',
+        responses: { '200': { description: 'Agricultural Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/agricultural-intelligence/products': {
+      get: {
+        summary: 'Agricultural Intelligence products',
+        operationId: 'listAgriculturalIntelligenceProducts',
+        responses: { '200': { description: 'Agricultural Intelligence products' } },
+      },
+    },
+    '/v1/agricultural-intelligence/monitoring': {
+      get: {
+        summary: 'Agricultural Intelligence monitoring',
+        operationId: 'getAgriculturalIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/agricultural-intelligence/terms': {
+      get: {
+        summary: 'List Agricultural Intelligence terms',
+        operationId: 'listAgriculturalIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/agricultural-intelligence/query': {
+      get: {
+        summary: 'Query Agricultural Intelligence terms',
+        operationId: 'queryAgriculturalIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/engine': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence engine catalog',
+        operationId: 'getTourismHeritageIntelligenceEngine',
+        responses: { '200': { description: 'Tourism & Heritage Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/products': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence products',
+        operationId: 'listTourismHeritageIntelligenceProducts',
+        responses: { '200': { description: 'Tourism & Heritage Intelligence products' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/monitoring': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence monitoring',
+        operationId: 'getTourismHeritageIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/terms': {
+      get: {
+        summary: 'List Tourism & Heritage Intelligence terms',
+        operationId: 'listTourismHeritageIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/query': {
+      get: {
+        summary: 'Query Tourism & Heritage Intelligence terms',
+        operationId: 'queryTourismHeritageIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

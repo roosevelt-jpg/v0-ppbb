@@ -87,6 +87,16 @@ import { WorkflowMarketplaceModule } from './workflow-marketplace/workflow-marke
 import { ConnectorMarketplaceModule } from './connector-marketplace/connector-marketplace.module';
 import { VoiceLanguageMarketplaceModule } from './voice-language-marketplace/voice-language-marketplace.module';
 import { CreatorEconomyModule } from './creator-economy/creator-economy.module';
+import { TourismHeritageIntelligenceModule } from './tourism-heritage-intelligence/tourism-heritage-intelligence.module';
+import { AgriculturalIntelligenceModule } from './agricultural-intelligence/agricultural-intelligence.module';
+import { EducationIntelligenceModule } from './education-intelligence/education-intelligence.module';
+import { FinancialIntelligenceModule } from './financial-intelligence/financial-intelligence.module';
+import { HealthcareIntelligenceModule } from './healthcare-intelligence/healthcare-intelligence.module';
+import { GovernmentIntelligenceModule } from './government-intelligence/government-intelligence.module';
+import { AfricanKnowledgeGraphModule } from './african-knowledge-graph/african-knowledge-graph.module';
+import { CulturalIntelligenceModule } from './cultural-intelligence/cultural-intelligence.module';
+import { AfricanLanguageRegistryModule } from './african-language-registry/african-language-registry.module';
+import { AfricanIntelligenceCloudModule } from './african-intelligence-cloud/african-intelligence-cloud.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -192,6 +202,16 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ConnectorMarketplaceModule,
     VoiceLanguageMarketplaceModule,
     CreatorEconomyModule,
+    TourismHeritageIntelligenceModule,
+    AgriculturalIntelligenceModule,
+    EducationIntelligenceModule,
+    FinancialIntelligenceModule,
+    HealthcareIntelligenceModule,
+    GovernmentIntelligenceModule,
+    AfricanKnowledgeGraphModule,
+    CulturalIntelligenceModule,
+    AfricanLanguageRegistryModule,
+    AfricanIntelligenceCloudModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

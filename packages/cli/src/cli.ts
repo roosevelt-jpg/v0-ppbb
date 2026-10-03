@@ -57,6 +57,16 @@ function usage(): never {
   verbalab connector-marketplace-engine
   verbalab voice-language-marketplace-engine
   verbalab creator-economy-engine
+  verbalab african-intelligence-cloud-products
+  verbalab african-language-registry-engine
+  verbalab cultural-intelligence-engine
+  verbalab african-knowledge-graph-engine
+  verbalab government-intelligence-engine
+  verbalab healthcare-intelligence-engine
+  verbalab financial-intelligence-engine
+  verbalab education-intelligence-engine
+  verbalab agricultural-intelligence-engine
+  verbalab tourism-heritage-intelligence-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -516,6 +526,56 @@ async function main() {
 
   if (command === 'creator-economy-engine') {
     console.log(JSON.stringify(await vl.creatorEconomyEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'african-intelligence-cloud-products') {
+    console.log(JSON.stringify(await vl.africanIntelligenceCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'african-language-registry-engine') {
+    console.log(JSON.stringify(await vl.africanLanguageRegistryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'cultural-intelligence-engine') {
+    console.log(JSON.stringify(await vl.culturalIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'african-knowledge-graph-engine') {
+    console.log(JSON.stringify(await vl.africanKnowledgeGraphEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'government-intelligence-engine') {
+    console.log(JSON.stringify(await vl.governmentIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'healthcare-intelligence-engine') {
+    console.log(JSON.stringify(await vl.healthcareIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'financial-intelligence-engine') {
+    console.log(JSON.stringify(await vl.financialIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'education-intelligence-engine') {
+    console.log(JSON.stringify(await vl.educationIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agricultural-intelligence-engine') {
+    console.log(JSON.stringify(await vl.agriculturalIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'tourism-heritage-intelligence-engine') {
+    console.log(JSON.stringify(await vl.tourismHeritageIntelligenceEngine(), null, 2));
     return;
   }
 
