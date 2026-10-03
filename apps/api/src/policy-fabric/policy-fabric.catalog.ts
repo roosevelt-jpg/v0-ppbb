@@ -43,6 +43,7 @@ export const FABRIC_BUSES = [
   'memory-fabric',
   'agent-fabric',
   'policy-fabric',
+  'plugin-marketplace',
 ] as const;
 
 /**

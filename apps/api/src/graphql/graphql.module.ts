@@ -26,6 +26,7 @@ import { MemoryFabricApplicationModule } from '../memory-fabric/application/memo
 import { AgentFabricApplicationModule } from '../agent-fabric/application/agent-fabric-application.module';
 import { PolicyFabricApplicationModule } from '../policy-fabric/application/policy-fabric-application.module';
 import { EcosystemCloudApplicationModule } from '../ecosystem-cloud/application/ecosystem-cloud-application.module';
+import { PluginMarketplaceApplicationModule } from '../plugin-marketplace/application/plugin-marketplace-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -105,6 +106,7 @@ import { MemoryFabricGraphqlResolver } from './memory-fabric.resolver';
 import { AgentFabricGraphqlResolver } from './agent-fabric.resolver';
 import { PolicyFabricGraphqlResolver } from './policy-fabric.resolver';
 import { EcosystemCloudGraphqlResolver } from './ecosystem-cloud.resolver';
+import { PluginMarketplaceGraphqlResolver } from './plugin-marketplace.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -204,6 +206,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AgentFabricApplicationModule,
     PolicyFabricApplicationModule,
     EcosystemCloudApplicationModule,
+    PluginMarketplaceApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -291,6 +294,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AgentFabricGraphqlResolver,
     PolicyFabricGraphqlResolver,
     EcosystemCloudGraphqlResolver,
+    PluginMarketplaceGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

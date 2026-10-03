@@ -47,11 +47,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'plugin-marketplace',
       name: 'Plugin Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/plugin-marketplace/engine',
+      console: '/plugin-marketplace',
       notes:
-        'VL-250 / Phase 117. Must enforce Plugin Runtime sandbox + Policy gate before third-party plugin code runs for other users.',
+        'VL-250 / Phase 117. Publish/install/run via Plugin Runtime sandbox + PluginPolicyGate + FabricPolicyGate. liveCodeExecution=false.',
     },
     {
       id: 'model-marketplace',
@@ -209,6 +209,11 @@ export function ecosystemRoutingTable() {
   return [
     { surface: 'content-marketplace', path: '/marketplace', api: '/v1/marketplace/listings' },
     { surface: 'voice-marketplace', path: '/voice-marketplace', api: '/v1/voice-marketplace/engine' },
+    {
+      surface: 'plugin-marketplace',
+      path: '/plugin-marketplace',
+      api: '/v1/plugin-marketplace/engine',
+    },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },
     { surface: 'plugin-runtime', path: '/plugin-runtime', api: '/v1/plugin-runtime/engine' },

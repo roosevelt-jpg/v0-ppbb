@@ -124,7 +124,8 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
     expect(voice.status).toBe('shipped');
 
     const plugin = res.body.products.find((p: { id: string }) => p.id === 'plugin-marketplace');
-    expect(plugin.status).toBe('deferred');
+    expect(plugin.status).toBe('shipped');
+    expect(plugin.console).toBe('/plugin-marketplace');
     expect(plugin.notes).toMatch(/sandbox|Policy/i);
   });
 
@@ -145,7 +146,7 @@ describe('Ecosystem Cloud Foundation (VL-249)', () => {
       clerkUserId: 'clerk_eco',
       role: 'owner',
     });
-    expect(overview.deferred.pluginMarketplace).toBe(true);
+    expect(overview.deferred.pluginMarketplace).toBe(false);
     expect(overview.deferred.agentMarketplace).toBe(true);
     expect(overview.deferred.creatorEconomyExpansion).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to10).toBe(false);

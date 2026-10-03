@@ -568,6 +568,45 @@ export class GqlEcosystemProduct {
 }
 
 @ObjectType()
+export class GqlPluginMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPluginMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPluginMarketplaceCapability])
+  capabilities!: GqlPluginMarketplaceCapability[];
+
+  @Field()
+  liveCodeExecution!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  pluginPolicyHardGateRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

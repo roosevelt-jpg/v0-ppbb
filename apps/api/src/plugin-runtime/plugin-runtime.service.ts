@@ -364,11 +364,11 @@ export class PluginRuntimeService {
       kind: 'plugin',
       listings,
       published,
-      api: 'GET /v1/marketplace?kind=plugin',
-      console: '/marketplace',
+      api: 'GET /v1/plugin-marketplace/listings',
+      console: '/plugin-marketplace',
       honesty: { regeneratesMarketplace: false, extendsMarketplace: true },
       note:
-        'Plugin marketplace counts via existing listings when kind=plugin is present (today marketplace kinds are glossary/prompt/dataset — count may be 0).',
+        'Listing counts for kind=plugin. Full publish/install/run lives at /v1/plugin-marketplace (VL-250) with sandbox + Policy gates.',
     };
   }
 

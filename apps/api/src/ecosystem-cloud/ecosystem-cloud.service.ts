@@ -72,7 +72,7 @@ export class EcosystemCloudService {
           'Real-money volume. Stripe Connect already backs VL-092 creator payouts. Tax/dispute/1099 flows remain gaps until Creator Economy (VL-258) documents coverage. Plugin/Agent listings must stay sandboxed.',
       },
       deferred: {
-        pluginMarketplace: true,
+        pluginMarketplace: false,
         modelMarketplace: true,
         datasetMarketplace: true,
         promptMarketplace: true,
@@ -93,6 +93,7 @@ export class EcosystemCloudService {
         ecosystemCloud: '/ecosystem-cloud',
         contentMarketplace: '/marketplace',
         voiceMarketplace: '/voice-marketplace',
+        pluginMarketplace: '/plugin-marketplace',
         billing: '/billing',
         pluginRuntime: '/plugin-runtime',
         agentRuntime: '/agent-runtime',
