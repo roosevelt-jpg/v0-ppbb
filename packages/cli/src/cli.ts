@@ -21,6 +21,8 @@ function usage(): never {
   verbalab ai-kernel-products
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
+  verbalab prompt-runtime-engine
+  verbalab prompt-runtime-execute [--key chat|rag|voice_faq] [--feature <name>] [--var k=v]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -188,6 +190,35 @@ async function main() {
           content,
           scope: argValue(rest, '--scope') ?? undefined,
           kind: argValue(rest, '--kind') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'prompt-runtime-engine') {
+    console.log(JSON.stringify(await vl.promptRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'prompt-runtime-execute') {
+    const variables: Record<string, string> = {};
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--var' && rest[i + 1]) {
+        const raw = rest[i + 1]!;
+        const eq = raw.indexOf('=');
+        if (eq > 0) variables[raw.slice(0, eq)] = raw.slice(eq + 1);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(
+        await vl.promptRuntimeExecute({
+          key: argValue(rest, '--key') ?? undefined,
+          feature: argValue(rest, '--feature') ?? undefined,
+          variables: Object.keys(variables).length ? variables : undefined,
         }),
         null,
         2,

@@ -33,11 +33,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'prompt-runtime',
       name: 'Prompt Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/prompt-runtime/engine',
+      console: '/prompt-runtime',
       notes:
-        'Prompt execution primitives (Phase 83 / VL-216). Extends Prompt Intelligence / versioned prompts.',
+        'Kernel prompt execution over VL-086/VL-188 (VL-216). Variables/validate/cache — not research lab/mesh OS.',
     },
     {
       id: 'context-runtime',

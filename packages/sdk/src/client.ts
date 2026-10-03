@@ -1144,6 +1144,63 @@ export class VerbaLab {
     return this.requestJson('/v1/memory-runtime/engine', { method: 'GET' });
   }
 
+  async promptRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    mode: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    ceilings: {
+      maxRenderedChars: number;
+      cacheTtlSec: number;
+      mode: string;
+    };
+    honesty: {
+      autoPromptResearchLab: boolean;
+      llmAsJudgeEvalLab: boolean;
+      promptMeshOs: boolean;
+      redisPromptCacheOs: boolean;
+      callsLlmOnExecute: boolean;
+      regeneratesPromptIntelligence: boolean;
+      regeneratesVl086: boolean;
+      extendsPromptIntelligence: boolean;
+      extendsVersionedPrompts: boolean;
+      orgWorkspaceScoped: boolean;
+      usesIntelligentCachePromptNamespace: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/prompt-runtime/engine', { method: 'GET' });
+  }
+
+  async promptRuntimeExecute(body: {
+    key?: string;
+    feature?: string;
+    body?: string;
+    version?: number;
+    variables?: Record<string, string>;
+    useCache?: boolean;
+    skipSecurity?: boolean;
+  }): Promise<{
+    key: string;
+    source: string;
+    version: number | null;
+    body: string;
+    chars: number;
+    cache: string;
+    note?: string;
+  }> {
+    return this.requestJson('/v1/prompt-runtime/execute', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

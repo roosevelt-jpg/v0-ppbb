@@ -2840,6 +2840,119 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty' } },
       },
     },
+    '/v1/prompt-runtime/engine': {
+      get: {
+        summary: 'Prompt Runtime catalog',
+        operationId: 'getPromptRuntimeEngine',
+        responses: {
+          '200': { description: 'Kernel prompt capabilities and honesty' },
+        },
+      },
+    },
+    '/v1/prompt-runtime/keys': {
+      get: {
+        summary: 'Prompt Runtime keys',
+        operationId: 'listPromptRuntimeKeys',
+        responses: { '200': { description: 'Managed prompt keys' } },
+      },
+    },
+    '/v1/prompt-runtime/routes': {
+      get: {
+        summary: 'Prompt Runtime feature routes',
+        operationId: 'listPromptRuntimeRoutes',
+        responses: { '200': { description: 'Sandbox feature→key map' } },
+      },
+    },
+    '/v1/prompt-runtime/registry': {
+      get: {
+        summary: 'Prompt Runtime registry façade',
+        operationId: 'getPromptRuntimeRegistry',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'VL-086 registry rows' } },
+      },
+    },
+    '/v1/prompt-runtime/templates': {
+      get: {
+        summary: 'Prompt Runtime templates',
+        operationId: 'listPromptRuntimeTemplates',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Templates + variables' } },
+      },
+    },
+    '/v1/prompt-runtime/versions': {
+      get: {
+        summary: 'Prompt Runtime versions',
+        operationId: 'listPromptRuntimeVersions',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Version list for key' } },
+      },
+    },
+    '/v1/prompt-runtime/route': {
+      post: {
+        summary: 'Route feature to prompt key',
+        operationId: 'routePromptRuntime',
+        responses: { '200': { description: 'Sandbox route result' } },
+      },
+    },
+    '/v1/prompt-runtime/render': {
+      post: {
+        summary: 'Render prompt variables',
+        operationId: 'renderPromptRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Rendered body' } },
+      },
+    },
+    '/v1/prompt-runtime/validate': {
+      post: {
+        summary: 'Validate rendered prompt',
+        operationId: 'validatePromptRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Heuristic validation' } },
+      },
+    },
+    '/v1/prompt-runtime/security-scan': {
+      post: {
+        summary: 'Security-scan prompt',
+        operationId: 'securityScanPromptRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Pattern scan via Prompt Intelligence' } },
+      },
+    },
+    '/v1/prompt-runtime/optimize': {
+      post: {
+        summary: 'Heuristic optimize prompt',
+        operationId: 'optimizePromptRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Trim/tips stub' } },
+      },
+    },
+    '/v1/prompt-runtime/execute': {
+      post: {
+        summary: 'Execute prompt (resolve/render/validate)',
+        operationId: 'executePromptRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Rendered prompt (no LLM call)' },
+          '400': { description: 'Validation or security failure' },
+        },
+      },
+    },
+    '/v1/prompt-runtime/analytics': {
+      get: {
+        summary: 'Prompt Runtime analytics',
+        operationId: 'getPromptRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/prompt-runtime/monitoring': {
+      get: {
+        summary: 'Prompt Runtime monitoring',
+        operationId: 'getPromptRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

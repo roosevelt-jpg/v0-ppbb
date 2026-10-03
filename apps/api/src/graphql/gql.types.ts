@@ -490,6 +490,75 @@ export class GqlMemoryRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlPromptRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPromptRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPromptRuntimeCapability])
+  capabilities!: GqlPromptRuntimeCapability[];
+
+  @Field()
+  autoPromptResearchLab!: boolean;
+
+  @Field()
+  llmAsJudgeEvalLab!: boolean;
+
+  @Field()
+  promptMeshOs!: boolean;
+
+  @Field()
+  redisPromptCacheOs!: boolean;
+
+  @Field()
+  callsLlmOnExecute!: boolean;
+
+  @Field()
+  regeneratesPromptIntelligence!: boolean;
+
+  @Field()
+  regeneratesVl086!: boolean;
+
+  @Field()
+  extendsPromptIntelligence!: boolean;
+
+  @Field()
+  extendsVersionedPrompts!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  usesIntelligentCachePromptNamespace!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxRenderedChars!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;
