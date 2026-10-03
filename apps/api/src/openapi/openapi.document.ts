@@ -2683,6 +2683,51 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ai-kernel/products': {
+      get: {
+        summary: 'AI Kernel runtime catalog',
+        operationId: 'listAiKernelRuntimes',
+        responses: {
+          '200': {
+            description: 'Internal kernel runtimes, architecture, and safety notes',
+          },
+        },
+      },
+    },
+    '/v1/ai-kernel/engine': {
+      get: {
+        summary: 'AI Kernel engine (alias of products)',
+        operationId: 'getAiKernelEngine',
+        responses: {
+          '200': { description: 'Kernel catalog + honesty' },
+        },
+      },
+    },
+    '/v1/ai-kernel/overview': {
+      get: {
+        summary: 'AI Kernel org overview',
+        operationId: 'getAiKernelOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session usage, deferred runtimes, safety notes',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ai-kernel/monitoring': {
+      get: {
+        summary: 'AI Kernel foundation monitoring',
+        operationId: 'getAiKernelMonitoring',
+        responses: {
+          '200': { description: 'Runtime status snapshot + safety honesty' },
+        },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

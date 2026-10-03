@@ -243,6 +243,16 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-211 | Cost Optimization Engine (Phase 78) | Done | `/v1/cost-optimization/*` hard daily/monthly enforce + optimize; ADR-0122. Not FinOps/Spot OS; gates AI Router resolve. |
 | VL-212 | AI Runtime Analytics (Phase 79) | Done | `/v1/ai-runtime-analytics/*` Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
 | VL-213 | Inference Cloud Production Audit (Phase 80) | Done | Audit gate + reports under `docs/inference-cloud-audit/`; ADR-0124. Rejects GPU hyperscaler / AI Kernel here. Spend-safety verified. |
+| VL-214 | AI Kernel Foundation (Phase 81) | Done | `/ai-kernel` internal hub + catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety notes for VL-219–222. |
+| VL-215 | Memory Runtime (Phase 82) | Not Started | Extends Memory Cloud; sandbox primitives. |
+| VL-216 | Prompt Runtime (Phase 83) | Not Started | |
+| VL-217 | Context Runtime (Phase 84) | Not Started | |
+| VL-218 | Reasoning Runtime (Phase 85) | Not Started | |
+| VL-219 | Agent Runtime (Phase 86) | Not Started | Must sandbox + scoped permissions. |
+| VL-220 | Workflow Runtime (Phase 87) | Not Started | Must sandbox + scoped permissions. |
+| VL-221 | Plugin Runtime (Phase 88) | Not Started | Must sandbox + scoped permissions. |
+| VL-222 | Policy Runtime (Phase 89) | Not Started | Must hard-gate Agent/Workflow/Plugin. |
+| VL-223 | Kernel Production Audit (Phase 90) | Not Started | |
 
 ---
 
@@ -370,3 +380,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-211 Done: Cost Optimization Engine (Phase 78) — hard daily/monthly spend enforce + cost optimize; ADR-0122. Not FinOps/Spot OS; gates AI Router resolve. |
 | 2026-10-03 | VL-212 Done: AI Runtime Analytics (Phase 79) — Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
 | 2026-10-03 | VL-213 Done: Inference Cloud Production Audit (Phase 80) — checklist/tests/reports; ADR-0124. Volume closed. Spend-safety verified; AI Kernel rejected here. |
+| 2026-10-03 | VL-214 Done: AI Kernel Foundation (Phase 81) — internal hub/catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety constraints for Agent/Workflow/Plugin/Policy. |

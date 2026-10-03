@@ -1,0 +1,149 @@
+export type KernelRuntimeStatus = 'shipped' | 'partial' | 'deferred';
+
+export type KernelRuntimeRow = {
+  id: string;
+  name: string;
+  status: KernelRuntimeStatus;
+  api: string | null;
+  console: string | null;
+  notes: string;
+};
+
+/** Library Phase 81 runtime map (VL-214). Internal OS hub — not a customer product. */
+export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
+  return [
+    {
+      id: 'ai-kernel',
+      name: 'VerbaLab AI Kernel',
+      status: 'shipped',
+      api: 'GET /v1/ai-kernel/products',
+      console: '/ai-kernel',
+      notes:
+        'Internal runtime hub (VL-214). Not a customer-facing product. Routes future Agent/Workflow/Plugin execution through Nest kernel modules — not a Linux/VAIOS rewrite.',
+    },
+    {
+      id: 'memory-runtime',
+      name: 'Memory Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Low-level kernel memory primitives (Phase 82 / VL-215). Extends Memory Cloud / Knowledge Memory — does not regenerate them.',
+    },
+    {
+      id: 'prompt-runtime',
+      name: 'Prompt Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Prompt execution primitives (Phase 83 / VL-216). Extends Prompt Intelligence / versioned prompts.',
+    },
+    {
+      id: 'context-runtime',
+      name: 'Context Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Kernel context assembly (Phase 84 / VL-217). Extends Context Engine — not infinite-context OS.',
+    },
+    {
+      id: 'reasoning-runtime',
+      name: 'Reasoning Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Reasoning execution primitives (Phase 85 / VL-218). Extends Reasoning Cloud — not custom reasoner kernel OS.',
+    },
+    {
+      id: 'agent-runtime',
+      name: 'Agent Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Autonomous agents (Phase 86 / VL-219). Must have scoped permissions + sandbox — not open tool execution.',
+    },
+    {
+      id: 'workflow-runtime',
+      name: 'Workflow Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Multi-step workflows (Phase 87 / VL-220). Must have scoped permissions + sandbox.',
+    },
+    {
+      id: 'plugin-runtime',
+      name: 'Plugin Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Third-party/extension plugins (Phase 88 / VL-221). Must have scoped permissions + sandbox.',
+    },
+    {
+      id: 'policy-runtime',
+      name: 'Policy Runtime',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Hard enforcement gate for Agent/Workflow/Plugin (Phase 89 / VL-222). Must block, not only log.',
+    },
+    {
+      id: 'kernel-telemetry',
+      name: 'Kernel Telemetry',
+      status: 'partial',
+      api: 'GET /v1/ai-kernel/monitoring',
+      console: '/ai-kernel',
+      notes: 'Foundation monitoring snapshot — full kernel telemetry deferred with runtimes.',
+    },
+  ];
+}
+
+export function aiKernelArchitectureNotes() {
+  return {
+    style: 'nest_modular_monolith',
+    ddd: 'bounded_ai_kernel_hub',
+    cqrs: true,
+    hexagonalRewrite: false,
+    repositoryPattern: 'prisma_via_existing_modules',
+    eventDriven: 'audit_and_jobs_only',
+    rest: true,
+    graphql: true,
+    sdk: '@verbalab/sdk',
+    cli: '@verbalab/cli',
+    docker: true,
+    terraform: true,
+    kubernetes: true,
+    primaryRegion: 'af-south-1',
+    deployment: 'Fly default; optional EKS af-south-1 (shared platform)',
+    customerFacingProduct: false,
+    linuxOsRewrite: false,
+    vaiosOs: false,
+    regeneratesVolumes1to7: false,
+    extendsInferenceCloud: true,
+    extendsMemoryCloud: true,
+    extendsPromptIntelligence: true,
+    extendsContextEngine: true,
+    extendsReasoningCloud: true,
+    extendsAiOrchestration: true,
+    agentActionBoundariesRequired: true,
+    policyHardGateRequired: true,
+    policyLogOnlyForbidden: true,
+  };
+}
+
+export function aiKernelSafetyNotes() {
+  return {
+    agentWorkflowPluginMustSandbox: true,
+    scopedPermissionsRequired: true,
+    policyMustHardGate: true,
+    policyLogOnlyRejected: true,
+    note:
+      'Volume 8 README: Agent/Workflow/Plugin Runtimes must have scoped permissions and sandboxing — not open function calls. Policy Runtime (VL-222) must be a hard gate wired into those runtimes, not decoration that only logs.',
+  };
+}

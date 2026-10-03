@@ -18,6 +18,7 @@ function usage(): never {
   verbalab intelligence-products
   verbalab knowledge-products
   verbalab inference-products
+  verbalab ai-kernel-products
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -163,6 +164,11 @@ async function main() {
 
   if (command === 'inference-products') {
     console.log(JSON.stringify(await vl.inferenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-kernel-products') {
+    console.log(JSON.stringify(await vl.aiKernelProducts(), null, 2));
     return;
   }
 

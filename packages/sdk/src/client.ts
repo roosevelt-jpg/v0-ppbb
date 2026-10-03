@@ -1093,6 +1093,24 @@ export class VerbaLab {
     return this.requestJson('/v1/inference-cloud/products', { method: 'GET' });
   }
 
+  async aiKernelProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ai-kernel/products', { method: 'GET' });
+  }
+
   async gpuPlatformEngine(): Promise<{
     product: string;
     note: string;
