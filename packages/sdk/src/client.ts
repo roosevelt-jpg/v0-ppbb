@@ -1316,6 +1316,43 @@ export class VerbaLab {
     });
   }
 
+  async recommendationEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      retailRecommenderOs: boolean;
+      collaborativeFiltering: boolean;
+      banditsFeatureStore: boolean;
+      trainsRankingModels: boolean;
+      lightRankers: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/recommendation-engine/engine', { method: 'GET' });
+  }
+
+  async recommend(body: {
+    kind: string;
+    query?: string;
+    language?: string;
+    k?: number;
+  }): Promise<{
+    kind: string;
+    items: Array<{ id: string; title: string; score: number; reason: string }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/recommendation-engine/recommend', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

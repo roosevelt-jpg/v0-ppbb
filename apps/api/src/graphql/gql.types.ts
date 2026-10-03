@@ -592,6 +592,45 @@ export class GqlReasoningCloudEngine {
 }
 
 @ObjectType()
+export class GqlRecommendationEngineCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlRecommendationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlRecommendationEngineCapability])
+  capabilities!: GqlRecommendationEngineCapability[];
+
+  @Field()
+  retailRecommenderOs!: boolean;
+
+  @Field()
+  collaborativeFiltering!: boolean;
+
+  @Field()
+  lightRankers!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

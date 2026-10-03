@@ -18,6 +18,7 @@ const links = [
   { href: '/knowledge-graph', label: 'Knowledge Graph' },
   { href: '/context-engine', label: 'Context' },
   { href: '/reasoning-cloud', label: 'Reasoning' },
+  { href: '/recommendation-engine', label: 'Recommend' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

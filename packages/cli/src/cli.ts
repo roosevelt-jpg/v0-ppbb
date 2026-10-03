@@ -27,6 +27,8 @@ function usage(): never {
   verbalab context-assemble [--query <text>] [--max-chars <n>]
   verbalab reasoning-cloud-engine
   verbalab reasoning-cloud-reason --problem <text> [--strategy <id>]
+  verbalab recommendation-engine
+  verbalab recommend --kind <language|voice|content|...> [--query <text>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -192,6 +194,28 @@ async function main() {
         await vl.reasoningCloudReason({
           problem,
           strategy: argValue(rest, '--strategy'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'recommendation-engine') {
+    console.log(JSON.stringify(await vl.recommendationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'recommend') {
+    const kind = argValue(rest, '--kind');
+    if (!kind) usage();
+    console.log(
+      JSON.stringify(
+        await vl.recommend({
+          kind,
+          query: argValue(rest, '--query'),
+          language: argValue(rest, '--language'),
         }),
         null,
         2,

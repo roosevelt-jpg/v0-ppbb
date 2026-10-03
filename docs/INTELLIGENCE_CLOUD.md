@@ -16,7 +16,7 @@
 | Knowledge Graph Cloud | **Partial** — **VL-184** `/knowledge-graph` bounded ER; Neo4j/ontology/verticals deferred; prefer RAG |
 | Context Engine | **Partial** — **VL-185** `/context-engine` assemble; char-budget compression; infinite/realtime deferred |
 | Reasoning Cloud | **Partial** — **VL-186** `/reasoning-cloud` LLM strategies; not a custom reasoner kernel |
-| Recommendation Engine | **Deferred** — VL-187 |
+| Recommendation Engine | **Partial** — **VL-187** `/recommendation-engine` light rankers; not retail recommender OS |
 | Prompt Intelligence | **Partial** — platform prompt versioning; hub VL-188 |
 | AI Decision Engine | **Deferred** — VL-189 |
 | AI Orchestration | **Partial** — VL-060 chat/gateway; product VL-190 |

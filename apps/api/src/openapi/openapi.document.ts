@@ -2954,6 +2954,44 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/recommendation-engine/engine': {
+      get: {
+        summary: 'Recommendation Engine catalog',
+        operationId: 'getRecommendationEngine',
+        responses: { '200': { description: 'Kinds and retail-recommender honesty notes' } },
+      },
+    },
+    '/v1/recommendation-engine/kinds': {
+      get: {
+        summary: 'Recommendable kinds',
+        operationId: 'listRecommendationEngineKinds',
+        responses: { '200': { description: 'Supported recommendation kinds' } },
+      },
+    },
+    '/v1/recommendation-engine/recommend': {
+      post: {
+        summary: 'Rank recommendations',
+        operationId: 'recommendRecommendationEngine',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Scored items from light rankers' } },
+      },
+    },
+    '/v1/recommendation-engine/analytics': {
+      get: {
+        summary: 'Recommendation Engine analytics',
+        operationId: 'getRecommendationEngineAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Recommend audit aggregates' } },
+      },
+    },
+    '/v1/recommendation-engine/monitoring': {
+      get: {
+        summary: 'Recommendation Engine monitoring snapshot',
+        operationId: 'getRecommendationEngineMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

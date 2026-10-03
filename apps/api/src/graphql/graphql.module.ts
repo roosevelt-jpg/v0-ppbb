@@ -14,6 +14,7 @@ import { MemoryCloudModule } from '../memory-cloud/memory-cloud.module';
 import { KnowledgeGraphModule } from '../knowledge-graph/knowledge-graph.module';
 import { ContextEngineModule } from '../context-engine/context-engine.module';
 import { ReasoningCloudModule } from '../reasoning-cloud/reasoning-cloud.module';
+import { RecommendationEngineModule } from '../recommendation-engine/recommendation-engine.module';
 import { NeuralTtsModule } from '../neural-tts/neural-tts.module';
 import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from '../emotion-voice/emotion-voice.module';
@@ -45,6 +46,7 @@ import { MemoryCloudGraphqlResolver } from './memory-cloud.resolver';
 import { KnowledgeGraphGraphqlResolver } from './knowledge-graph.resolver';
 import { ContextEngineGraphqlResolver } from './context-engine.resolver';
 import { ReasoningCloudGraphqlResolver } from './reasoning-cloud.resolver';
+import { RecommendationEngineGraphqlResolver } from './recommendation-engine.resolver';
 import { NeuralTtsGraphqlResolver } from './neural-tts.resolver';
 import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { EmotionVoiceGraphqlResolver } from './emotion-voice.resolver';
@@ -96,6 +98,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeGraphModule,
     ContextEngineModule,
     ReasoningCloudModule,
+    RecommendationEngineModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
@@ -135,6 +138,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeGraphGraphqlResolver,
     ContextEngineGraphqlResolver,
     ReasoningCloudGraphqlResolver,
+    RecommendationEngineGraphqlResolver,
     NeuralTtsGraphqlResolver,
     VoiceCloningGraphqlResolver,
     EmotionVoiceGraphqlResolver,

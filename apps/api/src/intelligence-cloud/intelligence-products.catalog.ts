@@ -78,10 +78,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'recommendations',
       name: 'Recommendation Engine',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Recommendations over embeddings/memory — VL-187.',
+      status: 'partial',
+      api: 'GET /v1/recommendation-engine/engine',
+      console: '/recommendation-engine',
+      notes:
+        'Light rankers over languages/voices/knowledge (VL-187). Not a retail recommender OS.',
     },
     {
       id: 'prompt-intelligence',

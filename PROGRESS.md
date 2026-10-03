@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-186 Done — Reasoning Cloud)
+Last updated: 2026-10-03 (VL-187 Done — Recommendation Engine)
 
 ---
 
@@ -216,6 +216,7 @@ Last updated: 2026-10-03 (VL-186 Done — Reasoning Cloud)
 | VL-184 | Knowledge Graph Cloud (Phase 51) | Done | `/v1/knowledge-graph/*` entities/edges/neighborhood; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |
 | VL-185 | Context Engine (Phase 52) | Done | `/v1/context-engine/*` assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; infinite window deferred. |
 | VL-186 | Reasoning Cloud (Phase 53) | Done | `/v1/reasoning-cloud/*` LLM strategies + reason; ADR-0097. Not custom reasoner kernel; shallow ToT. |
+| VL-187 | Recommendation Engine (Phase 54) | Done | `/v1/recommendation-engine/*` light rankers; ADR-0098. Not retail recommender OS; enterprise deferred. |
 
 ---
 
@@ -316,3 +317,4 @@ Last updated: 2026-10-03 (VL-186 Done — Reasoning Cloud)
 | 2026-10-03 | VL-184 Done: Knowledge Graph Cloud (Phase 51) — bounded Postgres ER layer; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |
 | 2026-10-03 | VL-185 Done: Context Engine (Phase 52) — assemble retrieval+memory+prompt; ADR-0096. Char-budget compression; not infinite context. |
 | 2026-10-03 | VL-186 Done: Reasoning Cloud (Phase 53) — LLM-gateway strategies + reason API; ADR-0097. Not custom reasoner kernel. |
+| 2026-10-03 | VL-187 Done: Recommendation Engine (Phase 54) — light rankers over langs/voices/knowledge; ADR-0098. Not retail recommender OS. |
