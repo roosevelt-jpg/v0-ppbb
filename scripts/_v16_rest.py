@@ -236,8 +236,11 @@ def write_hub(hub: dict) -> None:
             module_ts(
                 slug,
                 pascal,
-                extra_imports="import { UsageModule } from '../usage/usage.module';\n",
-                extra_module="imports: [UsageModule],\n  ",
+                extra_imports=(
+                    "import { UsageModule } from '../usage/usage.module';\n"
+                    "import { IdentityModule } from '../identity/identity.module';\n"
+                ),
+                extra_module="imports: [UsageModule, IdentityModule],\n  ",
             ),
         )
         for name, content in application_files(
