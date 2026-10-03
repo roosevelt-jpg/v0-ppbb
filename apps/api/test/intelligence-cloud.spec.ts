@@ -145,6 +145,11 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(promptIntel.status).toBe('partial');
     expect(promptIntel.api).toContain('/v1/prompt-intelligence/engine');
     expect(promptIntel.console).toBe('/prompt-intelligence');
+
+    const decision = res.body.products.find((p: { id: string }) => p.id === 'decision-engine');
+    expect(decision.status).toBe('partial');
+    expect(decision.api).toContain('/v1/decision-engine/engine');
+    expect(decision.console).toBe('/decision-engine');
   });
 
   it('returns org intelligence overview with chat/embeddings usage + deferred flags', async () => {
@@ -173,6 +178,8 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.deferred.customReasoner).toBe(true);
     expect(overview.deferred.recommendationEngine).toBe(false);
     expect(overview.deferred.promptIntelligence).toBe(false);
+    expect(overview.deferred.decisionEngineProduct).toBe(false);
+    expect(overview.deferred.decisionEngineOs).toBe(true);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
     expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
     expect(overview.links.vectorCloud).toBe('/vector-cloud');
@@ -182,6 +189,7 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.links.reasoningCloud).toBe('/reasoning-cloud');
     expect(overview.links.recommendationEngine).toBe('/recommendation-engine');
     expect(overview.links.promptIntelligence).toBe('/prompt-intelligence');
+    expect(overview.links.decisionEngine).toBe('/decision-engine');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);

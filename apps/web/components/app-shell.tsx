@@ -20,6 +20,7 @@ const links = [
   { href: '/reasoning-cloud', label: 'Reasoning' },
   { href: '/recommendation-engine', label: 'Recommend' },
   { href: '/prompt-intelligence', label: 'Prompt Intel' },
+  { href: '/decision-engine', label: 'Decisions' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

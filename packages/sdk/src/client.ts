@@ -1407,6 +1407,47 @@ export class VerbaLab {
     });
   }
 
+  async decisionEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      enterpriseBrms: boolean;
+      droolsPegaParity: boolean;
+      lightRules: boolean;
+      trainsDecisionModels: boolean;
+      executesTools: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/decision-engine/engine', { method: 'GET' });
+  }
+
+  async decide(body: {
+    kind: string;
+    query?: string;
+    family?: string;
+    quality?: string;
+    signalStrength?: number;
+    matched?: boolean;
+  }): Promise<{
+    kind: string;
+    decision: string;
+    confidence: number;
+    reasons: string[];
+    note: string;
+  }> {
+    return this.requestJson('/v1/decision-engine/decide', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

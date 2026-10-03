@@ -32,6 +32,8 @@ function usage(): never {
   verbalab prompt-intelligence
   verbalab prompt-intelligence-preview --key <chat|rag|voice_faq> [--body <text>]
   verbalab prompt-intelligence-evaluate --key <chat|rag|voice_faq> [--body <text>]
+  verbalab decision-engine
+  verbalab decide --kind <routing|policy|model_selection|...> [--query <text>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -256,6 +258,29 @@ async function main() {
         await vl.promptIntelligenceEvaluate({
           key,
           body: argValue(rest, '--body'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'decision-engine') {
+    console.log(JSON.stringify(await vl.decisionEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'decide') {
+    const kind = argValue(rest, '--kind');
+    if (!kind) usage();
+    console.log(
+      JSON.stringify(
+        await vl.decide({
+          kind,
+          query: argValue(rest, '--query'),
+          family: argValue(rest, '--family'),
+          quality: argValue(rest, '--quality'),
         }),
         null,
         2,

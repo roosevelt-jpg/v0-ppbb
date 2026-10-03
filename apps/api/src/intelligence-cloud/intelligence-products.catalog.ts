@@ -96,10 +96,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'decision-engine',
       name: 'AI Decision Engine',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Decision-making logic layer — VL-189. Not an enterprise rules OS.',
+      status: 'partial',
+      api: 'GET /v1/decision-engine/engine',
+      console: '/decision-engine',
+      notes:
+        'Bounded policy/routing helpers (VL-189). Light rules — not Drools/Pega BRMS.',
     },
     {
       id: 'orchestration',

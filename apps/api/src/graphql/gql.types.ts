@@ -670,6 +670,45 @@ export class GqlPromptIntelligence {
 }
 
 @ObjectType()
+export class GqlDecisionEngineCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlDecisionEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlDecisionEngineCapability])
+  capabilities!: GqlDecisionEngineCapability[];
+
+  @Field()
+  enterpriseBrms!: boolean;
+
+  @Field()
+  droolsPegaParity!: boolean;
+
+  @Field()
+  lightRules!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

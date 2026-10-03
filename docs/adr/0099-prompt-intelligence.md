@@ -22,4 +22,4 @@ ROADMAP VL-188: prompt management/optimization hub over versioned prompts. Buy v
 ## Consequences
 
 - Intelligence Cloud marks prompt-intelligence `partial` with hub links.  
-- AI Decision Engine (VL-189) is next and must stay bounded helpers, not Drools/Pega parity.
+- AI Decision Engine (VL-189) ships bounded helpers (ADR-0100), not Drools/Pega parity.

@@ -60,6 +60,7 @@ import { ContextEngineModule } from './context-engine/context-engine.module';
 import { ReasoningCloudModule } from './reasoning-cloud/reasoning-cloud.module';
 import { RecommendationEngineModule } from './recommendation-engine/recommendation-engine.module';
 import { PromptIntelligenceModule } from './prompt-intelligence/prompt-intelligence.module';
+import { DecisionEngineModule } from './decision-engine/decision-engine.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -110,6 +111,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ReasoningCloudModule,
     RecommendationEngineModule,
     PromptIntelligenceModule,
+    DecisionEngineModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,

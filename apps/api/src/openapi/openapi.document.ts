@@ -3062,6 +3062,44 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/decision-engine/engine': {
+      get: {
+        summary: 'AI Decision Engine catalog',
+        operationId: 'getDecisionEngine',
+        responses: { '200': { description: 'Kinds and BRMS honesty notes' } },
+      },
+    },
+    '/v1/decision-engine/kinds': {
+      get: {
+        summary: 'Decision kinds',
+        operationId: 'listDecisionEngineKinds',
+        responses: { '200': { description: 'Supported decision kinds' } },
+      },
+    },
+    '/v1/decision-engine/decide': {
+      post: {
+        summary: 'Make a bounded decision',
+        operationId: 'decideDecisionEngine',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decision + confidence from light rules' } },
+      },
+    },
+    '/v1/decision-engine/analytics': {
+      get: {
+        summary: 'Decision Engine analytics',
+        operationId: 'getDecisionEngineAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decide audit aggregates' } },
+      },
+    },
+    '/v1/decision-engine/monitoring': {
+      get: {
+        summary: 'Decision Engine monitoring snapshot',
+        operationId: 'getDecisionEngineMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',
