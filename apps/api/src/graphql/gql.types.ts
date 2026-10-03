@@ -607,6 +607,48 @@ export class GqlPluginMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlModelMarketplaceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlModelMarketplaceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlModelMarketplaceCapability])
+  capabilities!: GqlModelMarketplaceCapability[];
+
+  @Field()
+  huggingFaceOs!: boolean;
+
+  @Field()
+  weightHostingOs!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

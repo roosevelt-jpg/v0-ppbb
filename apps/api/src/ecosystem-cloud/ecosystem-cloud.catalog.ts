@@ -56,10 +56,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'model-marketplace',
       name: 'Model Marketplace',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'VL-251 / Phase 118. Buy/sell/publish models over Model Registry — not a Hugging Face OS.',
+      status: 'shipped',
+      api: 'GET /v1/model-marketplace/engine',
+      console: '/model-marketplace',
+      notes:
+        'VL-251 / Phase 118. License SKUs over Model Registry; FabricPolicyGate + Stripe honesty. Not Hugging Face / weight CDN OS.',
     },
     {
       id: 'dataset-marketplace',
@@ -213,6 +214,11 @@ export function ecosystemRoutingTable() {
       surface: 'plugin-marketplace',
       path: '/plugin-marketplace',
       api: '/v1/plugin-marketplace/engine',
+    },
+    {
+      surface: 'model-marketplace',
+      path: '/model-marketplace',
+      api: '/v1/model-marketplace/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },
