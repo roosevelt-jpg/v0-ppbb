@@ -37,6 +37,9 @@ function usage(): never {
   verbalab cost-optimization-engine
   verbalab cost-optimization-record --category <cat> --amount <usd>
   verbalab cost-optimization-optimize [--feature chat|translate|stt|tts|ocr|embeddings|detect]
+  verbalab ai-runtime-analytics-engine
+  verbalab ai-runtime-analytics-overview
+  verbalab ai-runtime-analytics-report
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -358,6 +361,39 @@ async function main() {
       JSON.stringify(
         await vl.costOptimizationOptimize({
           feature: argValue(rest, '--feature') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'ai-runtime-analytics-engine') {
+    console.log(JSON.stringify(await vl.aiRuntimeAnalyticsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-runtime-analytics-overview') {
+    console.log(
+      JSON.stringify(
+        await vl.aiRuntimeAnalyticsOverview({
+          from: argValue(rest, '--from') ?? undefined,
+          to: argValue(rest, '--to') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'ai-runtime-analytics-report') {
+    console.log(
+      JSON.stringify(
+        await vl.aiRuntimeAnalyticsReport({
+          from: argValue(rest, '--from') ?? undefined,
+          to: argValue(rest, '--to') ?? undefined,
         }),
         null,
         2,

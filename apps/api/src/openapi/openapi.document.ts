@@ -3391,6 +3391,127 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/ai-runtime-analytics/engine': {
+      get: {
+        summary: 'AI Runtime Analytics catalog',
+        operationId: 'getAiRuntimeAnalyticsEngine',
+        responses: {
+          '200': { description: 'Capabilities and honesty flags' },
+        },
+      },
+    },
+    '/v1/ai-runtime-analytics/overview': {
+      get: {
+        summary: 'Runtime analytics overview',
+        operationId: 'getAiRuntimeAnalyticsOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Bundled Inference Cloud aggregates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/latency': {
+      get: {
+        summary: 'Runtime latency proxies',
+        operationId: 'getAiRuntimeAnalyticsLatency',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'p50/p95 latency proxies' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/throughput': {
+      get: {
+        summary: 'Runtime throughput',
+        operationId: 'getAiRuntimeAnalyticsThroughput',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decisions/usage/batch/streaming rates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/gpu': {
+      get: {
+        summary: 'GPU usage aggregates',
+        operationId: 'getAiRuntimeAnalyticsGpu',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sandbox GPU allocation aggregates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/cpu': {
+      get: {
+        summary: 'CPU host/process snapshot',
+        operationId: 'getAiRuntimeAnalyticsCpu',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Nest host/process CPU snapshot' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/cache': {
+      get: {
+        summary: 'Cache hit/miss aggregates',
+        operationId: 'getAiRuntimeAnalyticsCache',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Intelligent Cache hit rates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/requests': {
+      get: {
+        summary: 'Request counts',
+        operationId: 'getAiRuntimeAnalyticsRequests',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Request aggregates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/errors': {
+      get: {
+        summary: 'Error proxies',
+        operationId: 'getAiRuntimeAnalyticsErrors',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Failed batch/streaming + audit proxies' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/cost': {
+      get: {
+        summary: 'Runtime cost aggregates',
+        operationId: 'getAiRuntimeAnalyticsCost',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Ledger + GPU hourly (report-only)' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/customers': {
+      get: {
+        summary: 'Customer/workspace activity',
+        operationId: 'getAiRuntimeAnalyticsCustomers',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace activity counts' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/models': {
+      get: {
+        summary: 'Model selection aggregates',
+        operationId: 'getAiRuntimeAnalyticsModels',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Router + serving model aggregates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/streaming': {
+      get: {
+        summary: 'Streaming session aggregates',
+        operationId: 'getAiRuntimeAnalyticsStreaming',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Streaming Runtime aggregates' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/report': {
+      get: {
+        summary: 'Bundled runtime analytics report',
+        operationId: 'getAiRuntimeAnalyticsReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Full JSON report' } },
+      },
+    },
+    '/v1/ai-runtime-analytics/monitoring': {
+      get: {
+        summary: 'Runtime analytics monitoring',
+        operationId: 'getAiRuntimeAnalyticsMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

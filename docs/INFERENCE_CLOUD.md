@@ -1,6 +1,6 @@
 # VerbaLab Inference Cloud
 
-**Status:** Foundation through Cost Optimization partial (VL-204–211 / library Phases 71–78); Volume 7 continues through VL-213  
+**Status:** Foundation through AI Runtime Analytics partial (VL-204–212 / library Phases 71–79); Volume 7 continues through VL-213  
 **Rule:** Shared model runtime layer underneath AI Orchestration and every product cloud that calls a model. Extends **AI Gateway (VL-021)** + chat/embeddings. Do **not** regenerate Gateway, Intelligence, Knowledge, or invent a GPU hyperscaler / multi-region Inference OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume7-inference-cloud/`](./roadmap/volume7-inference-cloud/).
 
 Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge clouds. They call vendor models through the Gateway today — this volume layers a discoverable Inference hub without cloning those products.
@@ -19,7 +19,7 @@ Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge 
 | Batch Runtime | **Partial** — **VL-209** `/batch-runtime` over BullMQ + sandbox runs; not Spark/Airflow |
 | Intelligent Cache | **Partial** — **VL-210** `/intelligent-cache` opt-in exact-key store; not Redis/vector OS |
 | Cost Optimization Engine | **Partial** — **VL-211** `/cost-optimization` hard daily/monthly enforce; not FinOps/Spot OS |
-| AI Runtime Analytics | **Deferred** — Phase 79 / VL-212 |
+| AI Runtime Analytics | **Partial** — **VL-212** `/ai-runtime-analytics` Inference aggregates; ≠ VL-191/202; not BI/APM OS |
 | Production Audit | Phase 80 / VL-213 |
 | CPU Runtime | **Partial** — Nest + vendor HTTP adapters |
 | Model Registry Integration | **Partial** — links `/models` (not regenerated) |
@@ -47,6 +47,7 @@ Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge 
 | Batch Runtime | `/batch-runtime` · `GET /v1/batch-runtime/engine` · `POST …/runs` (VL-209) |
 | Intelligent Cache | `/intelligent-cache` · `GET /v1/intelligent-cache/engine` · `POST …/put|lookup` (VL-210) |
 | Cost Optimization | `/cost-optimization` · `GET /v1/cost-optimization/engine` · `POST …/record|check` (VL-211) |
+| AI Runtime Analytics | `/ai-runtime-analytics` · `GET /v1/ai-runtime-analytics/engine` · `/overview` (VL-212) |
 | Existing Gateway | `/gateway` · VL-021 |
 | Existing models | `/models` |
 

@@ -17,6 +17,7 @@ import { StreamingRuntimeModule } from '../streaming-runtime/streaming-runtime.m
 import { BatchRuntimeModule } from '../batch-runtime/batch-runtime.module';
 import { IntelligentCacheModule } from '../intelligent-cache/intelligent-cache.module';
 import { CostOptimizationModule } from '../cost-optimization/cost-optimization.module';
+import { AiRuntimeAnalyticsModule } from '../ai-runtime-analytics/ai-runtime-analytics.module';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
@@ -71,6 +72,7 @@ import { StreamingRuntimeGraphqlResolver } from './streaming-runtime.resolver';
 import { BatchRuntimeGraphqlResolver } from './batch-runtime.resolver';
 import { IntelligentCacheGraphqlResolver } from './intelligent-cache.resolver';
 import { CostOptimizationGraphqlResolver } from './cost-optimization.resolver';
+import { AiRuntimeAnalyticsGraphqlResolver } from './ai-runtime-analytics.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
@@ -145,6 +147,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     BatchRuntimeModule,
     IntelligentCacheModule,
     CostOptimizationModule,
+    AiRuntimeAnalyticsModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
@@ -207,6 +210,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     BatchRuntimeGraphqlResolver,
     IntelligentCacheGraphqlResolver,
     CostOptimizationGraphqlResolver,
+    AiRuntimeAnalyticsGraphqlResolver,
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,

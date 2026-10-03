@@ -151,6 +151,11 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(cost.api).toContain('/v1/cost-optimization/engine');
     expect(cost.console).toBe('/cost-optimization');
     expect(cost.notes).toMatch(/enforce/i);
+
+    const runtime = res.body.products.find((p: { id: string }) => p.id === 'ai-runtime-analytics');
+    expect(runtime.status).toBe('partial');
+    expect(runtime.api).toContain('/v1/ai-runtime-analytics/engine');
+    expect(runtime.console).toBe('/ai-runtime-analytics');
   });
 
   it('returns org inference overview with usage + deferred + spend safety', async () => {
@@ -180,6 +185,8 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(overview.links.intelligentCache).toBe('/intelligent-cache');
     expect(overview.deferred.costOptimization).toBe(false);
     expect(overview.links.costOptimization).toBe('/cost-optimization');
+    expect(overview.deferred.aiRuntimeAnalytics).toBe(false);
+    expect(overview.links.aiRuntimeAnalytics).toBe('/ai-runtime-analytics');
     expect(overview.deferred.gpuHyperscalerOs).toBe(true);
     expect(overview.deferred.regeneratesAiGateway).toBe(false);
     expect(overview.spendSafety.hardSpendCeilingsRequired).toBe(true);

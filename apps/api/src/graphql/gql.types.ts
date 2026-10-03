@@ -841,6 +841,66 @@ export class GqlCostOptimizationEngine {
 }
 
 @ObjectType()
+export class GqlAiRuntimeAnalyticsCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAiRuntimeAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAiRuntimeAnalyticsCapability])
+  capabilities!: GqlAiRuntimeAnalyticsCapability[];
+
+  @Field()
+  biDashboardOs!: boolean;
+
+  @Field()
+  apmOs!: boolean;
+
+  @Field()
+  cloudGpuTelemetryOs!: boolean;
+
+  @Field()
+  regeneratesIntelligenceAnalytics!: boolean;
+
+  @Field()
+  regeneratesKnowledgeAnalytics!: boolean;
+
+  @Field()
+  enterpriseReportingSuite!: boolean;
+
+  @Field()
+  aggregatesOnly!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsInferenceCloud!: boolean;
+
+  @Field()
+  mode!: string;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

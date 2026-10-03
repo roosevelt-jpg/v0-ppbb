@@ -87,10 +87,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'ai-runtime-analytics',
       name: 'AI Runtime Analytics',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Usage/performance analytics for Inference Cloud (Phase 79 / VL-212). ≠ sibling analytics clouds.',
+      status: 'partial',
+      api: 'GET /v1/ai-runtime-analytics/engine',
+      console: '/ai-runtime-analytics',
+      notes:
+        'Inference Cloud latency/throughput/GPU/CPU/cache/requests/errors/cost/models/streaming aggregates (VL-212). ≠ VL-191/VL-202; not BI/APM OS.',
     },
     {
       id: 'cpu-runtime',

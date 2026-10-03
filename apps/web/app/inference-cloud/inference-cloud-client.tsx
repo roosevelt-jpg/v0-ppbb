@@ -130,6 +130,12 @@ export function InferenceCloudClient() {
               <Link href={data.links.costOptimization ?? '/cost-optimization'} style={secondary}>
                 Cost
               </Link>
+              <Link
+                href={data.links.aiRuntimeAnalytics ?? '/ai-runtime-analytics'}
+                style={secondary}
+              >
+                Runtime Analytics
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

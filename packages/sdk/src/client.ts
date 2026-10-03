@@ -1461,6 +1461,54 @@ export class VerbaLab {
     });
   }
 
+  async aiRuntimeAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      biDashboardOs: boolean;
+      apmOs: boolean;
+      cloudGpuTelemetryOs: boolean;
+      regeneratesIntelligenceAnalytics: boolean;
+      aggregatesOnly: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/ai-runtime-analytics/engine', { method: 'GET' });
+  }
+
+  async aiRuntimeAnalyticsOverview(input?: {
+    from?: string;
+    to?: string;
+  }): Promise<Record<string, unknown>> {
+    const q = new URLSearchParams();
+    if (input?.from) q.set('from', input.from);
+    if (input?.to) q.set('to', input.to);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/ai-runtime-analytics/overview${suffix}`, {
+      method: 'GET',
+    });
+  }
+
+  async aiRuntimeAnalyticsReport(input?: {
+    from?: string;
+    to?: string;
+  }): Promise<Record<string, unknown>> {
+    const q = new URLSearchParams();
+    if (input?.from) q.set('from', input.from);
+    if (input?.to) q.set('to', input.to);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/ai-runtime-analytics/report${suffix}`, {
+      method: 'GET',
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

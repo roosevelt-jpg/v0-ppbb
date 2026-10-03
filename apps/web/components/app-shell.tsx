@@ -21,6 +21,7 @@ const links = [
   { href: '/batch-runtime', label: 'Batch Runtime' },
   { href: '/intelligent-cache', label: 'Intelligent Cache' },
   { href: '/cost-optimization', label: 'Cost Optimization' },
+  { href: '/ai-runtime-analytics', label: 'Runtime Analytics' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },
