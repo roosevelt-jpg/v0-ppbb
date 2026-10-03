@@ -48,6 +48,7 @@ export const FABRIC_BUSES = [
   'dataset-marketplace',
   'prompt-marketplace',
   'agent-marketplace',
+  'workflow-marketplace',
 ] as const;
 
 /**

@@ -3642,6 +3642,97 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/workflow-marketplace/engine': {
+      get: {
+        summary: 'Workflow Marketplace engine catalog',
+        operationId: 'getWorkflowMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Workflow marketplace capabilities, Stripe honesty, sandbox + Policy hard-gate denials',
+          },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/products': {
+      get: {
+        summary: 'Workflow Marketplace products (alias of engine)',
+        operationId: 'listWorkflowMarketplaceProducts',
+        responses: { '200': { description: 'Workflow marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/workflow-marketplace/listings': {
+      get: {
+        summary: 'List workflow marketplace listings',
+        operationId: 'listWorkflowMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine workflow listings' } },
+      },
+      post: {
+        summary: 'Publish a Workflow Runtime definition as a marketplace listing',
+        operationId: 'publishWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a workflow listing into Workflow Runtime (sandboxed)',
+        operationId: 'installWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandboxed workflow installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace workflow (Policy-gated sandbox)',
+        operationId: 'runWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result (may be denied)' },
+          '403': { description: 'Not installed or policy deny' },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List workflow listing reviews',
+        operationId: 'listWorkflowMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a workflow listing review',
+        operationId: 'reviewWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/workflow-marketplace/sales': {
+      get: {
+        summary: 'Workflow marketplace publisher sales',
+        operationId: 'listWorkflowMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/workflow-marketplace/analytics': {
+      get: {
+        summary: 'Workflow marketplace analytics',
+        operationId: 'getWorkflowMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/workflow-marketplace/monitoring': {
+      get: {
+        summary: 'Workflow marketplace monitoring',
+        operationId: 'getWorkflowMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
