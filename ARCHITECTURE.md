@@ -376,3 +376,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Voice Marketplace partial (VL-177 / Phase 34). See VOICE_MARKETPLACE + ADR-0088. Distinct from localization Marketplace; celebrity without rights forbidden.
 - Voice Analytics partial (VL-178 / Phase 35). See VOICE_ANALYTICS + ADR-0089. Distinct from Speech Analytics; BI dashboard deferred.
 - Voice Cloud volume complete through Production Audit (VL-170–179). See VOICE_CLOUD + `docs/voice-cloud-audit/` and ADR-0081–0090. Competitor-parity claims rejected.
+- Intelligence Cloud Foundation shipped (VL-180 / Phase 47). See INTELLIGENCE_CLOUD + ADR-0091. Hub over LLM gateway + embeddings + RAG; custom AI kernel deferred.

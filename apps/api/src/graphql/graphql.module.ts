@@ -7,6 +7,7 @@ import { RateLimitModule } from '../rate-limit/rate-limit.module';
 import { LanguageCloudApplicationModule } from '../language-cloud/application/language-cloud-application.module';
 import { SpeechCloudApplicationModule } from '../speech-cloud/application/speech-cloud-application.module';
 import { VoiceCloudApplicationModule } from '../voice-cloud/application/voice-cloud-application.module';
+import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/application/intelligence-cloud-application.module';
 import { NeuralTtsModule } from '../neural-tts/neural-tts.module';
 import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from '../emotion-voice/emotion-voice.module';
@@ -31,6 +32,7 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
 import { LanguageCloudGraphqlResolver } from './language-cloud.resolver';
 import { SpeechCloudGraphqlResolver } from './speech-cloud.resolver';
 import { VoiceCloudGraphqlResolver } from './voice-cloud.resolver';
+import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver';
 import { NeuralTtsGraphqlResolver } from './neural-tts.resolver';
 import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { EmotionVoiceGraphqlResolver } from './emotion-voice.resolver';
@@ -75,6 +77,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     LanguageCloudApplicationModule,
     SpeechCloudApplicationModule,
     VoiceCloudApplicationModule,
+    IntelligenceCloudApplicationModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
@@ -107,6 +110,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     LanguageCloudGraphqlResolver,
     SpeechCloudGraphqlResolver,
     VoiceCloudGraphqlResolver,
+    IntelligenceCloudGraphqlResolver,
     NeuralTtsGraphqlResolver,
     VoiceCloningGraphqlResolver,
     EmotionVoiceGraphqlResolver,

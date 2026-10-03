@@ -29,19 +29,19 @@ Every VerbaLab product cloud **shall** organize work and docs against these **12
 
 ### Mapping today
 
-| Layer | Language Cloud | Speech Cloud | Voice Cloud |
-| --- | --- | --- | --- |
-| Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` |
-| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS (+ VL-042/121) |
-| AI Models | Google/OpenAI MT (+ optional LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs clones | OpenAI/own TTS, ElevenLabs clones |
-| Intelligence | Dialect/Accent/Grammar/Style/LI/TM | Speaker/Accent/Emotion/Audio/Pronunciation/Wake/Call | Emotion TTS / studio / enhance / biometrics / marketplace |
-| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/tts*` `/v1/voice-*` + GraphQL |
-| SDK / CLI | `@verbalab/sdk` / CLI | same packages, speech methods | same packages, voice methods |
-| Dashboard | `/language`, product consoles | `/speech`, product consoles | `/voice-cloud`, product consoles |
-| Analytics | VL-146 `/v1/analytics` | VL-159 `/v1/speech-analytics` | VL-178 `/v1/voice-analytics` |
-| Billing | shared STT/TTS/translate metering | shared STT/TTS metering | shared TTS metering |
-| Security / Monitoring | shared | shared | shared + clone consent/watermark |
-| Production Audit | VL-147 | VL-160 | VL-179 |
+| Layer | Language | Speech | Voice | Intelligence |
+| --- | --- | --- | --- | --- |
+| Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` | VL-180 `/intelligence-cloud` |
+| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS | VL-060 chat + VL-190 orchestration *(scheduled)* |
+| AI Models | Google/OpenAI MT (+ LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs | OpenAI/own TTS, ElevenLabs | OpenAI embeddings/chat (gateway) |
+| Intelligence | Dialect/Grammar/Style/LI/TM | Speaker/Emotion/Audio/Wake/Call | Emotion/studio/enhance/biometrics/market | Memory/context/reason/recommend *(scheduled)* |
+| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/tts*` `/v1/voice-*` | `/v1/intelligence-cloud*` + GraphQL |
+| SDK / CLI | `@verbalab/sdk` / CLI | speech methods | voice methods | `intelligenceProducts` |
+| Dashboard | `/language` | `/speech` | `/voice-cloud` | `/intelligence-cloud` |
+| Analytics | VL-146 | VL-159 | VL-178 | VL-191 *(scheduled)* |
+| Billing | shared metering | STT/TTS | TTS | chat/embeddings metering |
+| Security / Monitoring | shared | shared | + clone consent/watermark | shared + memory GDPR *(VL-183)* |
+| Production Audit | VL-147 | VL-160 | VL-179 | VL-192 *(scheduled)* |
 
 ### Rules
 

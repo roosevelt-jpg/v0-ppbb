@@ -11,6 +11,7 @@ const links = [
   { href: '/language', label: 'Language' },
   { href: '/speech', label: 'Speech' },
   { href: '/voice-cloud', label: 'Voice' },
+  { href: '/intelligence-cloud', label: 'Intelligence' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

@@ -1110,6 +1110,127 @@ Executable Voice Cloud phases. Extend TTS/clones/studio — do not regenerate Sp
 - **Sources:** Library Phase 36
 - **Out of scope:** New voice features during audit
 
+### Volume 5 — Intelligence Cloud (VL-180–192)
+
+Library Phases 47–59. Hub over LLM gateway + embeddings + RAG. **Not** a custom AI kernel.
+
+#### VL-180 — Intelligence Cloud Foundation (Phase 47)
+
+- **Goal:** Parent hub `/intelligence-cloud` + catalog/overview + bounded CQRS/GraphQL over chat/embeddings/knowledge. Honest deferred map for memory/graph/reasoner/orchestration.
+- **Complexity:** S
+- **Depends on:** VL-060, VL-062, VL-063, VL-179
+- **Buy vs build:** Map existing gateway primitives
+- **Sources:** Library Phase 47
+- **Out of scope:** Custom AI kernel, regenerating Chat/RAG/Embeddings
+
+#### VL-181 — Embedding Cloud (Phase 48)
+
+- **Goal:** Productize embeddings hub over VL-063; multilingual text first; defer speech/image/video/cross-modal.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-063
+- **Buy vs build:** OpenAI/Gemini embeddings
+- **Sources:** Library Phase 48
+- **Out of scope:** Training embedding models; full multimodal OS
+
+#### VL-182 — Vector Cloud (Phase 49)
+
+- **Goal:** Vector search hub over pgvector (VL-062); optional dedicated vector DB only if scale forces it.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-062
+- **Buy vs build:** Postgres + pgvector first
+- **Sources:** Library Phase 49
+- **Out of scope:** Pinecone-parity managed vector OS on day one
+
+#### VL-183 — Memory Cloud (Phase 50)
+
+- **Goal:** Persistent interaction memory with **GDPR delete/export** before real user data.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-012
+- **Buy vs build:** Postgres + consent/audit
+- **Sources:** Library Phase 50
+- **Out of scope:** Infinite personalization OS without deletion path
+
+#### VL-184 — Knowledge Graph Cloud (Phase 51)
+
+- **Goal:** Bounded entity/relationship layer or honest deferral to RAG; not Neo4j enterprise KG OS.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-062
+- **Buy vs build:** Prefer RAG; graph vendor only if customer-paid
+- **Sources:** Library Phase 51
+- **Out of scope:** Ontology/taxonomy platforms (vision backlog)
+
+#### VL-185 — Context Engine (Phase 52)
+
+- **Goal:** Assemble retrieval + memory + prompt context for AI requests.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-182, VL-183
+- **Buy vs build:** Build orchestration helpers
+- **Sources:** Library Phase 52
+- **Out of scope:** Infinite context window product claims
+
+#### VL-186 — Reasoning Cloud (Phase 53)
+
+- **Goal:** Multi-step reasoning via LLM gateway prompts/tools — not a custom reasoner kernel.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-060
+- **Buy vs build:** LLM + gateway
+- **Sources:** Library Phase 53
+- **Out of scope:** Proprietary symbolic reasoner OS
+
+#### VL-187 — Recommendation Engine (Phase 54)
+
+- **Goal:** Recommendations over embeddings/memory for workspace content/voices/languages.
+- **Complexity:** M
+- **Depends on:** VL-180, VL-181
+- **Buy vs build:** Build light rankers
+- **Sources:** Library Phase 54
+- **Out of scope:** Retail recommender OS
+
+#### VL-188 — Prompt Intelligence (Phase 55)
+
+- **Goal:** Prompt management/optimization hub over versioned prompts.
+- **Complexity:** S
+- **Depends on:** VL-180, VL-060
+- **Buy vs build:** Extend existing prompt versioning
+- **Sources:** Library Phase 55
+- **Out of scope:** Auto-prompt research lab
+
+#### VL-189 — AI Decision Engine (Phase 56)
+
+- **Goal:** Bounded decision helpers (policy/routing) over LLM + rules — not enterprise BRMS.
+- **Complexity:** M
+- **Depends on:** VL-180
+- **Buy vs build:** LLM + light rules
+- **Sources:** Library Phase 56
+- **Out of scope:** Drools/Pega parity
+
+#### VL-190 — AI Orchestration (Phase 57)
+
+- **Goal:** Load-bearing orchestration that coordinates gateway/engines; exercise real e2e requests.
+- **Complexity:** L
+- **Depends on:** VL-180–189
+- **Buy vs build:** Build on gateway
+- **Sources:** Library Phase 57
+- **Out of scope:** Multi-cloud agent OS
+
+#### VL-191 — Intelligence Analytics (Phase 58)
+
+- **Goal:** Usage/quality analytics for Intelligence Cloud surfaces.
+- **Complexity:** M
+- **Depends on:** VL-180
+- **Buy vs build:** Build aggregates
+- **Sources:** Library Phase 58
+- **Out of scope:** Regenerating Language/Speech/Voice analytics
+
+#### VL-192 — Intelligence Cloud Production Audit (Phase 59)
+
+- **Goal:** Checklist + evidence pack over VL-180–191. Reject custom-kernel / competitor-parity marketing.
+- **Complexity:** S
+- **Depends on:** VL-180–191
+- **Buy vs build:** N/A (audit gate)
+- **Sources:** Library Phase 59
+- **Out of scope:** New intelligence features during audit
+
 ---
 
 ## Vision backlog (explicitly not scheduled)
@@ -1122,7 +1243,7 @@ These are in the libraries. They are **not** executable phases for a small team.
 | v2 18–25 Speaker/accent/emotion/pronunciation/wake-word/call intelligence | Speech research org | Vendor features if a customer pays |
 | v2 30–35 Emotion voice, studio, enhancement, biometrics, voice marketplace | Voice company | Scheduled as VL-173–177; buy vendors + consent |
 | v2 39–45 Document/invoice/ID/image intelligence, visual search | Vision company | Document AI vendor |
-| v2 47–59 Intelligence Cloud (reasoner, decision engine, orchestration) | Custom AI kernel | LLM + gateway |
+| v2 47–59 Intelligence Cloud (reasoner, decision engine, orchestration) | Custom AI kernel | Scheduled as VL-180+; LLM + gateway — no custom kernel |
 | v2 63–67 Ontology, taxonomy, knowledge intelligence | Enterprise knowledge graph vendor | RAG (VL-062) |
 | v2 71–90 Inference Cloud + AI Kernel | Internal AWS for models | OpenAI/Groq + later vLLM on a rented GPU |
 | v2 91–105 Foundation Model Cloud | Frontier lab | VL-112 gated |

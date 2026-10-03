@@ -15,6 +15,7 @@ function usage(): never {
   verbalab languages
   verbalab speech-products
   verbalab voice-products
+  verbalab intelligence-products
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -84,6 +85,11 @@ async function main() {
 
   if (command === 'voice-products') {
     console.log(JSON.stringify(await vl.voiceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'intelligence-products') {
+    console.log(JSON.stringify(await vl.intelligenceProducts(), null, 2));
     return;
   }
 

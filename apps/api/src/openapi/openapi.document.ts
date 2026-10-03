@@ -2618,6 +2618,33 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/intelligence-cloud/products': {
+      get: {
+        summary: 'Intelligence Cloud product catalog',
+        operationId: 'listIntelligenceProducts',
+        responses: {
+          '200': {
+            description: 'Intelligence products and architecture honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/intelligence-cloud/overview': {
+      get: {
+        summary: 'Intelligence Cloud org overview',
+        operationId: 'getIntelligenceOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session chat/embeddings usage, products, deferred flags, and console links',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',
