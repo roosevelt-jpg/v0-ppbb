@@ -92,7 +92,9 @@ export function VoiceAnalyticsClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Track voice usage, voices, marketplace revenue, and quality proxies. Not a BI cloud. Speech
         Analytics stays at <Link href="/speech-analytics">/speech-analytics</Link>.{' '}
-        <Link href="/voice-cloud">Voice Cloud</Link>.
+        <Link href="/voice-cloud">Voice Cloud</Link>
+        {' · '}
+        <Link href="/voice-marketplace">Voice Marketplace</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

@@ -97,14 +97,15 @@ export function voiceMarketplaceEngineCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/voice-marketplace/analytics',
-        notes: 'Listing/install/rating aggregates. Full Voice Analytics = Phase 35.',
+        notes: 'Listing/install/rating aggregates. Full Voice Analytics hub: VL-178.',
       },
       {
         id: 'billing',
         name: 'Billing',
         status: 'shipped',
-        api: 'shared Stripe + recorded sales',
-        notes: 'Pro gate + recorded paid installs. Live Connect payouts via shared billing.',
+        api: 'GET /v1/voice-marketplace/access',
+        notes:
+          'Free browse + free SKU publish/install. Paid SKUs (priceCents > 0) require Pro. Live Connect payouts via shared billing.',
       },
     ] satisfies VmCapability[],
     honesty: {

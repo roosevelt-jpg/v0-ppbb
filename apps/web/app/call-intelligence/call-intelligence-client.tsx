@@ -95,7 +95,11 @@ export function CallIntelligenceClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Ingest contact-center calls, transcribe, and score summaries, topics, sentiment, compliance,
         coaching, and QA. Not Gong. Voice FAQ stays at <Link href="/voice">/voice</Link>.{' '}
-        <Link href="/speech">Speech Cloud</Link>.
+        <Link href="/speech">Speech Cloud</Link>
+        {' · '}
+        <Link href="/wake-word">Wake Word</Link>
+        {' · '}
+        <Link href="/speech-analytics">Speech Analytics</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

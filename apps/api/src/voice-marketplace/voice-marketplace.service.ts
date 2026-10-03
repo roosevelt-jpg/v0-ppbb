@@ -40,6 +40,12 @@ export class VoiceMarketplaceService {
     }
   }
 
+  /** Paid SKUs require Pro; free listings are usable on Free for e2e catalog wiring. */
+  private async assertPaidAccess(organizationId: string, priceCents: number) {
+    if ((priceCents ?? 0) <= 0) return;
+    await this.billing.assertPro(organizationId);
+  }
+
   private serialize(row: {
     id: string;
     kind: string;
@@ -97,8 +103,7 @@ export class VoiceMarketplaceService {
     };
   }
 
-  async listPublished(organizationId: string, kind?: string) {
-    await this.billing.assertPro(organizationId);
+  async listPublished(_organizationId: string, kind?: string) {
     const rows = await this.prisma.voiceListing.findMany({
       where: {
         status: 'published',
@@ -111,13 +116,26 @@ export class VoiceMarketplaceService {
   }
 
   async listMine(organizationId: string) {
-    await this.billing.assertPro(organizationId);
     const rows = await this.prisma.voiceListing.findMany({
       where: { publisherOrgId: organizationId },
       include: { publisherOrg: { select: { name: true } } },
       orderBy: { createdAt: 'desc' },
     });
     return { listings: rows.map((r) => this.serialize(r)) };
+  }
+
+  async access(organizationId: string) {
+    const summary = await this.billing.getSummary(organizationId);
+    return {
+      plan: summary.plan,
+      planName: summary.planName,
+      isPro: summary.plan === 'pro',
+      freeListingsAllowed: true,
+      paidListingsRequirePro: true,
+      billingConsole: '/billing',
+      note:
+        'Browse + free SKU publish/install on Free. Paid SKUs (priceCents > 0) require Pro under Billing.',
+    };
   }
 
   async publish(input: {
@@ -145,7 +163,8 @@ export class VoiceMarketplaceService {
     ip?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
-    await this.billing.assertPro(input.organizationId);
+    const priceCents = Math.max(0, Math.floor(Number(input.priceCents ?? 0) || 0));
+    await this.assertPaidAccess(input.organizationId, priceCents);
 
     if (input.celebrityClaim) {
       throw new ApiException(
@@ -288,7 +307,6 @@ export class VoiceMarketplaceService {
       }
     }
 
-    const priceCents = Math.max(0, Math.floor(Number(input.priceCents) || 0));
     const subscriptionInterval =
       licenseType === 'subscription'
         ? input.subscriptionInterval === 'yearly'
@@ -343,7 +361,6 @@ export class VoiceMarketplaceService {
     ip?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
-    await this.billing.assertPro(input.organizationId);
     const row = await this.prisma.voiceListing.findFirst({
       where: { id: input.listingId, publisherOrgId: input.organizationId },
     });
@@ -375,13 +392,13 @@ export class VoiceMarketplaceService {
     ip?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
-    await this.billing.assertPro(input.organizationId);
     const listing = await this.prisma.voiceListing.findFirst({
       where: { id: input.listingId, status: 'published' },
     });
     if (!listing) {
       throw new ApiException('not_found', 'Published listing not found', HttpStatus.NOT_FOUND);
     }
+    await this.assertPaidAccess(input.organizationId, listing.priceCents);
 
     const existing = await this.prisma.voiceListingInstall.findUnique({
       where: {
@@ -465,7 +482,6 @@ export class VoiceMarketplaceService {
   }
 
   async listInstalls(organizationId: string, workspaceId: string) {
-    await this.billing.assertPro(organizationId);
     const rows = await this.prisma.voiceListingInstall.findMany({
       where: { installerOrgId: organizationId, installerWorkspaceId: workspaceId },
       include: {
@@ -510,7 +526,6 @@ export class VoiceMarketplaceService {
     body?: string;
     ip?: string;
   }) {
-    await this.billing.assertPro(input.organizationId);
     const rating = Math.floor(Number(input.rating));
     if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
       throw new ApiException(
@@ -586,7 +601,6 @@ export class VoiceMarketplaceService {
   }
 
   async analytics(organizationId: string) {
-    await this.billing.assertPro(organizationId);
     const [published, installs, sales, reviews] = await Promise.all([
       this.prisma.voiceListing.count({
         where: { publisherOrgId: organizationId, status: 'published' },
@@ -612,13 +626,12 @@ export class VoiceMarketplaceService {
       revenueCents: sales._sum.amountCents ?? 0,
       reviewsReceived: reviews,
       product: 'VerbaLab Voice Marketplace',
-      note: 'Publisher-side aggregates. Full Voice Analytics = Phase 35.',
+      note: 'Publisher-side aggregates. Full Voice Analytics hub: VL-178 /voice-analytics.',
       docs: '/docs/VOICE_MARKETPLACE.md',
     };
   }
 
   async listSales(organizationId: string) {
-    await this.billing.assertPro(organizationId);
     const rows = await this.prisma.voiceListingSale.findMany({
       where: {
         OR: [{ publisherOrgId: organizationId }, { buyerOrgId: organizationId }],
