@@ -37,4 +37,4 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | AI Kernel | VL-214 → VL-223 |
 | Foundation Model Cloud | VL-224 → VL-238 |
 
-Inference Cloud volume closed (VL-204–213). AI Kernel volume closed (VL-214–223) with audit pack under `docs/ai-kernel-audit/`. Foundation Model Cloud volume closed (VL-224 + VL-235–238) with audit pack under `docs/foundation-model-cloud-audit/`. Named-model scaffolds VL-225–234 remain deferred. AI Fabric (Volume 10) unscheduled — ask when ready — honest hub/scaffolds only; see [`FOUNDATION_MODEL_CLOUD.md`](./FOUNDATION_MODEL_CLOUD.md) and Volume 9 README. Named model training remains deferred (ADR-0041 / ADR-0135).
+Inference Cloud volume closed (VL-204–213). AI Kernel volume closed (VL-214–223) with audit pack under `docs/ai-kernel-audit/`. Foundation Model Cloud volume closed (VL-224 + VL-235–238) with audit pack under `docs/foundation-model-cloud-audit/` — see [`FOUNDATION_MODEL_CLOUD.md`](./FOUNDATION_MODEL_CLOUD.md). Named-model scaffolds VL-225–234 and trained weights remain deferred (ADR-0041 / ADR-0135). AI Fabric (Volume 10) unscheduled — ask when ready.
