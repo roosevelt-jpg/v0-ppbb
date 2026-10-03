@@ -36,4 +36,4 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | Inference | VL-204 → VL-213 |
 | AI Kernel | VL-214 → VL-223 |
 
-Inference Cloud volume closed (VL-204–213). AI Kernel Foundation shipped (VL-214); Memory/Prompt/Context/Reasoning/Agent/Workflow Runtimes partial (VL-215–220). Vision / Media / Foundation Model Cloud remain **unscheduled** until ROADMAP executable phases exist.
+Inference Cloud volume closed (VL-204–213). AI Kernel Foundation shipped (VL-214); Memory/Prompt/Context/Reasoning/Agent/Workflow/Plugin Runtimes partial (VL-215–221). Vision / Media / Foundation Model Cloud remain **unscheduled** until ROADMAP executable phases exist.

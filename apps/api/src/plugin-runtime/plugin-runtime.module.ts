@@ -1,0 +1,28 @@
+import { Module } from '@nestjs/common';
+import { PluginRuntimeController } from './plugin-runtime.controller';
+import { PluginRuntimeService } from './plugin-runtime.service';
+import { PluginPolicyGate } from './plugin-policy.gate';
+import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
+import { ReasoningRuntimeModule } from '../reasoning-runtime/reasoning-runtime.module';
+import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
+import { ApiKeysModule } from '../api-keys/api-keys.module';
+import { IdentityModule } from '../identity/identity.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuditCoreModule } from '../audit/audit-core.module';
+import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+
+@Module({
+  imports: [
+    MemoryRuntimeModule,
+    ReasoningRuntimeModule,
+    ContextRuntimeModule,
+    ApiKeysModule,
+    IdentityModule,
+    PrismaModule,
+    AuditCoreModule,
+  ],
+  controllers: [PluginRuntimeController],
+  providers: [PluginRuntimeService, PluginPolicyGate, TranslateAuthGuard],
+  exports: [PluginRuntimeService, PluginPolicyGate],
+})
+export class PluginRuntimeModule {}

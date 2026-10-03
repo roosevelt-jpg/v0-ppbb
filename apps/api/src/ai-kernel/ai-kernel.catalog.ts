@@ -78,11 +78,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'plugin-runtime',
       name: 'Plugin Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/plugin-runtime/engine',
+      console: '/plugin-runtime',
       notes:
-        'Third-party/extension plugins (Phase 88 / VL-221). Must have scoped permissions + sandbox.',
+        'Sandbox plugin registry with hard permission allowlists (VL-221). Not live code/network plugins; Policy Runtime VL-222 hardens further.',
     },
     {
       id: 'policy-runtime',

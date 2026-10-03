@@ -3352,6 +3352,93 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + safety' } },
       },
     },
+    '/v1/plugin-runtime/engine': {
+      get: {
+        summary: 'Plugin Runtime catalog',
+        operationId: 'getPluginRuntimeEngine',
+        responses: { '200': { description: 'Catalog + honesty + ceilings' } },
+      },
+    },
+    '/v1/plugin-runtime/permissions': {
+      get: {
+        summary: 'Plugin Runtime grantable/denied permissions',
+        operationId: 'listPluginRuntimePermissions',
+        responses: { '200': { description: 'Permission lists' } },
+      },
+    },
+    '/v1/plugin-runtime/plugins': {
+      get: {
+        summary: 'List registered plugins',
+        operationId: 'listPluginRuntimePlugins',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Plugins' } },
+      },
+      post: {
+        summary: 'Register a sandbox plugin',
+        operationId: 'registerPluginRuntimePlugin',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Registered' } },
+      },
+    },
+    '/v1/plugin-runtime/plugins/{id}': {
+      get: {
+        summary: 'Get plugin',
+        operationId: 'getPluginRuntimePlugin',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Plugin' } },
+      },
+    },
+    '/v1/plugin-runtime/plugins/{id}/lifecycle': {
+      post: {
+        summary: 'Update plugin lifecycle',
+        operationId: 'lifecyclePluginRuntimePlugin',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Updated' } },
+      },
+    },
+    '/v1/plugin-runtime/plugins/{id}/version': {
+      post: {
+        summary: 'Bump plugin version',
+        operationId: 'versionPluginRuntimePlugin',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Versioned' } },
+      },
+    },
+    '/v1/plugin-runtime/invoke': {
+      post: {
+        summary: 'Invoke sandbox plugin',
+        operationId: 'invokePluginRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sandbox invoke result' } },
+      },
+    },
+    '/v1/plugin-runtime/marketplace': {
+      get: {
+        summary: 'Plugin marketplace counts',
+        operationId: 'getPluginRuntimeMarketplace',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Listing counts' } },
+      },
+    },
+    '/v1/plugin-runtime/analytics': {
+      get: {
+        summary: 'Plugin Runtime analytics',
+        operationId: 'getPluginRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/plugin-runtime/monitoring': {
+      get: {
+        summary: 'Plugin Runtime monitoring',
+        operationId: 'getPluginRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + safety' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

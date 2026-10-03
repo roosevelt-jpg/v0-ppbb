@@ -33,6 +33,9 @@ function usage(): never {
   verbalab workflow-runtime-engine
   verbalab workflow-runtime-create --name <name> [--permission <id>]... [--mode sequential|parallel]
   verbalab workflow-runtime-run --workflow <id> [--approved]
+  verbalab plugin-runtime-engine
+  verbalab plugin-runtime-register --name <name> [--permission <id>]...
+  verbalab plugin-runtime-invoke --plugin <id> [--action <permission>]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -363,6 +366,51 @@ async function main() {
         await vl.workflowRuntimeRun({
           workflowId,
           approved: rest.includes('--approved'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'plugin-runtime-engine') {
+    console.log(JSON.stringify(await vl.pluginRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'plugin-runtime-register') {
+    const name = argValue(rest, '--name');
+    if (!name) usage();
+    const permissions: string[] = [];
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--permission' && rest[i + 1]) {
+        permissions.push(rest[i + 1]!);
+        i++;
+      }
+    }
+    console.log(
+      JSON.stringify(
+        await vl.pluginRuntimeRegister({
+          name,
+          permissions: permissions.length ? permissions : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'plugin-runtime-invoke') {
+    const pluginId = argValue(rest, '--plugin');
+    if (!pluginId) usage();
+    const action = argValue(rest, '--action');
+    console.log(
+      JSON.stringify(
+        await vl.pluginRuntimeInvoke({
+          pluginId,
+          actions: action ? [{ action }] : undefined,
         }),
         null,
         2,

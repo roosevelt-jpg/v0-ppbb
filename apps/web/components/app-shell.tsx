@@ -21,6 +21,7 @@ const links = [
   { href: '/reasoning-runtime', label: 'Reasoning Runtime' },
   { href: '/agent-runtime', label: 'Agent Runtime' },
   { href: '/workflow-runtime', label: 'Workflow Runtime' },
+  { href: '/plugin-runtime', label: 'Plugin Runtime' },
   { href: '/gpu-platform', label: 'GPU Platform' },
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },

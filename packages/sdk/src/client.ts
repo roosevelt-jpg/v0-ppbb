@@ -1555,6 +1555,98 @@ export class VerbaLab {
     });
   }
 
+  async pluginRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    permissions: Array<{ id: string }>;
+    deniedActions: Array<{ id: string }>;
+    ceilings: {
+      maxPluginsPerWorkspace: number;
+      maxInvokeSteps: number;
+      mode: string;
+      liveCodeExecution: boolean;
+    };
+    mode: string;
+    honesty: {
+      openToolExecution: boolean;
+      liveCodeExecution: boolean;
+      browserExtensionOs: boolean;
+      vsCodeExtensionOs: boolean;
+      wasmPluginOs: boolean;
+      regeneratesVolumes1to7: boolean;
+      regeneratesMarketplace: boolean;
+      extendsMarketplace: boolean;
+      scopedPermissionsRequired: boolean;
+      sandboxRequired: boolean;
+      policyHardGateRequired: boolean;
+      policyRuntimeWired: boolean;
+      localPermissionHardGate: boolean;
+      orgWorkspaceScoped: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/plugin-runtime/engine', { method: 'GET' });
+  }
+
+  async pluginRuntimeRegister(body: {
+    name: string;
+    permissions?: string[];
+    dependencies?: string[];
+    description?: string;
+  }): Promise<{
+    plugin: {
+      id: string;
+      name: string;
+      status: string;
+      version: number;
+      permissions: string[];
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/plugin-runtime/plugins', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async pluginRuntimeLifecycle(
+    id: string,
+    body: { status: string },
+  ): Promise<{ plugin: { id: string; status: string }; note?: string }> {
+    return this.requestJson(`/v1/plugin-runtime/plugins/${encodeURIComponent(id)}/lifecycle`, {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async pluginRuntimeInvoke(body: {
+    pluginId: string;
+    actions?: Array<{ action: string; input?: Record<string, unknown> }>;
+    payload?: Record<string, unknown>;
+  }): Promise<{
+    invocation: {
+      id: string;
+      pluginId: string;
+      status: string;
+      sandbox: boolean;
+      liveCodeExecution: boolean;
+      steps: Array<{ action: string; allowed: boolean; simulated: boolean }>;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/plugin-runtime/invoke', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

@@ -123,6 +123,11 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(workflow.console).toBe('/workflow-runtime');
     expect(workflow.notes).toMatch(/sandbox|permission/i);
 
+    const plugin = res.body.products.find((p: { id: string }) => p.id === 'plugin-runtime');
+    expect(plugin.status).toBe('partial');
+    expect(plugin.console).toBe('/plugin-runtime');
+    expect(plugin.notes).toMatch(/sandbox|permission/i);
+
     const policy = res.body.products.find((p: { id: string }) => p.id === 'policy-runtime');
     expect(policy.status).toBe('deferred');
     expect(policy.notes).toMatch(/hard|block|gate/i);
@@ -144,6 +149,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.deferred.reasoningRuntime).toBe(false);
     expect(overview.deferred.agentRuntime).toBe(false);
     expect(overview.deferred.workflowRuntime).toBe(false);
+    expect(overview.deferred.pluginRuntime).toBe(false);
     expect(overview.deferred.policyRuntime).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to7).toBe(false);
     expect(overview.safety.policyMustHardGate).toBe(true);
@@ -154,6 +160,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.links.reasoningRuntime).toBe('/reasoning-runtime');
     expect(overview.links.agentRuntime).toBe('/agent-runtime');
     expect(overview.links.workflowRuntime).toBe('/workflow-runtime');
+    expect(overview.links.pluginRuntime).toBe('/plugin-runtime');
     expect(overview.links.inferenceCloud).toBe('/inference-cloud');
     expect(overview.architecture.extendsInferenceCloud).toBe(true);
 
@@ -180,6 +187,10 @@ describe('AI Kernel Foundation (VL-214)', () => {
     const workflow = overview.products.find((p: { id: string }) => p.id === 'workflow-runtime');
     expect(workflow?.status).toBe('partial');
     expect(workflow?.console).toBe('/workflow-runtime');
+
+    const plugin = overview.products.find((p: { id: string }) => p.id === 'plugin-runtime');
+    expect(plugin?.status).toBe('partial');
+    expect(plugin?.console).toBe('/plugin-runtime');
   });
 
   it('exposes aiKernelRuntimes via GraphQL CQRS façade', async () => {

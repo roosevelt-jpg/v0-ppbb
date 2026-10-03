@@ -17,6 +17,7 @@ import { ContextRuntimeModule } from '../context-runtime/context-runtime.module'
 import { ReasoningRuntimeModule } from '../reasoning-runtime/reasoning-runtime.module';
 import { AgentRuntimeModule } from '../agent-runtime/agent-runtime.module';
 import { WorkflowRuntimeModule } from '../workflow-runtime/workflow-runtime.module';
+import { PluginRuntimeModule } from '../plugin-runtime/plugin-runtime.module';
 import { GpuPlatformModule } from '../gpu-platform/gpu-platform.module';
 import { ModelServingModule } from '../model-serving/model-serving.module';
 import { AiRouterModule } from '../ai-router/ai-router.module';
@@ -79,6 +80,7 @@ import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
 import { ReasoningRuntimeGraphqlResolver } from './reasoning-runtime.resolver';
 import { AgentRuntimeGraphqlResolver } from './agent-runtime.resolver';
 import { WorkflowRuntimeGraphqlResolver } from './workflow-runtime.resolver';
+import { PluginRuntimeGraphqlResolver } from './plugin-runtime.resolver';
 import { GpuPlatformGraphqlResolver } from './gpu-platform.resolver';
 import { ModelServingGraphqlResolver } from './model-serving.resolver';
 import { AiRouterGraphqlResolver } from './ai-router.resolver';
@@ -161,6 +163,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ReasoningRuntimeModule,
     AgentRuntimeModule,
     WorkflowRuntimeModule,
+    PluginRuntimeModule,
     GpuPlatformModule,
     ModelServingModule,
     AiRouterModule,
@@ -231,6 +234,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ReasoningRuntimeGraphqlResolver,
     AgentRuntimeGraphqlResolver,
     WorkflowRuntimeGraphqlResolver,
+    PluginRuntimeGraphqlResolver,
     GpuPlatformGraphqlResolver,
     ModelServingGraphqlResolver,
     AiRouterGraphqlResolver,

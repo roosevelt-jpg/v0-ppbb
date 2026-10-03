@@ -832,6 +832,81 @@ export class GqlWorkflowRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlPluginRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPluginRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPluginRuntimeCapability])
+  capabilities!: GqlPluginRuntimeCapability[];
+
+  @Field()
+  openToolExecution!: boolean;
+
+  @Field()
+  liveCodeExecution!: boolean;
+
+  @Field()
+  browserExtensionOs!: boolean;
+
+  @Field()
+  vsCodeExtensionOs!: boolean;
+
+  @Field()
+  wasmPluginOs!: boolean;
+
+  @Field()
+  extendsMarketplace!: boolean;
+
+  @Field()
+  regeneratesMarketplace!: boolean;
+
+  @Field()
+  scopedPermissionsRequired!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  policyHardGateRequired!: boolean;
+
+  @Field()
+  policyRuntimeWired!: boolean;
+
+  @Field()
+  localPermissionHardGate!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxPluginsPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;
