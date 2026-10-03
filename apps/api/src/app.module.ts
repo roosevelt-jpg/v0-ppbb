@@ -66,6 +66,7 @@ import { AiKernelModule } from './ai-kernel/ai-kernel.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
+import { ReasoningRuntimeModule } from './reasoning-runtime/reasoning-runtime.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -142,6 +143,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
+    ReasoningRuntimeModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

@@ -51,11 +51,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'reasoning-runtime',
       name: 'Reasoning Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/reasoning-runtime/engine',
+      console: '/reasoning-runtime',
       notes:
-        'Reasoning execution primitives (Phase 85 / VL-218). Extends Reasoning Cloud — not custom reasoner kernel OS.',
+        'Kernel reasoning over VL-186 (VL-218). Plan/reflect/eval/history — not custom reasoner/tool-exec OS.',
     },
     {
       id: 'agent-runtime',

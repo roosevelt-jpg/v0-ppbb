@@ -18,6 +18,7 @@ const links = [
   { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },
+  { href: '/reasoning-runtime', label: 'Reasoning Runtime' },
   { href: '/gpu-platform', label: 'GPU Platform' },
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },

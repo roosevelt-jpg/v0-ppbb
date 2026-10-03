@@ -43,7 +43,7 @@ export class AiKernelService {
         memoryRuntime: false,
         promptRuntime: false,
         contextRuntime: false,
-        reasoningRuntime: true,
+        reasoningRuntime: false,
         agentRuntime: true,
         workflowRuntime: true,
         pluginRuntime: true,
@@ -57,6 +57,7 @@ export class AiKernelService {
         memoryRuntime: '/memory-runtime',
         promptRuntime: '/prompt-runtime',
         contextRuntime: '/context-runtime',
+        reasoningRuntime: '/reasoning-runtime',
         inferenceCloud: '/inference-cloud',
         gateway: '/gateway',
         memoryCloud: '/memory-cloud',
@@ -90,7 +91,7 @@ export class AiKernelService {
         vaiosOs: false,
         regeneratesVolumes1to7: false,
       },
-      note: 'Kernel monitoring snapshot (VL-214+). Memory/Prompt/Context Runtimes partial (VL-215–217); further VL-218–222.',
+      note: 'Kernel monitoring snapshot (VL-214+). Memory/Prompt/Context/Reasoning Runtimes partial (VL-215–218); further VL-219–222.',
     };
   }
 }

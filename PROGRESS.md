@@ -247,7 +247,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-215 | Memory Runtime (Phase 82) | Done | `/memory-runtime` + kernel layer over VL-183; ADR-0126. Not Mem0/replication OS. |
 | VL-216 | Prompt Runtime (Phase 83) | Done | `/prompt-runtime` over VL-086/188; ADR-0127. Execute=render/validate; not research lab/mesh. |
 | VL-217 | Context Runtime (Phase 84) | Done | `/context-runtime` over VL-185; ADR-0128. Prioritize/compress/retrieve; not infinite-context OS. |
-| VL-218 | Reasoning Runtime (Phase 85) | Not Started | |
+| VL-218 | Reasoning Runtime (Phase 85) | Done | `/reasoning-runtime` over VL-186; ADR-0129. Plan/reflect/eval/history; no tool execution. |
 | VL-219 | Agent Runtime (Phase 86) | Not Started | Must sandbox + scoped permissions. |
 | VL-220 | Workflow Runtime (Phase 87) | Not Started | Must sandbox + scoped permissions. |
 | VL-221 | Plugin Runtime (Phase 88) | Not Started | Must sandbox + scoped permissions. |
@@ -384,3 +384,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-215 Done: Memory Runtime (Phase 82) — kernel-layer over VL-183 MemoryRecord; ADR-0126. Ceilings/eviction/versioning; not Mem0/replication OS. |
 | 2026-10-03 | VL-216 Done: Prompt Runtime (Phase 83) — execute/render/validate over VL-086/188; ADR-0127. IC prompt cache; not research lab/mesh OS. |
 | 2026-10-03 | VL-217 Done: Context Runtime (Phase 84) — assemble/prioritize/compress over VL-185; ADR-0128. IC context cache; not infinite-context OS. |
+| 2026-10-03 | VL-218 Done: Reasoning Runtime (Phase 85) — plan/reflect/eval/history over VL-186; ADR-0129. Tool selection without execution; not custom reasoner OS. |

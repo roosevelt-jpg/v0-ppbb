@@ -1266,6 +1266,80 @@ export class VerbaLab {
     });
   }
 
+  async reasoningRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    mode: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    ceilings: {
+      maxHistoryPerWorkspace: number;
+      mode: string;
+    };
+    honesty: {
+      customReasonerKernel: boolean;
+      symbolicReasonerOs: boolean;
+      fullTreeOfThought: boolean;
+      toolExecution: boolean;
+      agentOs: boolean;
+      llmAsJudgeEvalLab: boolean;
+      droolsPegaBrms: boolean;
+      regeneratesReasoningCloud: boolean;
+      extendsReasoningCloud: boolean;
+      orgWorkspaceScoped: boolean;
+      storesHistoryInMemoryCloud: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/reasoning-runtime/engine', { method: 'GET' });
+  }
+
+  async reasoningRuntimePlan(body: {
+    problem: string;
+    language?: string;
+    model?: string;
+    retrieve?: boolean;
+    sandboxOnly?: boolean;
+  }): Promise<{
+    strategy: string;
+    problem: string;
+    steps: string[];
+    answer: string;
+    historyId?: string | null;
+    note?: string;
+  }> {
+    return this.requestJson('/v1/reasoning-runtime/plan', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async reasoningRuntimeReason(body: {
+    problem: string;
+    strategy?: string;
+    language?: string;
+    model?: string;
+    retrieve?: boolean;
+    persist?: boolean;
+  }): Promise<{
+    strategy: string;
+    steps: string[];
+    answer: string;
+    confidence?: { score: number; label: string };
+    historyId?: string | null;
+    note?: string;
+  }> {
+    return this.requestJson('/v1/reasoning-runtime/reason', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

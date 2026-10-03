@@ -3017,6 +3017,119 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty' } },
       },
     },
+    '/v1/reasoning-runtime/engine': {
+      get: {
+        summary: 'Reasoning Runtime catalog',
+        operationId: 'getReasoningRuntimeEngine',
+        responses: {
+          '200': { description: 'Kernel reasoning capabilities and honesty' },
+        },
+      },
+    },
+    '/v1/reasoning-runtime/reason': {
+      post: {
+        summary: 'Run kernel reasoning',
+        operationId: 'reasonReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Reasoned answer + eval/confidence' } },
+      },
+    },
+    '/v1/reasoning-runtime/plan': {
+      post: {
+        summary: 'Plan via Reasoning Runtime',
+        operationId: 'planReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Plan steps' } },
+      },
+    },
+    '/v1/reasoning-runtime/reflect': {
+      post: {
+        summary: 'Reflect on an answer',
+        operationId: 'reflectReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Heuristic critiques' } },
+      },
+    },
+    '/v1/reasoning-runtime/select-tools': {
+      post: {
+        summary: 'Select tools (no execution)',
+        operationId: 'selectToolsReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Suggested tool ids' } },
+      },
+    },
+    '/v1/reasoning-runtime/select-model': {
+      post: {
+        summary: 'Select model via AI Router',
+        operationId: 'selectModelReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Model selection' } },
+      },
+    },
+    '/v1/reasoning-runtime/decision-tree': {
+      post: {
+        summary: 'Sandbox decision tree',
+        operationId: 'decisionTreeReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decision tree façade' } },
+      },
+    },
+    '/v1/reasoning-runtime/evaluate': {
+      post: {
+        summary: 'Self-evaluate answer',
+        operationId: 'evaluateReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Heuristic evaluation' } },
+      },
+    },
+    '/v1/reasoning-runtime/confidence': {
+      post: {
+        summary: 'Confidence score',
+        operationId: 'confidenceReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Blended confidence' } },
+      },
+    },
+    '/v1/reasoning-runtime/history': {
+      get: {
+        summary: 'Reasoning history',
+        operationId: 'listReasoningRuntimeHistory',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Stored runs' } },
+      },
+    },
+    '/v1/reasoning-runtime/history/{id}': {
+      get: {
+        summary: 'Replay reasoning run',
+        operationId: 'replayReasoningRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: { '200': { description: 'Stored run payload' } },
+      },
+    },
+    '/v1/reasoning-runtime/analytics': {
+      get: {
+        summary: 'Reasoning Runtime analytics',
+        operationId: 'getReasoningRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/reasoning-runtime/monitoring': {
+      get: {
+        summary: 'Reasoning Runtime monitoring',
+        operationId: 'getReasoningRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

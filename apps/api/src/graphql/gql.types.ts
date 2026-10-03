@@ -622,6 +622,75 @@ export class GqlContextRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlReasoningRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlReasoningRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlReasoningRuntimeCapability])
+  capabilities!: GqlReasoningRuntimeCapability[];
+
+  @Field()
+  customReasonerKernel!: boolean;
+
+  @Field()
+  symbolicReasonerOs!: boolean;
+
+  @Field()
+  fullTreeOfThought!: boolean;
+
+  @Field()
+  toolExecution!: boolean;
+
+  @Field()
+  agentOs!: boolean;
+
+  @Field()
+  llmAsJudgeEvalLab!: boolean;
+
+  @Field()
+  droolsPegaBrms!: boolean;
+
+  @Field()
+  regeneratesReasoningCloud!: boolean;
+
+  @Field()
+  extendsReasoningCloud!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  storesHistoryInMemoryCloud!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxHistoryPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

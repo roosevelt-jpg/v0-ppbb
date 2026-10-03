@@ -25,6 +25,8 @@ function usage(): never {
   verbalab prompt-runtime-execute [--key chat|rag|voice_faq] [--feature <name>] [--var k=v]
   verbalab context-runtime-engine
   verbalab context-runtime-assemble [--query <text>] [--model <hint>] [--max-chars <n>]
+  verbalab reasoning-runtime-engine
+  verbalab reasoning-runtime-plan --problem <text> [--sandbox]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -242,6 +244,27 @@ async function main() {
           query: argValue(rest, '--query') ?? undefined,
           modelHint: argValue(rest, '--model') ?? undefined,
           maxChars: maxCharsRaw ? Number(maxCharsRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'reasoning-runtime-engine') {
+    console.log(JSON.stringify(await vl.reasoningRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reasoning-runtime-plan') {
+    const problem = argValue(rest, '--problem');
+    if (!problem) usage();
+    console.log(
+      JSON.stringify(
+        await vl.reasoningRuntimePlan({
+          problem,
+          sandboxOnly: rest.includes('--sandbox'),
         }),
         null,
         2,
