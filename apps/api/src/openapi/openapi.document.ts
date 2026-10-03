@@ -2849,6 +2849,111 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/model-evaluation-platform/engine': {
+      get: {
+        summary: 'Model Evaluation Platform engine catalog',
+        operationId: 'getModelEvaluationPlatformEngine',
+        responses: {
+          '200': {
+            description:
+              'Eval suites, ceilings, coverage link, honesty (no global leaderboard/SOTA)',
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/suites': {
+      get: {
+        summary: 'Model Evaluation Platform suites',
+        operationId: 'listModelEvaluationSuites',
+        responses: {
+          '200': {
+            description: 'Translation/bias/safety/latency runnable; MMLU/HumanEval deferred',
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/overview': {
+      get: {
+        summary: 'Model Evaluation Platform org overview',
+        operationId: 'getModelEvaluationPlatformOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, runs, deferred suites' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/runs': {
+      get: {
+        summary: 'List evaluation runs',
+        operationId: 'listModelEvaluationRuns',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Org-scoped sandbox/handoff runs' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create evaluation run',
+        operationId: 'createModelEvaluationRun',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Run created (and executed unless execute=false)' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/leaderboard': {
+      get: {
+        summary: 'Org-scoped evaluation leaderboard',
+        operationId: 'getModelEvaluationLeaderboard',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Local ranks only — not public SOTA board' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/reports': {
+      get: {
+        summary: 'Evaluation reports aggregate',
+        operationId: 'getModelEvaluationReports',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Run aggregates + coverage snapshot' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-evaluation-platform/monitoring': {
+      get: {
+        summary: 'Model Evaluation Platform monitoring',
+        operationId: 'getModelEvaluationPlatformMonitoring',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Run status snapshot + honesty' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

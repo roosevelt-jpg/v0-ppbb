@@ -65,6 +65,7 @@ import { AiRuntimeAnalyticsModule } from './ai-runtime-analytics/ai-runtime-anal
 import { AiKernelModule } from './ai-kernel/ai-kernel.module';
 import { FoundationModelCloudModule } from './foundation-model-cloud/foundation-model-cloud.module';
 import { ModelTrainingPlatformModule } from './model-training-platform/model-training-platform.module';
+import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model-evaluation-platform.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -148,6 +149,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiKernelModule,
     FoundationModelCloudModule,
     ModelTrainingPlatformModule,
+    ModelEvaluationPlatformModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

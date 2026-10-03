@@ -160,6 +160,12 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     );
     expect(training.status).toBe('partial');
     expect(training.console).toBe('/model-training-platform');
+
+    const evaluation = res.body.products.find(
+      (p: { id: string }) => p.id === 'model-evaluation-platform',
+    );
+    expect(evaluation.status).toBe('partial');
+    expect(evaluation.console).toBe('/model-evaluation-platform');
   });
 
   it('returns org overview with deferred families', async () => {
@@ -175,7 +181,7 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     expect(overview.deferred.atlas).toBe(true);
     expect(overview.deferred.baobab).toBe(true);
     expect(overview.deferred.modelTrainingPlatform).toBe(false);
-    expect(overview.deferred.modelEvaluationPlatform).toBe(true);
+    expect(overview.deferred.modelEvaluationPlatform).toBe(false);
     expect(overview.deferred.modelRegistry).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to8).toBe(false);
     expect(overview.honesty.trainsCompetitiveFoundationWeights).toBe(false);

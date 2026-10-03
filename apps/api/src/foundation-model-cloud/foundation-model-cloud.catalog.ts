@@ -130,11 +130,12 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
     {
       id: 'model-evaluation-platform',
       name: 'Model Evaluation Platform',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/model-evaluation-platform/engine',
+      console: '/model-evaluation-platform',
       modality: 'mlops',
-      notes: 'Generic evaluation harness (Phase 103 / VL-236).',
+      notes:
+        'Eval hub over VL-100 + sandbox bias/safety/latency (Phase 103 / VL-236). MMLU/HumanEval deferred; no SOTA claims.',
     },
     {
       id: 'model-registry',
@@ -186,6 +187,7 @@ export function foundationModelCloudHonesty() {
     modelFamilyScaffoldCatalog: true,
     mLOpsPlatformShipped: false,
     modelTrainingPlatformPartial: true,
+    modelEvaluationPlatformPartial: true,
     hexagonalRewrite: false,
     linuxOsRewrite: false,
   };

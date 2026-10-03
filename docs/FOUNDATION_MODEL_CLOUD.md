@@ -16,7 +16,7 @@ ADR-0041 deferred the *training program* (VL-112). VL-224 **re-opens only the ho
 | Foundation Model Cloud Foundation | **VL-224** — `/foundation-model-cloud` + product catalog / overview |
 | Atlas … Translate (Phases 92–101) | **Deferred** scaffolds in catalog — no trained weights |
 | Model Training Platform (Phase 102) | **Partial** — VL-235 ([`MODEL_TRAINING_PLATFORM.md`](./MODEL_TRAINING_PLATFORM.md)); over VL-111 |
-| Model Evaluation Platform (Phase 103) | **Deferred** — high-value MLOps track |
+| Model Evaluation Platform (Phase 103) | **Partial** — VL-236 ([`MODEL_EVALUATION_PLATFORM.md`](./MODEL_EVALUATION_PLATFORM.md)); over VL-100 |
 | Model Registry (Phase 104) | **Deferred** — extends existing VL-110 registry concepts |
 | Production Audit (Phase 105) | Later — **VL-238** |
 | DDD / CQRS / Hexagonal | Bounded catalog CQRS slice — `hexagonalRewrite: false` |

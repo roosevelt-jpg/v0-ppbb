@@ -469,6 +469,27 @@ export class GqlModelTrainingMethod {
 }
 
 @ObjectType()
+export class GqlModelEvaluationSuite {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field()
+  runnable!: boolean;
+
+  @Field(() => String, { nullable: true })
+  existingApi!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

@@ -1155,6 +1155,30 @@ export class VerbaLab {
     return this.requestJson('/v1/model-training-platform/engine', { method: 'GET' });
   }
 
+  async modelEvaluationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    suites: Array<{
+      id: string;
+      name: string;
+      status: string;
+      runnable: boolean;
+      existingApi: string | null;
+      notes: string;
+    }>;
+    honesty: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/model-evaluation-platform/engine', { method: 'GET' });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

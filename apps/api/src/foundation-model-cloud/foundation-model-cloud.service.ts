@@ -65,7 +65,7 @@ export class FoundationModelCloudService {
         fusion: true,
         translate: true,
         modelTrainingPlatform: false,
-        modelEvaluationPlatform: true,
+        modelEvaluationPlatform: false,
         modelRegistry: true,
         trainsCompetitiveFoundationWeights: true,
         openAiReplacementOs: true,
@@ -74,6 +74,7 @@ export class FoundationModelCloudService {
       links: {
         foundationModelCloud: '/foundation-model-cloud',
         modelTrainingPlatform: '/model-training-platform',
+        modelEvaluationPlatform: '/model-evaluation-platform',
         inferenceCloud: '/inference-cloud',
         aiKernel: '/ai-kernel',
         modelServing: '/model-serving',
