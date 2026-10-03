@@ -83,7 +83,7 @@ export function EnterpriseArchitectureRepositoryClient() {
         Enterprise Architecture Repository
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-359 — VerbaLab VCOS console. Internal business tooling; not a substitute for a real board or counsel.
+        VerbaLab VCOS console. Internal business tooling; not a substitute for a real board or counsel.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

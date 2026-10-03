@@ -48,7 +48,7 @@ export function localizationPlatformCatalog() {
         name: 'Timezone',
         status: 'shipped',
         api: 'POST /v1/locales/format',
-        notes: 'IANA timeZone on Intl.DateTimeFormat (VL-141).',
+        notes: 'IANA timeZone on Intl.DateTimeFormat.',
       },
       {
         id: 'date_formats',
@@ -127,7 +127,7 @@ export function localizationPlatformCatalog() {
       localePacks: { status: 'shipped', api: '/v1/locales' },
       qa: { status: 'shipped', api: 'POST /v1/localize/qa' },
       rest: { status: 'shipped' },
-      graphql: { status: 'shipped', notes: 'localize + ICU ops (VL-141)' },
+      graphql: { status: 'shipped', notes: 'localize + ICU ops' },
       sdk: { status: 'shipped', package: '@verbalab/sdk' },
       analytics: { status: 'shipped', api: 'GET /v1/analytics/overview', notes: 'Org translate analytics' },
       monitoring: { status: 'shipped', api: 'GET /v1/metrics/translate' },

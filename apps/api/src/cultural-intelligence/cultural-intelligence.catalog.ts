@@ -114,7 +114,7 @@ export function culturalIntelligenceEngineCatalog() {
   return {
     product: 'VerbaLab Cultural Intelligence',
     note:
-      'Cultural Intelligence (VL-262). Greetings/etiquette/festivals/proverbs/idioms with provenance, sourceCommunity, and consentStatus. traditionalKnowledgeConsentRequired=true — not an extractive scrape of traditional knowledge.',
+      'Cultural Intelligence. Greetings/etiquette/festivals/proverbs/idioms with provenance, sourceCommunity, and consentStatus. traditionalKnowledgeConsentRequired=true — not an extractive scrape of traditional knowledge.',
     capabilities: [
       {
         id: 'cultural-entries',

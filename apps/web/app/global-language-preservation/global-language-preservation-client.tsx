@@ -84,7 +84,7 @@ export function GlobalLanguagePreservationClient() {
         Global Language Preservation
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-388 — VerbaLab Digital Civilization console. Demo/licensable platform products — not national infrastructure already in production.
+        VerbaLab Digital Civilization console. Demo/licensable platform products — not national infrastructure already in production.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

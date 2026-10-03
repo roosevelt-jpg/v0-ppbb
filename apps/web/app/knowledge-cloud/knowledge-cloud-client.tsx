@@ -72,7 +72,7 @@ export function KnowledgeCloudClient() {
         Knowledge Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Enterprise knowledge hub over VL-062 RAG and Intelligence Cloud. Extends existing
+        Enterprise knowledge hub over RAG and Intelligence Cloud. Extends existing
         knowledge surfaces — does not invent a SharePoint/ontology OS.
       </p>
 
@@ -156,7 +156,7 @@ export function KnowledgeCloudClient() {
           <section>
             <h2 style={label}>Architecture honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
-              Extends VL-062 {data.architecture.extendsVl062 ? 'yes' : 'no'} · Regenerates VL-062{' '}
+              Extends {data.architecture.extendsVl062 ? 'yes' : 'no'} · Regenerates {' '}
               {data.architecture.regeneratesVl062 ? 'yes' : 'no'} · Enterprise knowledge OS{' '}
               {data.architecture.enterpriseKnowledgeOs ? 'yes' : 'no'} · Ontology OS{' '}
               {data.architecture.ontologyOs ? 'yes' : 'no'} · pgvector{' '}

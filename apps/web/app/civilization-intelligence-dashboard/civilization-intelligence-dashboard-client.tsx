@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { hidePhaseIds } from '@/lib/ui-copy';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -84,16 +85,16 @@ export function CivilizationIntelligenceDashboardClient() {
         Civilization Intelligence Dashboard
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-392 — VerbaLab Digital Civilization console. Demo/licensable platform products — not national infrastructure already in production.
+        VerbaLab Digital Civilization console. Demo/licensable platform products — not national infrastructure already in production.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
         <div style={{ display: 'grid', gap: '1.25rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{data.note}</p>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(data.note)}</p>
           {data.safety?.note ? (
             <p style={{ margin: 0, borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem', color: 'var(--muted)' }}>
-              {String(data.safety.note)}
+              {hidePhaseIds(String(data.safety.note))}
             </p>
           ) : null}
 

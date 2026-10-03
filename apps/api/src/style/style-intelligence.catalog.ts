@@ -27,7 +27,7 @@ export function styleIntelligenceCatalog() {
         name: 'Professional',
         status: 'shipped',
         api: 'POST /v1/style/rewrite profile=professional',
-        notes: 'Business formality (VL-134).',
+        notes: 'Business formality.',
       },
       {
         id: 'academic',

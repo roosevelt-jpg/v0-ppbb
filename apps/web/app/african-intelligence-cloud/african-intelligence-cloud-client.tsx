@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { hidePhaseIds } from '@/lib/ui-copy';
 import { AppShell } from '@/components/app-shell';
 
 type Product = {
@@ -52,10 +53,10 @@ export function AfricanIntelligenceCloudClient() {
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
       {data ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{data.note}</p>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(data.note)}</p>
           <section style={{ borderLeft: '3px solid #0f766e', paddingLeft: '0.85rem' }}>
             <h2 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--muted)', margin: '0 0 0.35rem' }}>Safety</h2>
-            <p style={{ margin: 0, maxWidth: '44rem', color: 'var(--muted)' }}>{data.safety.note}</p>
+            <p style={{ margin: 0, maxWidth: '44rem', color: 'var(--muted)' }}>{hidePhaseIds(data.safety.note)}</p>
           </section>
           <section>
             <h2 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--muted)', margin: '0 0 0.75rem' }}>Products</h2>
@@ -66,7 +67,7 @@ export function AfricanIntelligenceCloudClient() {
                     {p.console ? <Link href={p.console}>{p.name}</Link> : <span>{p.name}</span>}
                     <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{p.status}</span>
                   </div>
-                  <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>{p.notes}</p>
+                  <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(p.notes)}</p>
                 </li>
               ))}
             </ul>

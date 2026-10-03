@@ -33,7 +33,7 @@ export class NestExecutiveIntelligencePlatformCatalogAdapter implements Executiv
       status: 'shipped',
       api: 'GET /v1/executive-intelligence-platform/engine',
       console: '/executive-intelligence-platform',
-      notes: 'VL-361 shipped.',
+      notes: 'shipped.',
     }];
   }
 }

@@ -46,7 +46,7 @@ export function educationIntelligenceEngineCatalog() {
   return {
     product: 'VerbaLab Education Intelligence',
     note:
-      'Education Intelligence (VL-267). Domain terms/services catalog for African Intelligence Cloud with domain-specific safety flags. Extends Knowledge/Intelligence clouds — not a vertical operations OS.',
+      'Education Intelligence. Domain terms/services catalog for African Intelligence Cloud with domain-specific safety flags. Extends Knowledge/Intelligence clouds — not a vertical operations OS.',
     capabilities: terms,
     terms,
     architecture: {

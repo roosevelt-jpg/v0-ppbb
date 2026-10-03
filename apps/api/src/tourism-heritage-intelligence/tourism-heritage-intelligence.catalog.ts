@@ -46,7 +46,7 @@ export function tourismHeritageIntelligenceEngineCatalog() {
   return {
     product: 'VerbaLab Tourism & Heritage Intelligence',
     note:
-      'Tourism & Heritage Intelligence (VL-269). Domain terms/services catalog for African Intelligence Cloud with domain-specific safety flags. Extends Knowledge/Intelligence clouds — not a vertical operations OS.',
+      'Tourism & Heritage Intelligence. Domain terms/services catalog for African Intelligence Cloud with domain-specific safety flags. Extends Knowledge/Intelligence clouds — not a vertical operations OS.',
     capabilities: terms,
     terms,
     architecture: {

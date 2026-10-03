@@ -84,7 +84,7 @@ export function AiEconomyClient() {
         AI Economy
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-374 — VerbaLab AI Economy console. Marketplace/commerce tooling; not world-largest-economy status, funding portal, or autonomous payouts.
+        VerbaLab AI Economy console. Marketplace/commerce tooling; not world-largest-economy status, funding portal, or autonomous payouts.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

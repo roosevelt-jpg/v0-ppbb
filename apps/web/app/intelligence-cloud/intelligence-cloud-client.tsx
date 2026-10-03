@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { hidePhaseIds } from '@/lib/ui-copy';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -84,7 +85,7 @@ export function IntelligenceCloudClient() {
             {data.usage.embeddings.requests} req · Docs {data.workspace.knowledgeDocuments} · Chunks{' '}
             {data.workspace.knowledgeChunks}
           </p>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{data.note}</p>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(data.note)}</p>
 
           <section>
             <h2 style={label}>Links</h2>

@@ -661,7 +661,7 @@ export function africanLanguageRegistryEngineCatalog() {
   return {
     product: 'VerbaLab African Language Registry',
     note:
-      'African Language Registry (VL-261). Curated major-language seed extending dialects/locales. coverageComplete=false — Africa country packs and major spoken languages are seeded; micro-languages may still expand. Not an Ethnologue dump.',
+      'African Language Registry. Curated major-language seed extending dialects/locales. coverageComplete=false — Africa country packs and major spoken languages are seeded; micro-languages may still expand. Not an Ethnologue dump.',
     capabilities: [
       {
         id: 'language-catalog',

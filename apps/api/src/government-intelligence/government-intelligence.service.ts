@@ -71,7 +71,7 @@ export class GovernmentIntelligenceService {
       honesty: catalog.honesty,
       safety: catalog.safety,
       productionUnlock: catalog.productionUnlock,
-      note: 'Government Intelligence monitoring snapshot (VL-264) + Model Runtime unlock.',
+      note: 'Government Intelligence monitoring snapshot + Model Runtime unlock.',
     };
   }
 }

@@ -87,7 +87,7 @@ export function VoiceCloningClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Enterprise cloning with explicit consent, ownership attestation, abuse review, licensing,
-        permissions, and required watermarking. Extends VL-064 — does not skip trust gates.
+        permissions, and required watermarking. Extends — does not skip trust gates.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

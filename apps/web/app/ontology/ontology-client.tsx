@@ -120,7 +120,7 @@ export function OntologyClient() {
             <h2 style={label}>Honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Org/workspace scoped {engine.honesty.orgWorkspaceScoped ? 'yes' : 'no'} · Extends
-              VL-184 {engine.honesty.extendsVl184 ? 'yes' : 'no'} · OWL OS{' '}
+              {engine.honesty.extendsVl184 ? 'yes' : 'no'} · OWL OS{' '}
               {engine.honesty.owlOs ? 'yes' : 'no'} · Protegé parity{' '}
               {engine.honesty.protegeParity ? 'yes' : 'no'} · Certified verticals{' '}
               {engine.honesty.certifiedVerticalOntologies ? 'yes' : 'no'}

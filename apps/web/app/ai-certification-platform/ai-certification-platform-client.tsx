@@ -105,7 +105,7 @@ export function AiCertificationPlatformClient() {
         AI Certification Platform
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-365 — VerbaLab personnel certificates under ISO-aligned scheme VGAS-PCS-001. Not third-party accredited.
+        VerbaLab personnel certificates under ISO-aligned scheme VGAS-PCS-001. Not third-party accredited.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

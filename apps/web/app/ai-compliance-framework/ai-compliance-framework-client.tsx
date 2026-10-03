@@ -83,7 +83,7 @@ export function AiComplianceFrameworkClient() {
         AI Compliance Framework
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-366 — VerbaLab VGAS console. Internal business tooling; not external industry recognition or third-party accreditation.
+        VerbaLab VGAS console. Internal business tooling; not external industry recognition or third-party accreditation.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

@@ -72,7 +72,7 @@ export function africanKnowledgeGraphEngineCatalog() {
   return {
     product: 'VerbaLab African Knowledge Graph',
     note:
-      'African Knowledge Graph (VL-263). In-process entity/relationship graph for countries/regions/languages/institutions. neo4jOs=false — not a Neo4j / graph-database OS.',
+      'African Knowledge Graph. In-process entity/relationship graph for countries/regions/languages/institutions. neo4jOs=false — not a Neo4j / graph-database OS.',
     capabilities: [
       {
         id: 'nodes',

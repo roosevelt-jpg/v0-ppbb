@@ -27,7 +27,7 @@ export function IdentityFederationClient() {
         Identity Federation
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        VL-299 — VerbaLab Identity Federation console in the Trust Cloud.
+        VerbaLab Identity Federation console in the Trust Cloud.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
