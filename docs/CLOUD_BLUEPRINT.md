@@ -35,4 +35,4 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | Knowledge | VL-193 → VL-203 |
 | Inference | VL-204 → VL-213 |
 
-Vision / Media / AI Kernel / … remain **unscheduled** until ROADMAP executable phases exist (Inference Foundation started Volume 7).
+Inference Cloud volume closed (VL-204–213). Vision / Media / **AI Kernel** remain **unscheduled** until ROADMAP executable phases exist (Volume 8 — ask when ready).

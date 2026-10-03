@@ -242,7 +242,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-210 | Intelligent Cache (Phase 77) | Done | `/v1/intelligent-cache/*` opt-in exact-key/normalized-hash store; ADR-0121. Not Redis Cluster/vector/CDN; Gateway not auto-wired. |
 | VL-211 | Cost Optimization Engine (Phase 78) | Done | `/v1/cost-optimization/*` hard daily/monthly enforce + optimize; ADR-0122. Not FinOps/Spot OS; gates AI Router resolve. |
 | VL-212 | AI Runtime Analytics (Phase 79) | Done | `/v1/ai-runtime-analytics/*` Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
-| VL-213 | Inference Cloud Production Audit (Phase 80) | Not Started | |
+| VL-213 | Inference Cloud Production Audit (Phase 80) | Done | Audit gate + reports under `docs/inference-cloud-audit/`; ADR-0124. Rejects GPU hyperscaler / AI Kernel here. Spend-safety verified. |
 
 ---
 
@@ -369,3 +369,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-210 Done: Intelligent Cache (Phase 77) — opt-in exact-key/normalized-hash store; ADR-0121. Not Redis/vector/CDN OS; Gateway not auto-wired. |
 | 2026-10-03 | VL-211 Done: Cost Optimization Engine (Phase 78) — hard daily/monthly spend enforce + cost optimize; ADR-0122. Not FinOps/Spot OS; gates AI Router resolve. |
 | 2026-10-03 | VL-212 Done: AI Runtime Analytics (Phase 79) — Inference Cloud aggregates; ADR-0123. ≠ VL-191/202; not BI/APM OS. |
+| 2026-10-03 | VL-213 Done: Inference Cloud Production Audit (Phase 80) — checklist/tests/reports; ADR-0124. Volume closed. Spend-safety verified; AI Kernel rejected here. |
