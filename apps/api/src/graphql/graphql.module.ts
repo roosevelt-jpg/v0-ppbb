@@ -14,6 +14,7 @@ import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.m
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
 import { TaxonomyPlatformModule } from '../taxonomy-platform/taxonomy-platform.module';
 import { EnterpriseRagModule } from '../enterprise-rag/enterprise-rag.module';
+import { KnowledgeMemoryModule } from '../knowledge-memory/knowledge-memory.module';
 import { EmbeddingCloudModule } from '../embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from '../vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from '../memory-cloud/memory-cloud.module';
@@ -56,6 +57,7 @@ import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
 import { TaxonomyPlatformGraphqlResolver } from './taxonomy-platform.resolver';
 import { EnterpriseRagGraphqlResolver } from './enterprise-rag.resolver';
+import { KnowledgeMemoryGraphqlResolver } from './knowledge-memory.resolver';
 import { EmbeddingCloudGraphqlResolver } from './embedding-cloud.resolver';
 import { VectorCloudGraphqlResolver } from './vector-cloud.resolver';
 import { MemoryCloudGraphqlResolver } from './memory-cloud.resolver';
@@ -118,6 +120,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     OntologyPlatformModule,
     TaxonomyPlatformModule,
     EnterpriseRagModule,
+    KnowledgeMemoryModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
@@ -168,6 +171,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     OntologyPlatformGraphqlResolver,
     TaxonomyPlatformGraphqlResolver,
     EnterpriseRagGraphqlResolver,
+    KnowledgeMemoryGraphqlResolver,
     EmbeddingCloudGraphqlResolver,
     VectorCloudGraphqlResolver,
     MemoryCloudGraphqlResolver,

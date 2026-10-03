@@ -3032,6 +3032,88 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-memory/engine': {
+      get: {
+        summary: 'Knowledge Memory engine catalog',
+        operationId: 'getKnowledgeMemoryEngine',
+        responses: { '200': { description: 'Knowledge Memory capabilities and honesty flags' } },
+      },
+    },
+    '/v1/knowledge-memory/scopes': {
+      get: {
+        summary: 'Knowledge Memory scopes',
+        operationId: 'listKnowledgeMemoryScopes',
+        responses: { '200': { description: 'Scope map onto VL-183 Memory Cloud' } },
+      },
+    },
+    '/v1/knowledge-memory/memories': {
+      get: {
+        summary: 'List knowledge-layer memories',
+        operationId: 'listKnowledgeMemories',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace knowledge memories' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create knowledge-layer memory',
+        operationId: 'createKnowledgeMemory',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Created knowledge memory' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-memory/search': {
+      post: {
+        summary: 'Search knowledge-layer memories',
+        operationId: 'searchKnowledgeMemory',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Matching knowledge memories' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-memory/analytics': {
+      get: {
+        summary: 'Knowledge Memory analytics',
+        operationId: 'getKnowledgeMemoryAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace analytics' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-memory/monitoring': {
+      get: {
+        summary: 'Knowledge Memory monitoring',
+        operationId: 'getKnowledgeMemoryMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Honesty + deferred flags' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

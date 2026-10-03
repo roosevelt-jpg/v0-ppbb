@@ -583,6 +583,51 @@ export class GqlEnterpriseRagEngine {
 }
 
 @ObjectType()
+export class GqlKnowledgeMemoryCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeMemoryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeMemoryCapability])
+  capabilities!: GqlKnowledgeMemoryCapability[];
+
+  @Field()
+  mem0Os!: boolean;
+
+  @Field()
+  regeneratesMemoryCloud!: boolean;
+
+  @Field()
+  extendsVl183!: boolean;
+
+  @Field()
+  distinctFromMemoryCloud!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

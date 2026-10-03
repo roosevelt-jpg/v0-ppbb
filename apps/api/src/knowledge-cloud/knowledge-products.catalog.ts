@@ -69,11 +69,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'knowledge-memory',
       name: 'Knowledge Memory',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/knowledge-memory/engine',
+      console: '/knowledge-memory',
       notes:
-        'Persistent knowledge-layer memory (Phase 66 / VL-199). Distinct from Intelligence Memory Cloud (VL-183).',
+        'Knowledge-layer memory over VL-183 (VL-199). Org/workspace/user/conversation/AI + evolve/versions. Not Mem0 OS; distinct from Memory Cloud hub.',
     },
     {
       id: 'knowledge-intelligence',

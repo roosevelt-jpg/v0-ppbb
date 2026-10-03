@@ -1304,6 +1304,64 @@ export class VerbaLab {
     });
   }
 
+  async knowledgeMemoryEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      mem0Os: boolean;
+      zepParity: boolean;
+      infinitePersonalizationOs: boolean;
+      regeneratesMemoryCloud: boolean;
+      extendsVl183: boolean;
+      distinctFromMemoryCloud: boolean;
+      orgWorkspaceScoped: boolean;
+      gdprViaMemoryCloud: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-memory/engine', { method: 'GET' });
+  }
+
+  async knowledgeMemoryCreate(body: {
+    scope?: 'organization' | 'workspace' | 'user' | 'conversation' | 'ai';
+    kind?: string;
+    content: string;
+    key?: string;
+    subjectUserId?: string;
+    agentId?: string;
+    conversationId?: string;
+    documentId?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{
+    id: string;
+    scope: string;
+    content: string;
+    version: number;
+    documentId: string | null;
+    layer: string;
+  }> {
+    return this.requestJson('/v1/knowledge-memory/memories', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async knowledgeMemoryEvolve(
+    id: string,
+    body: { content: string; reason?: string },
+  ): Promise<{ id: string; version: number; content: string; evolutionCount: number }> {
+    return this.requestJson(`/v1/knowledge-memory/memories/${id}/evolve`, {
+      method: 'POST',
+      body,
+    });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

@@ -18,6 +18,7 @@ const links = [
   { href: '/ontology', label: 'Ontology' },
   { href: '/taxonomy', label: 'Taxonomy' },
   { href: '/enterprise-rag', label: 'Enterprise RAG' },
+  { href: '/knowledge-memory', label: 'Knowledge Memory' },
   { href: '/embedding-cloud', label: 'Embeddings' },
   { href: '/vector-cloud', label: 'Vectors' },
   { href: '/memory-cloud', label: 'Memory' },
