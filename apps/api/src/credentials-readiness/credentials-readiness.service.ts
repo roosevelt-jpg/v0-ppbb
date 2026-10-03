@@ -17,11 +17,24 @@ export class CredentialsReadinessService {
       clerk: {
         ready: present(['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY']),
         env: ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY'],
+        howToGet: 'https://dashboard.clerk.com → API Keys (see docs/CREDENTIALS.md)',
       },
       stripe: {
         ready: present(['STRIPE_SECRET_KEY', 'STRIPE_PRICE_ID_PRO']),
         env: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'STRIPE_PRICE_ID_PRO'],
         note: 'Checkout/Portal wired; add keys later for live billing.',
+        howToGet: 'https://dashboard.stripe.com/apikeys + Products → Price id (docs/CREDENTIALS.md)',
+      },
+      verbalabModelKeys: {
+        ready: present(['VERBALAB_MODEL_API_KEY']),
+        env: ['VERBALAB_MODEL_API_KEY'],
+        createInProduct: {
+          console: '/model-keys',
+          mintRoot: 'POST /v1/model-keys/platform-root',
+          createServing: 'POST /v1/model-keys',
+          prefixes: ['vmod_root_', 'vmod_live_', 'vmod_test_'],
+        },
+        note: 'You mint these inside VerbaLab — not from OpenAI/ElevenLabs.',
       },
       verbalabModels: {
         ready:
@@ -39,14 +52,21 @@ export class CredentialsReadinessService {
           'VERBALAB_CLONE_URL',
         ],
         fixture: process.env.VERBALAB_OWN_AI_FIXTURE === '1',
+        howToGet: 'Deploy your model services; set BASE_URL + key from /model-keys',
       },
       fly: {
         ready: present(['FLY_API_TOKEN']),
         env: ['FLY_API_TOKEN'],
+        howToGet: 'fly auth login && fly tokens create deploy',
       },
       resend: {
         ready: present(['RESEND_API_KEY']),
         env: ['RESEND_API_KEY'],
+        howToGet: 'https://resend.com/api-keys',
+      },
+      docs: {
+        ready: true,
+        path: 'docs/CREDENTIALS.md',
       },
     };
   }

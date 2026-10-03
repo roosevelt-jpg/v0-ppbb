@@ -13,7 +13,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 ## Current
 
 | In flight | — |
-| Next up | Add deploy credentials (Stripe / Clerk / `VERBALAB_*` model URLs) |
+| Next up | Deploy model services URL + optional Stripe/Clerk live keys |
 
 ---
 
@@ -637,3 +637,5 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | VL-407 | VerbaLab Global OS (Phase 274) | Done | `/verbalab-global-os` AI Internet hub; Prisma store; ADR-0321. |
 | VL-408 | Credentials Readiness (Phase 275) | Done | `/credentials-readiness` AI Internet hub; Prisma store; ADR-0322. |
 | VL-409 | AI Internet Production Audit (Phase 276) | Done | Audit pack; Volume 25 closed — AI Internet 261–300 packaged. |
+
+| 2026-10-03 | Model keys: `vmod_live_`/`vmod_test_`/`vmod_root_` mint in `/model-keys`; docs/CREDENTIALS.md for Stripe/Clerk/Fly. ADR-0324. |

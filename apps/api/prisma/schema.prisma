@@ -47,6 +47,7 @@ model Organization {
   memberships         Membership[]
   workspaces          Workspace[]
   apiKeys             ApiKey[]
+  modelApiKeys        ModelApiKey[]
   translationRequests TranslationRequest[]
   usageEvents         UsageEvent[]
   auditEvents         AuditEvent[]
@@ -1779,6 +1780,33 @@ model DcivRecord {
   @@index([organizationId, kind])
   @@index([organizationId, status])
   @@map("dciv_records")
+}
+
+/// VerbaLab-owned model API keys (`vmod_live_` / `vmod_test_` / `vmod_root_`).
+/// Authenticates calls to VerbaLab model services — not third-party vendor keys.
+model ModelApiKey {
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  workspaceId    String?           @map("workspace_id")
+  createdById    String?           @map("created_by_id")
+  name           String
+  prefix         String
+  secretHash     String            @map("secret_hash")
+  /// live | test | root
+  kind           String            @default("live")
+  /// modalities this key may call: mt,stt,tts,chat,embed,ocr,clone,* 
+  scopes         String[]          @default(["*"])
+  revokedAt      DateTime?         @map("revoked_at")
+  lastUsedAt     DateTime?         @map("last_used_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([organizationId])
+  @@index([secretHash])
+  @@map("model_api_keys")
 }
 
 /// Volume 25 AI Internet records (DNS/discovery/federation/trust/payments).
