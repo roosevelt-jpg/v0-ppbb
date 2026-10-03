@@ -4664,3 +4664,141 @@ export class GqlResearchAnalyticsEngine {
   aiSovereigntyOs!: boolean;
 }
 
+@ObjectType()
+export class GqlMlopsLlmopsCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlDatasetPipelineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  regeneratesDatasetMarketplace!: boolean;
+}
+
+
+@ObjectType()
+export class GqlTrainingPipelineEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  distributedTrainingOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlContinuousEvaluationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  continuousEvalPass!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPromptopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  langSmithOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlRagopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  vectorDbOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAgentopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  policyViolationsVisible!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiDriftDetectionEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  driftClear!: boolean;
+}
+
+
+@ObjectType()
+export class GqlContinuousLearningEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  humanApprovalRequiredBeforePromote!: boolean;
+}
+
+
+@ObjectType()
+export class GqlAiOperationsDashboardEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  trustCloudOs!: boolean;
+}
+

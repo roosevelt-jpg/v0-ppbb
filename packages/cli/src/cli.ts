@@ -68,6 +68,16 @@ function usage(): never {
   verbalab agricultural-intelligence-engine
   verbalab tourism-heritage-intelligence-engine
   verbalab research-cloud-products
+  verbalab mlops-llmops-cloud-products
+  verbalab dataset-pipeline-engine
+  verbalab training-pipeline-engine
+  verbalab continuous-evaluation-engine
+  verbalab promptops-platform-engine
+  verbalab ragops-platform-engine
+  verbalab agentops-platform-engine
+  verbalab ai-drift-detection-engine
+  verbalab continuous-learning-engine
+  verbalab ai-operations-dashboard-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -590,6 +600,56 @@ async function main() {
 
   if (command === 'research-cloud-products') {
     console.log(JSON.stringify(await vl.researchCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'mlops-llmops-cloud-products') {
+    console.log(JSON.stringify(await vl.mlopsLlmopsCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'dataset-pipeline-engine') {
+    console.log(JSON.stringify(await vl.datasetPipelineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'training-pipeline-engine') {
+    console.log(JSON.stringify(await vl.trainingPipelineEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'continuous-evaluation-engine') {
+    console.log(JSON.stringify(await vl.continuousEvaluationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'promptops-platform-engine') {
+    console.log(JSON.stringify(await vl.promptopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ragops-platform-engine') {
+    console.log(JSON.stringify(await vl.ragopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agentops-platform-engine') {
+    console.log(JSON.stringify(await vl.agentopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-drift-detection-engine') {
+    console.log(JSON.stringify(await vl.aiDriftDetectionEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'continuous-learning-engine') {
+    console.log(JSON.stringify(await vl.continuousLearningEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-operations-dashboard-engine') {
+    console.log(JSON.stringify(await vl.aiOperationsDashboardEngine(), null, 2));
     return;
   }
 

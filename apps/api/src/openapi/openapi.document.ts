@@ -4700,6 +4700,400 @@ export const openApiDocument = {
         responses: { '200': { description: 'Filtered catalog rows' } },
       },
     },
+    '/v1/mlops-llmops-cloud/products': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud product catalog',
+        operationId: 'listMlopsLlmopsCloudProducts',
+        responses: { '200': { description: 'Product catalog' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/engine': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud engine (alias of products)',
+        operationId: 'getMlopsLlmopsCloudEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/routing': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud routing table',
+        operationId: 'getMlopsLlmopsCloudRouting',
+        responses: { '200': { description: 'Routing table' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/overview': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud authenticated overview',
+        operationId: 'getMlopsLlmopsCloudOverview',
+        responses: {
+          '200': { description: 'Overview' },
+          '401': { description: 'Unauthorized' },
+        },
+      },
+    },
+    '/v1/mlops-llmops-cloud/monitoring': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud monitoring snapshot',
+        operationId: 'getMlopsLlmopsCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+
+    '/v1/dataset-pipeline/engine': {
+      get: {
+        summary: 'Dataset Pipeline engine catalog',
+        operationId: 'getDatasetPipelineEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/dataset-pipeline/products': {
+      get: {
+        summary: 'Dataset Pipeline products alias',
+        operationId: 'listDatasetPipelineProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/dataset-pipeline/monitoring': {
+      get: {
+        summary: 'Dataset Pipeline monitoring',
+        operationId: 'getDatasetPipelineMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/dataset-pipeline/runs': {
+      get: {
+        summary: 'List Dataset Pipeline runs',
+        operationId: 'listDatasetPipelineRuns',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/dataset-pipeline/query': {
+      get: {
+        summary: 'Query Dataset Pipeline',
+        operationId: 'queryDatasetPipeline',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/training-pipeline/engine': {
+      get: {
+        summary: 'Training Pipeline engine catalog',
+        operationId: 'getTrainingPipelineEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/training-pipeline/products': {
+      get: {
+        summary: 'Training Pipeline products alias',
+        operationId: 'listTrainingPipelineProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/training-pipeline/monitoring': {
+      get: {
+        summary: 'Training Pipeline monitoring',
+        operationId: 'getTrainingPipelineMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/training-pipeline/jobs': {
+      get: {
+        summary: 'List Training Pipeline jobs',
+        operationId: 'listTrainingPipelineJobs',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/training-pipeline/query': {
+      get: {
+        summary: 'Query Training Pipeline',
+        operationId: 'queryTrainingPipeline',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/continuous-evaluation/engine': {
+      get: {
+        summary: 'Continuous Evaluation engine catalog',
+        operationId: 'getContinuousEvaluationEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-evaluation/products': {
+      get: {
+        summary: 'Continuous Evaluation products alias',
+        operationId: 'listContinuousEvaluationProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-evaluation/monitoring': {
+      get: {
+        summary: 'Continuous Evaluation monitoring',
+        operationId: 'getContinuousEvaluationMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/continuous-evaluation/gates': {
+      get: {
+        summary: 'List Continuous Evaluation gates',
+        operationId: 'listContinuousEvaluationGates',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-evaluation/query': {
+      get: {
+        summary: 'Query Continuous Evaluation',
+        operationId: 'queryContinuousEvaluation',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-evaluation/gate-status': {
+      get: {
+        summary: 'Continuous Evaluation gate status for promote',
+        operationId: 'getContinuousEvaluationGateStatus',
+        responses: { '200': { description: 'Gate status' } },
+      },
+    },
+
+    '/v1/promptops-platform/engine': {
+      get: {
+        summary: 'PromptOps Platform engine catalog',
+        operationId: 'getPromptopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/promptops-platform/products': {
+      get: {
+        summary: 'PromptOps Platform products alias',
+        operationId: 'listPromptopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/promptops-platform/monitoring': {
+      get: {
+        summary: 'PromptOps Platform monitoring',
+        operationId: 'getPromptopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/promptops-platform/prompts': {
+      get: {
+        summary: 'List PromptOps Platform prompts',
+        operationId: 'listPromptopsPlatformPrompts',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/promptops-platform/query': {
+      get: {
+        summary: 'Query PromptOps Platform',
+        operationId: 'queryPromptopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/ragops-platform/engine': {
+      get: {
+        summary: 'RAGOps Platform engine catalog',
+        operationId: 'getRagopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ragops-platform/products': {
+      get: {
+        summary: 'RAGOps Platform products alias',
+        operationId: 'listRagopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ragops-platform/monitoring': {
+      get: {
+        summary: 'RAGOps Platform monitoring',
+        operationId: 'getRagopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ragops-platform/pipelines': {
+      get: {
+        summary: 'List RAGOps Platform pipelines',
+        operationId: 'listRagopsPlatformPipelines',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ragops-platform/query': {
+      get: {
+        summary: 'Query RAGOps Platform',
+        operationId: 'queryRagopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/agentops-platform/engine': {
+      get: {
+        summary: 'AgentOps Platform engine catalog',
+        operationId: 'getAgentopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/agentops-platform/products': {
+      get: {
+        summary: 'AgentOps Platform products alias',
+        operationId: 'listAgentopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/agentops-platform/monitoring': {
+      get: {
+        summary: 'AgentOps Platform monitoring',
+        operationId: 'getAgentopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/agentops-platform/agents': {
+      get: {
+        summary: 'List AgentOps Platform agents',
+        operationId: 'listAgentopsPlatformAgents',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/agentops-platform/query': {
+      get: {
+        summary: 'Query AgentOps Platform',
+        operationId: 'queryAgentopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/ai-drift-detection/engine': {
+      get: {
+        summary: 'AI Drift Detection engine catalog',
+        operationId: 'getAiDriftDetectionEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-drift-detection/products': {
+      get: {
+        summary: 'AI Drift Detection products alias',
+        operationId: 'listAiDriftDetectionProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-drift-detection/monitoring': {
+      get: {
+        summary: 'AI Drift Detection monitoring',
+        operationId: 'getAiDriftDetectionMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-drift-detection/signals': {
+      get: {
+        summary: 'List AI Drift Detection signals',
+        operationId: 'listAiDriftDetectionSignals',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-drift-detection/query': {
+      get: {
+        summary: 'Query AI Drift Detection',
+        operationId: 'queryAiDriftDetection',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-drift-detection/check': {
+      get: {
+        summary: 'Drift clear check for Continuous Learning promote',
+        operationId: 'checkAiDriftDetection',
+        responses: { '200': { description: 'Drift clear status' } },
+      },
+    },
+
+    '/v1/continuous-learning/engine': {
+      get: {
+        summary: 'Continuous Learning engine catalog',
+        operationId: 'getContinuousLearningEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-learning/products': {
+      get: {
+        summary: 'Continuous Learning products alias',
+        operationId: 'listContinuousLearningProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-learning/monitoring': {
+      get: {
+        summary: 'Continuous Learning monitoring',
+        operationId: 'getContinuousLearningMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/continuous-learning/feedback': {
+      get: {
+        summary: 'List Continuous Learning feedback',
+        operationId: 'listContinuousLearningFeedback',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-learning/query': {
+      get: {
+        summary: 'Query Continuous Learning',
+        operationId: 'queryContinuousLearning',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-learning/promote-check': {
+      get: {
+        summary: 'Continuous Learning promote gate check',
+        operationId: 'checkContinuousLearningPromote',
+        responses: { '200': { description: 'Promote check result' } },
+      },
+    },
+    '/v1/continuous-learning/promote': {
+      get: {
+        summary: 'Attempt Continuous Learning promote (gated)',
+        operationId: 'promoteContinuousLearning',
+        responses: {
+          '200': { description: 'Promoted' },
+          '400': { description: 'Gate failed' },
+        },
+      },
+    },
+
+    '/v1/ai-operations-dashboard/engine': {
+      get: {
+        summary: 'AI Operations Dashboard engine catalog',
+        operationId: 'getAiOperationsDashboardEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/products': {
+      get: {
+        summary: 'AI Operations Dashboard products alias',
+        operationId: 'listAiOperationsDashboardProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/monitoring': {
+      get: {
+        summary: 'AI Operations Dashboard monitoring',
+        operationId: 'getAiOperationsDashboardMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/snapshot': {
+      get: {
+        summary: 'List AI Operations Dashboard snapshot',
+        operationId: 'listAiOperationsDashboardSnapshot',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/query': {
+      get: {
+        summary: 'Query AI Operations Dashboard',
+        operationId: 'queryAiOperationsDashboard',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

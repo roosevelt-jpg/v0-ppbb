@@ -2006,6 +2006,116 @@ export class VerbaLab {
   }
 
 
+
+  async mlopsLlmopsCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/mlops-llmops-cloud/products', { method: 'GET' });
+  }
+
+  async datasetPipelineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/dataset-pipeline/engine', { method: 'GET' });
+  }
+
+  async trainingPipelineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/training-pipeline/engine', { method: 'GET' });
+  }
+
+  async continuousEvaluationEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/continuous-evaluation/engine', { method: 'GET' });
+  }
+
+  async promptopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/promptops-platform/engine', { method: 'GET' });
+  }
+
+  async ragopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ragops-platform/engine', { method: 'GET' });
+  }
+
+  async agentopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agentops-platform/engine', { method: 'GET' });
+  }
+
+  async aiDriftDetectionEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-drift-detection/engine', { method: 'GET' });
+  }
+
+  async continuousLearningEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/continuous-learning/engine', { method: 'GET' });
+  }
+
+  async aiOperationsDashboardEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-operations-dashboard/engine', { method: 'GET' });
+  }
+
   async researchCloudProducts(): Promise<{
     product: string;
     products: Array<{

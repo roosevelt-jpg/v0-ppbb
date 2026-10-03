@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-280 Done — Research Cloud Production Audit; Volume 13 closed)
+Last updated: 2026-10-03 (VL-291 Done — MLOps & LLMOps Cloud Production Audit; Volume 14 closed)
 
 ---
 
@@ -310,6 +310,17 @@ Last updated: 2026-10-03 (VL-280 Done — Research Cloud Production Audit; Volum
 | VL-278 | Open Science Platform (Phase 145) | Done | `/open-science-platform`; ADR-0180. Consent gate blocks restricted/unverified TK. |
 | VL-279 | Research Analytics (Phase 146) | Done | `/research-analytics` sibling aggregation; ADR-0181. |
 | VL-280 | Research Cloud Production Audit (Phase 147) | Done | Audit pack under `docs/research-cloud-audit/`; ADR-0182. Volume 13 closed. AI Sovereignty → Volume 14+. |
+| VL-281 | MLOps & LLMOps Cloud Foundation (Phase 148) | Done | `/mlops-llmops-cloud` hub + asset types; ADR-0183. Extends Inference/Kernel/Foundation/RAG/Agent/Prompt. `trustCloudOs=false`. |
+| VL-282 | Dataset Pipeline (Phase 149) | Done | `/dataset-pipeline`; ADR-0184. Extends dataset marketplace/VL-101 — does not regenerate. |
+| VL-283 | Training Pipeline (Phase 150) | Done | `/training-pipeline` LoRA/QLoRA/DPO/RLHF/SFT; ADR-0185. `distributedTrainingOs=false`. |
+| VL-284 | Continuous Evaluation (Phase 151) | Done | `/continuous-evaluation` gate status; ADR-0186. Extends evaluation-platform — promote gate for VL-289. |
+| VL-285 | PromptOps Platform (Phase 152) | Done | `/promptops-platform`; ADR-0187. Over Prompt Runtime/Fabric. Not LangSmith OS. |
+| VL-286 | RAGOps Platform (Phase 153) | Done | `/ragops-platform`; ADR-0188. Over Volume 6 RAG. Not vector-DB OS. |
+| VL-287 | AgentOps Platform (Phase 154) | Done | `/agentops-platform`; ADR-0189. `policyViolationsVisible=true`. |
+| VL-288 | AI Drift Detection (Phase 155) | Done | `/ai-drift-detection` driftClear check; ADR-0190. Required Continuous Learning promote gate. |
+| VL-289 | Continuous Learning (Phase 156) | Done | `/continuous-learning`; ADR-0191. Never auto-promote; human+drift+eval+vetted feedback. |
+| VL-290 | AI Operations Dashboard (Phase 157) | Done | `/ai-operations-dashboard` sibling aggregation; ADR-0192. |
+| VL-291 | MLOps & LLMOps Cloud Production Audit (Phase 158) | Done | Audit pack under `docs/mlops-llmops-cloud-audit/`; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
 
 ---
 
@@ -478,3 +489,5 @@ Last updated: 2026-10-03 (VL-280 Done — Research Cloud Production Audit; Volum
 | 2026-10-03 | VL-270 Done: African Intelligence Production Audit (Phase 137) — evidence pack; ADR-0172. Volume 12 closed. Research / Global Intelligence → Volume 13+. |
 | 2026-10-03 | VL-271–279 Done: Research Cloud hubs (Phases 138–146) — foundation through research analytics; ADR-0173–0181. Synthetic labeling + open-science consent honesty. |
 | 2026-10-03 | VL-280 Done: Research Cloud Production Audit (Phase 147) — evidence pack; ADR-0182. Volume 13 closed. AI Sovereignty / MLOps → Volume 14+. |
+| 2026-10-03 | VL-281–290 Done: MLOps & LLMOps Cloud hubs (Phases 148–157) — foundation through AI ops dashboard; ADR-0183–0192. Promote gates + AgentOps policy visibility honesty. |
+| 2026-10-03 | VL-291 Done: MLOps & LLMOps Cloud Production Audit (Phase 158) — evidence pack; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |

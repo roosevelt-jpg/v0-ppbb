@@ -37,6 +37,16 @@ import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-mar
 import { CreatorEconomyApplicationModule } from '../creator-economy/application/creator-economy-application.module';
 import { TourismHeritageIntelligenceApplicationModule } from '../tourism-heritage-intelligence/application/tourism-heritage-intelligence-application.module';
 import { ResearchAnalyticsApplicationModule } from '../research-analytics/application/research-analytics-application.module';
+import { AiOperationsDashboardApplicationModule } from '../ai-operations-dashboard/application/ai-operations-dashboard-application.module';
+import { ContinuousLearningApplicationModule } from '../continuous-learning/application/continuous-learning-application.module';
+import { AiDriftDetectionApplicationModule } from '../ai-drift-detection/application/ai-drift-detection-application.module';
+import { AgentopsPlatformApplicationModule } from '../agentops-platform/application/agentops-platform-application.module';
+import { RagopsPlatformApplicationModule } from '../ragops-platform/application/ragops-platform-application.module';
+import { PromptopsPlatformApplicationModule } from '../promptops-platform/application/promptops-platform-application.module';
+import { ContinuousEvaluationApplicationModule } from '../continuous-evaluation/application/continuous-evaluation-application.module';
+import { TrainingPipelineApplicationModule } from '../training-pipeline/application/training-pipeline-application.module';
+import { DatasetPipelineApplicationModule } from '../dataset-pipeline/application/dataset-pipeline-application.module';
+import { MlopsLlmopsCloudApplicationModule } from '../mlops-llmops-cloud/application/mlops-llmops-cloud-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -144,6 +154,16 @@ import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-market
 import { CreatorEconomyGraphqlResolver } from './creator-economy.resolver';
 import { TourismHeritageIntelligenceGraphqlResolver } from './tourism-heritage-intelligence.resolver';
 import { ResearchAnalyticsGraphqlResolver } from './research-analytics.resolver';
+import { AiOperationsDashboardGraphqlResolver } from './ai-operations-dashboard.resolver';
+import { ContinuousLearningGraphqlResolver } from './continuous-learning.resolver';
+import { AiDriftDetectionGraphqlResolver } from './ai-drift-detection.resolver';
+import { AgentopsPlatformGraphqlResolver } from './agentops-platform.resolver';
+import { RagopsPlatformGraphqlResolver } from './ragops-platform.resolver';
+import { PromptopsPlatformGraphqlResolver } from './promptops-platform.resolver';
+import { ContinuousEvaluationGraphqlResolver } from './continuous-evaluation.resolver';
+import { TrainingPipelineGraphqlResolver } from './training-pipeline.resolver';
+import { DatasetPipelineGraphqlResolver } from './dataset-pipeline.resolver';
+import { MlopsLlmopsCloudGraphqlResolver } from './mlops-llmops-cloud.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -271,6 +291,16 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     CreatorEconomyApplicationModule,
     TourismHeritageIntelligenceApplicationModule,
     ResearchAnalyticsApplicationModule,
+    AiOperationsDashboardApplicationModule,
+    ContinuousLearningApplicationModule,
+    AiDriftDetectionApplicationModule,
+    AgentopsPlatformApplicationModule,
+    RagopsPlatformApplicationModule,
+    PromptopsPlatformApplicationModule,
+    ContinuousEvaluationApplicationModule,
+    TrainingPipelineApplicationModule,
+    DatasetPipelineApplicationModule,
+    MlopsLlmopsCloudApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -386,6 +416,16 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     CreatorEconomyGraphqlResolver,
     TourismHeritageIntelligenceGraphqlResolver,
     ResearchAnalyticsGraphqlResolver,
+    AiOperationsDashboardGraphqlResolver,
+    ContinuousLearningGraphqlResolver,
+    AiDriftDetectionGraphqlResolver,
+    AgentopsPlatformGraphqlResolver,
+    RagopsPlatformGraphqlResolver,
+    PromptopsPlatformGraphqlResolver,
+    ContinuousEvaluationGraphqlResolver,
+    TrainingPipelineGraphqlResolver,
+    DatasetPipelineGraphqlResolver,
+    MlopsLlmopsCloudGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

@@ -89,6 +89,16 @@ import { VoiceLanguageMarketplaceModule } from './voice-language-marketplace/voi
 import { CreatorEconomyModule } from './creator-economy/creator-economy.module';
 import { TourismHeritageIntelligenceModule } from './tourism-heritage-intelligence/tourism-heritage-intelligence.module';
 import { ResearchAnalyticsModule } from './research-analytics/research-analytics.module';
+import { AiOperationsDashboardModule } from './ai-operations-dashboard/ai-operations-dashboard.module';
+import { ContinuousLearningModule } from './continuous-learning/continuous-learning.module';
+import { AiDriftDetectionModule } from './ai-drift-detection/ai-drift-detection.module';
+import { AgentopsPlatformModule } from './agentops-platform/agentops-platform.module';
+import { RagopsPlatformModule } from './ragops-platform/ragops-platform.module';
+import { PromptopsPlatformModule } from './promptops-platform/promptops-platform.module';
+import { ContinuousEvaluationModule } from './continuous-evaluation/continuous-evaluation.module';
+import { TrainingPipelineModule } from './training-pipeline/training-pipeline.module';
+import { DatasetPipelineModule } from './dataset-pipeline/dataset-pipeline.module';
+import { MlopsLlmopsCloudModule } from './mlops-llmops-cloud/mlops-llmops-cloud.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -213,6 +223,16 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     CreatorEconomyModule,
     TourismHeritageIntelligenceModule,
     ResearchAnalyticsModule,
+    AiOperationsDashboardModule,
+    ContinuousLearningModule,
+    AiDriftDetectionModule,
+    AgentopsPlatformModule,
+    RagopsPlatformModule,
+    PromptopsPlatformModule,
+    ContinuousEvaluationModule,
+    TrainingPipelineModule,
+    DatasetPipelineModule,
+    MlopsLlmopsCloudModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,
