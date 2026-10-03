@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-203 Done — Knowledge Cloud Production Audit)
+Last updated: 2026-10-03 (VL-204 Done — Inference Cloud Foundation)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | Volume 7 Inference Cloud (new ROADMAP phases) |
+| Next up | VL-205 GPU Platform (Phase 72) |
 
 ---
 
@@ -233,6 +233,16 @@ Last updated: 2026-10-03 (VL-203 Done — Knowledge Cloud Production Audit)
 | VL-201 | Enterprise Knowledge APIs (Phase 68) | Done | `/v1/knowledge-apis/*` REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
 | VL-202 | Knowledge Analytics (Phase 69) | Done | `/v1/knowledge-analytics/*` growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS; ≠ sibling analytics. |
 | VL-203 | Knowledge Cloud Production Audit (Phase 70) | Done | Audit gate + reports under `docs/knowledge-cloud-audit/`; ADR-0114. Rejects enterprise knowledge OS / Inference Cloud here. |
+| VL-204 | Inference Cloud Foundation (Phase 71) | Done | `/inference-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0115. Maps onto AI Gateway; GPU hyperscaler deferred. Spend-safety constraints carried for VL-205/211. |
+| VL-205 | GPU Platform (Phase 72) | Not Started | Hard spend ceilings + sandbox billing required. |
+| VL-206 | Model Serving (Phase 73) | Not Started | |
+| VL-207 | AI Router (Phase 74) | Not Started | |
+| VL-208 | Streaming Runtime (Phase 75) | Not Started | |
+| VL-209 | Batch Runtime (Phase 76) | Not Started | |
+| VL-210 | Intelligent Cache (Phase 77) | Not Started | |
+| VL-211 | Cost Optimization Engine (Phase 78) | Not Started | Must enforce spend caps. |
+| VL-212 | AI Runtime Analytics (Phase 79) | Not Started | |
+| VL-213 | Inference Cloud Production Audit (Phase 80) | Not Started | |
 
 ---
 
@@ -350,3 +360,4 @@ Last updated: 2026-10-03 (VL-203 Done — Knowledge Cloud Production Audit)
 | 2026-10-03 | VL-201 Done: Enterprise Knowledge APIs (Phase 68) — REST/GraphQL/OpenAPI/SDK/CLI/webhooks/SSE pack; ADR-0112. Not gRPC/Kafka/SDK-generator OS. |
 | 2026-10-03 | VL-202 Done: Knowledge Analytics (Phase 69) — growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS. |
 | 2026-10-03 | VL-203 Done: Knowledge Cloud Production Audit (Phase 70) — checklist/tests/reports; ADR-0114. Volume closed. |
+| 2026-10-03 | VL-204 Done: Inference Cloud Foundation (Phase 71) — hub/catalog/overview; ADR-0115. Extends AI Gateway; no GPU hyperscaler. Spend-safety notes for GPU/Cost phases. |

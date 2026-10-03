@@ -9,6 +9,7 @@ import { SpeechCloudApplicationModule } from '../speech-cloud/application/speech
 import { VoiceCloudApplicationModule } from '../voice-cloud/application/voice-cloud-application.module';
 import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/application/intelligence-cloud-application.module';
 import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/knowledge-cloud-application.module';
+import { InferenceCloudApplicationModule } from '../inference-cloud/application/inference-cloud-application.module';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
@@ -55,6 +56,7 @@ import { SpeechCloudGraphqlResolver } from './speech-cloud.resolver';
 import { VoiceCloudGraphqlResolver } from './voice-cloud.resolver';
 import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver';
 import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
+import { InferenceCloudGraphqlResolver } from './inference-cloud.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
@@ -121,6 +123,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     VoiceCloudApplicationModule,
     IntelligenceCloudApplicationModule,
     KnowledgeCloudApplicationModule,
+    InferenceCloudApplicationModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
@@ -175,6 +178,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     VoiceCloudGraphqlResolver,
     IntelligenceCloudGraphqlResolver,
     KnowledgeCloudGraphqlResolver,
+    InferenceCloudGraphqlResolver,
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,

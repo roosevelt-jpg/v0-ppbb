@@ -33,5 +33,6 @@ See [`docs/adr/0080-verbalab-cloud-blueprint.md`](./adr/0080-verbalab-cloud-blue
 | Voice | VL-170 → VL-179 |
 | Intelligence | VL-180 → VL-192 |
 | Knowledge | VL-193 → VL-203 |
+| Inference | VL-204 → VL-213 |
 
-Vision / Media / … remain **unscheduled** until ROADMAP executable phases exist.
+Vision / Media / AI Kernel / … remain **unscheduled** until ROADMAP executable phases exist (Inference Foundation started Volume 7).

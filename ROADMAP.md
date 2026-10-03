@@ -1245,7 +1245,7 @@ These are in the libraries. They are **not** executable phases for a small team.
 | v2 39–45 Document/invoice/ID/image intelligence, visual search | Vision company | Document AI vendor |
 | v2 47–59 Intelligence Cloud (reasoner, decision engine, orchestration) | Custom AI kernel | Scheduled as VL-180+; LLM + gateway — no custom kernel |
 | v2 63–67 Ontology, taxonomy, knowledge intelligence | Enterprise knowledge graph vendor | RAG (VL-062) |
-| v2 71–90 Inference Cloud + AI Kernel | Internal AWS for models | OpenAI/Groq + later vLLM on a rented GPU |
+| v2 71–90 Inference Cloud + AI Kernel | Internal AWS for models | Scheduled as VL-204+ (Volume 7 Inference); OpenAI/Groq today — no GPU hyperscaler OS; AI Kernel remains later |
 | v2 91–105 Foundation Model Cloud | Frontier lab | VL-112 gated |
 | v2 106–115 AI Fabric | Duplicates kernel + events | Postgres + queue |
 | v2 116–126 Ecosystem Cloud | Marketplace suite | VL-090+ |

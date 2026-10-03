@@ -29,19 +29,19 @@ Every VerbaLab product cloud **shall** organize work and docs against these **12
 
 ### Mapping today
 
-| Layer | Language | Speech | Voice | Intelligence | Knowledge |
-| --- | --- | --- | --- | --- | --- |
-| Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` | VL-180 `/intelligence-cloud` | VL-193 `/knowledge-cloud` |
-| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS | VL-060 chat + VL-190 orchestration | VL-062 RAG (+ VL-198 Enterprise RAG) |
-| AI Models | Google/OpenAI MT (+ LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs | OpenAI/own TTS, ElevenLabs | OpenAI embeddings/chat (gateway) | OpenAI embeddings (shared) |
-| Intelligence | Dialect/Grammar/Style/LI/TM | Speaker/Emotion/Audio/Wake/Call | Emotion/studio/enhance/biometrics/market | Memory/context/reason/recommend/decide | KB/search/ontology/taxonomy (VL-194+) |
-| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/tts*` `/v1/voice-*` | `/v1/intelligence-cloud*` + GraphQL | `/v1/knowledge-cloud*` + `/v1/knowledge*` |
-| SDK / CLI | `@verbalab/sdk` / CLI | speech methods | voice methods | `intelligenceProducts` + intel hubs | `knowledgeProducts` + knowledge hubs |
-| Dashboard | `/language` | `/speech` | `/voice-cloud` | `/intelligence-cloud` | `/knowledge-cloud` |
-| Analytics | VL-146 | VL-159 | VL-178 | VL-191 | VL-202 |
-| Billing | shared metering | STT/TTS | TTS | chat/embeddings metering | embeddings/RAG metering |
-| Security / Monitoring | shared | shared | + clone consent/watermark | shared + memory GDPR (VL-183) | tenant-scoped KB (VL-194+) |
-| Production Audit | VL-147 | VL-160 | VL-179 | VL-192 | VL-203 |
+| Layer | Language | Speech | Voice | Intelligence | Knowledge | Inference |
+| --- | --- | --- | --- | --- | --- | --- |
+| Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` | VL-180 `/intelligence-cloud` | VL-193 `/knowledge-cloud` | VL-204 `/inference-cloud` |
+| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS | VL-060 chat + VL-190 orchestration | VL-062 RAG (+ VL-198 Enterprise RAG) | VL-021 Gateway (+ VL-206 serving) |
+| AI Models | Google/OpenAI MT (+ LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs | OpenAI/own TTS, ElevenLabs | OpenAI embeddings/chat (gateway) | OpenAI embeddings (shared) | Vendor APIs today; rented GPU later |
+| Intelligence | Dialect/Grammar/Style/LI/TM | Speaker/Emotion/Audio/Wake/Call | Emotion/studio/enhance/biometrics/market | Memory/context/reason/recommend/decide | KB/search/ontology/taxonomy (VL-194+) | Router/cache/cost (VL-207+) |
+| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/tts*` `/v1/voice-*` | `/v1/intelligence-cloud*` + GraphQL | `/v1/knowledge-cloud*` + `/v1/knowledge*` | `/v1/inference-cloud*` + GraphQL |
+| SDK / CLI | `@verbalab/sdk` / CLI | speech methods | voice methods | `intelligenceProducts` + intel hubs | `knowledgeProducts` + knowledge hubs | `inferenceProducts` |
+| Dashboard | `/language` | `/speech` | `/voice-cloud` | `/intelligence-cloud` | `/knowledge-cloud` | `/inference-cloud` |
+| Analytics | VL-146 | VL-159 | VL-178 | VL-191 | VL-202 | VL-212 |
+| Billing | shared metering | STT/TTS | TTS | chat/embeddings metering | embeddings/RAG metering | chat/embeddings + future GPU caps |
+| Security / Monitoring | shared | shared | + clone consent/watermark | shared + memory GDPR (VL-183) | tenant-scoped KB (VL-194+) | spend ceilings (VL-205/211) |
+| Production Audit | VL-147 | VL-160 | VL-179 | VL-192 | VL-203 | VL-213 |
 
 ### Rules
 

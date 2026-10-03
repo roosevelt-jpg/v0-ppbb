@@ -2672,6 +2672,33 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/inference-cloud/products': {
+      get: {
+        summary: 'Inference Cloud product catalog',
+        operationId: 'listInferenceProducts',
+        responses: {
+          '200': {
+            description: 'Inference products and architecture honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/inference-cloud/overview': {
+      get: {
+        summary: 'Inference Cloud org overview',
+        operationId: 'getInferenceOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Session chat/embeddings usage, products, deferred flags, spend-safety notes',
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

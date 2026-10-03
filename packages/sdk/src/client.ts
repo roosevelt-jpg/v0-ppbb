@@ -1078,6 +1078,21 @@ export class VerbaLab {
     return this.requestJson('/v1/knowledge-cloud/products', { method: 'GET' });
   }
 
+  async inferenceProducts(): Promise<{
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/inference-cloud/products', { method: 'GET' });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

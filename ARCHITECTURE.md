@@ -377,7 +377,8 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Voice Analytics partial (VL-178 / Phase 35). See VOICE_ANALYTICS + ADR-0089. Distinct from Speech Analytics; BI dashboard deferred.
 - Voice Cloud volume complete through Production Audit (VL-170–179). See VOICE_CLOUD + `docs/voice-cloud-audit/` and ADR-0081–0090. Competitor-parity claims rejected.
 - Intelligence Cloud volume complete through Production Audit (VL-180–192). See INTELLIGENCE_CLOUD + `docs/intelligence-cloud-audit/` and ADR-0091–0103. Hub over LLM gateway + embeddings + RAG; custom AI kernel / Intelligence Graph OS rejected.
-- Knowledge Cloud volume complete through Production Audit (VL-193–203). See KNOWLEDGE_CLOUD + `docs/knowledge-cloud-audit/` and ADR-0104–0114. Hub over VL-062 RAG + Intelligence; enterprise knowledge OS / Inference Cloud rejected in this volume.
+- Knowledge Cloud volume complete through Production Audit (VL-193–203). See KNOWLEDGE_CLOUD + `docs/knowledge-cloud-audit/` and ADR-0104–0114. Hub over VL-062 RAG + Intelligence; enterprise knowledge OS rejected in that volume.
+- Inference Cloud Foundation shipped (VL-204 / Phase 71). See INFERENCE_CLOUD + ADR-0115. Hub over AI Gateway + vendor APIs; GPU hyperscaler / multi-region OS deferred (VL-205–213). Spend-safety constraints for GPU/Cost phases.
 - Enterprise Knowledge Base partial (VL-194 / Phase 61). See ENTERPRISE_KNOWLEDGE_BASE + ADR-0105. Extends VL-062 with collections/tags/content kinds + MD/HTML; org/workspace-scoped get/remove hardened; Confluence/media/approval deferred.
 - Enterprise Search partial (VL-195 / Phase 62). See ENTERPRISE_SEARCH + ADR-0106. Keyword + semantic + light hybrid RRF over VL-062/Vector Cloud; Elastic/BM25/image/voice deferred.
 - Ontology Platform partial (VL-196 / Phase 63). See ONTOLOGY_PLATFORM + ADR-0107. Concepts/hierarchies/synonyms over VL-184 KG; OWL/Protegé/certified vertical packs deferred.

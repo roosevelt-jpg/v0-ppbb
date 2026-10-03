@@ -53,6 +53,7 @@ import { SpeechCloudModule } from './speech-cloud/speech-cloud.module';
 import { VoiceCloudModule } from './voice-cloud/voice-cloud.module';
 import { IntelligenceCloudModule } from './intelligence-cloud/intelligence-cloud.module';
 import { KnowledgeCloudModule } from './knowledge-cloud/knowledge-cloud.module';
+import { InferenceCloudModule } from './inference-cloud/inference-cloud.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -116,6 +117,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceCloudModule,
     IntelligenceCloudModule,
     KnowledgeCloudModule,
+    InferenceCloudModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

@@ -17,6 +17,7 @@ function usage(): never {
   verbalab voice-products
   verbalab intelligence-products
   verbalab knowledge-products
+  verbalab inference-products
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -135,6 +136,11 @@ async function main() {
 
   if (command === 'knowledge-products') {
     console.log(JSON.stringify(await vl.knowledgeProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'inference-products') {
+    console.log(JSON.stringify(await vl.inferenceProducts(), null, 2));
     return;
   }
 
