@@ -1,5 +1,7 @@
 /** Default VerbaLab marketing CMS seed — product UX patterns inspired by leading voice platforms; original VerbaLab African brand copy & assets. */
 
+import { USE_CASE_HOME_LINKS } from './marketing-cms.pages';
+
 export const DEFAULT_DESIGN_SCOPE = {
   brand: 'VerbaLab',
   positioning: "Africa's voice intelligence platform",
@@ -145,34 +147,12 @@ export const DEFAULT_HOME_BLOCKS = [
       id: 'use-cases',
       title: 'Why Africans choose VerbaLab',
       subtitle: 'Voice ownership for the moments that move economies and communities.',
-      items: [
-        {
-          title: 'Trade & negotiations',
-          body: 'Speak and translate across markets without losing tone, respect, or intent.',
-          imageKey: 'use-case.trade',
-        },
-        {
-          title: 'Education',
-          body: 'Lessons, tutoring, and exams in the languages students actually live in.',
-          imageKey: 'use-case.education',
-        },
-        {
-          title: 'Sales & marketing',
-          body: 'Campaigns that sound local — accents, idioms, and cultural cues included.',
-        },
-        {
-          title: 'Public speech',
-          body: 'Addresses, broadcasts, and civic messaging that feel native, not imported.',
-        },
-        {
-          title: 'Customer experience',
-          body: 'Support and agents that hear African callers the way Africans speak.',
-        },
-        {
-          title: 'Creative voice',
-          body: 'Own your voice for podcasts, film, ads, and storytelling across the continent.',
-        },
-      ],
+      items: USE_CASE_HOME_LINKS.map(({ title, body, href, imageKey }) => ({
+        title,
+        body,
+        href,
+        ...(imageKey ? { imageKey } : {}),
+      })),
     },
   },
   {

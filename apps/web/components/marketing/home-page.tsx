@@ -343,7 +343,7 @@ export function MarketingHomePage() {
             id?: string;
             title?: string;
             subtitle?: string;
-            items?: Array<{ title: string; body: string; imageKey?: string }>;
+            items?: Array<{ title: string; body: string; imageKey?: string; href?: string }>;
           };
           return (
             <section key={block.id} id={c.id} className="vl-mkt-section">
@@ -354,14 +354,23 @@ export function MarketingHomePage() {
               <div className="vl-mkt-use-grid">
                 {(c.items ?? []).map((item) => {
                   const img = item.imageKey ? assetMap[item.imageKey] : undefined;
-                  return (
-                    <article key={item.title} className="vl-mkt-use">
+                  const inner = (
+                    <>
                       {img ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={img.url} alt={img.alt} className="vl-mkt-card-img" />
                       ) : null}
                       <h3>{item.title}</h3>
                       <p>{item.body}</p>
+                    </>
+                  );
+                  return item.href ? (
+                    <Link key={item.title} href={item.href} className="vl-mkt-use">
+                      {inner}
+                    </Link>
+                  ) : (
+                    <article key={item.title} className="vl-mkt-use">
+                      {inner}
                     </article>
                   );
                 })}

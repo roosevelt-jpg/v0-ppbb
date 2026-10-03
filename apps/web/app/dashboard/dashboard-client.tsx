@@ -54,6 +54,9 @@ export function DashboardClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [welcome, setWelcome] = useState(
+    'Jump into product hubs or review plan, residency, and workspace health.',
+  );
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -65,6 +68,14 @@ export function DashboardClient() {
     if (!isLoaded) return;
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
+
+  useEffect(() => {
+    void apiFetch<{ prefill: { welcome?: string } }>('/v1/cms/prefills/dashboard')
+      .then((res) => {
+        if (res.prefill.welcome) setWelcome(res.prefill.welcome);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const usagePct = useMemo(() => {
     if (!data?.billing.characterQuota) return 0;
@@ -89,9 +100,7 @@ export function DashboardClient() {
           >
             {data ? `Welcome back, ${data.organization.name}` : 'Dashboard'}
           </h1>
-          <p style={{ color: 'var(--muted)', margin: 0, maxWidth: '36rem' }}>
-            Jump into product hubs or review plan, residency, and workspace health.
-          </p>
+          <p style={{ color: 'var(--muted)', margin: 0, maxWidth: '36rem' }}>{welcome}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.55rem', alignItems: 'flex-start' }}>
           <Link href="/translate" className="vl-btn vl-btn-primary">

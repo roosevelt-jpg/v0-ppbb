@@ -20,11 +20,27 @@ export function TranslateClient() {
   const [detectedSource, setDetectedSource] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prefillNote, setPrefillNote] = useState<string | null>(null);
 
   useEffect(() => {
     void apiFetch<{ data: Language[] }>('/v1/languages')
       .then((res) => setLanguages(res.data))
       .catch((err: Error) => setError(err.message));
+  }, []);
+
+  useEffect(() => {
+    void apiFetch<{
+      prefill: { text?: string; source?: string; target?: string; note?: string };
+    }>('/v1/cms/prefills/translate')
+      .then((res) => {
+        if (res.prefill.text) setText(res.prefill.text);
+        if (res.prefill.source) setSource(res.prefill.source);
+        if (res.prefill.target) setTarget(res.prefill.target);
+        setPrefillNote(res.prefill.note ?? 'CMS prefill loaded for review.');
+      })
+      .catch(() => {
+        /* keep empty defaults if CMS unavailable */
+      });
   }, []);
 
   async function onSubmit(event: FormEvent) {
@@ -71,6 +87,9 @@ export function TranslateClient() {
           </p>
           <h1 style={titleStyle}>Translate</h1>
           <p style={ledeStyle}>Paste text, pick a pair, get a metered translation.</p>
+          {prefillNote ? (
+            <p style={{ margin: '0.55rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>{prefillNote}</p>
+          ) : null}
         </div>
         <div style={{ display: 'flex', gap: '0.55rem' }}>
           <Link href="/glossary" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>

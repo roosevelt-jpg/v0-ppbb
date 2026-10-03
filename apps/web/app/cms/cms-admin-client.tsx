@@ -20,6 +20,8 @@ type PageRow = {
   slug: string;
   title: string;
   status: string;
+  description?: string;
+  seo?: { reviewStatus?: string; kind?: string };
   _count: { blocks: number; assets: number };
 };
 
@@ -95,9 +97,30 @@ export function CmsAdminClient() {
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/cms/reseed-home', { token, method: 'POST', body: '{}' });
       await load();
-      setStatus('Home page reseeded from catalog defaults.');
+      setStatus('Reseeded home + pending-review use-case/product pages (approved pages kept).');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reseed failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setReview(slug: string, reviewStatus: 'pending_review' | 'approved') {
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      await apiFetch(`/v1/cms/pages/${slug}/review`, {
+        token,
+        method: 'POST',
+        body: JSON.stringify({ reviewStatus }),
+      });
+      await load();
+      setStatus(`Marked ${slug} as ${reviewStatus.replace('_', ' ')}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Review update failed');
     } finally {
       setBusy(false);
     }
@@ -120,8 +143,8 @@ export function CmsAdminClient() {
         Marketing content
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.35rem', maxWidth: '42rem' }}>
-        Edit site settings, review CMS blocks/assets, and reseed the ElevenLabs-style marketing homepage. Copy and media
-        are database-backed — not hardcoded in the React tree.
+        Every use-case and product surface ships prefilled. Review pending pages here, approve when ready, or reseed
+        defaults for anything still pending review.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
@@ -183,7 +206,7 @@ export function CmsAdminClient() {
                 Save settings
               </button>
               <button type="button" className="vl-btn vl-btn-secondary" disabled={busy} onClick={() => void reseed()}>
-                Reseed home defaults
+                Reseed pending defaults
               </button>
               <a href="/" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>
                 View marketing site
@@ -192,14 +215,69 @@ export function CmsAdminClient() {
           </section>
 
           <section className="vl-panel" style={{ padding: '1.2rem' }}>
-            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Pages</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
-              {pages.map((p) => (
-                <li key={p.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
-                  <strong>/{p.slug}</strong> · {p.title} · {p.status} · {p._count.blocks} blocks ·{' '}
-                  {p._count.assets} assets
-                </li>
-              ))}
+            <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Pages to review</h2>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.75rem' }}>
+              {pages.map((p) => {
+                const review = p.seo?.reviewStatus ?? 'pending_review';
+                const publicPath = p.slug.startsWith('use-case-')
+                  ? `/use-cases/${p.slug.replace('use-case-', '').replace('public-speech', 'public-speech')}`
+                  : p.slug === 'home'
+                    ? '/'
+                    : null;
+                // map use-case-public-speech -> public-speech already handled by replace once
+                const href =
+                  p.slug === 'use-case-public-speech'
+                    ? '/use-cases/public-speech'
+                    : p.slug === 'use-case-customer-experience'
+                      ? '/use-cases/customer-experience'
+                      : publicPath;
+                return (
+                  <li
+                    key={p.id}
+                    style={{
+                      borderTop: '1px solid var(--line)',
+                      paddingTop: '0.65rem',
+                      display: 'grid',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <div>
+                      <strong>{p.title}</strong>{' '}
+                      <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
+                        /{p.slug} · {p._count.blocks} blocks · {review.replace('_', ' ')}
+                      </span>
+                    </div>
+                    {p.description ? (
+                      <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.88rem' }}>{p.description}</p>
+                    ) : null}
+                    <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
+                      {href ? (
+                        <a href={href} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>
+                          Preview
+                        </a>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="vl-btn vl-btn-secondary"
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                        disabled={busy || review === 'approved'}
+                        onClick={() => void setReview(p.slug, 'approved')}
+                      >
+                        Mark approved
+                      </button>
+                      <button
+                        type="button"
+                        className="vl-btn vl-btn-secondary"
+                        style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                        disabled={busy || review === 'pending_review'}
+                        onClick={() => void setReview(p.slug, 'pending_review')}
+                      >
+                        Needs review
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </section>
 

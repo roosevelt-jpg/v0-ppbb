@@ -6,6 +6,7 @@ import {
   DEFAULT_DESIGN_SCOPE,
   DEFAULT_HOME_BLOCKS,
 } from './marketing-cms.catalog';
+import { DEFAULT_CONTENT_PAGES, PRODUCT_PREFILLS } from './marketing-cms.pages';
 
 @Injectable()
 export class MarketingCmsService implements OnModuleInit {
@@ -21,7 +22,30 @@ export class MarketingCmsService implements OnModuleInit {
     }
   }
 
-  async ensureSeeded() {
+  private async seedPageBlocks(
+    pageId: string,
+    blocks: Array<{ type: string; sortOrder: number; content: Record<string, unknown> }>,
+    replace: boolean,
+  ) {
+    const count = await this.prisma.cmsBlock.count({ where: { pageId } });
+    if (count > 0 && !replace) return;
+    if (replace) {
+      await this.prisma.cmsBlock.deleteMany({ where: { pageId } });
+    }
+    for (const block of blocks) {
+      await this.prisma.cmsBlock.create({
+        data: {
+          pageId,
+          type: block.type,
+          sortOrder: block.sortOrder,
+          content: block.content as Prisma.InputJsonValue,
+          published: true,
+        },
+      });
+    }
+  }
+
+  async ensureSeeded(opts?: { replaceHome?: boolean; replaceContentPages?: boolean }) {
     await this.prisma.cmsSiteSettings.upsert({
       where: { id: 'default' },
       create: {
@@ -37,7 +61,7 @@ export class MarketingCmsService implements OnModuleInit {
       update: {},
     });
 
-    const page = await this.prisma.cmsPage.upsert({
+    const home = await this.prisma.cmsPage.upsert({
       where: { slug: 'home' },
       create: {
         slug: 'home',
@@ -48,31 +72,45 @@ export class MarketingCmsService implements OnModuleInit {
         seo: {
           title: 'VerbaLab',
           description: "Africa's own AI voice, speech, and language platform.",
+          reviewStatus: 'pending_review',
         } as Prisma.InputJsonValue,
       },
       update: {},
     });
 
-    const blockCount = await this.prisma.cmsBlock.count({ where: { pageId: page.id } });
-    if (blockCount === 0) {
-      for (const block of DEFAULT_HOME_BLOCKS) {
-        await this.prisma.cmsBlock.create({
-          data: {
-            pageId: page.id,
-            type: block.type,
-            sortOrder: block.sortOrder,
-            content: block.content as unknown as Prisma.InputJsonValue,
-            published: true,
-          },
-        });
-      }
+    await this.seedPageBlocks(
+      home.id,
+      DEFAULT_HOME_BLOCKS.map((b) => ({
+        type: b.type,
+        sortOrder: b.sortOrder,
+        content: b.content as unknown as Record<string, unknown>,
+      })),
+      Boolean(opts?.replaceHome),
+    );
+
+    for (const pageSeed of DEFAULT_CONTENT_PAGES) {
+      const page = await this.prisma.cmsPage.upsert({
+        where: { slug: pageSeed.slug },
+        create: {
+          slug: pageSeed.slug,
+          title: pageSeed.title,
+          description: pageSeed.description,
+          status: 'published',
+          seo: {
+            reviewStatus: pageSeed.reviewStatus,
+            kind: pageSeed.slug.startsWith('use-case') ? 'use_case' : 'product_copy',
+          } as Prisma.InputJsonValue,
+        },
+        update: {},
+      });
+      await this.seedPageBlocks(page.id, pageSeed.blocks, Boolean(opts?.replaceContentPages));
     }
 
     for (const asset of DEFAULT_ASSETS) {
       await this.prisma.cmsAsset.upsert({
         where: { key: asset.key },
         create: {
-          pageId: page.id,
+          pageId: home.id,
           key: asset.key,
           url: asset.url,
           alt: asset.alt,
@@ -85,7 +123,7 @@ export class MarketingCmsService implements OnModuleInit {
       });
     }
 
-    this.log.log('Marketing CMS seed ensured');
+    this.log.log('Marketing CMS seed ensured (home + use-case + product prefills)');
   }
 
   async getSettings() {
@@ -136,6 +174,18 @@ export class MarketingCmsService implements OnModuleInit {
     return this.prisma.cmsPage.findMany({
       orderBy: { slug: 'asc' },
       include: { _count: { select: { blocks: true, assets: true } } },
+    });
+  }
+
+  async setReviewStatus(slug: string, reviewStatus: 'pending_review' | 'approved') {
+    const page = await this.prisma.cmsPage.findUnique({ where: { slug } });
+    if (!page) throw new Error('page_not_found');
+    const seo = (page.seo ?? {}) as Record<string, unknown>;
+    return this.prisma.cmsPage.update({
+      where: { slug },
+      data: {
+        seo: { ...seo, reviewStatus } as Prisma.InputJsonValue,
+      },
     });
   }
 
@@ -199,41 +249,48 @@ export class MarketingCmsService implements OnModuleInit {
     });
   }
 
-  async reseedHome() {
-    const page = await this.prisma.cmsPage.findUnique({ where: { slug: 'home' } });
-    if (!page) {
-      await this.ensureSeeded();
-      return this.getPageBySlug('home');
-    }
-    await this.prisma.cmsBlock.deleteMany({ where: { pageId: page.id } });
-    for (const block of DEFAULT_HOME_BLOCKS) {
-      await this.prisma.cmsBlock.create({
-        data: {
-          pageId: page.id,
-          type: block.type,
-          sortOrder: block.sortOrder,
-          content: block.content as unknown as Prisma.InputJsonValue,
-          published: true,
-        },
-      });
-    }
-    for (const asset of DEFAULT_ASSETS) {
-      await this.prisma.cmsAsset.upsert({
-        where: { key: asset.key },
-        create: {
-          pageId: page.id,
-          key: asset.key,
-          url: asset.url,
-          alt: asset.alt,
-          kind: asset.kind,
-        },
-        update: { url: asset.url, alt: asset.alt, pageId: page.id },
-      });
-    }
-    await this.prisma.cmsSiteSettings.update({
-      where: { id: 'default' },
-      data: { designScope: DEFAULT_DESIGN_SCOPE as unknown as Prisma.InputJsonValue },
+  async getPrefill(surface: keyof typeof PRODUCT_PREFILLS) {
+    await this.ensureSeeded();
+    const slug = `product-${surface}`;
+    const page = await this.prisma.cmsPage.findUnique({
+      where: { slug },
+      include: { blocks: { where: { type: 'product_prefill', published: true }, take: 1 } },
     });
-    return this.getPageBySlug('home');
+    const fromCms = page?.blocks[0]?.content as Record<string, unknown> | undefined;
+    const fallback = PRODUCT_PREFILLS[surface];
+    return {
+      surface,
+      pageSlug: slug,
+      reviewStatus:
+        ((page?.seo as Record<string, unknown> | null)?.reviewStatus as string) ?? 'pending_review',
+      prefill: { ...fallback, ...(fromCms ?? {}) },
+    };
+  }
+
+  async reseedHome() {
+    await this.ensureSeeded({ replaceHome: true, replaceContentPages: false });
+    // Always refresh content pages that are still pending_review (safe for admin edits that were approved).
+    for (const pageSeed of DEFAULT_CONTENT_PAGES) {
+      const page = await this.prisma.cmsPage.findUnique({ where: { slug: pageSeed.slug } });
+      if (!page) continue;
+      const status = (page.seo as Record<string, unknown> | null)?.reviewStatus;
+      if (status === 'approved') continue;
+      await this.seedPageBlocks(page.id, pageSeed.blocks, true);
+      await this.prisma.cmsPage.update({
+        where: { id: page.id },
+        data: {
+          title: pageSeed.title,
+          description: pageSeed.description,
+          seo: {
+            reviewStatus: 'pending_review',
+            kind: pageSeed.slug.startsWith('use-case') ? 'use_case' : 'product_copy',
+          } as Prisma.InputJsonValue,
+        },
+      });
+    }
+    return {
+      home: await this.getPageBySlug('home'),
+      pages: await this.listPages(),
+    };
   }
 }

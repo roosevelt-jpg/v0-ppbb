@@ -61,6 +61,18 @@ export function VoiceStudioClient() {
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
 
+  useEffect(() => {
+    void apiFetch<{
+      prefill: { text?: string; ssml?: string; voice?: string; note?: string };
+    }>('/v1/cms/prefills/voice')
+      .then((res) => {
+        if (res.prefill.text) setText(res.prefill.text);
+        if (res.prefill.ssml) setSsml(res.prefill.ssml);
+        if (res.prefill.voice) setVoice(res.prefill.voice);
+      })
+      .catch(() => undefined);
+  }, []);
+
   async function compileSsml() {
     setError(null);
     try {

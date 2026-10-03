@@ -58,6 +58,14 @@ export function SpeechClient() {
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
 
+  useEffect(() => {
+    void apiFetch<{ prefill: { text?: string } }>('/v1/cms/prefills/speech')
+      .then((res) => {
+        if (res.prefill.text) setTtsText(res.prefill.text);
+      })
+      .catch(() => undefined);
+  }, []);
+
   async function previewTts() {
     setTtsBusy(true);
     setTtsError(null);
