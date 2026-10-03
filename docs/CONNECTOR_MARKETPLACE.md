@@ -3,6 +3,8 @@
 **Status:** Shipped (VL-256 / library Phase 123)  
 **Rule:** Entitlement SKUs over the built-in connector catalog + Slack (ADR-0026) — **not** Zapier, MuleSoft, or iPaaS OS. Real-money honesty: Stripe (or equivalent); `storesRawCardData: false`. Install never opens live arbitrary outbound. Roadmap: [`docs/roadmap/volume11-ecosystem-cloud/`](./roadmap/volume11-ecosystem-cloud/).
 
+Partner video/LLM platform connectors (Higgsfield, Claude, Cursor, Runway, …) with live REST/MCP APIs live under **Partner Connectors** — see [`docs/PARTNER_CONNECTORS.md`](./PARTNER_CONNECTORS.md) and ADR-0326.
+
 ---
 
 ## Library term → VerbaLab

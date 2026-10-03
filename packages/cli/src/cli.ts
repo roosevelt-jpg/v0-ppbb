@@ -55,6 +55,12 @@ function usage(): never {
   verbalab agent-marketplace-engine
   verbalab workflow-marketplace-engine
   verbalab connector-marketplace-engine
+  verbalab partner-connectors-engine
+  verbalab partner-platforms [--kind video|llm|agent|creative|custom]
+  verbalab partner-tools
+  verbalab partner-invoke --tool <name> [--args <json>] [--platform <id>]
+  verbalab partner-mcp-tools
+  verbalab partner-mcp-manifest
   verbalab voice-language-marketplace-engine
   verbalab creator-economy-engine
   verbalab african-intelligence-cloud-products
@@ -638,6 +644,53 @@ async function main() {
 
   if (command === 'connector-marketplace-engine') {
     console.log(JSON.stringify(await vl.connectorMarketplaceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'partner-connectors-engine') {
+    console.log(JSON.stringify(await vl.partnerConnectorsEngine(), null, 2));
+    return;
+  }
+  if (command === 'partner-platforms') {
+    console.log(JSON.stringify(await vl.partnerConnectorsPlatforms(argValue(rest, '--kind')), null, 2));
+    return;
+  }
+  if (command === 'partner-tools') {
+    console.log(JSON.stringify(await vl.partnerConnectorsTools(), null, 2));
+    return;
+  }
+  if (command === 'partner-invoke') {
+    const tool = argValue(rest, '--tool');
+    if (!tool) usage();
+    const raw = argValue(rest, '--args') ?? '{}';
+    let args: Record<string, unknown> = {};
+    try {
+      args = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      console.error('Invalid --args JSON');
+      process.exit(1);
+    }
+    console.log(
+      JSON.stringify(
+        await vl.partnerInvoke({
+          tool,
+          arguments: args,
+          platformId: argValue(rest, '--platform') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+  if (command === 'partner-mcp-tools') {
+    console.log(
+      JSON.stringify(await vl.partnerMcp({ jsonrpc: '2.0', id: 1, method: 'tools/list' }), null, 2),
+    );
+    return;
+  }
+  if (command === 'partner-mcp-manifest') {
+    console.log(JSON.stringify(await vl.partnerMcpManifest(), null, 2));
     return;
   }
 

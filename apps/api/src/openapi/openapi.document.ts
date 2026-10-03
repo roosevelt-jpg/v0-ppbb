@@ -3733,6 +3733,49 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/partner-connectors/engine': {
+      get: {
+        summary: 'Partner Connectors engine (MCP/CLI/REST for video+LLM platforms)',
+        operationId: 'getPartnerConnectorsEngine',
+        responses: { '200': { description: 'Platforms, tools, MCP, honesty' } },
+      },
+    },
+    '/v1/partner-connectors/platforms': {
+      get: {
+        summary: 'List partner platforms (Higgsfield, Claude, Runway, …)',
+        operationId: 'listPartnerConnectorsPlatforms',
+        responses: { '200': { description: 'Partner platforms' } },
+      },
+    },
+    '/v1/partner-connectors/tools': {
+      get: {
+        summary: 'List partner/MCP Own AI tools',
+        operationId: 'listPartnerConnectorsTools',
+        responses: { '200': { description: 'Tool schemas' } },
+      },
+    },
+    '/v1/partner-connectors/invoke': {
+      post: {
+        summary: 'Invoke a partner Own AI tool',
+        operationId: 'invokePartnerConnectorTool',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Tool result' } },
+      },
+    },
+    '/v1/partner-connectors/mcp': {
+      post: {
+        summary: 'MCP JSON-RPC endpoint (tools/list, tools/call)',
+        operationId: 'partnerConnectorsMcp',
+        responses: { '200': { description: 'JSON-RPC result' } },
+      },
+    },
+    '/v1/partner-connectors/mcp/manifest': {
+      get: {
+        summary: 'MCP server manifest for Claude/Cursor',
+        operationId: 'getPartnerConnectorsMcpManifest',
+        responses: { '200': { description: 'MCP manifest' } },
+      },
+    },
     '/v1/connector-marketplace/engine': {
       get: {
         summary: 'Connector Marketplace engine catalog',

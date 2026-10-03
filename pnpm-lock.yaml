@@ -246,6 +246,18 @@ importers:
         specifier: ^8.18.2
         version: 8.69.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
 
+  packages/mcp:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.20.1
+      '@verbalab/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
   packages/sdk:
     devDependencies:
       '@types/node':

@@ -94,6 +94,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/models', label: 'Models' },
       { href: '/workflows', label: 'Workflows' },
       { href: '/connectors', label: 'Connectors' },
+      { href: '/partner-connectors', label: 'Partner Connectors', keywords: ['mcp', 'higgsfield', 'claude', 'runway'] },
       { href: '/marketplace', label: 'Marketplace' },
     ],
   },

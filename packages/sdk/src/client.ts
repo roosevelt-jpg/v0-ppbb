@@ -1887,6 +1887,41 @@ export class VerbaLab {
     return this.requestJson('/v1/connector-marketplace/engine', { method: 'GET' });
   }
 
+  async partnerConnectorsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/engine', { method: 'GET' });
+  }
+
+  async partnerConnectorsPlatforms(kind?: string): Promise<Record<string, unknown>> {
+    const q = kind ? `?kind=${encodeURIComponent(kind)}` : '';
+    return this.requestJson(`/v1/partner-connectors/platforms${q}`, { method: 'GET' });
+  }
+
+  async partnerConnectorsTools(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/tools', { method: 'GET' });
+  }
+
+  async partnerInvoke(input: {
+    tool: string;
+    arguments?: Record<string, unknown>;
+    platformId?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/invoke', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async partnerMcp(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/mcp', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async partnerMcpManifest(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/mcp/manifest', { method: 'GET' });
+  }
+
   async voiceLanguageMarketplaceEngine(): Promise<{
     product: string;
     note: string;
