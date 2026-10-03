@@ -3161,6 +3161,59 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ecosystem-cloud/products': {
+      get: {
+        summary: 'Ecosystem Cloud product catalog',
+        operationId: 'listEcosystemCloudProducts',
+        responses: {
+          '200': {
+            description:
+              'Marketplace/monetization hub catalog, honesty, Stripe safety, deferred marketplaces',
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/engine': {
+      get: {
+        summary: 'Ecosystem Cloud engine (alias of products)',
+        operationId: 'getEcosystemCloudEngine',
+        responses: {
+          '200': { description: 'Ecosystem catalog + honesty' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/routing': {
+      get: {
+        summary: 'Ecosystem Cloud marketplace routing table',
+        operationId: 'getEcosystemCloudRouting',
+        responses: {
+          '200': { description: 'Static marketplace/monetization route catalog' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/overview': {
+      get: {
+        summary: 'Ecosystem Cloud org overview',
+        operationId: 'getEcosystemCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, deferred marketplaces, real-money safety notes' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/monitoring': {
+      get: {
+        summary: 'Ecosystem Cloud foundation monitoring',
+        operationId: 'getEcosystemCloudMonitoring',
+        responses: {
+          '200': { description: 'Product status snapshot + honesty' },
+        },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

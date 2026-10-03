@@ -1742,6 +1742,25 @@ export class VerbaLab {
     return this.requestJson('/v1/policy-fabric/products', { method: 'GET' });
   }
 
+  async ecosystemCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ecosystem-cloud/products', { method: 'GET' });
+  }
+
   async policyFabricRoute(body?: { kinds?: string[] }): Promise<{
     plan: Array<Record<string, unknown>>;
     missing: string[];

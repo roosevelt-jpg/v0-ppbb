@@ -25,6 +25,7 @@ import { ReasoningFabricApplicationModule } from '../reasoning-fabric/applicatio
 import { MemoryFabricApplicationModule } from '../memory-fabric/application/memory-fabric-application.module';
 import { AgentFabricApplicationModule } from '../agent-fabric/application/agent-fabric-application.module';
 import { PolicyFabricApplicationModule } from '../policy-fabric/application/policy-fabric-application.module';
+import { EcosystemCloudApplicationModule } from '../ecosystem-cloud/application/ecosystem-cloud-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -103,6 +104,7 @@ import { ReasoningFabricGraphqlResolver } from './reasoning-fabric.resolver';
 import { MemoryFabricGraphqlResolver } from './memory-fabric.resolver';
 import { AgentFabricGraphqlResolver } from './agent-fabric.resolver';
 import { PolicyFabricGraphqlResolver } from './policy-fabric.resolver';
+import { EcosystemCloudGraphqlResolver } from './ecosystem-cloud.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -201,6 +203,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     MemoryFabricApplicationModule,
     AgentFabricApplicationModule,
     PolicyFabricApplicationModule,
+    EcosystemCloudApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -287,6 +290,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     MemoryFabricGraphqlResolver,
     AgentFabricGraphqlResolver,
     PolicyFabricGraphqlResolver,
+    EcosystemCloudGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,
