@@ -56,6 +56,17 @@ import { CompliancePlatformApplicationModule } from '../compliance-platform/appl
 import { RiskIntelligenceApplicationModule } from '../risk-intelligence/application/risk-intelligence-application.module';
 import { IdentityFederationApplicationModule } from '../identity-federation/application/identity-federation-application.module';
 import { TrustAnalyticsApplicationModule } from '../trust-analytics/application/trust-analytics-application.module';
+import { PlatformEngineeringCloudApplicationModule } from '../platform-engineering-cloud/application/platform-engineering-cloud-application.module';
+import { InternalDeveloperPortalApplicationModule } from '../internal-developer-portal/application/internal-developer-portal-application.module';
+import { ServiceCatalogApplicationModule } from '../service-catalog/application/service-catalog-application.module';
+import { GoldenPathPlatformApplicationModule } from '../golden-path-platform/application/golden-path-platform-application.module';
+import { GitopsPlatformApplicationModule } from '../gitops-platform/application/gitops-platform-application.module';
+import { ReleaseEngineeringApplicationModule } from '../release-engineering/application/release-engineering-application.module';
+import { ReliabilityEngineeringApplicationModule } from '../reliability-engineering/application/reliability-engineering-application.module';
+import { FinopsPlatformApplicationModule } from '../finops-platform/application/finops-platform-application.module';
+import { SupplyChainSecurityApplicationModule } from '../supply-chain-security/application/supply-chain-security-application.module';
+import { DeveloperExperiencePlatformApplicationModule } from '../developer-experience-platform/application/developer-experience-platform-application.module';
+import { PlatformEngineeringAnalyticsApplicationModule } from '../platform-engineering-analytics/application/platform-engineering-analytics-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -182,6 +193,17 @@ import { CompliancePlatformGraphqlResolver } from './compliance-platform.resolve
 import { RiskIntelligenceGraphqlResolver } from './risk-intelligence.resolver';
 import { IdentityFederationGraphqlResolver } from './identity-federation.resolver';
 import { TrustAnalyticsGraphqlResolver } from './trust-analytics.resolver';
+import { PlatformEngineeringCloudGraphqlResolver } from './platform-engineering-cloud.resolver';
+import { InternalDeveloperPortalGraphqlResolver } from './internal-developer-portal.resolver';
+import { ServiceCatalogGraphqlResolver } from './service-catalog.resolver';
+import { GoldenPathPlatformGraphqlResolver } from './golden-path-platform.resolver';
+import { GitopsPlatformGraphqlResolver } from './gitops-platform.resolver';
+import { ReleaseEngineeringGraphqlResolver } from './release-engineering.resolver';
+import { ReliabilityEngineeringGraphqlResolver } from './reliability-engineering.resolver';
+import { FinopsPlatformGraphqlResolver } from './finops-platform.resolver';
+import { SupplyChainSecurityGraphqlResolver } from './supply-chain-security.resolver';
+import { DeveloperExperiencePlatformGraphqlResolver } from './developer-experience-platform.resolver';
+import { PlatformEngineeringAnalyticsGraphqlResolver } from './platform-engineering-analytics.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -328,6 +350,17 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     RiskIntelligenceApplicationModule,
     IdentityFederationApplicationModule,
     TrustAnalyticsApplicationModule,
+    PlatformEngineeringCloudApplicationModule,
+    InternalDeveloperPortalApplicationModule,
+    ServiceCatalogApplicationModule,
+    GoldenPathPlatformApplicationModule,
+    GitopsPlatformApplicationModule,
+    ReleaseEngineeringApplicationModule,
+    ReliabilityEngineeringApplicationModule,
+    FinopsPlatformApplicationModule,
+    SupplyChainSecurityApplicationModule,
+    DeveloperExperiencePlatformApplicationModule,
+    PlatformEngineeringAnalyticsApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -462,6 +495,17 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     RiskIntelligenceGraphqlResolver,
     IdentityFederationGraphqlResolver,
     TrustAnalyticsGraphqlResolver,
+    PlatformEngineeringCloudGraphqlResolver,
+    InternalDeveloperPortalGraphqlResolver,
+    ServiceCatalogGraphqlResolver,
+    GoldenPathPlatformGraphqlResolver,
+    GitopsPlatformGraphqlResolver,
+    ReleaseEngineeringGraphqlResolver,
+    ReliabilityEngineeringGraphqlResolver,
+    FinopsPlatformGraphqlResolver,
+    SupplyChainSecurityGraphqlResolver,
+    DeveloperExperiencePlatformGraphqlResolver,
+    PlatformEngineeringAnalyticsGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

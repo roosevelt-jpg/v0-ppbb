@@ -4927,3 +4927,163 @@ export class GqlTrustAnalyticsEngine {
   @Field(() => Boolean)
   siemOs!: boolean;
 }
+
+@ObjectType()
+export class GqlPlatformEngineeringCloudProduct {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field(() => String, { nullable: true })
+  console!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+
+@ObjectType()
+export class GqlInternalDeveloperPortalEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  backstageOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlServiceCatalogEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  serviceMeshOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGoldenPathPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  scaffoldingOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlGitopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  argoCdOs!: boolean;
+
+  @Field(() => Boolean)
+  fluxOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlReleaseEngineeringEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  spinnakerOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlReliabilityEngineeringEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  datadogOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlFinopsPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  finopsOs!: boolean;
+
+  @Field(() => Boolean)
+  gpuBudgetAlertsEnabled!: boolean;
+}
+
+
+@ObjectType()
+export class GqlSupplyChainSecurityEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  snykOs!: boolean;
+
+  @Field(() => Int)
+  findingCount!: number;
+}
+
+
+@ObjectType()
+export class GqlDeveloperExperiencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  ideOs!: boolean;
+}
+
+
+@ObjectType()
+export class GqlPlatformEngineeringAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  devopsIntelligenceOs!: boolean;
+}

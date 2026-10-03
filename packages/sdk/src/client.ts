@@ -2215,6 +2215,125 @@ export class VerbaLab {
     return this.requestJson('/v1/trust-analytics/engine', { method: 'GET' });
   }
 
+  async platformEngineeringCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/platform-engineering-cloud/products', { method: 'GET' });
+  }
+
+  async internalDeveloperPortalEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/internal-developer-portal/engine', { method: 'GET' });
+  }
+
+  async serviceCatalogEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/service-catalog/engine', { method: 'GET' });
+  }
+
+  async goldenPathPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/golden-path-platform/engine', { method: 'GET' });
+  }
+
+  async gitopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/gitops-platform/engine', { method: 'GET' });
+  }
+
+  async releaseEngineeringEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/release-engineering/engine', { method: 'GET' });
+  }
+
+  async reliabilityEngineeringEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/reliability-engineering/engine', { method: 'GET' });
+  }
+
+  async finopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/finops-platform/engine', { method: 'GET' });
+  }
+
+  async supplyChainSecurityEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/supply-chain-security/engine', { method: 'GET' });
+  }
+
+  async developerExperiencePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/developer-experience-platform/engine', { method: 'GET' });
+  }
+
+  async platformEngineeringAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/platform-engineering-analytics/engine', { method: 'GET' });
+  }
+
   async researchCloudProducts(): Promise<{
     product: string;
     products: Array<{

@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-301 Done — Trust Cloud Production Audit; Volume 15 closed)
+Last updated: 2026-10-03 (VL-313 Done — Platform Engineering Cloud Production Audit; Volume 16 closed)
 
 ---
 
@@ -331,6 +331,18 @@ Last updated: 2026-10-03 (VL-301 Done — Trust Cloud Production Audit; Volume 1
 | VL-299 | Identity Federation (Phase 166) | Done | Federation readiness over Clerk; `oktaOs=false`. ADR-0201. |
 | VL-300 | Trust Analytics (Phase 167) | Done | Aggregates sibling trust hubs; `siemOs=false`. ADR-0202. |
 | VL-301 | Trust Cloud Production Audit (Phase 168) | Done | Audit pack under `docs/trust-cloud-audit/`; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
+| VL-302 | Platform Engineering Foundation (Phase 169) | Done | `/platform-engineering-cloud` hub; ADR-0204. Internal IDP. `controlPlaneOs=false`. |
+| VL-303 | Internal Developer Portal (Phase 170) | Done | Portal catalog over developer-cloud; `backstageOs=false`. ADR-0205. |
+| VL-304 | Service Catalog (Phase 171) | Done | api/web/sdk/cli/db/queue/infra seed. ADR-0206. |
+| VL-305 | Golden Path Platform (Phase 172) | Done | Service/cloud/SDK/CI/security templates. ADR-0207. |
+| VL-306 | GitOps Platform (Phase 173) | Done | Fly/shared platform readiness; `argoCdOs=false`; `fluxOs=false`. ADR-0208. |
+| VL-307 | Release Engineering (Phase 174) | Done | Blue-green/canary/rolling/flags/rollback seed. ADR-0209. |
+| VL-308 | Reliability Engineering (Phase 175) | Done | SLO/SLI/error budgets; extends observability; `datadogOs=false`. ADR-0210. |
+| VL-309 | FinOps Platform (Phase 176) | Done | GPU/model budgets+alerts; `gpuBudgetAlertsEnabled=true`; `finopsOs=false`. ADR-0211. |
+| VL-310 | Supply Chain Security (Phase 177) | Done | SBOM/scan/findings inventory; `snykOs=false`. ADR-0212. |
+| VL-311 | Developer Experience Platform (Phase 178) | Done | CLI/SDK/codegen/docs/repo health; extends VL-127. ADR-0213. |
+| VL-312 | Platform Engineering Analytics (Phase 179) | Done | DORA + sibling aggregation. ADR-0214. |
+| VL-313 | Platform Engineering Production Audit (Phase 180) | Done | Audit pack under `docs/platform-engineering-cloud-audit/`; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |
 
 ---
 
@@ -503,3 +515,5 @@ Last updated: 2026-10-03 (VL-301 Done — Trust Cloud Production Audit; Volume 1
 | 2026-10-03 | VL-291 Done: MLOps & LLMOps Cloud Production Audit (Phase 158) — evidence pack; ADR-0193. Volume 14 closed. Trust Cloud → Volume 15+. |
 | 2026-10-03 | VL-292–300 Done: Trust Cloud hubs (Phases 159–167) — foundation through trust analytics; ADR-0194–0202. Safety↔Policy, Privacy TK consent, Governance human sign-off, Compliance honesty. |
 | 2026-10-03 | VL-301 Done: Trust Cloud Production Audit (Phase 168) — evidence pack; ADR-0203. Volume 15 closed. Platform Engineering → Volume 16+. |
+| 2026-10-03 | VL-302–312 Done: Platform Engineering Cloud hubs (Phases 169–179) — foundation through PE analytics; ADR-0204–0214. FinOps GPU alerts, supply-chain scan/findings, GitOps honesty. |
+| 2026-10-03 | VL-313 Done: Platform Engineering Cloud Production Audit (Phase 180) — evidence pack; ADR-0215. Volume 16 closed. Control Plane → Volume 17+. |

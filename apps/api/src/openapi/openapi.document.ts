@@ -10327,6 +10327,413 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/platform-engineering-cloud/products': {
+      get: {
+        summary: 'Platform Engineering products',
+        operationId: 'listPlatformEngineeringCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/engine': {
+      get: {
+        summary: 'Platform Engineering engine alias',
+        operationId: 'getPlatformEngineeringCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/routing': {
+      get: {
+        summary: 'Platform Engineering routing',
+        operationId: 'getPlatformEngineeringCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/overview': {
+      get: {
+        summary: 'Platform Engineering overview',
+        operationId: 'getPlatformEngineeringCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/monitoring': {
+      get: {
+        summary: 'Platform Engineering monitoring',
+        operationId: 'getPlatformEngineeringCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/engine': {
+      get: {
+        summary: 'Internal Developer Portal engine',
+        operationId: 'getInternalDeveloperPortalEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/products': {
+      get: {
+        summary: 'Internal Developer Portal products',
+        operationId: 'listInternalDeveloperPortalProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/monitoring': {
+      get: {
+        summary: 'Internal Developer Portal monitoring',
+        operationId: 'getInternalDeveloperPortalMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/portal': {
+      get: {
+        summary: 'List Internal Developer Portal rows',
+        operationId: 'listInternalDeveloperPortalRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/query': {
+      get: {
+        summary: 'Query Internal Developer Portal',
+        operationId: 'queryInternalDeveloperPortal',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/engine': {
+      get: {
+        summary: 'Service Catalog engine',
+        operationId: 'getServiceCatalogEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/products': {
+      get: {
+        summary: 'Service Catalog products',
+        operationId: 'listServiceCatalogProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/monitoring': {
+      get: {
+        summary: 'Service Catalog monitoring',
+        operationId: 'getServiceCatalogMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/services': {
+      get: {
+        summary: 'List Service Catalog rows',
+        operationId: 'listServiceCatalogRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/query': {
+      get: {
+        summary: 'Query Service Catalog',
+        operationId: 'queryServiceCatalog',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/engine': {
+      get: {
+        summary: 'Golden Path Platform engine',
+        operationId: 'getGoldenPathPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/products': {
+      get: {
+        summary: 'Golden Path Platform products',
+        operationId: 'listGoldenPathPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/monitoring': {
+      get: {
+        summary: 'Golden Path Platform monitoring',
+        operationId: 'getGoldenPathPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/templates': {
+      get: {
+        summary: 'List Golden Path Platform rows',
+        operationId: 'listGoldenPathPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/query': {
+      get: {
+        summary: 'Query Golden Path Platform',
+        operationId: 'queryGoldenPathPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/engine': {
+      get: {
+        summary: 'GitOps Platform engine',
+        operationId: 'getGitopsPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/products': {
+      get: {
+        summary: 'GitOps Platform products',
+        operationId: 'listGitopsPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/monitoring': {
+      get: {
+        summary: 'GitOps Platform monitoring',
+        operationId: 'getGitopsPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/readiness': {
+      get: {
+        summary: 'List GitOps Platform rows',
+        operationId: 'listGitopsPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/query': {
+      get: {
+        summary: 'Query GitOps Platform',
+        operationId: 'queryGitopsPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/engine': {
+      get: {
+        summary: 'Release Engineering engine',
+        operationId: 'getReleaseEngineeringEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/products': {
+      get: {
+        summary: 'Release Engineering products',
+        operationId: 'listReleaseEngineeringProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/monitoring': {
+      get: {
+        summary: 'Release Engineering monitoring',
+        operationId: 'getReleaseEngineeringMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/releases': {
+      get: {
+        summary: 'List Release Engineering rows',
+        operationId: 'listReleaseEngineeringRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/query': {
+      get: {
+        summary: 'Query Release Engineering',
+        operationId: 'queryReleaseEngineering',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/engine': {
+      get: {
+        summary: 'Reliability Engineering engine',
+        operationId: 'getReliabilityEngineeringEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/products': {
+      get: {
+        summary: 'Reliability Engineering products',
+        operationId: 'listReliabilityEngineeringProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/monitoring': {
+      get: {
+        summary: 'Reliability Engineering monitoring',
+        operationId: 'getReliabilityEngineeringMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/reliability': {
+      get: {
+        summary: 'List Reliability Engineering rows',
+        operationId: 'listReliabilityEngineeringRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/query': {
+      get: {
+        summary: 'Query Reliability Engineering',
+        operationId: 'queryReliabilityEngineering',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/engine': {
+      get: {
+        summary: 'FinOps Platform engine',
+        operationId: 'getFinopsPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/products': {
+      get: {
+        summary: 'FinOps Platform products',
+        operationId: 'listFinopsPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/monitoring': {
+      get: {
+        summary: 'FinOps Platform monitoring',
+        operationId: 'getFinopsPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/costs': {
+      get: {
+        summary: 'FinOps Platform costs',
+        operationId: 'listFinopsPlatformCosts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/budgets': {
+      get: {
+        summary: 'FinOps Platform budgets',
+        operationId: 'listFinopsPlatformBudgets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/alerts': {
+      get: {
+        summary: 'FinOps Platform alerts',
+        operationId: 'listFinopsPlatformAlerts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/query': {
+      get: {
+        summary: 'Query FinOps Platform',
+        operationId: 'queryFinopsPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/engine': {
+      get: {
+        summary: 'Supply Chain Security engine',
+        operationId: 'getSupplyChainSecurityEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/products': {
+      get: {
+        summary: 'Supply Chain Security products',
+        operationId: 'listSupplyChainSecurityProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/monitoring': {
+      get: {
+        summary: 'Supply Chain Security monitoring',
+        operationId: 'getSupplyChainSecurityMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/findings': {
+      get: {
+        summary: 'Supply Chain Security findings',
+        operationId: 'listSupplyChainSecurityFindings',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/scan': {
+      get: {
+        summary: 'Scan Supply Chain Security',
+        operationId: 'scanSupplyChainSecurity',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/query': {
+      get: {
+        summary: 'Query Supply Chain Security',
+        operationId: 'querySupplyChainSecurity',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/engine': {
+      get: {
+        summary: 'Developer Experience Platform engine',
+        operationId: 'getDeveloperExperiencePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/products': {
+      get: {
+        summary: 'Developer Experience Platform products',
+        operationId: 'listDeveloperExperiencePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/monitoring': {
+      get: {
+        summary: 'Developer Experience Platform monitoring',
+        operationId: 'getDeveloperExperiencePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/devex': {
+      get: {
+        summary: 'List Developer Experience Platform rows',
+        operationId: 'listDeveloperExperiencePlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/query': {
+      get: {
+        summary: 'Query Developer Experience Platform',
+        operationId: 'queryDeveloperExperiencePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/engine': {
+      get: {
+        summary: 'Platform Engineering Analytics engine',
+        operationId: 'getPlatformEngineeringAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/products': {
+      get: {
+        summary: 'Platform Engineering Analytics products',
+        operationId: 'listPlatformEngineeringAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/monitoring': {
+      get: {
+        summary: 'Platform Engineering Analytics monitoring',
+        operationId: 'getPlatformEngineeringAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/snapshot': {
+      get: {
+        summary: 'List Platform Engineering Analytics rows',
+        operationId: 'listPlatformEngineeringAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/query': {
+      get: {
+        summary: 'Query Platform Engineering Analytics',
+        operationId: 'queryPlatformEngineeringAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

@@ -108,6 +108,17 @@ import { CompliancePlatformModule } from './compliance-platform/compliance-platf
 import { RiskIntelligenceModule } from './risk-intelligence/risk-intelligence.module';
 import { IdentityFederationModule } from './identity-federation/identity-federation.module';
 import { TrustAnalyticsModule } from './trust-analytics/trust-analytics.module';
+import { PlatformEngineeringCloudModule } from './platform-engineering-cloud/platform-engineering-cloud.module';
+import { InternalDeveloperPortalModule } from './internal-developer-portal/internal-developer-portal.module';
+import { ServiceCatalogModule } from './service-catalog/service-catalog.module';
+import { GoldenPathPlatformModule } from './golden-path-platform/golden-path-platform.module';
+import { GitopsPlatformModule } from './gitops-platform/gitops-platform.module';
+import { ReleaseEngineeringModule } from './release-engineering/release-engineering.module';
+import { ReliabilityEngineeringModule } from './reliability-engineering/reliability-engineering.module';
+import { FinopsPlatformModule } from './finops-platform/finops-platform.module';
+import { SupplyChainSecurityModule } from './supply-chain-security/supply-chain-security.module';
+import { DeveloperExperiencePlatformModule } from './developer-experience-platform/developer-experience-platform.module';
+import { PlatformEngineeringAnalyticsModule } from './platform-engineering-analytics/platform-engineering-analytics.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -251,6 +262,17 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     RiskIntelligenceModule,
     IdentityFederationModule,
     TrustAnalyticsModule,
+    PlatformEngineeringCloudModule,
+    InternalDeveloperPortalModule,
+    ServiceCatalogModule,
+    GoldenPathPlatformModule,
+    GitopsPlatformModule,
+    ReleaseEngineeringModule,
+    ReliabilityEngineeringModule,
+    FinopsPlatformModule,
+    SupplyChainSecurityModule,
+    DeveloperExperiencePlatformModule,
+    PlatformEngineeringAnalyticsModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

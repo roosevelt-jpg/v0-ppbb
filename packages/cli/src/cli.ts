@@ -87,6 +87,17 @@ function usage(): never {
   verbalab risk-intelligence-engine
   verbalab identity-federation-engine
   verbalab trust-analytics-engine
+  verbalab platform-engineering-cloud-products
+  verbalab internal-developer-portal-engine
+  verbalab service-catalog-engine
+  verbalab golden-path-platform-engine
+  verbalab gitops-platform-engine
+  verbalab release-engineering-engine
+  verbalab reliability-engineering-engine
+  verbalab finops-platform-engine
+  verbalab supply-chain-security-engine
+  verbalab developer-experience-platform-engine
+  verbalab platform-engineering-analytics-engine
   verbalab experiment-platform-engine
   verbalab synthetic-data-platform-engine
   verbalab benchmark-platform-engine
@@ -705,6 +716,61 @@ async function main() {
     console.log(JSON.stringify(await vl.trustAnalyticsEngine(), null, 2));
     return;
   }
+  if (command === 'platform-engineering-cloud-products') {
+    console.log(JSON.stringify(await vl.platformEngineeringCloudProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'internal-developer-portal-engine') {
+    console.log(JSON.stringify(await vl.internalDeveloperPortalEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'service-catalog-engine') {
+    console.log(JSON.stringify(await vl.serviceCatalogEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'golden-path-platform-engine') {
+    console.log(JSON.stringify(await vl.goldenPathPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'gitops-platform-engine') {
+    console.log(JSON.stringify(await vl.gitopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'release-engineering-engine') {
+    console.log(JSON.stringify(await vl.releaseEngineeringEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reliability-engineering-engine') {
+    console.log(JSON.stringify(await vl.reliabilityEngineeringEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'finops-platform-engine') {
+    console.log(JSON.stringify(await vl.finopsPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'supply-chain-security-engine') {
+    console.log(JSON.stringify(await vl.supplyChainSecurityEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'developer-experience-platform-engine') {
+    console.log(JSON.stringify(await vl.developerExperiencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'platform-engineering-analytics-engine') {
+    console.log(JSON.stringify(await vl.platformEngineeringAnalyticsEngine(), null, 2));
+    return;
+  }
+
 
 
   if (command === 'experiment-platform-engine') {
