@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Body,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -33,8 +34,15 @@ export class KnowledgeController {
     req: Request & {
       translateAuth: TranslateAuthContext;
     },
+    @Query('collection') collection?: string,
+    @Query('tag') tag?: string,
+    @Query('contentKind') contentKind?: string,
   ) {
-    return this.knowledge.list(req.translateAuth.organizationId, req.translateAuth.workspaceId);
+    return this.knowledge.list(req.translateAuth.organizationId, req.translateAuth.workspaceId, {
+      collection,
+      tag,
+      contentKind,
+    });
   }
 
   @Get('documents/:id')
@@ -46,7 +54,11 @@ export class KnowledgeController {
     },
     @Param('id') id: string,
   ) {
-    return this.knowledge.get(req.translateAuth.organizationId, id);
+    return this.knowledge.get(
+      req.translateAuth.organizationId,
+      req.translateAuth.workspaceId,
+      id,
+    );
   }
 
   @Post('documents')
@@ -63,6 +75,7 @@ export class KnowledgeController {
     req: Request & {
       translateAuth: TranslateAuthContext;
       sessionAuth?: SessionContext;
+      body: { collection?: string; tags?: string; contentKind?: string };
     },
     @UploadedFile() file: Express.Multer.File | undefined,
   ) {
@@ -76,6 +89,9 @@ export class KnowledgeController {
       apiKeyId: req.translateAuth.apiKeyId,
       userId: req.sessionAuth?.userId,
       ip: clientIp(req),
+      collection: req.body?.collection,
+      tags: req.body?.tags,
+      contentKind: req.body?.contentKind,
     });
   }
 
@@ -88,7 +104,11 @@ export class KnowledgeController {
     },
     @Param('id') id: string,
   ) {
-    return this.knowledge.remove(req.translateAuth.organizationId, id);
+    return this.knowledge.remove(
+      req.translateAuth.organizationId,
+      req.translateAuth.workspaceId,
+      id,
+    );
   }
 
   @Post('query')

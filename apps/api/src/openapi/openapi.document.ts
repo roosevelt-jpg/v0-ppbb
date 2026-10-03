@@ -2672,6 +2672,76 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-base/engine': {
+      get: {
+        summary: 'Enterprise Knowledge Base engine catalog',
+        operationId: 'getKnowledgeBaseEngine',
+        responses: { '200': { description: 'EKB capabilities and honesty flags' } },
+      },
+    },
+    '/v1/knowledge-base/content-kinds': {
+      get: {
+        summary: 'Knowledge Base content kinds',
+        operationId: 'listKnowledgeBaseContentKinds',
+        responses: { '200': { description: 'Shipped and deferred content kinds' } },
+      },
+    },
+    '/v1/knowledge-base/collections': {
+      get: {
+        summary: 'Workspace knowledge collections',
+        operationId: 'listKnowledgeBaseCollections',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Collections for the authenticated workspace' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-base/documents': {
+      get: {
+        summary: 'List Knowledge Base documents (workspace-scoped)',
+        operationId: 'listKnowledgeBaseDocuments',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Documents filtered by collection/tag/contentKind' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-base/analytics': {
+      get: {
+        summary: 'Knowledge Base analytics',
+        operationId: 'getKnowledgeBaseAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace document/chunk counts' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-base/monitoring': {
+      get: {
+        summary: 'Knowledge Base monitoring',
+        operationId: 'getKnowledgeBaseMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Analytics + honesty + deferred capability ids' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

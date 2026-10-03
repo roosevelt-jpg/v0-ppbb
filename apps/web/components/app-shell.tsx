@@ -13,6 +13,7 @@ const links = [
   { href: '/voice-cloud', label: 'Voice' },
   { href: '/intelligence-cloud', label: 'Intelligence' },
   { href: '/knowledge-cloud', label: 'Knowledge Cloud' },
+  { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/embedding-cloud', label: 'Embeddings' },
   { href: '/vector-cloud', label: 'Vectors' },
   { href: '/memory-cloud', label: 'Memory' },

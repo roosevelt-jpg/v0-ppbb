@@ -382,6 +382,45 @@ export class GqlKnowledgeProduct {
 }
 
 @ObjectType()
+export class GqlKnowledgeBaseCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeBaseEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeBaseCapability])
+  capabilities!: GqlKnowledgeBaseCapability[];
+
+  @Field()
+  confluenceOs!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsVl062!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

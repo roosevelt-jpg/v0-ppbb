@@ -24,11 +24,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'enterprise-knowledge-base',
       name: 'Enterprise Knowledge Base',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/knowledge-base/engine',
+      console: '/knowledge-base',
       notes:
-        'Document/content ingestion & storage (Phase 61 / VL-194). Must be org/workspace-scoped from day one.',
+        'Org/workspace-scoped ingest over VL-062 (VL-194). Collections/tags/MD/HTML. Not Confluence OS; media/approval deferred.',
     },
     {
       id: 'enterprise-search',

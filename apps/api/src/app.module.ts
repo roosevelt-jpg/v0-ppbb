@@ -53,6 +53,7 @@ import { SpeechCloudModule } from './speech-cloud/speech-cloud.module';
 import { VoiceCloudModule } from './voice-cloud/voice-cloud.module';
 import { IntelligenceCloudModule } from './intelligence-cloud/intelligence-cloud.module';
 import { KnowledgeCloudModule } from './knowledge-cloud/knowledge-cloud.module';
+import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EmbeddingCloudModule } from './embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from './vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from './memory-cloud/memory-cloud.module';
@@ -107,6 +108,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceCloudModule,
     IntelligenceCloudModule,
     KnowledgeCloudModule,
+    KnowledgeBaseModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,

@@ -598,6 +598,14 @@ model KnowledgeDocument {
   status         String   @default("processing") // processing | ready | failed
   error          String?
   chunkCount     Int      @default(0) @map("chunk_count")
+  /// VL-194 EKB: logical collection within a workspace (not a vector OS).
+  collection     String   @default("default")
+  /// VL-194 EKB: freeform tags for filtering (not taxonomy OS).
+  tags           String[] @default([])
+  /// VL-194 EKB: document | policy | manual | book | markdown | html | …
+  contentKind    String   @default("document") @map("content_kind")
+  /// VL-194 EKB: light revise counter (not full history table).
+  version        Int      @default(1)
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
@@ -607,6 +615,7 @@ model KnowledgeDocument {
   chunks       KnowledgeChunk[]
 
   @@index([workspaceId, createdAt])
+  @@index([workspaceId, collection])
   @@map("knowledge_documents")
 }
 

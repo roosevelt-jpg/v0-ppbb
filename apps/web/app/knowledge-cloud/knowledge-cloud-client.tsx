@@ -89,6 +89,9 @@ export function KnowledgeCloudClient() {
           <section>
             <h2 style={label}>Links</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+              <Link href={data.links.knowledgeBase ?? '/knowledge-base'} style={secondary}>
+                Knowledge Base
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

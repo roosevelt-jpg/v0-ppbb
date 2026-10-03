@@ -59,13 +59,21 @@ export class KnowledgeService {
       file.mimetype === DOCX_MIME ||
       file.mimetype === PDF_MIME ||
       file.mimetype === 'text/plain' ||
+      file.mimetype === 'text/markdown' ||
+      file.mimetype === 'text/x-markdown' ||
+      file.mimetype === 'text/html' ||
+      file.mimetype === 'application/xhtml+xml' ||
       name.endsWith('.docx') ||
       name.endsWith('.pdf') ||
-      name.endsWith('.txt');
+      name.endsWith('.txt') ||
+      name.endsWith('.md') ||
+      name.endsWith('.markdown') ||
+      name.endsWith('.html') ||
+      name.endsWith('.htm');
     if (!ok) {
       throw new ApiException(
         'validation_error',
-        'Unsupported file type. Upload DOCX, PDF, or TXT.',
+        'Unsupported file type. Upload DOCX, PDF, TXT, Markdown, or HTML. Images/video/audio/Office decks deferred.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -75,7 +83,36 @@ export class KnowledgeService {
     const lower = filename.toLowerCase();
     if (lower.endsWith('.docx')) return DOCX_MIME;
     if (lower.endsWith('.pdf')) return PDF_MIME;
+    if (lower.endsWith('.md') || lower.endsWith('.markdown')) return 'text/markdown';
+    if (lower.endsWith('.html') || lower.endsWith('.htm')) return 'text/html';
     return 'text/plain';
+  }
+
+  private guessContentKind(filename: string, mimeType: string, explicit?: string): string {
+    if (explicit?.trim()) return explicit.trim().slice(0, 64);
+    const lower = filename.toLowerCase();
+    if (lower.endsWith('.md') || lower.endsWith('.markdown') || mimeType.includes('markdown')) {
+      return 'markdown';
+    }
+    if (lower.endsWith('.html') || lower.endsWith('.htm') || mimeType.includes('html')) {
+      return 'html';
+    }
+    if (lower.includes('policy')) return 'policy';
+    if (lower.includes('manual')) return 'manual';
+    return 'document';
+  }
+
+  private parseTags(raw?: string | string[]): string[] {
+    if (!raw) return [];
+    const parts = Array.isArray(raw) ? raw : raw.split(/[,|]/);
+    return [
+      ...new Set(
+        parts
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean)
+          .map((t) => t.slice(0, 48)),
+      ),
+    ].slice(0, 32);
   }
 
   private sanitizeFilename(name: string): string {
@@ -90,6 +127,10 @@ export class KnowledgeService {
     status: string;
     error: string | null;
     chunkCount: number;
+    collection: string;
+    tags: string[];
+    contentKind: string;
+    version: number;
     createdAt: Date;
     updatedAt: Date;
   }) {
@@ -101,23 +142,37 @@ export class KnowledgeService {
       status: doc.status,
       error: doc.error,
       chunkCount: doc.chunkCount,
+      collection: doc.collection,
+      tags: doc.tags,
+      contentKind: doc.contentKind,
+      version: doc.version,
       createdAt: doc.createdAt.toISOString(),
       updatedAt: doc.updatedAt.toISOString(),
     };
   }
 
-  async list(organizationId: string, workspaceId: string) {
+  async list(
+    organizationId: string,
+    workspaceId: string,
+    filters?: { collection?: string; tag?: string; contentKind?: string },
+  ) {
     const docs = await this.prisma.knowledgeDocument.findMany({
-      where: { organizationId, workspaceId },
+      where: {
+        organizationId,
+        workspaceId,
+        ...(filters?.collection ? { collection: filters.collection } : {}),
+        ...(filters?.contentKind ? { contentKind: filters.contentKind } : {}),
+        ...(filters?.tag ? { tags: { has: filters.tag.trim().toLowerCase() } } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
     return { data: docs.map((d) => this.toDocDto(d)) };
   }
 
-  async get(organizationId: string, documentId: string) {
+  async get(organizationId: string, workspaceId: string, documentId: string) {
     const doc = await this.prisma.knowledgeDocument.findFirst({
-      where: { id: documentId, organizationId },
+      where: { id: documentId, organizationId, workspaceId },
     });
     if (!doc) {
       throw new ApiException('not_found', 'Knowledge document not found', HttpStatus.NOT_FOUND);
@@ -125,9 +180,9 @@ export class KnowledgeService {
     return this.toDocDto(doc);
   }
 
-  async remove(organizationId: string, documentId: string) {
+  async remove(organizationId: string, workspaceId: string, documentId: string) {
     const doc = await this.prisma.knowledgeDocument.findFirst({
-      where: { id: documentId, organizationId },
+      where: { id: documentId, organizationId, workspaceId },
     });
     if (!doc) {
       throw new ApiException('not_found', 'Knowledge document not found', HttpStatus.NOT_FOUND);
@@ -144,6 +199,9 @@ export class KnowledgeService {
     apiKeyId?: string;
     userId?: string;
     ip?: string;
+    collection?: string;
+    tags?: string | string[];
+    contentKind?: string;
   }) {
     this.assertAllowedUpload(input.file);
 
@@ -161,16 +219,25 @@ export class KnowledgeService {
     const storageKey = `knowledge/${input.organizationId}/${randomUUID()}-${this.sanitizeFilename(input.file.originalname)}`;
     await this.storage.writeBuffer(storageKey, input.file.buffer);
 
+    const mimeType = input.file.mimetype || this.guessMime(input.file.originalname);
+    const collection = (input.collection?.trim() || 'default').slice(0, 64) || 'default';
+    const tags = this.parseTags(input.tags);
+    const contentKind = this.guessContentKind(input.file.originalname, mimeType, input.contentKind);
+
     const doc = await this.prisma.knowledgeDocument.create({
       data: {
         organizationId: input.organizationId,
         workspaceId: input.workspaceId,
         apiKeyId: input.apiKeyId,
         filename: input.file.originalname,
-        mimeType: input.file.mimetype || this.guessMime(input.file.originalname),
+        mimeType,
         sizeBytes: input.file.size,
         storageKey,
         status: 'processing',
+        collection,
+        tags,
+        contentKind,
+        version: 1,
       },
     });
 
@@ -217,7 +284,11 @@ export class KnowledgeService {
     apiKeyId?: string;
   }) {
     const doc = await this.prisma.knowledgeDocument.findFirst({
-      where: { id: input.documentId, organizationId: input.organizationId },
+      where: {
+        id: input.documentId,
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+      },
     });
     if (!doc) {
       throw new ApiException('not_found', 'Knowledge document not found', HttpStatus.NOT_FOUND);

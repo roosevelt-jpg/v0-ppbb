@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-193 Done — Knowledge Cloud Foundation)
+Last updated: 2026-10-03 (VL-194 Done — Enterprise Knowledge Base)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-194 Enterprise Knowledge Base (Phase 61) |
+| Next up | VL-195 Enterprise Search (Phase 62) |
 
 ---
 
@@ -223,6 +223,7 @@ Last updated: 2026-10-03 (VL-193 Done — Knowledge Cloud Foundation)
 | VL-191 | Intelligence Analytics (Phase 58) | Done | `/v1/intelligence-analytics/*` aggregates; ADR-0102. ≠ Language/Speech/Voice analytics; BI OS deferred. |
 | VL-192 | Intelligence Cloud Production Audit (Phase 59) | Done | Audit gate + reports under `docs/intelligence-cloud-audit/`; ADR-0103. Rejects custom-kernel / Intelligence Graph OS. |
 | VL-193 | Knowledge Cloud Foundation (Phase 60) | Done | `/knowledge-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0104. Maps onto VL-062 + Intelligence; enterprise knowledge OS deferred. |
+| VL-194 | Enterprise Knowledge Base (Phase 61) | Done | `/v1/knowledge-base/*` over VL-062; collections/tags/MD/HTML; workspace-hardened get/remove; ADR-0105. Not Confluence OS. |
 
 ---
 
@@ -330,3 +331,4 @@ Last updated: 2026-10-03 (VL-193 Done — Knowledge Cloud Foundation)
 | 2026-10-03 | VL-191 Done: Intelligence Analytics (Phase 58) — usage/quality aggregates for Intelligence Cloud; ADR-0102. ≠ Speech/Voice analytics. |
 | 2026-10-03 | VL-192 Done: Intelligence Cloud Production Audit (Phase 59) — checklist/tests/reports; ADR-0103. Volume closed. |
 | 2026-10-03 | VL-193 Done: Knowledge Cloud Foundation (Phase 60) — hub/catalog/overview; ADR-0104. Extends VL-062 + Intelligence; no enterprise knowledge OS. |
+| 2026-10-03 | VL-194 Done: Enterprise Knowledge Base (Phase 61) — hub over VL-062 + collections/tags/MD/HTML; ADR-0105. Tenant-scoped; Confluence OS deferred. |

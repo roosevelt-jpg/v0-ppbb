@@ -8,7 +8,7 @@ const nodeRequire = createRequire(__filename);
 const pdfParse = nodeRequire('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>;
 
 export type ExtractedDocument = {
-  format: 'docx' | 'pdf' | 'txt';
+  format: 'docx' | 'pdf' | 'txt' | 'markdown' | 'html';
   paragraphs: string[];
 };
 
@@ -30,9 +30,34 @@ export class DocumentCodecService {
     if (mimeType === 'text/plain' || lower.endsWith('.txt')) {
       return { format: 'txt', paragraphs: this.splitParagraphs(buffer.toString('utf8')) };
     }
+    if (
+      mimeType === 'text/markdown' ||
+      mimeType === 'text/x-markdown' ||
+      lower.endsWith('.md') ||
+      lower.endsWith('.markdown')
+    ) {
+      return { format: 'markdown', paragraphs: this.splitParagraphs(buffer.toString('utf8')) };
+    }
+    if (
+      mimeType === 'text/html' ||
+      mimeType === 'application/xhtml+xml' ||
+      lower.endsWith('.html') ||
+      lower.endsWith('.htm')
+    ) {
+      const raw = buffer.toString('utf8');
+      const stripped = raw
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+      return { format: 'html', paragraphs: this.splitParagraphs(stripped) };
+    }
     throw new ApiException(
       'validation_error',
-      'Unsupported file type. Upload DOCX or PDF.',
+      'Unsupported file type. Upload DOCX, PDF, TXT, Markdown, or HTML.',
       HttpStatus.BAD_REQUEST,
     );
   }

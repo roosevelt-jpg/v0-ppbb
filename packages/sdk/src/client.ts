@@ -1078,6 +1078,30 @@ export class VerbaLab {
     return this.requestJson('/v1/knowledge-cloud/products', { method: 'GET' });
   }
 
+  async knowledgeBaseEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      confluenceOs: boolean;
+      sharePointParity: boolean;
+      approvalWorkflow: boolean;
+      multimodalMediaIngest: boolean;
+      ocrLayoutTables: boolean;
+      orgWorkspaceScoped: boolean;
+      extendsVl062: boolean;
+      regeneratesVl062: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-base/engine', { method: 'GET' });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

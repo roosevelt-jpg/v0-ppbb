@@ -51,7 +51,7 @@ export class KnowledgeCloudService {
       products: knowledgeProductCatalog(),
       architecture: knowledgeArchitectureNotes(),
       deferred: {
-        enterpriseKnowledgeBase: true,
+        enterpriseKnowledgeBase: false,
         enterpriseSearch: true,
         ontologyPlatform: true,
         taxonomyPlatform: true,
@@ -67,6 +67,7 @@ export class KnowledgeCloudService {
       },
       links: {
         knowledgeCloud: '/knowledge-cloud',
+        knowledgeBase: '/knowledge-base',
         knowledge: '/knowledge',
         knowledgeGraph: '/knowledge-graph',
         vectorCloud: '/vector-cloud',
