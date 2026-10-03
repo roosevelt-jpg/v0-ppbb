@@ -13,9 +13,10 @@ async function bootstrap() {
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalInterceptors(new HidePhaseIdsInterceptor());
 
-  const corsOriginEnv = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
-  const corsOrigin = corsOriginEnv.includes(',') 
-    ? corsOriginEnv.split(',').map(s => s.trim())
+  const corsOriginEnv =
+    process.env.CORS_ORIGIN ?? 'http://localhost:3000,http://127.0.0.1:3000';
+  const corsOrigin = corsOriginEnv.includes(',')
+    ? corsOriginEnv.split(',').map((s) => s.trim()).filter(Boolean)
     : corsOriginEnv;
   app.enableCors({ origin: corsOrigin });
 
