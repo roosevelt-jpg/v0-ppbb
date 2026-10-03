@@ -47,6 +47,7 @@ function usage(): never {
   verbalab policy-fabric-products
   verbalab policy-fabric-route [--kind <kind>]...
   verbalab policy-fabric-pipeline [--id <pipelineId>]
+  verbalab ecosystem-cloud-products
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -456,6 +457,11 @@ async function main() {
 
   if (command === 'policy-fabric-products') {
     console.log(JSON.stringify(await vl.policyFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'ecosystem-cloud-products') {
+    console.log(JSON.stringify(await vl.ecosystemCloudProducts(), null, 2));
     return;
   }
 

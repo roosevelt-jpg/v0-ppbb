@@ -1248,7 +1248,7 @@ These are in the libraries. They are **not** executable phases for a small team.
 | v2 71–90 Inference Cloud + AI Kernel | Internal AWS for models | Scheduled as VL-204+ (Volume 7 Inference); OpenAI/Groq today — no GPU hyperscaler OS; AI Kernel remains later |
 | v2 91–105 Foundation Model Cloud | Frontier lab | VL-112 trained-weights still gated; VL-224+ honest platform/MLOps hub allowed (ADR-0135) |
 | v2 106–115 AI Fabric | Internal bus architecture | VL-239–248 closed (Policy hard gate + audit); Kafka/NATS/Rabbit adapters deferred — not Kafka hyperscaler OS |
-| v2 116–126 Ecosystem Cloud | Marketplace suite | VL-090+ |
+| v2 116–126 Ecosystem Cloud | Marketplace suite | VL-249 Foundation shipped (extends VL-090+/voice marketplace); VL-250–259 marketplaces/creator/audit remain — not payment-processor OS |
 | v2 127–137 African Intelligence as 10 products | Sector AI startups | VL-100–103 content |
 | v2 138–147 Research Cloud | Academic org | Notion + Git + eval harness |
 | v2 148–158 MLOps Cloud | Platform team | W&B + CI |

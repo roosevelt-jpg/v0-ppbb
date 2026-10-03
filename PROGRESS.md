@@ -278,6 +278,17 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-246 | Agent Fabric (Phase 113) | Done | Router/discovery/collaborate/schedule over Agent Runtime; SSE ticks; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |
 | VL-247 | Policy Fabric (Phase 114) | Done | Fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. Not OPA/Cedar OS. |
 | VL-248 | AI Fabric Production Audit (Phase 115) | Done | Audit pack under `docs/ai-fabric-audit/`; ADR-0150. Volume 10 closed. Ecosystem/Marketplaces → Volume 11. |
+| VL-249 | Ecosystem Foundation (Phase 116) | Done | `/ecosystem-cloud` hub + product catalog; ADR-0151. Extends VL-090+/voice marketplace. Not payment OS; Stripe + sandbox safety from day one. |
+| VL-250 | Plugin Marketplace (Phase 117) | Not Started | Buy/sell/publish plugins; enforce Plugin Runtime sandbox + Policy gate. |
+| VL-251 | Model Marketplace (Phase 118) | Not Started | Buy/sell/publish models over Model Registry. |
+| VL-252 | Dataset Marketplace (Phase 119) | Not Started | Extends content-marketplace dataset kind. |
+| VL-253 | Prompt Marketplace (Phase 120) | Not Started | Extends content-marketplace prompt kind + Prompt Fabric. |
+| VL-254 | Agent Marketplace (Phase 121) | Not Started | Buy/sell/publish agents; enforce Agent Runtime sandbox + Policy Fabric. |
+| VL-255 | Workflow Marketplace (Phase 122) | Not Started | Buy/sell/publish workflows. |
+| VL-256 | Connector Marketplace (Phase 123) | Not Started | Buy/sell/publish connectors. |
+| VL-257 | Voice & Language Marketplace (Phase 124) | Not Started | Extends voice marketplace + Volume 1 language packs. |
+| VL-258 | Creator Economy (Phase 125) | Not Started | Revenue sharing/payouts expansion over VL-092; hand-check payout math; tax/dispute honesty. |
+| VL-259 | Ecosystem Production Audit (Phase 126) | Not Started | Hardening pass — review, don't add features. |
 
 ---
 
@@ -431,3 +442,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-246 Done: Agent Fabric (Phase 113) — router/discovery/collaborate/schedule over Agent Runtime; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |
 | 2026-10-03 | VL-247 Done: Policy Fabric (Phase 114) — fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. |
 | 2026-10-03 | VL-248 Done: AI Fabric Production Audit (Phase 115) — evidence pack; ADR-0150. Volume 10 closed. Ecosystem → Volume 11. |
+| 2026-10-03 | VL-249 Done: Ecosystem Foundation (Phase 116) — `/ecosystem-cloud` hub/catalog; ADR-0151. Extends VL-090+/voice marketplace; Stripe + sandbox safety; not payment-processor OS. |
