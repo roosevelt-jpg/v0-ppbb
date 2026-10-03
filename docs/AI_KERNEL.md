@@ -14,7 +14,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | AI Kernel Foundation | **VL-214** — `/ai-kernel` + runtime catalog / overview |
 | Memory Runtime | **Partial** — Phase 82 / VL-215 ([`MEMORY_RUNTIME.md`](./MEMORY_RUNTIME.md); extends Memory Cloud) |
 | Prompt Runtime | **Partial** — Phase 83 / VL-216 ([`PROMPT_RUNTIME.md`](./PROMPT_RUNTIME.md); extends Prompt Intelligence) |
-| Context Runtime | **Deferred** — Phase 84 / VL-217 |
+| Context Runtime | **Partial** — Phase 84 / VL-217 ([`CONTEXT_RUNTIME.md`](./CONTEXT_RUNTIME.md); extends Context Engine) |
 | Reasoning Runtime | **Deferred** — Phase 85 / VL-218 |
 | Agent Runtime | **Deferred** — Phase 86 / VL-219 (must sandbox + scope permissions) |
 | Workflow Runtime | **Deferred** — Phase 87 / VL-220 (must sandbox + scope permissions) |
@@ -33,6 +33,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Console (internal) | `/ai-kernel` |
 | Memory Runtime | `/memory-runtime` + `GET /v1/memory-runtime/engine` |
 | Prompt Runtime | `/prompt-runtime` + `GET /v1/prompt-runtime/engine` |
+| Context Runtime | `/context-runtime` + `GET /v1/context-runtime/engine` |
 | REST catalog | `GET /v1/ai-kernel/products` (public) |
 | REST engine | `GET /v1/ai-kernel/engine` |
 | REST overview | `GET /v1/ai-kernel/overview` (Clerk session) |

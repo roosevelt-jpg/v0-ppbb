@@ -246,7 +246,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-214 | AI Kernel Foundation (Phase 81) | Done | `/ai-kernel` internal hub + catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety notes for VL-219–222. |
 | VL-215 | Memory Runtime (Phase 82) | Done | `/memory-runtime` + kernel layer over VL-183; ADR-0126. Not Mem0/replication OS. |
 | VL-216 | Prompt Runtime (Phase 83) | Done | `/prompt-runtime` over VL-086/188; ADR-0127. Execute=render/validate; not research lab/mesh. |
-| VL-217 | Context Runtime (Phase 84) | Not Started | |
+| VL-217 | Context Runtime (Phase 84) | Done | `/context-runtime` over VL-185; ADR-0128. Prioritize/compress/retrieve; not infinite-context OS. |
 | VL-218 | Reasoning Runtime (Phase 85) | Not Started | |
 | VL-219 | Agent Runtime (Phase 86) | Not Started | Must sandbox + scoped permissions. |
 | VL-220 | Workflow Runtime (Phase 87) | Not Started | Must sandbox + scoped permissions. |
@@ -383,3 +383,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-214 Done: AI Kernel Foundation (Phase 81) — internal hub/catalog/overview; ADR-0125. Not customer product / Linux-VAIOS. Action-safety constraints for Agent/Workflow/Plugin/Policy. |
 | 2026-10-03 | VL-215 Done: Memory Runtime (Phase 82) — kernel-layer over VL-183 MemoryRecord; ADR-0126. Ceilings/eviction/versioning; not Mem0/replication OS. |
 | 2026-10-03 | VL-216 Done: Prompt Runtime (Phase 83) — execute/render/validate over VL-086/188; ADR-0127. IC prompt cache; not research lab/mesh OS. |
+| 2026-10-03 | VL-217 Done: Context Runtime (Phase 84) — assemble/prioritize/compress over VL-185; ADR-0128. IC context cache; not infinite-context OS. |

@@ -559,6 +559,69 @@ export class GqlPromptRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlContextRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlContextRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlContextRuntimeCapability])
+  capabilities!: GqlContextRuntimeCapability[];
+
+  @Field()
+  infiniteContextWindow!: boolean;
+
+  @Field()
+  llmSummarization!: boolean;
+
+  @Field()
+  realtimePush!: boolean;
+
+  @Field()
+  regeneratesContextEngine!: boolean;
+
+  @Field()
+  extendsContextEngine!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  redisContextCacheOs!: boolean;
+
+  @Field()
+  usesIntelligentCacheContextNamespace!: boolean;
+
+  @Field()
+  modelRouterOs!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxChars!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

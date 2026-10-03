@@ -115,6 +115,9 @@ export function AiKernelClient() {
               <Link href={data.links.promptRuntime ?? '/prompt-runtime'} style={secondary}>
                 Prompt Runtime
               </Link>
+              <Link href={data.links.contextRuntime ?? '/context-runtime'} style={secondary}>
+                Context Runtime
+              </Link>
               <Link href={data.links.inferenceCloud ?? '/inference-cloud'} style={secondary}>
                 Inference Cloud
               </Link>

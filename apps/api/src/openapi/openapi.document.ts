@@ -2953,6 +2953,70 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty' } },
       },
     },
+    '/v1/context-runtime/engine': {
+      get: {
+        summary: 'Context Runtime catalog',
+        operationId: 'getContextRuntimeEngine',
+        responses: {
+          '200': { description: 'Kernel context capabilities and honesty' },
+        },
+      },
+    },
+    '/v1/context-runtime/scopes': {
+      get: {
+        summary: 'Context Runtime scopes/priorities',
+        operationId: 'listContextRuntimeScopes',
+        responses: { '200': { description: 'Context kinds and priorities' } },
+      },
+    },
+    '/v1/context-runtime/assemble': {
+      post: {
+        summary: 'Assemble kernel context',
+        operationId: 'assembleContextRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Assembled promptContext + blocks' } },
+      },
+    },
+    '/v1/context-runtime/retrieve': {
+      post: {
+        summary: 'Retrieve kernel context',
+        operationId: 'retrieveContextRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Retrieve façade over assemble' } },
+      },
+    },
+    '/v1/context-runtime/prioritize': {
+      post: {
+        summary: 'Prioritize context blocks',
+        operationId: 'prioritizeContextRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Reordered blocks' } },
+      },
+    },
+    '/v1/context-runtime/compress': {
+      post: {
+        summary: 'Compress context blocks',
+        operationId: 'compressContextRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Char-budget truncation' } },
+      },
+    },
+    '/v1/context-runtime/analytics': {
+      get: {
+        summary: 'Context Runtime analytics',
+        operationId: 'getContextRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/context-runtime/monitoring': {
+      get: {
+        summary: 'Context Runtime monitoring',
+        operationId: 'getContextRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

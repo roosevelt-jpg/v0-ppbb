@@ -23,6 +23,8 @@ function usage(): never {
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
   verbalab prompt-runtime-execute [--key chat|rag|voice_faq] [--feature <name>] [--var k=v]
+  verbalab context-runtime-engine
+  verbalab context-runtime-assemble [--query <text>] [--model <hint>] [--max-chars <n>]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -219,6 +221,27 @@ async function main() {
           key: argValue(rest, '--key') ?? undefined,
           feature: argValue(rest, '--feature') ?? undefined,
           variables: Object.keys(variables).length ? variables : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'context-runtime-engine') {
+    console.log(JSON.stringify(await vl.contextRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'context-runtime-assemble') {
+    const maxCharsRaw = argValue(rest, '--max-chars');
+    console.log(
+      JSON.stringify(
+        await vl.contextRuntimeAssemble({
+          query: argValue(rest, '--query') ?? undefined,
+          modelHint: argValue(rest, '--model') ?? undefined,
+          maxChars: maxCharsRaw ? Number(maxCharsRaw) : undefined,
         }),
         null,
         2,

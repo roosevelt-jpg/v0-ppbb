@@ -1201,6 +1201,71 @@ export class VerbaLab {
     });
   }
 
+  async contextRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    mode: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    ceilings: {
+      maxChars: number;
+      cacheTtlSec: number;
+      mode: string;
+    };
+    honesty: {
+      infiniteContextWindow: boolean;
+      llmSummarization: boolean;
+      realtimePush: boolean;
+      regeneratesContextEngine: boolean;
+      extendsContextEngine: boolean;
+      orgWorkspaceScoped: boolean;
+      redisContextCacheOs: boolean;
+      usesIntelligentCacheContextNamespace: boolean;
+      modelRouterOs: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/context-runtime/engine', { method: 'GET' });
+  }
+
+  async contextRuntimeAssemble(body?: {
+    query?: string;
+    conversationId?: string;
+    projectKey?: string;
+    subjectUserId?: string;
+    promptKey?: 'chat' | 'rag';
+    modelHint?: string;
+    providerHint?: string;
+    include?: Record<string, boolean>;
+    maxChars?: number;
+    documentK?: number;
+    memoryLimit?: number;
+    useCache?: boolean;
+    priorityOverrides?: Record<string, number>;
+  }): Promise<{
+    assembledAt: string;
+    included: string[];
+    promptContext: string;
+    compression: {
+      maxChars: number;
+      beforeChars: number;
+      afterChars: number;
+      truncated: boolean;
+    };
+    cache: string;
+    note?: string;
+  }> {
+    return this.requestJson('/v1/context-runtime/assemble', {
+      method: 'POST',
+      body: body ?? {},
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

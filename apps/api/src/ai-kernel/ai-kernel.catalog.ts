@@ -42,11 +42,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'context-runtime',
       name: 'Context Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/context-runtime/engine',
+      console: '/context-runtime',
       notes:
-        'Kernel context assembly (Phase 84 / VL-217). Extends Context Engine — not infinite-context OS.',
+        'Kernel assembly over VL-185 Context Engine (VL-217). Prioritize/compress/retrieve — not infinite-context OS.',
     },
     {
       id: 'reasoning-runtime',

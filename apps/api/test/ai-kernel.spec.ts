@@ -134,6 +134,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.usage.chat).toBeDefined();
     expect(overview.deferred.memoryRuntime).toBe(false);
     expect(overview.deferred.promptRuntime).toBe(false);
+    expect(overview.deferred.contextRuntime).toBe(false);
     expect(overview.deferred.agentRuntime).toBe(true);
     expect(overview.deferred.policyRuntime).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to7).toBe(false);
@@ -141,6 +142,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.links.aiKernel).toBe('/ai-kernel');
     expect(overview.links.memoryRuntime).toBe('/memory-runtime');
     expect(overview.links.promptRuntime).toBe('/prompt-runtime');
+    expect(overview.links.contextRuntime).toBe('/context-runtime');
     expect(overview.links.inferenceCloud).toBe('/inference-cloud');
     expect(overview.architecture.extendsInferenceCloud).toBe(true);
 
@@ -151,6 +153,10 @@ describe('AI Kernel Foundation (VL-214)', () => {
     const prompt = overview.products.find((p: { id: string }) => p.id === 'prompt-runtime');
     expect(prompt?.status).toBe('partial');
     expect(prompt?.console).toBe('/prompt-runtime');
+
+    const context = overview.products.find((p: { id: string }) => p.id === 'context-runtime');
+    expect(context?.status).toBe('partial');
+    expect(context?.console).toBe('/context-runtime');
   });
 
   it('exposes aiKernelRuntimes via GraphQL CQRS façade', async () => {
