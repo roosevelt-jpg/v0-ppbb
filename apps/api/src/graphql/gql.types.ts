@@ -628,6 +628,48 @@ export class GqlKnowledgeMemoryEngine {
 }
 
 @ObjectType()
+export class GqlKnowledgeIntelligenceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeIntelligenceCapability])
+  capabilities!: GqlKnowledgeIntelligenceCapability[];
+
+  @Field()
+  biOs!: boolean;
+
+  @Field()
+  regeneratesIntelligenceAnalytics!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsKnowledgeCloud!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

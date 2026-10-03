@@ -78,10 +78,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'knowledge-intelligence',
       name: 'Knowledge Intelligence',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Combined knowledge analysis/insight (Phase 67 / VL-200).',
+      status: 'partial',
+      api: 'GET /v1/knowledge-intelligence/engine',
+      console: '/knowledge-intelligence',
+      notes:
+        'Discovery/link/recommend/validate/duplicates/confidence (VL-200). Heuristic over Knowledge Cloud; not BI/Palantir OS.',
     },
     {
       id: 'enterprise-knowledge-apis',

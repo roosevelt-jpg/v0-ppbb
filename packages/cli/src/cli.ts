@@ -26,6 +26,8 @@ function usage(): never {
   verbalab enterprise-rag-retrieve --query <text> [--mode keyword|semantic|hybrid]
   verbalab enterprise-rag-query --question <text> [--mode keyword|semantic|hybrid]
   verbalab knowledge-memory-engine
+  verbalab knowledge-intelligence-engine
+  verbalab knowledge-intelligence-discover --query <text>
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -188,6 +190,20 @@ async function main() {
 
   if (command === 'knowledge-memory-engine') {
     console.log(JSON.stringify(await vl.knowledgeMemoryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-intelligence-engine') {
+    console.log(JSON.stringify(await vl.knowledgeIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-intelligence-discover') {
+    const query = argValue(rest, '--query');
+    if (!query) usage();
+    console.log(
+      JSON.stringify(await vl.knowledgeIntelligenceDiscover({ query }), null, 2),
+    );
     return;
   }
 

@@ -3114,6 +3114,139 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/knowledge-intelligence/engine': {
+      get: {
+        summary: 'Knowledge Intelligence engine catalog',
+        operationId: 'getKnowledgeIntelligenceEngine',
+        responses: { '200': { description: 'Capabilities and honesty flags' } },
+      },
+    },
+    '/v1/knowledge-intelligence/insight': {
+      get: {
+        summary: 'Knowledge Intelligence insight snapshot',
+        operationId: 'getKnowledgeIntelligenceInsight',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace knowledge insight' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/discover': {
+      post: {
+        summary: 'Discover docs/terms/concepts',
+        operationId: 'discoverKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Discovery hits' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/link': {
+      post: {
+        summary: 'Suggest related knowledge documents',
+        operationId: 'linkKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Related document links' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/recommend': {
+      post: {
+        summary: 'Recommend knowledge documents',
+        operationId: 'recommendKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Ranked recommendations' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/validate': {
+      post: {
+        summary: 'Validate knowledge documents',
+        operationId: 'validateKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Validation results' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/duplicates': {
+      post: {
+        summary: 'Detect duplicate knowledge documents',
+        operationId: 'duplicatesKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Duplicate pairs' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/confidence': {
+      post: {
+        summary: 'Heuristic knowledge confidence scores',
+        operationId: 'confidenceKnowledgeIntelligence',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Confidence scores' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/analytics': {
+      get: {
+        summary: 'Knowledge Intelligence analytics',
+        operationId: 'getKnowledgeIntelligenceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Analytics snapshot' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-intelligence/monitoring': {
+      get: {
+        summary: 'Knowledge Intelligence monitoring',
+        operationId: 'getKnowledgeIntelligenceMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Honesty + deferred flags' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

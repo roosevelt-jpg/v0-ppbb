@@ -1362,6 +1362,58 @@ export class VerbaLab {
     });
   }
 
+  async knowledgeIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      biOs: boolean;
+      palantirParity: boolean;
+      mlNearDuplicate: boolean;
+      calibratedConfidence: boolean;
+      regeneratesIntelligenceAnalytics: boolean;
+      regeneratesVl191: boolean;
+      orgWorkspaceScoped: boolean;
+      extendsKnowledgeCloud: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-intelligence/engine', { method: 'GET' });
+  }
+
+  async knowledgeIntelligenceDiscover(body: {
+    query: string;
+    limit?: number;
+  }): Promise<{
+    query: string;
+    documents: Array<{ id: string; filename: string; status: string }>;
+    taxonomyTerms: Array<{ id: string; name: string; slug: string }>;
+    ontologyConcepts: Array<{ id: string; name: string; type: string }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/knowledge-intelligence/discover', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async knowledgeIntelligenceInsight(): Promise<{
+    documents: number;
+    ready: number;
+    failed: number;
+    chunks: number;
+    taxonomyTerms: number;
+    ontologyConcepts: number;
+    knowledgeMemories: number;
+  }> {
+    return this.requestJson('/v1/knowledge-intelligence/insight', { method: 'GET' });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;
