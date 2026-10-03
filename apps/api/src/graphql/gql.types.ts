@@ -361,6 +361,42 @@ export class GqlIntelligenceProduct {
 }
 
 @ObjectType()
+export class GqlEmbeddingCloudCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEmbeddingCloudEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlEmbeddingCloudCapability])
+  capabilities!: GqlEmbeddingCloudCapability[];
+
+  @Field()
+  trainsEmbeddingModels!: boolean;
+
+  @Field()
+  multimodalOs!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

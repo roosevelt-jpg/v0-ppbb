@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-180 Done — Intelligence Cloud Foundation)
+Last updated: 2026-10-03 (VL-181 Done — Embedding Cloud)
 
 ---
 
@@ -210,6 +210,7 @@ Last updated: 2026-10-03 (VL-180 Done — Intelligence Cloud Foundation)
 | VL-178 | Voice Analytics (Phase 35) | Done | `/v1/voice-analytics/*` usage/voices/revenue/quality; ADR-0089. Distinct from VL-159; BI dashboard deferred. |
 | VL-179 | Voice Cloud Production Audit (Phase 36) | Done | Audit gate + reports under `docs/voice-cloud-audit/`; ADR-0090. Rejects commercial voice-OS parity. |
 | VL-180 | Intelligence Cloud Foundation (Phase 47) | Done | `/intelligence-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0091. Maps onto VL-060/062/063; custom AI kernel deferred. |
+| VL-181 | Embedding Cloud (Phase 48) | Done | `/v1/embedding-cloud/*` engine/models/embed/analytics; ADR-0092. Extends VL-063; multimodal deferred. |
 
 ---
 
@@ -304,3 +305,4 @@ Last updated: 2026-10-03 (VL-180 Done — Intelligence Cloud Foundation)
 | 2026-10-03 | VL-178 Done: Voice Analytics (Phase 35) — TTS/voice audit aggregates + marketplace revenue; ADR-0089. ≠ Speech Analytics; BI deferred. |
 | 2026-10-03 | VL-179 Done: Voice Cloud Production Audit (Phase 36) — checklist/tests/reports; ADR-0090. Volume closed. |
 | 2026-10-03 | VL-180 Done: Intelligence Cloud Foundation (Phase 47) — hub/catalog/overview; ADR-0091. Extends chat/embeddings/RAG; no custom AI kernel. |
+| 2026-10-03 | VL-181 Done: Embedding Cloud (Phase 48) — hub over VL-063 text embeds; modality tags; ADR-0092. Speech/image/video deferred. |

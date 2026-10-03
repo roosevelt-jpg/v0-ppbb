@@ -104,7 +104,8 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
 
     const embeddings = res.body.products.find((p: { id: string }) => p.id === 'embeddings');
     expect(embeddings.status).toBe('partial');
-    expect(embeddings.api).toContain('/v1/embeddings');
+    expect(embeddings.api).toContain('/v1/embedding-cloud/engine');
+    expect(embeddings.console).toBe('/embedding-cloud');
 
     const memory = res.body.products.find((p: { id: string }) => p.id === 'memory');
     expect(memory.status).toBe('deferred');
@@ -128,10 +129,12 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.usage.embeddings).toBeDefined();
     expect(overview.workspace.knowledgeDocuments).toBeGreaterThanOrEqual(0);
     expect(overview.deferred.customAiKernel).toBe(true);
+    expect(overview.deferred.embeddingCloudProduct).toBe(false);
     expect(overview.deferred.memoryCloud).toBe(true);
     expect(overview.deferred.knowledgeGraphOs).toBe(true);
     expect(overview.deferred.customReasoner).toBe(true);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
+    expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);

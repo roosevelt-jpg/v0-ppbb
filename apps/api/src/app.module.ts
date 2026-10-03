@@ -52,6 +52,7 @@ import { LanguageCloudModule } from './language-cloud/language-cloud.module';
 import { SpeechCloudModule } from './speech-cloud/speech-cloud.module';
 import { VoiceCloudModule } from './voice-cloud/voice-cloud.module';
 import { IntelligenceCloudModule } from './intelligence-cloud/intelligence-cloud.module';
+import { EmbeddingCloudModule } from './embedding-cloud/embedding-cloud.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -94,6 +95,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SpeechCloudModule,
     VoiceCloudModule,
     IntelligenceCloudModule,
+    EmbeddingCloudModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,

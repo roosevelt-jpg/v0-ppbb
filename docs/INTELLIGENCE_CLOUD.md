@@ -10,7 +10,7 @@
 | Library ask | VerbaLab reality |
 | --- | --- |
 | Intelligence Cloud Foundation | **VL-180** — `/intelligence-cloud` + product catalog / overview |
-| Embedding Cloud | **Partial** — VL-063 `POST /v1/embeddings` (text); multimodal deferred (VL-181) |
+| Embedding Cloud | **Partial** — **VL-181** `/embedding-cloud` over VL-063 text; multimodal deferred |
 | Vector Cloud | **Partial** — pgvector in VL-062 Knowledge; dedicated vector DB deferred (VL-182) |
 | Memory Cloud | **Deferred** — VL-183 (must include GDPR delete/export) |
 | Knowledge Graph Cloud | **Deferred** — VL-184; use RAG until then |

@@ -16,6 +16,8 @@ function usage(): never {
   verbalab speech-products
   verbalab voice-products
   verbalab intelligence-products
+  verbalab embedding-cloud-engine
+  verbalab embedding-cloud-models
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -90,6 +92,16 @@ async function main() {
 
   if (command === 'intelligence-products') {
     console.log(JSON.stringify(await vl.intelligenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'embedding-cloud-engine') {
+    console.log(JSON.stringify(await vl.embeddingCloudEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'embedding-cloud-models') {
+    console.log(JSON.stringify(await vl.embeddingCloudModels(), null, 2));
     return;
   }
 

@@ -1063,6 +1063,38 @@ export class VerbaLab {
     return this.requestJson('/v1/intelligence-cloud/products', { method: 'GET' });
   }
 
+  async embeddingCloudEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      trainsEmbeddingModels: boolean;
+      multimodalOs: boolean;
+      speechImageVideo: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/embedding-cloud/engine', { method: 'GET' });
+  }
+
+  async embeddingCloudModels(): Promise<{
+    models: Array<{
+      id: string;
+      provider: string;
+      modalities: string[];
+      dimensions: number;
+      default: boolean;
+      status: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/embedding-cloud/models', { method: 'GET' });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

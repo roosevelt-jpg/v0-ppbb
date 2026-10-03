@@ -25,10 +25,10 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       id: 'embeddings',
       name: 'Embedding Cloud',
       status: 'partial',
-      api: 'POST /v1/embeddings',
-      console: '/knowledge',
+      api: 'GET /v1/embedding-cloud/engine',
+      console: '/embedding-cloud',
       notes:
-        'Text embeddings via gateway (VL-063). Speech/image/video/cross-modal deferred to VL-181 productization.',
+        'Text/document/code via VL-181 hub over VL-063. Speech/image/video/cross-modal deferred.',
     },
     {
       id: 'vector',

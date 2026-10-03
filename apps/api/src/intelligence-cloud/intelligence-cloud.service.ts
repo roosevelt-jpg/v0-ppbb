@@ -56,6 +56,7 @@ export class IntelligenceCloudService {
         imageEmbeddings: true,
         videoEmbeddings: true,
         crossModalEmbeddings: true,
+        embeddingCloudProduct: false,
         dedicatedVectorDb: true,
         memoryCloud: true,
         knowledgeGraphOs: true,
@@ -69,7 +70,8 @@ export class IntelligenceCloudService {
       },
       links: {
         intelligenceCloud: '/intelligence-cloud',
-        embeddings: '/embeddings',
+        embeddings: '/embedding-cloud',
+        embeddingCloud: '/embedding-cloud',
         knowledge: '/knowledge',
         chat: '/chat',
         language: '/language',

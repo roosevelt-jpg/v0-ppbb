@@ -2645,6 +2645,51 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/embedding-cloud/engine': {
+      get: {
+        summary: 'Embedding Cloud engine catalog',
+        operationId: 'getEmbeddingCloudEngine',
+        responses: { '200': { description: 'Embedding modalities and capabilities' } },
+      },
+    },
+    '/v1/embedding-cloud/models': {
+      get: {
+        summary: 'Embedding models catalog',
+        operationId: 'listEmbeddingCloudModels',
+        responses: { '200': { description: 'Available embedding models' } },
+      },
+    },
+    '/v1/embedding-cloud/modalities': {
+      get: {
+        summary: 'Embedding modalities',
+        operationId: 'listEmbeddingCloudModalities',
+        responses: { '200': { description: 'Modality statuses' } },
+      },
+    },
+    '/v1/embedding-cloud/embed': {
+      post: {
+        summary: 'Create embeddings (Embedding Cloud)',
+        operationId: 'createEmbeddingCloudEmbed',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'OpenAI-shaped embedding list + modality' } },
+      },
+    },
+    '/v1/embedding-cloud/analytics': {
+      get: {
+        summary: 'Embedding Cloud analytics',
+        operationId: 'getEmbeddingCloudAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Token/request aggregates' } },
+      },
+    },
+    '/v1/embedding-cloud/monitoring': {
+      get: {
+        summary: 'Embedding Cloud monitoring snapshot',
+        operationId: 'getEmbeddingCloudMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

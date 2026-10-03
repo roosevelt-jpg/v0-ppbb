@@ -91,6 +91,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.chat ?? '/chat'} style={secondary}>
                 Chat
               </Link>
+              <Link href={data.links.embeddingCloud ?? '/embedding-cloud'} style={secondary}>
+                Embeddings
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>
