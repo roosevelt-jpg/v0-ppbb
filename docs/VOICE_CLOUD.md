@@ -13,7 +13,7 @@
 | Neural TTS | **VL-171** — `GET /v1/tts/engine`, `POST /v1/tts/synthesize` (+ legacy VL-042/121) |
 | Streaming / Batch TTS productization | **Partial streaming** — chunk SSE `POST /v1/tts/stream`; batch shipped |
 | Voice Cloning / Instant Cloning | **Shipped hub** — **VL-172** `/voice-cloning` over **VL-064** consent + review + watermark |
-| Professional Voice Studio | **VL-120** — `/audio` African studio UX |
+| Professional Voice Studio | **VL-174** — `/voice-studio` (+ legacy VL-120 `/audio`) |
 | Emotion Voice | **Partial** — **VL-173** `/emotion-voice` soft prosody + voice profiles; trained expressive TTS deferred. Distinct from VL-154 detection |
 | Voice Conversion | **Deferred** |
 | Voice Enhancement | **Partial** — Audio Intelligence enhance (VL-155); Phase 32 expands |

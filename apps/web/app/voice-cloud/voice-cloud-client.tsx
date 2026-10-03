@@ -127,8 +127,11 @@ export function VoiceCloudClient() {
             <Link href={data.links.emotionVoice ?? '/emotion-voice'} style={secondary}>
               Emotion Voice
             </Link>
-            <Link href={data.links.audio} style={secondary}>
+            <Link href={data.links.voiceStudio ?? '/voice-studio'} style={secondary}>
               Voice Studio
+            </Link>
+            <Link href={data.links.audio} style={secondary}>
+              African studio
             </Link>
             <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>
               Speakers / biometrics

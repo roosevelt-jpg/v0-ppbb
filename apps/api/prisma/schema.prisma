@@ -73,6 +73,9 @@ model Organization {
   speakerEvents               SpeakerEvent[]
   wakeKeywords                WakeKeyword[]
   callRecords                 CallRecord[]
+  voiceStudioProjects         VoiceStudioProject[]
+  voiceStudioLexemes          VoiceStudioLexeme[]
+  voiceStudioProfiles         VoiceStudioProfile[]
 
   @@map("organizations")
 }
@@ -141,6 +144,9 @@ model Workspace {
   speakerEvents       SpeakerEvent[]
   wakeKeywords        WakeKeyword[]
   callRecords         CallRecord[]
+  voiceStudioProjects VoiceStudioProject[]
+  voiceStudioLexemes  VoiceStudioLexeme[]
+  voiceStudioProfiles VoiceStudioProfile[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -875,6 +881,72 @@ model FineTuneJob {
   @@index([sourceLang, targetLang])
   @@index([callbackToken])
   @@map("fine_tune_jobs")
+}
+
+/**
+ * Voice Studio project with linear timeline JSON (VL-174).
+ * Not a DAW — ordered speak/pause clips only.
+ */
+model VoiceStudioProject {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  name           String
+  description    String   @default("")
+  /// [{ id?, text?, ssml?, voice?, language?, pauseMsAfter? }]
+  timeline       Json     @default("[]")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId])
+  @@map("voice_studio_projects")
+}
+
+/**
+ * Voice Studio pronunciation lexicon grapheme→alias (VL-174).
+ * Distinct from Pronunciation Intelligence assess/coach (VL-156).
+ */
+model VoiceStudioLexeme {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  grapheme       String
+  alias          String
+  language       String?
+  notes          String   @default("")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, grapheme])
+  @@index([organizationId, workspaceId])
+  @@map("voice_studio_lexemes")
+}
+
+/**
+ * Saved Voice Studio voice presets (VL-174) — not speaker biometric profiles.
+ */
+model VoiceStudioProfile {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  name           String
+  voice          String
+  language       String?
+  notes          String   @default("")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId])
+  @@map("voice_studio_profiles")
 }
 
 /**

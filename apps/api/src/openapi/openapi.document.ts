@@ -2801,6 +2801,110 @@ export const openApiDocument = {
         responses: { '200': { description: 'text/event-stream' } },
       },
     },
+    '/v1/voice-studio/engine': {
+      get: {
+        summary: 'Voice Studio engine catalog',
+        operationId: 'getVoiceStudioEngine',
+        responses: { '200': { description: 'Capabilities and honesty notes' } },
+      },
+    },
+    '/v1/voice-studio/library': {
+      get: {
+        summary: 'Voice Studio library (TTS + clones)',
+        operationId: 'getVoiceStudioLibrary',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Voice catalog' } },
+      },
+    },
+    '/v1/voice-studio/ssml/compile': {
+      post: {
+        summary: 'Compile SSML lite to plain speak/pause plan',
+        operationId: 'compileVoiceStudioSsml',
+        responses: { '200': { description: 'Compiled plan' } },
+      },
+    },
+    '/v1/voice-studio/pronunciation': {
+      get: {
+        summary: 'List Voice Studio pronunciation lexicon',
+        operationId: 'listVoiceStudioPronunciation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Lexemes' } },
+      },
+      post: {
+        summary: 'Upsert pronunciation lexeme',
+        operationId: 'upsertVoiceStudioPronunciation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Lexeme' } },
+      },
+    },
+    '/v1/voice-studio/profiles': {
+      get: {
+        summary: 'List Voice Studio voice profiles',
+        operationId: 'listVoiceStudioProfiles',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Profiles' } },
+      },
+      post: {
+        summary: 'Upsert Voice Studio profile',
+        operationId: 'upsertVoiceStudioProfile',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Profile' } },
+      },
+    },
+    '/v1/voice-studio/projects': {
+      get: {
+        summary: 'List Voice Studio projects',
+        operationId: 'listVoiceStudioProjects',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Projects' } },
+      },
+      post: {
+        summary: 'Upsert Voice Studio project',
+        operationId: 'upsertVoiceStudioProject',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Project' } },
+      },
+    },
+    '/v1/voice-studio/preview': {
+      post: {
+        summary: 'Preview studio speech (lexicon + SSML lite)',
+        operationId: 'previewVoiceStudio',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Raw audio bytes' } },
+      },
+    },
+    '/v1/voice-studio/generate': {
+      post: {
+        summary: 'Generate studio speech',
+        operationId: 'generateVoiceStudio',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Raw audio bytes' } },
+      },
+    },
+    '/v1/voice-studio/test': {
+      post: {
+        summary: 'Quick voice test clip',
+        operationId: 'testVoiceStudioVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Raw audio bytes' } },
+      },
+    },
+    '/v1/voice-studio/compare': {
+      post: {
+        summary: 'Compare the same text across voices',
+        operationId: 'compareVoiceStudioVoices',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Multi-voice base64 clips' } },
+      },
+    },
+    '/v1/voice-studio/timeline/render': {
+      post: {
+        summary: 'Render linear timeline clips',
+        operationId: 'renderVoiceStudioTimeline',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Linear concat + per-clip audio' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

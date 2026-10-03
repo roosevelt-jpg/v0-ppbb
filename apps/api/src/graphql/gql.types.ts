@@ -520,6 +520,39 @@ export class GqlEmotionVoiceProfile {
 }
 
 @ObjectType()
+export class GqlVoiceStudioCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlVoiceStudioEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlVoiceStudioCapability])
+  capabilities!: GqlVoiceStudioCapability[];
+
+  @Field()
+  nonlinearDaw!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

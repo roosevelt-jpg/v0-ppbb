@@ -21,6 +21,8 @@ function usage(): never {
   verbalab voice-cloning-consent
   verbalab emotion-voice-engine
   verbalab emotion-voice-profiles
+  verbalab voice-studio-engine
+  verbalab voice-studio-library
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -115,6 +117,16 @@ async function main() {
 
   if (command === 'emotion-voice-profiles') {
     console.log(JSON.stringify(await vl.emotionVoiceProfiles(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-studio-engine') {
+    console.log(JSON.stringify(await vl.voiceStudioEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'voice-studio-library') {
+    console.log(JSON.stringify(await vl.voiceStudioLibrary(), null, 2));
     return;
   }
 

@@ -107,6 +107,8 @@ describe('Voice Cloud Foundation (VL-170)', () => {
 
     const studio = res.body.products.find((p: { id: string }) => p.id === 'voice-studio');
     expect(studio.status).toBe('shipped');
+    expect(studio.api).toContain('/v1/voice-studio/engine');
+    expect(studio.console).toBe('/voice-studio');
 
     const cloning = res.body.products.find((p: { id: string }) => p.id === 'voice-cloning');
     expect(cloning.status).toBe('shipped');
@@ -141,8 +143,11 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(overview.deferred.streamingTts).toBe(true);
     expect(overview.deferred.emotionVoiceSynthesis).toBe(false);
     expect(overview.deferred.trainedExpressiveTts).toBe(true);
+    expect(overview.deferred.ssmlTimelineStudio).toBe(false);
+    expect(overview.deferred.nonlinearDaw).toBe(true);
     expect(overview.links.emotionVoice).toBe('/emotion-voice');
     expect(overview.links.neuralTts).toBe('/neural-tts');
+    expect(overview.links.voiceStudio).toBe('/voice-studio');
     expect(overview.deferred.voiceMarketplace).toBe(true);
     expect(overview.deferred.nistVoiceBiometrics).toBe(true);
     expect(overview.links.audio).toBe('/audio');

@@ -60,9 +60,10 @@ export function voiceProductCatalog(): VoiceProductRow[] {
       id: 'voice-studio',
       name: 'Professional Voice Studio',
       status: 'shipped',
-      api: 'GET /v1/audio/voices',
-      console: '/audio',
-      notes: 'African Voice Studio UX — presets, clone lifecycle, preview (VL-120). Timeline/SSML editor deferred to Phase 31.',
+      api: 'GET /v1/voice-studio/engine',
+      console: '/voice-studio',
+      notes:
+        'Voice Studio hub (VL-174): library, SSML lite, pronunciation lexicon, linear timeline, compare/test + VL-120 `/audio` African UX. Not a nonlinear DAW.',
     },
     {
       id: 'emotion-voice',
