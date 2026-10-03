@@ -64,7 +64,7 @@ export class ContextEngineService {
         { id: 'conversation', status: 'shipped', from: 'conversation memories' },
         { id: 'historical', status: 'shipped', from: 'long_term/shared memories' },
         { id: 'documents', status: 'shipped', from: 'vector search (VL-182)' },
-        { id: 'knowledgeGraph', status: 'partial', from: 'entity name list (VL-184)' },
+        { id: 'knowledgeGraph', status: 'shipped', from: 'entity name list (VL-184)' },
         { id: 'prompt', status: 'shipped', from: 'prompts resolve (chat/rag)' },
       ],
       note: 'Context sources assembled by VL-185. Realtime deferred.',

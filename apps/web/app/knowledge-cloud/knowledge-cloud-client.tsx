@@ -102,6 +102,24 @@ export function KnowledgeCloudClient() {
               <Link href={data.links.taxonomy ?? '/taxonomy'} style={secondary}>
                 Taxonomy
               </Link>
+              <Link href={data.links.enterpriseRag ?? '/enterprise-rag'} style={secondary}>
+                Enterprise RAG
+              </Link>
+              <Link href={data.links.knowledgeMemory ?? '/knowledge-memory'} style={secondary}>
+                Knowledge Memory
+              </Link>
+              <Link
+                href={data.links.knowledgeIntelligence ?? '/knowledge-intelligence'}
+                style={secondary}
+              >
+                Knowledge Intelligence
+              </Link>
+              <Link href={data.links.knowledgeApis ?? '/knowledge-apis'} style={secondary}>
+                Knowledge APIs
+              </Link>
+              <Link href={data.links.knowledgeAnalytics ?? '/knowledge-analytics'} style={secondary}>
+                Knowledge Analytics
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

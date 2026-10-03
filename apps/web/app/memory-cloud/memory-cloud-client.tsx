@@ -118,6 +118,25 @@ export function MemoryCloudClient() {
     }
   }
 
+  async function sweepExpired() {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const body = await apiFetch<{ deleted: number; sweptAt: string; note: string }>(
+        '/v1/memory-cloud/sweep',
+        { token, method: 'POST', body: {} },
+      );
+      setResult(JSON.stringify(body, null, 2));
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sweep failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <AppShell>
       <h1
@@ -132,8 +151,9 @@ export function MemoryCloudClient() {
         Memory Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Persistent AI interaction memory with GDPR export and erase. Not infinite personalization.{' '}
-        <Link href="/intelligence-cloud">Intelligence Cloud</Link> · <Link href="/data">Data / GDPR</Link>.
+        Persistent AI interaction memory with GDPR export/erase and retention sweeper. Not infinite
+        personalization. <Link href="/intelligence-cloud">Intelligence Cloud</Link> ·{' '}
+        <Link href="/data">Data / GDPR</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -187,6 +207,9 @@ export function MemoryCloudClient() {
             </button>
             <button type="button" disabled={loading} style={secondary} onClick={() => void exportMemories()}>
               Export (GDPR)
+            </button>
+            <button type="button" disabled={loading} style={secondary} onClick={() => void sweepExpired()}>
+              Sweep expired
             </button>
             <button type="button" disabled={loading} style={danger} onClick={() => void eraseAll()}>
               Erase all

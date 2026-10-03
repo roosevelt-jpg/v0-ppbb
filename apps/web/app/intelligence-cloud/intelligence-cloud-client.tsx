@@ -122,11 +122,17 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.aiOrchestration ?? '/ai-orchestration'} style={secondary}>
                 Orchestration
               </Link>
+              <Link href={data.links.agentIntelligence ?? '/agent-intelligence'} style={secondary}>
+                Agent Intelligence
+              </Link>
               <Link
                 href={data.links.intelligenceAnalytics ?? '/intelligence-analytics'}
                 style={secondary}
               >
                 Intel Analytics
+              </Link>
+              <Link href={data.links.aiObservability ?? '/ai-observability'} style={secondary}>
+                AI Observability
               </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG

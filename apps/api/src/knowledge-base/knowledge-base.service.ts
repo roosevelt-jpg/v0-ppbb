@@ -23,8 +23,8 @@ export class KnowledgeBaseService {
   contentKinds() {
     return {
       kinds: KNOWLEDGE_CONTENT_KINDS.map((id) => ({ id })),
-      deferred: ['image', 'video', 'audio', 'powerpoint', 'excel', 'web_crawl'],
-      note: 'Shipped text document kinds for VL-194. Media/Office decks deferred.',
+      deferred: ['video', 'audio', 'powerpoint', 'excel', 'web_crawl'],
+      note: 'Shipped text kinds + OCR caption image path for VL-194. Full media CMS/Office decks deferred.',
     };
   }
 
@@ -161,5 +161,58 @@ export class KnowledgeBaseService {
     });
 
     return this.knowledge.get(input.organizationId, input.workspaceId, updated.id);
+  }
+
+  /** Light approval gate — tags document approved/rejected without CMS OS. */
+  async setApproval(input: {
+    organizationId: string;
+    workspaceId: string;
+    id: string;
+    status: 'approved' | 'rejected' | 'pending';
+    userId?: string;
+    ip?: string;
+    note?: string;
+  }) {
+    const doc = await this.prisma.knowledgeDocument.findFirst({
+      where: {
+        id: input.id,
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+      },
+    });
+    if (!doc) {
+      throw new ApiException('not_found', 'Knowledge document not found', HttpStatus.NOT_FOUND);
+    }
+    const tags = new Set((doc.tags ?? []).map((t) => t.toLowerCase()));
+    tags.delete('approval:approved');
+    tags.delete('approval:rejected');
+    tags.delete('approval:pending');
+    tags.add(`approval:${input.status}`);
+    const updated = await this.prisma.knowledgeDocument.update({
+      where: { id: doc.id },
+      data: {
+        tags: [...tags].slice(0, 32),
+        version: { increment: 1 },
+      },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'knowledge_base.document_approval',
+      route: 'POST /v1/knowledge-base/documents/:id/approve',
+      ip: input.ip,
+      metadata: {
+        documentId: updated.id,
+        approval: input.status,
+        note: input.note ?? null,
+      },
+    });
+    return {
+      documentId: updated.id,
+      approval: input.status,
+      tags: updated.tags,
+      version: updated.version,
+      note: 'Light approval tag — not an enterprise CMS approval OS.',
+    };
   }
 }

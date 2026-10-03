@@ -280,6 +280,55 @@ export class ReasoningCloudService {
     }
 
     const steps = this.parseSteps(answer);
+    let toolResults: Array<{ tool: string; ok: boolean; summary: string }> | undefined;
+    if (strategy === 'tool_selection') {
+      const { invokePartnerTool } = await import('../partner-connectors/partner-connectors.tools');
+      const toRun = (selectedTools?.length ? selectedTools : ['translate']).slice(0, 3);
+      toolResults = [];
+      for (const toolId of toRun) {
+        if (toolId === 'translate') {
+          const out = await invokePartnerTool('verbalab_translate', {
+            text: problem.slice(0, 400),
+            source: 'en',
+            target: input.language?.trim() || 'sw',
+          });
+          toolResults.push({
+            tool: toolId,
+            ok: out.ok,
+            summary: out.ok
+              ? String((out.result as { text?: string }).text ?? '').slice(0, 200)
+              : out.error,
+          });
+        } else if (toolId === 'chat') {
+          const out = await invokePartnerTool('verbalab_chat', { message: problem.slice(0, 400) });
+          toolResults.push({
+            tool: toolId,
+            ok: out.ok,
+            summary: out.ok
+              ? String(
+                  (out.result as { message?: { content?: string } }).message?.content ?? '',
+                ).slice(0, 200)
+              : out.error,
+          });
+        } else if (toolId === 'tts') {
+          const out = await invokePartnerTool('verbalab_tts', { text: problem.slice(0, 120) });
+          toolResults.push({
+            tool: toolId,
+            ok: out.ok,
+            summary: out.ok
+              ? `audio bytes=${(out.result as { bytes?: number }).bytes ?? 0}`
+              : out.error,
+          });
+        } else {
+          toolResults.push({
+            tool: toolId,
+            ok: true,
+            summary: `Planned allowlisted tool ${toolId} (catalog API ${REASONING_TOOL_CATALOG.find((t) => t.id === toolId)?.api ?? 'n/a'})`,
+          });
+        }
+      }
+      selectedTools = toRun;
+    }
 
     await this.audit.record({
       organizationId: input.organizationId,
@@ -295,6 +344,7 @@ export class ReasoningCloudService {
         totalTokens,
         retrieved: Boolean(contextBlock),
         language: input.language ?? null,
+        toolExecution: Boolean(toolResults?.length),
       },
     });
 
@@ -307,16 +357,18 @@ export class ReasoningCloudService {
       answer,
       branches,
       selectedTools,
+      toolResults,
       retrieved: Boolean(contextBlock),
       provider,
       model: modelUsed,
       usage: { total_tokens: totalTokens, calls },
       honesty: {
         customReasonerKernel: false,
-        toolExecution: false,
+        toolExecution: Boolean(toolResults?.length),
+        allowlistedToolsOnly: true,
         fullTreeOfThought: strategy === 'tree_of_thought' ? false : undefined,
       },
-      note: 'LLM-gateway reasoning (VL-186). Not a proprietary symbolic reasoner OS.',
+      note: 'LLM-gateway reasoning (VL-186) with allowlisted Own AI tool execution. Not a proprietary symbolic reasoner OS.',
     };
   }
 

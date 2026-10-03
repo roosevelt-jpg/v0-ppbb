@@ -501,7 +501,32 @@ export class MemoryCloudService {
       writes,
       exports,
       erases,
-      note: 'Memory Cloud analytics (VL-183). Retention sweeper not automated.',
+      note: 'Memory Cloud analytics (VL-183). Retention sweeper available via POST /v1/memory-cloud/sweep.',
+    };
+  }
+
+  /** Delete expired memory rows for the workspace (retention sweeper). */
+  async sweepExpired(organizationId: string, workspaceId: string, auth?: AuthCtx) {
+    const result = await this.prisma.memoryRecord.deleteMany({
+      where: {
+        organizationId,
+        workspaceId,
+        expiresAt: { lte: new Date() },
+      },
+    });
+    await this.audit.record({
+      organizationId,
+      userId: auth?.userId,
+      action: 'memory_cloud.swept',
+      route: 'POST /v1/memory-cloud/sweep',
+      ip: auth?.ip,
+      metadata: { workspaceId, deleted: result.count },
+    });
+    return {
+      deleted: result.count,
+      sweptAt: new Date().toISOString(),
+      honesty: { automatedRetentionSweeper: true, embeddingNnSemanticMemory: false },
+      note: 'Expired memory rows removed. Embedding NN semantic memory remains deferred.',
     };
   }
 

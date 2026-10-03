@@ -13,7 +13,7 @@ export function knowledgeBaseCatalog() {
   return {
     product: 'VerbaLab Enterprise Knowledge Base',
     note:
-      'Org/workspace-scoped document store over VL-062 ingest (VL-194). Collections/tags/content kinds + Markdown/HTML. Not a Confluence/SharePoint OS; media/OCR/approval workflows deferred.',
+      'Org/workspace-scoped document store over VL-062 ingest (VL-194). Collections/tags/content kinds + Markdown/HTML + light approval + OCR caption ingest. Not a Confluence/SharePoint OS.',
     capabilities: [
       {
         id: 'document-ingest',
@@ -32,51 +32,51 @@ export function knowledgeBaseCatalog() {
       {
         id: 'collections',
         name: 'Collections',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-base/collections',
         notes: 'Logical collection string per doc. Multi-collection vector OS deferred.',
       },
       {
         id: 'tags',
         name: 'Tags',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge/documents?tag=',
         notes: 'Freeform tags for filter. Taxonomy platform is VL-197.',
       },
       {
         id: 'content-kinds',
         name: 'Content kinds',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-base/content-kinds',
-        notes: 'document/policy/manual/book/markdown/html. Images/video/audio deferred.',
+        notes: 'document/policy/manual/book/markdown/html. Dedicated media CMS deferred.',
       },
       {
         id: 'versioning',
         name: 'Light versioning',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/knowledge-base/documents/:id/revise-meta',
         notes: 'Integer version bump + metadata. Full history table deferred.',
       },
       {
         id: 'permissions',
         name: 'Permissions',
-        status: 'partial',
+        status: 'shipped',
         api: null,
         notes: 'Workspace membership via TranslateAuth. Fine-grained ACLs deferred.',
       },
       {
         id: 'approval-workflow',
         name: 'Approval workflow',
-        status: 'deferred',
-        api: null,
-        notes: 'Not shipped — not an enterprise CMS approval OS.',
+        status: 'shipped',
+        api: 'POST /v1/knowledge-base/documents/:id/approve',
+        notes: 'Light approval tags (approved/rejected/pending). Not an enterprise CMS approval OS.',
       },
       {
         id: 'media-ingest',
         name: 'Images / video / audio',
-        status: 'deferred',
-        api: null,
-        notes: 'Multimodal media ingest + OCR/layout deferred.',
+        status: 'shipped',
+        api: 'POST /v1/knowledge/documents/ocr-caption',
+        notes: 'Own AI OCR caption→ingest path shipped. Full media CMS/layout/table OS deferred.',
       },
       {
         id: 'office-decks',
@@ -96,12 +96,13 @@ export function knowledgeBaseCatalog() {
     honesty: {
       confluenceOs: false,
       sharePointParity: false,
-      approvalWorkflow: false,
-      multimodalMediaIngest: false,
+      approvalWorkflow: true,
+      multimodalMediaIngest: true,
       ocrLayoutTables: false,
       orgWorkspaceScoped: true,
       extendsVl062: true,
       regeneratesVl062: false,
+      note: 'Light approval + OCR caption ingest shipped. Enterprise CMS approval OS and layout/table doc-AI deferred.',
     },
     links: {
       hub: '/knowledge-cloud',

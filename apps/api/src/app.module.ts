@@ -269,6 +269,8 @@ import { PromptIntelligenceModule } from './prompt-intelligence/prompt-intellige
 import { DecisionEngineModule } from './decision-engine/decision-engine.module';
 import { AiOrchestrationModule } from './ai-orchestration/ai-orchestration.module';
 import { IntelligenceAnalyticsModule } from './intelligence-analytics/intelligence-analytics.module';
+import { AgentIntelligenceModule } from './agent-intelligence/agent-intelligence.module';
+import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -526,6 +528,8 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     DecisionEngineModule,
     AiOrchestrationModule,
     IntelligenceAnalyticsModule,
+    AgentIntelligenceModule,
+    AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,

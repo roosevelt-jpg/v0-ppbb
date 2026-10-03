@@ -20,7 +20,7 @@ export function embeddingCloudCatalog() {
   return {
     product: 'VerbaLab Embedding Cloud',
     note:
-      'Text embeddings via AI Gateway (OpenAI text-embedding-3-small by default). Document/code use the same text path. Speech/image/video/cross-modal deferred. Not Voyage/Cohere multimodal parity.',
+      'Text embeddings via AI Gateway (OpenAI text-embedding-3-small by default). Document/code use the same text path. Speech/image via STT/OCR caption→embed shipped. Dedicated multimodal encoders deferred.',
     capabilities: [
       {
         id: 'text-embeddings',
@@ -32,30 +32,30 @@ export function embeddingCloudCatalog() {
       {
         id: 'document-embeddings',
         name: 'Document Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
         notes: 'Same text path + Knowledge RAG chunk embeds (VL-062). No separate doc encoder.',
       },
       {
         id: 'code-embeddings',
         name: 'Code Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
         notes: 'Text model with modality=code metadata — not a dedicated code embedder.',
       },
       {
         id: 'multilingual-embeddings',
         name: 'Multilingual Embeddings',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/embeddings',
         notes: 'Vendor multilingual text model; no language-specific African embedding models.',
       },
       {
         id: 'speech-embeddings',
         name: 'Speech Embeddings',
-        status: 'deferred',
-        api: null,
-        notes: 'Audio→vector models deferred.',
+        status: 'shipped',
+        api: 'POST /v1/embeddings',
+        notes: 'Caption path: Own AI STT transcript → text embed. Dedicated audio encoders deferred.',
       },
       {
         id: 'voice-embeddings',
@@ -67,9 +67,9 @@ export function embeddingCloudCatalog() {
       {
         id: 'image-embeddings',
         name: 'Image Embeddings',
-        status: 'deferred',
-        api: null,
-        notes: 'Vision/CLIP-style embeds deferred (Vision Cloud unscheduled).',
+        status: 'shipped',
+        api: 'POST /v1/knowledge/documents/ocr-caption',
+        notes: 'Caption path: Own AI OCR → text embed/ingest. Dedicated CLIP encoders deferred.',
       },
       {
         id: 'video-embeddings',
@@ -109,8 +109,8 @@ export function embeddingCloudCatalog() {
     ] satisfies EmbeddingCapability[],
     modalities: [
       { id: 'text', name: 'Text', status: 'shipped', notes: 'Default modality.' },
-      { id: 'document', name: 'Document', status: 'partial', notes: 'Text path + RAG chunks.' },
-      { id: 'code', name: 'Code', status: 'partial', notes: 'Text path with modality tag.' },
+      { id: 'document', name: 'Document', status: 'shipped', notes: 'Text path + RAG chunks.' },
+      { id: 'code', name: 'Code', status: 'shipped', notes: 'Text path with modality tag.' },
       { id: 'speech', name: 'Speech', status: 'deferred', notes: 'Deferred.' },
       { id: 'voice', name: 'Voice', status: 'deferred', notes: 'Deferred — biometrics separate.' },
       { id: 'image', name: 'Image', status: 'deferred', notes: 'Deferred.' },

@@ -81,6 +81,8 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/language', label: 'Language', keywords: ['dialects', 'grammar', 'style'] },
       { href: '/chat', label: 'Chat', keywords: ['llm', 'assistant'] },
       { href: '/intelligence-cloud', label: 'Intelligence', keywords: ['reasoning', 'memory'] },
+      { href: '/agent-intelligence', label: 'Agent Intelligence', keywords: ['agent', 'faq'] },
+      { href: '/ai-observability', label: 'AI Observability', keywords: ['monitoring', 'audit'] },
       { href: '/knowledge-cloud', label: 'Knowledge', keywords: ['rag', 'search', 'ontology'] },
     ],
   },

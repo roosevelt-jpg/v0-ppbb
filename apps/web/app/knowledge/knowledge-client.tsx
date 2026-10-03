@@ -44,11 +44,11 @@ export function KnowledgeClient() {
     void refreshDocs(apiKey).catch(() => undefined);
   }, [apiKey]);
 
-  async function onUpload(event: FormEvent) {
+  async function onUpload(event: FormEvent, mode: 'document' | 'ocr' = 'document') {
     event.preventDefault();
     setError(null);
     if (!file) {
-      setError('Choose a DOCX, PDF, or TXT file');
+      setError(mode === 'ocr' ? 'Choose an image for OCR caption ingest' : 'Choose a DOCX, PDF, or TXT file');
       return;
     }
     if (!apiKey.startsWith('vl_live_')) {
@@ -59,7 +59,9 @@ export function KnowledgeClient() {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch(`${API_URL}/v1/knowledge/documents`, {
+      const path =
+        mode === 'ocr' ? '/v1/knowledge/documents/ocr-caption' : '/v1/knowledge/documents';
+      const res = await fetch(`${API_URL}${path}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}` },
         body: form,
@@ -124,19 +126,41 @@ export function KnowledgeClient() {
         />
       </label>
 
-      <form onSubmit={onUpload} className="vl-panel" style={{ marginTop: '1rem', padding: '1.25rem', display: 'grid', gap: '0.85rem' }}>
+      <form
+        onSubmit={(e) => void onUpload(e, 'document')}
+        className="vl-panel"
+        style={{ marginTop: '1rem', padding: '1.25rem', display: 'grid', gap: '0.85rem' }}
+      >
         <label className="vl-label">
-          Upload document
+          Upload document or image (OCR)
           <input
             className="vl-field"
             type="file"
-            accept=".txt,.pdf,.docx,text/plain,application/pdf"
+            accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp,text/plain,application/pdf,image/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>
-        <button type="submit" disabled={loading} className="vl-btn vl-btn-primary" style={{ justifySelf: 'start' }}>
-          {loading ? 'Working…' : 'Upload & embed'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="vl-btn vl-btn-primary"
+            style={{ justifySelf: 'start' }}
+          >
+            {loading ? 'Working…' : 'Upload & embed'}
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            className="vl-btn vl-btn-secondary"
+            onClick={(e) => {
+              e.preventDefault();
+              void onUpload(e as unknown as FormEvent, 'ocr');
+            }}
+          >
+            {loading ? 'Working…' : 'OCR caption → ingest'}
+          </button>
+        </div>
       </form>
 
       {docs.length > 0 ? (
