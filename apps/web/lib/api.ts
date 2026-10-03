@@ -1,3 +1,5 @@
+import { getDevBearer } from '@/lib/dev-auth';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export const WORKSPACE_STORAGE_KEY = 'verbalab_workspace_id';
@@ -17,7 +19,8 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit & { token?: string; workspaceId?: string | null } = {},
 ): Promise<T> {
-  const { token, workspaceId, headers, ...rest } = options;
+  const { token: tokenOption, workspaceId, headers, ...rest } = options;
+  const token = tokenOption || getDevBearer() || undefined;
   const ws =
     workspaceId === null
       ? undefined

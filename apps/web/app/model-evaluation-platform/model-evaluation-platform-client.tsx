@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Suite = {
@@ -42,7 +43,7 @@ export function ModelEvaluationPlatformClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/model-evaluation-platform/engine', { token }),
@@ -61,7 +62,7 @@ export function ModelEvaluationPlatformClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/model-evaluation-platform/runs', {
         token,

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Profile = {
@@ -33,7 +34,7 @@ export function SpeakerIntelligenceClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, prof, hist] = await Promise.all([
       apiFetch<Engine>('/v1/speakers/engine', { token }),
@@ -52,14 +53,14 @@ export function SpeakerIntelligenceClient() {
   }, [isLoaded, refresh]);
 
   async function authHeaders() {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     return { Authorization: `Bearer ${token}` };
   }
 
   async function onCreate(e: FormEvent) {
     e.preventDefault();
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token || !name.trim()) return;
     await apiFetch('/v1/speakers/profiles', {
       token,

@@ -1,86 +1,41 @@
 'use client';
 
-import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { setDevBearer } from '@/lib/dev-auth';
 
+/**
+ * Does not call Clerk useSignIn / hosted UI — those keep forcing email OTP on this instance.
+ */
 export function DevLoginClient() {
-  const { isLoaded, signIn, setActive } = useSignIn();
   const router = useRouter();
-  const [email, setEmail] = useState('local.reviewer@example.com');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
-  async function completeSession(sessionId: string | null | undefined) {
-    if (!sessionId || !setActive) throw new Error('No session created');
-    await setActive({ session: sessionId });
-    router.replace('/dashboard');
-  }
-
-  async function signInWithTicket() {
-    if (!isLoaded || !signIn) return;
+  async function signInWithoutClerkUi() {
     setBusy(true);
     setError(null);
-    setStatus('Minting sign-in ticket…');
+    setStatus('Creating local review session…');
     try {
       const res = await fetch('/api/dev-login', { method: 'POST' });
       const data = (await res.json()) as {
-        ticket?: string;
+        ok?: boolean;
+        bearer?: string;
+        redirectTo?: string;
         email?: string;
         error?: string;
         message?: string;
       };
-      if (!res.ok || !data.ticket) {
-        throw new Error(data.message || data.error || `Ticket mint failed (${res.status})`);
+      if (!res.ok || !data.bearer) {
+        throw new Error(data.message || data.error || `Dev login failed (${res.status})`);
       }
-      if (data.email) setEmail(data.email);
-      setStatus('Completing ticket sign-in…');
-      const result = await signIn.create({ strategy: 'ticket', ticket: data.ticket });
-      if (result.status === 'complete') {
-        await completeSession(result.createdSessionId);
-        return;
-      }
-      throw new Error(
-        `Ticket sign-in incomplete: status=${result.status}. Check Clerk email-code settings.`,
-      );
+      setDevBearer(data.bearer);
+      setStatus(`Signed in as ${data.email ?? 'reviewer'} — loading…`);
+      router.replace(data.redirectTo || '/vaios');
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(false);
-      setStatus(null);
-    }
-  }
-
-  async function signInWithPassword(e: React.FormEvent) {
-    e.preventDefault();
-    if (!isLoaded || !signIn) return;
-    setBusy(true);
-    setError(null);
-    setStatus('Signing in with password…');
-    try {
-      const result = await signIn.create({
-        identifier: email.trim(),
-        strategy: 'password',
-        password,
-      });
-      if (result.status === 'complete') {
-        await completeSession(result.createdSessionId);
-        return;
-      }
-      // Surface which factor Clerk wants next (often email_code on this instance)
-      const first = result.supportedFirstFactors?.map((f) => f.strategy).join(', ');
-      const second = result.supportedSecondFactors?.map((f) => f.strategy).join(', ');
-      throw new Error(
-        `Password sign-in incomplete: status=${result.status}` +
-          (first ? `; firstFactors=${first}` : '') +
-          (second ? `; secondFactors=${second}` : '') +
-          '. Use “Sign in without OTP” instead.',
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
       setBusy(false);
       setStatus(null);
     }
@@ -111,17 +66,17 @@ export function DevLoginClient() {
           LOCAL DEV LOGIN
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', margin: '0.4rem 0 0.5rem', fontSize: '1.6rem' }}>
-          Skip Clerk OTP
+          Browse without Clerk OTP
         </h1>
         <p style={{ color: '#78716c', margin: '0 0 1.25rem', lineHeight: 1.5 }}>
-          This instance’s hosted Sign-in UI prefers email codes. Use the ticket button below for a
-          one-click session on localhost.
+          This skips Clerk&apos;s hosted sign-in entirely (test keys only). Sets a local session cookie so
+          middleware and API accept you — no email code.
         </p>
 
         <button
           type="button"
-          disabled={!isLoaded || busy}
-          onClick={() => void signInWithTicket()}
+          disabled={busy}
+          onClick={() => void signInWithoutClerkUi()}
           style={{
             width: '100%',
             border: 0,
@@ -131,53 +86,10 @@ export function DevLoginClient() {
             color: 'white',
             fontWeight: 700,
             cursor: busy ? 'wait' : 'pointer',
-            marginBottom: '1rem',
           }}
         >
-          {busy ? 'Working…' : 'Sign in without OTP'}
+          {busy ? 'Working…' : 'Enter local review session'}
         </button>
-
-        <details>
-          <summary style={{ cursor: 'pointer', color: '#57534e', marginBottom: '0.75rem' }}>
-            Or try email + password
-          </summary>
-          <form onSubmit={(e) => void signInWithPassword(e)} style={{ display: 'grid', gap: '0.65rem' }}>
-            <label style={{ display: 'grid', gap: '0.25rem', fontSize: '0.9rem' }}>
-              Email
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="username"
-                style={{ padding: '0.65rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #d6d3d1' }}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: '0.25rem', fontSize: '0.9rem' }}>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                style={{ padding: '0.65rem 0.75rem', borderRadius: '0.5rem', border: '1px solid #d6d3d1' }}
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={!isLoaded || busy || !password}
-              style={{
-                border: 0,
-                borderRadius: '0.65rem',
-                padding: '0.75rem 1rem',
-                background: '#1c1917',
-                color: 'white',
-                fontWeight: 650,
-                cursor: busy ? 'wait' : 'pointer',
-              }}
-            >
-              Sign in with password
-            </button>
-          </form>
-        </details>
 
         {status ? <p style={{ color: '#0f766e', margin: '1rem 0 0' }}>{status}</p> : null}
         {error ? (

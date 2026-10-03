@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -36,7 +37,7 @@ export function PromptRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/prompt-runtime/engine', { token }),
@@ -54,7 +55,7 @@ export function PromptRuntimeClient() {
   const execute = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       let variables: Record<string, string> = {};
       try {

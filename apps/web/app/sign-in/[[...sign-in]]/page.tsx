@@ -12,7 +12,7 @@ export default function SignInPage() {
       <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
         Stuck on email OTP?{' '}
         <Link href="/dev-login" style={{ color: '#0f766e', fontWeight: 650 }}>
-          Use local password/ticket login
+          Enter local review session (no OTP)
         </Link>
       </p>
     </main>

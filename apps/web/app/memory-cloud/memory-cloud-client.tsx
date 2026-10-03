@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -40,7 +41,7 @@ export function MemoryCloudClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, an, list] = await Promise.all([
       apiFetch<Engine>('/v1/memory-cloud/engine', { token }),
@@ -62,7 +63,7 @@ export function MemoryCloudClient() {
     setError(null);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<Memory>('/v1/memory-cloud/memories', {
         token,
@@ -82,7 +83,7 @@ export function MemoryCloudClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<{ count: number; exportedAt: string; note: string }>(
         '/v1/memory-cloud/export',
@@ -102,7 +103,7 @@ export function MemoryCloudClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<{ erased: boolean; count: number; note: string }>(
         '/v1/memory-cloud/erase',

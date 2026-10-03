@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type AuditRow = {
@@ -25,7 +26,7 @@ export function AuditClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         const data = await apiFetch<AuditRow[]>('/v1/audit-events?limit=100', { token });
         setEvents(data);

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -28,7 +29,7 @@ export function KnowledgeGraphClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, an, list] = await Promise.all([
       apiFetch<Engine>('/v1/knowledge-graph/engine', { token }),
@@ -50,7 +51,7 @@ export function KnowledgeGraphClient() {
     setError(null);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const a = await apiFetch<Entity>('/v1/knowledge-graph/entities', {
         token,

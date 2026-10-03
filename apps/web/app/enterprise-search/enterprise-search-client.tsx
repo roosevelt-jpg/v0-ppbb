@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = {
@@ -48,7 +49,7 @@ export function EnterpriseSearchClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         setEngine(await apiFetch<Engine>('/v1/enterprise-search/engine', { token }));
       } catch (err) {
@@ -61,7 +62,7 @@ export function EnterpriseSearchClient() {
     setSearching(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ hits: Hit[] }>('/v1/enterprise-search/search', {
         token,

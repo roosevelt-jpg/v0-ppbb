@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Language = { code: string; name: string; tier: string };
@@ -30,7 +31,7 @@ export function TranslateClient() {
     setError(null);
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         text: string;

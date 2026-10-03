@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Language = { code: string; name: string };
@@ -48,7 +49,7 @@ export function ChatClient() {
     setInput('');
 
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<ChatCompletion>('/v1/chat/completions', {
         method: 'POST',

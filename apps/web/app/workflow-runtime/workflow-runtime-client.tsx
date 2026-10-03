@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -44,7 +45,7 @@ export function WorkflowRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/workflow-runtime/engine', { token }),
@@ -62,7 +63,7 @@ export function WorkflowRuntimeClient() {
   const createAndRun = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ workflow: Workflow }>('/v1/workflow-runtime/workflows', {
         token,

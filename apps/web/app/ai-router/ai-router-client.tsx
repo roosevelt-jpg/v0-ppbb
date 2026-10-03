@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -45,7 +46,7 @@ export function AiRouterClient() {
   const [optimize, setOptimize] = useState('balanced');
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setEngine(await apiFetch<Engine>('/v1/ai-router/engine', { token }));
   }, [getToken]);
@@ -59,7 +60,7 @@ export function AiRouterClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<ResolveResult>('/v1/ai-router/resolve', {
         token,

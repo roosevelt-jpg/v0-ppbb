@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -38,7 +39,7 @@ export function VoiceStudioClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, lib, pron, prof] = await Promise.all([
       apiFetch<Engine>('/v1/voice-studio/engine', { token }),
@@ -63,7 +64,7 @@ export function VoiceStudioClient() {
   async function compileSsml() {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ plainText: string; unsupportedTags: string[]; note: string }>(
         '/v1/voice-studio/ssml/compile',
@@ -79,7 +80,7 @@ export function VoiceStudioClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/voice-studio/pronunciation', {
         token,
@@ -98,7 +99,7 @@ export function VoiceStudioClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/voice-studio/profiles', {
         token,
@@ -117,7 +118,7 @@ export function VoiceStudioClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await fetch(`${API_URL}/v1/voice-studio/preview`, {
         method: 'POST',
@@ -142,7 +143,7 @@ export function VoiceStudioClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         clips: Array<{ voice: string; mimeType: string; audioBase64: string }>;
@@ -174,7 +175,7 @@ export function VoiceStudioClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ audioBase64: string; mimeType: string; note: string }>(
         '/v1/voice-studio/timeline/render',

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Language = { code: string; name: string };
@@ -60,7 +61,7 @@ export function GlossaryClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         await Promise.all([loadTerms(token), loadPacks(token)]);
       } catch (err) {
@@ -75,7 +76,7 @@ export function GlossaryClient() {
     setMessage(null);
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/glossary/terms', {
         method: 'POST',
@@ -95,7 +96,7 @@ export function GlossaryClient() {
   async function onDelete(id: string) {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/glossary/terms/${id}`, { method: 'DELETE', token });
       await loadTerms(token);
@@ -109,7 +110,7 @@ export function GlossaryClient() {
     setMessage(null);
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const result = await apiFetch<{ termsInstalled: number }>(
         `/v1/vertical-glossaries/${id}/install`,

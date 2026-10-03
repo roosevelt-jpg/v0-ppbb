@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -34,7 +35,7 @@ export function WakeWordClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list, stats] = await Promise.all([
       apiFetch<Engine>('/v1/wake-word/engine', { token }),
@@ -56,7 +57,7 @@ export function WakeWordClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/wake-word/keywords', {
         token,
@@ -77,7 +78,7 @@ export function WakeWordClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<DetectResult>('/v1/wake-word/detect', {
         token,
@@ -94,7 +95,7 @@ export function WakeWordClient() {
   }
 
   async function onDelete(id: string) {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     await apiFetch(`/v1/wake-word/keywords/${id}`, { token, method: 'DELETE' });
     await refresh();

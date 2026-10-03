@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type ApiKeyRow = {
@@ -25,7 +26,7 @@ export function KeysClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) return;
     const rows = await apiFetch<ApiKeyRow[]>('/v1/api-keys', { token });
     setKeys(rows);
@@ -41,7 +42,7 @@ export function KeysClient() {
     setError(null);
     setSecretOnce(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ secret: string }>('/v1/api-keys', {
         method: 'POST',
@@ -58,7 +59,7 @@ export function KeysClient() {
   async function onRevoke(id: string) {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/api-keys/${id}`, { method: 'DELETE', token });
       await load();

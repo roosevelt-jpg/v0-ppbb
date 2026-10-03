@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Listing = {
@@ -35,7 +36,7 @@ export function VoiceMarketplaceClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/voice-marketplace/engine', { token }),
@@ -55,7 +56,7 @@ export function VoiceMarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/voice-marketplace/listings', {
         token,
@@ -82,7 +83,7 @@ export function VoiceMarketplaceClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ note: string }>(`/v1/voice-marketplace/listings/${id}/install`, {
         token,
@@ -102,7 +103,7 @@ export function VoiceMarketplaceClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/voice-marketplace/listings/${id}/reviews`, {
         token,

@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Workflow = {
@@ -28,7 +29,7 @@ export function WorkflowsClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const list = await apiFetch<Workflow[]>('/v1/workflows', { token });
     setRows(list);
@@ -44,7 +45,7 @@ export function WorkflowsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       let steps: unknown;
       try {
@@ -70,7 +71,7 @@ export function WorkflowsClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/workflows/${id}`, { method: 'DELETE', token });
       setMessage('Deleted.');
