@@ -114,7 +114,8 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(hub.console).toBe('/ai-kernel');
 
     const agent = res.body.products.find((p: { id: string }) => p.id === 'agent-runtime');
-    expect(agent.status).toBe('deferred');
+    expect(agent.status).toBe('partial');
+    expect(agent.console).toBe('/agent-runtime');
     expect(agent.notes).toMatch(/sandbox|permission/i);
 
     const policy = res.body.products.find((p: { id: string }) => p.id === 'policy-runtime');
@@ -136,7 +137,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.deferred.promptRuntime).toBe(false);
     expect(overview.deferred.contextRuntime).toBe(false);
     expect(overview.deferred.reasoningRuntime).toBe(false);
-    expect(overview.deferred.agentRuntime).toBe(true);
+    expect(overview.deferred.agentRuntime).toBe(false);
     expect(overview.deferred.policyRuntime).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to7).toBe(false);
     expect(overview.safety.policyMustHardGate).toBe(true);
@@ -145,6 +146,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.links.promptRuntime).toBe('/prompt-runtime');
     expect(overview.links.contextRuntime).toBe('/context-runtime');
     expect(overview.links.reasoningRuntime).toBe('/reasoning-runtime');
+    expect(overview.links.agentRuntime).toBe('/agent-runtime');
     expect(overview.links.inferenceCloud).toBe('/inference-cloud');
     expect(overview.architecture.extendsInferenceCloud).toBe(true);
 
@@ -163,6 +165,10 @@ describe('AI Kernel Foundation (VL-214)', () => {
     const reasoning = overview.products.find((p: { id: string }) => p.id === 'reasoning-runtime');
     expect(reasoning?.status).toBe('partial');
     expect(reasoning?.console).toBe('/reasoning-runtime');
+
+    const agent = overview.products.find((p: { id: string }) => p.id === 'agent-runtime');
+    expect(agent?.status).toBe('partial');
+    expect(agent?.console).toBe('/agent-runtime');
   });
 
   it('exposes aiKernelRuntimes via GraphQL CQRS façade', async () => {

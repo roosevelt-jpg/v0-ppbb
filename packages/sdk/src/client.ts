@@ -1340,6 +1340,127 @@ export class VerbaLab {
     });
   }
 
+  async agentRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    permissions: Array<{ id: string }>;
+    deniedActions: Array<{ id: string }>;
+    ceilings: {
+      maxAgentsPerWorkspace: number;
+      maxStepsPerRun: number;
+      mode: string;
+      liveToolExecution: boolean;
+    };
+    mode: string;
+    honesty: {
+      openToolExecution: boolean;
+      liveExternalActionsByDefault: boolean;
+      langGraphOs: boolean;
+      autoGptOs: boolean;
+      regeneratesVolumes1to7: boolean;
+      scopedPermissionsRequired: boolean;
+      sandboxRequired: boolean;
+      policyHardGateRequired: boolean;
+      policyRuntimeWired: boolean;
+      localPermissionHardGate: boolean;
+      orgWorkspaceScoped: boolean;
+    };
+    links: Record<string, string>;
+    safety?: {
+      scopedPermissionsRequired: boolean;
+      sandboxRequired: boolean;
+      openToolExecutionForbidden: boolean;
+      policyMustHardGate: boolean;
+      note: string;
+    };
+  }> {
+    return this.requestJson('/v1/agent-runtime/engine', { method: 'GET' });
+  }
+
+  async agentRuntimeCreate(body: {
+    name: string;
+    permissions?: string[];
+    goal?: string;
+  }): Promise<{
+    agent: {
+      id: string;
+      name: string;
+      status: string;
+      permissions: string[];
+      goal?: string;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/agent-runtime/agents', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async agentRuntimeLifecycle(
+    id: string,
+    body: { status: string },
+  ): Promise<{ agent: { id: string; status: string }; note?: string }> {
+    return this.requestJson(`/v1/agent-runtime/agents/${encodeURIComponent(id)}/lifecycle`, {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async agentRuntimeRun(body: {
+    agentId: string;
+    goal?: string;
+    actions?: Array<{ action: string; input?: Record<string, unknown> }>;
+  }): Promise<{
+    run: {
+      id: string;
+      agentId: string;
+      status: string;
+      sandbox: boolean;
+      liveToolExecution: boolean;
+      steps: Array<{
+        action: string;
+        allowed: boolean;
+        simulated: boolean;
+        error?: string;
+      }>;
+    };
+    honesty?: { openToolExecution: boolean; simulatedSteps?: boolean };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/agent-runtime/run', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async agentRuntimeCollaborate(body: {
+    agentIds: string[];
+    topic?: string;
+    message?: string;
+  }): Promise<{
+    session: {
+      id: string;
+      topic: string;
+      agentIds: string[];
+      transcript: Array<{ from: string; to: string; body: string }>;
+      sandbox: boolean;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/agent-runtime/collaborate', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

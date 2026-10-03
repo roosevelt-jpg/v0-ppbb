@@ -15,7 +15,7 @@ Part of the internal [AI Kernel](./AI_KERNEL.md) (Volume 8). Roadmap: [`docs/roa
 | Long-term Memory | **Shipped** — `kind=long_term` |
 | Semantic Memory | **Partial** — text contains search; not embedding ANN |
 | Workspace / Org / Conversation Memory | **Shipped** — scopes on kernel `MemoryRecord` rows |
-| Agent Memory | **Partial** — `scope=agent` + `agentId`; Agent Runtime VL-219 |
+| Agent Memory | **Partial** — `scope=agent` + `agentId`; Agent Runtime VL-219 writes via `/v1/agent-runtime/memory` |
 | Context Compression | **Partial** — heuristic truncate; not ML compressor OS |
 | Memory Versioning | **Shipped** — revise via Memory Cloud |
 | Memory Synchronization | **Partial** — sandbox sync stamp; not multi-region |

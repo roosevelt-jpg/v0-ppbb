@@ -27,6 +27,9 @@ function usage(): never {
   verbalab context-runtime-assemble [--query <text>] [--model <hint>] [--max-chars <n>]
   verbalab reasoning-runtime-engine
   verbalab reasoning-runtime-plan --problem <text> [--sandbox]
+  verbalab agent-runtime-engine
+  verbalab agent-runtime-create --name <name> [--permission <id>]... [--goal <text>]
+  verbalab agent-runtime-run --agent <id> [--goal <text>] [--action <permission>]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -265,6 +268,53 @@ async function main() {
         await vl.reasoningRuntimePlan({
           problem,
           sandboxOnly: rest.includes('--sandbox'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'agent-runtime-engine') {
+    console.log(JSON.stringify(await vl.agentRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'agent-runtime-create') {
+    const name = argValue(rest, '--name');
+    if (!name) usage();
+    const permissions: string[] = [];
+    for (let i = 0; i < rest.length; i++) {
+      if (rest[i] === '--permission' && rest[i + 1]) {
+        permissions.push(rest[i + 1]!);
+        i++;
+      }
+    }
+    console.log(
+      JSON.stringify(
+        await vl.agentRuntimeCreate({
+          name,
+          permissions: permissions.length ? permissions : undefined,
+          goal: argValue(rest, '--goal') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'agent-runtime-run') {
+    const agentId = argValue(rest, '--agent');
+    if (!agentId) usage();
+    const action = argValue(rest, '--action');
+    console.log(
+      JSON.stringify(
+        await vl.agentRuntimeRun({
+          agentId,
+          goal: argValue(rest, '--goal') ?? undefined,
+          actions: action ? [{ action }] : undefined,
         }),
         null,
         2,

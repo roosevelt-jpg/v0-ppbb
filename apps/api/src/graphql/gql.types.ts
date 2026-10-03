@@ -691,6 +691,72 @@ export class GqlReasoningRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlAgentRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAgentRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAgentRuntimeCapability])
+  capabilities!: GqlAgentRuntimeCapability[];
+
+  @Field()
+  openToolExecution!: boolean;
+
+  @Field()
+  liveExternalActionsByDefault!: boolean;
+
+  @Field()
+  langGraphOs!: boolean;
+
+  @Field()
+  autoGptOs!: boolean;
+
+  @Field()
+  scopedPermissionsRequired!: boolean;
+
+  @Field()
+  sandboxRequired!: boolean;
+
+  @Field()
+  policyHardGateRequired!: boolean;
+
+  @Field()
+  policyRuntimeWired!: boolean;
+
+  @Field()
+  localPermissionHardGate!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxAgentsPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

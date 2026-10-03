@@ -107,7 +107,7 @@ export function memoryRuntimeCatalog() {
         name: 'Agent Memory',
         status: 'partial',
         api: 'POST /v1/memory-runtime/put',
-        notes: 'scope=agent + agentId — full agent OS deferred to VL-219.',
+        notes: 'scope=agent + agentId — Agent Runtime VL-219 writes via /v1/agent-runtime/memory.',
       },
       {
         id: 'context-compression',

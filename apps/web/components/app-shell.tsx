@@ -19,6 +19,7 @@ const links = [
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },
   { href: '/reasoning-runtime', label: 'Reasoning Runtime' },
+  { href: '/agent-runtime', label: 'Agent Runtime' },
   { href: '/gpu-platform', label: 'GPU Platform' },
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },

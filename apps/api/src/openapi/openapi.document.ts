@@ -3130,6 +3130,117 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty' } },
       },
     },
+    '/v1/agent-runtime/engine': {
+      get: {
+        summary: 'Agent Runtime catalog',
+        operationId: 'getAgentRuntimeEngine',
+        responses: {
+          '200': { description: 'Agent sandbox capabilities, permissions, honesty' },
+        },
+      },
+    },
+    '/v1/agent-runtime/permissions': {
+      get: {
+        summary: 'Agent Runtime grantable permissions',
+        operationId: 'listAgentRuntimePermissions',
+        responses: { '200': { description: 'Allowlist + denied actions' } },
+      },
+    },
+    '/v1/agent-runtime/agents': {
+      get: {
+        summary: 'List agents',
+        operationId: 'listAgentRuntimeAgents',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace agents' } },
+      },
+      post: {
+        summary: 'Create agent',
+        operationId: 'createAgentRuntimeAgent',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Agent created (draft)' } },
+      },
+    },
+    '/v1/agent-runtime/agents/{id}': {
+      get: {
+        summary: 'Get agent',
+        operationId: 'getAgentRuntimeAgent',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Agent' } },
+      },
+    },
+    '/v1/agent-runtime/agents/{id}/lifecycle': {
+      post: {
+        summary: 'Update agent lifecycle',
+        operationId: 'lifecycleAgentRuntimeAgent',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Lifecycle updated' } },
+      },
+    },
+    '/v1/agent-runtime/run': {
+      post: {
+        summary: 'Run agent (sandbox + hard permissions)',
+        operationId: 'runAgentRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result' },
+          '403': { description: 'Permission/policy hard deny' },
+        },
+      },
+    },
+    '/v1/agent-runtime/collaborate': {
+      post: {
+        summary: 'Sandbox multi-agent collaboration',
+        operationId: 'collaborateAgentRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Collaboration session' } },
+      },
+    },
+    '/v1/agent-runtime/schedule': {
+      post: {
+        summary: 'Schedule agent run (record only)',
+        operationId: 'scheduleAgentRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Schedule recorded' } },
+      },
+    },
+    '/v1/agent-runtime/memory': {
+      post: {
+        summary: 'Put agent memory',
+        operationId: 'putAgentRuntimeMemory',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Memory stored via Memory Runtime' } },
+      },
+    },
+    '/v1/agent-runtime/marketplace': {
+      get: {
+        summary: 'Agent marketplace counts',
+        operationId: 'getAgentRuntimeMarketplace',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Listing counts' } },
+      },
+    },
+    '/v1/agent-runtime/analytics': {
+      get: {
+        summary: 'Agent Runtime analytics',
+        operationId: 'getAgentRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/agent-runtime/monitoring': {
+      get: {
+        summary: 'Agent Runtime monitoring',
+        operationId: 'getAgentRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + safety' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

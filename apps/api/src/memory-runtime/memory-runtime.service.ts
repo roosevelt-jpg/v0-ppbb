@@ -38,7 +38,7 @@ export class MemoryRuntimeService {
       safety: {
         agentActionBoundariesRequired: true,
         note:
-          'Kernel memory is org/workspace-scoped. Agent memory writes require agentId; full Agent Runtime sandbox is VL-219.',
+          'Kernel memory is org/workspace-scoped. Agent memory writes require agentId; Agent Runtime VL-219 writes via /v1/agent-runtime/memory.',
       },
     };
   }

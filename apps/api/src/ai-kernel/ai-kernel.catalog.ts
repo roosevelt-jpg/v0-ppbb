@@ -60,11 +60,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'agent-runtime',
       name: 'Agent Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/agent-runtime/engine',
+      console: '/agent-runtime',
       notes:
-        'Autonomous agents (Phase 86 / VL-219). Must have scoped permissions + sandbox — not open tool execution.',
+        'Sandbox agents with hard permission allowlists (VL-219). Not open tool execution; Policy Runtime VL-222 hardens further.',
     },
     {
       id: 'workflow-runtime',
