@@ -3161,6 +3161,116 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/event-fabric/products': {
+      get: {
+        summary: 'Event Fabric capability catalog',
+        operationId: 'listEventFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Event bus capabilities, brokers, Redis Streams honesty, deferred Kafka/NATS/Rabbit',
+          },
+        },
+      },
+    },
+    '/v1/event-fabric/engine': {
+      get: {
+        summary: 'Event Fabric engine (alias of products)',
+        operationId: 'getEventFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/event-fabric/brokers': {
+      get: {
+        summary: 'Event Fabric broker catalog',
+        operationId: 'listEventFabricBrokers',
+        responses: { '200': { description: 'Active Redis Streams + deferred adapters' } },
+      },
+    },
+    '/v1/event-fabric/events': {
+      get: {
+        summary: 'Poll / consume CloudEvents from a topic',
+        operationId: 'pollEventFabricEvents',
+        parameters: [
+          { name: 'topic', in: 'query', schema: { type: 'string' } },
+          { name: 'count', in: 'query', schema: { type: 'integer' } },
+          { name: 'eventVersion', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'CloudEvents batch' } },
+      },
+      post: {
+        summary: 'Publish a CloudEvent',
+        operationId: 'publishEventFabricEvent',
+        responses: { '201': { description: 'Published CloudEvent' } },
+      },
+    },
+    '/v1/event-fabric/events/{streamId}/fail': {
+      post: {
+        summary: 'Mark event failed (retry or DLQ)',
+        operationId: 'failEventFabricEvent',
+        parameters: [
+          { name: 'streamId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'retry or dlq action' } },
+      },
+    },
+    '/v1/event-fabric/dlq': {
+      get: {
+        summary: 'List dead-letter events',
+        operationId: 'listEventFabricDlq',
+        parameters: [{ name: 'topic', in: 'query', schema: { type: 'string' } }],
+        responses: { '200': { description: 'DLQ events' } },
+      },
+    },
+    '/v1/event-fabric/dlq/retry': {
+      post: {
+        summary: 'Requeue an event from DLQ',
+        operationId: 'retryEventFabricDlq',
+        responses: { '200': { description: 'Republished event' } },
+      },
+    },
+    '/v1/event-fabric/replay': {
+      post: {
+        summary: 'Replay events from a stream offset',
+        operationId: 'replayEventFabric',
+        responses: { '200': { description: 'Replayed CloudEvents' } },
+      },
+    },
+    '/v1/event-fabric/snapshots': {
+      get: {
+        summary: 'Consumer-group cursor snapshots',
+        operationId: 'listEventFabricSnapshots',
+        responses: { '200': { description: 'Snapshots' } },
+      },
+    },
+    '/v1/event-fabric/analytics': {
+      get: {
+        summary: 'Event Fabric analytics',
+        operationId: 'getEventFabricAnalytics',
+        responses: { '200': { description: 'Per-topic publish/consume/DLQ counts' } },
+      },
+    },
+    '/v1/event-fabric/overview': {
+      get: {
+        summary: 'Event Fabric org overview',
+        operationId: 'getEventFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + brokers + analytics' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/event-fabric/monitoring': {
+      get: {
+        summary: 'Event Fabric monitoring',
+        operationId: 'getEventFabricMonitoring',
+        responses: { '200': { description: 'Backend + counters + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

@@ -21,6 +21,7 @@ const links = [
   { href: '/model-registry', label: 'Model Registry' },
   { href: '/atlas', label: 'Atlas' },
   { href: '/ai-fabric', label: 'AI Fabric' },
+  { href: '/event-fabric', label: 'Event Fabric' },
   { href: '/memory-runtime', label: 'Memory Runtime' },
   { href: '/prompt-runtime', label: 'Prompt Runtime' },
   { href: '/context-runtime', label: 'Context Runtime' },

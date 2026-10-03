@@ -547,6 +547,42 @@ export class GqlAiFabricBus {
 }
 
 @ObjectType()
+export class GqlEventFabricCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEventFabricBroker {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field()
+  protocol!: string;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

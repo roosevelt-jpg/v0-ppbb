@@ -28,10 +28,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'event-fabric',
       name: 'Event Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Kafka/NATS/RabbitMQ/Redis Streams bus (Phase 107 / VL-240).',
+      status: 'shipped',
+      api: 'GET /v1/event-fabric/products',
+      console: '/event-fabric',
+      notes:
+        'Redis Streams + CloudEvents bus (VL-240). Kafka/NATS/RabbitMQ adapters deferred.',
     },
     {
       id: 'context-fabric',
@@ -187,9 +188,11 @@ export function aiFabricArchitectureNotes() {
     serviceMeshOs: false,
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
-    brokerBackendsDeferred: true,
+    brokerBackendsDeferred: false,
+    redisStreamsActive: true,
+    kafkaAdapterDeferred: true,
     note:
-      'Volume 10 README: buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric (Kafka/NATS/Rabbit/Redis Streams) deferred to VL-240. Policy Fabric must hard-gate when shipped.',
+      'Volume 10 README: buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric (VL-240) wires Redis Streams + CloudEvents. Kafka/NATS/Rabbit adapters remain deferred. Policy Fabric must hard-gate when shipped.',
   };
 }
 
@@ -203,7 +206,9 @@ export function aiFabricHonesty() {
     regeneratesAiKernel: false,
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
-    brokerBackendsDeferred: true,
+    brokerBackendsDeferred: false,
+    redisStreamsActive: true,
+    kafkaAdapterDeferred: true,
     staticRoutingCatalog: true,
   };
 }

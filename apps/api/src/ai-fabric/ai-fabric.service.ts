@@ -26,7 +26,7 @@ export class AiFabricService {
       },
       docs: '/docs/AI_FABRIC.md',
       note:
-        'AI Fabric hub (VL-239). Internal communication layer connecting VerbaLab clouds. Not a Kafka hyperscaler or customer-facing mesh product. Broker backends deferred to Event Fabric (VL-240).',
+        'AI Fabric hub (VL-239). Internal communication layer connecting VerbaLab clouds. Not a Kafka hyperscaler or customer-facing mesh product. Event Fabric (VL-240) provides Redis Streams + CloudEvents.',
     };
   }
 
@@ -68,7 +68,7 @@ export class AiFabricService {
           'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
-        eventFabric: true,
+        eventFabric: false,
         contextFabric: true,
         knowledgeFabric: true,
         promptFabric: true,
@@ -82,6 +82,7 @@ export class AiFabricService {
       },
       links: {
         aiFabric: '/ai-fabric',
+        eventFabric: '/event-fabric',
         aiKernel: '/ai-kernel',
         inferenceCloud: '/inference-cloud',
         foundationModelCloud: '/foundation-model-cloud',
@@ -93,7 +94,7 @@ export class AiFabricService {
       },
       docs: '/docs/AI_FABRIC.md',
       note:
-        'AI Fabric Foundation (VL-239). Discovery + routing hub. Event/Policy fabrics deferred with hard-gate requirement documented.',
+        'AI Fabric Foundation (VL-239). Discovery + routing hub. Event Fabric (VL-240) shipped; Policy Fabric deferred with hard-gate requirement documented.',
     };
   }
 
@@ -105,7 +106,7 @@ export class AiFabricService {
       architecture: aiFabricArchitectureNotes(),
       honesty: aiFabricHonesty(),
       note:
-        'AI Fabric monitoring snapshot (VL-239). Hub shipped; broker-backed Event Fabric and Policy Fabric deferred per Volume 10 plan.',
+        'AI Fabric monitoring snapshot (VL-239). Hub + Event Fabric shipped; Policy Fabric deferred per Volume 10 plan.',
     };
   }
 }

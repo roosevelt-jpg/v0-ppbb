@@ -104,7 +104,8 @@ describe('AI Fabric Foundation (VL-239)', () => {
     expect(res.body.architecture.fabricWidePolicyHardGateRequired).toBe(true);
     expect(res.body.architecture.policyLogOnlyForbidden).toBe(true);
     expect(res.body.architecture.cqrs).toBe(true);
-    expect(res.body.honesty.brokerBackendsDeferred).toBe(true);
+    expect(res.body.honesty.brokerBackendsDeferred).toBe(false);
+    expect(res.body.honesty.redisStreamsActive).toBe(true);
     expect(res.body.safety.fabricWidePolicyHardGateRequired).toBe(true);
     expect(res.body.docs).toBe('/docs/AI_FABRIC.md');
 
@@ -113,7 +114,8 @@ describe('AI Fabric Foundation (VL-239)', () => {
     expect(hub.console).toBe('/ai-fabric');
 
     const event = res.body.products.find((p: { id: string }) => p.id === 'event-fabric');
-    expect(event.status).toBe('deferred');
+    expect(event.status).toBe('shipped');
+    expect(event.console).toBe('/event-fabric');
 
     const policy = res.body.products.find((p: { id: string }) => p.id === 'policy-fabric');
     expect(policy.status).toBe('deferred');
@@ -133,7 +135,7 @@ describe('AI Fabric Foundation (VL-239)', () => {
       clerkUserId: 'clerk_af',
       role: 'owner',
     });
-    expect(overview.deferred.eventFabric).toBe(true);
+    expect(overview.deferred.eventFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to9).toBe(false);
     expect(overview.links.aiFabric).toBe('/ai-fabric');

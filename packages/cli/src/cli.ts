@@ -25,6 +25,9 @@ function usage(): never {
   verbalab model-registry-engine
   verbalab atlas-engine
   verbalab ai-fabric-products
+  verbalab event-fabric-products
+  verbalab event-fabric-publish --topic <topic> --type <type> [--data <json>]
+  verbalab event-fabric-poll [--topic <topic>] [--count <n>]
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -225,6 +228,38 @@ async function main() {
 
   if (command === 'ai-fabric-products') {
     console.log(JSON.stringify(await vl.aiFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'event-fabric-products') {
+    console.log(JSON.stringify(await vl.eventFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'event-fabric-publish') {
+    const topic = argValue(rest, '--topic') ?? 'default';
+    const type = argValue(rest, '--type') ?? 'com.verbalab.event';
+    const dataRaw = argValue(rest, '--data');
+    const data = dataRaw ? JSON.parse(dataRaw) : { ok: true };
+    console.log(
+      JSON.stringify(await vl.eventFabricPublish({ topic, type, data }), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'event-fabric-poll') {
+    console.log(
+      JSON.stringify(
+        await vl.eventFabricPoll({
+          topic: argValue(rest, '--topic') ?? undefined,
+          count: argValue(rest, '--count')
+            ? Number(argValue(rest, '--count'))
+            : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

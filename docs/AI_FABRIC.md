@@ -12,7 +12,7 @@ Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/N
 | Library ask | VerbaLab reality |
 | --- | --- |
 | AI Fabric Foundation | **VL-239** — `/ai-fabric` + bus catalog / routing |
-| Event Fabric | **Deferred** — Phase 107 / VL-240 |
+| Event Fabric | **Shipped** — VL-240 — Redis Streams + CloudEvents; Kafka/NATS/Rabbit adapters deferred |
 | Context / Knowledge / Prompt / Reasoning / Memory / Agent Fabric | **Deferred** — VL-241–246 |
 | Policy Fabric | **Deferred** — VL-247; hard-gate required when shipped |
 | Service Discovery | **Partial** — static routing catalog |
@@ -52,6 +52,8 @@ Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/N
 | `regeneratesVolumes1to9` | false |
 | `fabricWidePolicyHardGateRequired` | true |
 | `policyLogOnlyForbidden` | true |
-| `brokerBackendsDeferred` | true |
+| `brokerBackendsDeferred` | false |
+| `redisStreamsActive` | true (via Event Fabric) |
+| `kafkaAdapterDeferred` | true |
 
-See ADR-0141.
+See ADR-0141. Event Fabric: [`EVENT_FABRIC.md`](./EVENT_FABRIC.md) / ADR-0142.

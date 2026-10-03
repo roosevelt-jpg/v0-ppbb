@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-239 Done — AI Fabric Foundation)
+Last updated: 2026-10-03 (VL-240 Done — Event Fabric)
 
 ---
 
@@ -269,7 +269,7 @@ Last updated: 2026-10-03 (VL-239 Done — AI Fabric Foundation)
 | VL-237 | Model Registry (Phase 104) | Done | `/model-registry` over VL-110; ADR-0138. Cards/versions/approvals/deploy plans; not MLflow/traffic-mesh. |
 | VL-238 | FMC Production Audit (Phase 105) | Done | Audit pack under `docs/foundation-model-cloud-audit/`; ADR-0139. Volume MLOps track closed. Named FM scaffolds remain deferred; AI Fabric → Volume 10. |
 | VL-239 | AI Fabric Foundation (Phase 106) | Done | `/ai-fabric` internal hub + routing catalog; ADR-0141. Not Kafka OS/customer mesh. Policy hard-gate required for VL-247. |
-| VL-240 | Event Fabric (Phase 107) | Not Started | Kafka/NATS/Rabbit/Redis Streams — verify real broker path. |
+| VL-240 | Event Fabric (Phase 107) | Done | Redis Streams + CloudEvents (DLQ/retries/replay/snapshots); Kafka/NATS/Rabbit adapters deferred; ADR-0142. |
 | VL-241 | Context Fabric (Phase 108) | Not Started | |
 | VL-242 | Knowledge Fabric (Phase 109) | Not Started | |
 | VL-243 | Prompt Fabric (Phase 110) | Not Started | |
@@ -422,3 +422,4 @@ Last updated: 2026-10-03 (VL-239 Done — AI Fabric Foundation)
 | 2026-10-03 | VL-238 Done: Foundation Model Cloud Production Audit (Phase 105) — evidence pack; ADR-0139. Volume 9 MLOps track closed. AI Fabric deferred to Volume 10. |
 | 2026-10-03 | VL-225 Done: Atlas scaffold (Phase 92) — capability catalog + Gateway/MLOps handoffs; ADR-0140. Not trained competitive weights. |
 | 2026-10-03 | VL-239 Done: AI Fabric Foundation (Phase 106) — internal bus hub/routing; ADR-0141. Not Kafka hyperscaler; Policy Fabric hard-gate required later. |
+| 2026-10-03 | VL-240 Done: Event Fabric (Phase 107) — Redis Streams + CloudEvents; DLQ/retries/replay/snapshots; ADR-0142. Kafka/NATS/Rabbit deferred adapters. |

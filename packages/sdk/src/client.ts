@@ -1230,6 +1230,72 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-fabric/products', { method: 'GET' });
   }
 
+  async eventFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    brokers: Array<{
+      id: string;
+      name: string;
+      status: string;
+      protocol: string;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    backend: string;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/event-fabric/products', { method: 'GET' });
+  }
+
+  async eventFabricPublish(input: {
+    topic?: string;
+    type?: string;
+    source?: string;
+    data?: unknown;
+    eventVersion?: string;
+    dataschema?: string | null;
+    subject?: string | null;
+  }): Promise<{ event: Record<string, unknown>; backend: string }> {
+    return this.requestJson('/v1/event-fabric/events', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async eventFabricPoll(params?: {
+    topic?: string;
+    count?: number;
+    eventVersion?: string;
+  }): Promise<{
+    events: Array<Record<string, unknown>>;
+    backend: string;
+    group: string;
+    topic: string;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.topic) q.set('topic', params.topic);
+    if (params?.count != null) q.set('count', String(params.count));
+    if (params?.eventVersion) q.set('eventVersion', params.eventVersion);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/event-fabric/events${suffix}`, { method: 'GET' });
+  }
+
+  async eventFabricAnalytics(): Promise<{
+    backend: string;
+    topics: Array<Record<string, unknown>>;
+    totals: Record<string, number>;
+  }> {
+    return this.requestJson('/v1/event-fabric/analytics', { method: 'GET' });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;
