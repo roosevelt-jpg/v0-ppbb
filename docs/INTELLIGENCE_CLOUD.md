@@ -1,7 +1,7 @@
 # VerbaLab Intelligence Cloud
 
-**Status:** Foundation shipped (VL-180 / library Phase 47)  
-**Rule:** Shared intelligence layer over the LLM gateway, embeddings, and RAG. Extend existing Chat / Embeddings / Knowledge modules. Do not regenerate Language/Speech/Voice Clouds. Do **not** invent a custom AI kernel or reasoner OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080).
+**Status:** Volume complete (VL-180–192 / library Phases 47–59)  
+**Rule:** Shared intelligence layer over the LLM gateway, embeddings, and RAG. Extend existing Chat / Embeddings / Knowledge modules. Do not regenerate Language/Speech/Voice Clouds. Do **not** invent a custom AI kernel or reasoner OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Audit evidence: [`docs/intelligence-cloud-audit/`](./intelligence-cloud-audit/).
 
 ---
 
@@ -21,7 +21,7 @@
 | AI Decision Engine | **Partial** — **VL-189** `/decision-engine` light rules; not Drools/Pega BRMS |
 | AI Orchestration | **Partial** — **VL-190** `/ai-orchestration` e2e pipelines; not multi-cloud agent OS |
 | Intelligence Analytics | **Partial** — **VL-191** `/intelligence-analytics` aggregates; ≠ Language/Speech/Voice analytics |
-| Production Audit | Phase 59 (VL-192) |
+| Production Audit | **Done** — **VL-192** evidence pack under `docs/intelligence-cloud-audit/` |
 | GraphQL / CQRS | Bounded Intelligence Cloud catalog slice |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
 

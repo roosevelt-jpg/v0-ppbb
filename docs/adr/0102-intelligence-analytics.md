@@ -21,4 +21,4 @@ ROADMAP VL-191: usage/quality analytics for Intelligence Cloud surfaces. Out of 
 ## Consequences
 
 - Intelligence Cloud marks intelligence-analytics `partial` with hub links.  
-- Intelligence Cloud Production Audit (VL-192) is next — checklist/evidence over VL-180–191; no new intelligence features during audit.
+- Intelligence Cloud Production Audit (VL-192) closes the volume with evidence (ADR-0103); no new intelligence features during audit.
