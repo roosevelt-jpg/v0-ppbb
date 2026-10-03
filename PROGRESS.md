@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-353 Done — Enterprise Engineering System Production Audit; Volume 20 closed)
+Last updated: 2026-10-03 (VL-363 Done — VCOS Production Audit; Volume 21 closed)
 
 ---
 
@@ -383,6 +383,16 @@ Last updated: 2026-10-03 (VL-353 Done — Enterprise Engineering System Producti
 | VL-351 | Database Engineering Standards (Phase 218) | Done | Postgres/Redis/ES/vector/KG standards; `databaseOs=false`; ADR-0253. |
 | VL-352 | Infrastructure Engineering Standards (Phase 219) | Done | IaC/deploy/GPU; FinOps+secrets honesty; `kubernetesOs=false`; ADR-0254. |
 | VL-353 | EES Production Audit (Phase 220) | Done | Audit pack under `docs/enterprise-engineering-system-audit/`; ADR-0255. Volume 20 closed. |
+| VL-354 | Corporate Operating System Foundation (Phase 221) | Done | `/corporate-operating-system`; ADR-0256. `realCorporateGovernance=false`. |
+| VL-355 | Corporate Governance Platform (Phase 222) | Done | Committee tracking; ADR-0257. |
+| VL-356 | Strategic Planning Platform (Phase 223) | Done | Strategy/OKR tooling; ADR-0258. |
+| VL-357 | Enterprise Portfolio Management (Phase 224) | Done | Portfolio tracking; ADR-0259. |
+| VL-358 | Business Architecture (Phase 225) | Done | Capability/value-stream models; ADR-0260. |
+| VL-359 | Enterprise Architecture Repository (Phase 226) | Done | Artifact store; `togafModelingSuiteOs=false`; ADR-0261. |
+| VL-360 | Corporate Knowledge System (Phase 227) | Done | Knowledge portal; `confluenceOs=false`; ADR-0262. |
+| VL-361 | Executive Intelligence Platform (Phase 228) | Done | Exec/board KPI cockpits; ADR-0263. |
+| VL-362 | Corporate Risk Platform (Phase 229) | Done | Risk register; ADR-0264. |
+| VL-363 | VCOS Production Audit (Phase 230) | Done | Audit pack + Digital Constitution; ADR-0265. Volume 21 closed. |
 
 ---
 
@@ -565,3 +575,6 @@ Last updated: 2026-10-03 (VL-353 Done — Enterprise Engineering System Producti
 | 2026-10-03 | VL-343 Done: VAIOS Production Audit (Phase 210) — evidence pack; ADR-0245. Volume 19 closed. Enterprise Engineering System deferred past Volume 19. |
 | 2026-10-03 | VL-344–352 Done: Enterprise Engineering System hubs (Phases 211–219) — foundation through Infrastructure Standards; ADR-0246–0254. Standards/governance for humans+Cursor; architectureKnowledgeBaseOs/adrFactoryOs=false. |
 | 2026-10-03 | VL-353 Done: EES Production Audit (Phase 220) — evidence pack; ADR-0255. Volume 20 closed. Architecture Knowledge Base / mass ADR factory deferred past Volume 20. |
+| 2026-10-03 | VL-354–362 Done: VCOS hubs (Phases 221–229) — foundation through Corporate Risk; ADR-0256–0264. Internal business software; realCorporateGovernance=false. |
+| 2026-10-03 | VL-363 Done: VCOS Production Audit (Phase 230) — audit pack + Digital Constitution; ADR-0265. Volume 21 closed. Ask for Volume 22 when ready. |
+

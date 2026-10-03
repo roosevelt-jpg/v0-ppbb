@@ -5363,6 +5363,47 @@ export class VerbaLab {
     return this.requestJson('/v1/ai-engineering-standards/check/list', { method: 'GET' });
   }
 
+
+  async corporateOperatingSystemProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-operating-system/products', { method: 'GET' });
+  }
+
+  async corporateGovernancePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-governance-platform/engine', { method: 'GET' });
+  }
+
+  async strategicPlanningPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/strategic-planning-platform/engine', { method: 'GET' });
+  }
+
+  async enterprisePortfolioManagementEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-portfolio-management/engine', { method: 'GET' });
+  }
+
+  async businessArchitectureEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/business-architecture/engine', { method: 'GET' });
+  }
+
+  async enterpriseArchitectureRepositoryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-architecture-repository/engine', { method: 'GET' });
+  }
+
+  async corporateKnowledgeSystemEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-knowledge-system/engine', { method: 'GET' });
+  }
+
+  async executiveIntelligencePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/executive-intelligence-platform/engine', { method: 'GET' });
+  }
+
+  async corporateRiskPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-risk-platform/engine', { method: 'GET' });
+  }
+
+  async corporateOperatingSystemConstitution(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-operating-system/constitution', { method: 'GET' });
+  }
+
   private async parseJsonResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => ({}))) as T & ErrorBody;
 

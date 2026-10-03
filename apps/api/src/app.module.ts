@@ -156,6 +156,15 @@ import { AiEngineeringStandardsModule } from './ai-engineering-standards/ai-engi
 import { ApiEngineeringStandardsModule } from './api-engineering-standards/api-engineering-standards.module';
 import { DatabaseEngineeringStandardsModule } from './database-engineering-standards/database-engineering-standards.module';
 import { InfrastructureEngineeringStandardsModule } from './infrastructure-engineering-standards/infrastructure-engineering-standards.module';
+import { CorporateOperatingSystemModule } from './corporate-operating-system/corporate-operating-system.module';
+import { CorporateGovernancePlatformModule } from './corporate-governance-platform/corporate-governance-platform.module';
+import { StrategicPlanningPlatformModule } from './strategic-planning-platform/strategic-planning-platform.module';
+import { EnterprisePortfolioManagementModule } from './enterprise-portfolio-management/enterprise-portfolio-management.module';
+import { BusinessArchitectureModule } from './business-architecture/business-architecture.module';
+import { EnterpriseArchitectureRepositoryModule } from './enterprise-architecture-repository/enterprise-architecture-repository.module';
+import { CorporateKnowledgeSystemModule } from './corporate-knowledge-system/corporate-knowledge-system.module';
+import { ExecutiveIntelligencePlatformModule } from './executive-intelligence-platform/executive-intelligence-platform.module';
+import { CorporateRiskPlatformModule } from './corporate-risk-platform/corporate-risk-platform.module';
 import { OpenSciencePlatformModule } from './open-science-platform/open-science-platform.module';
 import { PatentInnovationPlatformModule } from './patent-innovation-platform/patent-innovation-platform.module';
 import { AiPublicationPlatformModule } from './ai-publication-platform/ai-publication-platform.module';
@@ -346,6 +355,15 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ApiEngineeringStandardsModule,
     DatabaseEngineeringStandardsModule,
     InfrastructureEngineeringStandardsModule,
+    CorporateOperatingSystemModule,
+    CorporateGovernancePlatformModule,
+    StrategicPlanningPlatformModule,
+    EnterprisePortfolioManagementModule,
+    BusinessArchitectureModule,
+    EnterpriseArchitectureRepositoryModule,
+    CorporateKnowledgeSystemModule,
+    ExecutiveIntelligencePlatformModule,
+    CorporateRiskPlatformModule,
     OpenSciencePlatformModule,
     PatentInnovationPlatformModule,
     AiPublicationPlatformModule,

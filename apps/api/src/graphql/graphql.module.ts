@@ -103,6 +103,15 @@ import { AiEngineeringStandardsApplicationModule } from '../ai-engineering-stand
 import { ApiEngineeringStandardsApplicationModule } from '../api-engineering-standards/application/api-engineering-standards-application.module';
 import { DatabaseEngineeringStandardsApplicationModule } from '../database-engineering-standards/application/database-engineering-standards-application.module';
 import { InfrastructureEngineeringStandardsApplicationModule } from '../infrastructure-engineering-standards/application/infrastructure-engineering-standards-application.module';
+import { CorporateOperatingSystemApplicationModule } from '../corporate-operating-system/application/corporate-operating-system-application.module';
+import { CorporateGovernancePlatformApplicationModule } from '../corporate-governance-platform/application/corporate-governance-platform-application.module';
+import { StrategicPlanningPlatformApplicationModule } from '../strategic-planning-platform/application/strategic-planning-platform-application.module';
+import { EnterprisePortfolioManagementApplicationModule } from '../enterprise-portfolio-management/application/enterprise-portfolio-management-application.module';
+import { BusinessArchitectureApplicationModule } from '../business-architecture/application/business-architecture-application.module';
+import { EnterpriseArchitectureRepositoryApplicationModule } from '../enterprise-architecture-repository/application/enterprise-architecture-repository-application.module';
+import { CorporateKnowledgeSystemApplicationModule } from '../corporate-knowledge-system/application/corporate-knowledge-system-application.module';
+import { ExecutiveIntelligencePlatformApplicationModule } from '../executive-intelligence-platform/application/executive-intelligence-platform-application.module';
+import { CorporateRiskPlatformApplicationModule } from '../corporate-risk-platform/application/corporate-risk-platform-application.module';
 import { OpenSciencePlatformApplicationModule } from '../open-science-platform/application/open-science-platform-application.module';
 import { PatentInnovationPlatformApplicationModule } from '../patent-innovation-platform/application/patent-innovation-platform-application.module';
 import { AiPublicationPlatformApplicationModule } from '../ai-publication-platform/application/ai-publication-platform-application.module';
@@ -276,6 +285,15 @@ import { AiEngineeringStandardsGraphqlResolver } from './ai-engineering-standard
 import { ApiEngineeringStandardsGraphqlResolver } from './api-engineering-standards.resolver';
 import { DatabaseEngineeringStandardsGraphqlResolver } from './database-engineering-standards.resolver';
 import { InfrastructureEngineeringStandardsGraphqlResolver } from './infrastructure-engineering-standards.resolver';
+import { CorporateOperatingSystemGraphqlResolver } from './corporate-operating-system.resolver';
+import { CorporateGovernancePlatformGraphqlResolver } from './corporate-governance-platform.resolver';
+import { StrategicPlanningPlatformGraphqlResolver } from './strategic-planning-platform.resolver';
+import { EnterprisePortfolioManagementGraphqlResolver } from './enterprise-portfolio-management.resolver';
+import { BusinessArchitectureGraphqlResolver } from './business-architecture.resolver';
+import { EnterpriseArchitectureRepositoryGraphqlResolver } from './enterprise-architecture-repository.resolver';
+import { CorporateKnowledgeSystemGraphqlResolver } from './corporate-knowledge-system.resolver';
+import { ExecutiveIntelligencePlatformGraphqlResolver } from './executive-intelligence-platform.resolver';
+import { CorporateRiskPlatformGraphqlResolver } from './corporate-risk-platform.resolver';
 import { OpenSciencePlatformGraphqlResolver } from './open-science-platform.resolver';
 import { PatentInnovationPlatformGraphqlResolver } from './patent-innovation-platform.resolver';
 import { AiPublicationPlatformGraphqlResolver } from './ai-publication-platform.resolver';
@@ -469,6 +487,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ApiEngineeringStandardsApplicationModule,
     DatabaseEngineeringStandardsApplicationModule,
     InfrastructureEngineeringStandardsApplicationModule,
+    CorporateOperatingSystemApplicationModule,
+    CorporateGovernancePlatformApplicationModule,
+    StrategicPlanningPlatformApplicationModule,
+    EnterprisePortfolioManagementApplicationModule,
+    BusinessArchitectureApplicationModule,
+    EnterpriseArchitectureRepositoryApplicationModule,
+    CorporateKnowledgeSystemApplicationModule,
+    ExecutiveIntelligencePlatformApplicationModule,
+    CorporateRiskPlatformApplicationModule,
     OpenSciencePlatformApplicationModule,
     PatentInnovationPlatformApplicationModule,
     AiPublicationPlatformApplicationModule,
@@ -650,6 +677,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ApiEngineeringStandardsGraphqlResolver,
     DatabaseEngineeringStandardsGraphqlResolver,
     InfrastructureEngineeringStandardsGraphqlResolver,
+    CorporateOperatingSystemGraphqlResolver,
+    CorporateGovernancePlatformGraphqlResolver,
+    StrategicPlanningPlatformGraphqlResolver,
+    EnterprisePortfolioManagementGraphqlResolver,
+    BusinessArchitectureGraphqlResolver,
+    EnterpriseArchitectureRepositoryGraphqlResolver,
+    CorporateKnowledgeSystemGraphqlResolver,
+    ExecutiveIntelligencePlatformGraphqlResolver,
+    CorporateRiskPlatformGraphqlResolver,
     OpenSciencePlatformGraphqlResolver,
     PatentInnovationPlatformGraphqlResolver,
     AiPublicationPlatformGraphqlResolver,

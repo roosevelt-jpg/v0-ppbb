@@ -12390,6 +12390,336 @@ export const openApiDocument = {
       },
     },
 
+    '/v1/corporate-operating-system/products': {
+      get: {
+        summary: 'VCOS products',
+        operationId: 'listCorporateOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/engine': {
+      get: {
+        summary: 'VCOS engine',
+        operationId: 'getCorporateOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/routing': {
+      get: {
+        summary: 'VCOS routing',
+        operationId: 'getCorporateOperatingSystemRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/overview': {
+      get: {
+        summary: 'VCOS overview',
+        operationId: 'getCorporateOperatingSystemOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/constitution': {
+      get: {
+        summary: 'Digital Constitution',
+        operationId: 'getCorporateOperatingSystemConstitution',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/records': {
+      get: {
+        summary: 'VCOS records',
+        operationId: 'listCorporateOperatingSystemRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/monitoring': {
+      get: {
+        summary: 'VCOS monitoring',
+        operationId: 'getCorporateOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/engine': {
+      get: {
+        summary: 'Corporate Governance Platform engine',
+        operationId: 'getCorporateGovernancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/products': {
+      get: {
+        summary: 'Corporate Governance Platform products',
+        operationId: 'listCorporateGovernancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/monitoring': {
+      get: {
+        summary: 'Corporate Governance Platform monitoring',
+        operationId: 'getCorporateGovernancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/routes': {
+      get: {
+        summary: 'Corporate Governance Platform routes',
+        operationId: 'listCorporateGovernancePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/records': {
+      get: {
+        summary: 'Corporate Governance Platform records',
+        operationId: 'listCorporateGovernancePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/engine': {
+      get: {
+        summary: 'Strategic Planning Platform engine',
+        operationId: 'getStrategicPlanningPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/products': {
+      get: {
+        summary: 'Strategic Planning Platform products',
+        operationId: 'listStrategicPlanningPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/monitoring': {
+      get: {
+        summary: 'Strategic Planning Platform monitoring',
+        operationId: 'getStrategicPlanningPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/routes': {
+      get: {
+        summary: 'Strategic Planning Platform routes',
+        operationId: 'listStrategicPlanningPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/records': {
+      get: {
+        summary: 'Strategic Planning Platform records',
+        operationId: 'listStrategicPlanningPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/engine': {
+      get: {
+        summary: 'Enterprise Portfolio Management engine',
+        operationId: 'getEnterprisePortfolioManagementEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/products': {
+      get: {
+        summary: 'Enterprise Portfolio Management products',
+        operationId: 'listEnterprisePortfolioManagementProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/monitoring': {
+      get: {
+        summary: 'Enterprise Portfolio Management monitoring',
+        operationId: 'getEnterprisePortfolioManagementMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/routes': {
+      get: {
+        summary: 'Enterprise Portfolio Management routes',
+        operationId: 'listEnterprisePortfolioManagementRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/records': {
+      get: {
+        summary: 'Enterprise Portfolio Management records',
+        operationId: 'listEnterprisePortfolioManagementRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/engine': {
+      get: {
+        summary: 'Business Architecture engine',
+        operationId: 'getBusinessArchitectureEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/products': {
+      get: {
+        summary: 'Business Architecture products',
+        operationId: 'listBusinessArchitectureProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/monitoring': {
+      get: {
+        summary: 'Business Architecture monitoring',
+        operationId: 'getBusinessArchitectureMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/routes': {
+      get: {
+        summary: 'Business Architecture routes',
+        operationId: 'listBusinessArchitectureRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/records': {
+      get: {
+        summary: 'Business Architecture records',
+        operationId: 'listBusinessArchitectureRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/engine': {
+      get: {
+        summary: 'Enterprise Architecture Repository engine',
+        operationId: 'getEnterpriseArchitectureRepositoryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/products': {
+      get: {
+        summary: 'Enterprise Architecture Repository products',
+        operationId: 'listEnterpriseArchitectureRepositoryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/monitoring': {
+      get: {
+        summary: 'Enterprise Architecture Repository monitoring',
+        operationId: 'getEnterpriseArchitectureRepositoryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/routes': {
+      get: {
+        summary: 'Enterprise Architecture Repository routes',
+        operationId: 'listEnterpriseArchitectureRepositoryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/records': {
+      get: {
+        summary: 'Enterprise Architecture Repository records',
+        operationId: 'listEnterpriseArchitectureRepositoryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/engine': {
+      get: {
+        summary: 'Corporate Knowledge System engine',
+        operationId: 'getCorporateKnowledgeSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/products': {
+      get: {
+        summary: 'Corporate Knowledge System products',
+        operationId: 'listCorporateKnowledgeSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/monitoring': {
+      get: {
+        summary: 'Corporate Knowledge System monitoring',
+        operationId: 'getCorporateKnowledgeSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/routes': {
+      get: {
+        summary: 'Corporate Knowledge System routes',
+        operationId: 'listCorporateKnowledgeSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/records': {
+      get: {
+        summary: 'Corporate Knowledge System records',
+        operationId: 'listCorporateKnowledgeSystemRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/engine': {
+      get: {
+        summary: 'Executive Intelligence Platform engine',
+        operationId: 'getExecutiveIntelligencePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/products': {
+      get: {
+        summary: 'Executive Intelligence Platform products',
+        operationId: 'listExecutiveIntelligencePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/monitoring': {
+      get: {
+        summary: 'Executive Intelligence Platform monitoring',
+        operationId: 'getExecutiveIntelligencePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/routes': {
+      get: {
+        summary: 'Executive Intelligence Platform routes',
+        operationId: 'listExecutiveIntelligencePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/records': {
+      get: {
+        summary: 'Executive Intelligence Platform records',
+        operationId: 'listExecutiveIntelligencePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/engine': {
+      get: {
+        summary: 'Corporate Risk Platform engine',
+        operationId: 'getCorporateRiskPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/products': {
+      get: {
+        summary: 'Corporate Risk Platform products',
+        operationId: 'listCorporateRiskPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/monitoring': {
+      get: {
+        summary: 'Corporate Risk Platform monitoring',
+        operationId: 'getCorporateRiskPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/routes': {
+      get: {
+        summary: 'Corporate Risk Platform routes',
+        operationId: 'listCorporateRiskPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/records': {
+      get: {
+        summary: 'Corporate Risk Platform records',
+        operationId: 'listCorporateRiskPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

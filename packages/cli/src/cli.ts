@@ -125,6 +125,16 @@ function usage(): never {
   verbalab ai-memory-operating-system-engine
   verbalab knowledge-operating-system-engine
   verbalab plugin-operating-system-engine
+  verbalab corporate-operating-system-products
+  verbalab corporate-governance-platform-engine
+  verbalab strategic-planning-platform-engine
+  verbalab enterprise-portfolio-management-engine
+  verbalab business-architecture-engine
+  verbalab enterprise-architecture-repository-engine
+  verbalab corporate-knowledge-system-engine
+  verbalab executive-intelligence-platform-engine
+  verbalab corporate-risk-platform-engine
+  verbalab corporate-operating-system-constitution
   verbalab enterprise-engineering-system-products
   verbalab engineering-governance-engine
   verbalab architecture-governance-engine
@@ -939,6 +949,56 @@ async function main() {
     console.log(JSON.stringify(await vl.pluginOperatingSystemEngine(), null, 2));
     return;
   }
+  if (command === 'corporate-operating-system-products') {
+    console.log(JSON.stringify(await vl.corporateOperatingSystemProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-governance-platform-engine') {
+    console.log(JSON.stringify(await vl.corporateGovernancePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'strategic-planning-platform-engine') {
+    console.log(JSON.stringify(await vl.strategicPlanningPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-portfolio-management-engine') {
+    console.log(JSON.stringify(await vl.enterprisePortfolioManagementEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'business-architecture-engine') {
+    console.log(JSON.stringify(await vl.businessArchitectureEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-architecture-repository-engine') {
+    console.log(JSON.stringify(await vl.enterpriseArchitectureRepositoryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-knowledge-system-engine') {
+    console.log(JSON.stringify(await vl.corporateKnowledgeSystemEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'executive-intelligence-platform-engine') {
+    console.log(JSON.stringify(await vl.executiveIntelligencePlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-risk-platform-engine') {
+    console.log(JSON.stringify(await vl.corporateRiskPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'corporate-operating-system-constitution') {
+    console.log(JSON.stringify(await vl.corporateOperatingSystemConstitution(), null, 2));
+    return;
+  }
+
   if (command === 'enterprise-engineering-system-products') {
     console.log(JSON.stringify(await vl.enterpriseEngineeringSystemProducts(), null, 2));
     return;

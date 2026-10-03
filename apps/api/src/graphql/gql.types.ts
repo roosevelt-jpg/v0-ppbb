@@ -5875,3 +5875,193 @@ export class GqlInfrastructureEngineeringStandardsEngine {
   @Field(() => Boolean)
   adrFactoryOs!: boolean;
 }
+
+@ObjectType()
+export class GqlCorporateOperatingSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateGovernancePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlStrategicPlanningPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterprisePortfolioManagementEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlBusinessArchitectureEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlEnterpriseArchitectureRepositoryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateKnowledgeSystemEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlExecutiveIntelligencePlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
+@ObjectType()
+export class GqlCorporateRiskPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  internalBusinessSoftware!: boolean;
+
+  @Field(() => Boolean)
+  realCorporateGovernance!: boolean;
+
+  @Field(() => Boolean)
+  boardOs!: boolean;
+
+  @Field(() => Boolean)
+  legalCounselOs!: boolean;
+}
+
