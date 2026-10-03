@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-197 Done — Taxonomy Platform)
+Last updated: 2026-10-03 (VL-198 Done — Enterprise RAG Platform)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-198 Enterprise RAG Platform (Phase 65) |
+| Next up | VL-199 Knowledge Memory (Phase 66) |
 
 ---
 
@@ -227,6 +227,7 @@ Last updated: 2026-10-03 (VL-197 Done — Taxonomy Platform)
 | VL-195 | Enterprise Search (Phase 62) | Done | `/v1/enterprise-search/*` keyword/semantic/light hybrid RRF; ADR-0106. Not Elastic/BM25 OS; image/voice deferred. |
 | VL-196 | Ontology Platform (Phase 63) | Done | `/v1/ontology/*` concepts/hierarchies/synonyms over VL-184; ADR-0107. Not OWL/Protege OS. |
 | VL-197 | Taxonomy Platform (Phase 64) | Done | `/v1/taxonomy/*` terms/trees/assign/heuristic classify; ADR-0108. Not enterprise taxonomy OS. |
+| VL-198 | Enterprise RAG Platform (Phase 65) | Done | `/v1/enterprise-rag/*` retrieve/chunk/cite/grounded query; ADR-0109. Extends VL-062 + hybrid search; not LangChain OS. Hand-verify required. |
 
 ---
 
@@ -338,3 +339,4 @@ Last updated: 2026-10-03 (VL-197 Done — Taxonomy Platform)
 | 2026-10-03 | VL-195 Done: Enterprise Search (Phase 62) — keyword/semantic/light hybrid over VL-062; ADR-0106. Not Elastic/BM25 OS. |
 | 2026-10-03 | VL-196 Done: Ontology Platform (Phase 63) — concepts/is_a/synonyms over VL-184 KG; ADR-0107. Not OWL/Protege OS. |
 | 2026-10-03 | VL-197 Done: Taxonomy Platform (Phase 64) — terms/trees/assign + heuristic classify; ADR-0108. Not enterprise taxonomy OS. |
+| 2026-10-03 | VL-198 Done: Enterprise RAG Platform (Phase 65) — retrieve/chunk/cite/grounded query; ADR-0109. Extends VL-062 + hybrid; not LangChain OS. Hand-verified on real docs. |

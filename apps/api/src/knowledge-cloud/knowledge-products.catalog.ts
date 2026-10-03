@@ -61,10 +61,10 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
       id: 'enterprise-rag',
       name: 'Enterprise RAG Platform',
       status: 'partial',
-      api: 'POST /v1/knowledge/query',
-      console: '/knowledge',
+      api: 'GET /v1/enterprise-rag/engine',
+      console: '/enterprise-rag',
       notes:
-        'Maps onto VL-062 pgvector RAG (+ Vector/Context engines). Full Enterprise RAG product is Phase 65 / VL-198 — hand-verify retrieval on real docs.',
+        'Retrieve/chunk/cite/grounded query over VL-062 + hybrid search (VL-198). Not LangChain OS; hand-verify retrieval on real docs.',
     },
     {
       id: 'knowledge-memory',

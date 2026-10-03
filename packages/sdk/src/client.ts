@@ -1201,6 +1201,109 @@ export class VerbaLab {
     return this.requestJson('/v1/taxonomy/engine', { method: 'GET' });
   }
 
+  async enterpriseRagEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      langchainOs: boolean;
+      llamaindexParity: boolean;
+      agenticRagOs: boolean;
+      bm25Parity: boolean;
+      learnedRanker: boolean;
+      regeneratesVl062: boolean;
+      extendsVl062: boolean;
+      extendsEnterpriseSearch: boolean;
+      orgWorkspaceScoped: boolean;
+      handVerifyRequired: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/enterprise-rag/engine', { method: 'GET' });
+  }
+
+  async enterpriseRagRetrieve(body: {
+    query: string;
+    mode?: 'keyword' | 'semantic' | 'hybrid';
+    k?: number;
+    maxChars?: number;
+    collection?: string;
+    tag?: string;
+    contentKind?: string;
+    documentId?: string;
+    minScore?: number;
+  }): Promise<{
+    query: string;
+    mode: string;
+    passages: Array<{
+      rank: number;
+      id: string;
+      documentId: string;
+      filename: string;
+      ordinal: number;
+      score: number;
+      content: string;
+      source: string;
+    }>;
+    citations: Array<{
+      index: number;
+      documentId: string;
+      chunkId: string;
+      filename: string;
+      snippet: string;
+      score: number;
+    }>;
+    context: {
+      passageCount: number;
+      droppedDuplicates: number;
+      maxChars: number;
+      truncated: boolean;
+      totalChars: number;
+    };
+    note: string;
+  }> {
+    return this.requestJson('/v1/enterprise-rag/retrieve', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async enterpriseRagQuery(body: {
+    question: string;
+    mode?: 'keyword' | 'semantic' | 'hybrid';
+    k?: number;
+    maxChars?: number;
+    collection?: string;
+    tag?: string;
+    contentKind?: string;
+    documentId?: string;
+  }): Promise<{
+    answer: string;
+    citations: Array<{
+      index: number;
+      documentId: string;
+      chunkId: string;
+      filename: string;
+      snippet: string;
+      score: number;
+    }>;
+    mode: string;
+    grounded: boolean;
+    model: string | null;
+    provider: string | null;
+    note?: string;
+  }> {
+    return this.requestJson('/v1/enterprise-rag/query', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

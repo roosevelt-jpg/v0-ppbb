@@ -22,6 +22,9 @@ function usage(): never {
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
   verbalab ontology-engine
   verbalab taxonomy-engine
+  verbalab enterprise-rag-engine
+  verbalab enterprise-rag-retrieve --query <text> [--mode keyword|semantic|hybrid]
+  verbalab enterprise-rag-query --question <text> [--mode keyword|semantic|hybrid]
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -154,6 +157,31 @@ async function main() {
 
   if (command === 'taxonomy-engine') {
     console.log(JSON.stringify(await vl.taxonomyEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-rag-engine') {
+    console.log(JSON.stringify(await vl.enterpriseRagEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'enterprise-rag-retrieve') {
+    const query = argValue(rest, '--query');
+    if (!query) usage();
+    const mode = argValue(rest, '--mode') as 'keyword' | 'semantic' | 'hybrid' | undefined;
+    console.log(
+      JSON.stringify(await vl.enterpriseRagRetrieve({ query, mode }), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'enterprise-rag-query') {
+    const question = argValue(rest, '--question');
+    if (!question) usage();
+    const mode = argValue(rest, '--mode') as 'keyword' | 'semantic' | 'hybrid' | undefined;
+    console.log(
+      JSON.stringify(await vl.enterpriseRagQuery({ question, mode }), null, 2),
+    );
     return;
   }
 

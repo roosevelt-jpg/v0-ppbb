@@ -2962,6 +2962,76 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/enterprise-rag/engine': {
+      get: {
+        summary: 'Enterprise RAG Platform engine catalog',
+        operationId: 'getEnterpriseRagEngine',
+        responses: { '200': { description: 'RAG capabilities and honesty flags' } },
+      },
+    },
+    '/v1/enterprise-rag/chunk': {
+      post: {
+        summary: 'Preview RAG chunking windows',
+        operationId: 'previewEnterpriseRagChunk',
+        responses: { '200': { description: 'Chunk preview (not persisted)' } },
+      },
+    },
+    '/v1/enterprise-rag/retrieve': {
+      post: {
+        summary: 'Enterprise RAG retrieve with citations',
+        operationId: 'retrieveEnterpriseRag',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Ranked passages + citations + context optimization' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-rag/query': {
+      post: {
+        summary: 'Grounded Enterprise RAG query',
+        operationId: 'queryEnterpriseRag',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Grounded answer with citations' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-rag/analytics': {
+      get: {
+        summary: 'Enterprise RAG analytics',
+        operationId: 'getEnterpriseRagAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace RAG analytics' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/enterprise-rag/monitoring': {
+      get: {
+        summary: 'Enterprise RAG monitoring',
+        operationId: 'getEnterpriseRagMonitoring',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Honesty + deferred flags' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

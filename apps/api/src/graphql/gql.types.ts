@@ -538,6 +538,51 @@ export class GqlTaxonomyEngine {
 }
 
 @ObjectType()
+export class GqlEnterpriseRagCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEnterpriseRagEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlEnterpriseRagCapability])
+  capabilities!: GqlEnterpriseRagCapability[];
+
+  @Field()
+  langchainOs!: boolean;
+
+  @Field()
+  agenticRagOs!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsVl062!: boolean;
+
+  @Field()
+  handVerifyRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

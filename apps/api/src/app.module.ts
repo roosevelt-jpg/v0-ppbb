@@ -57,6 +57,7 @@ import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
 import { TaxonomyPlatformModule } from './taxonomy-platform/taxonomy-platform.module';
+import { EnterpriseRagModule } from './enterprise-rag/enterprise-rag.module';
 import { EmbeddingCloudModule } from './embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from './vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from './memory-cloud/memory-cloud.module';
@@ -115,6 +116,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     EnterpriseSearchModule,
     OntologyPlatformModule,
     TaxonomyPlatformModule,
+    EnterpriseRagModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,

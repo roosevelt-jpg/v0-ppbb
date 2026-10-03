@@ -1,6 +1,6 @@
 # VerbaLab Knowledge Cloud
 
-**Status:** Foundation through Taxonomy partial (VL-193–197 / library Phases 60–64); Volume 6 continues through VL-203  
+**Status:** Foundation through Enterprise RAG partial (VL-193–198 / library Phases 60–65); Volume 6 continues through VL-203  
 **Rule:** Enterprise knowledge layer over VL-062 RAG and Intelligence Cloud (embeddings, vectors, knowledge graph, context). Extend existing Knowledge / Vector / Graph modules. Do **not** regenerate Intelligence Cloud or invent a Confluence/SharePoint/ontology OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume6-knowledge-cloud/`](./roadmap/volume6-knowledge-cloud/).
 
 ---
@@ -14,7 +14,7 @@
 | Enterprise Search | **Partial** — **VL-195** `/enterprise-search`; keyword/semantic/light hybrid; not Elastic OS |
 | Ontology Platform | **Partial** — **VL-196** `/ontology` over VL-184 KG; not OWL/Protege OS |
 | Taxonomy Platform | **Partial** — **VL-197** `/taxonomy` trees + doc assign; not enterprise taxonomy OS |
-| Enterprise RAG Platform | **Partial** — VL-062 `/knowledge` + Vector/Context; full product Phase 65 / VL-198 |
+| Enterprise RAG Platform | **Partial** — **VL-198** `/enterprise-rag` retrieve/cite/grounded query; not LangChain OS |
 | Knowledge Memory | **Deferred** — Phase 66 / VL-199 (≠ Intelligence Memory Cloud VL-183) |
 | Knowledge Intelligence | **Deferred** — Phase 67 / VL-200 |
 | Enterprise Knowledge APIs | **Partial** — existing `/v1/knowledge/*`; pack Phase 68 / VL-201 |
@@ -42,6 +42,7 @@
 | Enterprise Search | `/enterprise-search` · `POST /v1/enterprise-search/search` (VL-195) |
 | Ontology | `/ontology` · `GET /v1/ontology/engine` (VL-196) |
 | Taxonomy | `/taxonomy` · `GET /v1/taxonomy/engine` (VL-197) |
+| Enterprise RAG | `/enterprise-rag` · `POST /v1/enterprise-rag/query` (VL-198) |
 
 ---
 
