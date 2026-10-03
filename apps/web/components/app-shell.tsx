@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useAuth } from '@clerk/nextjs';
 import { useEffect, useMemo, useState } from 'react';
 import { isClerkConfigured } from '@/lib/clerk-config';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
 import { ThemeSwitcher } from '@/components/theme-provider';
+import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import {
   CONSOLE_NAV,
   filterNav,
@@ -85,14 +87,37 @@ function NavGroupBlock({
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [query, setQuery] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
-  const groups = useMemo(() => filterNav(query), [query]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const groups = useMemo(() => filterNav(query, { isAdmin }), [query, isAdmin]);
   const searching = query.trim().length > 0;
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const token = await resolveApiToken(getToken);
+        if (!token) {
+          if (!cancelled) setIsAdmin(false);
+          return;
+        }
+        const me = await apiFetch<{ role?: string }>('/v1/identity/me', { token });
+        if (!cancelled) setIsAdmin(me.role === 'owner' || me.role === 'admin');
+      } catch {
+        if (!cancelled) setIsAdmin(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, getToken]);
 
   return (
     <div className="vl-console">

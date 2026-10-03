@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 import { useEffect, useMemo, useState } from 'react';
-import { API_URL } from '@/lib/api';
-import { getDevBearer } from '@/lib/dev-auth';
+import { API_URL, apiFetch } from '@/lib/api';
+import { getDevBearer, resolveApiToken } from '@/lib/dev-auth';
 import { ThemeSwitcher } from '@/components/theme-provider';
 
 type CmsAsset = { key: string; url: string; alt: string };
@@ -21,11 +22,25 @@ type CmsPagePayload = {
   assetMap: Record<string, CmsAsset>;
 };
 
+type FooterLink = {
+  label: string;
+  href: string;
+  adminOnly?: boolean;
+};
+
+const ADMIN_FOOTER_HREFS = new Set(['/cms', '/dashboard']);
+
 function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
+function isAdminFooterLink(link: FooterLink): boolean {
+  if (link.adminOnly) return true;
+  return ADMIN_FOOTER_HREFS.has(link.href);
+}
+
 export function MarketingHomePage() {
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [data, setData] = useState<CmsPagePayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [text, setText] = useState('');
@@ -33,6 +48,7 @@ export function MarketingHomePage() {
   const [busy, setBusy] = useState(false);
   const [playError, setPlayError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     void fetch(`${API_URL}/v1/cms/pages/home`)
@@ -58,6 +74,29 @@ export function MarketingHomePage() {
       })
       .catch((err: Error) => setError(err.message));
   }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const token = await resolveApiToken(getToken);
+        if (!token) {
+          if (!cancelled) setIsAdmin(false);
+          return;
+        }
+        const me = await apiFetch<{ role?: string }>('/v1/identity/me', { token });
+        if (!cancelled) {
+          setIsAdmin(me.role === 'owner' || me.role === 'admin');
+        }
+      } catch {
+        if (!cancelled) setIsAdmin(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, getToken]);
 
   const blocks = data?.page.blocks ?? [];
   const assetMap = data?.assetMap ?? {};
@@ -430,14 +469,15 @@ export function MarketingHomePage() {
           const c = block.content as {
             brand?: string;
             blurb?: string;
-            links?: Array<{ label: string; href: string }>;
+            links?: FooterLink[];
           };
+          const links = (c.links ?? []).filter((link) => !isAdminFooterLink(link) || isAdmin);
           return (
             <footer key={block.id} className="vl-mkt-footer">
               <strong>{c.brand}</strong>
               <span>{c.blurb}</span>
               <div>
-                {(c.links ?? []).map((link) => (
+                {links.map((link) => (
                   <Link key={link.href} href={link.href}>
                     {link.label}
                   </Link>

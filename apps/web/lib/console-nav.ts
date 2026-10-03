@@ -1,10 +1,18 @@
-export type NavItem = { href: string; label: string; keywords?: string[] };
+export type NavItem = {
+  href: string;
+  label: string;
+  keywords?: string[];
+  /** Only show for org owner/admin sessions. */
+  adminOnly?: boolean;
+};
 
 export type NavGroup = {
   id: string;
   label: string;
   /** When true, group starts collapsed unless a child is active or user is searching. */
   collapsible?: boolean;
+  /** Hide entire group unless the viewer is an admin/owner. */
+  adminOnly?: boolean;
   items: NavItem[];
 };
 
@@ -57,8 +65,21 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/data', label: 'Data & residency' },
       { href: '/audit', label: 'Audit' },
       { href: '/admin', label: 'Admin' },
-      { href: '/cms', label: 'Marketing CMS', keywords: ['content', 'blocks', 'assets', 'theme'] },
       { href: '/docs', label: 'Docs' },
+    ],
+  },
+  {
+    id: 'admin-tools',
+    label: 'Admin',
+    collapsible: true,
+    adminOnly: true,
+    items: [
+      {
+        href: '/cms',
+        label: 'Marketing CMS',
+        keywords: ['content', 'blocks', 'assets', 'theme', 'admin'],
+        adminOnly: true,
+      },
     ],
   },
   {
@@ -274,14 +295,21 @@ export function groupHasActive(pathname: string, group: NavGroup): boolean {
   return group.items.some((item) => isNavItemActive(pathname, item.href) || pathname === item.href || pathname.startsWith(`${item.href}/`));
 }
 
-export function filterNav(query: string): NavGroup[] {
+export function filterNav(query: string, opts?: { isAdmin?: boolean }): NavGroup[] {
   const q = query.trim().toLowerCase();
-  if (!q) return CONSOLE_NAV;
-  return CONSOLE_NAV.map((group) => ({
+  const isAdmin = Boolean(opts?.isAdmin);
+  const base = CONSOLE_NAV.filter((group) => !group.adminOnly || isAdmin).map((group) => ({
     ...group,
-    items: group.items.filter((item) => {
-      const hay = [item.label, item.href, ...(item.keywords ?? [])].join(' ').toLowerCase();
-      return hay.includes(q);
-    }),
-  })).filter((group) => group.items.length > 0);
+    items: group.items.filter((item) => !item.adminOnly || isAdmin),
+  }));
+  if (!q) return base.filter((group) => group.items.length > 0);
+  return base
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        const hay = [item.label, item.href, ...(item.keywords ?? [])].join(' ').toLowerCase();
+        return hay.includes(q);
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
 }
