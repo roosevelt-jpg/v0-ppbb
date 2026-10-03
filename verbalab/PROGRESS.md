@@ -279,7 +279,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-247 | Policy Fabric (Phase 114) | Done | Fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. Not OPA/Cedar OS. |
 | VL-248 | AI Fabric Production Audit (Phase 115) | Done | Audit pack under `docs/ai-fabric-audit/`; ADR-0150. Volume 10 closed. Ecosystem/Marketplaces → Volume 11. |
 | VL-249 | Ecosystem Foundation (Phase 116) | Done | `/ecosystem-cloud` hub + product catalog; ADR-0151. Extends VL-090+/voice marketplace. Not payment OS; Stripe + sandbox safety from day one. |
-| VL-250 | Plugin Marketplace (Phase 117) | Not Started | Buy/sell/publish plugins; enforce Plugin Runtime sandbox + Policy gate. |
+| VL-250 | Plugin Marketplace (Phase 117) | Done | `/plugin-marketplace` publish/install/run/reviews; FabricPolicyGate + PluginPolicyGate + sandbox invoke; ADR-0152. liveCodeExecution=false. |
 | VL-251 | Model Marketplace (Phase 118) | Not Started | Buy/sell/publish models over Model Registry. |
 | VL-252 | Dataset Marketplace (Phase 119) | Not Started | Extends content-marketplace dataset kind. |
 | VL-253 | Prompt Marketplace (Phase 120) | Not Started | Extends content-marketplace prompt kind + Prompt Fabric. |
@@ -443,3 +443,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-247 Done: Policy Fabric (Phase 114) — fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. |
 | 2026-10-03 | VL-248 Done: AI Fabric Production Audit (Phase 115) — evidence pack; ADR-0150. Volume 10 closed. Ecosystem → Volume 11. |
 | 2026-10-03 | VL-249 Done: Ecosystem Foundation (Phase 116) — `/ecosystem-cloud` hub/catalog; ADR-0151. Extends VL-090+/voice marketplace; Stripe + sandbox safety; not payment-processor OS. |
+| 2026-10-03 | VL-250 Done: Plugin Marketplace (Phase 117) — publish/install/run/reviews over Plugin Runtime; FabricPolicyGate + PluginPolicyGate; ADR-0152. Not extension store OS / live code. |

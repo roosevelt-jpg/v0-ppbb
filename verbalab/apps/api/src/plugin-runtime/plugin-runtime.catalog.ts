@@ -95,9 +95,10 @@ export function pluginRuntimeCatalog() {
       {
         id: 'plugin-marketplace',
         name: 'Plugin Marketplace',
-        status: 'partial',
-        api: 'GET /v1/plugin-runtime/marketplace',
-        notes: 'Counts listings kind=plugin when present (may be 0; marketplace kinds today are glossary/prompt/dataset).',
+        status: 'shipped',
+        api: 'GET /v1/plugin-marketplace/engine',
+        notes:
+          'VL-250 dedicated Plugin Marketplace. Runtime still exposes listing counts at GET /v1/plugin-runtime/marketplace.',
       },
       {
         id: 'plugin-dependencies',

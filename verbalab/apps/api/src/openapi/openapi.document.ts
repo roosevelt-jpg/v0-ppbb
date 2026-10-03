@@ -3214,6 +3214,95 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/plugin-marketplace/engine': {
+      get: {
+        summary: 'Plugin Marketplace engine catalog',
+        operationId: 'getPluginMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Plugin marketplace capabilities, sandbox/Policy honesty, deferred monetization depth',
+          },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/products': {
+      get: {
+        summary: 'Plugin Marketplace products (alias of engine)',
+        operationId: 'listPluginMarketplaceProducts',
+        responses: {
+          '200': { description: 'Plugin marketplace catalog + honesty' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings': {
+      get: {
+        summary: 'List plugin marketplace listings',
+        operationId: 'listPluginMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Published or mine plugin listings' },
+        },
+      },
+      post: {
+        summary: 'Publish a Plugin Runtime plugin as a marketplace listing',
+        operationId: 'publishPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Listing created' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a plugin listing into Plugin Runtime (sandboxed)',
+        operationId: 'installPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Installed sandboxed plugin' },
+          '403': { description: 'Policy/sandbox deny' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace plugin (Policy-gated sandbox invoke)',
+        operationId: 'runPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox invoke result' },
+          '403': { description: 'Policy deny or not installed' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List plugin listing reviews',
+        operationId: 'listPluginMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a plugin listing review',
+        operationId: 'reviewPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/plugin-marketplace/analytics': {
+      get: {
+        summary: 'Plugin marketplace analytics',
+        operationId: 'getPluginMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/plugin-marketplace/monitoring': {
+      get: {
+        summary: 'Plugin marketplace monitoring',
+        operationId: 'getPluginMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
