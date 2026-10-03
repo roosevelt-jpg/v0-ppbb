@@ -3161,6 +3161,487 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ecosystem-cloud/products': {
+      get: {
+        summary: 'Ecosystem Cloud product catalog',
+        operationId: 'listEcosystemCloudProducts',
+        responses: {
+          '200': {
+            description:
+              'Marketplace/monetization hub catalog, honesty, Stripe safety, deferred marketplaces',
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/engine': {
+      get: {
+        summary: 'Ecosystem Cloud engine (alias of products)',
+        operationId: 'getEcosystemCloudEngine',
+        responses: {
+          '200': { description: 'Ecosystem catalog + honesty' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/routing': {
+      get: {
+        summary: 'Ecosystem Cloud marketplace routing table',
+        operationId: 'getEcosystemCloudRouting',
+        responses: {
+          '200': { description: 'Static marketplace/monetization route catalog' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/overview': {
+      get: {
+        summary: 'Ecosystem Cloud org overview',
+        operationId: 'getEcosystemCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, deferred marketplaces, real-money safety notes' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/monitoring': {
+      get: {
+        summary: 'Ecosystem Cloud foundation monitoring',
+        operationId: 'getEcosystemCloudMonitoring',
+        responses: {
+          '200': { description: 'Product status snapshot + honesty' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/engine': {
+      get: {
+        summary: 'Plugin Marketplace engine catalog',
+        operationId: 'getPluginMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Plugin marketplace capabilities, sandbox/Policy honesty, deferred monetization depth',
+          },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/products': {
+      get: {
+        summary: 'Plugin Marketplace products (alias of engine)',
+        operationId: 'listPluginMarketplaceProducts',
+        responses: {
+          '200': { description: 'Plugin marketplace catalog + honesty' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings': {
+      get: {
+        summary: 'List plugin marketplace listings',
+        operationId: 'listPluginMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Published or mine plugin listings' },
+        },
+      },
+      post: {
+        summary: 'Publish a Plugin Runtime plugin as a marketplace listing',
+        operationId: 'publishPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Listing created' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a plugin listing into Plugin Runtime (sandboxed)',
+        operationId: 'installPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Installed sandboxed plugin' },
+          '403': { description: 'Policy/sandbox deny' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace plugin (Policy-gated sandbox invoke)',
+        operationId: 'runPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox invoke result' },
+          '403': { description: 'Policy deny or not installed' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List plugin listing reviews',
+        operationId: 'listPluginMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a plugin listing review',
+        operationId: 'reviewPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/plugin-marketplace/analytics': {
+      get: {
+        summary: 'Plugin marketplace analytics',
+        operationId: 'getPluginMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/plugin-marketplace/monitoring': {
+      get: {
+        summary: 'Plugin marketplace monitoring',
+        operationId: 'getPluginMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/model-marketplace/engine': {
+      get: {
+        summary: 'Model Marketplace engine catalog',
+        operationId: 'getModelMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Model marketplace capabilities, Stripe honesty, Hugging Face / weight-hosting denials',
+          },
+        },
+      },
+    },
+    '/v1/model-marketplace/products': {
+      get: {
+        summary: 'Model Marketplace products (alias of engine)',
+        operationId: 'listModelMarketplaceProducts',
+        responses: { '200': { description: 'Model marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/model-marketplace/listings': {
+      get: {
+        summary: 'List model marketplace listings',
+        operationId: 'listModelMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine model listings' } },
+      },
+      post: {
+        summary: 'Publish a Model Registry card as a marketplace listing',
+        operationId: 'publishModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a model listing license entitlement',
+        operationId: 'installModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'License entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List model listing reviews',
+        operationId: 'listModelMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a model listing review',
+        operationId: 'reviewModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/model-marketplace/sales': {
+      get: {
+        summary: 'Model marketplace publisher sales',
+        operationId: 'listModelMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/model-marketplace/analytics': {
+      get: {
+        summary: 'Model marketplace analytics',
+        operationId: 'getModelMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/model-marketplace/monitoring': {
+      get: {
+        summary: 'Model marketplace monitoring',
+        operationId: 'getModelMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/dataset-marketplace/engine': {
+      get: {
+        summary: 'Dataset Marketplace engine catalog',
+        operationId: 'getDatasetMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Dataset marketplace capabilities, Stripe honesty, Label Studio / Dataset Cloud denials',
+          },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/products': {
+      get: {
+        summary: 'Dataset Marketplace products (alias of engine)',
+        operationId: 'listDatasetMarketplaceProducts',
+        responses: { '200': { description: 'Dataset marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings': {
+      get: {
+        summary: 'List dataset marketplace listings',
+        operationId: 'listDatasetMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine dataset listings' } },
+      },
+      post: {
+        summary: 'Publish a TM corpus or DatasetAsset as a marketplace listing',
+        operationId: 'publishDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a dataset listing (TM copy or asset entitlement)',
+        operationId: 'installDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Dataset installed / entitlement granted' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List dataset listing reviews',
+        operationId: 'listDatasetMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a dataset listing review',
+        operationId: 'reviewDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/dataset-marketplace/sales': {
+      get: {
+        summary: 'Dataset marketplace publisher sales',
+        operationId: 'listDatasetMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/analytics': {
+      get: {
+        summary: 'Dataset marketplace analytics',
+        operationId: 'getDatasetMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/dataset-marketplace/monitoring': {
+      get: {
+        summary: 'Dataset marketplace monitoring',
+        operationId: 'getDatasetMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/prompt-marketplace/engine': {
+      get: {
+        summary: 'Prompt Marketplace engine catalog',
+        operationId: 'getPromptMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Prompt marketplace capabilities, Stripe honesty, prompt-mesh / auto-prompt research denials',
+          },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/products': {
+      get: {
+        summary: 'Prompt Marketplace products (alias of engine)',
+        operationId: 'listPromptMarketplaceProducts',
+        responses: { '200': { description: 'Prompt marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings': {
+      get: {
+        summary: 'List prompt marketplace listings',
+        operationId: 'listPromptMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine prompt listings' } },
+      },
+      post: {
+        summary: 'Publish managed prompts as a marketplace listing',
+        operationId: 'publishPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/test': {
+      post: {
+        summary: 'Dry-run validate a prompt listing snapshot',
+        operationId: 'testPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Dry-run test results' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a prompt listing into the buyer workspace',
+        operationId: 'installPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Prompt versions installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List prompt listing reviews',
+        operationId: 'listPromptMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a prompt listing review',
+        operationId: 'reviewPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/prompt-marketplace/sales': {
+      get: {
+        summary: 'Prompt marketplace publisher sales',
+        operationId: 'listPromptMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/analytics': {
+      get: {
+        summary: 'Prompt marketplace analytics',
+        operationId: 'getPromptMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/prompt-marketplace/monitoring': {
+      get: {
+        summary: 'Prompt marketplace monitoring',
+        operationId: 'getPromptMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/agent-marketplace/engine': {
+      get: {
+        summary: 'Agent Marketplace engine catalog',
+        operationId: 'getAgentMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Agent marketplace capabilities, Stripe honesty, sandbox + Policy hard-gate denials',
+          },
+        },
+      },
+    },
+    '/v1/agent-marketplace/products': {
+      get: {
+        summary: 'Agent Marketplace products (alias of engine)',
+        operationId: 'listAgentMarketplaceProducts',
+        responses: { '200': { description: 'Agent marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/listings': {
+      get: {
+        summary: 'List agent marketplace listings',
+        operationId: 'listAgentMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine agent listings' } },
+      },
+      post: {
+        summary: 'Publish an Agent Runtime agent as a marketplace listing',
+        operationId: 'publishAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install an agent listing into Agent Runtime (sandboxed)',
+        operationId: 'installAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandboxed agent installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace agent (Policy-gated sandbox)',
+        operationId: 'runAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result (may be denied)' },
+          '403': { description: 'Not installed or policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List agent listing reviews',
+        operationId: 'listAgentMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert an agent listing review',
+        operationId: 'reviewAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/agent-marketplace/sales': {
+      get: {
+        summary: 'Agent marketplace publisher sales',
+        operationId: 'listAgentMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/analytics': {
+      get: {
+        summary: 'Agent marketplace analytics',
+        operationId: 'getAgentMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/agent-marketplace/monitoring': {
+      get: {
+        summary: 'Agent marketplace monitoring',
+        operationId: 'getAgentMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

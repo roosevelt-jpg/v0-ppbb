@@ -1742,6 +1742,115 @@ export class VerbaLab {
     return this.requestJson('/v1/policy-fabric/products', { method: 'GET' });
   }
 
+  async ecosystemCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ecosystem-cloud/products', { method: 'GET' });
+  }
+
+  async pluginMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/plugin-marketplace/engine', { method: 'GET' });
+  }
+
+  async modelMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/model-marketplace/engine', { method: 'GET' });
+  }
+
+  async datasetMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/dataset-marketplace/engine', { method: 'GET' });
+  }
+
+  async promptMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/prompt-marketplace/engine', { method: 'GET' });
+  }
+
+  async agentMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/agent-marketplace/engine', { method: 'GET' });
+  }
+
   async policyFabricRoute(body?: { kinds?: string[] }): Promise<{
     plan: Array<Record<string, unknown>>;
     missing: string[];

@@ -25,6 +25,12 @@ import { ReasoningFabricApplicationModule } from '../reasoning-fabric/applicatio
 import { MemoryFabricApplicationModule } from '../memory-fabric/application/memory-fabric-application.module';
 import { AgentFabricApplicationModule } from '../agent-fabric/application/agent-fabric-application.module';
 import { PolicyFabricApplicationModule } from '../policy-fabric/application/policy-fabric-application.module';
+import { EcosystemCloudApplicationModule } from '../ecosystem-cloud/application/ecosystem-cloud-application.module';
+import { PluginMarketplaceApplicationModule } from '../plugin-marketplace/application/plugin-marketplace-application.module';
+import { ModelMarketplaceApplicationModule } from '../model-marketplace/application/model-marketplace-application.module';
+import { DatasetMarketplaceApplicationModule } from '../dataset-marketplace/application/dataset-marketplace-application.module';
+import { PromptMarketplaceApplicationModule } from '../prompt-marketplace/application/prompt-marketplace-application.module';
+import { AgentMarketplaceApplicationModule } from '../agent-marketplace/application/agent-marketplace-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -103,6 +109,12 @@ import { ReasoningFabricGraphqlResolver } from './reasoning-fabric.resolver';
 import { MemoryFabricGraphqlResolver } from './memory-fabric.resolver';
 import { AgentFabricGraphqlResolver } from './agent-fabric.resolver';
 import { PolicyFabricGraphqlResolver } from './policy-fabric.resolver';
+import { EcosystemCloudGraphqlResolver } from './ecosystem-cloud.resolver';
+import { PluginMarketplaceGraphqlResolver } from './plugin-marketplace.resolver';
+import { ModelMarketplaceGraphqlResolver } from './model-marketplace.resolver';
+import { DatasetMarketplaceGraphqlResolver } from './dataset-marketplace.resolver';
+import { PromptMarketplaceGraphqlResolver } from './prompt-marketplace.resolver';
+import { AgentMarketplaceGraphqlResolver } from './agent-marketplace.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -201,6 +213,12 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     MemoryFabricApplicationModule,
     AgentFabricApplicationModule,
     PolicyFabricApplicationModule,
+    EcosystemCloudApplicationModule,
+    PluginMarketplaceApplicationModule,
+    ModelMarketplaceApplicationModule,
+    DatasetMarketplaceApplicationModule,
+    PromptMarketplaceApplicationModule,
+    AgentMarketplaceApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -287,6 +305,12 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     MemoryFabricGraphqlResolver,
     AgentFabricGraphqlResolver,
     PolicyFabricGraphqlResolver,
+    EcosystemCloudGraphqlResolver,
+    PluginMarketplaceGraphqlResolver,
+    ModelMarketplaceGraphqlResolver,
+    DatasetMarketplaceGraphqlResolver,
+    PromptMarketplaceGraphqlResolver,
+    AgentMarketplaceGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,
