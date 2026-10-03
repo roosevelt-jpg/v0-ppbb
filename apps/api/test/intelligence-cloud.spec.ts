@@ -155,6 +155,13 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(orchestration.status).toBe('partial');
     expect(orchestration.api).toContain('/v1/ai-orchestration/engine');
     expect(orchestration.console).toBe('/ai-orchestration');
+
+    const intelAnalytics = res.body.products.find(
+      (p: { id: string }) => p.id === 'intelligence-analytics',
+    );
+    expect(intelAnalytics.status).toBe('partial');
+    expect(intelAnalytics.api).toContain('/v1/intelligence-analytics/engine');
+    expect(intelAnalytics.console).toBe('/intelligence-analytics');
   });
 
   it('returns org intelligence overview with chat/embeddings usage + deferred flags', async () => {
@@ -187,6 +194,7 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.deferred.decisionEngineOs).toBe(true);
     expect(overview.deferred.orchestrationProduct).toBe(false);
     expect(overview.deferred.multiCloudAgentOs).toBe(true);
+    expect(overview.deferred.intelligenceAnalyticsProduct).toBe(false);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
     expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
     expect(overview.links.vectorCloud).toBe('/vector-cloud');
@@ -198,6 +206,7 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.links.promptIntelligence).toBe('/prompt-intelligence');
     expect(overview.links.decisionEngine).toBe('/decision-engine');
     expect(overview.links.aiOrchestration).toBe('/ai-orchestration');
+    expect(overview.links.intelligenceAnalytics).toBe('/intelligence-analytics');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);

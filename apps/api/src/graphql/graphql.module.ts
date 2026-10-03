@@ -18,6 +18,7 @@ import { RecommendationEngineModule } from '../recommendation-engine/recommendat
 import { PromptIntelligenceModule } from '../prompt-intelligence/prompt-intelligence.module';
 import { DecisionEngineModule } from '../decision-engine/decision-engine.module';
 import { AiOrchestrationModule } from '../ai-orchestration/ai-orchestration.module';
+import { IntelligenceAnalyticsModule } from '../intelligence-analytics/intelligence-analytics.module';
 import { NeuralTtsModule } from '../neural-tts/neural-tts.module';
 import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from '../emotion-voice/emotion-voice.module';
@@ -53,6 +54,7 @@ import { RecommendationEngineGraphqlResolver } from './recommendation-engine.res
 import { PromptIntelligenceGraphqlResolver } from './prompt-intelligence.resolver';
 import { DecisionEngineGraphqlResolver } from './decision-engine.resolver';
 import { AiOrchestrationGraphqlResolver } from './ai-orchestration.resolver';
+import { IntelligenceAnalyticsGraphqlResolver } from './intelligence-analytics.resolver';
 import { NeuralTtsGraphqlResolver } from './neural-tts.resolver';
 import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { EmotionVoiceGraphqlResolver } from './emotion-voice.resolver';
@@ -108,6 +110,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     PromptIntelligenceModule,
     DecisionEngineModule,
     AiOrchestrationModule,
+    IntelligenceAnalyticsModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
@@ -151,6 +154,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     PromptIntelligenceGraphqlResolver,
     DecisionEngineGraphqlResolver,
     AiOrchestrationGraphqlResolver,
+    IntelligenceAnalyticsGraphqlResolver,
     NeuralTtsGraphqlResolver,
     VoiceCloningGraphqlResolver,
     EmotionVoiceGraphqlResolver,

@@ -748,6 +748,48 @@ export class GqlAiOrchestration {
 }
 
 @ObjectType()
+export class GqlIntelligenceAnalyticsCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlIntelligenceAnalytics {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlIntelligenceAnalyticsCapability])
+  capabilities!: GqlIntelligenceAnalyticsCapability[];
+
+  @Field()
+  regeneratesSpeechAnalytics!: boolean;
+
+  @Field()
+  regeneratesVoiceAnalytics!: boolean;
+
+  @Field()
+  biDashboardOs!: boolean;
+
+  @Field()
+  aggregatesOnly!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

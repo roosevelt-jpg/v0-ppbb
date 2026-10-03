@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-190 Done — AI Orchestration)
+Last updated: 2026-10-03 (VL-191 Done — Intelligence Analytics)
 
 ---
 
@@ -220,6 +220,7 @@ Last updated: 2026-10-03 (VL-190 Done — AI Orchestration)
 | VL-188 | Prompt Intelligence (Phase 55) | Done | `/v1/prompt-intelligence/*` hub over VL-086; ADR-0099. Heuristic eval/security; not auto-prompt research lab. |
 | VL-189 | AI Decision Engine (Phase 56) | Done | `/v1/decision-engine/*` light rules helpers; ADR-0100. Not Drools/Pega BRMS; tools suggest-only. |
 | VL-190 | AI Orchestration (Phase 57) | Done | `/v1/ai-orchestration/*` e2e pipelines; ADR-0101. Not multi-cloud agent OS; extends VL-083. |
+| VL-191 | Intelligence Analytics (Phase 58) | Done | `/v1/intelligence-analytics/*` aggregates; ADR-0102. ≠ Language/Speech/Voice analytics; BI OS deferred. |
 
 ---
 
@@ -324,3 +325,4 @@ Last updated: 2026-10-03 (VL-190 Done — AI Orchestration)
 | 2026-10-03 | VL-188 Done: Prompt Intelligence (Phase 55) — hub over VL-086 versioned prompts; ADR-0099. Not auto-prompt research lab. |
 | 2026-10-03 | VL-189 Done: AI Decision Engine (Phase 56) — light rules policy/routing helpers; ADR-0100. Not Drools/Pega BRMS. |
 | 2026-10-03 | VL-190 Done: AI Orchestration (Phase 57) — load-bearing e2e pipelines over gateway/engines; ADR-0101. Not multi-cloud agent OS. |
+| 2026-10-03 | VL-191 Done: Intelligence Analytics (Phase 58) — usage/quality aggregates for Intelligence Cloud; ADR-0102. ≠ Speech/Voice analytics. |

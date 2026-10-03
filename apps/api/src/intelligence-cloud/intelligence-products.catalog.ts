@@ -122,10 +122,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'intelligence-analytics',
       name: 'Intelligence Analytics',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Usage/quality analytics for this cloud — VL-191. Distinct from Language/Speech/Voice analytics.',
+      status: 'partial',
+      api: 'GET /v1/intelligence-analytics/engine',
+      console: '/intelligence-analytics',
+      notes:
+        'Usage/quality aggregates for Intelligence Cloud (VL-191). Not Language/Speech/Voice analytics or BI OS.',
     },
     {
       id: 'ai-observability',

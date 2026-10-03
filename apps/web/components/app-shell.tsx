@@ -22,6 +22,7 @@ const links = [
   { href: '/prompt-intelligence', label: 'Prompt Intel' },
   { href: '/decision-engine', label: 'Decisions' },
   { href: '/ai-orchestration', label: 'Orchestration' },
+  { href: '/intelligence-analytics', label: 'Intel Analytics' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

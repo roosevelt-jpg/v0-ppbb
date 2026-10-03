@@ -36,6 +36,9 @@ function usage(): never {
   verbalab decide --kind <routing|policy|model_selection|...> [--query <text>]
   verbalab ai-orchestration
   verbalab ai-orchestration-run --pipeline <detect_translate|...> --text <text> [--target <lang>]
+  verbalab intelligence-analytics
+  verbalab intelligence-analytics-overview
+  verbalab intelligence-analytics-report
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -307,6 +310,39 @@ async function main() {
           text,
           target: argValue(rest, '--target'),
           source: argValue(rest, '--source'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'intelligence-analytics') {
+    console.log(JSON.stringify(await vl.intelligenceAnalyticsEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'intelligence-analytics-overview') {
+    console.log(
+      JSON.stringify(
+        await vl.intelligenceAnalyticsOverview({
+          from: argValue(rest, '--from'),
+          to: argValue(rest, '--to'),
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'intelligence-analytics-report') {
+    console.log(
+      JSON.stringify(
+        await vl.intelligenceAnalyticsReport({
+          from: argValue(rest, '--from'),
+          to: argValue(rest, '--to'),
         }),
         null,
         2,

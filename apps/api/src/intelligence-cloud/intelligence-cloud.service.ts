@@ -71,7 +71,7 @@ export class IntelligenceCloudService {
         decisionEngineOs: true,
         orchestrationProduct: false,
         multiCloudAgentOs: true,
-        intelligenceAnalyticsProduct: true,
+        intelligenceAnalyticsProduct: false,
         agentOs: true,
       },
       links: {
@@ -87,6 +87,7 @@ export class IntelligenceCloudService {
         promptIntelligence: '/prompt-intelligence',
         decisionEngine: '/decision-engine',
         aiOrchestration: '/ai-orchestration',
+        intelligenceAnalytics: '/intelligence-analytics',
         prompts: '/prompts',
         knowledge: '/knowledge',
         chat: '/chat',

@@ -20,7 +20,7 @@
 | Prompt Intelligence | **Partial** — **VL-188** `/prompt-intelligence` over VL-086; not auto-prompt research lab |
 | AI Decision Engine | **Partial** — **VL-189** `/decision-engine` light rules; not Drools/Pega BRMS |
 | AI Orchestration | **Partial** — **VL-190** `/ai-orchestration` e2e pipelines; not multi-cloud agent OS |
-| Intelligence Analytics | **Deferred** — VL-191 |
+| Intelligence Analytics | **Partial** — **VL-191** `/intelligence-analytics` aggregates; ≠ Language/Speech/Voice analytics |
 | Production Audit | Phase 59 (VL-192) |
 | GraphQL / CQRS | Bounded Intelligence Cloud catalog slice |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |

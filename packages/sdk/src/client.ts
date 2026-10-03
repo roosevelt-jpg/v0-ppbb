@@ -1488,6 +1488,58 @@ export class VerbaLab {
     });
   }
 
+  async intelligenceAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      regeneratesLanguageAnalytics: boolean;
+      regeneratesSpeechAnalytics: boolean;
+      regeneratesVoiceAnalytics: boolean;
+      biDashboardOs: boolean;
+      aggregatesOnly: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/intelligence-analytics/engine', { method: 'GET' });
+  }
+
+  async intelligenceAnalyticsOverview(params?: {
+    from?: string;
+    to?: string;
+  }): Promise<{
+    periodStart: string;
+    periodEnd: string;
+    estimatedCostUsd: number;
+    note: string;
+  }> {
+    const qs = new URLSearchParams();
+    if (params?.from) qs.set('from', params.from);
+    if (params?.to) qs.set('to', params.to);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    return this.requestJson(`/v1/intelligence-analytics/overview${suffix}`, {
+      method: 'GET',
+    });
+  }
+
+  async intelligenceAnalyticsReport(params?: {
+    from?: string;
+    to?: string;
+  }): Promise<{ generatedAt: string; note: string }> {
+    const qs = new URLSearchParams();
+    if (params?.from) qs.set('from', params.from);
+    if (params?.to) qs.set('to', params.to);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    return this.requestJson(`/v1/intelligence-analytics/report${suffix}`, {
+      method: 'GET',
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

@@ -3138,6 +3138,87 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/intelligence-analytics/engine': {
+      get: {
+        summary: 'Intelligence Analytics catalog',
+        operationId: 'getIntelligenceAnalyticsEngine',
+        responses: {
+          '200': { description: 'Capabilities and Language/Speech/Voice separation honesty' },
+        },
+      },
+    },
+    '/v1/intelligence-analytics/overview': {
+      get: {
+        summary: 'Intelligence Analytics overview',
+        operationId: 'getIntelligenceAnalyticsOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Usage/surfaces/cost/quality snapshot' } },
+      },
+    },
+    '/v1/intelligence-analytics/usage': {
+      get: {
+        summary: 'Intelligence chat/embeddings usage',
+        operationId: 'getIntelligenceAnalyticsUsage',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Chat and embeddings usage_events aggregates' } },
+      },
+    },
+    '/v1/intelligence-analytics/surfaces': {
+      get: {
+        summary: 'Intelligence Cloud surface activity',
+        operationId: 'getIntelligenceAnalyticsSurfaces',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Per-surface audit counts' } },
+      },
+    },
+    '/v1/intelligence-analytics/latency': {
+      get: {
+        summary: 'Intelligence latency proxies',
+        operationId: 'getIntelligenceAnalyticsLatency',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'latencyMs from audits when present' } },
+      },
+    },
+    '/v1/intelligence-analytics/quality': {
+      get: {
+        summary: 'Intelligence quality/confidence proxies',
+        operationId: 'getIntelligenceAnalyticsQuality',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Prompt eval scores and decision confidence' } },
+      },
+    },
+    '/v1/intelligence-analytics/routing': {
+      get: {
+        summary: 'Model/routing decision aggregates',
+        operationId: 'getIntelligenceAnalyticsRouting',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decision Engine kind/decision counts' } },
+      },
+    },
+    '/v1/intelligence-analytics/costs': {
+      get: {
+        summary: 'Estimated Intelligence Cloud costs',
+        operationId: 'getIntelligenceAnalyticsCosts',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Estimated chat/embeddings USD' } },
+      },
+    },
+    '/v1/intelligence-analytics/report': {
+      get: {
+        summary: 'Bundled Intelligence Analytics report',
+        operationId: 'getIntelligenceAnalyticsReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Full JSON report' } },
+      },
+    },
+    '/v1/intelligence-analytics/monitoring': {
+      get: {
+        summary: 'Intelligence Analytics monitoring snapshot',
+        operationId: 'getIntelligenceAnalyticsMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

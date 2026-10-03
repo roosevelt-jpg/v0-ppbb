@@ -21,4 +21,4 @@ ROADMAP VL-190: load-bearing orchestration that coordinates gateway/engines; exe
 ## Consequences
 
 - Intelligence Cloud marks orchestration `partial` with hub links.  
-- Intelligence Analytics (VL-191) is next — aggregates for this cloud, not regenerating Language/Speech/Voice analytics.
+- Intelligence Analytics (VL-191) aggregates for this cloud (ADR-0102), not regenerating Language/Speech/Voice analytics.

@@ -62,6 +62,7 @@ import { RecommendationEngineModule } from './recommendation-engine/recommendati
 import { PromptIntelligenceModule } from './prompt-intelligence/prompt-intelligence.module';
 import { DecisionEngineModule } from './decision-engine/decision-engine.module';
 import { AiOrchestrationModule } from './ai-orchestration/ai-orchestration.module';
+import { IntelligenceAnalyticsModule } from './intelligence-analytics/intelligence-analytics.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -114,6 +115,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     PromptIntelligenceModule,
     DecisionEngineModule,
     AiOrchestrationModule,
+    IntelligenceAnalyticsModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
