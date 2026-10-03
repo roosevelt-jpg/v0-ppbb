@@ -129,8 +129,11 @@ export VERBALAB_API_URL=${API_URL}`}</pre>
             <Link href="/playground" style={secondaryLink}>
               Playground
             </Link>
-            <a href={`${API_URL}/v1/openapi.json`} style={secondaryLink}>
-              OpenAPI
+            <Link href="/docs/openapi" style={secondaryLink}>
+              OpenAPI explorer
+            </Link>
+            <a href={`${API_URL}/v1/openapi.json`} style={secondaryLink} download>
+              Raw openapi.json
             </a>
             <Link href="/usage" style={secondaryLink}>
               Usage

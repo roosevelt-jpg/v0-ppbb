@@ -33,8 +33,20 @@ export default function DocsPage() {
           <Link href="/coverage" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
             Coverage
           </Link>
-          <a href={specUrl} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}>
-            openapi.json
+          <Link
+            href="/docs/openapi"
+            className="vl-btn vl-btn-secondary"
+            style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}
+          >
+            OpenAPI explorer
+          </Link>
+          <a
+            href={specUrl}
+            className="vl-btn vl-btn-secondary"
+            style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}
+            download
+          >
+            Raw JSON
           </a>
         </div>
       </div>
@@ -43,10 +55,27 @@ export default function DocsPage() {
         API documentation
       </h1>
       <p style={{ color: 'var(--muted)', lineHeight: 1.65, maxWidth: '38rem' }}>
-        Machine-readable OpenAPI for the VerbaLab API (translate, media, jobs, knowledge, and more). Authenticate
-        product calls with <code className="vl-code">Authorization: Bearer vl_live_...</code> or soft-sandbox{' '}
+        Machine-readable OpenAPI for the VerbaLab API (translate, media, jobs, knowledge, and more). Browse every field
+        in the <Link href="/docs/openapi">OpenAPI explorer</Link> (copy paths/values, show/hide). Authenticate product
+        calls with <code className="vl-code">Authorization: Bearer vl_live_...</code> or soft-sandbox{' '}
         <code className="vl-code">vl_test_...</code>. Hub: <Link href="/developers">/developers</Link>.
       </p>
+
+      <div className="vl-panel" style={{ marginTop: '1.25rem', padding: '1.2rem 1.25rem', background: 'var(--bg-soft)', border: 'none' }}>
+        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>Developer OpenAPI explorer</h2>
+        <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Structured JSON for every endpoint — expand nodes, copy field paths or values, and hide values when sharing
+          your screen. Raw download stays available for codegen and CI.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+          <Link href="/docs/openapi" className="vl-btn vl-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            Open explorer
+          </Link>
+          <a href={specUrl} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }} download>
+            Download openapi.json
+          </a>
+        </div>
+      </div>
 
       <div className="vl-panel" style={{ marginTop: '1.5rem', padding: '1.35rem', background: 'var(--bg-soft)', border: 'none' }}>
         <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>POST /v1/translate</h2>
@@ -147,7 +176,10 @@ export default function DocsPage() {
         <Endpoint title="POST /v1/jobs" body="Enqueue batch_translate, document_translate, or workflow (API key)." />
         <Endpoint title="GET /v1/jobs/{id}" body="Poll job status and result." />
         <Endpoint title="GET /v1/audit-events" body="Org audit trail (Clerk session; owners/admins)." />
-        <Endpoint title="GET /v1/openapi.json" body="This OpenAPI 3.1 document." />
+        <Endpoint
+          title="GET /v1/openapi.json"
+          body="OpenAPI 3.1 document. Browse it in /docs/openapi (copy + show/hide), or download the raw JSON."
+        />
         <Endpoint title="POST /v1/api-keys" body="Create a key (Clerk session). Secret returned once." />
         <Endpoint title="GET /v1/usage/summary" body="Month-to-date characters and request counts." />
       </div>

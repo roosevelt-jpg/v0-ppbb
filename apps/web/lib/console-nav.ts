@@ -116,6 +116,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/audit', label: 'Audit' },
       { href: '/admin', label: 'Admin' },
       { href: '/docs', label: 'Docs' },
+      { href: '/docs/openapi', label: 'OpenAPI', keywords: ['swagger', 'spec', 'json explorer'] },
     ],
   },
   {
