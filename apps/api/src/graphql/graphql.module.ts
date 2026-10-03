@@ -15,6 +15,7 @@ import { FoundationModelCloudApplicationModule } from '../foundation-model-cloud
 import { ModelTrainingPlatformApplicationModule } from '../model-training-platform/application/model-training-platform-application.module';
 import { ModelEvaluationPlatformApplicationModule } from '../model-evaluation-platform/application/model-evaluation-platform-application.module';
 import { ModelRegistryApplicationModule } from '../model-registry/application/model-registry-application.module';
+import { AtlasApplicationModule } from '../atlas/application/atlas-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -83,6 +84,7 @@ import { FoundationModelCloudGraphqlResolver } from './foundation-model-cloud.re
 import { ModelTrainingPlatformGraphqlResolver } from './model-training-platform.resolver';
 import { ModelEvaluationPlatformGraphqlResolver } from './model-evaluation-platform.resolver';
 import { ModelRegistryGraphqlResolver } from './model-registry.resolver';
+import { AtlasGraphqlResolver } from './atlas.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -171,6 +173,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ModelTrainingPlatformApplicationModule,
     ModelEvaluationPlatformApplicationModule,
     ModelRegistryApplicationModule,
+    AtlasApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -247,6 +250,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ModelTrainingPlatformGraphqlResolver,
     ModelEvaluationPlatformGraphqlResolver,
     ModelRegistryGraphqlResolver,
+    AtlasGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

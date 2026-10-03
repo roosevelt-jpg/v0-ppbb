@@ -167,7 +167,7 @@ describe('Foundation Model Cloud Production Audit (VL-238)', () => {
     expect(byId['model-training-platform']).toBe('partial');
     expect(byId['model-evaluation-platform']).toBe('partial');
     expect(byId['model-registry']).toBe('partial');
-    expect(byId.atlas).toBe('deferred');
+    expect(byId.atlas).toBe('partial');
   });
 
   it('rejects unauthenticated sensitive FMC routes', async () => {

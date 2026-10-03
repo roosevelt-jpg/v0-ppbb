@@ -1195,6 +1195,22 @@ export class VerbaLab {
     return this.requestJson('/v1/model-registry/engine', { method: 'GET' });
   }
 
+  async atlasEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/atlas/engine', { method: 'GET' });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

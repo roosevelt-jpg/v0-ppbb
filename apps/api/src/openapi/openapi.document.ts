@@ -3064,6 +3064,50 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/atlas/engine': {
+      get: {
+        summary: 'Atlas family scaffold engine',
+        operationId: 'getAtlasEngine',
+        responses: {
+          '200': {
+            description:
+              'Atlas capability map + honesty (scaffold only — no trained weights)',
+          },
+        },
+      },
+    },
+    '/v1/atlas/capabilities': {
+      get: {
+        summary: 'Atlas capabilities',
+        operationId: 'listAtlasCapabilities',
+        responses: {
+          '200': { description: 'Reasoning/planning handoffs; specialists deferred' },
+        },
+      },
+    },
+    '/v1/atlas/overview': {
+      get: {
+        summary: 'Atlas org overview',
+        operationId: 'getAtlasOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, deferred specialists, links' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/atlas/monitoring': {
+      get: {
+        summary: 'Atlas scaffold monitoring',
+        operationId: 'getAtlasMonitoring',
+        responses: {
+          '200': { description: 'Capability status snapshot + honesty' },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

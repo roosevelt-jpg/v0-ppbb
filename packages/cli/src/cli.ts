@@ -23,6 +23,7 @@ function usage(): never {
   verbalab model-training-platform-engine
   verbalab model-evaluation-platform-engine
   verbalab model-registry-engine
+  verbalab atlas-engine
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -213,6 +214,11 @@ async function main() {
 
   if (command === 'model-registry-engine') {
     console.log(JSON.stringify(await vl.modelRegistryEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'atlas-engine') {
+    console.log(JSON.stringify(await vl.atlasEngine(), null, 2));
     return;
   }
 

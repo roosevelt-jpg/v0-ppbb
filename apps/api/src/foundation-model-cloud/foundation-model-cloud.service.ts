@@ -54,7 +54,7 @@ export class FoundationModelCloudService {
           'Named model products are deferred scaffolds. This hub does not claim trained competitive weights or OpenAI replacement.',
       },
       deferred: {
-        atlas: true,
+        atlas: false,
         baobab: true,
         echo: true,
         voice: true,
@@ -76,6 +76,7 @@ export class FoundationModelCloudService {
         modelTrainingPlatform: '/model-training-platform',
         modelEvaluationPlatform: '/model-evaluation-platform',
         modelRegistry: '/model-registry',
+        atlas: '/atlas',
         inferenceCloud: '/inference-cloud',
         aiKernel: '/ai-kernel',
         modelServing: '/model-serving',

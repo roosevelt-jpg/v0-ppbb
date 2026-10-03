@@ -14,7 +14,8 @@ ADR-0041 deferred the *training program* (VL-112). VL-224+ ships an **honest pla
 | Library ask | VerbaLab reality |
 | --- | --- |
 | Foundation Model Cloud Foundation | **VL-224** — `/foundation-model-cloud` + product catalog / overview |
-| Atlas … Translate (Phases 92–101) | **Deferred** scaffolds in catalog — no trained weights |
+| Atlas (Phase 92) | **Partial** — VL-225 ([`ATLAS.md`](./ATLAS.md)); scaffold only |
+| Baobab … Translate (Phases 93–101) | **Deferred** scaffolds in catalog — no trained weights |
 | Model Training Platform (Phase 102) | **Partial** — VL-235 ([`MODEL_TRAINING_PLATFORM.md`](./MODEL_TRAINING_PLATFORM.md)); over VL-111 |
 | Model Evaluation Platform (Phase 103) | **Partial** — VL-236 ([`MODEL_EVALUATION_PLATFORM.md`](./MODEL_EVALUATION_PLATFORM.md)); over VL-100 |
 | Model Registry (Phase 104) | **Partial** — VL-237 ([`MODEL_REGISTRY.md`](./MODEL_REGISTRY.md)); over VL-110 |

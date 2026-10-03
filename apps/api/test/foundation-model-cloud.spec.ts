@@ -152,8 +152,8 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     expect(hub.console).toBe('/foundation-model-cloud');
 
     const atlas = res.body.products.find((p: { id: string }) => p.id === 'atlas');
-    expect(atlas.status).toBe('deferred');
-    expect(atlas.api).toBeNull();
+    expect(atlas.status).toBe('partial');
+    expect(atlas.console).toBe('/atlas');
 
     const training = res.body.products.find(
       (p: { id: string }) => p.id === 'model-training-platform',
@@ -182,7 +182,7 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
       role: 'owner',
     });
     expect(overview.usage.chat).toBeDefined();
-    expect(overview.deferred.atlas).toBe(true);
+    expect(overview.deferred.atlas).toBe(false);
     expect(overview.deferred.baobab).toBe(true);
     expect(overview.deferred.modelTrainingPlatform).toBe(false);
     expect(overview.deferred.modelEvaluationPlatform).toBe(false);

@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-238 Done — Foundation Model Cloud Production Audit)
+Last updated: 2026-10-03 (VL-225 Done — Atlas scaffold)
 
 ---
 
@@ -254,7 +254,7 @@ Last updated: 2026-10-03 (VL-238 Done — Foundation Model Cloud Production Audi
 | VL-222 | Policy Runtime (Phase 89) | Done | `/policy-runtime` hard-gate into Agent/Workflow/Plugin; ADR-0133. |
 | VL-223 | Kernel Production Audit (Phase 90) | Done | Audit pack under `docs/ai-kernel-audit/`; ADR-0134. |
 | VL-224 | Foundation Model Cloud Foundation (Phase 91) | Done | `/foundation-model-cloud` hub + catalog; ADR-0135. Scaffolds only — no trained competitive weights. |
-| VL-225 | Atlas (Phase 92) | Not Started | Deferred scaffold — not trained weights. |
+| VL-225 | Atlas (Phase 92) | Done | `/atlas` family scaffold; ADR-0140. Capability map + MLOps handoffs — not trained Atlas weights. |
 | VL-226 | Baobab (Phase 93) | Not Started | Deferred scaffold. |
 | VL-227 | Echo (Phase 94) | Not Started | Deferred scaffold. |
 | VL-228 | Voice FM (Phase 95) | Not Started | Deferred scaffold. |
@@ -410,3 +410,4 @@ Last updated: 2026-10-03 (VL-238 Done — Foundation Model Cloud Production Audi
 | 2026-10-03 | VL-236 Done: Model Evaluation Platform (Phase 103) — VL-100 handoff + sandbox suites/leaderboard/reports; ADR-0137. No MMLU OS / SOTA claims. |
 | 2026-10-03 | VL-237 Done: Model Registry hub (Phase 104) — cards/versions/approvals/canary plans over VL-110; ADR-0138. Not MLflow/mesh OS. |
 | 2026-10-03 | VL-238 Done: Foundation Model Cloud Production Audit (Phase 105) — evidence pack; ADR-0139. Volume 9 MLOps track closed. AI Fabric deferred to Volume 10. |
+| 2026-10-03 | VL-225 Done: Atlas scaffold (Phase 92) — capability catalog + Gateway/MLOps handoffs; ADR-0140. Not trained competitive weights. |

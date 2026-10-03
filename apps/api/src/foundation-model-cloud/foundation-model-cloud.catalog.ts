@@ -30,11 +30,12 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
     {
       id: 'atlas',
       name: 'VerbaLab Atlas',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/atlas/engine',
+      console: '/atlas',
       modality: 'multilingual_reasoning',
-      notes: 'Large multilingual reasoning family scaffold (Phase 92 / VL-225). Platform only until data/compute exist.',
+      notes:
+        'Large multilingual reasoning family scaffold (Phase 92 / VL-225). Interface + MLOps handoffs — not trained Atlas weights.',
     },
     {
       id: 'baobab',
