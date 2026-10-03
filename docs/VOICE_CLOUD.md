@@ -1,6 +1,6 @@
 # VerbaLab Voice Cloud
 
-**Status:** Foundation shipped (VL-170 / library Phase 27)  
+**Status:** Volume complete through Production Audit (VL-170–179)  
 **Rule:** Parent hub for voice synthesis products. Extend existing audio / voice-clone / studio modules. Do not regenerate Speech Cloud, Language Cloud, Identity, or AI Gateway. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080).
 
 ---
@@ -22,7 +22,7 @@
 | Voice Profiles | **Partial** — speaker profiles (VL-152) |
 | Voice Marketplace | **Partial** — **VL-177** `/voice-marketplace` (≠ localization `/marketplace`) |
 | Voice Analytics | **Partial** — **VL-178** `/voice-analytics` (≠ Speech Analytics) |
-| Production Audit | Phase 36 (VL-179) |
+| Production Audit | **VL-179** — evidence pack in [`voice-cloud-audit/`](./voice-cloud-audit/) |
 | GraphQL / CQRS | Bounded Voice Cloud slice (products query + catalog port) |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
 

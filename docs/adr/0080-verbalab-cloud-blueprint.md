@@ -32,16 +32,16 @@ Every VerbaLab product cloud **shall** organize work and docs against these **12
 | Layer | Language Cloud | Speech Cloud | Voice Cloud |
 | --- | --- | --- | --- |
 | Foundation | VL-130 `/language` | VL-150 `/speech` | VL-170 `/voice-cloud` |
-| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS *(scheduled)*; today VL-042/121 |
+| Core Engine | VL-140 Translate | VL-151 Recognition | VL-171 Neural TTS (+ VL-042/121) |
 | AI Models | Google/OpenAI MT (+ optional LLM) | Whisper STT, OpenAI/own TTS, ElevenLabs clones | OpenAI/own TTS, ElevenLabs clones |
-| Intelligence | Dialect/Accent/Grammar/Style/LI/TM | Speaker/Accent/Emotion/Audio/Pronunciation/Wake/Call | Emotion TTS / biometrics / enhance *(later phases)* |
-| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/voice-cloud*` + GraphQL |
-| SDK / CLI | `@verbalab/sdk` / CLI | same packages, speech methods | same packages, `voiceProducts` |
-| Dashboard | `/language`, product consoles | `/speech`, product consoles | `/voice-cloud`, `/audio` |
-| Analytics | VL-146 `/v1/analytics` | VL-159 `/v1/speech-analytics` | Phase 35 scheduled |
+| Intelligence | Dialect/Accent/Grammar/Style/LI/TM | Speaker/Accent/Emotion/Audio/Pronunciation/Wake/Call | Emotion TTS / studio / enhance / biometrics / marketplace |
+| Enterprise APIs | `/v1/*` + GraphQL | `/v1/speech*` + GraphQL | `/v1/tts*` `/v1/voice-*` + GraphQL |
+| SDK / CLI | `@verbalab/sdk` / CLI | same packages, speech methods | same packages, voice methods |
+| Dashboard | `/language`, product consoles | `/speech`, product consoles | `/voice-cloud`, product consoles |
+| Analytics | VL-146 `/v1/analytics` | VL-159 `/v1/speech-analytics` | VL-178 `/v1/voice-analytics` |
 | Billing | shared STT/TTS/translate metering | shared STT/TTS metering | shared TTS metering |
 | Security / Monitoring | shared | shared | shared + clone consent/watermark |
-| Production Audit | VL-147 | VL-160 | Phase 36 scheduled |
+| Production Audit | VL-147 | VL-160 | VL-179 |
 
 ### Rules
 
