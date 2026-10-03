@@ -147,7 +147,9 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(cache.console).toBe('/intelligent-cache');
 
     const cost = res.body.products.find((p: { id: string }) => p.id === 'cost-optimization');
-    expect(cost.status).toBe('deferred');
+    expect(cost.status).toBe('partial');
+    expect(cost.api).toContain('/v1/cost-optimization/engine');
+    expect(cost.console).toBe('/cost-optimization');
     expect(cost.notes).toMatch(/enforce/i);
   });
 
@@ -176,7 +178,8 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(overview.links.batchRuntime).toBe('/batch-runtime');
     expect(overview.deferred.intelligentCache).toBe(false);
     expect(overview.links.intelligentCache).toBe('/intelligent-cache');
-    expect(overview.deferred.costOptimization).toBe(true);
+    expect(overview.deferred.costOptimization).toBe(false);
+    expect(overview.links.costOptimization).toBe('/cost-optimization');
     expect(overview.deferred.gpuHyperscalerOs).toBe(true);
     expect(overview.deferred.regeneratesAiGateway).toBe(false);
     expect(overview.spendSafety.hardSpendCeilingsRequired).toBe(true);

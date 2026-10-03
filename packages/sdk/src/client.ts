@@ -1415,6 +1415,52 @@ export class VerbaLab {
     });
   }
 
+  async costOptimizationEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      finOpsOs: boolean;
+      cloudSpotApis: boolean;
+      reservedInstanceMarketplace: boolean;
+      openEndedAutoscale: boolean;
+      enforcesSpendCaps: boolean;
+      reportOnly: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/cost-optimization/engine', { method: 'GET' });
+  }
+
+  async costOptimizationRecord(input: {
+    category: string;
+    amountUsd: number;
+    feature?: string;
+    providerId?: string;
+    label?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/cost-optimization/record', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async costOptimizationOptimize(input: {
+    feature?: string;
+    tokensPer1k?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/cost-optimization/optimize', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

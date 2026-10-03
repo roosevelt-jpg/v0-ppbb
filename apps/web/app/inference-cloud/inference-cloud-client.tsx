@@ -127,6 +127,9 @@ export function InferenceCloudClient() {
               <Link href={data.links.intelligentCache ?? '/intelligent-cache'} style={secondary}>
                 Cache
               </Link>
+              <Link href={data.links.costOptimization ?? '/cost-optimization'} style={secondary}>
+                Cost
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

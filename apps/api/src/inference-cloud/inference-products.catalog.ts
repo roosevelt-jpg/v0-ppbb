@@ -78,11 +78,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'cost-optimization',
       name: 'Cost Optimization Engine',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/cost-optimization/engine',
+      console: '/cost-optimization',
       notes:
-        'Cost-aware routing/scaling (Phase 78 / VL-211). Must enforce spend limits, not only report after the fact.',
+        'Hard daily/monthly spend caps + cost-preferring optimize (VL-211). Not FinOps/Spot OS; enforces, not report-only.',
     },
     {
       id: 'ai-runtime-analytics',

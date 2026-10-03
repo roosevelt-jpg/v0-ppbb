@@ -230,7 +230,7 @@ export function aiRouterCatalog() {
   return {
     product: 'VerbaLab AI Router',
     note:
-      'AI Router (VL-207). Dry-run model/provider/inference selection over AI Gateway adapters with latency/cost/balanced strategies, fallbacks, retries, regional preference, and light load-balancing weights. Not a service mesh, multi-cloud router OS, or Gateway regenerate. Caching deferred to Intelligent Cache (VL-210); full spend caps to Cost Optimization (VL-211).',
+      'AI Router (VL-207). Dry-run model/provider/inference selection over AI Gateway adapters with latency/cost/balanced strategies, fallbacks, retries, regional preference, and light load-balancing weights. Not a service mesh, multi-cloud router OS, or Gateway regenerate. Caching via Intelligent Cache (VL-210); spend caps enforced by Cost Optimization (VL-211) on resolve.',
     capabilities: [
       {
         id: 'model-selection',
@@ -264,8 +264,8 @@ export function aiRouterCatalog() {
         id: 'cost-optimization',
         name: 'Cost Optimization',
         status: 'partial',
-        api: 'POST /v1/ai-router/resolve',
-        notes: 'optimize=cost sorts by estimated USD — full enforce caps are VL-211.',
+        api: 'GET /v1/cost-optimization/engine',
+        notes: 'optimize=cost sorts by estimated USD; hard daily/monthly enforce via VL-211 on resolve.',
       },
       {
         id: 'regional-routing',

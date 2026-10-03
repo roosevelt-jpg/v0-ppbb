@@ -772,6 +772,75 @@ export class GqlIntelligentCacheEngine {
 }
 
 @ObjectType()
+export class GqlCostOptimizationCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlCostOptimizationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlCostOptimizationCapability])
+  capabilities!: GqlCostOptimizationCapability[];
+
+  @Field()
+  finOpsOs!: boolean;
+
+  @Field()
+  cloudSpotApis!: boolean;
+
+  @Field()
+  reservedInstanceMarketplace!: boolean;
+
+  @Field()
+  openEndedAutoscale!: boolean;
+
+  @Field()
+  regeneratesAiGateway!: boolean;
+
+  @Field()
+  enforcesSpendCaps!: boolean;
+
+  @Field()
+  reportOnly!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  extendsGpuPlatform!: boolean;
+
+  @Field()
+  extendsAiRouter!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  defaultDailyCapUsd!: number;
+
+  @Field()
+  defaultMonthlyCapUsd!: number;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

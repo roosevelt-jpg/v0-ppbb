@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ApiException } from '../common/errors/api-exception';
+import { CostOptimizationService } from '../cost-optimization/cost-optimization.service';
 import {
   ROUTER_FEATURES,
   STREAMING_FEATURES,
@@ -27,6 +28,7 @@ export class AiRouterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly cost: CostOptimizationService,
   ) {}
 
   engine() {
@@ -36,9 +38,10 @@ export class AiRouterService {
       defaults: defaultRouterPolicy(),
       spendSafety: {
         hardSpendCeilingsRequired: true,
-        enforcesSpendCaps: false,
+        enforcesSpendCaps: true,
+        costOptimizationApi: 'GET /v1/cost-optimization/engine',
         note:
-          'AI Router may prefer cheaper candidates (optimize=cost) but does not enforce spend caps. Cost Optimization (VL-211) must enforce limits. GPU ceilings remain on GPU Platform (VL-205).',
+          'Resolve gates via Cost Optimization (VL-211) hard daily/monthly caps (402 when over). Router honesty.enforcesSpendCaps remains false (ledger lives in Cost Opt). GPU ceilings remain on GPU Platform (VL-205).',
       },
     };
   }
@@ -273,6 +276,15 @@ export class AiRouterService {
       ...c,
     }));
 
+    // Hard spend gate via Cost Optimization (VL-211) — refuse when already over caps.
+    const spendGate = await this.cost.assertWithinCaps({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      userId: input.userId,
+      ip: input.ip,
+      additionalUsd: selected.estimatedCostPer1kUsd,
+    });
+
     const decision = {
       feature,
       gatewayApi: route.gatewayApi,
@@ -303,6 +315,12 @@ export class AiRouterService {
         note: 'Opt-in via Intelligent Cache (VL-210) — resolve does not auto-cache.',
         api: 'GET /v1/intelligent-cache/engine',
       },
+      spendGate: {
+        allowed: spendGate.allowed,
+        enforce: spendGate.enforce,
+        api: 'GET /v1/cost-optimization/engine',
+        note: 'Hard caps enforced by Cost Optimization (VL-211).',
+      },
       loadBalancing: {
         strategy: 'weighted_static',
         note: 'Weights from catalog + Model Serving trafficPercent — not live L7 LB.',
@@ -314,7 +332,7 @@ export class AiRouterService {
       },
       dryRun: input.dryRun !== false,
       honesty: aiRouterCatalog().honesty,
-      note: 'Dry-run route plan — does not invoke the provider. Call Gateway APIs to execute.',
+      note: 'Dry-run route plan — does not invoke the provider. Call Gateway APIs to execute. Spend caps enforced via VL-211.',
     };
 
     const row = await this.prisma.aiRouterDecision.create({

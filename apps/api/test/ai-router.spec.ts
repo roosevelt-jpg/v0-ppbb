@@ -87,6 +87,7 @@ describe('AI Router (VL-207)', () => {
     expect(res.body.honesty.extendsAiGateway).toBe(true);
     expect(res.body.honesty.dryRunResolveOnly).toBe(true);
     expect(res.body.honesty.enforcesSpendCaps).toBe(false);
+    expect(res.body.spendSafety.enforcesSpendCaps).toBe(true);
     expect(res.body.honesty.primaryRegion).toBe('af-south-1');
     expect(res.body.mode).toBe('sandbox');
     expect(res.body.capabilities.some((c: { id: string }) => c.id === 'caching')).toBe(true);

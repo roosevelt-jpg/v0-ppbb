@@ -93,6 +93,8 @@ model Organization {
   streamingSessions            StreamingSession[]
   batchRuns                    BatchRun[]
   cacheEntries                 CacheEntry[]
+  costBudgets                  CostBudget[]
+  costSpendEvents              CostSpendEvent[]
 
   @@map("organizations")
 }
@@ -178,6 +180,8 @@ model Workspace {
   streamingSessions      StreamingSession[]
   batchRuns              BatchRun[]
   cacheEntries           CacheEntry[]
+  costBudgets            CostBudget[]
+  costSpendEvents        CostSpendEvent[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1579,6 +1583,50 @@ model CacheEntry {
   @@index([organizationId, workspaceId, namespace])
   @@index([expiresAt])
   @@map("cache_entries")
+}
+
+/// Cost Optimization budget (VL-211). Hard daily/monthly spend caps — not report-only FinOps OS.
+model CostBudget {
+  id                   String   @id @default(cuid())
+  organizationId       String   @map("organization_id")
+  workspaceId          String   @map("workspace_id")
+  dailyCapUsd          Float    @map("daily_cap_usd")
+  monthlyCapUsd        Float    @map("monthly_cap_usd")
+  enforce              Boolean  @default(true)
+  preferSpot           Boolean  @default(true) @map("prefer_spot")
+  reservedCapacityUnits Int     @default(0) @map("reserved_capacity_units")
+  optimizeRouting      Boolean  @default(true) @map("optimize_routing")
+  metadata             Json     @default("{}")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, workspaceId])
+  @@map("cost_budgets")
+}
+
+/// Cost Optimization spend ledger event (VL-211). Sandbox recorded spend for enforcement.
+model CostSpendEvent {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  /// provider | gpu | router | batch | cache | other
+  category       String
+  amountUsd      Float    @map("amount_usd")
+  feature        String   @default("")
+  providerId     String   @default("") @map("provider_id")
+  label          String   @default("")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, createdAt])
+  @@index([workspaceId, category])
+  @@map("cost_spend_events")
 }
 
 

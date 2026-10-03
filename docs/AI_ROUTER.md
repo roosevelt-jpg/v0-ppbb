@@ -2,7 +2,7 @@
 
 **Status:** Partial (VL-207 / library Phase 74)  
 **Parent:** [Inference Cloud](./INFERENCE_CLOUD.md)  
-**Rule:** Dry-run **model / provider / inference** selection over **AI Gateway** adapters. Authed policies and decision logs are org/workspace-scoped. Extends Gateway routing + Model Serving canary weights. Does **not** invent a service mesh, multi-cloud router OS, or regenerate the Gateway. Does **not** enforce spend caps (that is [Cost Optimization](./INFERENCE_CLOUD.md) / VL-211).
+**Rule:** Dry-run **model / provider / inference** selection over **AI Gateway** adapters. Authed policies and decision logs are org/workspace-scoped. Extends Gateway routing + Model Serving canary weights. Does **not** invent a service mesh, multi-cloud router OS, or regenerate the Gateway. Spend caps are enforced via [Cost Optimization](./COST_OPTIMIZATION.md) (VL-211) on resolve (402 when over).
 
 ---
 
@@ -28,7 +28,8 @@
 | Regional routing | partial (`af-south-1` preference; multi-region mesh deferred) |
 | Fallback | shipped (ordered chain) |
 | Retries | partial (advisory `maxRetries`; Gateway owns HTTP retry) |
-| Caching | deferred → Intelligent Cache (VL-210) |
+| Caching | partial → Intelligent Cache (VL-210) |
+| Spend caps | enforced via Cost Optimization (VL-211) on resolve |
 | Streaming | partial (capability flag; runtime VL-208) |
 | Load balancing | partial (static weights + Model Serving traffic %) |
 

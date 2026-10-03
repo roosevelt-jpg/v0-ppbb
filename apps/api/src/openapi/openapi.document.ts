@@ -3289,6 +3289,108 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/cost-optimization/engine': {
+      get: {
+        summary: 'Cost Optimization Engine catalog',
+        operationId: 'getCostOptimizationEngine',
+        responses: {
+          '200': {
+            description: 'Ceilings, honesty, and spend-enforcement flags',
+          },
+        },
+      },
+    },
+    '/v1/cost-optimization/ceilings': {
+      get: {
+        summary: 'Default hard spend ceilings',
+        operationId: 'getCostOptimizationCeilings',
+        responses: { '200': { description: 'Daily/monthly default caps' } },
+      },
+    },
+    '/v1/cost-optimization/budgets': {
+      get: {
+        summary: 'Get workspace cost budget',
+        operationId: 'getCostOptimizationBudget',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace budget' } },
+      },
+      put: {
+        summary: 'Upsert workspace cost budget',
+        operationId: 'upsertCostOptimizationBudget',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Budget persisted' } },
+      },
+    },
+    '/v1/cost-optimization/check': {
+      post: {
+        summary: 'Check spend against hard caps',
+        operationId: 'checkCostOptimizationSpend',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Gate result' },
+          '402': { description: 'Hard spend ceiling exceeded' },
+        },
+      },
+    },
+    '/v1/cost-optimization/record': {
+      post: {
+        summary: 'Record spend (enforces caps)',
+        operationId: 'recordCostOptimizationSpend',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Spend recorded' },
+          '402': { description: 'Hard spend ceiling exceeded' },
+        },
+      },
+    },
+    '/v1/cost-optimization/optimize': {
+      post: {
+        summary: 'Cost-preferring route plan',
+        operationId: 'optimizeCostOptimizationRoute',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Cheapest candidates + spend gate' } },
+      },
+    },
+    '/v1/cost-optimization/gpu': {
+      get: {
+        summary: 'GPU cost view + scale advice',
+        operationId: 'getCostOptimizationGpu',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'GPU ceilings + workspace spend' } },
+      },
+    },
+    '/v1/cost-optimization/predictions': {
+      get: {
+        summary: 'Spend predictions + spot/reserved plans',
+        operationId: 'getCostOptimizationPredictions',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Linear projection + sandbox plans' } },
+      },
+    },
+    '/v1/cost-optimization/reports': {
+      get: {
+        summary: 'Spend reports',
+        operationId: 'getCostOptimizationReports',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Ledger-backed reports' } },
+      },
+    },
+    '/v1/cost-optimization/analytics': {
+      get: {
+        summary: 'Cost analytics',
+        operationId: 'getCostOptimizationAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Utilization aggregates' } },
+      },
+    },
+    '/v1/cost-optimization/monitoring': {
+      get: {
+        summary: 'Cost Optimization monitoring',
+        operationId: 'getCostOptimizationMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

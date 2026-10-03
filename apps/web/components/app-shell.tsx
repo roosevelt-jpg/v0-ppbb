@@ -20,6 +20,7 @@ const links = [
   { href: '/streaming-runtime', label: 'Streaming Runtime' },
   { href: '/batch-runtime', label: 'Batch Runtime' },
   { href: '/intelligent-cache', label: 'Intelligent Cache' },
+  { href: '/cost-optimization', label: 'Cost Optimization' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },

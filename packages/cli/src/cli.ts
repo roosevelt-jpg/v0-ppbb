@@ -34,6 +34,9 @@ function usage(): never {
   verbalab intelligent-cache-engine
   verbalab intelligent-cache-put --namespace <ns> --key <key> [--value <json>]
   verbalab intelligent-cache-lookup --namespace <ns> --key <key>
+  verbalab cost-optimization-engine
+  verbalab cost-optimization-record --category <cat> --amount <usd>
+  verbalab cost-optimization-optimize [--feature chat|translate|stt|tts|ocr|embeddings|detect]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -323,6 +326,42 @@ async function main() {
     if (!namespace || !key) usage();
     console.log(
       JSON.stringify(await vl.intelligentCacheLookup({ namespace, key }), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'cost-optimization-engine') {
+    console.log(JSON.stringify(await vl.costOptimizationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'cost-optimization-record') {
+    const category = argValue(rest, '--category');
+    const amount = argValue(rest, '--amount');
+    if (!category || !amount) usage();
+    console.log(
+      JSON.stringify(
+        await vl.costOptimizationRecord({
+          category,
+          amountUsd: Number(amount),
+          feature: argValue(rest, '--feature') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'cost-optimization-optimize') {
+    console.log(
+      JSON.stringify(
+        await vl.costOptimizationOptimize({
+          feature: argValue(rest, '--feature') ?? undefined,
+        }),
+        null,
+        2,
+      ),
     );
     return;
   }
