@@ -1179,6 +1179,28 @@ export class VerbaLab {
     return this.requestJson('/v1/ontology/engine', { method: 'GET' });
   }
 
+  async taxonomyEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      enterpriseTaxonomyOs: boolean;
+      mlAutoClassification: boolean;
+      schemaRegistry: boolean;
+      orgWorkspaceScoped: boolean;
+      extendsKnowledgeBase: boolean;
+      distinctFromOntology: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/taxonomy/engine', { method: 'GET' });
+  }
+
   async embeddingCloudEngine(): Promise<{
     product: string;
     note: string;

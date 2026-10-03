@@ -12,6 +12,7 @@ import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
+import { TaxonomyPlatformModule } from '../taxonomy-platform/taxonomy-platform.module';
 import { EmbeddingCloudModule } from '../embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from '../vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from '../memory-cloud/memory-cloud.module';
@@ -52,6 +53,7 @@ import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
+import { TaxonomyPlatformGraphqlResolver } from './taxonomy-platform.resolver';
 import { EmbeddingCloudGraphqlResolver } from './embedding-cloud.resolver';
 import { VectorCloudGraphqlResolver } from './vector-cloud.resolver';
 import { MemoryCloudGraphqlResolver } from './memory-cloud.resolver';
@@ -112,6 +114,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
+    TaxonomyPlatformModule,
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
@@ -160,6 +163,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,
+    TaxonomyPlatformGraphqlResolver,
     EmbeddingCloudGraphqlResolver,
     VectorCloudGraphqlResolver,
     MemoryCloudGraphqlResolver,

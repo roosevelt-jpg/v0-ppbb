@@ -2880,6 +2880,88 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/taxonomy/engine': {
+      get: {
+        summary: 'Taxonomy Platform engine catalog',
+        operationId: 'getTaxonomyEngine',
+        responses: { '200': { description: 'Taxonomy capabilities and honesty flags' } },
+      },
+    },
+    '/v1/taxonomy/content-types': {
+      get: {
+        summary: 'Taxonomy content types',
+        operationId: 'listTaxonomyContentTypes',
+        responses: { '200': { description: 'EKB-aligned content kinds' } },
+      },
+    },
+    '/v1/taxonomy/terms': {
+      get: {
+        summary: 'List taxonomy terms',
+        operationId: 'listTaxonomyTerms',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Workspace-scoped terms' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create taxonomy term',
+        operationId: 'createTaxonomyTerm',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Created term' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/taxonomy/trees': {
+      get: {
+        summary: 'Taxonomy trees (roots + one child level)',
+        operationId: 'listTaxonomyTrees',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Knowledge trees for workspace' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/taxonomy/assign': {
+      post: {
+        summary: 'Assign taxonomy term to knowledge document',
+        operationId: 'assignTaxonomyTerm',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Assignment created' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/taxonomy/classify': {
+      post: {
+        summary: 'Heuristic classify document against taxonomy terms',
+        operationId: 'classifyTaxonomyDocument',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Matched terms (optional apply)' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/embedding-cloud/engine': {
       get: {
         summary: 'Embedding Cloud engine catalog',

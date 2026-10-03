@@ -84,6 +84,8 @@ model Organization {
   memoryRecords                MemoryRecord[]
   kgEntities                   KgEntity[]
   kgRelationships              KgRelationship[]
+  taxonomyTerms                TaxonomyTerm[]
+  taxonomyAssignments          TaxonomyAssignment[]
 
   @@map("organizations")
 }
@@ -160,6 +162,8 @@ model Workspace {
   memoryRecords          MemoryRecord[]
   kgEntities             KgEntity[]
   kgRelationships        KgRelationship[]
+  taxonomyTerms          TaxonomyTerm[]
+  taxonomyAssignments    TaxonomyAssignment[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1326,6 +1330,55 @@ model KgRelationship {
   @@index([toEntityId])
   @@index([workspaceId, type])
   @@map("kg_relationships")
+}
+
+/// Taxonomy term / tree node (VL-197). Classification trees — not enterprise taxonomy OS.
+model TaxonomyTerm {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  parentId       String?  @map("parent_id")
+  slug           String
+  name           String
+  /// category | tag | content_type
+  kind           String   @default("category")
+  description    String   @default("")
+  sortOrder      Int      @default(0) @map("sort_order")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent       TaxonomyTerm?        @relation("TaxonomyTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     TaxonomyTerm[]       @relation("TaxonomyTree")
+  assignments  TaxonomyAssignment[]
+
+  @@unique([workspaceId, slug])
+  @@index([organizationId, workspaceId, kind])
+  @@index([workspaceId, parentId])
+  @@map("taxonomy_terms")
+}
+
+/// Document ↔ taxonomy term assignment (VL-197). Always org+workspace scoped.
+model TaxonomyAssignment {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  termId         String   @map("term_id")
+  documentId     String   @map("document_id")
+  /// manual | heuristic
+  source         String   @default("manual")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  term         TaxonomyTerm @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  @@unique([termId, documentId])
+  @@index([organizationId, workspaceId])
+  @@index([documentId])
+  @@map("taxonomy_assignments")
 }
 
 

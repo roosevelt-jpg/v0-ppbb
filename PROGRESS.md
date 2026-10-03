@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-196 Done — Ontology Platform)
+Last updated: 2026-10-03 (VL-197 Done — Taxonomy Platform)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-197 Taxonomy Platform (Phase 64) |
+| Next up | VL-198 Enterprise RAG Platform (Phase 65) |
 
 ---
 
@@ -226,6 +226,7 @@ Last updated: 2026-10-03 (VL-196 Done — Ontology Platform)
 | VL-194 | Enterprise Knowledge Base (Phase 61) | Done | `/v1/knowledge-base/*` over VL-062; collections/tags/MD/HTML; workspace-hardened get/remove; ADR-0105. Not Confluence OS. |
 | VL-195 | Enterprise Search (Phase 62) | Done | `/v1/enterprise-search/*` keyword/semantic/light hybrid RRF; ADR-0106. Not Elastic/BM25 OS; image/voice deferred. |
 | VL-196 | Ontology Platform (Phase 63) | Done | `/v1/ontology/*` concepts/hierarchies/synonyms over VL-184; ADR-0107. Not OWL/Protege OS. |
+| VL-197 | Taxonomy Platform (Phase 64) | Done | `/v1/taxonomy/*` terms/trees/assign/heuristic classify; ADR-0108. Not enterprise taxonomy OS. |
 
 ---
 
@@ -336,3 +337,4 @@ Last updated: 2026-10-03 (VL-196 Done — Ontology Platform)
 | 2026-10-03 | VL-194 Done: Enterprise Knowledge Base (Phase 61) — hub over VL-062 + collections/tags/MD/HTML; ADR-0105. Tenant-scoped; Confluence OS deferred. |
 | 2026-10-03 | VL-195 Done: Enterprise Search (Phase 62) — keyword/semantic/light hybrid over VL-062; ADR-0106. Not Elastic/BM25 OS. |
 | 2026-10-03 | VL-196 Done: Ontology Platform (Phase 63) — concepts/is_a/synonyms over VL-184 KG; ADR-0107. Not OWL/Protege OS. |
+| 2026-10-03 | VL-197 Done: Taxonomy Platform (Phase 64) — terms/trees/assign + heuristic classify; ADR-0108. Not enterprise taxonomy OS. |

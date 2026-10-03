@@ -499,6 +499,45 @@ export class GqlOntologyEngine {
 }
 
 @ObjectType()
+export class GqlTaxonomyCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlTaxonomyEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlTaxonomyCapability])
+  capabilities!: GqlTaxonomyCapability[];
+
+  @Field()
+  enterpriseTaxonomyOs!: boolean;
+
+  @Field()
+  mlAutoClassification!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+}
+
+@ObjectType()
 export class GqlEmbeddingCloudCapability {
   @Field()
   id!: string;

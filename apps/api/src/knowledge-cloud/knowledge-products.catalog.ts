@@ -51,10 +51,11 @@ export function knowledgeProductCatalog(): KnowledgeProductRow[] {
     {
       id: 'taxonomy-platform',
       name: 'Taxonomy Platform',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Classification/categorization structures (Phase 64 / VL-197).',
+      status: 'partial',
+      api: 'GET /v1/taxonomy/engine',
+      console: '/taxonomy',
+      notes:
+        'Categories/tags/trees + doc assign (VL-197). Not enterprise taxonomy OS; ML auto-class deferred.',
     },
     {
       id: 'enterprise-rag',

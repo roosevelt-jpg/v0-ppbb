@@ -98,6 +98,9 @@ export function KnowledgeCloudClient() {
               <Link href={data.links.ontology ?? '/ontology'} style={secondary}>
                 Ontology
               </Link>
+              <Link href={data.links.taxonomy ?? '/taxonomy'} style={secondary}>
+                Taxonomy
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

@@ -21,6 +21,7 @@ function usage(): never {
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
   verbalab ontology-engine
+  verbalab taxonomy-engine
   verbalab embedding-cloud-engine
   verbalab embedding-cloud-models
   verbalab vector-cloud-engine
@@ -148,6 +149,11 @@ async function main() {
 
   if (command === 'ontology-engine') {
     console.log(JSON.stringify(await vl.ontologyEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'taxonomy-engine') {
+    console.log(JSON.stringify(await vl.taxonomyEngine(), null, 2));
     return;
   }
 
