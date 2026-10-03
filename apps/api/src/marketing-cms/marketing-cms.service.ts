@@ -46,6 +46,14 @@ export class MarketingCmsService implements OnModuleInit {
   }
 
   async ensureSeeded(opts?: { replaceHome?: boolean; replaceContentPages?: boolean }) {
+    const existingSettings = await this.prisma.cmsSiteSettings.findUnique({ where: { id: 'default' } });
+    const mergedDesignScope = {
+      ...DEFAULT_DESIGN_SCOPE,
+      ...((existingSettings?.designScope as Record<string, unknown> | null) ?? {}),
+      northStar: DEFAULT_DESIGN_SCOPE.northStar,
+      components: DEFAULT_DESIGN_SCOPE.components,
+    };
+
     await this.prisma.cmsSiteSettings.upsert({
       where: { id: 'default' },
       create: {
@@ -58,7 +66,9 @@ export class MarketingCmsService implements OnModuleInit {
         designScope: DEFAULT_DESIGN_SCOPE as unknown as Prisma.InputJsonValue,
         socialLinks: { docs: '/docs', console: '/dev-login' } as Prisma.InputJsonValue,
       },
-      update: {},
+      update: {
+        designScope: mergedDesignScope as unknown as Prisma.InputJsonValue,
+      },
     });
 
     const home = await this.prisma.cmsPage.upsert({
@@ -97,6 +107,10 @@ export class MarketingCmsService implements OnModuleInit {
       });
     }
 
+    const homeBlockCount = await this.prisma.cmsBlock.count({ where: { pageId: home.id } });
+    const shouldReplaceHome =
+      Boolean(opts?.replaceHome) || homeBlockCount < DEFAULT_HOME_BLOCKS.length;
+
     await this.seedPageBlocks(
       home.id,
       DEFAULT_HOME_BLOCKS.map((b) => ({
@@ -104,7 +118,7 @@ export class MarketingCmsService implements OnModuleInit {
         sortOrder: b.sortOrder,
         content: b.content as unknown as Record<string, unknown>,
       })),
-      Boolean(opts?.replaceHome),
+      shouldReplaceHome,
     );
 
     for (const pageSeed of DEFAULT_CONTENT_PAGES) {

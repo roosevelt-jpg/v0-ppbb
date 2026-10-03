@@ -19,13 +19,19 @@ export const DEFAULT_DESIGN_SCOPE = {
     'site-nav',
     'theme-switcher',
     'hero-tts-playground',
+    'product-hub-tabs',
     'product-cards',
     'logo-strip',
     'use-case-grid',
     'platform-split',
+    'feature-deep-dive',
+    'impact-grid',
+    'api-split',
     'research-timeline',
     'safety-panel',
-    'footer',
+    'updates-grid',
+    'final-cta',
+    'footer-columns',
     'console-sidebar',
   ],
   imageSlots: [
@@ -36,6 +42,8 @@ export const DEFAULT_DESIGN_SCOPE = {
     'use-case.trade',
     'use-case.education',
   ],
+  northStar:
+    'Match and exceed world-class AI voice platforms — owned by Africa, for African languages, accents, and economies.',
   honesty: {
     notElevenLabsCloneOfAssets: true,
     mirrorsProductUxPatterns: true,
@@ -50,8 +58,8 @@ export const DEFAULT_HOME_BLOCKS = [
     content: {
       links: [
         { label: 'Products', href: '#products' },
+        { label: 'Hubs', href: '#hubs' },
         { label: 'Use cases', href: '#use-cases' },
-        { label: 'Platform', href: '#platform' },
         { label: 'Research', href: '#research' },
         { label: 'Safety', href: '#safety' },
         { label: 'Docs', href: '/docs' },
@@ -147,12 +155,44 @@ export const DEFAULT_HOME_BLOCKS = [
       id: 'use-cases',
       title: 'Why Africans choose VerbaLab',
       subtitle: 'Voice ownership for the moments that move economies and communities.',
-      items: USE_CASE_HOME_LINKS.map(({ title, body, href, imageKey }) => ({
-        title,
-        body,
-        href,
-        ...(imageKey ? { imageKey } : {}),
+      items: USE_CASE_HOME_LINKS.map((link) => ({
+        title: link.title,
+        body: link.body,
+        href: link.href,
+        ...('imageKey' in link && link.imageKey ? { imageKey: link.imageKey } : {}),
       })),
+    },
+  },
+  {
+    type: 'product_hubs',
+    sortOrder: 45,
+    content: {
+      id: 'hubs',
+      title: 'Three ways to ship African voice',
+      subtitle: 'Creative studio, conversational agents, and APIs — same research foundation, same ownership model.',
+      tabs: [
+        {
+          id: 'creative',
+          label: 'VerbaCreative',
+          blurb: 'Produce speech, campaigns, and story worlds that sound local.',
+          href: '/voice-studio',
+          pills: ['Text to speech', 'Voice clone', 'Dubbing', 'Lexicon', 'SFX'],
+        },
+        {
+          id: 'agents',
+          label: 'VerbaAgents',
+          blurb: 'Agents that hear code-switching and answer with respect.',
+          href: '/speech',
+          pills: ['STT', 'TTS', 'Workflows', 'Guardrails', 'Analytics'],
+        },
+        {
+          id: 'api',
+          label: 'VerbaAPI',
+          blurb: 'Metered APIs with residency for builders across the continent.',
+          href: '/playground',
+          pills: ['Speech', 'Translate', 'Detect', 'Chat', 'SDKs'],
+        },
+      ],
     },
   },
   {
@@ -178,21 +218,107 @@ export const DEFAULT_HOME_BLOCKS = [
     },
   },
   {
+    type: 'feature_deep_dive',
+    sortOrder: 55,
+    content: {
+      id: 'creative-deep',
+      kicker: 'VERBACREATIVE',
+      title: 'Create, edit, and localize in African languages',
+      lede: 'Scripts, voices, and delivery tuned for markets from Lagos to Nairobi — not imported defaults.',
+      cta: { label: 'Open Voice Studio', href: '/voice-studio' },
+      preview: {
+        label: 'Studio sample',
+        text: 'Karibu. Your brand can greet customers in Swahili, close in English, and keep the same voice identity.',
+        languages: ['English', 'Swahili', 'Yoruba', 'Amharic', 'Zulu', 'Hausa'],
+      },
+      cards: [
+        {
+          title: 'Voices',
+          body: 'Accent-aware libraries for creators, educators, and public broadcasters.',
+        },
+        {
+          title: 'Cloning',
+          body: 'Ethical voice ownership with consent, watermarking, and review gates.',
+        },
+        {
+          title: 'Dubbing & localize',
+          body: 'Move meaning across ethnic languages without flattening tone.',
+        },
+        {
+          title: 'Design',
+          body: 'Shape new voices for characters, brands, and civic messaging.',
+        },
+      ],
+    },
+  },
+  {
+    type: 'feature_deep_dive',
+    sortOrder: 56,
+    content: {
+      id: 'agents-deep',
+      kicker: 'VERBAAGENTS',
+      title: 'Deploy agents that talk, type, and act',
+      lede: 'Support, sales, and civic agents built for bilingual callers and low-latency African networks.',
+      cta: { label: 'Open Speech hub', href: '/speech' },
+      preview: {
+        label: 'Agent transcript',
+        text: 'Caller: "Habari, nina shida na order yangu." · Agent: "Karibu — let’s check that order in Kiswahili or English."',
+        languages: ['Swahili↔English', 'Yoruba↔English', 'French↔Wolof'],
+      },
+      cards: [
+        { title: 'Fastest paths', body: 'Streaming STT/TTS paths designed for real call-center latency.' },
+        { title: 'Human-like', body: 'Turn-taking that respects greetings, deference, and code-switch.' },
+        { title: 'Omni-channel', body: 'Same agent logic for phone, chat, and WhatsApp-style flows.' },
+        { title: 'Guardrails', body: 'Moderation, audit, and provenance before agents go live.' },
+      ],
+    },
+  },
+  {
     type: 'api',
     sortOrder: 60,
     content: {
       title: 'Or build anything with VerbaLab APIs',
-      subtitle: 'Text to speech, speech to text, translate, and platform APIs with metering and residency.',
+      subtitle:
+        'Text to speech, speech to text, translate, chat, and platform APIs — with metering, keys, and regional residency.',
       cta: { label: 'Explore docs', href: '/docs' },
+      endpoints: [
+        { name: 'Speech', href: '/docs' },
+        { name: 'Translate', href: '/translate' },
+        { name: 'Playground', href: '/playground' },
+        { name: 'Chat', href: '/chat' },
+      ],
       code: `import { VerbaLab } from "@verbalab/sdk";
 
 const client = new VerbaLab({ apiKey: process.env.VERBALAB_API_KEY });
 
 await client.audio.speech({
   voice: "nia_lagos",
-  text: "Karibu to VerbaLab.",
+  text: "Karibu to VerbaLab — Africa owns this voice.",
   format: "mp3",
 });`,
+    },
+  },
+  {
+    type: 'impact',
+    sortOrder: 65,
+    content: {
+      id: 'impact',
+      title: 'Impact across the continent',
+      subtitle: 'Prefill stories for partnerships, creators, and civic programs — replace with real wins as they land.',
+      items: [
+        {
+          title: 'Language sovereignty',
+          body: 'African orgs keep ownership of speech data and voice identities used on VerbaLab.',
+        },
+        {
+          title: 'Creator economy',
+          body: 'Podcasters and filmmakers ship in mother tongues without surrendering their voice IP.',
+        },
+        {
+          title: 'Public infrastructure',
+          body: 'Education, trade, and government messaging that sounds native — not imported.',
+        },
+      ],
     },
   },
   {
@@ -224,11 +350,84 @@ await client.audio.speech({
     },
   },
   {
+    type: 'updates',
+    sortOrder: 85,
+    content: {
+      id: 'updates',
+      title: 'Latest on the platform',
+      items: [
+        {
+          title: 'Marketing CMS + theme',
+          body: 'Ship homepage copy, images, and light/dark design from an admin console.',
+          href: '/cms',
+        },
+        {
+          title: 'Use-case prefills',
+          body: 'Trade, education, sales, public speech, CX, and creative pages ready for review.',
+          href: '/use-cases/trade',
+        },
+        {
+          title: 'Local review console',
+          body: 'Sidebar hubs + /dev-login so teams can build without OTP friction.',
+          href: '/dev-login',
+        },
+      ],
+    },
+  },
+  {
+    type: 'final_cta',
+    sortOrder: 88,
+    content: {
+      title: "Africa's AI communication platform",
+      lede: 'Own the stack that speaks for the continent — creative, agents, and APIs under one roof.',
+      primaryCta: { label: 'Start building', href: '/dev-login' },
+      secondaryCta: { label: 'Talk to us', href: '/sign-up' },
+    },
+  },
+  {
     type: 'footer',
     sortOrder: 90,
     content: {
       brand: 'VerbaLab',
-      blurb: "Africa's own voice — for trade, learning, and creation.",
+      blurb: "Africa's own voice — for trade, learning, creation, and public life.",
+      columns: [
+        {
+          title: 'Products',
+          links: [
+            { label: 'Voice Studio', href: '/voice-studio' },
+            { label: 'Speech', href: '/speech' },
+            { label: 'Translate', href: '/translate' },
+            { label: 'Chat', href: '/chat' },
+          ],
+        },
+        {
+          title: 'Solutions',
+          links: [
+            { label: 'Trade', href: '/use-cases/trade' },
+            { label: 'Education', href: '/use-cases/education' },
+            { label: 'Customer experience', href: '/use-cases/customer-experience' },
+            { label: 'Creative', href: '/use-cases/creative' },
+          ],
+        },
+        {
+          title: 'Developers',
+          links: [
+            { label: 'Docs', href: '/docs' },
+            { label: 'Playground', href: '/playground' },
+            { label: 'API keys', href: '/keys' },
+          ],
+        },
+        {
+          title: 'Company',
+          links: [
+            { label: 'Log in', href: '/sign-in' },
+            { label: 'Console', href: '/dev-login' },
+            { label: 'Safety', href: '#safety' },
+            { label: 'CMS', href: '/cms', adminOnly: true },
+            { label: 'Dashboard', href: '/dashboard', adminOnly: true },
+          ],
+        },
+      ],
       links: [
         { label: 'Log in', href: '/sign-in' },
         { label: 'Console', href: '/dev-login' },

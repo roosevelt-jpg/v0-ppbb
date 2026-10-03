@@ -946,13 +946,112 @@ html[data-theme='dark'] .vl-mkt-strip {
   gap: 0.55rem;
 }
 
-.vl-mkt-footer {
+.vl-mkt-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.vl-mkt-hub {
+  border: 1px solid var(--mkt-line);
+  border-radius: 18px;
+  padding: 1.25rem;
+  background: var(--mkt-card-bg);
+  color: var(--mkt-ink);
+  text-decoration: none;
+  display: grid;
+  gap: 0.65rem;
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.vl-mkt-hub:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand);
+}
+
+.vl-mkt-hub h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.vl-mkt-pill-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.85rem 1.25rem;
+  gap: 0.4rem;
+}
+
+a.vl-mkt-pill {
+  text-decoration: none;
+  color: inherit;
+}
+
+.vl-mkt-deep {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.vl-mkt-deep-copy h2 {
+  margin: 0.35rem 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  letter-spacing: -0.03em;
+  color: var(--mkt-ink);
+}
+
+.vl-mkt-deep-copy > p:not(.vl-mkt-kicker) {
+  margin: 0;
+  color: var(--mkt-ink);
+  opacity: 0.85;
+  line-height: 1.55;
+  max-width: 36rem;
+}
+
+.vl-mkt-final-cta {
+  margin: 0 clamp(1rem, 3vw, 2rem) 1.5rem;
+  padding: 1.6rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #143d31 0%, #1a6b52 55%, #2f8f6d 100%);
+  color: #f4f7f5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem clamp(1rem, 3vw, 2rem) 2.5rem;
+}
+
+.vl-mkt-final-cta h2 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  letter-spacing: -0.03em;
+}
+
+.vl-mkt-final-cta p {
+  margin: 0;
+  max-width: 36rem;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.vl-mkt-final-cta .vl-mkt-cta {
+  background: #f4f7f5;
+  color: #0a0a0a;
+}
+
+.vl-mkt-final-cta .vl-mkt-cta-ghost {
+  border-color: rgba(244, 247, 245, 0.55);
+  color: #f4f7f5;
+  background: transparent;
+}
+
+.vl-mkt-footer {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.75rem clamp(1rem, 3vw, 2rem) 2.5rem;
   border-top: 1px solid var(--mkt-line);
   color: var(--mkt-ink);
   background: #dfe2e7;
@@ -964,8 +1063,35 @@ html[data-theme='dark'] .vl-mkt-footer {
   color: var(--mkt-muted);
 }
 
+.vl-mkt-footer-brand {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.vl-mkt-footer-brand strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.vl-mkt-footer-cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.vl-mkt-footer-cols h4 {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mkt-ink);
+  opacity: 0.7;
+}
+
+.vl-mkt-footer-cols a,
 .vl-mkt-footer a {
-  margin-left: 0.85rem;
+  display: block;
+  margin: 0 0 0.4rem;
   text-decoration: none;
   color: var(--mkt-ink);
   font-weight: 600;
@@ -983,7 +1109,10 @@ html[data-theme='dark'] .vl-mkt-footer {
   .vl-mkt-hero,
   .vl-mkt-section-split,
   .vl-mkt-product-grid,
-  .vl-mkt-use-grid {
+  .vl-mkt-use-grid,
+  .vl-mkt-hub-grid,
+  .vl-mkt-deep,
+  .vl-mkt-footer-cols {
     grid-template-columns: 1fr;
   }
 }

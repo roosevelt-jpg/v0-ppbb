@@ -378,6 +378,43 @@ export function MarketingHomePage() {
             </section>
           );
         }
+        if (block.type === 'product_hubs') {
+          const c = block.content as {
+            id?: string;
+            title?: string;
+            subtitle?: string;
+            tabs?: Array<{
+              id: string;
+              label: string;
+              blurb: string;
+              href: string;
+              pills?: string[];
+            }>;
+          };
+          return (
+            <section key={block.id} id={c.id} className="vl-mkt-section">
+              <div className="vl-mkt-section-head">
+                <h2>{c.title}</h2>
+                <p>{c.subtitle}</p>
+              </div>
+              <div className="vl-mkt-hub-grid">
+                {(c.tabs ?? []).map((tab) => (
+                  <Link key={tab.id} href={tab.href} className="vl-mkt-hub">
+                    <span className="vl-mkt-kicker">{tab.label}</span>
+                    <h3>{tab.blurb}</h3>
+                    <div className="vl-mkt-pill-row">
+                      {(tab.pills ?? []).map((pill) => (
+                        <span key={pill} className="vl-mkt-pill">
+                          {pill}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        }
         if (block.type === 'platforms') {
           const c = block.content as {
             id?: string;
@@ -405,18 +442,81 @@ export function MarketingHomePage() {
             </section>
           );
         }
+        if (block.type === 'feature_deep_dive') {
+          const c = block.content as {
+            id?: string;
+            kicker?: string;
+            title?: string;
+            lede?: string;
+            cta?: { label: string; href: string };
+            preview?: { label?: string; text?: string; languages?: string[] };
+            cards?: Array<{ title: string; body: string }>;
+          };
+          return (
+            <section key={block.id} id={c.id} className="vl-mkt-section vl-mkt-deep">
+              <div className="vl-mkt-deep-copy">
+                <p className="vl-mkt-kicker">{c.kicker}</p>
+                <h2>{c.title}</h2>
+                <p>{c.lede}</p>
+                {c.cta ? (
+                  <div className="vl-mkt-hero-actions" style={{ marginTop: '1rem' }}>
+                    <Link href={c.cta.href} className="vl-btn vl-btn-primary vl-mkt-cta">
+                      {c.cta.label}
+                    </Link>
+                  </div>
+                ) : null}
+                {c.preview ? (
+                  <div className="vl-mkt-playground" style={{ marginTop: '1.25rem' }}>
+                    <div className="vl-mkt-playground-top">
+                      <span>{c.preview.label}</span>
+                      <span className="vl-mkt-pill">Prefilled</span>
+                    </div>
+                    <p style={{ margin: 0, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{c.preview.text}</p>
+                    {c.preview.languages?.length ? (
+                      <div className="vl-mkt-pill-row" style={{ marginTop: '0.85rem' }}>
+                        {c.preview.languages.map((lang) => (
+                          <span key={lang} className="vl-mkt-pill">
+                            {lang}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+              <div className="vl-mkt-use-grid">
+                {(c.cards ?? []).map((card) => (
+                  <article key={card.title} className="vl-mkt-use">
+                    <h3>{card.title}</h3>
+                    <p>{card.body}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          );
+        }
         if (block.type === 'api') {
           const c = block.content as {
             title?: string;
             subtitle?: string;
             cta?: { label: string; href: string };
             code?: string;
+            endpoints?: Array<{ name: string; href: string }>;
           };
           return (
             <section key={block.id} className="vl-mkt-section vl-mkt-section-split">
               <div>
                 <h2>{c.title}</h2>
                 <p>{c.subtitle}</p>
+                {c.endpoints?.length ? (
+                  <div className="vl-mkt-pill-row" style={{ marginTop: '1rem' }}>
+                    {c.endpoints.map((ep) => (
+                      <Link key={ep.name} href={ep.href} className="vl-mkt-pill">
+                        {ep.name}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
                 {c.cta ? (
                   <div className="vl-mkt-hero-actions" style={{ marginTop: '1.25rem' }}>
                     <Link href={c.cta.href} className="vl-btn vl-btn-primary vl-mkt-cta">
@@ -426,6 +526,30 @@ export function MarketingHomePage() {
                 ) : null}
               </div>
               <pre className="vl-mkt-code">{c.code}</pre>
+            </section>
+          );
+        }
+        if (block.type === 'impact') {
+          const c = block.content as {
+            id?: string;
+            title?: string;
+            subtitle?: string;
+            items?: Array<{ title: string; body: string }>;
+          };
+          return (
+            <section key={block.id} id={c.id} className="vl-mkt-section">
+              <div className="vl-mkt-section-head">
+                <h2>{c.title}</h2>
+                <p>{c.subtitle}</p>
+              </div>
+              <div className="vl-mkt-use-grid">
+                {(c.items ?? []).map((item) => (
+                  <article key={item.title} className="vl-mkt-use">
+                    <h3>{item.title}</h3>
+                    <p>{item.body}</p>
+                  </article>
+                ))}
+              </div>
             </section>
           );
         }
@@ -474,24 +598,113 @@ export function MarketingHomePage() {
             </section>
           );
         }
+        if (block.type === 'updates') {
+          const c = block.content as {
+            id?: string;
+            title?: string;
+            items?: Array<{ title: string; body: string; href?: string }>;
+          };
+          return (
+            <section key={block.id} id={c.id} className="vl-mkt-section">
+              <div className="vl-mkt-section-head">
+                <h2>{c.title}</h2>
+              </div>
+              <div className="vl-mkt-use-grid">
+                {(c.items ?? []).map((item) => {
+                  const inner = (
+                    <>
+                      <h3>{item.title}</h3>
+                      <p>{item.body}</p>
+                    </>
+                  );
+                  return item.href ? (
+                    <Link key={item.title} href={item.href} className="vl-mkt-use">
+                      {inner}
+                    </Link>
+                  ) : (
+                    <article key={item.title} className="vl-mkt-use">
+                      {inner}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+        if (block.type === 'final_cta') {
+          const c = block.content as {
+            title?: string;
+            lede?: string;
+            primaryCta?: { label: string; href: string };
+            secondaryCta?: { label: string; href: string };
+          };
+          return (
+            <section key={block.id} className="vl-mkt-final-cta">
+              <div>
+                <h2>{c.title}</h2>
+                <p>{c.lede}</p>
+              </div>
+              <div className="vl-mkt-hero-actions">
+                {c.primaryCta ? (
+                  <Link href={c.primaryCta.href} className="vl-btn vl-btn-primary vl-mkt-cta">
+                    {c.primaryCta.label}
+                  </Link>
+                ) : null}
+                {c.secondaryCta ? (
+                  <Link href={c.secondaryCta.href} className="vl-btn vl-btn-secondary vl-mkt-cta-ghost">
+                    {c.secondaryCta.label}
+                  </Link>
+                ) : null}
+              </div>
+            </section>
+          );
+        }
         if (block.type === 'footer') {
           const c = block.content as {
             brand?: string;
             blurb?: string;
             links?: FooterLink[];
+            columns?: Array<{ title: string; links: FooterLink[] }>;
           };
           const links = (c.links ?? []).filter((link) => !isAdminFooterLink(link) || isAdmin);
+          const columns = (c.columns ?? []).map((col) => ({
+            ...col,
+            links: col.links.filter((link) => !isAdminFooterLink(link) || isAdmin),
+          }));
           return (
             <footer key={block.id} className="vl-mkt-footer">
-              <strong>{c.brand}</strong>
-              <span>{c.blurb}</span>
-              <div>
-                {links.map((link) => (
-                  <Link key={link.href} href={link.href}>
-                    {link.label}
-                  </Link>
-                ))}
+              <div className="vl-mkt-footer-brand">
+                <strong>{c.brand}</strong>
+                <span>{c.blurb}</span>
               </div>
+              {columns.length ? (
+                <div className="vl-mkt-footer-cols">
+                  {columns.map((col) => (
+                    <div key={col.title}>
+                      <h4>{col.title}</h4>
+                      {col.links.map((link) =>
+                        link.href.startsWith('#') ? (
+                          <a key={`${col.title}-${link.href}-${link.label}`} href={link.href}>
+                            {link.label}
+                          </a>
+                        ) : (
+                          <Link key={`${col.title}-${link.href}-${link.label}`} href={link.href}>
+                            {link.label}
+                          </Link>
+                        ),
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  {links.map((link) => (
+                    <Link key={link.href} href={link.href}>
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </footer>
           );
         }
