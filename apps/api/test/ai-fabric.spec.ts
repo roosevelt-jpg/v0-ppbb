@@ -136,6 +136,7 @@ describe('AI Fabric Foundation (VL-239)', () => {
       role: 'owner',
     });
     expect(overview.deferred.eventFabric).toBe(false);
+    expect(overview.deferred.contextFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to9).toBe(false);
     expect(overview.links.aiFabric).toBe('/ai-fabric');

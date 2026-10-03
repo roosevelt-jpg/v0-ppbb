@@ -18,6 +18,7 @@ import { ModelRegistryApplicationModule } from '../model-registry/application/mo
 import { AtlasApplicationModule } from '../atlas/application/atlas-application.module';
 import { AiFabricApplicationModule } from '../ai-fabric/application/ai-fabric-application.module';
 import { EventFabricApplicationModule } from '../event-fabric/application/event-fabric-application.module';
+import { ContextFabricApplicationModule } from '../context-fabric/application/context-fabric-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -89,6 +90,7 @@ import { ModelRegistryGraphqlResolver } from './model-registry.resolver';
 import { AtlasGraphqlResolver } from './atlas.resolver';
 import { AiFabricGraphqlResolver } from './ai-fabric.resolver';
 import { EventFabricGraphqlResolver } from './event-fabric.resolver';
+import { ContextFabricGraphqlResolver } from './context-fabric.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -180,6 +182,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AtlasApplicationModule,
     AiFabricApplicationModule,
     EventFabricApplicationModule,
+    ContextFabricApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -259,6 +262,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AtlasGraphqlResolver,
     AiFabricGraphqlResolver,
     EventFabricGraphqlResolver,
+    ContextFabricGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

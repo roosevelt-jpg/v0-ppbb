@@ -13,7 +13,8 @@ Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/N
 | --- | --- |
 | AI Fabric Foundation | **VL-239** — `/ai-fabric` + bus catalog / routing |
 | Event Fabric | **Shipped** — VL-240 — Redis Streams + CloudEvents; Kafka/NATS/Rabbit adapters deferred |
-| Context / Knowledge / Prompt / Reasoning / Memory / Agent Fabric | **Deferred** — VL-241–246 |
+| Context Fabric | **Shipped** — VL-241 — router over Context Runtime |
+| Knowledge / Prompt / Reasoning / Memory / Agent Fabric | **Deferred** — VL-242–246 |
 | Policy Fabric | **Deferred** — VL-247; hard-gate required when shipped |
 | Service Discovery | **Partial** — static routing catalog |
 | Identity Propagation | **Partial** — Clerk session + request IDs |

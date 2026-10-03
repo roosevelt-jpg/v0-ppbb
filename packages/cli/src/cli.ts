@@ -28,6 +28,8 @@ function usage(): never {
   verbalab event-fabric-products
   verbalab event-fabric-publish --topic <topic> --type <type> [--data <json>]
   verbalab event-fabric-poll [--topic <topic>] [--count <n>]
+  verbalab context-fabric-products
+  verbalab context-fabric-route [--kind <kind>]...
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -259,6 +261,25 @@ async function main() {
         null,
         2,
       ),
+    );
+    return;
+  }
+
+  if (command === 'context-fabric-products') {
+    console.log(JSON.stringify(await vl.contextFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'context-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.contextFabricRoute(kinds.length ? { kinds } : {}), null, 2),
     );
     return;
   }

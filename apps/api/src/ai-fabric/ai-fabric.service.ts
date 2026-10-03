@@ -69,7 +69,7 @@ export class AiFabricService {
       },
       deferred: {
         eventFabric: false,
-        contextFabric: true,
+        contextFabric: false,
         knowledgeFabric: true,
         promptFabric: true,
         reasoningFabric: true,
@@ -83,6 +83,7 @@ export class AiFabricService {
       links: {
         aiFabric: '/ai-fabric',
         eventFabric: '/event-fabric',
+        contextFabric: '/context-fabric',
         aiKernel: '/ai-kernel',
         inferenceCloud: '/inference-cloud',
         foundationModelCloud: '/foundation-model-cloud',

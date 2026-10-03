@@ -1296,6 +1296,58 @@ export class VerbaLab {
     return this.requestJson('/v1/event-fabric/analytics', { method: 'GET' });
   }
 
+  async contextFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    routes: Array<{
+      kind: string;
+      name: string;
+      target: string;
+      api: string;
+      cloud: string;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/context-fabric/products', { method: 'GET' });
+  }
+
+  async contextFabricRoute(body?: { kinds?: string[] }): Promise<{
+    plan: Array<Record<string, unknown>>;
+    missing: string[];
+    include: Record<string, boolean>;
+  }> {
+    return this.requestJson('/v1/context-fabric/route', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async contextFabricPropagate(body?: {
+    kinds?: string[];
+    query?: string;
+    conversationId?: string;
+    projectKey?: string;
+    modelHint?: string;
+    maxChars?: number;
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/context-fabric/propagate', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

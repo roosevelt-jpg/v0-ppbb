@@ -37,10 +37,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'context-fabric',
       name: 'Context Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Cross-cloud context propagation (Phase 108 / VL-241). Extends Context Runtime.',
+      status: 'shipped',
+      api: 'GET /v1/context-fabric/products',
+      console: '/context-fabric',
+      notes:
+        'Cross-cloud context router over Context Runtime (VL-241). Not infinite-context OS.',
     },
     {
       id: 'knowledge-fabric',

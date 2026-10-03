@@ -139,7 +139,7 @@ export class EventFabricService {
         kafkaAdapter: true,
         natsAdapter: true,
         rabbitmqAdapter: true,
-        contextFabric: true,
+        contextFabric: false,
         knowledgeFabric: true,
         promptFabric: true,
         reasoningFabric: true,
@@ -151,6 +151,7 @@ export class EventFabricService {
       },
       links: {
         eventFabric: '/event-fabric',
+        contextFabric: '/context-fabric',
         aiFabric: '/ai-fabric',
         aiKernel: '/ai-kernel',
         streamingRuntime: '/streaming-runtime',

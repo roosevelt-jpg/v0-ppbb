@@ -199,6 +199,7 @@ describe('Event Fabric (VL-240)', () => {
       role: 'owner',
     });
     expect(overview.deferred.kafkaAdapter).toBe(true);
+    expect(overview.deferred.contextFabric).toBe(false);
     expect(overview.deferred.policyFabric).toBe(true);
     expect(overview.links.eventFabric).toBe('/event-fabric');
     expect(overview.honesty.redisStreamsActive).toBe(true);

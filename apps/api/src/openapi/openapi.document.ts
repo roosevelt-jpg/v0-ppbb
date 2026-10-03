@@ -3271,6 +3271,81 @@ export const openApiDocument = {
         responses: { '200': { description: 'Backend + counters + honesty' } },
       },
     },
+    '/v1/context-fabric/products': {
+      get: {
+        summary: 'Context Fabric capability catalog',
+        operationId: 'listContextFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Context kinds, router routes, honesty (extends Context Runtime)',
+          },
+        },
+      },
+    },
+    '/v1/context-fabric/engine': {
+      get: {
+        summary: 'Context Fabric engine (alias of products)',
+        operationId: 'getContextFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/context-fabric/routes': {
+      get: {
+        summary: 'Context Fabric routing table',
+        operationId: 'listContextFabricRoutes',
+        responses: { '200': { description: 'kind → cloud/runtime handoffs' } },
+      },
+    },
+    '/v1/context-fabric/route': {
+      post: {
+        summary: 'Plan context routing for selected kinds',
+        operationId: 'planContextFabricRoute',
+        responses: { '200': { description: 'Router plan + include map' } },
+      },
+    },
+    '/v1/context-fabric/propagate': {
+      post: {
+        summary: 'Propagate context via Context Runtime assemble',
+        operationId: 'propagateContextFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Assembled context + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/context-fabric/stream': {
+      get: {
+        summary: 'Context Fabric SSE realtime ticks',
+        operationId: 'streamContextFabric',
+        responses: { '200': { description: 'text/event-stream ticks (not WebSocket OS)' } },
+      },
+    },
+    '/v1/context-fabric/overview': {
+      get: {
+        summary: 'Context Fabric org overview',
+        operationId: 'getContextFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + routes + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/context-fabric/monitoring': {
+      get: {
+        summary: 'Context Fabric monitoring',
+        operationId: 'getContextFabricMonitoring',
+        responses: { '200': { description: 'Counters + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',
