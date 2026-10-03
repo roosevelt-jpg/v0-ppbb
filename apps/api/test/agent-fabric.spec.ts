@@ -219,7 +219,7 @@ describe('Agent Fabric (VL-246)', () => {
       clerkUserId: 'clerk_af',
       role: 'owner',
     });
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.links.agentFabric).toBe('/agent-fabric');
     expect(overview.honesty.extendsAgentRuntime).toBe(true);
     expect(overview.safety.sandboxed).toBe(true);

@@ -325,7 +325,7 @@ export class ReasoningFabricService {
       deferred: {
         memoryFabric: false,
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         customReasonerOs: true,
         symbolicReasonerOs: true,
         crossOrgDataPlane: true,

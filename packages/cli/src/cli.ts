@@ -44,6 +44,9 @@ function usage(): never {
   verbalab agent-fabric-products
   verbalab agent-fabric-route [--kind <kind>]...
   verbalab agent-fabric-pipeline [--id <pipelineId>]
+  verbalab policy-fabric-products
+  verbalab policy-fabric-route [--kind <kind>]...
+  verbalab policy-fabric-pipeline [--id <pipelineId>]
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -444,6 +447,37 @@ async function main() {
     console.log(
       JSON.stringify(
         await vl.agentFabricPipeline(pipelineId ? { pipelineId } : {}),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'policy-fabric-products') {
+    console.log(JSON.stringify(await vl.policyFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'policy-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.policyFabricRoute(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'policy-fabric-pipeline') {
+    const pipelineId = argValue(rest, '--id') ?? undefined;
+    console.log(
+      JSON.stringify(
+        await vl.policyFabricPipeline(pipelineId ? { pipelineId } : {}),
         null,
         2,
       ),

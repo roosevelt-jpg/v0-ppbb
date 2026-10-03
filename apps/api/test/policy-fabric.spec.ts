@@ -8,7 +8,7 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ApiKeysService } from '../src/api-keys/api-keys.service';
-import { PromptFabricService } from '../src/prompt-fabric/prompt-fabric.service';
+import { PolicyFabricService } from '../src/policy-fabric/policy-fabric.service';
 import { EventFabricBus } from '../src/event-fabric/event-fabric.bus';
 import { ApiExceptionFilter } from '../src/common/errors/api-exception.filter';
 
@@ -51,17 +51,17 @@ async function seedOrg(prisma: PrismaService, name: string) {
   });
 }
 
-describe('Prompt Fabric (VL-243)', () => {
+describe('Policy Fabric (VL-247)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let apiKeys: ApiKeysService;
-  let fabric: PromptFabricService;
+  let fabric: PolicyFabricService;
   let bus: EventFabricBus;
-  const prevMode = process.env.VERBALAB_PROMPT_RUNTIME_MODE;
+  const prevMode = process.env.VERBALAB_POLICY_RUNTIME_MODE;
 
   beforeAll(async () => {
     process.env.EVENT_FABRIC_MEMORY = '1';
-    process.env.VERBALAB_PROMPT_RUNTIME_MODE = 'sandbox';
+    process.env.VERBALAB_POLICY_RUNTIME_MODE = 'enforce';
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -70,84 +70,82 @@ describe('Prompt Fabric (VL-243)', () => {
     await app.init();
     prisma = app.get(PrismaService);
     apiKeys = app.get(ApiKeysService);
-    fabric = app.get(PromptFabricService);
+    fabric = app.get(PolicyFabricService);
     bus = app.get(EventFabricBus);
     bus.resetForTests();
     fabric.resetCounters();
   });
 
   afterAll(async () => {
-    if (prevMode === undefined) delete process.env.VERBALAB_PROMPT_RUNTIME_MODE;
-    else process.env.VERBALAB_PROMPT_RUNTIME_MODE = prevMode;
+    if (prevMode === undefined) delete process.env.VERBALAB_POLICY_RUNTIME_MODE;
+    else process.env.VERBALAB_POLICY_RUNTIME_MODE = prevMode;
     await app.close();
   });
 
-  it('documents Prompt Fabric honesty (extends Prompt Runtime; not prompt mesh)', () => {
-    const doc = join(root, 'docs/PROMPT_FABRIC.md');
-    const adr = join(root, 'docs/adr/0145-prompt-fabric.md');
+  it('documents Policy Fabric honesty (hard gate; not log-only / OPA OS)', () => {
+    const doc = join(root, 'docs/POLICY_FABRIC.md');
+    const adr = join(root, 'docs/adr/0149-policy-fabric.md');
     const phase = join(
       root,
-      'docs/roadmap/volume10-ai-fabric/phases/phase_04_110_Prompt_Fabric.md',
+      'docs/roadmap/volume10-ai-fabric/phases/phase_08_114_Policy_Fabric.md',
     );
     expect(existsSync(doc)).toBe(true);
     expect(existsSync(adr)).toBe(true);
     expect(existsSync(phase)).toBe(true);
     const text = readFileSync(doc, 'utf8');
-    expect(text).toContain('VL-243');
-    expect(text).toMatch(/Prompt Runtime/i);
-    expect(text).toMatch(/prompt mesh/i);
-    expect(text).toMatch(/research lab/i);
+    expect(text).toContain('VL-247');
     expect(text).toMatch(/hard gate|hard-gate/i);
+    expect(text).toMatch(/log-only|log only/i);
+    expect(text).toMatch(/Policy Runtime/i);
   });
 
-  it('has no TODO/FIXME/implement-later markers in Prompt Fabric source', () => {
+  it('has no TODO/FIXME/implement-later markers in Policy Fabric source', () => {
     const banned = /TODO|FIXME|implement later|XXX\s*:|not implemented/i;
     const hits: string[] = [];
-    for (const file of walkTsFiles(join(apiSrc, 'prompt-fabric'))) {
+    for (const file of walkTsFiles(join(apiSrc, 'policy-fabric'))) {
       const text = readFileSync(file, 'utf8');
       if (banned.test(text)) hits.push(file.replace(root, ''));
     }
     expect(hits).toEqual([]);
   });
 
-  it('exposes catalog, routes, router, and policies with honesty', async () => {
-    const res = await request(app.getHttpServer()).get('/v1/prompt-fabric/products').expect(200);
-    expect(res.body.product).toBe('VerbaLab Prompt Fabric');
+  it('exposes catalog with hard-gate honesty and routes/pipelines', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/v1/policy-fabric/products')
+      .expect(200);
+    expect(res.body.product).toBe('VerbaLab Policy Fabric');
     expect(res.body.architecture.customerFacingProduct).toBe(false);
-    expect(res.body.architecture.promptMeshOs).toBe(false);
-    expect(res.body.architecture.autoPromptResearchLab).toBe(false);
-    expect(res.body.architecture.regeneratesPromptRuntime).toBe(false);
-    expect(res.body.architecture.extendsPromptRuntime).toBe(true);
-    expect(res.body.architecture.cqrs).toBe(true);
-    expect(res.body.honesty.promptPoliciesViaPolicyRuntime).toBe(true);
-    expect(res.body.safety.fabricWidePolicyHardGateRequired).toBe(true);
-    expect(res.body.docs).toBe('/docs/PROMPT_FABRIC.md');
-    expect(res.body.policyRuntime.product).toContain('Policy Runtime');
+    expect(res.body.architecture.hardGate).toBe(true);
+    expect(res.body.architecture.logOnlyMode).toBe(false);
+    expect(res.body.architecture.opaCedarOs).toBe(false);
+    expect(res.body.architecture.regeneratesPolicyRuntime).toBe(false);
+    expect(res.body.architecture.extendsPolicyRuntime).toBe(true);
+    expect(res.body.honesty.wiredIntoFabricDistribute).toBe(true);
+    expect(res.body.safety.policyLogOnlyForbidden).toBe(true);
+    expect(res.body.docs).toBe('/docs/POLICY_FABRIC.md');
+    expect(res.body.globalDenies.length).toBeGreaterThan(3);
+    expect(res.body.buses.length).toBeGreaterThanOrEqual(8);
 
-    const hub = res.body.products.find((p: { id: string }) => p.id === 'prompt-fabric');
+    const hub = res.body.products.find((p: { id: string }) => p.id === 'policy-fabric');
     expect(hub.status).toBe('shipped');
 
-    const routes = await request(app.getHttpServer()).get('/v1/prompt-fabric/routes').expect(200);
-    expect(routes.body.routes.length).toBeGreaterThanOrEqual(7);
-    expect(routes.body.runtimeRoutes.some((r: { feature: string }) => r.feature === 'rag')).toBe(
-      true,
-    );
-
     const plan = await request(app.getHttpServer())
-      .post('/v1/prompt-fabric/route')
-      .send({ feature: 'rag' })
+      .post('/v1/policy-fabric/route')
+      .send({ kinds: ['security', 'assert', 'nope'] })
       .expect(200);
-    expect(plan.body.runtimeRoute.key).toBe('rag');
-    expect(plan.body.runtimeRoute.honesty.promptMeshOs).toBe(false);
+    expect(plan.body.plan.map((p: { kind: string }) => p.kind)).toEqual(
+      expect.arrayContaining(['security', 'assert']),
+    );
+    expect(plan.body.missing).toContain('nope');
 
-    const policies = await request(app.getHttpServer())
-      .get('/v1/prompt-fabric/policies')
+    const pipeline = await request(app.getHttpServer())
+      .post('/v1/policy-fabric/pipeline')
+      .send({ pipelineId: 'evaluate-assert' })
       .expect(200);
-    expect(policies.body.fabric.policyFabricDeferred).toBe(false);
-    expect(policies.body.policies.target).toBe('policy-runtime');
+    expect(pipeline.body.pipeline.steps).toEqual(['evaluate', 'assert']);
   });
 
-  it('validates, distributes, and syncs same-org peers with Event Fabric events', async () => {
+  it('hard-gates forbidden actions with 403 and allows distribute when permitted', async () => {
     bus.resetForTests();
     fabric.resetCounters();
     const org = await seedOrg(prisma, `pf_${Date.now()}`);
@@ -160,47 +158,49 @@ describe('Prompt Fabric (VL-243)', () => {
       name: 'pf-key',
     });
 
-    const validated = await request(app.getHttpServer())
-      .post('/v1/prompt-fabric/validate')
+    const denied = await request(app.getHttpServer())
+      .post('/v1/policy-fabric/assert')
+      .set('Authorization', `Bearer ${key.secret}`)
+      .send({ bus: 'agent-fabric', action: 'fabric.bypass_policy' })
+      .expect(403);
+    expect(denied.body.error?.code ?? denied.body.code).toMatch(/policy_fabric_denied|denied/i);
+
+    const allowed = await request(app.getHttpServer())
+      .post('/v1/policy-fabric/assert')
       .set('Authorization', `Bearer ${key.secret}`)
       .send({
-        key: 'chat',
-        body: 'You are helpful. Locale={{locale}}.',
-        variables: { locale: 'sw' },
+        bus: 'policy-fabric',
+        action: 'fabric.distribute',
+        permissions: ['fabric.distribute'],
       })
       .expect(200);
-    expect(validated.body.honesty.regeneratesPromptRuntime).toBe(false);
+    expect(allowed.body.hardGate).toBe(true);
+    expect(allowed.body.logOnly).toBe(false);
 
     const dist = await request(app.getHttpServer())
-      .post('/v1/prompt-fabric/distribute')
+      .post('/v1/policy-fabric/distribute')
       .set('Authorization', `Bearer ${key.secret}`)
       .send({
-        keys: ['chat', 'rag'],
+        kinds: ['security', 'assert'],
         publishEvent: true,
-        topic: 'prompt-fabric-test',
+        topic: 'policy-fabric-test',
       })
       .expect(200);
     expect(dist.body.distribution.targets).toContain(peer.id);
-    expect(dist.body.event.type).toBe('com.verbalab.prompt.distributed');
+    expect(dist.body.event.type).toBe('com.verbalab.policy.distributed');
 
     const sync = await request(app.getHttpServer())
-      .post('/v1/prompt-fabric/sync')
+      .post('/v1/policy-fabric/sync')
       .set('Authorization', `Bearer ${key.secret}`)
-      .send({
-        targetWorkspaceId: peer.id,
-        keys: ['chat'],
-        publishEvent: true,
-      })
+      .send({})
       .expect(200);
-    expect(sync.body.sync.cursor).toMatch(/^pf:/);
-    expect(sync.body.event.type).toBe('com.verbalab.prompt.synced');
+    expect(typeof sync.body.synced).toBe('number');
 
     const monitoring = await request(app.getHttpServer())
-      .get('/v1/prompt-fabric/monitoring')
+      .get('/v1/policy-fabric/monitoring')
       .expect(200);
-    expect(monitoring.body.counters.validations).toBeGreaterThan(0);
+    expect(monitoring.body.counters.denies).toBeGreaterThan(0);
     expect(monitoring.body.counters.distributions).toBeGreaterThan(0);
-    expect(monitoring.body.counters.syncs).toBeGreaterThan(0);
   });
 
   it('exposes overview and GraphQL CQRS façades', async () => {
@@ -212,29 +212,28 @@ describe('Prompt Fabric (VL-243)', () => {
       clerkUserId: 'clerk_pf',
       role: 'owner',
     });
-    expect(overview.deferred.reasoningFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(false);
-    expect(overview.links.promptFabric).toBe('/prompt-fabric');
-    expect(overview.honesty.extendsPromptRuntime).toBe(true);
+    expect(overview.links.policyFabric).toBe('/policy-fabric');
+    expect(overview.honesty.hardGate).toBe(true);
+    expect(overview.safety.logOnlyMode).toBe(false);
 
     const caps = await request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: '{ promptFabricCapabilities { id name status api notes } }',
+        query: '{ policyFabricCapabilities { id name status api notes } }',
       })
       .expect(200);
     expect(caps.body.errors).toBeUndefined();
-    expect(caps.body.data.promptFabricCapabilities.length).toBeGreaterThan(5);
+    expect(caps.body.data.policyFabricCapabilities.length).toBeGreaterThan(5);
 
     const routes = await request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: '{ promptFabricRoutes { kind name target api cloud notes } }',
+        query: '{ policyFabricRoutes { kind name target api cloud notes } }',
       })
       .expect(200);
     expect(routes.body.errors).toBeUndefined();
     expect(
-      routes.body.data.promptFabricRoutes.some((r: { kind: string }) => r.kind === 'chat'),
+      routes.body.data.policyFabricRoutes.some((r: { kind: string }) => r.kind === 'assert'),
     ).toBe(true);
   });
 });

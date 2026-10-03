@@ -3680,6 +3680,163 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + honesty' } },
       },
     },
+    '/v1/policy-fabric/products': {
+      get: {
+        summary: 'Policy Fabric capability catalog',
+        operationId: 'listPolicyFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Policy router capabilities, hard-gate honesty, fabric bus list',
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/engine': {
+      get: {
+        summary: 'Policy Fabric engine (alias of products)',
+        operationId: 'getPolicyFabricEngine',
+        responses: { '200': { description: 'Catalog + hard-gate honesty' } },
+      },
+    },
+    '/v1/policy-fabric/routes': {
+      get: {
+        summary: 'Policy Fabric routing table',
+        operationId: 'listPolicyFabricRoutes',
+        responses: { '200': { description: 'kind → Runtime/Fabric handoffs' } },
+      },
+    },
+    '/v1/policy-fabric/route': {
+      post: {
+        summary: 'Plan policy routing for selected kinds',
+        operationId: 'planPolicyFabricRoute',
+        responses: { '200': { description: 'Router plan' } },
+      },
+    },
+    '/v1/policy-fabric/pipeline': {
+      post: {
+        summary: 'Plan a policy pipeline (ordered handoffs)',
+        operationId: 'planPolicyFabricPipeline',
+        responses: { '200': { description: 'Pipeline + routed steps' } },
+      },
+    },
+    '/v1/policy-fabric/versions': {
+      get: {
+        summary: 'Policy Fabric version catalog',
+        operationId: 'listPolicyFabricVersions',
+        responses: { '200': { description: 'Hard-gate/router/pipeline versions' } },
+      },
+    },
+    '/v1/policy-fabric/federate': {
+      post: {
+        summary: 'List policy federation handoff targets',
+        operationId: 'federatePolicyFabric',
+        responses: { '200': { description: 'Federation handoff catalog' } },
+      },
+    },
+    '/v1/policy-fabric/evaluate': {
+      post: {
+        summary: 'Evaluate a policy decision (no throw)',
+        operationId: 'evaluatePolicyFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Decision with hardGate:true' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/assert': {
+      post: {
+        summary: 'Hard-gate assert (403 on deny)',
+        operationId: 'assertPolicyFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Allowed' },
+          '403': {
+            description: 'Denied by Policy Fabric hard gate',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/policies': {
+      get: {
+        summary: 'List policies via Policy Runtime',
+        operationId: 'listPolicyFabricPolicies',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Policy list' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/sync': {
+      post: {
+        summary: 'Same-org policy catalog sync plan (hard-gated)',
+        operationId: 'syncPolicyFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sync plan' },
+          '403': {
+            description: 'Denied by Policy Fabric hard gate',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/distribute': {
+      post: {
+        summary: 'Plan policy distribution to same-org workspaces (hard-gated)',
+        operationId: 'distributePolicyFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '403': {
+            description: 'Denied by Policy Fabric hard gate',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/overview': {
+      get: {
+        summary: 'Policy Fabric org overview',
+        operationId: 'getPolicyFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + pipelines + counters' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/policy-fabric/monitoring': {
+      get: {
+        summary: 'Policy Fabric monitoring',
+        operationId: 'getPolicyFabricMonitoring',
+        responses: { '200': { description: 'Counters + honesty' } },
+      },
+    },
     '/v1/agent-fabric/products': {
       get: {
         summary: 'Agent Fabric capability catalog',

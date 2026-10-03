@@ -145,7 +145,7 @@ export class EventFabricService {
         reasoningFabric: false,
         memoryFabric: false,
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         kafkaHyperscalerOs: true,
         regeneratesVolumes1to9: false,
       },

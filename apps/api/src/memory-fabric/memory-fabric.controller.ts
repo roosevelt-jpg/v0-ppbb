@@ -148,6 +148,8 @@ export class MemoryFabricController {
     return this.fabric.distribute({
       organizationId: req.translateAuth.organizationId,
       workspaceId: req.translateAuth.workspaceId,
+      userId: req.sessionAuth?.userId,
+      apiKeyId: req.translateAuth.apiKeyId,
       kinds: body.kinds,
       targetWorkspaceIds: body.targetWorkspaceIds,
       publishEvent: body.publishEvent,

@@ -7,6 +7,7 @@ import { MemoryRuntimeService } from '../memory-runtime/memory-runtime.service';
 import { MemoryCloudService } from '../memory-cloud/memory-cloud.service';
 import { IntelligentCacheService } from '../intelligent-cache/intelligent-cache.service';
 import { EventFabricBus } from '../event-fabric/event-fabric.bus';
+import { FabricPolicyGate } from '../policy-fabric/fabric-policy.gate';
 import {
   memoryFabricArchitectureNotes,
   memoryFabricCapabilityCatalog,
@@ -63,6 +64,7 @@ export class MemoryFabricService {
     private readonly memoryCloud: MemoryCloudService,
     private readonly intelligentCache: IntelligentCacheService,
     private readonly eventBus: EventFabricBus,
+    private readonly fabricGate: FabricPolicyGate,
   ) {}
 
   /** Test hook. */
@@ -271,8 +273,18 @@ export class MemoryFabricService {
     targetWorkspaceIds?: string[];
     publishEvent?: boolean;
     topic?: string;
+    userId?: string;
+    apiKeyId?: string;
   }) {
     this.distributions += 1;
+    await this.fabricGate.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      bus: 'memory-fabric',
+      action: 'fabric.distribute',
+      subjectId: input.userId ?? input.apiKeyId,
+      permissions: ['fabric.distribute'],
+    });
     const plan = this.route({
       kinds: input.kinds ?? ['short_term', 'long_term', 'workspace', 'sync'],
     });
@@ -393,7 +405,7 @@ export class MemoryFabricService {
       },
       deferred: {
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         mem0Os: true,
         multiRegionReplicationOs: true,
         crossOrgDataPlane: true,

@@ -173,9 +173,9 @@ export class PromptFabricService {
       },
       fabric: {
         status: 'partial',
-        policyFabricDeferred: true,
+        policyFabricDeferred: false,
         note:
-          'Prompt policies use Policy Runtime hard-gates today. Fabric-wide Policy Fabric (VL-247) remains required.',
+          'Prompt policies use Policy Runtime hard-gates. Fabric-wide Policy Fabric (VL-247) hard-gates distribute planes.',
       },
       honesty: promptFabricHonesty(),
       docs: '/docs/PROMPT_FABRIC.md',
@@ -367,7 +367,7 @@ export class PromptFabricService {
         reasoningFabric: false,
         memoryFabric: false,
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         promptMeshOs: true,
         autoPromptResearchLab: true,
         crossOrgDataPlane: true,

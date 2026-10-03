@@ -75,7 +75,7 @@ export class AiFabricService {
         reasoningFabric: false,
         memoryFabric: false,
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         kafkaHyperscalerOs: true,
         serviceMeshOs: true,
         regeneratesVolumes1to9: false,
@@ -89,6 +89,7 @@ export class AiFabricService {
         reasoningFabric: '/reasoning-fabric',
         memoryFabric: '/memory-fabric',
         agentFabric: '/agent-fabric',
+        policyFabric: '/policy-fabric',
         aiKernel: '/ai-kernel',
         inferenceCloud: '/inference-cloud',
         foundationModelCloud: '/foundation-model-cloud',
@@ -100,7 +101,7 @@ export class AiFabricService {
       },
       docs: '/docs/AI_FABRIC.md',
       note:
-        'AI Fabric Foundation (VL-239). Discovery + routing hub. Event Fabric (VL-240) shipped; Policy Fabric deferred with hard-gate requirement documented.',
+        'AI Fabric Foundation (VL-239). Discovery + routing hub. Event through Policy Fabric (VL-240–247) shipped with fabric-wide hard gate.',
     };
   }
 
@@ -112,7 +113,7 @@ export class AiFabricService {
       architecture: aiFabricArchitectureNotes(),
       honesty: aiFabricHonesty(),
       note:
-        'AI Fabric monitoring snapshot (VL-239). Hub + Event Fabric shipped; Policy Fabric deferred per Volume 10 plan.',
+        'AI Fabric monitoring snapshot (VL-239). Hub through Policy Fabric shipped; production audit remains.',
     };
   }
 }

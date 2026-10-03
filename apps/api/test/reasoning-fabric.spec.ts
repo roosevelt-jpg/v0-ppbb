@@ -208,7 +208,7 @@ describe('Reasoning Fabric (VL-244)', () => {
       role: 'owner',
     });
     expect(overview.deferred.memoryFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.links.reasoningFabric).toBe('/reasoning-fabric');
     expect(overview.honesty.extendsReasoningRuntime).toBe(true);
 

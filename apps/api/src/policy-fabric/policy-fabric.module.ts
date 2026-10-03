@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AgentFabricController } from './agent-fabric.controller';
-import { AgentFabricService } from './agent-fabric.service';
+import { PolicyFabricController } from './policy-fabric.controller';
+import { PolicyFabricService } from './policy-fabric.service';
+import { FabricPolicyGate } from './fabric-policy.gate';
 import { UsageModule } from '../usage/usage.module';
 import { IdentityModule } from '../identity/identity.module';
 import { PrismaModule } from '../prisma/prisma.module';
-import { AgentRuntimeModule } from '../agent-runtime/agent-runtime.module';
+import { PolicyRuntimeModule } from '../policy-runtime/policy-runtime.module';
 import { EventFabricModule } from '../event-fabric/event-fabric.module';
-import { PolicyFabricModule } from '../policy-fabric/policy-fabric.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
 
@@ -15,13 +15,12 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     UsageModule,
     IdentityModule,
     PrismaModule,
-    AgentRuntimeModule,
+    PolicyRuntimeModule,
     EventFabricModule,
-    PolicyFabricModule,
     ApiKeysModule,
   ],
-  controllers: [AgentFabricController],
-  providers: [AgentFabricService, TranslateAuthGuard],
-  exports: [AgentFabricService],
+  controllers: [PolicyFabricController],
+  providers: [PolicyFabricService, FabricPolicyGate, TranslateAuthGuard],
+  exports: [PolicyFabricService, FabricPolicyGate],
 })
-export class AgentFabricModule {}
+export class PolicyFabricModule {}

@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-246 Done — Agent Fabric)
+Last updated: 2026-10-03 (VL-247 Done — Policy Fabric)
 
 ---
 
@@ -276,7 +276,7 @@ Last updated: 2026-10-03 (VL-246 Done — Agent Fabric)
 | VL-244 | Reasoning Fabric (Phase 111) | Done | Router/pipelines/replay over Reasoning Runtime; same-org distribute; ADR-0146. Not custom reasoner OS. |
 | VL-245 | Memory Fabric (Phase 112) | Done | Router/sync/distribute over Memory Runtime; same-org replicate plans; ADR-0147. Not Mem0 / multi-region replication OS. |
 | VL-246 | Agent Fabric (Phase 113) | Done | Router/discovery/collaborate/schedule over Agent Runtime; SSE ticks; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |
-| VL-247 | Policy Fabric (Phase 114) | Not Started | Must hard-gate fabric-wide (not log-only). |
+| VL-247 | Policy Fabric (Phase 114) | Done | Fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. Not OPA/Cedar OS. |
 | VL-248 | AI Fabric Production Audit (Phase 115) | Not Started | |
 
 ---
@@ -429,3 +429,4 @@ Last updated: 2026-10-03 (VL-246 Done — Agent Fabric)
 | 2026-10-03 | VL-244 Done: Reasoning Fabric (Phase 111) — router/pipelines/replay over Reasoning Runtime; ADR-0146. Not custom reasoner OS. |
 | 2026-10-03 | VL-245 Done: Memory Fabric (Phase 112) — router/sync/distribute over Memory Runtime; ADR-0147. Not Mem0 / multi-region replication OS. |
 | 2026-10-03 | VL-246 Done: Agent Fabric (Phase 113) — router/discovery/collaborate/schedule over Agent Runtime; ADR-0148. Sandboxed + Policy-gated; not LangGraph/AutoGPT OS. |
+| 2026-10-03 | VL-247 Done: Policy Fabric (Phase 114) — fabric-wide hard gate via FabricPolicyGate; ADR-0149. Denies 403 — not log-only. |

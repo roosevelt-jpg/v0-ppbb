@@ -332,7 +332,7 @@ export class KnowledgeFabricService {
         reasoningFabric: false,
         memoryFabric: false,
         agentFabric: false,
-        policyFabric: true,
+        policyFabric: false,
         confluenceSharepointOs: true,
         neo4jFederationOs: true,
         crossOrgDataPlane: true,

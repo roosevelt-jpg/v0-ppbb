@@ -1711,6 +1711,81 @@ export class VerbaLab {
     });
   }
 
+  async policyFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    routes: Array<{
+      kind: string;
+      name: string;
+      target: string;
+      api: string;
+      cloud: string;
+      notes: string;
+    }>;
+    pipelines: Array<{
+      id: string;
+      name: string;
+      steps: string[];
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/policy-fabric/products', { method: 'GET' });
+  }
+
+  async policyFabricRoute(body?: { kinds?: string[] }): Promise<{
+    plan: Array<Record<string, unknown>>;
+    missing: string[];
+  }> {
+    return this.requestJson('/v1/policy-fabric/route', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async policyFabricPipeline(body?: {
+    pipelineId?: string;
+    steps?: string[];
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/policy-fabric/pipeline', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async policyFabricAssert(body: {
+    bus?: string;
+    action: string;
+    subjectId?: string;
+    permissions?: string[];
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/policy-fabric/assert', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async policyFabricDistribute(body?: {
+    kinds?: string[];
+    targetWorkspaceIds?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/policy-fabric/distribute', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

@@ -91,11 +91,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'policy-fabric',
       name: 'Policy Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'shipped',
+      api: 'GET /v1/policy-fabric/products',
+      console: '/policy-fabric',
       notes:
-        'Fabric-wide hard gate (Phase 114 / VL-247). Volume 10 README: must enforce, not log-only.',
+        'Fabric-wide hard gate (VL-247). Enforces via FabricPolicyGate — not log-only. Not OPA/Cedar OS.',
     },
     {
       id: 'workflow-bus',

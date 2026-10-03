@@ -3,17 +3,19 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsageService } from '../usage/usage.service';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
-import { AgentRuntimeService } from '../agent-runtime/agent-runtime.service';
+import { PolicyRuntimeService } from '../policy-runtime/policy-runtime.service';
 import { EventFabricBus } from '../event-fabric/event-fabric.bus';
-import { FabricPolicyGate } from '../policy-fabric/fabric-policy.gate';
+import { FabricPolicyGate } from './fabric-policy.gate';
 import {
-  agentFabricArchitectureNotes,
-  agentFabricCapabilityCatalog,
-  agentFabricHonesty,
-  agentFabricPipelines,
-  agentFabricRoutingTable,
-  agentFabricVersions,
-} from './agent-fabric.catalog';
+  FABRIC_BUSES,
+  FABRIC_GLOBAL_DENIES,
+  policyFabricArchitectureNotes,
+  policyFabricCapabilityCatalog,
+  policyFabricHonesty,
+  policyFabricPipelines,
+  policyFabricRoutingTable,
+  policyFabricVersions,
+} from './policy-fabric.catalog';
 
 type AuthCtx = {
   organizationId: string;
@@ -34,12 +36,11 @@ type DistRecord = {
 };
 
 @Injectable()
-export class AgentFabricService {
+export class PolicyFabricService {
   private routePlans = 0;
   private pipelines = 0;
-  private discoveries = 0;
-  private collaborations = 0;
-  private schedules = 0;
+  private evaluations = 0;
+  private syncs = 0;
   private federations = 0;
   private distributions = 0;
   private eventPublishes = 0;
@@ -48,62 +49,62 @@ export class AgentFabricService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usage: UsageService,
-    private readonly agentRuntime: AgentRuntimeService,
-    private readonly eventBus: EventFabricBus,
+    private readonly policyRuntime: PolicyRuntimeService,
     private readonly fabricGate: FabricPolicyGate,
+    private readonly eventBus: EventFabricBus,
   ) {}
 
   /** Test hook. */
   resetCounters() {
     this.routePlans = 0;
     this.pipelines = 0;
-    this.discoveries = 0;
-    this.collaborations = 0;
-    this.schedules = 0;
+    this.evaluations = 0;
+    this.syncs = 0;
     this.federations = 0;
     this.distributions = 0;
     this.eventPublishes = 0;
     this.distLog.length = 0;
+    this.fabricGate.resetCounters();
   }
 
   products() {
     return {
-      product: 'VerbaLab Agent Fabric',
-      products: agentFabricCapabilityCatalog(),
-      routes: agentFabricRoutingTable(),
-      pipelines: agentFabricPipelines(),
-      versions: agentFabricVersions(),
-      agentRuntime: this.agentRuntime.engine(),
-      architecture: agentFabricArchitectureNotes(),
-      honesty: agentFabricHonesty(),
+      product: 'VerbaLab Policy Fabric',
+      products: policyFabricCapabilityCatalog(),
+      routes: policyFabricRoutingTable(),
+      pipelines: policyFabricPipelines(),
+      versions: policyFabricVersions(),
+      buses: FABRIC_BUSES.map((id) => ({ id })),
+      globalDenies: FABRIC_GLOBAL_DENIES.map((id) => ({ id })),
+      policyRuntime: this.policyRuntime.engine(),
+      architecture: policyFabricArchitectureNotes(),
+      honesty: policyFabricHonesty(),
       safety: {
-        sandboxed: true,
-        policyRuntimeHardGate: true,
-        openToolExecution: false,
-        liveToolExecution: false,
+        hardGate: true,
+        logOnlyMode: false,
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Agent actions stay sandboxed. Policy Runtime hard-gates Agent Runtime today; Policy Fabric (VL-247) must hard-gate fabric-wide when shipped — not log-only.',
+          'Policy Fabric hard-gates fabric buses. Denies return 403. Log-only mode is forbidden.',
       },
-      docs: '/docs/AGENT_FABRIC.md',
+      docs: '/docs/POLICY_FABRIC.md',
       note:
-        'Agent Fabric (VL-246). Cross-cloud agent router over Agent Runtime. Sandboxed + Policy-gated. Not LangGraph/AutoGPT OS.',
+        'Policy Fabric (VL-247). Fabric-wide hard gate over Policy Runtime. Not OPA/Cedar/GRC OS.',
     };
   }
 
   routes() {
     return {
-      routes: agentFabricRoutingTable(),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Static agent-intent → Runtime/Policy handoff catalog.',
+      routes: policyFabricRoutingTable(),
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'Static policy-kind → Runtime/Fabric handoff catalog.',
     };
   }
 
   route(input: { kinds?: string[] }) {
     this.routePlans += 1;
-    const table = agentFabricRoutingTable();
+    const table = policyFabricRoutingTable();
     const kinds = input.kinds?.length
       ? input.kinds.map((k) => k.toLowerCase())
       : table.map((r) => r.kind);
@@ -112,14 +113,14 @@ export class AgentFabricService {
     return {
       plan: selected,
       missing,
-      honesty: agentFabricHonesty(),
-      note: 'Agent Router plan — does not execute agent steps itself.',
+      honesty: policyFabricHonesty(),
+      note: 'Policy Router plan — enforcement is via assert/FabricPolicyGate.',
     };
   }
 
   pipeline(input: { pipelineId?: string; steps?: string[] }) {
     this.pipelines += 1;
-    const catalog = agentFabricPipelines();
+    const catalog = policyFabricPipelines();
     const chosen =
       catalog.find((p) => p.id === input.pipelineId) ??
       (input.steps?.length
@@ -136,17 +137,17 @@ export class AgentFabricService {
       pipeline: chosen,
       plan: routed.plan,
       missing: routed.missing,
-      honesty: agentFabricHonesty(),
-      note: 'Pipeline is an ordered handoff plan — each step runs via Agent Runtime APIs under Policy gate.',
+      honesty: policyFabricHonesty(),
+      note: 'Pipeline is an ordered handoff plan — assert steps hard-gate.',
     };
   }
 
   versions() {
     return {
-      versions: agentFabricVersions(),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Fabric router/pipeline versions — Runtime owns agent payloads.',
+      versions: policyFabricVersions(),
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'Fabric hard-gate/router versions — Runtime owns policy rows.',
     };
   }
 
@@ -158,52 +159,106 @@ export class AgentFabricService {
         kind: r.kind,
         target: r.target,
         api: r.api,
-        mode: r.kind === 'policy' ? 'hard_gate' : 'handoff',
+        mode: r.kind === 'assert' ? 'hard_gate' : 'handoff',
       })),
       missing: plan.missing,
-      honesty: agentFabricHonesty(),
-      note: 'Federation is a product-handoff catalog — not cross-tenant agent mesh.',
+      honesty: policyFabricHonesty(),
+      note: 'Federation is a product-handoff catalog — not cross-tenant policy mesh.',
     };
   }
 
-  async discover(auth: AuthCtx) {
-    this.discoveries += 1;
-    return {
-      ...(await this.agentRuntime.listAgents(auth)),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Discovery façade over Agent Runtime — workspace-scoped only.',
-    };
-  }
-
-  async collaborate(
-    auth: AuthCtx & { agentIds?: string[]; topic?: string; message?: string },
+  async evaluate(
+    auth: AuthCtx & {
+      runtime?: string;
+      subjectId?: string;
+      action?: string;
+      permissions?: string[];
+      bus?: string;
+    },
   ) {
-    this.collaborations += 1;
+    this.evaluations += 1;
+    const decision = await this.policyRuntime.evaluate({
+      organizationId: auth.organizationId,
+      workspaceId: auth.workspaceId,
+      userId: auth.userId,
+      ip: auth.ip,
+      runtime: auth.runtime,
+      subjectId: auth.subjectId,
+      action: auth.action,
+      permissions: auth.permissions,
+    });
+
+    const fabricDenied =
+      Boolean(auth.action) &&
+      (FABRIC_GLOBAL_DENIES as readonly string[]).includes(auth.action!);
+
     return {
-      ...(await this.agentRuntime.collaborate(auth)),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Collaborate façade over Agent Runtime sandbox — Policy-gated.',
+      ...decision,
+      fabric: {
+        bus: auth.bus ?? null,
+        fabricGlobalDeny: fabricDenied,
+        hardGate: true,
+        logOnly: false,
+      },
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'Evaluate façade — does not throw; use assert for hard-gate 403.',
     };
   }
 
-  async schedule(auth: AuthCtx & { agentId?: string; goal?: string; runAt?: string }) {
-    this.schedules += 1;
+  async assert(
+    auth: AuthCtx & {
+      bus?: string;
+      action?: string;
+      subjectId?: string;
+      permissions?: string[];
+    },
+  ) {
+    const gate = await this.fabricGate.assertAllowed({
+      organizationId: auth.organizationId,
+      workspaceId: auth.workspaceId,
+      bus: auth.bus ?? 'policy-fabric',
+      action: auth.action ?? '',
+      subjectId: auth.subjectId,
+      permissions: auth.permissions,
+    });
     return {
-      ...(await this.agentRuntime.schedule(auth)),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Schedule façade over Agent Runtime stubs — not cron fleet OS.',
+      ...gate,
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'Hard gate passed. Denies throw 403 — never log-only.',
     };
   }
 
-  async marketplace(auth: AuthCtx) {
+  async listPolicies(auth: AuthCtx) {
     return {
-      ...(await this.agentRuntime.marketplace(auth)),
-      honesty: agentFabricHonesty(),
-      docs: '/docs/AGENT_FABRIC.md',
-      note: 'Marketplace integration façade — listing counts only.',
+      ...(await this.policyRuntime.listPolicies(auth)),
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'List façade over Policy Runtime.',
+    };
+  }
+
+  async sync(auth: AuthCtx) {
+    this.syncs += 1;
+    await this.fabricGate.assertAllowed({
+      organizationId: auth.organizationId,
+      workspaceId: auth.workspaceId,
+      bus: 'policy-fabric',
+      action: 'fabric.policy.sync',
+      subjectId: auth.userId ?? auth.apiKeyId,
+      permissions: ['fabric.policy.sync'],
+    });
+
+    const listed = await this.policyRuntime.listPolicies(auth);
+    const peers = await this.peerWorkspaces(auth.organizationId, auth.workspaceId);
+    return {
+      synced: listed.policies.length,
+      peers: peers.map((p) => p.id),
+      stamp: new Date().toISOString(),
+      honesty: policyFabricHonesty(),
+      docs: '/docs/POLICY_FABRIC.md',
+      note: 'Same-org sync plan of policy catalog — does not push rows to peers automatically.',
     };
   }
 
@@ -221,13 +276,14 @@ export class AgentFabricService {
     await this.fabricGate.assertAllowed({
       organizationId: input.organizationId,
       workspaceId: input.workspaceId,
-      bus: 'agent-fabric',
+      bus: 'policy-fabric',
       action: 'fabric.distribute',
       subjectId: input.userId ?? input.apiKeyId,
       permissions: ['fabric.distribute'],
     });
+
     const plan = this.route({
-      kinds: input.kinds ?? ['discover', 'collaborate', 'schedule'],
+      kinds: input.kinds ?? ['security', 'organization', 'assert'],
     });
     const peers = await this.peerWorkspaces(input.organizationId, input.workspaceId);
     const targets =
@@ -249,9 +305,9 @@ export class AgentFabricService {
     if (input.publishEvent === true) {
       this.eventPublishes += 1;
       event = await this.eventBus.publish({
-        topic: input.topic ?? 'agent-fabric',
-        type: 'com.verbalab.agent.distributed',
-        source: '/verbalab/agent-fabric',
+        topic: input.topic ?? 'policy-fabric',
+        type: 'com.verbalab.policy.distributed',
+        source: '/verbalab/policy-fabric',
         eventVersion: '1',
         data: {
           distributionId: record.id,
@@ -270,25 +326,8 @@ export class AgentFabricService {
       plan: plan.plan,
       peers: targets,
       event,
-      honesty: agentFabricHonesty(),
-      note: 'Distribution plan for same-org workspaces — does not spawn remote agents automatically.',
-    };
-  }
-
-  streamSnapshot() {
-    return {
-      ts: new Date().toISOString(),
-      product: 'VerbaLab Agent Fabric',
-      counters: {
-        routePlans: this.routePlans,
-        discoveries: this.discoveries,
-        collaborations: this.collaborations,
-        schedules: this.schedules,
-        eventPublishes: this.eventPublishes,
-      },
-      routes: agentFabricRoutingTable().length,
-      honesty: agentFabricHonesty(),
-      note: 'SSE realtime tick — not WebSocket OS.',
+      honesty: policyFabricHonesty(),
+      note: 'Distribution plan for same-org workspaces — hard-gated before planning.',
     };
   }
 
@@ -303,24 +342,24 @@ export class AgentFabricService {
 
   monitoring() {
     return {
-      mode: 'agent_fabric',
+      mode: 'policy_fabric',
       counters: {
         routePlans: this.routePlans,
         pipelines: this.pipelines,
-        discoveries: this.discoveries,
-        collaborations: this.collaborations,
-        schedules: this.schedules,
+        evaluations: this.evaluations,
+        syncs: this.syncs,
         federations: this.federations,
         distributions: this.distributions,
         eventPublishes: this.eventPublishes,
+        ...this.fabricGate.counters(),
       },
       recent: { distributions: this.distLog.slice(-10) },
-      products: agentFabricCapabilityCatalog().map((p) => ({
+      products: policyFabricCapabilityCatalog().map((p) => ({
         id: p.id,
         status: p.status,
       })),
-      honesty: agentFabricHonesty(),
-      note: 'Agent Fabric monitoring (VL-246).',
+      honesty: policyFabricHonesty(),
+      note: 'Policy Fabric monitoring (VL-247).',
     };
   }
 
@@ -339,51 +378,46 @@ export class AgentFabricService {
         embeddings: usageSummary.embeddings,
       },
       workspace: { peerWorkspaces: peers.length },
-      products: agentFabricCapabilityCatalog(),
-      routes: agentFabricRoutingTable(),
-      pipelines: agentFabricPipelines(),
-      architecture: agentFabricArchitectureNotes(),
-      honesty: agentFabricHonesty(),
+      products: policyFabricCapabilityCatalog(),
+      routes: policyFabricRoutingTable(),
+      pipelines: policyFabricPipelines(),
+      architecture: policyFabricArchitectureNotes(),
+      honesty: policyFabricHonesty(),
       counters: {
         routePlans: this.routePlans,
         pipelines: this.pipelines,
-        discoveries: this.discoveries,
-        collaborations: this.collaborations,
-        schedules: this.schedules,
+        evaluations: this.evaluations,
+        syncs: this.syncs,
         federations: this.federations,
         distributions: this.distributions,
         eventPublishes: this.eventPublishes,
+        ...this.fabricGate.counters(),
       },
       safety: {
-        sandboxed: true,
-        policyRuntimeHardGate: true,
-        openToolExecution: false,
+        hardGate: true,
+        logOnlyMode: false,
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric hard-gates fabric buses. Agent/Workflow/Plugin remain gated by Policy Runtime. Log-only is forbidden.',
       },
       deferred: {
-        policyFabric: false,
-        langGraphOs: true,
-        autoGptOs: true,
-        openToolExecution: true,
+        opaCedarOs: true,
+        grcOs: true,
         crossOrgDataPlane: true,
         regeneratesVolumes1to9: false,
       },
       links: {
-        agentFabric: '/agent-fabric',
-        agentRuntime: '/agent-runtime',
+        policyFabric: '/policy-fabric',
         policyRuntime: '/policy-runtime',
+        agentFabric: '/agent-fabric',
         memoryFabric: '/memory-fabric',
-        reasoningFabric: '/reasoning-fabric',
         eventFabric: '/event-fabric',
         aiFabric: '/ai-fabric',
-        marketplace: '/marketplace',
       },
-      docs: '/docs/AGENT_FABRIC.md',
+      docs: '/docs/POLICY_FABRIC.md',
       note:
-        'Agent Fabric (VL-246). Router + discovery/collaborate/schedule over Agent Runtime; sandboxed + Policy-gated.',
+        'Policy Fabric (VL-247). Hard-gate engine + router over Policy Runtime; same-org sync/distribute.',
     };
   }
 }

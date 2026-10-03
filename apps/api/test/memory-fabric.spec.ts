@@ -218,7 +218,7 @@ describe('Memory Fabric (VL-245)', () => {
       role: 'owner',
     });
     expect(overview.deferred.agentFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.links.memoryFabric).toBe('/memory-fabric');
     expect(overview.honesty.extendsMemoryRuntime).toBe(true);
 

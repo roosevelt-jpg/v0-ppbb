@@ -210,7 +210,7 @@ describe('Knowledge Fabric (VL-242)', () => {
     });
     expect(overview.deferred.promptFabric).toBe(false);
     expect(overview.deferred.reasoningFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.deferred.crossOrgDataPlane).toBe(true);
     expect(overview.links.knowledgeFabric).toBe('/knowledge-fabric');
     expect(overview.honesty.extendsKnowledgeCloud).toBe(true);

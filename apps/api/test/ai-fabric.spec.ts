@@ -118,8 +118,9 @@ describe('AI Fabric Foundation (VL-239)', () => {
     expect(event.console).toBe('/event-fabric');
 
     const policy = res.body.products.find((p: { id: string }) => p.id === 'policy-fabric');
-    expect(policy.status).toBe('deferred');
-    expect(policy.notes).toMatch(/hard gate|enforce/i);
+    expect(policy.status).toBe('shipped');
+    expect(policy.console).toBe('/policy-fabric');
+    expect(policy.notes).toMatch(/hard gate|enforce|FabricPolicyGate/i);
   });
 
   it('exposes routing table and org overview', async () => {
@@ -142,7 +143,7 @@ describe('AI Fabric Foundation (VL-239)', () => {
     expect(overview.deferred.reasoningFabric).toBe(false);
     expect(overview.deferred.memoryFabric).toBe(false);
     expect(overview.deferred.agentFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.deferred.regeneratesVolumes1to9).toBe(false);
     expect(overview.links.aiFabric).toBe('/ai-fabric');
     expect(overview.safety.policyLogOnlyForbidden).toBe(true);

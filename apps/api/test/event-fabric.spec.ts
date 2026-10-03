@@ -203,7 +203,7 @@ describe('Event Fabric (VL-240)', () => {
     expect(overview.deferred.knowledgeFabric).toBe(false);
     expect(overview.deferred.promptFabric).toBe(false);
     expect(overview.deferred.reasoningFabric).toBe(false);
-    expect(overview.deferred.policyFabric).toBe(true);
+    expect(overview.deferred.policyFabric).toBe(false);
     expect(overview.links.eventFabric).toBe('/event-fabric');
     expect(overview.honesty.redisStreamsActive).toBe(true);
 

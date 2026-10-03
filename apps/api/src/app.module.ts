@@ -76,6 +76,7 @@ import { PromptFabricModule } from './prompt-fabric/prompt-fabric.module';
 import { ReasoningFabricModule } from './reasoning-fabric/reasoning-fabric.module';
 import { MemoryFabricModule } from './memory-fabric/memory-fabric.module';
 import { AgentFabricModule } from './agent-fabric/agent-fabric.module';
+import { PolicyFabricModule } from './policy-fabric/policy-fabric.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -170,6 +171,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ReasoningFabricModule,
     MemoryFabricModule,
     AgentFabricModule,
+    PolicyFabricModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
