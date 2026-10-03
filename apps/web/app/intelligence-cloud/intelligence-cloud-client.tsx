@@ -100,6 +100,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.memoryCloud ?? '/memory-cloud'} style={secondary}>
                 Memory Cloud
               </Link>
+              <Link href={data.links.knowledgeGraph ?? '/knowledge-graph'} style={secondary}>
+                Knowledge Graph
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

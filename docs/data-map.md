@@ -26,6 +26,7 @@ Living inventory of personal / customer data processed by VerbaLab AI. Update wh
 | `documents` + disk (`DOCUMENT_STORAGE_DIR`) | Uploaded / translated files | File bytes + metadata | Until delete; files unlinked on org delete | VerbaLab disk |
 | `knowledge_documents` / `knowledge_chunks` | RAG corpus | Filenames, chunk text, embeddings | Until delete | VerbaLab DB (pgvector) + disk |
 | `memory_records` | AI interaction Memory Cloud (VL-183) | Scope/kind, content, subject/agent/project/conversation ids, version, expiry | Until erase / org delete; `expiresAt` filtered on read | VerbaLab DB; export/erase via `/v1/memory-cloud/*` + org export |
+| `kg_entities` / `kg_relationships` | Bounded Knowledge Graph (VL-184) | Entity names/types, edges, optional knowledge doc link | Until delete / org delete | VerbaLab DB; not Neo4j |
 | Google Translate / Vision | MT, detect, OCR | Request text/images in transit | Vendor DPA; set `allowVendorTraining=false` by default | Google Cloud |
 | OpenAI | STT, TTS, chat, embeddings | Audio/text in transit | Vendor DPA; do-not-train via contract + flag | OpenAI |
 | Stripe | Billing | Customer / subscription ids | Stripe retention | Stripe |

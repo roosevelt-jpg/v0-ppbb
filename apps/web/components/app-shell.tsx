@@ -15,6 +15,7 @@ const links = [
   { href: '/embedding-cloud', label: 'Embeddings' },
   { href: '/vector-cloud', label: 'Vectors' },
   { href: '/memory-cloud', label: 'Memory' },
+  { href: '/knowledge-graph', label: 'Knowledge Graph' },
   { href: '/neural-tts', label: 'Neural TTS' },
   { href: '/voice-cloning', label: 'Cloning' },
   { href: '/emotion-voice', label: 'Emotion Voice' },

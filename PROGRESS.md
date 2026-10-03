@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-183 Done — Memory Cloud)
+Last updated: 2026-10-03 (VL-184 Done — Knowledge Graph Cloud)
 
 ---
 
@@ -213,6 +213,7 @@ Last updated: 2026-10-03 (VL-183 Done — Memory Cloud)
 | VL-181 | Embedding Cloud (Phase 48) | Done | `/v1/embedding-cloud/*` engine/models/embed/analytics; ADR-0092. Extends VL-063; multimodal deferred. |
 | VL-182 | Vector Cloud (Phase 49) | Done | `/v1/vector-cloud/*` engine/search/collections; ADR-0093. Hub over VL-062 pgvector; hybrid/sharding deferred. |
 | VL-183 | Memory Cloud (Phase 50) | Done | `/v1/memory-cloud/*` CRUD/search + GDPR export/erase; ADR-0094. Retention sweeper deferred. |
+| VL-184 | Knowledge Graph Cloud (Phase 51) | Done | `/v1/knowledge-graph/*` entities/edges/neighborhood; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |
 
 ---
 
@@ -310,3 +311,4 @@ Last updated: 2026-10-03 (VL-183 Done — Memory Cloud)
 | 2026-10-03 | VL-181 Done: Embedding Cloud (Phase 48) — hub over VL-063 text embeds; modality tags; ADR-0092. Speech/image/video deferred. |
 | 2026-10-03 | VL-182 Done: Vector Cloud (Phase 49) — hub over VL-062 pgvector search; ADR-0093. Hybrid/sharding/Pinecone OS deferred. |
 | 2026-10-03 | VL-183 Done: Memory Cloud (Phase 50) — persistent memories + GDPR export/erase; ADR-0094. Not infinite personalization OS. |
+| 2026-10-03 | VL-184 Done: Knowledge Graph Cloud (Phase 51) — bounded Postgres ER layer; ADR-0095. Prefer RAG; Neo4j/ontology deferred. |

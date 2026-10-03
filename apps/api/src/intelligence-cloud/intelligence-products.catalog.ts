@@ -51,10 +51,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'knowledge-graph',
       name: 'Knowledge Graph Cloud',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Entity/relationship graph OS deferred (VL-184). Use RAG (VL-062) until then.',
+      status: 'partial',
+      api: 'GET /v1/knowledge-graph/engine',
+      console: '/knowledge-graph',
+      notes:
+        'Bounded Postgres ER layer (VL-184). Prefer RAG. Neo4j/ontology/vertical packs deferred.',
     },
     {
       id: 'context-engine',

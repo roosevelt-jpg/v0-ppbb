@@ -22,6 +22,7 @@ function usage(): never {
   verbalab vector-cloud-search --query <text> [--k <n>]
   verbalab memory-cloud-engine
   verbalab memory-cloud-export [--subject <userId>]
+  verbalab knowledge-graph-engine
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -146,6 +147,11 @@ async function main() {
         2,
       ),
     );
+    return;
+  }
+
+  if (command === 'knowledge-graph-engine') {
+    console.log(JSON.stringify(await vl.knowledgeGraphEngine(), null, 2));
     return;
   }
 

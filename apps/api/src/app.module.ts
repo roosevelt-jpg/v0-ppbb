@@ -55,6 +55,7 @@ import { IntelligenceCloudModule } from './intelligence-cloud/intelligence-cloud
 import { EmbeddingCloudModule } from './embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from './vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from './memory-cloud/memory-cloud.module';
+import { KnowledgeGraphModule } from './knowledge-graph/knowledge-graph.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
@@ -100,6 +101,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
+    KnowledgeGraphModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,

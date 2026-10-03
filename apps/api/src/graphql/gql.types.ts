@@ -475,6 +475,45 @@ export class GqlMemoryCloudEngine {
 }
 
 @ObjectType()
+export class GqlKnowledgeGraphCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlKnowledgeGraphEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlKnowledgeGraphCapability])
+  capabilities!: GqlKnowledgeGraphCapability[];
+
+  @Field()
+  neo4jParity!: boolean;
+
+  @Field()
+  ontologyPlatform!: boolean;
+
+  @Field()
+  preferRag!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

@@ -11,6 +11,7 @@ import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/applic
 import { EmbeddingCloudModule } from '../embedding-cloud/embedding-cloud.module';
 import { VectorCloudModule } from '../vector-cloud/vector-cloud.module';
 import { MemoryCloudModule } from '../memory-cloud/memory-cloud.module';
+import { KnowledgeGraphModule } from '../knowledge-graph/knowledge-graph.module';
 import { NeuralTtsModule } from '../neural-tts/neural-tts.module';
 import { VoiceCloningModule } from '../voice-cloning/voice-cloning.module';
 import { EmotionVoiceModule } from '../emotion-voice/emotion-voice.module';
@@ -39,6 +40,7 @@ import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver'
 import { EmbeddingCloudGraphqlResolver } from './embedding-cloud.resolver';
 import { VectorCloudGraphqlResolver } from './vector-cloud.resolver';
 import { MemoryCloudGraphqlResolver } from './memory-cloud.resolver';
+import { KnowledgeGraphGraphqlResolver } from './knowledge-graph.resolver';
 import { NeuralTtsGraphqlResolver } from './neural-tts.resolver';
 import { VoiceCloningGraphqlResolver } from './voice-cloning.resolver';
 import { EmotionVoiceGraphqlResolver } from './emotion-voice.resolver';
@@ -87,6 +89,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmbeddingCloudModule,
     VectorCloudModule,
     MemoryCloudModule,
+    KnowledgeGraphModule,
     NeuralTtsModule,
     VoiceCloningModule,
     EmotionVoiceModule,
@@ -123,6 +126,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     EmbeddingCloudGraphqlResolver,
     VectorCloudGraphqlResolver,
     MemoryCloudGraphqlResolver,
+    KnowledgeGraphGraphqlResolver,
     NeuralTtsGraphqlResolver,
     VoiceCloningGraphqlResolver,
     EmotionVoiceGraphqlResolver,

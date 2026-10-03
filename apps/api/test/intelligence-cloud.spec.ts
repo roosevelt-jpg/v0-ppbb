@@ -118,7 +118,9 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(memory.console).toBe('/memory-cloud');
 
     const kg = res.body.products.find((p: { id: string }) => p.id === 'knowledge-graph');
-    expect(kg.status).toBe('deferred');
+    expect(kg.status).toBe('partial');
+    expect(kg.api).toContain('/v1/knowledge-graph/engine');
+    expect(kg.console).toBe('/knowledge-graph');
   });
 
   it('returns org intelligence overview with chat/embeddings usage + deferred flags', async () => {
@@ -140,12 +142,14 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.deferred.vectorCloudProduct).toBe(false);
     expect(overview.deferred.dedicatedVectorDb).toBe(true);
     expect(overview.deferred.memoryCloud).toBe(false);
+    expect(overview.deferred.knowledgeGraphProduct).toBe(false);
     expect(overview.deferred.knowledgeGraphOs).toBe(true);
     expect(overview.deferred.customReasoner).toBe(true);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
     expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
     expect(overview.links.vectorCloud).toBe('/vector-cloud');
     expect(overview.links.memoryCloud).toBe('/memory-cloud');
+    expect(overview.links.knowledgeGraph).toBe('/knowledge-graph');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);

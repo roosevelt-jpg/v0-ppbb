@@ -13,7 +13,7 @@
 | Embedding Cloud | **Partial** — **VL-181** `/embedding-cloud` over VL-063 text; multimodal deferred |
 | Vector Cloud | **Partial** — **VL-182** `/vector-cloud` over VL-062 pgvector; hybrid/Pinecone OS deferred |
 | Memory Cloud | **Partial** — **VL-183** `/memory-cloud` + GDPR export/erase; semantic NN + sweeper deferred |
-| Knowledge Graph Cloud | **Deferred** — VL-184; use RAG until then |
+| Knowledge Graph Cloud | **Partial** — **VL-184** `/knowledge-graph` bounded ER; Neo4j/ontology/verticals deferred; prefer RAG |
 | Context Engine | **Deferred** — VL-185 |
 | Reasoning Cloud | **Deferred** — VL-186 via LLM prompts, not a custom reasoner |
 | Recommendation Engine | **Deferred** — VL-187 |

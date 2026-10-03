@@ -82,6 +82,8 @@ model Organization {
   voiceListingSalesAsPublisher VoiceListingSale[] @relation("VoiceListingSalePublisher")
   voiceListingSalesAsBuyer     VoiceListingSale[] @relation("VoiceListingSaleBuyer")
   memoryRecords                MemoryRecord[]
+  kgEntities                   KgEntity[]
+  kgRelationships              KgRelationship[]
 
   @@map("organizations")
 }
@@ -156,6 +158,8 @@ model Workspace {
   voiceListingsPublished VoiceListing[] @relation("VoiceListingPublisherWorkspace")
   voiceListingInstalls   VoiceListingInstall[] @relation("VoiceListingInstallerWorkspace")
   memoryRecords          MemoryRecord[]
+  kgEntities             KgEntity[]
+  kgRelationships        KgRelationship[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1260,6 +1264,59 @@ model MemoryRecord {
   @@index([conversationId])
   @@index([workspaceId, key])
   @@map("memory_records")
+}
+
+/// Bounded knowledge-graph entity (VL-184). Not Neo4j / ontology platform.
+model KgEntity {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  type           String   @default("concept")
+  name           String
+  description    String   @default("")
+  documentId     String?  @map("document_id")
+  domain         String   @default("general")
+  aliases        String[] @default([])
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  outgoing     KgRelationship[] @relation("KgRelFrom")
+  incoming     KgRelationship[] @relation("KgRelTo")
+
+  @@index([organizationId, workspaceId, name])
+  @@index([workspaceId, type])
+  @@index([workspaceId, domain])
+  @@index([documentId])
+  @@map("kg_entities")
+}
+
+/// Bounded knowledge-graph edge (VL-184).
+model KgRelationship {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  fromEntityId   String   @map("from_entity_id")
+  toEntityId     String   @map("to_entity_id")
+  type           String   @default("related_to")
+  label          String   @default("")
+  weight         Float    @default(1)
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  fromEntity   KgEntity     @relation("KgRelFrom", fields: [fromEntityId], references: [id], onDelete: Cascade)
+  toEntity     KgEntity     @relation("KgRelTo", fields: [toEntityId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId])
+  @@index([fromEntityId])
+  @@index([toEntityId])
+  @@index([workspaceId, type])
+  @@map("kg_relationships")
 }
 
 

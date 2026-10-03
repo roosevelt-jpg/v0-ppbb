@@ -2820,6 +2820,64 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/knowledge-graph/engine': {
+      get: {
+        summary: 'Knowledge Graph engine catalog',
+        operationId: 'getKnowledgeGraphEngine',
+        responses: { '200': { description: 'Capabilities and Neo4j/ontology honesty notes' } },
+      },
+    },
+    '/v1/knowledge-graph/domains': {
+      get: {
+        summary: 'Knowledge Graph domains',
+        operationId: 'listKnowledgeGraphDomains',
+        responses: { '200': { description: 'General shipped; vertical packs deferred' } },
+      },
+    },
+    '/v1/knowledge-graph/entities': {
+      get: {
+        summary: 'List graph entities',
+        operationId: 'listKnowledgeGraphEntities',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Entity list' } },
+      },
+      post: {
+        summary: 'Create graph entity',
+        operationId: 'createKnowledgeGraphEntity',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created entity' } },
+      },
+    },
+    '/v1/knowledge-graph/relationships': {
+      get: {
+        summary: 'List graph relationships',
+        operationId: 'listKnowledgeGraphRelationships',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Edge list' } },
+      },
+      post: {
+        summary: 'Create graph relationship',
+        operationId: 'createKnowledgeGraphRelationship',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created edge' } },
+      },
+    },
+    '/v1/knowledge-graph/analytics': {
+      get: {
+        summary: 'Knowledge Graph analytics',
+        operationId: 'getKnowledgeGraphAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Entity/edge counts' } },
+      },
+    },
+    '/v1/knowledge-graph/monitoring': {
+      get: {
+        summary: 'Knowledge Graph monitoring snapshot',
+        operationId: 'getKnowledgeGraphMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

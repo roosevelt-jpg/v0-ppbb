@@ -1188,6 +1188,47 @@ export class VerbaLab {
     });
   }
 
+  async knowledgeGraphEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      neo4jParity: boolean;
+      ontologyPlatform: boolean;
+      taxonomyPlatform: boolean;
+      preferRag: boolean;
+      verticalDomainPacks: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/knowledge-graph/engine', { method: 'GET' });
+  }
+
+  async knowledgeGraphCreateEntity(body: {
+    name: string;
+    type?: string;
+    description?: string;
+    documentId?: string;
+    domain?: string;
+    aliases?: string[];
+  }): Promise<{
+    id: string;
+    name: string;
+    type: string;
+    domain: string;
+    documentId: string | null;
+  }> {
+    return this.requestJson('/v1/knowledge-graph/entities', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;
