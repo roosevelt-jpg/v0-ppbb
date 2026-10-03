@@ -1232,6 +1232,56 @@ export class VerbaLab {
     });
   }
 
+  async aiRouterEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      serviceMeshOs: boolean;
+      multiCloudRouterOs: boolean;
+      regeneratesAiGateway: boolean;
+      extendsAiGateway: boolean;
+      dryRunResolveOnly: boolean;
+      enforcesSpendCaps: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/ai-router/engine', { method: 'GET' });
+  }
+
+  async aiRouterResolve(input: {
+    feature?: string;
+    optimize?: string;
+    preferProvider?: string;
+    preferRegion?: string;
+    allowFallback?: boolean;
+    streaming?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-router/resolve', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async aiRouterUpsertPolicy(input: {
+    optimize?: string;
+    maxRetries?: number;
+    preferRegion?: string;
+    allowFallback?: boolean;
+    preferProvider?: string | null;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-router/policies', {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

@@ -88,6 +88,8 @@ model Organization {
   taxonomyAssignments          TaxonomyAssignment[]
   gpuAllocations               GpuAllocation[]
   modelServingDeployments      ModelServingDeployment[]
+  aiRouterPolicies             AiRouterPolicy[]
+  aiRouterDecisions            AiRouterDecision[]
 
   @@map("organizations")
 }
@@ -168,6 +170,8 @@ model Workspace {
   taxonomyAssignments    TaxonomyAssignment[]
   gpuAllocations         GpuAllocation[]
   modelServingDeployments ModelServingDeployment[]
+  aiRouterPolicies       AiRouterPolicy[]
+  aiRouterDecisions      AiRouterDecision[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1440,6 +1444,51 @@ model ModelServingDeployment {
   @@index([organizationId, workspaceId, status])
   @@index([workspaceId, kind, modelSlug])
   @@map("model_serving_deployments")
+}
+
+/// Workspace AI Router policy (VL-207). Advisory — Gateway still executes inference.
+model AiRouterPolicy {
+  id                    String   @id @default(cuid())
+  organizationId        String   @map("organization_id")
+  workspaceId           String   @map("workspace_id")
+  /// latency | cost | balanced | quality
+  optimize              String   @default("balanced")
+  maxRetries            Int      @default(1) @map("max_retries")
+  preferRegion          String   @default("af-south-1") @map("prefer_region")
+  allowFallback         Boolean  @default(true) @map("allow_fallback")
+  preferConfiguredOnly  Boolean  @default(true) @map("prefer_configured_only")
+  streamingPreferred    Boolean  @default(false) @map("streaming_preferred")
+  preferProvider        String   @default("") @map("prefer_provider")
+  metadata              Json     @default("{}")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, workspaceId])
+  @@map("ai_router_policies")
+}
+
+/// Dry-run AI Router decision log (VL-207).
+model AiRouterDecision {
+  id               String   @id @default(cuid())
+  organizationId   String   @map("organization_id")
+  workspaceId      String   @map("workspace_id")
+  feature          String
+  optimize         String
+  selectedProvider String   @map("selected_provider")
+  selectedModel    String   @map("selected_model")
+  chainJson        Json     @default("[]") @map("chain_json")
+  metadata         Json     @default("{}")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, createdAt])
+  @@index([workspaceId, feature])
+  @@map("ai_router_decisions")
 }
 
 

@@ -2950,6 +2950,83 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/ai-router/engine': {
+      get: {
+        summary: 'AI Router catalog',
+        operationId: 'getAiRouterEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, honesty, and spend-safety notes',
+          },
+        },
+      },
+    },
+    '/v1/ai-router/features': {
+      get: {
+        summary: 'Routable inference features',
+        operationId: 'listAiRouterFeatures',
+        responses: { '200': { description: 'Feature → gateway API map' } },
+      },
+    },
+    '/v1/ai-router/providers': {
+      get: {
+        summary: 'Router provider IDs',
+        operationId: 'listAiRouterProviders',
+        responses: { '200': { description: 'Gateway provider IDs used by router' } },
+      },
+    },
+    '/v1/ai-router/policies': {
+      get: {
+        summary: 'Workspace AI Router policy',
+        operationId: 'getAiRouterPolicy',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace policy or defaults' } },
+      },
+      put: {
+        summary: 'Upsert workspace AI Router policy',
+        operationId: 'upsertAiRouterPolicy',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Policy saved' },
+          '403': { description: 'Router mode disabled' },
+        },
+      },
+    },
+    '/v1/ai-router/resolve': {
+      post: {
+        summary: 'Dry-run resolve model/provider route',
+        operationId: 'resolveAiRouter',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Selected candidate + ordered fallback chain' },
+          '503': { description: 'No candidates available' },
+        },
+      },
+    },
+    '/v1/ai-router/decisions': {
+      get: {
+        summary: 'Recent dry-run route decisions',
+        operationId: 'listAiRouterDecisions',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decision log' } },
+      },
+    },
+    '/v1/ai-router/analytics': {
+      get: {
+        summary: 'AI Router analytics',
+        operationId: 'getAiRouterAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Decision aggregates' } },
+      },
+    },
+    '/v1/ai-router/monitoring': {
+      get: {
+        summary: 'AI Router monitoring',
+        operationId: 'getAiRouterMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

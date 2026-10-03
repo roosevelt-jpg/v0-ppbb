@@ -37,7 +37,7 @@ export class InferenceCloudService {
       deferred: {
         gpuPlatform: false,
         modelServing: false,
-        aiRouter: true,
+        aiRouter: false,
         streamingRuntimeProduct: true,
         batchRuntimeProduct: true,
         intelligentCache: true,
@@ -59,6 +59,7 @@ export class InferenceCloudService {
         inferenceCloud: '/inference-cloud',
         gpuPlatform: '/gpu-platform',
         modelServing: '/model-serving',
+        aiRouter: '/ai-router',
         gateway: '/gateway',
         models: '/models',
         chat: '/chat',

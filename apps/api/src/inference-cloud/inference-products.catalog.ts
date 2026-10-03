@@ -42,10 +42,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'ai-router',
       name: 'AI Router',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Routes to model/endpoint (Phase 74 / VL-207). Extends Gateway routing — not a new mesh.',
+      status: 'partial',
+      api: 'GET /v1/ai-router/engine',
+      console: '/ai-router',
+      notes:
+        'Dry-run model/provider routing over Gateway + Model Serving weights (VL-207). Not a service mesh; caching deferred; spend enforce is VL-211.',
     },
     {
       id: 'streaming-runtime',

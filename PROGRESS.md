@@ -236,7 +236,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-204 | Inference Cloud Foundation (Phase 71) | Done | `/inference-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0115. Maps onto AI Gateway; GPU hyperscaler deferred. Spend-safety constraints carried for VL-205/211. |
 | VL-205 | GPU Platform (Phase 72) | Done | `/v1/gpu-platform/*` sandbox pools/allocate/scale with hard instance+spend ceilings; ADR-0116. No cloud GPU APIs; MIG/distributed deferred. |
 | VL-206 | Model Serving (Phase 73) | Done | `/v1/model-serving/*` hub over Gateway + registry; sandbox versioning/canary/blue-green/rollback; ADR-0117. Not vLLM/KServe OS. |
-| VL-207 | AI Router (Phase 74) | Not Started | |
+| VL-207 | AI Router (Phase 74) | Done | `/v1/ai-router/*` dry-run resolve + policies over Gateway; ADR-0118. Not a mesh; cache deferred; spend enforce VL-211. |
 | VL-208 | Streaming Runtime (Phase 75) | Not Started | |
 | VL-209 | Batch Runtime (Phase 76) | Not Started | |
 | VL-210 | Intelligent Cache (Phase 77) | Not Started | |
@@ -363,3 +363,4 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | 2026-10-03 | VL-204 Done: Inference Cloud Foundation (Phase 71) — hub/catalog/overview; ADR-0115. Extends AI Gateway; no GPU hyperscaler. Spend-safety notes for GPU/Cost phases. |
 | 2026-10-03 | VL-205 Done: GPU Platform (Phase 72) — sandbox allocations + hard ceilings; ADR-0116. No cloud GPU APIs; open-ended autoscale forbidden. |
 | 2026-10-03 | VL-206 Done: Model Serving (Phase 73) — Gateway/registry hub + sandbox canary/blue-green/rollback; ADR-0117. Not vLLM/KServe OS. |
+| 2026-10-03 | VL-207 Done: AI Router (Phase 74) — dry-run model/provider routing + policies; ADR-0118. Not a mesh; does not enforce spend caps. |

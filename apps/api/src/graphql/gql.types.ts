@@ -523,6 +523,66 @@ export class GqlModelServingEngine {
 }
 
 @ObjectType()
+export class GqlAiRouterCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAiRouterEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAiRouterCapability])
+  capabilities!: GqlAiRouterCapability[];
+
+  @Field()
+  serviceMeshOs!: boolean;
+
+  @Field()
+  multiCloudRouterOs!: boolean;
+
+  @Field()
+  regeneratesAiGateway!: boolean;
+
+  @Field()
+  extendsAiGateway!: boolean;
+
+  @Field()
+  extendsModelServing!: boolean;
+
+  @Field()
+  dryRunResolveOnly!: boolean;
+
+  @Field()
+  enforcesSpendCaps!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  primaryRegion!: string;
+
+  @Field()
+  mode!: string;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

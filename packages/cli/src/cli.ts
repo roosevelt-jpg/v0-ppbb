@@ -25,6 +25,8 @@ function usage(): never {
   verbalab model-serving-kinds
   verbalab model-serving-endpoints [--kind llm|speech|voice|ocr|embedding|reasoning]
   verbalab model-serving-deploy --kind <kind> --model <slug> [--version <v>] [--strategy rolling|canary|blue_green]
+  verbalab ai-router-engine
+  verbalab ai-router-resolve [--feature chat|translate|stt|tts|ocr|embeddings|detect] [--optimize latency|cost|balanced|quality]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -216,6 +218,25 @@ async function main() {
           modelSlug,
           version: argValue(rest, '--version') ?? undefined,
           strategy: argValue(rest, '--strategy') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'ai-router-engine') {
+    console.log(JSON.stringify(await vl.aiRouterEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'ai-router-resolve') {
+    console.log(
+      JSON.stringify(
+        await vl.aiRouterResolve({
+          feature: argValue(rest, '--feature') ?? undefined,
+          optimize: argValue(rest, '--optimize') ?? undefined,
         }),
         null,
         2,

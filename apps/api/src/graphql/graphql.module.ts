@@ -12,6 +12,7 @@ import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/
 import { InferenceCloudApplicationModule } from '../inference-cloud/application/inference-cloud-application.module';
 import { GpuPlatformModule } from '../gpu-platform/gpu-platform.module';
 import { ModelServingModule } from '../model-serving/model-serving.module';
+import { AiRouterModule } from '../ai-router/ai-router.module';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
@@ -61,6 +62,7 @@ import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { InferenceCloudGraphqlResolver } from './inference-cloud.resolver';
 import { GpuPlatformGraphqlResolver } from './gpu-platform.resolver';
 import { ModelServingGraphqlResolver } from './model-serving.resolver';
+import { AiRouterGraphqlResolver } from './ai-router.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
@@ -130,6 +132,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     InferenceCloudApplicationModule,
     GpuPlatformModule,
     ModelServingModule,
+    AiRouterModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
@@ -187,6 +190,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     InferenceCloudGraphqlResolver,
     GpuPlatformGraphqlResolver,
     ModelServingGraphqlResolver,
+    AiRouterGraphqlResolver,
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,
