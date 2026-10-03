@@ -2,30 +2,36 @@
 
 :root,
 html[data-theme='light'] {
-  --bg: #ffffff;
-  --bg-soft: #f7f7f8;
+  --bg: #f0f1f3;
+  --bg-soft: #e4e6ea;
   --bg-elevated: #ffffff;
   --ink: #0a0a0a;
-  --muted: #6b6b76;
-  --line: #ebebef;
-  --line-strong: #d8d8de;
+  --muted: #3f4450;
+  --line: #d0d3d9;
+  --line-strong: #b4b8c0;
   --accent: #0a0a0a;
   --accent-fg: #ffffff;
-  --brand: #1a6b52;
-  --brand-soft: rgba(26, 107, 82, 0.08);
-  --ok: #1a6b52;
-  --bad: #c23b2e;
-  --shadow: 0 1px 2px rgba(10, 10, 10, 0.04), 0 12px 40px rgba(10, 10, 10, 0.06);
+  --brand: #145c46;
+  --brand-soft: rgba(20, 92, 70, 0.12);
+  --ok: #145c46;
+  --bad: #b42318;
+  --shadow: 0 1px 2px rgba(10, 10, 10, 0.05), 0 12px 40px rgba(10, 10, 10, 0.08);
   --radius: 14px;
   --radius-lg: 22px;
   --font-display: var(--font-display), 'Avenir Next', sans-serif;
   --font-body: var(--font-body), 'Avenir Next', sans-serif;
-  --mkt-bg: #f4f7f5;
+  /* Marketing light: solid grey page, black text */
+  --mkt-bg: #e8eaed;
   --mkt-elev: #ffffff;
-  --mkt-line: rgba(10, 20, 14, 0.1);
+  --mkt-line: #c5c9d0;
   --mkt-ink: #0a0a0a;
-  --mkt-muted: #5c675f;
-  --mkt-accent: #1a6b52;
+  --mkt-muted: #2a2f38;
+  --mkt-accent: #145c46;
+  --mkt-nav-bg: rgba(232, 234, 237, 0.94);
+  --mkt-input-bg: #f3f4f6;
+  --mkt-input-ink: #0a0a0a;
+  --mkt-card-bg: #ffffff;
+  --mkt-atmosphere-opacity: 0.08;
 }
 
 html[data-theme='dark'] {
@@ -47,8 +53,13 @@ html[data-theme='dark'] {
   --mkt-elev: #101411;
   --mkt-line: rgba(255, 255, 255, 0.08);
   --mkt-ink: #f4f7f5;
-  --mkt-muted: #9aa59e;
+  --mkt-muted: #c2cbc5;
   --mkt-accent: #6fcf9c;
+  --mkt-nav-bg: rgba(7, 9, 7, 0.9);
+  --mkt-input-bg: rgba(0, 0, 0, 0.45);
+  --mkt-input-ink: #f4f7f5;
+  --mkt-card-bg: rgba(255, 255, 255, 0.03);
+  --mkt-atmosphere-opacity: 0.28;
 }
 
 * {
@@ -545,11 +556,15 @@ textarea {
   position: relative;
   min-height: 100vh;
   color: var(--mkt-ink);
+  background: var(--mkt-bg);
+  overflow: hidden;
+}
+
+html[data-theme='dark'] .vl-mkt {
   background:
     radial-gradient(900px 480px at 70% -10%, rgba(47, 154, 118, 0.22), transparent 55%),
     radial-gradient(700px 420px at 0% 20%, rgba(26, 107, 82, 0.16), transparent 50%),
     var(--mkt-bg);
-  overflow: hidden;
 }
 
 .vl-mkt-atmosphere {
@@ -558,9 +573,13 @@ textarea {
   width: 100%;
   height: min(92vh, 920px);
   object-fit: cover;
-  opacity: 0.28;
+  opacity: var(--mkt-atmosphere-opacity);
   pointer-events: none;
   z-index: 0;
+}
+
+html[data-theme='light'] .vl-mkt-atmosphere {
+  display: none;
 }
 
 .vl-mkt > *:not(.vl-mkt-atmosphere) {
@@ -620,8 +639,9 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(7, 9, 7, 0.82);
+  background: var(--mkt-nav-bg);
   backdrop-filter: blur(14px);
+  color: var(--mkt-ink);
 }
 
 .vl-mkt-brand {
@@ -636,14 +656,17 @@ textarea {
   display: flex;
   gap: 1.1rem;
   font-size: 0.9rem;
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
+  font-weight: 550;
 }
 
 .vl-mkt-nav-links a {
   text-decoration: none;
+  opacity: 0.82;
 }
 
 .vl-mkt-nav-links a:hover {
+  opacity: 1;
   color: var(--mkt-ink);
 }
 
@@ -654,22 +677,32 @@ textarea {
 }
 
 .vl-mkt-link {
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .vl-mkt-cta {
   text-decoration: none;
-  background: #fff !important;
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] .vl-mkt-cta {
+  background: #ffffff !important;
   color: #0a0a0a !important;
 }
 
 .vl-mkt-cta-ghost {
   text-decoration: none;
+  background: #ffffff !important;
+  color: #0a0a0a !important;
+  border: 1px solid var(--mkt-line) !important;
+}
+
+html[data-theme='dark'] .vl-mkt-cta-ghost {
   background: transparent !important;
   color: var(--mkt-ink) !important;
-  border-color: var(--mkt-line) !important;
 }
 
 .vl-mkt-hero {
@@ -684,7 +717,7 @@ textarea {
 
 .vl-mkt-kicker {
   margin: 0 0 0.75rem;
-  color: #6fcf9c;
+  color: var(--mkt-accent);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -702,9 +735,10 @@ textarea {
 .vl-mkt-lede {
   margin: 1.1rem 0 0;
   max-width: 32rem;
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
   font-size: 1.05rem;
   line-height: 1.6;
+  opacity: 0.88;
 }
 
 .vl-mkt-hero-actions {
@@ -715,11 +749,12 @@ textarea {
 }
 
 .vl-mkt-playground {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 40%), var(--mkt-elev);
+  background: var(--mkt-elev);
   border: 1px solid var(--mkt-line);
   border-radius: 22px;
   padding: 1.15rem;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow);
+  color: var(--mkt-ink);
 }
 
 .vl-mkt-playground-top {
@@ -744,8 +779,8 @@ textarea {
   resize: vertical;
   border: 1px solid var(--mkt-line);
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.35);
-  color: var(--mkt-ink);
+  background: var(--mkt-input-bg);
+  color: var(--mkt-input-ink);
   padding: 0.9rem 1rem;
   outline: none;
 }
@@ -760,7 +795,7 @@ textarea {
 .vl-mkt-voice {
   text-align: left;
   border: 1px solid var(--mkt-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--mkt-card-bg);
   color: var(--mkt-ink);
   border-radius: 12px;
   padding: 0.7rem 0.8rem;
@@ -811,9 +846,17 @@ textarea {
 .vl-mkt-strip {
   border-block: 1px solid var(--mkt-line);
   padding: 1rem clamp(1rem, 3vw, 2rem);
-  color: var(--mkt-muted);
-  font-size: 0.88rem;
+  color: var(--mkt-ink);
+  background: #dfe2e7;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-align: center;
+}
+
+html[data-theme='dark'] .vl-mkt-strip {
+  background: transparent;
+  color: var(--mkt-muted);
+  font-weight: 500;
 }
 
 .vl-mkt-section {
@@ -838,7 +881,8 @@ textarea {
 .vl-mkt-section-head p,
 .vl-mkt-section-split p {
   margin: 0;
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
+  opacity: 0.85;
   line-height: 1.6;
 }
 
@@ -854,12 +898,13 @@ textarea {
   border: 1px solid var(--mkt-line);
   border-radius: 18px;
   padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--mkt-card-bg);
+  color: var(--mkt-ink);
   text-decoration: none;
 }
 
 .vl-mkt-product span {
-  color: #6fcf9c;
+  color: var(--mkt-accent);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -870,12 +915,14 @@ textarea {
   margin: 0.45rem 0 0.4rem;
   font-size: 1.1rem;
   font-family: var(--font-display);
+  color: var(--mkt-ink);
 }
 
 .vl-mkt-product p,
 .vl-mkt-use p {
   margin: 0;
-  color: var(--mkt-muted);
+  color: var(--mkt-ink);
+  opacity: 0.82;
   font-size: 0.92rem;
   line-height: 1.5;
 }
