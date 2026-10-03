@@ -62,7 +62,7 @@ export function agentRuntimeCatalog() {
   return {
     product: 'VerbaLab Agent Runtime',
     note:
-      'Agent Runtime (VL-219). Single/multi-agent sandbox with hard permission allowlists, lifecycle, scheduling stubs, agent memory via Memory Runtime, and marketplace listing counts. Actions are sandboxed — not open function calls against real accounts/data. Policy Runtime (VL-222) will hard-gate further; Agent Runtime already denies missing permissions and forbidden actions. Not a LangGraph/AutoGPT OS.',
+      'Agent Runtime (VL-219). Single/multi-agent sandbox with hard permission allowlists, lifecycle, scheduling stubs, agent memory via Memory Runtime, and marketplace listing counts. Actions are sandboxed — not open function calls against real accounts/data. Policy Runtime (VL-222) is wired as a hard gate via AgentPolicyGate. Not a LangGraph/AutoGPT OS.',
     capabilities: [
       {
         id: 'single-agents',
@@ -188,7 +188,7 @@ export function agentRuntimeCatalog() {
       scopedPermissionsRequired: true,
       sandboxRequired: true,
       policyHardGateRequired: true,
-      policyRuntimeWired: false,
+      policyRuntimeWired: true,
       localPermissionHardGate: true,
       orgWorkspaceScoped: true,
     },

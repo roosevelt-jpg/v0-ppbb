@@ -87,11 +87,11 @@ export function aiKernelRuntimeCatalog(): KernelRuntimeRow[] {
     {
       id: 'policy-runtime',
       name: 'Policy Runtime',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/policy-runtime/engine',
+      console: '/policy-runtime',
       notes:
-        'Hard enforcement gate for Agent/Workflow/Plugin (Phase 89 / VL-222). Must block, not only log.',
+        'Hard-gate enforcement for Agent/Workflow/Plugin (VL-222). Blocks with 403 — not log-only.',
     },
     {
       id: 'kernel-telemetry',

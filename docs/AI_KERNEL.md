@@ -19,7 +19,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Agent Runtime | **Partial** — Phase 86 / VL-219 ([`AGENT_RUNTIME.md`](./AGENT_RUNTIME.md); sandbox + hard permission allowlists) |
 | Workflow Runtime | **Partial** — Phase 87 / VL-220 ([`WORKFLOW_RUNTIME.md`](./WORKFLOW_RUNTIME.md); sandbox + hard permission allowlists; extends `/workflows`) |
 | Plugin Runtime | **Partial** — Phase 88 / VL-221 ([`PLUGIN_RUNTIME.md`](./PLUGIN_RUNTIME.md); sandbox + hard permission allowlists; extends marketplace) |
-| Policy Runtime | **Deferred** — Phase 89 / VL-222 (must **hard-gate**, not log-only) |
+| Policy Runtime | **Partial** — Phase 89 / VL-222 ([`POLICY_RUNTIME.md`](./POLICY_RUNTIME.md); hard-gate wired into Agent/Workflow/Plugin) |
 | Production Audit | Phase 90 / VL-223 |
 | DDD / CQRS / Hexagonal | Bounded catalog CQRS slice — `hexagonalRewrite: false` |
 | Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
@@ -38,6 +38,7 @@ Volumes 1–7 already ship Identity, Gateway, product clouds, Intelligence, Know
 | Agent Runtime | `/agent-runtime` + `GET /v1/agent-runtime/engine` |
 | Workflow Runtime | `/workflow-runtime` + `GET /v1/workflow-runtime/engine` |
 | Plugin Runtime | `/plugin-runtime` + `GET /v1/plugin-runtime/engine` |
+| Policy Runtime | `/policy-runtime` + `GET /v1/policy-runtime/engine` |
 | REST catalog | `GET /v1/ai-kernel/products` (public) |
 | REST engine | `GET /v1/ai-kernel/engine` |
 | REST overview | `GET /v1/ai-kernel/overview` (Clerk session) |

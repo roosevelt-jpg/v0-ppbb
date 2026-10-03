@@ -66,7 +66,7 @@ export function workflowRuntimeCatalog() {
   return {
     product: 'VerbaLab Workflow Runtime',
     note:
-      'Workflow Runtime (VL-220). Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime (VL-222) will harden further. Local WorkflowPolicyGate already denies missing permissions and forbidden actions.',
+      'Workflow Runtime (VL-220). Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime (VL-222) is wired as a hard gate via WorkflowPolicyGate.',
     capabilities: [
       {
         id: 'workflow-execution',
@@ -202,7 +202,7 @@ export function workflowRuntimeCatalog() {
       scopedPermissionsRequired: true,
       sandboxRequired: true,
       policyHardGateRequired: true,
-      policyRuntimeWired: false,
+      policyRuntimeWired: true,
       localPermissionHardGate: true,
       orgWorkspaceScoped: true,
     },

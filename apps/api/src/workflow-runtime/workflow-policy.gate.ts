@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
+import { PolicyRuntimeService } from '../policy-runtime/policy-runtime.service';
 import {
   WORKFLOW_DENIED_ACTIONS,
   WORKFLOW_PERMISSIONS,
@@ -7,16 +8,24 @@ import {
 } from './workflow-runtime.catalog';
 
 /**
- * Local hard gate used by Workflow Runtime (VL-220).
- * Full Policy Runtime (VL-222) will replace/extend this — Workflow must not wait to deny.
+ * Local allowlist + Policy Runtime hard gate (VL-220 / VL-222).
  */
 @Injectable()
 export class WorkflowPolicyGate {
-  assertAllowed(input: {
+  constructor(private readonly policyRuntime: PolicyRuntimeService) {}
+
+  async assertAllowed(input: {
+    organizationId: string;
+    workspaceId: string;
     workflowId: string;
     action: string;
     permissions: string[];
-  }): { allowed: true; action: WorkflowPermission; policy: 'local_allowlist' } {
+  }): Promise<{
+    allowed: true;
+    action: WorkflowPermission;
+    policy: 'policy-runtime';
+    hardGate: true;
+  }> {
     const action = (input.action ?? '').trim();
     if (!action) {
       throw new ApiException(
@@ -50,10 +59,20 @@ export class WorkflowPolicyGate {
       );
     }
 
+    await this.policyRuntime.assertHardGate({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      runtime: 'workflow-runtime',
+      subjectId: input.workflowId,
+      action,
+      permissions: input.permissions,
+    });
+
     return {
       allowed: true,
       action: action as WorkflowPermission,
-      policy: 'local_allowlist',
+      policy: 'policy-runtime',
+      hardGate: true,
     };
   }
 

@@ -264,7 +264,9 @@ export class PluginRuntimeService {
     for (const step of requested) {
       const at = new Date().toISOString();
       try {
-        const gate = this.policy.assertAllowed({
+        const gate = await this.policy.assertAllowed({
+          organizationId: input.organizationId,
+          workspaceId: input.workspaceId,
           pluginId: plugin.id,
           action: step.action,
           permissions: plugin.permissions,

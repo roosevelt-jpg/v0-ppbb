@@ -907,6 +907,72 @@ export class GqlPluginRuntimeEngine {
 }
 
 @ObjectType()
+export class GqlPolicyRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPolicyRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPolicyRuntimeCapability])
+  capabilities!: GqlPolicyRuntimeCapability[];
+
+  @Field()
+  hardGate!: boolean;
+
+  @Field()
+  logOnly!: boolean;
+
+  @Field()
+  logOnlyForbidden!: boolean;
+
+  @Field()
+  opaOs!: boolean;
+
+  @Field()
+  cedarOs!: boolean;
+
+  @Field()
+  enterpriseGrcOs!: boolean;
+
+  @Field()
+  wiredIntoAgentRuntime!: boolean;
+
+  @Field()
+  wiredIntoWorkflowRuntime!: boolean;
+
+  @Field()
+  wiredIntoPluginRuntime!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxPoliciesPerWorkspace!: number;
+}
+
+@ObjectType()
 export class GqlGpuPlatformCapability {
   @Field()
   id!: string;

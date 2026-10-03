@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
+import { PolicyRuntimeService } from '../policy-runtime/policy-runtime.service';
 import {
   AGENT_DENIED_ACTIONS,
   AGENT_PERMISSIONS,
@@ -7,20 +8,24 @@ import {
 } from './agent-runtime.catalog';
 
 /**
- * Local hard gate used by Agent Runtime (VL-219).
- * Full Policy Runtime (VL-222) will replace/extend this — Agent must not wait to deny.
+ * Local allowlist + Policy Runtime hard gate (VL-219 / VL-222).
  */
 @Injectable()
 export class AgentPolicyGate {
-  /**
-   * Hard-deny if action is globally forbidden or not in the agent's allowlist.
-   * Returns a structured allow result for audit.
-   */
-  assertAllowed(input: {
+  constructor(private readonly policyRuntime: PolicyRuntimeService) {}
+
+  async assertAllowed(input: {
+    organizationId: string;
+    workspaceId: string;
     agentId: string;
     action: string;
     permissions: string[];
-  }): { allowed: true; action: AgentPermission; policy: 'local_allowlist' } {
+  }): Promise<{
+    allowed: true;
+    action: AgentPermission;
+    policy: 'policy-runtime';
+    hardGate: true;
+  }> {
     const action = (input.action ?? '').trim();
     if (!action) {
       throw new ApiException(
@@ -54,10 +59,21 @@ export class AgentPolicyGate {
       );
     }
 
+    // Shared Policy Runtime hard gate (VL-222) — blocks, does not only log.
+    await this.policyRuntime.assertHardGate({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      runtime: 'agent-runtime',
+      subjectId: input.agentId,
+      action,
+      permissions: input.permissions,
+    });
+
     return {
       allowed: true,
       action: action as AgentPermission,
-      policy: 'local_allowlist',
+      policy: 'policy-runtime',
+      hardGate: true,
     };
   }
 
@@ -71,7 +87,6 @@ export class AgentPolicyGate {
       }
     }
     if (out.length === 0) {
-      // Safe default: plan + memory search only
       return ['reason.plan', 'memory.search'];
     }
     return out;

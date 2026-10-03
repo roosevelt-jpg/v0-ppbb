@@ -62,7 +62,7 @@ export function pluginRuntimeCatalog() {
   return {
     product: 'VerbaLab Plugin Runtime',
     note:
-      'Plugin Runtime (VL-221). Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only — not arbitrary JS/WASM or live network plugins. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime (VL-222) will harden further; PluginPolicyGate already denies missing permissions and forbidden actions.',
+      'Plugin Runtime (VL-221). Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only — not arbitrary JS/WASM or live network plugins. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime (VL-222) is wired as a hard gate via PluginPolicyGate.',
     capabilities: [
       {
         id: 'plugin-registry',
@@ -184,7 +184,7 @@ export function pluginRuntimeCatalog() {
       scopedPermissionsRequired: true,
       sandboxRequired: true,
       policyHardGateRequired: true,
-      policyRuntimeWired: false,
+      policyRuntimeWired: true,
       localPermissionHardGate: true,
       orgWorkspaceScoped: true,
     },

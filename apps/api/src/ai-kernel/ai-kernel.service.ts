@@ -47,7 +47,7 @@ export class AiKernelService {
         agentRuntime: false,
         workflowRuntime: false,
         pluginRuntime: false,
-        policyRuntime: true,
+        policyRuntime: false,
         linuxOsRewrite: true,
         vaiosOs: true,
         regeneratesVolumes1to7: false,
@@ -61,6 +61,7 @@ export class AiKernelService {
         agentRuntime: '/agent-runtime',
         workflowRuntime: '/workflow-runtime',
         pluginRuntime: '/plugin-runtime',
+        policyRuntime: '/policy-runtime',
         inferenceCloud: '/inference-cloud',
         gateway: '/gateway',
         memoryCloud: '/memory-cloud',
@@ -94,7 +95,7 @@ export class AiKernelService {
         vaiosOs: false,
         regeneratesVolumes1to7: false,
       },
-      note: 'Kernel monitoring snapshot (VL-214+). Runtimes through Plugin (VL-215–221) partial; Policy VL-222 next.',
+      note: 'Kernel monitoring snapshot (VL-214+). Runtimes through Policy (VL-215–222) partial; Production Audit VL-223 next.',
     };
   }
 }

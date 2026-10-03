@@ -36,6 +36,9 @@ function usage(): never {
   verbalab plugin-runtime-engine
   verbalab plugin-runtime-register --name <name> [--permission <id>]...
   verbalab plugin-runtime-invoke --plugin <id> [--action <permission>]
+  verbalab policy-runtime-engine
+  verbalab policy-runtime-evaluate --action <action> [--runtime agent-runtime|workflow-runtime|plugin-runtime]
+  verbalab policy-runtime-create --name <name> --action <action> [--kind security] [--effect deny]
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
@@ -411,6 +414,46 @@ async function main() {
         await vl.pluginRuntimeInvoke({
           pluginId,
           actions: action ? [{ action }] : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'policy-runtime-engine') {
+    console.log(JSON.stringify(await vl.policyRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'policy-runtime-evaluate') {
+    const action = argValue(rest, '--action');
+    if (!action) usage();
+    console.log(
+      JSON.stringify(
+        await vl.policyRuntimeEvaluate({
+          action,
+          runtime: argValue(rest, '--runtime') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'policy-runtime-create') {
+    const name = argValue(rest, '--name');
+    const action = argValue(rest, '--action');
+    if (!name || !action) usage();
+    console.log(
+      JSON.stringify(
+        await vl.policyRuntimeCreate({
+          name,
+          actions: [action],
+          kind: argValue(rest, '--kind') ?? undefined,
+          effect: argValue(rest, '--effect') ?? undefined,
         }),
         null,
         2,

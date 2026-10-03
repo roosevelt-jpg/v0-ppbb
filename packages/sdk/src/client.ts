@@ -1647,6 +1647,87 @@ export class VerbaLab {
     });
   }
 
+  async policyRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    globalDenies: Array<{ id: string }>;
+    kinds: Array<{ id: string }>;
+    ceilings: {
+      maxPoliciesPerWorkspace: number;
+      mode: string;
+      logOnlyForbidden: boolean;
+      hardGateRequired: boolean;
+    };
+    mode: string;
+    honesty: {
+      hardGate: boolean;
+      logOnly: boolean;
+      logOnlyForbidden: boolean;
+      opaOs: boolean;
+      cedarOs: boolean;
+      enterpriseGrcOs: boolean;
+      regeneratesVolumes1to7: boolean;
+      wiredIntoAgentRuntime: boolean;
+      wiredIntoWorkflowRuntime: boolean;
+      wiredIntoPluginRuntime: boolean;
+      orgWorkspaceScoped: boolean;
+    };
+    links: Record<string, string>;
+  }> {
+    return this.requestJson('/v1/policy-runtime/engine', { method: 'GET' });
+  }
+
+  async policyRuntimeEvaluate(body: {
+    runtime?: string;
+    subjectId?: string;
+    action: string;
+    permissions?: string[];
+  }): Promise<{
+    allowed: boolean;
+    hardGate: boolean;
+    logOnly: boolean;
+    reason: string;
+    matchedPolicyIds: string[];
+    engine: string;
+  }> {
+    return this.requestJson('/v1/policy-runtime/evaluate', {
+      method: 'POST',
+      body,
+    });
+  }
+
+  async policyRuntimeCreate(body: {
+    name: string;
+    kind?: string;
+    effect?: string;
+    actions: string[];
+    targets?: string[];
+    region?: string;
+    enabled?: boolean;
+  }): Promise<{
+    policy: {
+      id: string;
+      name: string;
+      kind: string;
+      effect: string;
+      actions: string[];
+      enabled: boolean;
+    };
+    note?: string;
+  }> {
+    return this.requestJson('/v1/policy-runtime/policies', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async memoryRuntimePut(body: {
     scope?: string;
     kind?: string;

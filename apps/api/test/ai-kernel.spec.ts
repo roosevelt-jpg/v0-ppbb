@@ -129,7 +129,8 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(plugin.notes).toMatch(/sandbox|permission/i);
 
     const policy = res.body.products.find((p: { id: string }) => p.id === 'policy-runtime');
-    expect(policy.status).toBe('deferred');
+    expect(policy.status).toBe('partial');
+    expect(policy.console).toBe('/policy-runtime');
     expect(policy.notes).toMatch(/hard|block|gate/i);
   });
 
@@ -150,7 +151,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.deferred.agentRuntime).toBe(false);
     expect(overview.deferred.workflowRuntime).toBe(false);
     expect(overview.deferred.pluginRuntime).toBe(false);
-    expect(overview.deferred.policyRuntime).toBe(true);
+    expect(overview.deferred.policyRuntime).toBe(false);
     expect(overview.deferred.regeneratesVolumes1to7).toBe(false);
     expect(overview.safety.policyMustHardGate).toBe(true);
     expect(overview.links.aiKernel).toBe('/ai-kernel');
@@ -161,6 +162,7 @@ describe('AI Kernel Foundation (VL-214)', () => {
     expect(overview.links.agentRuntime).toBe('/agent-runtime');
     expect(overview.links.workflowRuntime).toBe('/workflow-runtime');
     expect(overview.links.pluginRuntime).toBe('/plugin-runtime');
+    expect(overview.links.policyRuntime).toBe('/policy-runtime');
     expect(overview.links.inferenceCloud).toBe('/inference-cloud');
     expect(overview.architecture.extendsInferenceCloud).toBe(true);
 
@@ -191,6 +193,10 @@ describe('AI Kernel Foundation (VL-214)', () => {
     const plugin = overview.products.find((p: { id: string }) => p.id === 'plugin-runtime');
     expect(plugin?.status).toBe('partial');
     expect(plugin?.console).toBe('/plugin-runtime');
+
+    const policy = overview.products.find((p: { id: string }) => p.id === 'policy-runtime');
+    expect(policy?.status).toBe('partial');
+    expect(policy?.console).toBe('/policy-runtime');
   });
 
   it('exposes aiKernelRuntimes via GraphQL CQRS façade', async () => {

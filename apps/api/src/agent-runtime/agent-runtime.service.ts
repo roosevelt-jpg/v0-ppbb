@@ -215,7 +215,9 @@ export class AgentRuntimeService {
     for (const step of requested) {
       const at = new Date().toISOString();
       try {
-        const gate = this.policy.assertAllowed({
+        const gate = await this.policy.assertAllowed({
+          organizationId: input.organizationId,
+          workspaceId: input.workspaceId,
           agentId: agent.id,
           action: step.action,
           permissions: agent.permissions,
@@ -312,7 +314,9 @@ export class AgentRuntimeService {
       agents.push(await this.requireAgent(input, id));
     }
     for (const agent of agents) {
-      this.policy.assertAllowed({
+      await this.policy.assertAllowed({
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
         agentId: agent.id,
         action: 'agent.message',
         permissions: agent.permissions,
@@ -356,7 +360,9 @@ export class AgentRuntimeService {
   ) {
     this.assertEnabled();
     const agent = await this.requireAgent(input, input.agentId);
-    this.policy.assertAllowed({
+    await this.policy.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
       agentId: agent.id,
       action: 'agent.schedule',
       permissions: agent.permissions,
@@ -392,7 +398,9 @@ export class AgentRuntimeService {
   ) {
     this.assertEnabled();
     const agent = await this.requireAgent(input, input.agentId);
-    this.policy.assertAllowed({
+    await this.policy.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
       agentId: agent.id,
       action: 'memory.put',
       permissions: agent.permissions,

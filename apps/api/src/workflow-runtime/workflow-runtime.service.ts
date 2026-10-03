@@ -334,7 +334,9 @@ export class WorkflowRuntimeService {
   async approve(input: AuthCtx & { workflowId?: string; note?: string }) {
     this.assertEnabled();
     const workflow = await this.requireWorkflow(input, input.workflowId);
-    this.policy.assertAllowed({
+    await this.policy.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
       workflowId: workflow.id,
       action: 'workflow.approve',
       permissions: workflow.permissions,
@@ -365,7 +367,9 @@ export class WorkflowRuntimeService {
   ) {
     this.assertEnabled();
     const workflow = await this.requireWorkflow(input, input.workflowId);
-    this.policy.assertAllowed({
+    await this.policy.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
       workflowId: workflow.id,
       action: 'workflow.schedule',
       permissions: workflow.permissions,
@@ -416,7 +420,9 @@ export class WorkflowRuntimeService {
     }
     const workflowId = String(run.workflowId ?? '');
     const workflow = await this.requireWorkflow(input, workflowId);
-    this.policy.assertAllowed({
+    await this.policy.assertAllowed({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
       workflowId: workflow.id,
       action: 'workflow.rollback',
       permissions: workflow.permissions,
@@ -555,7 +561,9 @@ export class WorkflowRuntimeService {
         if (forceFailAction && forceFailAction === step.action && attempt === 1) {
           throw new Error('simulated_step_failure');
         }
-        const gate = this.policy.assertAllowed({
+        const gate = await this.policy.assertAllowed({
+          organizationId: input.organizationId,
+          workspaceId: input.workspaceId,
           workflowId: workflow.id,
           action: step.action,
           permissions: workflow.permissions,

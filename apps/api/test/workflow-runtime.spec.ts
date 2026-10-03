@@ -105,7 +105,7 @@ describe('Workflow Runtime (VL-220)', () => {
     expect(res.body.honesty.regeneratesWorkflowsProduct).toBe(false);
     expect(res.body.honesty.scopedPermissionsRequired).toBe(true);
     expect(res.body.honesty.localPermissionHardGate).toBe(true);
-    expect(res.body.honesty.policyRuntimeWired).toBe(false);
+    expect(res.body.honesty.policyRuntimeWired).toBe(true);
     expect(res.body.ceilings.liveStepExecution).toBe(false);
     expect(res.body.links.console).toBe('/workflow-runtime');
   });

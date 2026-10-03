@@ -3439,6 +3439,76 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + safety' } },
       },
     },
+    '/v1/policy-runtime/engine': {
+      get: {
+        summary: 'Policy Runtime catalog',
+        operationId: 'getPolicyRuntimeEngine',
+        responses: { '200': { description: 'Catalog + honesty + ceilings' } },
+      },
+    },
+    '/v1/policy-runtime/kinds': {
+      get: {
+        summary: 'Policy kinds and global denies',
+        operationId: 'listPolicyRuntimeKinds',
+        responses: { '200': { description: 'Kinds' } },
+      },
+    },
+    '/v1/policy-runtime/policies': {
+      get: {
+        summary: 'List workspace policies',
+        operationId: 'listPolicyRuntimePolicies',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Policies' } },
+      },
+      post: {
+        summary: 'Create workspace policy',
+        operationId: 'createPolicyRuntimePolicy',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created' } },
+      },
+    },
+    '/v1/policy-runtime/policies/{id}': {
+      get: {
+        summary: 'Get policy',
+        operationId: 'getPolicyRuntimePolicy',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Policy' } },
+      },
+    },
+    '/v1/policy-runtime/policies/{id}/enabled': {
+      post: {
+        summary: 'Enable or disable policy',
+        operationId: 'enablePolicyRuntimePolicy',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { '200': { description: 'Updated' } },
+      },
+    },
+    '/v1/policy-runtime/evaluate': {
+      post: {
+        summary: 'Evaluate policy hard-gate decision',
+        operationId: 'evaluatePolicyRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Allow/deny decision (hardGate)' } },
+      },
+    },
+    '/v1/policy-runtime/analytics': {
+      get: {
+        summary: 'Policy Runtime analytics',
+        operationId: 'getPolicyRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/policy-runtime/monitoring': {
+      get: {
+        summary: 'Policy Runtime monitoring',
+        operationId: 'getPolicyRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + wiring' } },
+      },
+    },
     '/v1/inference-cloud/overview': {
       get: {
         summary: 'Inference Cloud org overview',

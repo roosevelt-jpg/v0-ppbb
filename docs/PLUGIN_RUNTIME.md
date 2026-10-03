@@ -12,7 +12,7 @@ Part of the internal [AI Kernel](./AI_KERNEL.md) (Volume 8). Roadmap: [`docs/roa
 1. Every action passes `PluginPolicyGate` (local hard allowlist) before execution.
 2. Globally denied: `external.execute`, `shell.exec`, `network.fetch`, `plugin.invoke_live`, …
 3. Allowed actions run as **simulated sandbox handlers** — `liveCodeExecution: false`.
-4. Policy Runtime (VL-222) will harden further (`policyRuntimeWired: false` today); Plugin already hard-gates.
+4. Policy Runtime (VL-222) is wired (`policyRuntimeWired: true`) — org/global denies hard-block via `PluginPolicyGate`.
 
 ---
 

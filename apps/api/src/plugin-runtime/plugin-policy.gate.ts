@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
+import { PolicyRuntimeService } from '../policy-runtime/policy-runtime.service';
 import {
   PLUGIN_DENIED_ACTIONS,
   PLUGIN_PERMISSIONS,
@@ -7,16 +8,24 @@ import {
 } from './plugin-runtime.catalog';
 
 /**
- * Local hard gate used by Plugin Runtime (VL-221).
- * Full Policy Runtime (VL-222) will replace/extend this — Plugin must not wait to deny.
+ * Local allowlist + Policy Runtime hard gate (VL-221 / VL-222).
  */
 @Injectable()
 export class PluginPolicyGate {
-  assertAllowed(input: {
+  constructor(private readonly policyRuntime: PolicyRuntimeService) {}
+
+  async assertAllowed(input: {
+    organizationId: string;
+    workspaceId: string;
     pluginId: string;
     action: string;
     permissions: string[];
-  }): { allowed: true; action: PluginPermission; policy: 'local_allowlist' } {
+  }): Promise<{
+    allowed: true;
+    action: PluginPermission;
+    policy: 'policy-runtime';
+    hardGate: true;
+  }> {
     const action = (input.action ?? '').trim();
     if (!action) {
       throw new ApiException(
@@ -50,10 +59,20 @@ export class PluginPolicyGate {
       );
     }
 
+    await this.policyRuntime.assertHardGate({
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      runtime: 'plugin-runtime',
+      subjectId: input.pluginId,
+      action,
+      permissions: input.permissions,
+    });
+
     return {
       allowed: true,
       action: action as PluginPermission,
-      policy: 'local_allowlist',
+      policy: 'policy-runtime',
+      hardGate: true,
     };
   }
 

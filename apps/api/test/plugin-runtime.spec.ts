@@ -104,7 +104,7 @@ describe('Plugin Runtime (VL-221)', () => {
     expect(res.body.honesty.extendsMarketplace).toBe(true);
     expect(res.body.honesty.scopedPermissionsRequired).toBe(true);
     expect(res.body.honesty.localPermissionHardGate).toBe(true);
-    expect(res.body.honesty.policyRuntimeWired).toBe(false);
+    expect(res.body.honesty.policyRuntimeWired).toBe(true);
     expect(res.body.ceilings.liveCodeExecution).toBe(false);
     expect(res.body.links.console).toBe('/plugin-runtime');
   });

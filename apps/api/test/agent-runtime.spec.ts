@@ -101,7 +101,7 @@ describe('Agent Runtime (VL-219)', () => {
     expect(res.body.honesty.scopedPermissionsRequired).toBe(true);
     expect(res.body.honesty.sandboxRequired).toBe(true);
     expect(res.body.honesty.localPermissionHardGate).toBe(true);
-    expect(res.body.honesty.policyRuntimeWired).toBe(false);
+    expect(res.body.honesty.policyRuntimeWired).toBe(true);
     expect(res.body.honesty.langGraphOs).toBe(false);
     expect(res.body.ceilings.liveToolExecution).toBe(false);
     expect(res.body.safety.openToolExecutionForbidden).toBe(true);

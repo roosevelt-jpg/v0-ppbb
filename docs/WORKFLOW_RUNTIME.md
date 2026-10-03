@@ -12,7 +12,7 @@ Part of the internal [AI Kernel](./AI_KERNEL.md) (Volume 8). Roadmap: [`docs/roa
 1. Every step passes `WorkflowPolicyGate` (local hard allowlist) before execution.
 2. Globally denied: `external.execute`, `billing.charge`, `shell.exec`, `workflow.execute_live`, …
 3. Allowed steps run as **simulated sandbox steps** — `liveStepExecution: false`.
-4. Policy Runtime (VL-222) will harden further (`policyRuntimeWired: false` today); Workflow already hard-gates.
+4. Policy Runtime (VL-222) is wired (`policyRuntimeWired: true`) — org/global denies hard-block via `WorkflowPolicyGate`.
 
 ---
 

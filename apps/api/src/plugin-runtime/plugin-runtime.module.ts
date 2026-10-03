@@ -5,6 +5,7 @@ import { PluginPolicyGate } from './plugin-policy.gate';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { ReasoningRuntimeModule } from '../reasoning-runtime/reasoning-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
+import { PolicyRuntimeModule } from '../policy-runtime/policy-runtime.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -16,6 +17,7 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     MemoryRuntimeModule,
     ReasoningRuntimeModule,
     ContextRuntimeModule,
+    PolicyRuntimeModule,
     ApiKeysModule,
     IdentityModule,
     PrismaModule,
