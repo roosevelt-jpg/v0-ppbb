@@ -27,6 +27,8 @@ function usage(): never {
   verbalab model-serving-deploy --kind <kind> --model <slug> [--version <v>] [--strategy rolling|canary|blue_green]
   verbalab ai-router-engine
   verbalab ai-router-resolve [--feature chat|translate|stt|tts|ocr|embeddings|detect] [--optimize latency|cost|balanced|quality]
+  verbalab streaming-runtime-engine
+  verbalab streaming-runtime-surfaces [--kind speech|voice|translation|llm|video|realtime]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -237,6 +239,24 @@ async function main() {
         await vl.aiRouterResolve({
           feature: argValue(rest, '--feature') ?? undefined,
           optimize: argValue(rest, '--optimize') ?? undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'streaming-runtime-engine') {
+    console.log(JSON.stringify(await vl.streamingRuntimeEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'streaming-runtime-surfaces') {
+    console.log(
+      JSON.stringify(
+        await vl.streamingRuntimeSurfaces({
+          kind: argValue(rest, '--kind') ?? undefined,
         }),
         null,
         2,

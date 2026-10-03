@@ -57,6 +57,7 @@ import { InferenceCloudModule } from './inference-cloud/inference-cloud.module';
 import { GpuPlatformModule } from './gpu-platform/gpu-platform.module';
 import { ModelServingModule } from './model-serving/model-serving.module';
 import { AiRouterModule } from './ai-router/ai-router.module';
+import { StreamingRuntimeModule } from './streaming-runtime/streaming-runtime.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from './enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from './ontology-platform/ontology-platform.module';
@@ -124,6 +125,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     GpuPlatformModule,
     ModelServingModule,
     AiRouterModule,
+    StreamingRuntimeModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,

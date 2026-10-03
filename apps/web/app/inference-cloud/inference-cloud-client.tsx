@@ -118,6 +118,9 @@ export function InferenceCloudClient() {
               <Link href={data.links.aiRouter ?? '/ai-router'} style={secondary}>
                 AI Router
               </Link>
+              <Link href={data.links.streamingRuntime ?? '/streaming-runtime'} style={secondary}>
+                Streaming
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

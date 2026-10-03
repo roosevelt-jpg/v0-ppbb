@@ -3027,6 +3027,86 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + honesty snapshot' } },
       },
     },
+    '/v1/streaming-runtime/engine': {
+      get: {
+        summary: 'Streaming Runtime catalog',
+        operationId: 'getStreamingRuntimeEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, transports, and honesty flags',
+          },
+        },
+      },
+    },
+    '/v1/streaming-runtime/surfaces': {
+      get: {
+        summary: 'Streaming surfaces',
+        operationId: 'listStreamingRuntimeSurfaces',
+        responses: {
+          '200': {
+            description: 'Speech/voice/translation/LLM/video/realtime surface map',
+          },
+        },
+      },
+    },
+    '/v1/streaming-runtime/transports': {
+      get: {
+        summary: 'Streaming transports',
+        operationId: 'listStreamingRuntimeTransports',
+        responses: { '200': { description: 'SSE shipped; WebSocket/gRPC deferred' } },
+      },
+    },
+    '/v1/streaming-runtime/sessions': {
+      get: {
+        summary: 'List sandbox streaming sessions',
+        operationId: 'listStreamingSessions',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace sessions' } },
+      },
+      post: {
+        summary: 'Create sandbox streaming session',
+        operationId: 'createStreamingSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Session created' } },
+      },
+    },
+    '/v1/streaming-runtime/sessions/{id}/close': {
+      post: {
+        summary: 'Close sandbox streaming session',
+        operationId: 'closeStreamingSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Session closed' } },
+      },
+    },
+    '/v1/streaming-runtime/stream': {
+      post: {
+        summary: 'Sandbox SSE chunk stream (or redirect to existing product SSE)',
+        operationId: 'streamStreamingRuntime',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'text/event-stream chunk/redirect/done events' },
+        },
+      },
+    },
+    '/v1/streaming-runtime/analytics': {
+      get: {
+        summary: 'Streaming Runtime analytics',
+        operationId: 'getStreamingRuntimeAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Session aggregates' } },
+      },
+    },
+    '/v1/streaming-runtime/monitoring': {
+      get: {
+        summary: 'Streaming Runtime monitoring',
+        operationId: 'getStreamingRuntimeMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

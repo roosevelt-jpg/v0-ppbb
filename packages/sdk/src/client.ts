@@ -1282,6 +1282,55 @@ export class VerbaLab {
     });
   }
 
+  async streamingRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      websocketOs: boolean;
+      grpcStreamingOs: boolean;
+      videoStreamingOs: boolean;
+      regeneratesExistingStreams: boolean;
+      extendsExistingSse: boolean;
+      sandboxChunkStream: boolean;
+    };
+    mode: string;
+  }> {
+    return this.requestJson('/v1/streaming-runtime/engine', { method: 'GET' });
+  }
+
+  async streamingRuntimeSurfaces(params?: { kind?: string }): Promise<{
+    surfaces: Array<{
+      id: string;
+      kind: string;
+      status: string;
+      transport: string;
+      api: string | null;
+    }>;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.kind) q.set('kind', params.kind);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/streaming-runtime/surfaces${suffix}`, { method: 'GET' });
+  }
+
+  async streamingRuntimeCreateSession(input: {
+    kind?: string;
+    label?: string;
+    text?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/streaming-runtime/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

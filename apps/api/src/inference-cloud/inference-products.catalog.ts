@@ -52,10 +52,10 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
       id: 'streaming-runtime',
       name: 'Streaming Runtime',
       status: 'partial',
-      api: null,
-      console: null,
+      api: 'GET /v1/streaming-runtime/engine',
+      console: '/streaming-runtime',
       notes:
-        'Streaming inference (Phase 75 / VL-208). Partial via existing chat/TTS SSE where wired; dedicated runtime deferred.',
+        'SSE hub over existing speech/voice/translate streams + sandbox LLM chunks (VL-208). WebSocket/gRPC/video deferred.',
     },
     {
       id: 'batch-runtime',

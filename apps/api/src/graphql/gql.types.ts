@@ -583,6 +583,69 @@ export class GqlAiRouterEngine {
 }
 
 @ObjectType()
+export class GqlStreamingRuntimeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlStreamingRuntimeEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlStreamingRuntimeCapability])
+  capabilities!: GqlStreamingRuntimeCapability[];
+
+  @Field()
+  websocketOs!: boolean;
+
+  @Field()
+  grpcStreamingOs!: boolean;
+
+  @Field()
+  videoStreamingOs!: boolean;
+
+  @Field()
+  bidirectionalRealtimeOs!: boolean;
+
+  @Field()
+  regeneratesExistingStreams!: boolean;
+
+  @Field()
+  extendsExistingSse!: boolean;
+
+  @Field()
+  sandboxChunkStream!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  primaryTransport!: string;
+
+  @Field()
+  mode!: string;
+
+  @Field()
+  maxChunksPerStream!: number;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

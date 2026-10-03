@@ -90,6 +90,7 @@ model Organization {
   modelServingDeployments      ModelServingDeployment[]
   aiRouterPolicies             AiRouterPolicy[]
   aiRouterDecisions            AiRouterDecision[]
+  streamingSessions            StreamingSession[]
 
   @@map("organizations")
 }
@@ -172,6 +173,7 @@ model Workspace {
   modelServingDeployments ModelServingDeployment[]
   aiRouterPolicies       AiRouterPolicy[]
   aiRouterDecisions      AiRouterDecision[]
+  streamingSessions      StreamingSession[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1489,6 +1491,31 @@ model AiRouterDecision {
   @@index([organizationId, workspaceId, createdAt])
   @@index([workspaceId, feature])
   @@map("ai_router_decisions")
+}
+
+/// Sandbox streaming session (VL-208). Tracks SSE chunk streams — not a WebSocket OS.
+model StreamingSession {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  /// speech | voice | translation | llm | video | realtime
+  kind           String
+  /// sse | websocket | grpc
+  transport      String   @default("sse")
+  /// open | streaming | closed | failed
+  status         String   @default("open")
+  label          String   @default("")
+  chunkCount     Int      @default(0) @map("chunk_count")
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@index([workspaceId, kind])
+  @@map("streaming_sessions")
 }
 
 

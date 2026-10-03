@@ -17,6 +17,7 @@ const links = [
   { href: '/gpu-platform', label: 'GPU Platform' },
   { href: '/model-serving', label: 'Model Serving' },
   { href: '/ai-router', label: 'AI Router' },
+  { href: '/streaming-runtime', label: 'Streaming Runtime' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },
