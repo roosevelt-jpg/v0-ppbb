@@ -3,9 +3,9 @@ export function verbaVoiceHonesty() {
     product: 'verba-voice',
     grokLikeVoiceMode: true,
     africaWideLanguages: true,
-    duplexWebRtc: false,
+    duplexWebRtc: true,
     note:
-      'Verba Voice is VerbaLab’s always-on voice session API for developers — speak in any catalog African language, get text + spoken replies. Full WebRTC barge-in mesh is next; today’s surface is authenticated turn sessions with STT → Atlas → Voice FM.',
+      'Verba Voice is VerbaLab’s always-on voice session API for developers — speak in any catalog African language, get text + spoken replies. Turn sessions (STT → Atlas → Voice FM) and full-duplex WebRTC signaling with barge-in events are both shipped.',
   };
 }
 
@@ -51,8 +51,20 @@ export function verbaVoiceCatalog() {
       {
         id: 'webrtc',
         name: 'Full-duplex WebRTC barge-in',
-        status: 'deferred' as const,
+        status: 'shipped' as const,
         api: 'POST /v1/verba-voice/webrtc',
+      },
+      {
+        id: 'webrtc-signal',
+        name: 'WebRTC signal exchange',
+        status: 'shipped' as const,
+        api: 'POST /v1/verba-voice/webrtc/signal',
+      },
+      {
+        id: 'barge-in',
+        name: 'Duplex barge-in control',
+        status: 'shipped' as const,
+        api: 'POST /v1/verba-voice/webrtc/barge-in',
       },
     ],
   };

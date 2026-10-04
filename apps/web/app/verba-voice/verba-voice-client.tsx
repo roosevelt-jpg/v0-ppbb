@@ -42,6 +42,39 @@ export function VerbaVoiceClient() {
             { name: 'language', label: 'Language', placeholder: 'sw' },
           ],
         },
+        {
+          id: 'webrtc',
+          label: 'Open duplex WebRTC',
+          path: 'webrtc',
+          fields: [
+            { name: 'sessionId', label: 'Session id', placeholder: 'from open session' },
+            { name: 'bargeIn', label: 'Barge-in (true/false)', placeholder: 'true' },
+          ],
+        },
+        {
+          id: 'webrtc-signal',
+          label: 'WebRTC signal',
+          path: 'webrtc/signal',
+          fields: [
+            { name: 'sessionId', label: 'Session id', placeholder: 'from open session' },
+            { name: 'kind', label: 'Kind', placeholder: 'offer' },
+            {
+              name: 'sdp',
+              label: 'SDP (optional)',
+              type: 'textarea',
+              placeholder: 'v=0...',
+            },
+          ],
+        },
+        {
+          id: 'barge-in',
+          label: 'Barge-in control',
+          path: 'webrtc/barge-in',
+          fields: [
+            { name: 'sessionId', label: 'Session id', placeholder: 'from open session' },
+            { name: 'action', label: 'Action', placeholder: 'interrupt' },
+          ],
+        },
       ]}
     />
   );

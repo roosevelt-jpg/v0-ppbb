@@ -169,4 +169,52 @@ export class VerbaVoiceController {
       },
     );
   }
+
+  @Post('webrtc')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  webrtc(@Req() req: AuthReq, @Body() body: Record<string, unknown>) {
+    return this.voice.webrtc(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+        userId: req.sessionAuth?.userId,
+        apiKeyId: req.translateAuth.apiKeyId,
+        ip: clientIp(req),
+      },
+      body ?? {},
+    );
+  }
+
+  @Post('webrtc/signal')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  webrtcSignal(@Req() req: AuthReq, @Body() body: Record<string, unknown>) {
+    return this.voice.webrtcSignal(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+        userId: req.sessionAuth?.userId,
+        apiKeyId: req.translateAuth.apiKeyId,
+        ip: clientIp(req),
+      },
+      body ?? {},
+    );
+  }
+
+  @Post('webrtc/barge-in')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  bargeIn(@Req() req: AuthReq, @Body() body: Record<string, unknown>) {
+    return this.voice.bargeIn(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+        userId: req.sessionAuth?.userId,
+        apiKeyId: req.translateAuth.apiKeyId,
+        ip: clientIp(req),
+      },
+      body ?? {},
+    );
+  }
 }

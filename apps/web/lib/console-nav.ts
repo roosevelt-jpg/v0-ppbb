@@ -152,6 +152,53 @@ export const CONSOLE_NAV: NavGroup[] = [
     ],
   },
   {
+    id: 'next-gen',
+    label: 'Next-gen',
+    collapsible: true,
+    items: [
+      {
+        href: '/compliance-attestations',
+        label: 'Compliance Attestations',
+        keywords: ['dpa', 'attestation', 'soc2', 'popia', 'ndpr', 'gdpr'],
+      },
+      {
+        href: '/voice-passport',
+        label: 'Voice Passport',
+        keywords: ['passport', 'voice identity', 'consent', 'credential'],
+      },
+      {
+        href: '/industry-drops',
+        label: 'Industry Drops',
+        keywords: ['vertical', 'banking', 'healthcare', 'government', 'telco', 'agri'],
+      },
+      {
+        href: '/verba-voice',
+        label: 'Verba Voice Duplex',
+        keywords: ['webrtc', 'duplex', 'barge-in', 'realtime'],
+      },
+      {
+        href: '/edge-offline',
+        label: 'Edge Offline',
+        keywords: ['offline', 'edge', 'echo', 'voice fm', 'on-device'],
+      },
+      {
+        href: '/developer-gravity',
+        label: 'Developer Gravity',
+        keywords: ['sandbox', 'sdk', 'quickstart', 'openapi', 'dx'],
+      },
+      {
+        href: '/africa-eval-matrix',
+        label: 'Africa Eval Matrix',
+        keywords: ['wer', 'mos', 'eval', 'benchmark', 'africa'],
+      },
+      {
+        href: '/sovereign-flywheel',
+        label: 'Sovereign Flywheel',
+        keywords: ['flywheel', 'fine-tune', 'consent', 'dataset', 'sovereign'],
+      },
+    ],
+  },
+  {
     id: 'account',
     label: 'Account',
     items: [

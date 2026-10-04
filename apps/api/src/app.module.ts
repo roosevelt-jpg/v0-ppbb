@@ -279,6 +279,13 @@ import { CivicVoiceSealModule } from './civic-voice-seal/civic-voice-seal.module
 import { IntentPreservingDubModule } from './intent-preserving-dub/intent-preserving-dub.module';
 import { MeetingTranscriptionModule } from './meeting-transcription/meeting-transcription.module';
 import { VerbaVoiceModule } from './verba-voice/verba-voice.module';
+import { ComplianceAttestationsModule } from './compliance-attestations/compliance-attestations.module';
+import { VoicePassportModule } from './voice-passport/voice-passport.module';
+import { IndustryDropsModule } from './industry-drops/industry-drops.module';
+import { EdgeOfflineModule } from './edge-offline/edge-offline.module';
+import { DeveloperGravityModule } from './developer-gravity/developer-gravity.module';
+import { AfricaEvalMatrixModule } from './africa-eval-matrix/africa-eval-matrix.module';
+import { SovereignFlywheelModule } from './sovereign-flywheel/sovereign-flywheel.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -547,6 +554,13 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     IntentPreservingDubModule,
     MeetingTranscriptionModule,
     VerbaVoiceModule,
+    ComplianceAttestationsModule,
+    VoicePassportModule,
+    IndustryDropsModule,
+    EdgeOfflineModule,
+    DeveloperGravityModule,
+    AfricaEvalMatrixModule,
+    SovereignFlywheelModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,

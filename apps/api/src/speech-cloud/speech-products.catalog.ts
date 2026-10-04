@@ -157,7 +157,7 @@ export function speechProductCatalog(): SpeechProductRow[] {
       api: 'GET /v1/verba-voice/engine',
       console: '/verba-voice',
       notes:
-        'Grok-class conversational voice sessions (STT→Atlas→TTS). WebRTC duplex deferred. Africa residency default.',
+        'Grok-class conversational voice sessions (STT→Atlas→TTS) plus full-duplex WebRTC signaling with barge-in. Africa residency default.',
     },
     {
       id: 'call-intelligence',

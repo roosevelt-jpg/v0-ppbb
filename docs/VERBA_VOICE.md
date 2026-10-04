@@ -16,10 +16,13 @@ Grok-class conversational voice for African languages — session API for develo
 | `GET` | `/v1/verba-voice/sessions/:id/events` | Event log (`?stream=1` for SSE) |
 | `POST` | `/v1/verba-voice/text-turns` | Text in → Atlas reply + spoken audio |
 | `POST` | `/v1/verba-voice/turns` | Multipart audio → STT → Atlas → TTS |
+| `POST` | `/v1/verba-voice/webrtc` | Open full-duplex WebRTC signaling |
+| `POST` | `/v1/verba-voice/webrtc/signal` | Exchange SDP offer/answer/ICE |
+| `POST` | `/v1/verba-voice/webrtc/barge-in` | Interrupt / resume / enable / disable |
 
 ## Honesty
 
-Turn-based voice sessions ship today (STT → Atlas → Voice FM). Full-duplex WebRTC barge-in is deferred (`POST /v1/verba-voice/webrtc`).
+Turn-based voice sessions (STT → Atlas → Voice FM) and full-duplex WebRTC signaling with barge-in control are both shipped. Media plane uses client WebRTC with STUN; media relay TURN credentials are deploy-configured.
 
 ## Residency
 
@@ -33,3 +36,4 @@ Primary cloud residency is **Africa** (`VERBALAB_REGION=af`, Fly `jnb`). New org
 
 - Model families: `GET /v1/model-keys/models`
 - Meeting STT: `/docs/MEETING_TRANSCRIPTION.md`
+- Edge offline packs: `/docs/EDGE_OFFLINE.md`

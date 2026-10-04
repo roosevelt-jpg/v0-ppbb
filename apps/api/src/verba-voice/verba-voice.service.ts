@@ -37,6 +37,16 @@ type VoiceSession = {
   createdAt: string;
   turns: VoiceTurn[];
   events: Array<{ type: string; payload: Record<string, unknown>; at: string }>;
+  duplex?: {
+    mode: 'turn' | 'webrtc';
+    peerId: string;
+    iceServers: Array<{ urls: string | string[]; username?: string; credential?: string }>;
+    localDescription?: Record<string, unknown>;
+    remoteDescription?: Record<string, unknown>;
+    candidates: Array<Record<string, unknown>>;
+    bargeInEnabled: boolean;
+    speaking: 'user' | 'assistant' | 'idle';
+  };
 };
 
 const DEFAULT_SYSTEM =
@@ -403,6 +413,168 @@ export class VerbaVoiceService {
     return {
       sessionId: session.id,
       events: session.events.slice(start),
+    };
+  }
+
+  async webrtc(auth: OrgAuth, body: Record<string, unknown>) {
+    const sessionId = String(body.sessionId ?? '').trim();
+    if (!sessionId) {
+      throw new ApiException('validation_error', 'sessionId is required', HttpStatus.BAD_REQUEST);
+    }
+    const session = this.getOwnedSession(auth, sessionId);
+    const peerId = randomUUID();
+    session.duplex = {
+      mode: 'webrtc',
+      peerId,
+      iceServers: [
+        { urls: 'stun:stun.cloudflare.com:3478' },
+        { urls: 'stun:stun.l.google.com:19302' },
+      ],
+      candidates: [],
+      bargeInEnabled: body.bargeIn === false ? false : true,
+      speaking: 'idle',
+    };
+    this.pushEvent(session, 'webrtc.ready', {
+      peerId,
+      bargeInEnabled: session.duplex.bargeInEnabled,
+    });
+    this.sessionStore.set(session.id, session);
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      userId: auth.userId,
+      action: 'verba-voice.webrtc',
+      route: 'POST /v1/verba-voice/webrtc',
+      ip: auth.ip,
+      metadata: { sessionId: session.id, peerId } as never,
+    });
+    return {
+      sessionId: session.id,
+      duplex: {
+        peerId,
+        mode: 'webrtc',
+        bargeInEnabled: session.duplex.bargeInEnabled,
+        iceServers: session.duplex.iceServers,
+        signaling: {
+          offer: 'POST /v1/verba-voice/webrtc/signal',
+          answer: 'POST /v1/verba-voice/webrtc/signal',
+          candidate: 'POST /v1/verba-voice/webrtc/signal',
+          bargeIn: 'POST /v1/verba-voice/webrtc/barge-in',
+        },
+      },
+      note: 'Exchange SDP/ICE via /webrtc/signal; client plays Voice FM while listening for barge-in.',
+    };
+  }
+
+  async webrtcSignal(auth: OrgAuth, body: Record<string, unknown>) {
+    const sessionId = String(body.sessionId ?? '').trim();
+    const session = this.getOwnedSession(auth, sessionId);
+    if (!session.duplex || session.duplex.mode !== 'webrtc') {
+      throw new ApiException(
+        'conflict',
+        'Open duplex with POST /v1/verba-voice/webrtc first',
+        HttpStatus.CONFLICT,
+      );
+    }
+    const kind = String(body.kind ?? body.type ?? 'offer').toLowerCase();
+    if (kind === 'offer' || kind === 'local') {
+      session.duplex.localDescription = (body.description as Record<string, unknown>) ?? {
+        type: 'offer',
+        sdp: String(body.sdp ?? ''),
+      };
+    } else if (kind === 'answer' || kind === 'remote') {
+      session.duplex.remoteDescription = (body.description as Record<string, unknown>) ?? {
+        type: 'answer',
+        sdp: String(body.sdp ?? `v=0\r\no=- ${Date.now()} 2 IN IP4 127.0.0.1\r\ns=VerbaVoice\r\nt=0 0\r\n`),
+      };
+    } else if (kind === 'candidate' || kind === 'ice') {
+      const candidate = (body.candidate as Record<string, unknown>) ?? {
+        candidate: String(body.sdpMid ?? '0'),
+        sdpMLineIndex: 0,
+      };
+      session.duplex.candidates.push(candidate);
+    } else {
+      throw new ApiException(
+        'validation_error',
+        'kind must be offer, answer, or candidate',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    this.pushEvent(session, `webrtc.signal.${kind}`, { kind });
+    this.sessionStore.set(session.id, session);
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      userId: auth.userId,
+      action: 'verba-voice.webrtc.signal',
+      route: 'POST /v1/verba-voice/webrtc/signal',
+      ip: auth.ip,
+      metadata: { sessionId: session.id, kind } as never,
+    });
+    return {
+      sessionId: session.id,
+      peerId: session.duplex.peerId,
+      kind,
+      duplex: {
+        hasLocal: Boolean(session.duplex.localDescription),
+        hasRemote: Boolean(session.duplex.remoteDescription),
+        candidateCount: session.duplex.candidates.length,
+        bargeInEnabled: session.duplex.bargeInEnabled,
+        speaking: session.duplex.speaking,
+      },
+      answer:
+        kind === 'offer'
+          ? {
+              type: 'answer',
+              sdp:
+                (session.duplex.remoteDescription?.sdp as string | undefined) ??
+                `v=0\r\no=- ${Date.now()} 2 IN IP4 127.0.0.1\r\ns=VerbaVoice\r\nt=0 0\r\n`,
+            }
+          : undefined,
+    };
+  }
+
+  async bargeIn(auth: OrgAuth, body: Record<string, unknown>) {
+    const sessionId = String(body.sessionId ?? '').trim();
+    const session = this.getOwnedSession(auth, sessionId);
+    if (!session.duplex || session.duplex.mode !== 'webrtc') {
+      throw new ApiException(
+        'conflict',
+        'Open duplex with POST /v1/verba-voice/webrtc first',
+        HttpStatus.CONFLICT,
+      );
+    }
+    const action = String(body.action ?? 'interrupt').toLowerCase();
+    if (action === 'enable') session.duplex.bargeInEnabled = true;
+    else if (action === 'disable') session.duplex.bargeInEnabled = false;
+    else if (action === 'interrupt' || action === 'barge') {
+      if (!session.duplex.bargeInEnabled) {
+        throw new ApiException('conflict', 'barge-in is disabled for this session', HttpStatus.CONFLICT);
+      }
+      session.duplex.speaking = 'user';
+      this.pushEvent(session, 'webrtc.barge-in', { action: 'interrupt', speaking: 'user' });
+    } else if (action === 'resume') {
+      session.duplex.speaking = 'assistant';
+      this.pushEvent(session, 'webrtc.barge-in', { action: 'resume', speaking: 'assistant' });
+    } else {
+      throw new ApiException(
+        'validation_error',
+        'action must be interrupt, resume, enable, or disable',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    this.sessionStore.set(session.id, session);
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      userId: auth.userId,
+      action: 'verba-voice.webrtc.barge-in',
+      route: 'POST /v1/verba-voice/webrtc/barge-in',
+      ip: auth.ip,
+      metadata: { sessionId: session.id, action } as never,
+    });
+    return {
+      sessionId: session.id,
+      bargeInEnabled: session.duplex.bargeInEnabled,
+      speaking: session.duplex.speaking,
+      action,
     };
   }
 }

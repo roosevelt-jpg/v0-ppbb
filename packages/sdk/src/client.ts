@@ -1022,6 +1022,152 @@ export class VerbaLab {
     return this.requestForm('/v1/verba-voice/turns', form);
   }
 
+  async verbaVoiceWebRtc(input: {
+    sessionId: string;
+    bargeIn?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceWebRtcSignal(input: {
+    sessionId: string;
+    kind: string;
+    sdp?: string;
+    description?: Record<string, unknown>;
+    candidate?: Record<string, unknown>;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc/signal', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceBargeIn(input: {
+    sessionId: string;
+    action: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc/barge-in', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async complianceAttestationsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/compliance-attestations/engine', {
+      method: 'GET',
+    });
+  }
+
+  async issueComplianceAttestation(input: {
+    industry?: string;
+    framework?: string;
+    region?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/compliance-attestations/issue', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voicePassportEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-passport/engine', { method: 'GET' });
+  }
+
+  async issueVoicePassport(input: {
+    holderName: string;
+    country?: string;
+    scopes?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-passport/issue', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async industryDropsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/industry-drops/engine', { method: 'GET' });
+  }
+
+  async installIndustryDrop(input: {
+    packId?: string;
+    workspaceName?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/industry-drops/install', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async edgeOfflineEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/edge-offline/engine', { method: 'GET' });
+  }
+
+  async buildEdgeOfflinePack(input: {
+    models?: string;
+    locales?: string;
+    deviceClass?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/edge-offline/build', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async developerGravityEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/developer-gravity/engine', {
+      method: 'GET',
+    });
+  }
+
+  async createDeveloperSandbox(input: {
+    name?: string;
+    tier?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/developer-gravity/sandbox', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async africaEvalMatrixEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-eval-matrix/engine', {
+      method: 'GET',
+    });
+  }
+
+  async scoreAfricaEval(input: {
+    language?: string;
+    domain?: string;
+    hypothesis: string;
+    reference: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-eval-matrix/score', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async sovereignFlywheelEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/sovereign-flywheel/engine', {
+      method: 'GET',
+    });
+  }
+
+  async ingestSovereignDataset(input: {
+    source?: string;
+    language?: string;
+    consentToken: string;
+    samples?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/sovereign-flywheel/ingest', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async locales(): Promise<LocalePack[]> {
     const res = await this.requestJson<{ data: LocalePack[] }>('/v1/locales', { method: 'GET' });
     return res.data;
