@@ -309,7 +309,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     features: [
       'African Voice LLM chat',
       'Speak or type in any language',
-      'Jarvis-style voice replies',
+      'Spoken voice replies',
       'Language-aware translate-then-answer',
     ],
     audiences: ['Support', 'Sales', 'Internal IT'],

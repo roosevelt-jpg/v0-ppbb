@@ -6,7 +6,15 @@ import { apiFetch, API_URL } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
-type ConnectorType = 'slack' | 'webhook' | 'http' | 'discord' | 'email';
+type ConnectorType =
+  | 'slack'
+  | 'webhook'
+  | 'http'
+  | 'discord'
+  | 'email'
+  | 'gmail'
+  | 'google_drive'
+  | 'office365';
 
 type ConnectorDef = {
   type: ConnectorType;
@@ -49,6 +57,15 @@ const TYPE_DEFAULTS: Record<ConnectorType, { label: string; configHint: string }
   http: { label: 'HTTP API', configHint: '{"url":"https://api.example.com/hook","method":"POST"}' },
   discord: { label: 'Discord webhook', configHint: '{"url":"https://discord.com/api/webhooks/…"}' },
   email: { label: 'Email notify', configHint: '{"to":"ops@example.com"}' },
+  gmail: { label: 'Gmail account', configHint: '{"account":"you@gmail.com","oauthMode":"sandbox"}' },
+  google_drive: {
+    label: 'Google Drive',
+    configHint: '{"account":"you@gmail.com","oauthMode":"sandbox"}',
+  },
+  office365: {
+    label: 'Microsoft 365',
+    configHint: '{"account":"you@company.com","oauthMode":"sandbox"}',
+  },
 };
 
 export function ConnectorsClient() {
@@ -161,8 +178,8 @@ export function ConnectorsClient() {
         Connectors
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
-        Install and invoke Slack, webhook, HTTP, Discord, and email connectors. Not a Zapier clone —
-        each type has a focused install/invoke path.
+        Install and invoke Slack, webhook, HTTP, Discord, email, Gmail, Google Drive, and Microsoft 365
+        connectors for chat share/translate workflows.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}

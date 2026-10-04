@@ -294,7 +294,7 @@ const OVERVIEW_OVERRIDES: Partial<Record<string, string>> = {
   'speech-to-text':
     'VerbaLab Speech to Text hears accents, dialects, and code-switching that break imported STT stacks. Use it for contact-center QA, media captioning, clinic notes, and agent loops where missing a local word means missing the customer. Review in the Speech hub, then automate with the STT API.',
   'conversational-ai':
-    'Conversational AI on VerbaLab is the African Voice LLM experience: customers type or speak, the platform understands multilingual intent, and Jarvis-style speak-back replies in a useful language. It is the front door for support, sales, and internal ops that must feel culturally fluent — not like a chatbot translated after the fact.',
+    'Conversational AI on VerbaLab is the African Voice LLM experience: customers type or speak, the platform understands multilingual intent, and speak-back replies in a useful language. It is the front door for support, sales, and internal ops that must feel culturally fluent — not like a chatbot translated after the fact.',
   'voice-agents':
     'Voice Agents combine STT, reasoning, and TTS into phone- and app-ready conversations for African markets. Deploy playbooks for telco, finance, public services, and retail with guardrails and observability so agents stay on-policy while sounding human.',
   'translate-api':
@@ -345,7 +345,7 @@ function howItWorksFor(product: ProductPage, kind: ProductDemoKind): string[] {
       'Open African Voice LLM chat or call the chat API.',
       'User types or speaks in any supported language.',
       'VerbaLab understands, optionally translates, and answers.',
-      'Enable Jarvis speak-back so replies are heard, not only read.',
+      'Enable speak-back so replies are heard, not only read.',
     ],
     languages: [
       'Query the languages inventory from coverage or API.',
@@ -422,7 +422,7 @@ function apiEndpointsFor(kind: ProductDemoKind, product: ProductPage): ProductAp
     chat: [
       { method: 'POST', path: '/v1/chat/completions', summary: 'African Voice LLM chat' },
       { method: 'POST', path: '/v1/audio/transcriptions', summary: 'Optional voice-in' },
-      { method: 'POST', path: '/v1/audio/speech', summary: 'Optional Jarvis speak-back' },
+      { method: 'POST', path: '/v1/audio/speech', summary: 'Optional speak-back voice reply' },
     ],
     languages: [
       { method: 'GET', path: '/v1/languages', summary: 'Full language inventory' },
@@ -472,7 +472,7 @@ function mediaFor(kind: ProductDemoKind, product: ProductPage): ProductDemoMedia
   if (kind === 'chat') {
     return {
       poster: '/demos/chat-demo.svg',
-      title: 'Jarvis-style conversation',
+      title: 'Spoken conversation',
       caption: 'See the chat loop, then try the live African Voice LLM demo below.',
       audioSamples: [
         { label: 'Swahili-style sample', src: '/demos/voice-swahili-sample.wav' },

@@ -2174,6 +2174,48 @@ html[data-theme='dark'] .vl-avc {
   color: var(--ink);
 }
 
+.vl-avc-attach {
+  position: relative;
+}
+
+.vl-avc-attach-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.45rem);
+  min-width: 15.5rem;
+  padding: 0.4rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 0.15rem;
+  z-index: 30;
+}
+
+.vl-avc-attach-menu button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.vl-avc-attach-menu button:hover {
+  background: var(--brand-soft);
+}
+
+.vl-avc-attach-menu hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 0.25rem 0.35rem;
+}
+
 .vl-avc-mic {
   background: transparent;
   color: var(--muted);

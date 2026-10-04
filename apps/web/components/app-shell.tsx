@@ -16,7 +16,6 @@ import {
   isNavItemActive,
   type NavGroup,
 } from '@/lib/console-nav';
-import { ConsoleFooter } from '@/components/marketing/console-footer';
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -199,7 +198,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </header>
         <main className="vl-console-content vl-fade-up">{children}</main>
-        <ConsoleFooter />
       </div>
     </div>
   );

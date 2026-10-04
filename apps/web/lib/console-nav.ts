@@ -82,7 +82,7 @@ export const CONSOLE_NAV: NavGroup[] = [
       {
         href: '/chat',
         label: 'African Voice LLM',
-        keywords: ['llm', 'assistant', 'voice', 'jarvis', 'chat', 'speak'],
+        keywords: ['llm', 'assistant', 'voice', 'chat', 'speak'],
       },
       { href: '/intelligence-cloud', label: 'Intelligence', keywords: ['reasoning', 'memory'] },
       { href: '/agent-intelligence', label: 'Agent Intelligence', keywords: ['agent', 'faq'] },

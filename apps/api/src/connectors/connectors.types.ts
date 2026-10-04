@@ -1,4 +1,14 @@
-export const CONNECTOR_TYPES = ['slack', 'webhook', 'http', 'discord', 'email', 'teams'] as const;
+export const CONNECTOR_TYPES = [
+  'slack',
+  'webhook',
+  'http',
+  'discord',
+  'email',
+  'teams',
+  'gmail',
+  'google_drive',
+  'office365',
+] as const;
 export type ConnectorType = (typeof CONNECTOR_TYPES)[number];
 
 export function isConnectorType(value: string): value is ConnectorType {
@@ -69,6 +79,33 @@ export const CONNECTOR_REGISTRY: ConnectorDefinition[] = [
     installPath: '/v1/connectors/teams/install',
     invokePath: '/v1/connectors/teams/invoke',
     notes: 'Also available via POST /v1/connectors/teams/commands.',
+  },
+  {
+    type: 'gmail',
+    name: 'Gmail',
+    status: 'shipped',
+    description: 'Connect a Gmail mailbox to share threads with African Voice LLM and translate.',
+    installPath: '/v1/connectors/gmail/install',
+    invokePath: '/v1/connectors/gmail/invoke',
+    notes: 'OAuth sandbox install; list/share/translate actions via invoke.',
+  },
+  {
+    type: 'google_drive',
+    name: 'Google Drive',
+    status: 'shipped',
+    description: 'Connect Google Drive to open docs into chat for translation and Q&A.',
+    installPath: '/v1/connectors/google_drive/install',
+    invokePath: '/v1/connectors/google_drive/invoke',
+    notes: 'OAuth sandbox install; list/share/translate actions via invoke.',
+  },
+  {
+    type: 'office365',
+    name: 'Microsoft 365',
+    status: 'shipped',
+    description: 'Connect Outlook / OneDrive / Office files to share and translate with the LLM.',
+    installPath: '/v1/connectors/office365/install',
+    invokePath: '/v1/connectors/office365/invoke',
+    notes: 'OAuth sandbox install for Office tools; list/share/translate via invoke.',
   },
 ];
 

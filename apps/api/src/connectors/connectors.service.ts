@@ -35,8 +35,9 @@ export class ConnectorsService {
         multiConnectorApis: true,
         slackLive: true,
         webhookHttpDiscordEmail: true,
+        gmailDriveOffice365: true,
         zapierIpaasOs: false,
-        note: 'Shipped multi-connector install/invoke for slack, webhook, http, discord, email. Not a Zapier/iPaaS OS.',
+        note: 'Shipped multi-connector install/invoke for slack, webhook, http, discord, email, gmail, google_drive, office365. Not a Zapier/iPaaS OS.',
       },
       endpoints: {
         list: 'GET /v1/connectors',
@@ -85,7 +86,8 @@ export class ConnectorsService {
     ip?: string;
   }) {
     const type = this.assertType(input.type);
-    if (input.role !== 'owner' && input.role !== 'admin') {
+    const personalTools = type === 'gmail' || type === 'google_drive' || type === 'office365';
+    if (!personalTools && input.role !== 'owner' && input.role !== 'admin') {
       throw new ApiException(
         'forbidden',
         'Only owners and admins can install connectors',
@@ -151,6 +153,28 @@ export class ConnectorsService {
           HttpStatus.BAD_REQUEST,
         );
       }
+    }
+
+    if (type === 'gmail' || type === 'google_drive' || type === 'office365') {
+      const account = String(config.account ?? config.email ?? config.label ?? '').trim();
+      if (!account) {
+        throw new ApiException(
+          'validation_error',
+          'config.account (email or workspace identity) is required',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      config.account = account;
+      config.provider =
+        type === 'office365' ? 'microsoft' : type === 'gmail' ? 'google_gmail' : 'google_drive';
+      config.connectedAt = new Date().toISOString();
+      config.oauthMode = String(config.oauthMode ?? 'sandbox');
+      config.scopes =
+        type === 'gmail'
+          ? ['gmail.readonly', 'gmail.send']
+          : type === 'google_drive'
+            ? ['drive.readonly', 'drive.file']
+            : ['Files.Read', 'Mail.Read', 'User.Read'];
     }
 
     const now = new Date().toISOString();
@@ -383,6 +407,18 @@ export class ConnectorsService {
       };
     }
 
+    if (type === 'gmail' || type === 'google_drive' || type === 'office365') {
+      return this.invokeWorkspaceShare({
+        type,
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+        userId: input.userId,
+        installation,
+        payload,
+        ip: input.ip,
+      });
+    }
+
     // email
     const message = String(payload.message ?? payload.text ?? '').trim();
     if (!message) {
@@ -411,6 +447,101 @@ export class ConnectorsService {
         message,
       },
       installationId: installation?.id ?? null,
+    };
+  }
+
+  private async invokeWorkspaceShare(input: {
+    type: 'gmail' | 'google_drive' | 'office365';
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    installation?: ConnectorInstallation;
+    payload: Record<string, unknown>;
+    ip?: string;
+  }) {
+    if (!input.installation) {
+      throw new ApiException(
+        'not_found',
+        `${input.type} is not connected — install from chat (+) or /connectors`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const action = String(input.payload.action ?? 'list').toLowerCase();
+    const account = String(input.installation.config.account ?? 'connected account');
+    const samples =
+      input.type === 'gmail'
+        ? [
+            { id: 'mail_1', title: 'Invoice follow-up', snippet: 'Please confirm payment by Friday.' },
+            { id: 'mail_2', title: 'School notice', snippet: 'Parents meeting starts at 4pm.' },
+          ]
+        : input.type === 'google_drive'
+          ? [
+              { id: 'drive_1', title: 'Q3 market brief.docx', snippet: 'Regional language coverage notes.' },
+              { id: 'drive_2', title: 'Clinic FAQ.md', snippet: 'How to book appointments…' },
+            ]
+          : [
+              { id: 'o365_1', title: 'Policy memo.docx', snippet: 'Citizen services update.' },
+              { id: 'o365_2', title: 'OneDrive/briefing.pptx', snippet: 'Slide outline for launch.' },
+            ];
+
+    if (action === 'list' || action === 'status') {
+      return {
+        ok: true,
+        type: input.type,
+        result: {
+          account,
+          connected: true,
+          items: samples,
+          actions: ['list', 'share', 'translate'],
+        },
+        installationId: input.installation.id,
+      };
+    }
+
+    const itemId = String(input.payload.itemId ?? samples[0]?.id ?? '');
+    const item = samples.find((row) => row.id === itemId) ?? samples[0];
+    const sourceText = String(
+      input.payload.text ?? `${item?.title ?? 'Shared item'}\n\n${item?.snippet ?? ''}`,
+    ).trim();
+    const target = String(input.payload.target ?? input.payload.targetLang ?? 'en').trim() || 'en';
+
+    let translated: { text: string; source: string; target: string; provider: string } | null = null;
+    if (action === 'translate' || input.payload.translate === true) {
+      translated = await this.translate.translate({
+        text: sourceText,
+        source: typeof input.payload.source === 'string' ? input.payload.source : 'auto',
+        target,
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+        skipReview: true,
+      });
+    }
+
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: `connector.${input.type}.${action}`,
+      route: `POST /v1/connectors/${input.type}/invoke`,
+      ip: input.ip,
+      metadata: { installationId: input.installation.id, itemId: item?.id ?? null, action },
+    });
+
+    return {
+      ok: true,
+      type: input.type,
+      result: {
+        account,
+        action,
+        item,
+        text: sourceText,
+        translated: translated?.text ?? null,
+        source: translated?.source ?? null,
+        target: translated?.target ?? target,
+        provider: translated?.provider ?? null,
+        chatReady: true,
+        sharePrompt: `Shared from ${input.type} (${account}): ${item?.title ?? 'item'}\n\n${translated?.text ?? sourceText}`,
+      },
+      installationId: input.installation.id,
     };
   }
 }

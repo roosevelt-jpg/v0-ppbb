@@ -65,10 +65,15 @@ export function AfricanVoiceChat() {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [connecting, setConnecting] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const attachMenuRef = useRef<HTMLDivElement | null>(null);
 
   const active = useMemo(
     () => sessions.find((s) => s.id === activeId) ?? null,
@@ -114,6 +119,24 @@ export function AfricanVoiceChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, recording, transcribing]);
+
+  useEffect(() => {
+    if (!attachOpen) return;
+    function onPointerDown(event: MouseEvent) {
+      if (!attachMenuRef.current?.contains(event.target as Node)) {
+        setAttachOpen(false);
+      }
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setAttachOpen(false);
+    }
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [attachOpen]);
 
   const patchActive = useCallback(
     (updater: (session: ChatSession) => ChatSession) => {
@@ -312,7 +335,95 @@ export function AfricanVoiceChat() {
     }
   }
 
+  async function uploadDocument(file: File, mode: 'ask' | 'translate') {
+    setUploading(true);
+    setError(null);
+    setAttachOpen(false);
+    try {
+      const token = await ensureToken();
+      const form = new FormData();
+      form.append('file', file);
+      if (mode === 'translate') {
+        form.append('translate', 'true');
+        form.append('target', translateReplyTo || 'en');
+        if (translateReplyTo) form.append('source', 'auto');
+      }
+      const res = await fetch(`${API_URL}/v1/chat/attachments`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const payload = (await res.json().catch(() => ({}))) as {
+        chatPrompt?: string;
+        error?: { message?: string };
+      };
+      if (!res.ok) throw new Error(payload.error?.message ?? `Upload failed (${res.status})`);
+      const prompt = payload.chatPrompt?.trim();
+      if (!prompt) throw new Error('Could not prepare that document for chat');
+      await sendMessage(prompt, 'text');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Document upload failed');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function connectWorkspaceTool(type: 'gmail' | 'google_drive' | 'office365') {
+    setConnecting(type);
+    setError(null);
+    setAttachOpen(false);
+    try {
+      const token = await ensureToken();
+      const accountHint =
+        typeof window !== 'undefined'
+          ? window.prompt(
+              type === 'gmail'
+                ? 'Gmail address to connect'
+                : type === 'google_drive'
+                  ? 'Google account email for Drive'
+                  : 'Microsoft 365 account email',
+              '',
+            )
+          : null;
+      if (!accountHint?.trim()) {
+        setConnecting(null);
+        return;
+      }
+      await apiFetch(`/v1/connectors/${type}/install`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          label: `${type} · ${accountHint.trim()}`,
+          config: { account: accountHint.trim(), oauthMode: 'sandbox' },
+        }),
+      });
+      const shared = await apiFetch<{
+        result?: { sharePrompt?: string; items?: Array<{ title: string }> };
+      }>(`/v1/connectors/${type}/invoke`, {
+        method: 'POST',
+        token,
+        body: JSON.stringify({
+          payload: {
+            action: 'share',
+            target: translateReplyTo || 'en',
+            translate: Boolean(translateReplyTo),
+          },
+        }),
+      });
+      const prompt =
+        shared.result?.sharePrompt ??
+        `Connected ${type}. Share a file or email so I can translate or answer questions about it.`;
+      await sendMessage(prompt, 'text');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Could not connect ${type}`);
+    } finally {
+      setConnecting(null);
+    }
+  }
+
   const empty = messages.length === 0;
+  const showMarketingFooter = !hasToken && !isSignedIn;
 
   return (
     <>
@@ -454,20 +565,93 @@ export function AfricanVoiceChat() {
                   checked={autoSpeak}
                   onChange={(e) => setAutoSpeak(e.target.checked)}
                 />
-                Speak replies (Jarvis mode)
+                Speak replies
               </label>
             </div>
 
             <div className="vl-avc-input-row">
-              <button type="button" className="vl-avc-plus" aria-label="New chat" onClick={newChat}>
-                +
-              </button>
+              <div className="vl-avc-attach" ref={attachMenuRef}>
+                <button
+                  type="button"
+                  className="vl-avc-plus"
+                  aria-label="Attach or connect"
+                  aria-expanded={attachOpen}
+                  aria-haspopup="menu"
+                  onClick={() => setAttachOpen((open) => !open)}
+                  disabled={loading || recording || transcribing || uploading || Boolean(connecting)}
+                >
+                  +
+                </button>
+                {attachOpen ? (
+                  <div className="vl-avc-attach-menu" role="menu">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        fileInputRef.current?.setAttribute('data-mode', 'ask');
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      Upload document
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        fileInputRef.current?.setAttribute('data-mode', 'translate');
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      Upload &amp; translate
+                    </button>
+                    <hr />
+                    <button type="button" role="menuitem" onClick={() => void connectWorkspaceTool('gmail')}>
+                      Connect Gmail
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void connectWorkspaceTool('google_drive')}
+                    >
+                      Connect Google Drive
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void connectWorkspaceTool('office365')}
+                    >
+                      Connect Microsoft 365
+                    </button>
+                  </div>
+                ) : null}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="vl-sr-only"
+                  accept=".txt,.md,.markdown,.html,.htm,.pdf,.docx,text/plain,text/markdown,text/html,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    const mode =
+                      event.currentTarget.getAttribute('data-mode') === 'translate' ? 'translate' : 'ask';
+                    void uploadDocument(file, mode);
+                  }}
+                />
+              </div>
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={recording ? 'Listening…' : 'Ask VerbaLab — or hold the mic and speak'}
+                placeholder={
+                  recording
+                    ? 'Listening…'
+                    : uploading
+                      ? 'Uploading document…'
+                      : connecting
+                        ? `Connecting ${connecting}…`
+                        : 'Ask VerbaLab — or hold the mic and speak'
+                }
                 rows={1}
-                disabled={loading || recording || transcribing}
+                disabled={loading || recording || transcribing || uploading || Boolean(connecting)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -480,7 +664,7 @@ export function AfricanVoiceChat() {
                 className={`vl-avc-mic${recording ? ' is-hot' : ''}`}
                 aria-label={recording ? 'Stop recording' : 'Speak'}
                 onClick={() => (recording ? stopRecording() : void startRecording())}
-                disabled={loading || transcribing}
+                disabled={loading || transcribing || uploading || Boolean(connecting)}
               >
                 {recording ? (
                   <span aria-hidden="true">■</span>
@@ -499,7 +683,14 @@ export function AfricanVoiceChat() {
               <button
                 type="submit"
                 className="vl-avc-send"
-                disabled={loading || recording || transcribing || !input.trim()}
+                disabled={
+                  loading ||
+                  recording ||
+                  transcribing ||
+                  uploading ||
+                  Boolean(connecting) ||
+                  !input.trim()
+                }
                 aria-label="Send"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -523,7 +714,7 @@ export function AfricanVoiceChat() {
       </main>
       <SupportBot />
     </div>
-    <SiteFooter />
+    {showMarketingFooter ? <SiteFooter /> : null}
     </>
   );
 }
