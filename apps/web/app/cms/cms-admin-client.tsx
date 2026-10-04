@@ -635,7 +635,6 @@ export function CmsAdminClient() {
               <div className="vl-hub-grid">
                 {assetDrafts.map((a, idx) => (
                   <div key={a.key} className="vl-hub-card" style={{ cursor: 'default', display: 'grid', gap: '0.55rem' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={a.url} alt={a.alt} style={{ width: '100%', borderRadius: 10 }} />
                     <strong style={{ fontSize: '0.9rem' }}>{a.key}</strong>
                     <label className="vl-label">

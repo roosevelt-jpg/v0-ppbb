@@ -211,7 +211,6 @@ export function SiteFooter({
     <footer className={className}>
       <div className="vl-mkt-footer-brand">
         {footerLogo ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={footerLogo} alt={brand} className="vl-mkt-footer-logo" />
         ) : (
           <strong>{brand}</strong>

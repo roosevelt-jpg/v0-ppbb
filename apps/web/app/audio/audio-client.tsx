@@ -501,7 +501,7 @@ export function AudioClient() {
             </label>
             {samplePreviewUrls.length > 0 ? (
               <div style={{ display: 'grid', gap: '0.5rem' }}>
-                {samplePreviewUrls.map((url, i) => (
+                {samplePreviewUrls.map((url) => (
                   <audio key={url} controls src={url} style={{ width: '100%' }} />
                 ))}
               </div>

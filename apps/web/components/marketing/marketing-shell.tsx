@@ -44,7 +44,6 @@ export function MarketingShell({
       <header className="vl-mkt-nav">
         <Link href="/" className="vl-mkt-brand">
           {headerLogoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={headerLogoUrl} alt={brandName} className="vl-mkt-brand-logo" />
           ) : (
             brandName

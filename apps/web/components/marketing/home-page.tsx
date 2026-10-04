@@ -158,14 +158,12 @@ export function MarketingHomePage() {
   return (
     <div className="vl-mkt">
       {atmosphere ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img className="vl-mkt-atmosphere" src={atmosphere.url} alt={atmosphere.alt} />
       ) : null}
 
       <header className="vl-mkt-nav">
         <Link href="/" className="vl-mkt-brand">
           {data.settings.headerLogoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={data.settings.headerLogoUrl}
               alt={data.settings.brandName}
@@ -309,7 +307,6 @@ export function MarketingHomePage() {
                   return (
                     <Link key={p.href} href={p.href} className="vl-mkt-product">
                       {img ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={img.url} alt={img.alt} className="vl-mkt-card-img" />
                       ) : null}
                       <span>{p.kicker}</span>
@@ -341,7 +338,6 @@ export function MarketingHomePage() {
                   const inner = (
                     <>
                       {img ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={img.url} alt={img.alt} className="vl-mkt-card-img" />
                       ) : null}
                       <h3>{item.title}</h3>

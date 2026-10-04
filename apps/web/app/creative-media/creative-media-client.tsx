@@ -273,7 +273,6 @@ export function CreativeMediaClient() {
         {meta ? <p style={{ margin: 0, color: 'var(--muted)' }}>{meta}</p> : null}
         {audioUrl ? <audio controls src={audioUrl} style={{ width: '100%' }} /> : null}
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={imageUrl} alt="Generated creative" style={{ width: '100%', maxWidth: 640, borderRadius: 12 }} />
         ) : null}
       </div>
