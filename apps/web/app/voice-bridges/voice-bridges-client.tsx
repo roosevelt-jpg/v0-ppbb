@@ -27,7 +27,6 @@ type Engine = {
 export function VoiceBridgesClient() {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [snippet, setSnippet] = useState<string | null>(null);
-  const [snippetTitle, setSnippetTitle] = useState('Integration snippet');
   const [snippetBusy, setSnippetBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState('vapi');
@@ -59,15 +58,15 @@ export function VoiceBridgesClient() {
     setSnippet(null);
     void (async () => {
       try {
-        const snip = await apiFetch<{ title?: string; platform?: string }>(
+        const snip = await apiFetch<Record<string, unknown>>(
           `/v1/voice-bridges/platforms/${encodeURIComponent(selected)}/snippet`,
         );
         if (cancelled) return;
-        setSnippetTitle(snip.title ?? `${selected} integration snippet`);
+        // Guard against a stale VAPI payload if selection raced.
+        if (snip.platform && snip.platform !== selected) return;
         setSnippet(JSON.stringify(snip, null, 2));
       } catch (err) {
         if (!cancelled) {
-          setSnippetTitle(`${selected} integration snippet`);
           setSnippet(
             JSON.stringify(
               {
@@ -90,6 +89,10 @@ export function VoiceBridgesClient() {
 
   const platforms = engine?.platforms ?? [];
   const active = platforms.find((p) => p.id === selected) ?? platforms[0];
+  // Title always tracks the selected chip — never a hardcoded VAPI label.
+  const snippetHeading = active
+    ? `${active.name} integration snippet`
+    : 'Integration snippet';
 
   return (
     <AppShell>
@@ -160,7 +163,10 @@ export function VoiceBridgesClient() {
           </section>
         ) : null}
 
-        <h2 style={{ marginTop: '1.5rem', fontSize: '1.15rem' }}>{snippetTitle}</h2>
+        <h2 style={{ marginTop: '1.5rem', fontSize: '1.15rem' }}>{snippetHeading}</h2>
+        <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: 0 }}>
+          Showing recipe for <code className="vl-code">{selected}</code>
+        </p>
         <pre
           style={{
             overflow: 'auto',
