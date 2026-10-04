@@ -1124,116 +1124,6 @@ html[data-theme='dark'] .vl-mkt-footer {
   }
 }
 
-/* —— Africa map watermark (every page) —— */
-.vl-africa-watermark {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-
-.vl-africa-watermark-svg {
-  width: min(78vw, 720px);
-  height: auto;
-  opacity: 0.85;
-}
-
-.vl-africa-land {
-  fill: var(--brand);
-  fill-opacity: 0.14;
-  stroke: var(--brand);
-  stroke-opacity: 0.32;
-  stroke-width: 1.35;
-}
-
-.vl-africa-arc {
-  stroke: var(--brand);
-  stroke-opacity: 0.28;
-  stroke-width: 1;
-  stroke-dasharray: 3 3;
-  animation: vl-africa-arc-flow 8s linear infinite;
-}
-
-.vl-africa-dot {
-  fill: var(--brand);
-  fill-opacity: 0.9;
-}
-
-.vl-africa-pulse {
-  fill: var(--brand);
-  fill-opacity: 0.18;
-  transform-origin: center;
-  transform-box: fill-box;
-  animation: vl-africa-pulse 2.8s ease-out infinite;
-}
-
-.vl-africa-plotter {
-  animation: vl-africa-fade 1.2s ease both;
-}
-
-.vl-africa-label {
-  fill: var(--brand);
-  fill-opacity: 0.55;
-  font-size: 5px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.vl-africa-langs {
-  fill: var(--ink);
-  fill-opacity: 0.35;
-  font-size: 4px;
-}
-
-.vl-africa-watermark-caption {
-  position: absolute;
-  bottom: 1.1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  opacity: 0.65;
-  white-space: nowrap;
-}
-
-@keyframes vl-africa-pulse {
-  0% {
-    transform: scale(0.4);
-    opacity: 0.45;
-  }
-  70% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-}
-
-@keyframes vl-africa-arc-flow {
-  to {
-    stroke-dashoffset: -40;
-  }
-}
-
-@keyframes vl-africa-fade {
-  from {
-    opacity: 0;
-    transform: translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 .vl-console,
 .vl-mkt,
 main {
@@ -1381,6 +1271,282 @@ main {
 
 .vl-support-links a:hover {
   text-decoration: underline;
+}
+
+/* —— Product landers (detail + live demos) —— */
+.vl-prod-page .vl-prod-hero .vl-mkt-headline {
+  font-size: clamp(2.1rem, 4.5vw, 3.2rem);
+  max-width: 16ch;
+}
+
+.vl-prod-page .vl-prod-hero .vl-mkt-lede {
+  max-width: 40rem;
+}
+
+.vl-prod-page .vl-mkt-hero-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.vl-prod-overview p,
+.vl-prod-section-lede {
+  margin: 0;
+  max-width: 52rem;
+  line-height: 1.65;
+  color: var(--mkt-ink, var(--ink));
+  font-size: 1.05rem;
+}
+
+.vl-prod-page h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.85rem;
+}
+
+.vl-prod-subhead {
+  margin-top: 1.5rem !important;
+}
+
+.vl-prod-proof {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vl-prod-proof li {
+  border: 1px solid var(--mkt-line, var(--line));
+  background: rgba(20, 92, 70, 0.06);
+  color: var(--mkt-ink, var(--ink));
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.vl-prod-split {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.vl-prod-steps,
+.vl-prod-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 0.65rem;
+  color: var(--mkt-ink, var(--ink));
+  line-height: 1.5;
+}
+
+.vl-prod-usecases {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.vl-prod-usecase {
+  border: 1px solid var(--mkt-line, var(--line));
+  background:
+    linear-gradient(180deg, rgba(20, 92, 70, 0.05), transparent 40%),
+    var(--mkt-elev, var(--bg-elevated));
+  border-radius: 1rem;
+  padding: 1.15rem 1.2rem;
+}
+
+.vl-prod-usecase h3 {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.vl-prod-usecase p {
+  margin: 0;
+  color: var(--mkt-ink, var(--ink));
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.vl-prod-outcome {
+  margin-top: 0.75rem !important;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--mkt-line, var(--line));
+  color: var(--mkt-muted, var(--muted)) !important;
+}
+
+.vl-prod-outcome span {
+  display: inline-block;
+  margin-right: 0.35rem;
+  color: var(--brand);
+  font-weight: 750;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vl-prod-demo {
+  border: 1px solid var(--mkt-line, var(--line));
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 0%, rgba(20, 92, 70, 0.1), transparent 55%),
+    var(--mkt-elev, var(--bg-elevated));
+  display: grid;
+  gap: 1rem;
+}
+
+.vl-prod-demo-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.vl-prod-demo-head h2 {
+  margin-bottom: 0.35rem;
+}
+
+.vl-prod-demo-head p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--mkt-muted, var(--muted));
+  line-height: 1.5;
+}
+
+.vl-prod-demo-meta {
+  margin-top: 0.45rem !important;
+  color: var(--brand) !important;
+  font-weight: 700;
+  font-size: 0.85rem !important;
+}
+
+.vl-prod-demo-panel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.vl-prod-demo-row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.vl-prod-demo-field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--mkt-muted, var(--muted));
+}
+
+.vl-prod-demo-field input,
+.vl-prod-demo-field select,
+.vl-prod-demo-field textarea {
+  border: 1px solid var(--mkt-line, var(--line));
+  background: var(--mkt-input-bg, var(--bg));
+  color: var(--mkt-input-ink, var(--ink));
+  border-radius: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.vl-prod-demo-field span {
+  font-size: 0.75rem;
+}
+
+.vl-prod-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.vl-prod-demo-error {
+  margin: 0;
+  color: var(--bad);
+  font-size: 0.9rem;
+}
+
+.vl-prod-demo-audio {
+  width: 100%;
+}
+
+.vl-prod-demo-result,
+.vl-prod-code-block {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: #0f1412;
+  color: #dff5e8;
+  overflow: auto;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  max-height: 22rem;
+}
+
+html[data-theme='light'] .vl-prod-demo-result,
+html[data-theme='light'] .vl-prod-code-block {
+  background: #122019;
+}
+
+.vl-prod-demo-idle {
+  margin: 0;
+  color: var(--mkt-muted, var(--muted));
+  font-size: 0.9rem;
+}
+
+.vl-prod-related {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.vl-prod-related a {
+  display: grid;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--mkt-line, var(--line));
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: var(--mkt-elev, var(--bg-elevated));
+  min-height: 100%;
+}
+
+.vl-prod-related a:hover {
+  border-color: var(--brand);
+}
+
+.vl-prod-related span {
+  font-size: 0.9rem;
+  color: var(--mkt-muted, var(--muted));
+  line-height: 1.45;
+}
+
+.vl-prod-close {
+  text-align: center;
+  padding-bottom: 3rem;
+}
+
+.vl-prod-close p {
+  margin: 0 auto 1.25rem;
+  max-width: 36rem;
+  color: var(--mkt-muted, var(--muted));
+}
+
+.vl-prod-close .vl-mkt-hero-actions {
+  justify-content: center;
 }
 
 /* —— African Voice LLM chat (ChatGPT-style shell) —— */

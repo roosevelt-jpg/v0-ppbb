@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { ThemeSwitcher } from '@/components/theme-provider';
 import { buildPageMetadata } from '@/lib/seo';
 import { getProductPage, listProductSlugs, productsByFamily } from '@/lib/product-pages';
+import { getProductStory } from '@/lib/product-stories';
+import { ProductLiveDemo } from './product-live-demo';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -38,20 +40,22 @@ export default async function ProductMarketingPage({ params }: Props) {
   const product = getProductPage(slug);
   if (!product) notFound();
 
+  const story = getProductStory(product);
   const related = productsByFamily()[product.family]
     .filter((p) => p.slug !== product.slug)
     .slice(0, 4);
 
   return (
-    <div className="vl-mkt">
+    <div className="vl-mkt vl-prod-page">
       <header className="vl-mkt-nav">
         <Link href="/" className="vl-mkt-brand">
           VerbaLab
         </Link>
         <nav className="vl-mkt-nav-links">
           <Link href="/products">All products</Link>
-          <Link href={`/#products`}>{product.family}</Link>
+          <Link href="/#products">{product.family}</Link>
           <Link href="/docs">Docs</Link>
+          <a href="#live-demo">Live demo</a>
         </nav>
         <div className="vl-mkt-nav-actions">
           <ThemeSwitcher />
@@ -65,81 +69,145 @@ export default async function ProductMarketingPage({ params }: Props) {
       </header>
 
       <main>
-        <section className="vl-mkt-section" style={{ paddingBottom: '1rem' }}>
+        <section className="vl-mkt-section vl-prod-hero">
           <p className="vl-mkt-kicker">{product.kicker}</p>
-          <h1 className="vl-mkt-headline" style={{ fontSize: 'clamp(2.1rem, 4.5vw, 3.2rem)', maxWidth: '18ch' }}>
-            {product.headline}
-          </h1>
-          <p className="vl-mkt-lede" style={{ maxWidth: '40rem' }}>
-            {product.lede}
-          </p>
-          <div className="vl-mkt-hero-actions" style={{ marginTop: '1.25rem' }}>
-            <Link href={product.consoleHref} className="vl-btn vl-btn-primary vl-mkt-cta">
+          <h1 className="vl-mkt-headline">{product.headline}</h1>
+          <p className="vl-mkt-lede">{product.lede}</p>
+          <div className="vl-mkt-hero-actions">
+            <a href="#live-demo" className="vl-btn vl-btn-primary vl-mkt-cta">
+              Try live demo
+            </a>
+            <Link href={product.consoleHref} className="vl-btn vl-btn-secondary">
               Open {product.linkName}
             </Link>
             {product.secondaryHref ? (
-              <Link href={product.secondaryHref} className="vl-btn vl-btn-secondary">
+              <Link href={product.secondaryHref} className="vl-mkt-link">
                 {product.secondaryLabel ?? 'Learn more'}
               </Link>
             ) : (
-              <Link href="/sign-up" className="vl-btn vl-btn-secondary">
+              <Link href="/sign-up" className="vl-mkt-link">
                 Start free
               </Link>
             )}
           </div>
-          <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: 'var(--mkt-muted, var(--muted))' }}>
-            Page: <code>/products/{product.slug}</code> · {product.linkName}
-          </p>
         </section>
 
-        <section className="vl-mkt-section" style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))' }}>
+        <section className="vl-mkt-section vl-prod-overview">
+          <h2>What {product.linkName} is</h2>
+          <p>{story.overview}</p>
+          <ul className="vl-prod-proof">
+            {story.proofPoints.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="vl-mkt-section vl-prod-split">
           <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', margin: '0 0 0.75rem' }}>
-              What you get
-            </h2>
-            <ul style={{ margin: 0, paddingLeft: '1.15rem', display: 'grid', gap: '0.55rem', color: 'var(--mkt-ink, var(--ink))' }}>
+            <h2>How it works</h2>
+            <ol className="vl-prod-steps">
+              {story.howItWorks.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+          <div>
+            <h2>What you get</h2>
+            <ul className="vl-prod-list">
               {product.features.map((feature) => (
                 <li key={feature}>{feature}</li>
               ))}
             </ul>
-          </div>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', margin: '0 0 0.75rem' }}>
-              Built for
-            </h2>
-            <ul style={{ margin: 0, paddingLeft: '1.15rem', display: 'grid', gap: '0.55rem', color: 'var(--mkt-ink, var(--ink))' }}>
+            <h2 className="vl-prod-subhead">Built for</h2>
+            <ul className="vl-prod-list">
               {product.audiences.map((audience) => (
                 <li key={audience}>{audience}</li>
               ))}
             </ul>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', margin: '1.5rem 0 0.75rem' }}>
-              Why it matters
-            </h2>
-            <p style={{ margin: 0, color: 'var(--mkt-ink, var(--ink))', lineHeight: 1.55 }}>
-              {product.description}
-            </p>
+          </div>
+        </section>
+
+        <section className="vl-mkt-section">
+          <h2>Use cases that win deals</h2>
+          <p className="vl-prod-section-lede">
+            Concrete scenarios buyers recognize — so the page sells the outcome, not only the feature list.
+          </p>
+          <div className="vl-prod-usecases">
+            {story.useCases.map((useCase) => (
+              <article key={useCase.title} className="vl-prod-usecase">
+                <h3>{useCase.title}</h3>
+                <p>{useCase.scenario}</p>
+                <p className="vl-prod-outcome">
+                  <span>Outcome</span> {useCase.outcome}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <div className="vl-mkt-section">
+          <ProductLiveDemo
+            demoKind={story.demoKind}
+            demoTitle={story.demoTitle}
+            demoBlurb={story.demoBlurb}
+            samplePrompt={story.samplePrompt}
+            consoleHref={product.consoleHref}
+            productName={product.linkName}
+          />
+        </div>
+
+        <section className="vl-mkt-section vl-prod-code">
+          <h2>Ship it in your stack</h2>
+          <p className="vl-prod-section-lede">
+            Same capability as the live demo — copy the pattern into backends, apps, and agents.
+          </p>
+          <pre className="vl-prod-code-block">{story.sampleCode}</pre>
+          <div className="vl-mkt-hero-actions">
+            <Link href="/docs" className="vl-btn vl-btn-secondary">
+              Read docs
+            </Link>
+            <Link href="/docs/openapi" className="vl-btn vl-btn-secondary">
+              OpenAPI explorer
+            </Link>
+            <Link href="/keys" className="vl-btn vl-btn-primary">
+              Create API key
+            </Link>
           </div>
         </section>
 
         {related.length ? (
           <section className="vl-mkt-section">
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', margin: '0 0 1rem' }}>
-              More in {product.family}
-            </h2>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.75rem', gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))' }}>
+            <h2>More in {product.family}</h2>
+            <ul className="vl-prod-related">
               {related.map((item) => (
-                <li key={item.slug} className="vl-panel" style={{ padding: '1rem' }}>
-                  <Link href={`/products/${item.slug}`} style={{ fontWeight: 650, color: 'inherit', textDecoration: 'none' }}>
-                    {item.linkName}
+                <li key={item.slug}>
+                  <Link href={`/products/${item.slug}`}>
+                    <strong>{item.linkName}</strong>
+                    <span>{item.lede}</span>
                   </Link>
-                  <p style={{ margin: '0.4rem 0 0', fontSize: '0.9rem', color: 'var(--mkt-muted, var(--muted))' }}>
-                    {item.lede}
-                  </p>
                 </li>
               ))}
             </ul>
           </section>
         ) : null}
+
+        <section className="vl-mkt-section vl-prod-close">
+          <h2>Ready to put {product.linkName} in front of customers?</h2>
+          <p>
+            Run the live demo above, open the console on your content, then integrate with keys and SDKs.
+          </p>
+          <div className="vl-mkt-hero-actions">
+            <a href="#live-demo" className="vl-btn vl-btn-primary vl-mkt-cta">
+              Back to live demo
+            </a>
+            <Link href={product.consoleHref} className="vl-btn vl-btn-secondary">
+              Open {product.linkName}
+            </Link>
+            <Link href="/sign-up" className="vl-btn vl-btn-secondary">
+              Start free
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

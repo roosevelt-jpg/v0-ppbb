@@ -5,7 +5,6 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
 import { getDevBearer, resolveApiToken } from '@/lib/dev-auth';
-import { AfricaMapWatermark } from '@/components/africa-map-watermark';
 import { SupportBot } from '@/components/support-bot';
 
 type Language = { code: string; name: string };
@@ -316,7 +315,6 @@ export function AfricanVoiceChat() {
 
   return (
     <div className="vl-avc">
-      <AfricaMapWatermark />
       <aside className={`vl-avc-sidebar${sidebarOpen ? '' : ' is-collapsed'}`}>
         <div className="vl-avc-sidebar-top">
           <Link href="/" className="vl-avc-brand">
