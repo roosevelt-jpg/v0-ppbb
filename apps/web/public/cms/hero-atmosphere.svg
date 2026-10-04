@@ -1,22 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-label="VerbaLab atmosphere">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="heroatmospheresky" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#07140f"/>
-      <stop offset="55%" stop-color="#0f2e24"/>
-      <stop offset="100%" stop-color="#06100c"/>
+      <stop offset="100%" stop-color="#0f2e24"/>
     </linearGradient>
-    <radialGradient id="r" cx="70%" cy="20%" r="60%">
-      <stop offset="0%" stop-color="#6fcf9c" stop-opacity="0.55"/>
+    <radialGradient id="heroatmosphereglow" cx="72%" cy="28%" r="55%">
+      <stop offset="0%" stop-color="#6fcf9c" stop-opacity="0.75"/>
       <stop offset="100%" stop-color="#6fcf9c" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="heroatmosphereface" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6fcf9c" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#1a6b52" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="heroatmosphereside" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a6b52" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#07140f" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="heroatmospherefloor" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="heroatmospheresoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
   </defs>
-  <rect width="1200" height="720" fill="url(#g)"/>
-  <rect width="1200" height="720" fill="url(#r)"/>
-  <g fill="none" stroke="#e8fff4" stroke-opacity="0.35" stroke-width="3">
-    <path d="M0 420 C 180 300, 320 540, 500 400 S 820 260, 1200 380"/>
-    <path d="M0 470 C 220 360, 360 560, 540 450 S 860 320, 1200 430"/>
-    <path d="M0 520 C 200 420, 380 580, 560 500 S 900 360, 1200 480"/>
+  <rect width="1200" height="720" fill="url(#heroatmospheresky)"/>
+  <rect width="1200" height="720" fill="url(#heroatmosphereglow)"/>
+  <!-- anamorphic perspective floor -->
+  <g stroke="#ffffff" stroke-opacity="0.14" stroke-width="2" fill="none">
+    <path d="M80 620 L600 390 L1120 620"/>
+    <path d="M160 620 L600 410 L1040 620"/>
+    <path d="M240 620 L600 430 L960 620"/>
+    <path d="M320 620 L600 450 L880 620"/>
+    <path d="M400 620 L600 470 L800 620"/>
+    <path d="M200 560 L1000 560"/>
+    <path d="M260 590 L940 590"/>
+    <path d="M340 640 L860 640"/>
   </g>
-  <circle cx="220" cy="180" r="90" fill="#ffffff" fill-opacity="0.08"/>
-  <circle cx="980" cy="520" r="140" fill="#ffffff" fill-opacity="0.06"/>
-  </svg>
+  <ellipse cx="600" cy="560" rx="340" ry="48" fill="url(#heroatmospherefloor)" filter="url(#heroatmospheresoft)"/>
+  
+  <!-- floating 3D torus-ish ribbon -->
+  <g transform="translate(620 250) skewX(-18)">
+    <ellipse cx="0" cy="0" rx="210" ry="78" fill="none" stroke="url(#heroatmosphereface)" stroke-width="34"/>
+    <ellipse cx="18" cy="16" rx="210" ry="78" fill="none" stroke="url(#heroatmosphereside)" stroke-width="18" opacity="0.55"/>
+  </g>
+  <g transform="translate(280 210)">
+    <ellipse cx="40" cy="90" rx="70" ry="18" fill="#000" opacity="0.25" filter="url(#heroatmospheresoft)"/>
+    <ellipse cx="0" cy="0" rx="86" ry="86" fill="url(#heroatmosphereface)"/>
+    <ellipse cx="-22" cy="-28" rx="34" ry="22" fill="#fff" opacity="0.35"/>
+  </g>
+  <g transform="translate(940 340) skewY(-8)">
+    <rect x="-40" y="-120" width="80" height="240" rx="18" fill="url(#heroatmosphereside)"/>
+    <rect x="-70" y="-90" width="60" height="180" rx="14" fill="url(#heroatmosphereface)" opacity="0.85"/>
+  </g>
+  <text x="56" y="668" fill="#f7fffb" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">VerbaLab atmosphere</text>
+</svg>

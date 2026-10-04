@@ -26,17 +26,21 @@ type FooterLink = {
   label: string;
   href: string;
   adminOnly?: boolean;
+  authOnly?: boolean;
 };
 
-const ADMIN_FOOTER_HREFS = new Set(['/cms', '/dashboard']);
+/** Company links that must stay hidden until a user/admin session exists. */
+const AUTH_GATED_FOOTER_HREFS = new Set(['/cms', '/dashboard', '/dev-login']);
+const AUTH_GATED_FOOTER_LABELS = new Set(['CMS', 'Console', 'Dashboard', 'Brand & Press']);
 
 function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function isAdminFooterLink(link: FooterLink): boolean {
-  if (link.adminOnly) return true;
-  return ADMIN_FOOTER_HREFS.has(link.href);
+function isAuthGatedFooterLink(link: FooterLink): boolean {
+  if (link.authOnly || link.adminOnly) return true;
+  if (AUTH_GATED_FOOTER_HREFS.has(link.href)) return true;
+  return AUTH_GATED_FOOTER_LABELS.has(link.label);
 }
 
 export function MarketingHomePage() {
@@ -48,7 +52,7 @@ export function MarketingHomePage() {
   const [busy, setBusy] = useState(false);
   const [playError, setPlayError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     void fetch(`${API_URL}/v1/cms/pages/home`)
@@ -81,16 +85,9 @@ export function MarketingHomePage() {
     void (async () => {
       try {
         const token = await resolveApiToken(getToken);
-        if (!token) {
-          if (!cancelled) setIsAdmin(false);
-          return;
-        }
-        const me = await apiFetch<{ role?: string }>('/v1/identity/me', { token });
-        if (!cancelled) {
-          setIsAdmin(me.role === 'owner' || me.role === 'admin');
-        }
+        if (!cancelled) setIsAuthed(Boolean(token) || Boolean(isSignedIn) || Boolean(getDevBearer()));
       } catch {
-        if (!cancelled) setIsAdmin(false);
+        if (!cancelled) setIsAuthed(Boolean(isSignedIn) || Boolean(getDevBearer()));
       }
     })();
     return () => {
@@ -674,11 +671,13 @@ export function MarketingHomePage() {
             links?: FooterLink[];
             columns?: Array<{ title: string; links: FooterLink[] }>;
           };
-          const links = (c.links ?? []).filter((link) => !isAdminFooterLink(link) || isAdmin);
-          const columns = (c.columns ?? []).map((col) => ({
-            ...col,
-            links: col.links.filter((link) => !isAdminFooterLink(link) || isAdmin),
-          }));
+          const links = (c.links ?? []).filter((link) => !isAuthGatedFooterLink(link) || isAuthed);
+          const columns = (c.columns ?? [])
+            .map((col) => ({
+              ...col,
+              links: col.links.filter((link) => !isAuthGatedFooterLink(link) || isAuthed),
+            }))
+            .filter((col) => col.links.length > 0);
           return (
             <footer key={block.id} className="vl-mkt-footer">
               <div className="vl-mkt-footer-brand">

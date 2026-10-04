@@ -160,6 +160,7 @@ export class MarketingCmsService implements OnModuleInit {
     await this.syncSeededBlockType(home.id, 'footer');
     await this.syncSeededBlockType(home.id, 'product_hubs');
     await this.syncSeededBlockType(home.id, 'products');
+    await this.syncSeededBlockType(home.id, 'use_cases');
 
     this.log.log('Marketing CMS seed ensured (home + use-case + product prefills)');
   }
@@ -184,20 +185,26 @@ export class MarketingCmsService implements OnModuleInit {
       return;
     }
     const current = existing.content as {
-      columns?: Array<{ title?: string; links?: Array<{ label?: string; href?: string; adminOnly?: boolean }> }>;
+      columns?: Array<{
+        title?: string;
+        links?: Array<{ label?: string; href?: string; adminOnly?: boolean; authOnly?: boolean }>;
+      }>;
       tabs?: unknown[];
-      items?: Array<{ title?: string; href?: string }>;
+      items?: Array<{ title?: string; href?: string; imageKey?: string; body?: string }>;
       brand?: string;
       blurb?: string;
-      links?: unknown[];
+      links?: Array<{ label?: string; href?: string; adminOnly?: boolean; authOnly?: boolean }>;
     };
     const next = seed.content as {
-      columns?: Array<{ title?: string; links?: Array<{ label?: string; href?: string; adminOnly?: boolean }> }>;
+      columns?: Array<{
+        title?: string;
+        links?: Array<{ label?: string; href?: string; adminOnly?: boolean; authOnly?: boolean }>;
+      }>;
       tabs?: unknown[];
-      items?: Array<{ title?: string; href?: string }>;
+      items?: Array<{ title?: string; href?: string; imageKey?: string; body?: string }>;
       brand?: string;
       blurb?: string;
-      links?: unknown[];
+      links?: Array<{ label?: string; href?: string; adminOnly?: boolean; authOnly?: boolean }>;
     };
     // Additive-only sync: never wipe admin edits — only fill in when catalog grew,
     // or refresh known product hrefs to dedicated /products/* SEO landers.
@@ -207,24 +214,45 @@ export class MarketingCmsService implements OnModuleInit {
       type === 'product_hubs' && (current.tabs?.length ?? 0) < (next.tabs?.length ?? 0);
 
     if (type === 'footer' && current.columns?.length && next.columns?.length) {
-      const hrefByLabel = new Map<string, string>();
+      const seedByLabel = new Map<
+        string,
+        { href: string; authOnly?: boolean; adminOnly?: boolean }
+      >();
       for (const col of next.columns) {
         for (const link of col.links ?? []) {
-          if (link.label && link.href) hrefByLabel.set(link.label, link.href);
+          if (link.label && link.href) {
+            seedByLabel.set(link.label, {
+              href: link.href,
+              authOnly: link.authOnly,
+              adminOnly: link.adminOnly,
+            });
+          }
         }
       }
       let changed = false;
       const mergedColumns = current.columns.map((col) => ({
         ...col,
         links: (col.links ?? []).map((link) => {
-          const nextHref = link.label ? hrefByLabel.get(link.label) : undefined;
-          if (nextHref && nextHref !== link.href) {
+          const seed = link.label ? seedByLabel.get(link.label) : undefined;
+          if (!seed) return link;
+          const nextLink = {
+            ...link,
+            href: seed.href,
+            ...(seed.authOnly ? { authOnly: true } : {}),
+            ...(seed.adminOnly ? { adminOnly: true } : {}),
+          };
+          if (
+            nextLink.href !== link.href ||
+            Boolean(nextLink.authOnly) !== Boolean(link.authOnly) ||
+            Boolean(nextLink.adminOnly) !== Boolean(link.adminOnly)
+          ) {
             changed = true;
-            return { ...link, href: nextHref };
           }
-          return link;
+          return nextLink;
         }),
       }));
+      // Drop auth-gated labels that moved out of public seed order is not required —
+      // client hides them when logged out.
       if (changed) {
         await this.prisma.cmsBlock.update({
           where: { id: existing.id },
@@ -232,6 +260,7 @@ export class MarketingCmsService implements OnModuleInit {
             content: {
               ...current,
               columns: mergedColumns,
+              ...(next.links ? { links: next.links } : {}),
             } as unknown as Prisma.InputJsonValue,
           },
         });
@@ -239,19 +268,31 @@ export class MarketingCmsService implements OnModuleInit {
       }
     }
 
-    if (type === 'products' && current.items?.length && next.items?.length) {
-      const hrefByTitle = new Map(
-        next.items.filter((i) => i.title && i.href).map((i) => [i.title as string, i.href as string]),
+    if ((type === 'products' || type === 'use_cases') && current.items?.length && next.items?.length) {
+      const seedByTitle = new Map(
+        next.items
+          .filter((i) => i.title)
+          .map((i) => [i.title as string, { href: i.href, imageKey: i.imageKey, body: i.body }]),
       );
       let changed = false;
       const mergedItems = current.items.map((item) => {
-        const nextHref = item.title ? hrefByTitle.get(item.title) : undefined;
-        if (nextHref && nextHref !== item.href) {
-          changed = true;
-          return { ...item, href: nextHref };
-        }
-        return item;
+        const seed = item.title ? seedByTitle.get(item.title) : undefined;
+        if (!seed) return item;
+        const nextItem = {
+          ...item,
+          ...(seed.href ? { href: seed.href } : {}),
+          ...(seed.imageKey ? { imageKey: seed.imageKey } : {}),
+        };
+        if (nextItem.href !== item.href || nextItem.imageKey !== item.imageKey) changed = true;
+        return nextItem;
       });
+      // Add any new seeded cards (e.g. use cases that gained image keys / entries).
+      for (const seeded of next.items) {
+        if (seeded.title && !current.items.some((i) => i.title === seeded.title)) {
+          mergedItems.push(seeded);
+          changed = true;
+        }
+      }
       if (changed) {
         await this.prisma.cmsBlock.update({
           where: { id: existing.id },

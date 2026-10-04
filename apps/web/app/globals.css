@@ -579,7 +579,8 @@ html[data-theme='dark'] .vl-mkt {
 }
 
 html[data-theme='light'] .vl-mkt-atmosphere {
-  display: none;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
 }
 
 .vl-mkt > *:not(.vl-mkt-atmosphere) {

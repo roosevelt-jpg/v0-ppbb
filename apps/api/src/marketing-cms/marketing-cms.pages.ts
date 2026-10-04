@@ -389,24 +389,28 @@ export const USE_CASE_HOME_LINKS = [
   {
     title: 'Sales & marketing',
     body: 'Campaigns that sound local — accents, idioms, and cultural cues included.',
+    imageKey: 'use-case.sales',
     href: '/use-cases/sales',
     pageSlug: 'use-case-sales',
   },
   {
     title: 'Public speech',
     body: 'Addresses, broadcasts, and civic messaging that feel native, not imported.',
+    imageKey: 'use-case.public-speech',
     href: '/use-cases/public-speech',
     pageSlug: 'use-case-public-speech',
   },
   {
     title: 'Customer experience',
     body: 'Support and agents that hear African callers the way Africans speak.',
+    imageKey: 'use-case.customer-experience',
     href: '/use-cases/customer-experience',
     pageSlug: 'use-case-customer-experience',
   },
   {
     title: 'Creative voice',
     body: 'Own your voice for podcasts, film, ads, and storytelling across the continent.',
+    imageKey: 'use-case.creative',
     href: '/use-cases/creative',
     pageSlug: 'use-case-creative',
   },
