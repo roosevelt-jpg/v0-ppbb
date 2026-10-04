@@ -156,9 +156,10 @@ export class MarketingCmsService implements OnModuleInit {
       });
     }
 
-    // Keep footer / product hubs aligned with catalog (ElevenLabs-parity columns) without wiping custom blocks.
+    // Keep footer / product hubs / product cards aligned with catalog without wiping custom blocks.
     await this.syncSeededBlockType(home.id, 'footer');
     await this.syncSeededBlockType(home.id, 'product_hubs');
+    await this.syncSeededBlockType(home.id, 'products');
 
     this.log.log('Marketing CMS seed ensured (home + use-case + product prefills)');
   }
@@ -182,13 +183,89 @@ export class MarketingCmsService implements OnModuleInit {
       });
       return;
     }
-    const current = existing.content as { columns?: unknown[]; tabs?: unknown[] };
-    const next = seed.content as { columns?: unknown[]; tabs?: unknown[] };
-    // Additive-only sync: never wipe admin edits — only fill in when catalog grew.
+    const current = existing.content as {
+      columns?: Array<{ title?: string; links?: Array<{ label?: string; href?: string; adminOnly?: boolean }> }>;
+      tabs?: unknown[];
+      items?: Array<{ title?: string; href?: string }>;
+      brand?: string;
+      blurb?: string;
+      links?: unknown[];
+    };
+    const next = seed.content as {
+      columns?: Array<{ title?: string; links?: Array<{ label?: string; href?: string; adminOnly?: boolean }> }>;
+      tabs?: unknown[];
+      items?: Array<{ title?: string; href?: string }>;
+      brand?: string;
+      blurb?: string;
+      links?: unknown[];
+    };
+    // Additive-only sync: never wipe admin edits — only fill in when catalog grew,
+    // or refresh known product hrefs to dedicated /products/* SEO landers.
     const needsFooterSync =
       type === 'footer' && (current.columns?.length ?? 0) < (next.columns?.length ?? 0);
     const needsHubsSync =
       type === 'product_hubs' && (current.tabs?.length ?? 0) < (next.tabs?.length ?? 0);
+
+    if (type === 'footer' && current.columns?.length && next.columns?.length) {
+      const hrefByLabel = new Map<string, string>();
+      for (const col of next.columns) {
+        for (const link of col.links ?? []) {
+          if (link.label && link.href) hrefByLabel.set(link.label, link.href);
+        }
+      }
+      let changed = false;
+      const mergedColumns = current.columns.map((col) => ({
+        ...col,
+        links: (col.links ?? []).map((link) => {
+          const nextHref = link.label ? hrefByLabel.get(link.label) : undefined;
+          if (nextHref && nextHref !== link.href) {
+            changed = true;
+            return { ...link, href: nextHref };
+          }
+          return link;
+        }),
+      }));
+      if (changed) {
+        await this.prisma.cmsBlock.update({
+          where: { id: existing.id },
+          data: {
+            content: {
+              ...current,
+              columns: mergedColumns,
+            } as unknown as Prisma.InputJsonValue,
+          },
+        });
+        return;
+      }
+    }
+
+    if (type === 'products' && current.items?.length && next.items?.length) {
+      const hrefByTitle = new Map(
+        next.items.filter((i) => i.title && i.href).map((i) => [i.title as string, i.href as string]),
+      );
+      let changed = false;
+      const mergedItems = current.items.map((item) => {
+        const nextHref = item.title ? hrefByTitle.get(item.title) : undefined;
+        if (nextHref && nextHref !== item.href) {
+          changed = true;
+          return { ...item, href: nextHref };
+        }
+        return item;
+      });
+      if (changed) {
+        await this.prisma.cmsBlock.update({
+          where: { id: existing.id },
+          data: {
+            content: {
+              ...current,
+              items: mergedItems,
+            } as unknown as Prisma.InputJsonValue,
+          },
+        });
+        return;
+      }
+    }
+
     if (needsFooterSync || needsHubsSync) {
       await this.prisma.cmsBlock.update({
         where: { id: existing.id },

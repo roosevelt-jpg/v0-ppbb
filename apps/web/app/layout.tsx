@@ -19,8 +19,31 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'VerbaLab',
-  description: "Africa's voice intelligence platform — speak, translate, and reason across African languages.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+  ),
+  title: {
+    default: "VerbaLab — Africa's voice intelligence platform",
+    template: '%s | VerbaLab',
+  },
+  description:
+    "Africa's voice intelligence platform — speak, translate, clone, and reason across African languages.",
+  openGraph: {
+    type: 'website',
+    siteName: 'VerbaLab',
+    title: "VerbaLab — Africa's voice intelligence platform",
+    description:
+      'Speak, translate, clone, and reason across African languages — creative, agents, and APIs.',
+    images: [{ url: '/cms/og-default.svg', width: 1200, height: 630, alt: 'VerbaLab' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "VerbaLab — Africa's voice intelligence platform",
+    description:
+      'Speak, translate, clone, and reason across African languages — creative, agents, and APIs.',
+    images: ['/cms/og-default.svg'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

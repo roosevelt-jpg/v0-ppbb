@@ -1,0 +1,844 @@
+export type ProductFamily = 'VerbaCreative' | 'VerbaAgents' | 'VerbaAPI' | 'Resources';
+
+export type ProductPage = {
+  /** URL slug under /products/[slug] */
+  slug: string;
+  /** Footer / nav link label */
+  linkName: string;
+  family: ProductFamily;
+  /** Document <title> (+ template suffix from layout) */
+  title: string;
+  /** Meta description */
+  description: string;
+  /** Open Graph title (can be punchier than <title>) */
+  ogTitle: string;
+  /** Path under /public for fallback OG image */
+  ogImage: string;
+  /** Hero kicker */
+  kicker: string;
+  /** Hero headline */
+  headline: string;
+  /** Hero lede */
+  lede: string;
+  /** Feature bullets for the detail page */
+  features: string[];
+  /** Who it's for */
+  audiences: string[];
+  /** Related GEO / SEO keywords */
+  keywords: string[];
+  /** Deep link into the live console / docs after reading */
+  consoleHref: string;
+  /** Optional secondary CTA */
+  secondaryHref?: string;
+  secondaryLabel?: string;
+};
+
+function p(
+  partial: Omit<ProductPage, 'ogImage' | 'ogTitle'> & { ogTitle?: string; ogImage?: string },
+): ProductPage {
+  const familyImage =
+    partial.family === 'VerbaCreative'
+      ? '/cms/og-creative.svg'
+      : partial.family === 'VerbaAgents'
+        ? '/cms/og-agents.svg'
+        : partial.family === 'VerbaAPI'
+          ? '/cms/og-api.svg'
+          : '/cms/og-default.svg';
+  return {
+    ...partial,
+    ogTitle: partial.ogTitle ?? `${partial.linkName} | VerbaLab`,
+    ogImage: partial.ogImage ?? familyImage,
+  };
+}
+
+/** Dedicated public product landers — one per footer product link. */
+export const PRODUCT_PAGES: ProductPage[] = [
+  // VerbaCreative
+  p({
+    slug: 'text-to-speech',
+    linkName: 'Text to Speech',
+    family: 'VerbaCreative',
+    title: 'Text to Speech for African Languages',
+    description:
+      'Convert text into natural African speech with dialect-aware TTS. Yoruba, Swahili, Zulu, Hausa, Amharic, and more — built for brands, creators, and public services.',
+    kicker: 'VerbaCreative',
+    headline: 'Text to speech that sounds African',
+    lede: 'Generate studio-quality speech across ethnic languages, accents, and code-switching — for ads, lessons, IVR, and storytelling.',
+    features: [
+      'Dialect-aware voices with cultural tone controls',
+      'Multilingual scripts with mixed English + African languages',
+      'SSML-lite pacing for demos and production renders',
+      'Console Voice Studio for iteration and export',
+    ],
+    audiences: ['Creators', 'Educators', 'Contact centers', 'Public broadcasters'],
+    keywords: ['African text to speech', 'Yoruba TTS', 'Swahili TTS', 'dialect TTS', 'VerbaLab'],
+    consoleHref: '/voice-studio',
+    secondaryHref: '/docs',
+    secondaryLabel: 'API docs',
+    ogImage: '/cms/product-voice.svg',
+  }),
+  p({
+    slug: 'speech-to-text',
+    linkName: 'Speech to Text',
+    family: 'VerbaCreative',
+    title: 'Speech to Text for African Accents',
+    description:
+      'Transcribe African speech with accent, dialect, and code-switching intelligence. Accurate STT for support, media, and research across the continent.',
+    kicker: 'VerbaCreative',
+    headline: 'Speech to text that hears Africa',
+    lede: 'Capture calls, classrooms, and content in the languages people actually speak — not just textbook English.',
+    features: [
+      'Accent and dialect-aware transcription',
+      'Code-switching tolerant pipelines',
+      'Speech hub for review and export',
+      'Works with agents, dubbing, and analytics',
+    ],
+    audiences: ['CX teams', 'Media', 'Researchers', 'Enterprises'],
+    keywords: ['African speech to text', 'accent STT', 'dialect transcription', 'VerbaSpeech'],
+    consoleHref: '/speech',
+    ogImage: '/cms/product-speech.svg',
+  }),
+  p({
+    slug: 'voice-changer',
+    linkName: 'Voice Changer',
+    family: 'VerbaCreative',
+    title: 'AI Voice Changer for African Creators',
+    description:
+      'Transform recorded speech into new African voice styles while preserving intent — for content, privacy, and character performance.',
+    kicker: 'VerbaCreative',
+    headline: 'Change voice without losing meaning',
+    lede: 'Restyle speech for characters, privacy, or brand personas with African-aware creative media tools.',
+    features: ['Style transfer for speech', 'Creative media console', 'Character and brand personas', 'Export-ready renders'],
+    audiences: ['Creators', 'Game studios', 'Agencies'],
+    keywords: ['AI voice changer', 'African voice style', 'speech restyle'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'text-to-sound-effects',
+    linkName: 'Text to Sound Effects',
+    family: 'VerbaCreative',
+    title: 'Text to Sound Effects',
+    description:
+      'Generate sound effects from text prompts for African storytelling, ads, and immersive experiences.',
+    kicker: 'VerbaCreative',
+    headline: 'Sound design from a sentence',
+    lede: 'Prompt ambient markets, radio beds, and cinematic cues that fit African creative contexts.',
+    features: ['Promptable SFX generation', 'Creative media workspace', 'Pair with TTS and video', 'Campaign-ready assets'],
+    audiences: ['Podcast producers', 'Advertisers', 'Filmmakers'],
+    keywords: ['text to sound effects', 'AI SFX', 'African audio production'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'voice-cloning',
+    linkName: 'Voice Cloning',
+    family: 'VerbaCreative',
+    title: 'African Voice Cloning',
+    description:
+      'Clone consented African voices for branded speech, personal presence, and localized campaigns — with ownership controls.',
+    kicker: 'VerbaCreative',
+    headline: 'Clone voices you own',
+    lede: 'Build a voice library for founders, educators, and public figures — with clear consent and workspace controls.',
+    features: ['Consent-aware cloning flows', 'Brand and personal voice libraries', 'Works with TTS and dubbing', 'Console cloning workspace'],
+    audiences: ['Brands', 'Creators', 'Enterprises'],
+    keywords: ['African voice cloning', 'custom TTS voice', 'voice ownership'],
+    consoleHref: '/voice-cloning',
+    ogImage: '/cms/product-voice.svg',
+  }),
+  p({
+    slug: 'voice-isolator',
+    linkName: 'Voice Isolator',
+    family: 'VerbaCreative',
+    title: 'Voice Isolator',
+    description:
+      'Isolate speech from noisy African field recordings, calls, and content for cleaner STT, dubbing, and archives.',
+    kicker: 'VerbaCreative',
+    headline: 'Pull clean speech from real-world audio',
+    lede: 'Separate voice from markets, traffic, and room noise before transcription or creative reuse.',
+    features: ['Speech isolation for noisy inputs', 'Prep for STT and dubbing', 'Creative media tooling', 'Archive and compliance friendly'],
+    audiences: ['Journalists', 'Call centers', 'Archives'],
+    keywords: ['voice isolator', 'speech enhancement', 'noise separation'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'ai-music-generator',
+    linkName: 'AI Music Generator',
+    family: 'VerbaCreative',
+    title: 'AI Music Generator',
+    description:
+      'Generate music beds and motifs for African ads, podcasts, and social — then pair with VerbaLab voice.',
+    kicker: 'VerbaCreative',
+    headline: 'Music that supports African stories',
+    lede: 'Compose beds for campaigns and shows, then layer dialect-aware voiceovers in one creative stack.',
+    features: ['Promptable music generation', 'Campaign and podcast beds', 'Pairs with TTS and video', 'Creative media console'],
+    audiences: ['Agencies', 'Creators', 'Broadcasters'],
+    keywords: ['AI music generator', 'African ad music', 'podcast beds'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'studio',
+    linkName: 'Studio',
+    family: 'VerbaCreative',
+    title: 'VerbaLab Voice Studio',
+    description:
+      'Produce African voiceovers end-to-end — script, voice, timing, and timeline render in Voice Studio.',
+    kicker: 'VerbaCreative',
+    headline: 'Your African voice production desk',
+    lede: 'Iterate scripts, voices, and timing in one console built for continent-scale language work.',
+    features: ['Timeline render', 'Pronunciation and pacing controls', 'Multi-voice projects', 'Export for ads and lessons'],
+    audiences: ['Studios', 'Educators', 'Marketing teams'],
+    keywords: ['voice studio', 'African voiceover', 'TTS production'],
+    consoleHref: '/voice-studio',
+  }),
+  p({
+    slug: 'voice-design',
+    linkName: 'Voice Design',
+    family: 'VerbaCreative',
+    title: 'AI Voice Design',
+    description:
+      'Design new African voice personas from attributes — age, region, tone — then use them across TTS and agents.',
+    kicker: 'VerbaCreative',
+    headline: 'Design voices for regions and brands',
+    lede: 'Specify cultural and acoustic traits to create personas that fit Lagos, Nairobi, Accra, Johannesburg, and beyond.',
+    features: ['Attribute-driven voice design', 'Regional persona presets', 'Reuse in TTS and agents', 'Creative media workspace'],
+    audiences: ['Brand teams', 'Product designers', 'Agencies'],
+    keywords: ['AI voice design', 'voice persona', 'African brand voice'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'ai-voice-generator',
+    linkName: 'AI Voice Generator',
+    family: 'VerbaCreative',
+    title: 'AI Voice Generator (Neural TTS)',
+    description:
+      'Neural TTS for African languages with natural prosody — generate speech for products, learning, and media at scale.',
+    kicker: 'VerbaCreative',
+    headline: 'Neural voices for the continent',
+    lede: 'Ship high-quality speech generation with African language coverage and console-ready workflows.',
+    features: ['Neural TTS models', 'Language and accent coverage', 'API + console access', 'Pairs with cloning and studio'],
+    audiences: ['Developers', 'Product teams', 'Content ops'],
+    keywords: ['AI voice generator', 'neural TTS', 'African TTS API'],
+    consoleHref: '/neural-tts',
+  }),
+  p({
+    slug: 'ai-image-generator',
+    linkName: 'AI Image Generator',
+    family: 'VerbaCreative',
+    title: 'AI Image Generator',
+    description:
+      'Generate campaign and story visuals alongside African voice — creative media for ads, education, and social.',
+    kicker: 'VerbaCreative',
+    headline: 'Images that match the voice',
+    lede: 'Produce visual assets in the same creative workflow as speech, SFX, and video.',
+    features: ['Promptable image generation', 'Campaign creative packs', 'Aligned with voice and video', 'Creative media console'],
+    audiences: ['Marketers', 'Educators', 'Creators'],
+    keywords: ['AI image generator', 'African creative media'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'ai-video-generator',
+    linkName: 'AI Video Generator',
+    family: 'VerbaCreative',
+    title: 'AI Video Generator',
+    description:
+      'Generate short-form and campaign video with African voice tracks — from script to publishable cut.',
+    kicker: 'VerbaCreative',
+    headline: 'Video with African voice built in',
+    lede: 'Combine generated video with dialect-aware speech for social, ads, and learning content.',
+    features: ['Script-to-video workflows', 'Voice + picture alignment', 'Creative media console', 'Social and ad formats'],
+    audiences: ['Social teams', 'Agencies', 'Educators'],
+    keywords: ['AI video generator', 'African video ads', 'voiceover video'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'ads-engine',
+    linkName: 'Ads Engine',
+    family: 'VerbaCreative',
+    title: 'African Ads Engine',
+    description:
+      'Produce localized African ads with voice, music, and visuals tuned for regional markets and languages.',
+    kicker: 'VerbaCreative',
+    headline: 'Ads that speak the market',
+    lede: 'Localize campaigns across languages and accents without losing brand tone or cultural respect.',
+    features: ['Multi-market ad packs', 'Voice + music + visual bundle', 'Regional language targeting', 'Creative media workspace'],
+    audiences: ['Performance marketers', 'Agencies', 'Brand teams'],
+    keywords: ['African advertising', 'localized ads', 'multilingual campaigns'],
+    consoleHref: '/creative-media',
+  }),
+  p({
+    slug: 'dubbing',
+    linkName: 'Dubbing',
+    family: 'VerbaCreative',
+    title: 'AI Dubbing for African Languages',
+    description:
+      'Dub video and audio into African languages with voice continuity — for film, training, and public media.',
+    kicker: 'VerbaCreative',
+    headline: 'Dub into the languages audiences live in',
+    lede: 'Localize picture and speech together so stories travel across borders without losing presence.',
+    features: ['Video voice workflows', 'Language pair dubbing', 'Voice continuity controls', 'Console video-voice tools'],
+    audiences: ['Studios', 'Training teams', 'Broadcasters'],
+    keywords: ['AI dubbing', 'African language dubbing', 'video localization'],
+    consoleHref: '/video-voice',
+  }),
+
+  // VerbaAgents
+  p({
+    slug: 'voice-agents',
+    linkName: 'Voice Agents',
+    family: 'VerbaAgents',
+    title: 'African Voice Agents',
+    description:
+      'Deploy conversational voice agents that hear accents, dialects, and code-switching across African markets.',
+    kicker: 'VerbaAgents',
+    headline: 'Agents that hear how Africa speaks',
+    lede: 'Build voice agents for support, sales, and civic services with African language intelligence.',
+    features: ['Voice-first agent runtime', 'STT + TTS in the loop', 'Vertical playbooks', 'Observability and guardrails'],
+    audiences: ['CX leaders', 'Product teams', 'Governments'],
+    keywords: ['voice agents', 'African conversational AI', 'dialect agents'],
+    consoleHref: '/voice',
+  }),
+  p({
+    slug: 'conversational-ai',
+    linkName: 'Conversational AI',
+    family: 'VerbaAgents',
+    title: 'Conversational AI for African Languages',
+    description:
+      'Chat and multimodal agents that understand African language contexts — for support, sales, and internal ops.',
+    kicker: 'VerbaAgents',
+    headline: 'Conversation with cultural context',
+    lede: 'Ship chat agents that respect tone, idiom, and multilingual customers.',
+    features: ['Chat console with African prompts', 'Language-aware replies', 'Workflow actions', 'Audit-friendly logs'],
+    audiences: ['Support', 'Sales', 'Internal IT'],
+    keywords: ['conversational AI Africa', 'multilingual chatbot', 'VerbaChat'],
+    consoleHref: '/chat',
+  }),
+  p({
+    slug: 'integrations',
+    linkName: 'Integrations',
+    family: 'VerbaAgents',
+    title: 'VerbaLab Integrations & Connectors',
+    description:
+      'Connect VerbaLab voice and agents to your CRM, telephony, and workplace tools with managed connectors.',
+    kicker: 'VerbaAgents',
+    headline: 'Plug African voice into your stack',
+    lede: 'Wire STT, TTS, and agents into the systems your teams already run.',
+    features: ['Connector catalog', 'Workflow hooks', 'Enterprise-ready auth patterns', 'Partner connector paths'],
+    audiences: ['Platform engineers', 'IT', 'SIs'],
+    keywords: ['voice API integrations', 'AI connectors', 'African AI stack'],
+    consoleHref: '/connectors',
+  }),
+  p({
+    slug: 'telecommunications',
+    linkName: 'Telecommunications',
+    family: 'VerbaAgents',
+    title: 'Telecommunications Voice Intelligence',
+    description:
+      'Call intelligence for African telecom and contact centers — transcription, agents, and analytics.',
+    kicker: 'VerbaAgents',
+    headline: 'Smarter calls across the continent',
+    lede: 'Understand and automate voice traffic with accent-aware models and agent workflows.',
+    features: ['Call intelligence console', 'Live and batch speech analytics', 'Agent assist patterns', 'Carrier-friendly APIs'],
+    audiences: ['Telcos', 'BPOs', 'Enterprises'],
+    keywords: ['telecom AI', 'call intelligence', 'African contact center'],
+    consoleHref: '/call-intelligence',
+  }),
+  p({
+    slug: 'financial-services',
+    linkName: 'Financial Services',
+    family: 'VerbaAgents',
+    title: 'Financial Services Voice & Language AI',
+    description:
+      'Voice and language intelligence for African banks, fintechs, and insurers — KYC assist, support, and education.',
+    kicker: 'VerbaAgents',
+    headline: 'Finance that speaks customer languages',
+    lede: 'Serve clients in the languages they trust while keeping audit and residency controls.',
+    features: ['Vertical financial intelligence', 'Support and education flows', 'Residency-aware deployment', 'Agent + speech stack'],
+    audiences: ['Banks', 'Fintechs', 'Insurers'],
+    keywords: ['fintech voice AI', 'banking chatbot Africa', 'financial services STT'],
+    consoleHref: '/financial-intelligence',
+  }),
+  p({
+    slug: 'healthcare',
+    linkName: 'Healthcare',
+    family: 'VerbaAgents',
+    title: 'Healthcare Language & Voice AI',
+    description:
+      'Patient communication, triage assist, and training content in African languages with safety-aware workflows.',
+    kicker: 'VerbaAgents',
+    headline: 'Care conversations in local languages',
+    lede: 'Help clinicians and patients communicate clearly across languages — with enterprise controls.',
+    features: ['Healthcare intelligence surface', 'Multilingual patient education', 'Safety-aware agent patterns', 'Audit trails'],
+    audiences: ['Hospitals', 'NGOs', 'Digital health'],
+    keywords: ['healthcare AI Africa', 'medical translation', 'patient voice AI'],
+    consoleHref: '/healthcare-intelligence',
+  }),
+  p({
+    slug: 'government',
+    linkName: 'Government',
+    family: 'VerbaAgents',
+    title: 'Government & Civic Voice AI',
+    description:
+      'Civic messaging, citizen services, and public speech tools for African governments and institutions.',
+    kicker: 'VerbaAgents',
+    headline: 'Public services that sound local',
+    lede: 'Broadcast and converse with citizens in languages that build trust.',
+    features: ['Government intelligence console', 'Public speech localization', 'Citizen service agents', 'Residency options'],
+    audiences: ['Ministries', 'Municipalities', 'Public broadcasters'],
+    keywords: ['government AI Africa', 'civic voice', 'public service chatbot'],
+    consoleHref: '/government-intelligence',
+  }),
+  p({
+    slug: 'technology',
+    linkName: 'Technology',
+    family: 'VerbaAgents',
+    title: 'Technology Partner Connectors',
+    description:
+      'Partner and platform connectors so technology companies embed VerbaLab African voice into their products.',
+    kicker: 'VerbaAgents',
+    headline: 'Embed African voice in your product',
+    lede: 'Partner connectors and APIs for ISVs building for African users.',
+    features: ['Partner connector console', 'API-first integration', 'SDK paths', 'Co-sell ready surfaces'],
+    audiences: ['ISVs', 'Platforms', 'SIs'],
+    keywords: ['AI partner connectors', 'embed TTS API', 'African language SDK'],
+    consoleHref: '/partner-connectors',
+  }),
+  p({
+    slug: 'retail-ecommerce',
+    linkName: 'Retail & E-commerce',
+    family: 'VerbaAgents',
+    title: 'Retail & E-commerce Voice AI',
+    description:
+      'Shopping assistants, order support, and localized campaigns for African retail and e-commerce.',
+    kicker: 'VerbaAgents',
+    headline: 'Commerce that talks like your customers',
+    lede: 'Support and sell across languages with agents and creative localization.',
+    features: ['Retail use-case playbooks', 'Support agents', 'Localized campaign voice', 'Trade-oriented translate samples'],
+    audiences: ['Retailers', 'Marketplaces', 'D2C brands'],
+    keywords: ['ecommerce chatbot Africa', 'retail voice AI', 'multilingual shopping'],
+    consoleHref: '/use-cases/trade',
+    secondaryHref: '/agent-intelligence',
+    secondaryLabel: 'Agent console',
+  }),
+  p({
+    slug: 'travel-hospitality',
+    linkName: 'Travel & Hospitality',
+    family: 'VerbaAgents',
+    title: 'Travel & Hospitality Language AI',
+    description:
+      'Guest services, tourism content, and multilingual agents for African hospitality and heritage experiences.',
+    kicker: 'VerbaAgents',
+    headline: 'Welcome guests in their language',
+    lede: 'Power concierge agents and heritage storytelling with African language coverage.',
+    features: ['Tourism & heritage intelligence', 'Guest support agents', 'Multilingual content', 'Voice + chat surfaces'],
+    audiences: ['Hotels', 'Tourism boards', 'Experience brands'],
+    keywords: ['hospitality AI', 'tourism chatbot', 'heritage language AI'],
+    consoleHref: '/tourism-heritage-intelligence',
+  }),
+  p({
+    slug: 'customer-support',
+    linkName: 'Customer Support',
+    family: 'VerbaAgents',
+    title: 'Customer Support for African Callers',
+    description:
+      'Support agents and speech tools that hear African callers the way Africans speak — accents included.',
+    kicker: 'VerbaAgents',
+    headline: 'Support that actually understands',
+    lede: 'Reduce repeats and frustration with accent-aware STT and culturally tuned replies.',
+    features: ['CX use-case content', 'Voice + chat agents', 'Speech analytics hooks', 'Playbooks for African markets'],
+    audiences: ['CX orgs', 'BPOs', 'SaaS support'],
+    keywords: ['African customer support AI', 'accent-aware IVR', 'CX agents'],
+    consoleHref: '/use-cases/customer-experience',
+    secondaryHref: '/agent-intelligence',
+    secondaryLabel: 'Open agents',
+  }),
+  p({
+    slug: 'chatbots',
+    linkName: 'Chatbots',
+    family: 'VerbaAgents',
+    title: 'African Language Chatbots',
+    description:
+      'Build chatbots with African language intelligence, orchestration, and observability in Agent Intelligence.',
+    kicker: 'VerbaAgents',
+    headline: 'Chatbots with continental context',
+    lede: 'Design, run, and monitor agents that handle multilingual African customer journeys.',
+    features: ['Agent intelligence console', 'Orchestration routes', 'Activity and quality signals', 'Links to speech and chat'],
+    audiences: ['Product teams', 'CX', 'Developers'],
+    keywords: ['African chatbot', 'multilingual bot', 'agent intelligence'],
+    consoleHref: '/agent-intelligence',
+  }),
+  p({
+    slug: 'education',
+    linkName: 'Education',
+    family: 'VerbaAgents',
+    title: 'Education Voice & Language AI',
+    description:
+      'Lessons, tutoring, and assessments in the languages students live in — African education intelligence.',
+    kicker: 'VerbaAgents',
+    headline: 'Learning in living languages',
+    lede: 'Deliver instruction and feedback students can hear and understand.',
+    features: ['Education intelligence console', 'TTS for lessons', 'STT for oral practice', 'Localized assessments'],
+    audiences: ['Schools', 'Edtech', 'Ministries of education'],
+    keywords: ['edtech Africa', 'multilingual learning', 'oral assessment AI'],
+    consoleHref: '/education-intelligence',
+  }),
+
+  // VerbaAPI
+  p({
+    slug: 'api-reference',
+    linkName: 'API Reference',
+    family: 'VerbaAPI',
+    title: 'VerbaLab API Reference',
+    description:
+      'OpenAPI reference for VerbaLab speech, translate, agents, and creative APIs — explore endpoints interactively.',
+    kicker: 'VerbaAPI',
+    headline: 'Full API surface, documented',
+    lede: 'Browse the OpenAPI explorer for every shipped VerbaLab endpoint.',
+    features: ['Interactive OpenAPI explorer', 'Auth with API keys', 'Speech, translate, agents, and more', 'Copy-ready request shapes'],
+    audiences: ['Developers', 'Partners', 'SIs'],
+    keywords: ['VerbaLab API', 'OpenAPI', 'speech API reference'],
+    consoleHref: '/docs/openapi',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs home',
+  }),
+  p({
+    slug: 'agents-api',
+    linkName: 'Agents API',
+    family: 'VerbaAPI',
+    title: 'Agents API',
+    description:
+      'Programmatic access to VerbaLab agents — orchestrate conversational and voice agents for African languages.',
+    kicker: 'VerbaAPI',
+    headline: 'Agents as an API',
+    lede: 'Call agent endpoints from your backend with the same intelligence as the console.',
+    features: ['Agent APIs in docs', 'Session and tool patterns', 'Works with speech modalities', 'Metered workspace usage'],
+    audiences: ['Backend engineers', 'Platform teams'],
+    keywords: ['agents API', 'conversational API', 'VerbaLab developers'],
+    consoleHref: '/docs',
+    secondaryHref: '/agent-intelligence',
+    secondaryLabel: 'Agent console',
+  }),
+  p({
+    slug: 'speech-engine',
+    linkName: 'Speech Engine',
+    family: 'VerbaAPI',
+    title: 'Speech Engine API',
+    description:
+      'Core speech engine for STT and related African speech intelligence — API and console access.',
+    kicker: 'VerbaAPI',
+    headline: 'Speech engine for builders',
+    lede: 'Integrate transcription and speech understanding into products serving African users.',
+    features: ['Speech hub + APIs', 'Accent-aware models', 'Batch and interactive paths', 'Observability hooks'],
+    audiences: ['Developers', 'ISVs'],
+    keywords: ['speech engine API', 'STT API Africa', 'speech intelligence'],
+    consoleHref: '/speech',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'dubbing-api',
+    linkName: 'Dubbing API',
+    family: 'VerbaAPI',
+    title: 'Dubbing API',
+    description:
+      'API access to VerbaLab dubbing and video-voice localization for African languages.',
+    kicker: 'VerbaAPI',
+    headline: 'Dubbing via API',
+    lede: 'Automate localization pipelines for training video, media, and product content.',
+    features: ['Video-voice APIs', 'Language pair jobs', 'Console for review', 'Docs for integration'],
+    audiences: ['Media platforms', 'L&D tech', 'Studios'],
+    keywords: ['dubbing API', 'video localization API'],
+    consoleHref: '/video-voice',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'text-to-speech-api',
+    linkName: 'Text to Speech API',
+    family: 'VerbaAPI',
+    title: 'Text to Speech API',
+    description:
+      'HTTP TTS API for African languages — generate speech from text with API keys and SDKs.',
+    kicker: 'VerbaAPI',
+    headline: 'TTS as a metered API',
+    lede: 'Call VerbaLab TTS from apps, backends, and edge workers with workspace keys.',
+    features: ['REST TTS endpoints', 'API key auth', 'Console Voice Studio for prototyping', 'iOS/Android SDK paths'],
+    audiences: ['Developers', 'Mobile teams', 'Platforms'],
+    keywords: ['TTS API', 'African text to speech API', 'VerbaLab TTS'],
+    consoleHref: '/docs',
+    secondaryHref: '/voice-studio',
+    secondaryLabel: 'Try in Studio',
+  }),
+  p({
+    slug: 'speech-to-text-api',
+    linkName: 'Speech to Text API',
+    family: 'VerbaAPI',
+    title: 'Speech to Text API',
+    description:
+      'HTTP STT API for African accents and dialects — integrate transcription into your product.',
+    kicker: 'VerbaAPI',
+    headline: 'STT as a metered API',
+    lede: 'Stream or batch African speech into text with API keys and speech console tools.',
+    features: ['REST STT endpoints', 'Accent-aware models', 'Speech console for QA', 'Docs and OpenAPI'],
+    audiences: ['Developers', 'CX platforms'],
+    keywords: ['STT API', 'African speech to text API'],
+    consoleHref: '/docs',
+    secondaryHref: '/speech',
+    secondaryLabel: 'Speech console',
+  }),
+  p({
+    slug: 'sound-effects-api',
+    linkName: 'Sound Effects API',
+    family: 'VerbaAPI',
+    title: 'Sound Effects API',
+    description:
+      'Generate sound effects programmatically for African creative and product experiences.',
+    kicker: 'VerbaAPI',
+    headline: 'SFX generation API',
+    lede: 'Prompt effects from your backend and review them in creative media.',
+    features: ['Creative media APIs', 'Promptable SFX', 'Pairs with TTS API', 'Console preview'],
+    audiences: ['Game/audio developers', 'Creative tools'],
+    keywords: ['sound effects API', 'AI SFX API'],
+    consoleHref: '/creative-media',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'music-api',
+    linkName: 'Music API',
+    family: 'VerbaAPI',
+    title: 'Music API',
+    description:
+      'Generate music beds via API for ads, apps, and content serving African audiences.',
+    kicker: 'VerbaAPI',
+    headline: 'Music generation API',
+    lede: 'Compose campaign beds programmatically, then layer VerbaLab voice.',
+    features: ['Music generation endpoints', 'Creative media console', 'Campaign workflows', 'Docs for auth and quotas'],
+    audiences: ['Developers', 'Adtech'],
+    keywords: ['AI music API', 'generative music API'],
+    consoleHref: '/creative-media',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'translate-api',
+    linkName: 'Translate API',
+    family: 'VerbaAPI',
+    title: 'Translate API for African Languages',
+    description:
+      'Machine translation API across African and global languages with cultural context for trade and products.',
+    kicker: 'VerbaAPI',
+    headline: 'Translate meaning, not just words',
+    lede: 'Move product copy and conversations across tongues with VerbaTranslate APIs.',
+    features: ['Translate console + API', 'Trade-oriented samples', 'Streaming options', 'OpenAPI coverage'],
+    audiences: ['Developers', 'Marketplaces', 'Enterprises'],
+    keywords: ['African translation API', 'Yoruba translation API', 'VerbaTranslate'],
+    consoleHref: '/translate',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+    ogImage: '/cms/product-translate.svg',
+  }),
+  p({
+    slug: 'ios-sdk',
+    linkName: 'iOS SDK',
+    family: 'VerbaAPI',
+    title: 'VerbaLab iOS SDK',
+    description:
+      'iOS SDK for VerbaLab speech and language APIs — integrate African voice features into Apple apps.',
+    kicker: 'VerbaAPI',
+    headline: 'Ship African voice on iOS',
+    lede: 'Use the iOS SDK with your API keys for on-device product experiences.',
+    features: ['iOS install path in Developers', 'API key auth', 'Speech and translate surfaces', 'Docs + sample flows'],
+    audiences: ['iOS engineers', 'Mobile product teams'],
+    keywords: ['VerbaLab iOS SDK', 'TTS iOS SDK', 'African language SDK'],
+    consoleHref: '/developers',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'android-sdk',
+    linkName: 'Android SDK',
+    family: 'VerbaAPI',
+    title: 'VerbaLab Android SDK',
+    description:
+      'Android SDK for VerbaLab speech and language APIs — bring African voice intelligence to Android apps.',
+    kicker: 'VerbaAPI',
+    headline: 'Ship African voice on Android',
+    lede: 'Integrate STT, TTS, and translate with the Android SDK and workspace keys.',
+    features: ['Android install path in Developers', 'API key auth', 'Speech and translate surfaces', 'Docs + sample flows'],
+    audiences: ['Android engineers', 'Mobile product teams'],
+    keywords: ['VerbaLab Android SDK', 'TTS Android SDK', 'African language SDK'],
+    consoleHref: '/developers',
+    secondaryHref: '/docs',
+    secondaryLabel: 'Docs',
+  }),
+  p({
+    slug: 'api-key',
+    linkName: 'API Key',
+    family: 'VerbaAPI',
+    title: 'VerbaLab API Keys',
+    description:
+      'Create and manage VerbaLab API keys for live and test environments — the credential for every product API.',
+    kicker: 'VerbaAPI',
+    headline: 'Keys that unlock the platform',
+    lede: 'Mint vl_live_ / vl_test_ keys, rotate safely, and start calling speech, translate, and agents.',
+    features: ['Key console with create/revoke', 'Live vs test prefixes', 'Shown-once secrets', 'Links to Developers and Docs'],
+    audiences: ['Developers', 'Admins'],
+    keywords: ['VerbaLab API key', 'vl_live_', 'speech API authentication'],
+    consoleHref: '/keys',
+    secondaryHref: '/developers',
+    secondaryLabel: 'Developers',
+  }),
+
+  // Resources (footer product-adjacent)
+  p({
+    slug: 'playground',
+    linkName: 'Playground',
+    family: 'Resources',
+    title: 'VerbaLab API Playground',
+    description:
+      'Try VerbaLab translate and speech samples in the public playground before you ship.',
+    kicker: 'Resources',
+    headline: 'Try before you integrate',
+    lede: 'Exercise African language samples with your key in a safe playground.',
+    features: ['Public playground', 'Sample African market copy', 'API key ready', 'Path into Docs and Studio'],
+    audiences: ['Developers', 'Evaluators'],
+    keywords: ['VerbaLab playground', 'try TTS API', 'translate playground'],
+    consoleHref: '/playground',
+  }),
+  p({
+    slug: 'marketplace',
+    linkName: 'Marketplace',
+    family: 'Resources',
+    title: 'VerbaLab Marketplace',
+    description:
+      'Discover models, voices, datasets, and agents in the VerbaLab marketplace ecosystem.',
+    kicker: 'Resources',
+    headline: 'Find building blocks for African AI',
+    lede: 'Browse marketplace listings that extend VerbaLab creative and agent surfaces.',
+    features: ['Marketplace hub', 'Models, datasets, agents', 'Install entitlements', 'Creator economy links'],
+    audiences: ['Builders', 'Creators', 'Enterprises'],
+    keywords: ['AI marketplace Africa', 'voice marketplace', 'dataset marketplace'],
+    consoleHref: '/marketplace',
+  }),
+  p({
+    slug: 'enterprise',
+    linkName: 'Enterprise',
+    family: 'Resources',
+    title: 'VerbaLab Enterprise',
+    description:
+      'Enterprise controls for African voice AI — residency, governance, and scale for institutions.',
+    kicker: 'Resources',
+    headline: 'Enterprise-ready African voice',
+    lede: 'Deploy with governance, residency, and support patterns for banks, governments, and large platforms.',
+    features: ['Enterprise console', 'Residency and policy hooks', 'Admin controls', 'Trust and compliance links'],
+    audiences: ['CIOs', 'Security', 'Platform owners'],
+    keywords: ['enterprise AI Africa', 'data residency voice AI', 'VerbaLab enterprise'],
+    consoleHref: '/enterprise',
+  }),
+  p({
+    slug: 'trust-center',
+    linkName: 'Trust Center',
+    family: 'Resources',
+    title: 'VerbaLab Trust Center',
+    description:
+      'Trust, safety, and compliance posture for VerbaLab African voice and language products.',
+    kicker: 'Resources',
+    headline: 'Trust built into the platform',
+    lede: 'Review safety and trust surfaces that back creative, agents, and APIs.',
+    features: ['Trust cloud console', 'Safety messaging', 'Enterprise unlocks', 'Policy links'],
+    audiences: ['Security', 'Legal', 'Buyers'],
+    keywords: ['AI trust center', 'voice AI safety', 'VerbaLab compliance'],
+    consoleHref: '/trust-cloud',
+  }),
+  p({
+    slug: 'coverage',
+    linkName: 'Coverage',
+    family: 'Resources',
+    title: 'Language & Country Coverage',
+    description:
+      'See VerbaLab language and country coverage across Africa — languages, locales, and expansion status.',
+    kicker: 'Resources',
+    headline: 'Coverage across the continent',
+    lede: 'Explore which languages and markets VerbaLab supports today.',
+    features: ['Public coverage pages', 'Language inventory', 'Country packs', 'Honest expansion status'],
+    audiences: ['Buyers', 'Researchers', 'Partners'],
+    keywords: ['African language coverage', 'TTS language list', 'VerbaLab locales'],
+    consoleHref: '/coverage',
+  }),
+  p({
+    slug: 'developers',
+    linkName: 'Developers',
+    family: 'Resources',
+    title: 'VerbaLab Developers',
+    description:
+      'Developer hub for API keys, SDKs, CLI, OpenAPI, and honest sandbox limits on VerbaLab.',
+    kicker: 'Resources',
+    headline: 'Everything developers need',
+    lede: 'Keys, TypeScript/iOS/Android SDKs, CLI, and docs in one place.',
+    features: ['Developer overview', 'SDK install commands', 'API key management', 'OpenAPI explorer'],
+    audiences: ['Developers', 'DevRel', 'Partners'],
+    keywords: ['VerbaLab developers', 'speech SDK', 'African language API'],
+    consoleHref: '/developers',
+  }),
+  p({
+    slug: 'docs',
+    linkName: 'Docs',
+    family: 'Resources',
+    title: 'VerbaLab Documentation',
+    description:
+      'Product and API documentation for VerbaLab speech, translate, agents, and creative surfaces.',
+    kicker: 'Resources',
+    headline: 'Docs for the whole platform',
+    lede: 'Learn endpoints, auth, and product behavior — then jump into OpenAPI.',
+    features: ['Docs home', 'Endpoint catalog', 'Auth patterns', 'OpenAPI explorer'],
+    audiences: ['Developers', 'Admins'],
+    keywords: ['VerbaLab docs', 'API documentation', 'speech docs'],
+    consoleHref: '/docs',
+    secondaryHref: '/docs/openapi',
+    secondaryLabel: 'OpenAPI',
+  }),
+  p({
+    slug: 'openapi-explorer',
+    linkName: 'OpenAPI explorer',
+    family: 'Resources',
+    title: 'OpenAPI Explorer',
+    description:
+      'Interactive OpenAPI explorer for VerbaLab — inspect schemas and try endpoints.',
+    kicker: 'Resources',
+    headline: 'Explore the live API schema',
+    lede: 'Navigate the OpenAPI document with a console-friendly explorer.',
+    features: ['Live openapi.json', 'Endpoint browsing', 'Schema inspection', 'Auth with API keys'],
+    audiences: ['Developers'],
+    keywords: ['OpenAPI explorer', 'VerbaLab swagger', 'API schema'],
+    consoleHref: '/docs/openapi',
+  }),
+];
+
+const bySlug = new Map(PRODUCT_PAGES.map((page) => [page.slug, page]));
+
+export function getProductPage(slug: string): ProductPage | undefined {
+  return bySlug.get(slug);
+}
+
+export function listProductSlugs(): string[] {
+  return PRODUCT_PAGES.map((page) => page.slug);
+}
+
+export function productsByFamily(): Record<ProductFamily, ProductPage[]> {
+  return PRODUCT_PAGES.reduce(
+    (acc, page) => {
+      acc[page.family].push(page);
+      return acc;
+    },
+    {
+      VerbaCreative: [] as ProductPage[],
+      VerbaAgents: [] as ProductPage[],
+      VerbaAPI: [] as ProductPage[],
+      Resources: [] as ProductPage[],
+    },
+  );
+}
+
+/** Map footer label → dedicated /products slug (for CMS sync + renderer). */
+export const FOOTER_PRODUCT_HREF_BY_LABEL: Record<string, string> = Object.fromEntries(
+  PRODUCT_PAGES.map((page) => [page.linkName, `/products/${page.slug}`]),
+);
