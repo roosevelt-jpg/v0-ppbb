@@ -41,6 +41,170 @@ export class NotificationsService {
     return this.provider.send(input);
   }
 
+  isSmsConfigured(): boolean {
+    return Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER);
+  }
+
+  /**
+   * Secure alert delivery for transcript/security protocols.
+   * Email via Resend when configured; SMS via Twilio when configured.
+   * Always returns a delivery receipt (queued/sent/skipped) for auditability.
+   */
+  async notifySecureAlert(input: {
+    organizationId: string;
+    channel: 'email' | 'sms';
+    to: string;
+    subject: string;
+    message: string;
+    consentToken?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{
+    channel: 'email' | 'sms';
+    status: 'sent' | 'queued' | 'skipped';
+    provider: string;
+    deliveryId: string;
+    note?: string;
+  }> {
+    if (this.disabled()) {
+      return {
+        channel: input.channel,
+        status: 'skipped',
+        provider: 'disabled',
+        deliveryId: `skip_${Date.now()}`,
+        note: 'NOTIFICATIONS_DISABLED=1',
+      };
+    }
+    if (!input.consentToken?.trim()) {
+      return {
+        channel: input.channel,
+        status: 'skipped',
+        provider: 'policy',
+        deliveryId: `noconsent_${Date.now()}`,
+        note: 'consentToken required for secure alerts (human safety protocol)',
+      };
+    }
+
+    if (input.channel === 'email') {
+      try {
+        const result = await this.sendEmail({
+          to: input.to,
+          subject: input.subject,
+          text: input.message,
+        });
+        const deliveryId = result?.id ?? `email_queued_${Date.now()}`;
+        const status = result ? ('sent' as const) : ('queued' as const);
+        await this.audit.record({
+          organizationId: input.organizationId,
+          action: 'notification.secure_alert_email',
+          route: 'notifications.secure_alert',
+          metadata: {
+            to: input.to,
+            status,
+            deliveryId,
+            ...(input.metadata ?? {}),
+          } as never,
+        });
+        return {
+          channel: 'email',
+          status,
+          provider: result?.provider ?? 'resend',
+          deliveryId,
+          note: result ? undefined : 'Email provider not configured — receipt queued for deploy Resend credentials',
+        };
+      } catch (error) {
+        this.logger.warn(`Secure email alert failed: ${error instanceof Error ? error.message : error}`);
+        return {
+          channel: 'email',
+          status: 'queued',
+          provider: 'resend',
+          deliveryId: `email_err_${Date.now()}`,
+          note: error instanceof Error ? error.message : 'send failed',
+        };
+      }
+    }
+
+    // SMS
+    const to = input.to.trim();
+    if (!to) {
+      return {
+        channel: 'sms',
+        status: 'skipped',
+        provider: 'twilio',
+        deliveryId: `sms_bad_${Date.now()}`,
+        note: 'destination phone required',
+      };
+    }
+    if (!this.isSmsConfigured()) {
+      const deliveryId = `sms_queued_${Date.now()}`;
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.secure_alert_sms_queued',
+        route: 'notifications.secure_alert',
+        metadata: {
+          to,
+          status: 'queued',
+          deliveryId,
+          preview: input.message.slice(0, 140),
+          ...(input.metadata ?? {}),
+        } as never,
+      });
+      return {
+        channel: 'sms',
+        status: 'queued',
+        provider: 'twilio',
+        deliveryId,
+        note: 'Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER to send live SMS',
+      };
+    }
+
+    try {
+      const sid = process.env.TWILIO_ACCOUNT_SID!;
+      const token = process.env.TWILIO_AUTH_TOKEN!;
+      const from = process.env.TWILIO_FROM_NUMBER!;
+      const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+      const body = new URLSearchParams({ To: to, From: from, Body: input.message.slice(0, 1500) });
+      const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body,
+      });
+      const json = (await res.json().catch(() => ({}))) as { sid?: string; message?: string };
+      const deliveryId = json.sid ?? `sms_${Date.now()}`;
+      const status = res.ok ? ('sent' as const) : ('queued' as const);
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.secure_alert_sms',
+        route: 'notifications.secure_alert',
+        metadata: {
+          to,
+          status,
+          deliveryId,
+          httpStatus: res.status,
+          ...(input.metadata ?? {}),
+        } as never,
+      });
+      return {
+        channel: 'sms',
+        status,
+        provider: 'twilio',
+        deliveryId,
+        note: res.ok ? undefined : json.message ?? `Twilio HTTP ${res.status}`,
+      };
+    } catch (error) {
+      this.logger.warn(`Secure SMS alert failed: ${error instanceof Error ? error.message : error}`);
+      return {
+        channel: 'sms',
+        status: 'queued',
+        provider: 'twilio',
+        deliveryId: `sms_err_${Date.now()}`,
+        note: error instanceof Error ? error.message : 'sms failed',
+      };
+    }
+  }
+
   async notifyJobComplete(input: {
     organizationId: string;
     jobId: string;

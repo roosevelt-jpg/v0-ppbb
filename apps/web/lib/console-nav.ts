@@ -206,6 +206,26 @@ export const CONSOLE_NAV: NavGroup[] = [
         label: 'Phone Voice Recorder',
         keywords: ['phone', 'plugin', 'record', 'transcribe', 'android', 'ios'],
       },
+      {
+        href: '/africa-institutions',
+        label: 'Africa Institutions',
+        keywords: ['culture', 'sovereignty', 'justice', 'security', 'pride', 'truth'],
+      },
+      {
+        href: '/secure-transcript-alerts',
+        label: 'Secure Transcript Alerts',
+        keywords: ['sms', 'email', 'security', 'protect', 'consent', 'alert'],
+      },
+      {
+        href: '/justice-language-access',
+        label: 'Justice Language Access',
+        keywords: ['court', 'legal aid', 'interpreter', 'rights', 'defendant'],
+      },
+      {
+        href: '/civic-truth-guard',
+        label: 'Civic Truth Guard',
+        keywords: ['fake news', 'deepfake', 'misinformation', 'seal', 'authenticity'],
+      },
     ],
   },
   {

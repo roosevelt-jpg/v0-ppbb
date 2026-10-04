@@ -1241,6 +1241,51 @@ export class VerbaLab {
     return this.requestForm('/v1/voice-recorder-plugin/transcribe', form);
   }
 
+  async africaInstitutionsPillars(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-institutions/pillars', {
+      method: 'GET',
+    });
+  }
+
+  async protectSecureTranscript(input: {
+    text?: string;
+    channel: 'email' | 'sms';
+    to: string;
+    consentToken: string;
+    protocol?: string;
+    language?: string;
+    trustedName?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/secure-transcript-alerts/protect', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async justiceLanguageBrief(input: {
+    testimony: string;
+    speakerLanguage?: string;
+    courtLanguage?: string;
+    country?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/justice-language-access/brief', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async assessCivicTruth(input: {
+    claim: string;
+    speakerName?: string;
+    url?: string;
+    sealToken?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/civic-truth-guard/assess', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async locales(): Promise<LocalePack[]> {
     const res = await this.requestJson<{ data: LocalePack[] }>('/v1/locales', { method: 'GET' });
     return res.data;

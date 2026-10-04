@@ -288,6 +288,10 @@ import { AfricaEvalMatrixModule } from './africa-eval-matrix/africa-eval-matrix.
 import { SovereignFlywheelModule } from './sovereign-flywheel/sovereign-flywheel.module';
 import { ModelEconomyModule } from './model-economy/model-economy.module';
 import { VoiceRecorderPluginModule } from './voice-recorder-plugin/voice-recorder-plugin.module';
+import { AfricaInstitutionsModule } from './africa-institutions/africa-institutions.module';
+import { SecureTranscriptAlertsModule } from './secure-transcript-alerts/secure-transcript-alerts.module';
+import { JusticeLanguageAccessModule } from './justice-language-access/justice-language-access.module';
+import { CivicTruthGuardModule } from './civic-truth-guard/civic-truth-guard.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -565,6 +569,10 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SovereignFlywheelModule,
     ModelEconomyModule,
     VoiceRecorderPluginModule,
+    AfricaInstitutionsModule,
+    SecureTranscriptAlertsModule,
+    JusticeLanguageAccessModule,
+    CivicTruthGuardModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,
