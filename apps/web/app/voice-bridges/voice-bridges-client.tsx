@@ -31,16 +31,42 @@ export function VoiceBridgesClient() {
   const [selected, setSelected] = useState('vapi');
 
   useEffect(() => {
-    void Promise.all([
-      apiFetch<Engine>('/v1/voice-bridges/engine'),
-      apiFetch<Record<string, unknown>>('/v1/voice-bridges/vapi/assistant-snippet'),
-    ])
-      .then(([eng, snip]) => {
+    let cancelled = false;
+    void (async () => {
+      setError(null);
+      try {
+        const eng = await apiFetch<Engine>('/v1/voice-bridges/engine');
+        if (cancelled) return;
         setEngine(eng);
-        setSnippet(JSON.stringify(snip, null, 2));
         if (eng.platforms?.[0]?.id) setSelected(eng.platforms[0].id);
-      })
-      .catch((err: Error) => setError(err.message));
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load voice bridges');
+        }
+      }
+      try {
+        const snip = await apiFetch<Record<string, unknown>>(
+          '/v1/voice-bridges/vapi/assistant-snippet',
+        );
+        if (!cancelled) setSnippet(JSON.stringify(snip, null, 2));
+      } catch (err) {
+        if (!cancelled) {
+          setSnippet(
+            JSON.stringify(
+              {
+                error: err instanceof Error ? err.message : 'Failed to load VAPI snippet',
+              },
+              null,
+              2,
+            ),
+          );
+          setError((prev) => prev ?? (err instanceof Error ? err.message : 'snippet failed'));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const platforms = engine?.platforms ?? [];
