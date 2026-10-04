@@ -25,6 +25,7 @@ export function CreativeMediaClient() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [meta, setMeta] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [speechFile, setSpeechFile] = useState<File | null>(null);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -36,6 +37,47 @@ export function CreativeMediaClient() {
     if (!isLoaded) return;
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
+
+  async function runUpload(path: string, extra?: Record<string, string>) {
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      if (!speechFile) throw new Error('Choose a speech audio file first');
+      const form = new FormData();
+      form.set('file', speechFile);
+      if (extra) {
+        for (const [k, v] of Object.entries(extra)) form.set(k, v);
+      }
+      const res = await fetch(`${API_URL}${path}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error?.message ?? `HTTP ${res.status}`);
+      if (data.audioBase64) {
+        const bin = atob(data.audioBase64 as string);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+        setAudioUrl(URL.createObjectURL(new Blob([bytes], { type: data.mimeType ?? 'audio/wav' })));
+        setMeta(
+          String(
+            data.note ??
+              `Ready · credits=${data.creditsCharged ?? 'n/a'} · ${path.split('/').pop()}`,
+          ),
+        );
+      } else {
+        setMeta(JSON.stringify(data).slice(0, 280));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function runJson(path: string, body: Record<string, unknown>, kind: 'audio' | 'image' | 'text') {
     setBusy(true);
@@ -123,6 +165,32 @@ export function CreativeMediaClient() {
         className="vl-panel"
         style={{ marginTop: '1.25rem', padding: '1.1rem 1.25rem', display: 'grid', gap: '0.75rem' }}
       >
+        <label className="vl-label" style={{ display: 'grid', gap: '0.35rem' }}>
+          Speech file (voice changer / isolator)
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setSpeechFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <button
+            type="button"
+            className="vl-btn vl-btn-secondary"
+            disabled={busy || !speechFile}
+            onClick={() => void runUpload('/v1/creative-media/voice-changer', { pitchSemitones: '2' })}
+          >
+            Voice changer
+          </button>
+          <button
+            type="button"
+            className="vl-btn vl-btn-secondary"
+            disabled={busy || !speechFile}
+            onClick={() => void runUpload('/v1/creative-media/isolate')}
+          >
+            Voice isolator
+          </button>
+        </div>
         <label className="vl-label" style={{ display: 'grid', gap: '0.35rem' }}>
           Prompt
           <input className="vl-field" value={prompt} onChange={(e) => setPrompt(e.target.value)} />

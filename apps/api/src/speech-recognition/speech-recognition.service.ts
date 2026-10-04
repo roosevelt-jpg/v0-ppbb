@@ -4,6 +4,8 @@ import { UsageService } from '../usage/usage.service';
 import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AudioService } from '../audio/audio.service';
+import { BillingService } from '../billing/billing.service';
+import { creditsForSttSeconds } from '../billing/credits';
 import { ApiException } from '../common/errors/api-exception';
 import type { SttSegment } from '../gateway/stt-provider';
 import { speechEngineCatalog } from './speech-engine.catalog';
@@ -58,6 +60,7 @@ export class SpeechRecognitionService {
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
     private readonly audio: AudioService,
+    private readonly billing: BillingService,
   ) {}
 
   engine() {
@@ -183,6 +186,7 @@ export class SpeechRecognitionService {
 
   async recognize(input: RecognizeOptions): Promise<RecognitionResult> {
     this.audio.assertAllowedAudio(input.file);
+    await this.billing.assertWithinCredits(input.organizationId, creditsForSttSeconds(60));
 
     const industryPacks = (input.industryPacks ?? []).filter(isIndustryPack);
     const workspacePhrases =
@@ -228,6 +232,10 @@ export class SpeechRecognitionService {
     }));
 
     const durationSeconds = Math.max(1, Math.ceil(result.durationSeconds));
+    await this.billing.assertWithinCredits(
+      input.organizationId,
+      creditsForSttSeconds(durationSeconds),
+    );
     await this.usage.recordStt({
       organizationId: input.organizationId,
       workspaceId: input.workspaceId,

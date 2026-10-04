@@ -158,6 +158,9 @@ export class VoiceClonesService {
   }) {
     this.assertOwnerOrAdmin(input.role);
     await this.billing.assertPro(input.organizationId);
+    if (input.cloneMode === 'professional') {
+      await this.billing.assertCreator(input.organizationId);
+    }
 
     if (!input.consentAttested) {
       throw new ApiException(

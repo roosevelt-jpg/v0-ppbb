@@ -13948,5 +13948,121 @@ export const openApiDocument = {
         responses: { '200': { description: 'Localized content + serialized file' } },
       },
     },
+
+    '/v1/video-voice/engine': {
+      get: {
+        summary: 'Video Voice / dubbing engine catalog',
+        operationId: 'getVideoVoiceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/video-voice/dub': {
+      post: {
+        summary: 'Dub script or source audio into a target language (STT→translate→TTS)',
+        operationId: 'createVideoVoiceDub',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['targetLanguage'],
+                properties: {
+                  text: { type: 'string' },
+                  file: { type: 'string', format: 'binary' },
+                  sourceLanguage: { type: 'string', default: 'auto' },
+                  targetLanguage: { type: 'string' },
+                  voice: { type: 'string', default: 'alloy' },
+                  mode: {
+                    type: 'string',
+                    enum: ['auto_watermark', 'auto', 'studio_watermark', 'studio'],
+                  },
+                  format: { type: 'string', enum: ['mp3', 'wav'] },
+                  commercial: { type: 'boolean' },
+                },
+              },
+            },
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['targetLanguage'],
+                properties: {
+                  text: { type: 'string' },
+                  sourceLanguage: { type: 'string' },
+                  targetLanguage: { type: 'string' },
+                  voice: { type: 'string' },
+                  mode: {
+                    type: 'string',
+                    enum: ['auto_watermark', 'auto', 'studio_watermark', 'studio'],
+                  },
+                  format: { type: 'string', enum: ['mp3', 'wav'] },
+                  commercial: { type: 'boolean' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Dubbed audio (base64) + credit debit metadata' },
+          '402': { description: 'Credits or commercial plan required' },
+        },
+      },
+    },
+    '/v1/creative-media/sound-effects': {
+      post: {
+        summary: 'Generate sound effects from a text prompt',
+        operationId: 'createCreativeSoundEffects',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'WAV audio base64 + credits charged' } },
+      },
+    },
+    '/v1/creative-media/music': {
+      post: {
+        summary: 'Generate a music bed from a text prompt',
+        operationId: 'createCreativeMusic',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'WAV audio base64 + credits charged' } },
+      },
+    },
+    '/v1/creative-media/voice-changer': {
+      post: {
+        summary: 'Transform uploaded speech pitch/tempo',
+        operationId: 'createCreativeVoiceChanger',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'WAV audio base64 + credits charged' } },
+      },
+    },
+    '/v1/creative-media/isolate': {
+      post: {
+        summary: 'Isolate speech from uploaded audio',
+        operationId: 'createCreativeVoiceIsolator',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'WAV audio base64 + credits charged' } },
+      },
+    },
+    '/v1/creative-media/ads': {
+      post: {
+        summary: 'Compose an ads package (SFX + music + still + TTS recipe)',
+        operationId: 'createCreativeAdsPackage',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Ads package + credits charged' } },
+      },
+    },
+    '/v1/product-families/engine': {
+      get: {
+        summary: 'VerbaCreative / VerbaAgents / VerbaAPI readiness catalog',
+        operationId: 'getProductFamiliesEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/product-families/overview': {
+      get: {
+        summary: 'Product family readiness + org entitlements',
+        operationId: 'getProductFamiliesOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: { '200': { description: 'OK' } },
+      },
+    },
   },
 } as const;

@@ -21,6 +21,15 @@ import { audioMaxBytes } from '../audio/audio-limits';
 
 type AuthedReq = Request & { translateAuth: TranslateAuthContext };
 
+function orgMeta(req: AuthedReq, commercial?: boolean) {
+  return {
+    organizationId: req.translateAuth.organizationId,
+    workspaceId: req.translateAuth.workspaceId,
+    apiKeyId: req.translateAuth.apiKeyId,
+    commercial,
+  };
+}
+
 @Controller('v1/creative-media')
 export class CreativeMediaController {
   constructor(private readonly creative: CreativeMediaService) {}
@@ -50,10 +59,14 @@ export class CreativeMediaController {
     @Body() body: { pitchSemitones?: string; rate?: string },
   ) {
     if (!file?.buffer?.length) throw new ApiException('bad_request', 'file required', HttpStatus.BAD_REQUEST);
-    return this.creative.voiceChanger(file.buffer, {
-      pitchSemitones: body.pitchSemitones ? Number(body.pitchSemitones) : undefined,
-      rate: body.rate ? Number(body.rate) : undefined,
-    }, { organizationId: req.translateAuth.organizationId });
+    return this.creative.voiceChanger(
+      file.buffer,
+      {
+        pitchSemitones: body.pitchSemitones ? Number(body.pitchSemitones) : undefined,
+        rate: body.rate ? Number(body.rate) : undefined,
+      },
+      orgMeta(req),
+    );
   }
 
   @Post('isolate')
@@ -67,7 +80,7 @@ export class CreativeMediaController {
   )
   isolate(@Req() req: AuthedReq, @UploadedFile() file: Express.Multer.File | undefined) {
     if (!file?.buffer?.length) throw new ApiException('bad_request', 'file required', HttpStatus.BAD_REQUEST);
-    return this.creative.isolate(file.buffer, { organizationId: req.translateAuth.organizationId });
+    return this.creative.isolate(file.buffer, orgMeta(req));
   }
 
   @Post('sound-effects')
@@ -75,23 +88,26 @@ export class CreativeMediaController {
   @UseGuards(TranslateAuthGuard, RateLimitGuard)
   soundEffects(
     @Req() req: AuthedReq,
-    @Body() body: { prompt?: string; durationSeconds?: number },
+    @Body() body: { prompt?: string; durationSeconds?: number; commercial?: boolean },
   ) {
     if (!body.prompt?.trim()) throw new ApiException('bad_request', 'prompt required', HttpStatus.BAD_REQUEST);
     return this.creative.soundEffects(
       { prompt: body.prompt.trim(), durationSeconds: body.durationSeconds },
-      { organizationId: req.translateAuth.organizationId },
+      orgMeta(req, body.commercial),
     );
   }
 
   @Post('music')
   @HttpCode(HttpStatus.OK)
   @UseGuards(TranslateAuthGuard, RateLimitGuard)
-  music(@Req() req: AuthedReq, @Body() body: { prompt?: string; durationSeconds?: number }) {
+  music(
+    @Req() req: AuthedReq,
+    @Body() body: { prompt?: string; durationSeconds?: number; commercial?: boolean },
+  ) {
     if (!body.prompt?.trim()) throw new ApiException('bad_request', 'prompt required', HttpStatus.BAD_REQUEST);
     return this.creative.music(
       { prompt: body.prompt.trim(), durationSeconds: body.durationSeconds },
-      { organizationId: req.translateAuth.organizationId },
+      orgMeta(req, body.commercial),
     );
   }
 
@@ -120,7 +136,7 @@ export class CreativeMediaController {
         gender: body.gender,
         accent: body.accent,
       },
-      { organizationId: req.translateAuth.organizationId },
+      orgMeta(req),
     );
   }
 
@@ -129,10 +145,7 @@ export class CreativeMediaController {
   @UseGuards(TranslateAuthGuard, RateLimitGuard)
   image(@Req() req: AuthedReq, @Body() body: { prompt?: string; title?: string }) {
     if (!body.prompt?.trim()) throw new ApiException('bad_request', 'prompt required', HttpStatus.BAD_REQUEST);
-    return this.creative.image(
-      { prompt: body.prompt.trim(), title: body.title },
-      { organizationId: req.translateAuth.organizationId },
-    );
+    return this.creative.image({ prompt: body.prompt.trim(), title: body.title }, orgMeta(req));
   }
 
   @Post('video')
@@ -149,7 +162,7 @@ export class CreativeMediaController {
         durationSeconds: body.durationSeconds,
         language: body.language,
       },
-      { organizationId: req.translateAuth.organizationId },
+      orgMeta(req),
     );
   }
 
@@ -158,7 +171,14 @@ export class CreativeMediaController {
   @UseGuards(TranslateAuthGuard, RateLimitGuard)
   ads(
     @Req() req: AuthedReq,
-    @Body() body: { product?: string; script?: string; language?: string; mood?: string },
+    @Body()
+    body: {
+      product?: string;
+      script?: string;
+      language?: string;
+      mood?: string;
+      commercial?: boolean;
+    },
   ) {
     if (!body.product?.trim() || !body.script?.trim()) {
       throw new ApiException('bad_request', 'product and script required', HttpStatus.BAD_REQUEST);
@@ -169,8 +189,9 @@ export class CreativeMediaController {
         script: body.script.trim(),
         language: body.language,
         mood: body.mood,
+        commercial: body.commercial,
       },
-      { organizationId: req.translateAuth.organizationId },
+      orgMeta(req, body.commercial),
     );
   }
 }

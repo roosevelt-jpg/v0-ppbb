@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { AudioService } from '../audio/audio.service';
 import { ApiException } from '../common/errors/api-exception';
 import { africanLanguageSeed } from '../african-language-registry/african-language-registry.catalog';
 import {
@@ -55,6 +56,7 @@ export class AgentVoiceTrainingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly audio: AudioService,
   ) {}
 
   engine() {
@@ -217,7 +219,7 @@ export class AgentVoiceTrainingService {
       style,
       systemPrompt,
       status: 'draft',
-      sampleLine: SAMPLE_LINES[languages[0]] ?? SAMPLE_LINES.en,
+      sampleLine: SAMPLE_LINES[languages[0] ?? 'en'] ?? SAMPLE_LINES.en,
       createdAt: new Date().toISOString(),
     };
     this.personas.set(persona.id, persona);
@@ -292,6 +294,19 @@ export class AgentVoiceTrainingService {
     const text =
       String(body.text ?? '').trim() || SAMPLE_LINES[language] || persona.sampleLine;
     const model = this.requireModel(persona.baseModelId);
+    const voice = String(body.voice ?? 'alloy').trim() || 'alloy';
+
+    const speech = await this.audio.speak({
+      text,
+      voice,
+      language,
+      format: 'mp3',
+      organizationId: auth.organizationId,
+      workspaceId: auth.workspaceId,
+      apiKeyId: auth.apiKeyId,
+      userId: auth.userId,
+      ip: auth.ip,
+    });
 
     await this.audit.record({
       organizationId: auth.organizationId,
@@ -299,7 +314,12 @@ export class AgentVoiceTrainingService {
       action: 'agent-voice-training.persona_preview',
       route: 'POST /v1/agent-voice-training/personas/:id/preview',
       ip: auth.ip,
-      metadata: { personaId: persona.id, language, baseModelId: persona.baseModelId } as never,
+      metadata: {
+        personaId: persona.id,
+        language,
+        baseModelId: persona.baseModelId,
+        characters: speech.characters,
+      } as never,
     });
 
     return {
@@ -312,14 +332,19 @@ export class AgentVoiceTrainingService {
         model: model.id,
         api: model.api,
         voiceProfile: `${persona.id}:${language}`,
+        voice,
+        mimeType: speech.mimeType ?? 'audio/mpeg',
+        audioBase64: speech.audio.toString('base64'),
+        characters: speech.characters,
+        provider: speech.provider,
         note:
           persona.status === 'ready'
-            ? 'Ready for agent runtime TTS routing'
-            : 'Train the persona before production use',
+            ? 'Preview audio synthesized via VerbaLab TTS (metered credits)'
+            : 'Train the persona before production use — preview still returns audio',
       },
       agentHint: {
         systemPrompt: persona.systemPrompt,
-        tts: { model: model.id, language, style: persona.style },
+        tts: { model: model.id, language, style: persona.style, voice },
       },
     };
   }

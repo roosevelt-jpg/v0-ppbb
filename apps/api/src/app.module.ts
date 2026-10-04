@@ -74,6 +74,7 @@ import { ModelKeysModule } from './model-keys/model-keys.module';
 import { ModelRuntimeModule } from './model-runtime/model-runtime.module';
 import { AiInternetAuditModule } from './ai-internet-audit/ai-internet-audit.module';
 import { CredentialsReadinessModule } from './credentials-readiness/credentials-readiness.module';
+import { ProductFamiliesModule } from './product-families/product-families.module';
 import { VerbalabGlobalOsModule } from './verbalab-global-os/verbalab-global-os.module';
 import { AiMarketplaceFederationModule } from './ai-marketplace-federation/ai-marketplace-federation.module';
 import { AiSovereigntyExchangeModule } from './ai-sovereignty-exchange/ai-sovereignty-exchange.module';
@@ -356,6 +357,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelRuntimeModule,
     AiInternetAuditModule,
     CredentialsReadinessModule,
+    ProductFamiliesModule,
     VerbalabGlobalOsModule,
     AiMarketplaceFederationModule,
     AiSovereigntyExchangeModule,

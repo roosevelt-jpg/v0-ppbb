@@ -9,6 +9,7 @@ import { IdentityModule } from '../identity/identity.module';
 import { AudioModule } from '../audio/audio.module';
 import { RateLimitModule } from '../rate-limit/rate-limit.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { BillingModule } from '../billing/billing.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     IdentityModule,
     AudioModule,
     RateLimitModule,
+    BillingModule,
   ],
   controllers: [SpeechRecognitionController],
   providers: [SpeechRecognitionService, TranslateAuthGuard],

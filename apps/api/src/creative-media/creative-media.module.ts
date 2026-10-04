@@ -6,10 +6,20 @@ import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AudioModule } from '../audio/audio.module';
 import { RateLimitModule } from '../rate-limit/rate-limit.module';
+import { BillingModule } from '../billing/billing.module';
+import { UsageModule } from '../usage/usage.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
 
 @Module({
-  imports: [AuditCoreModule, ApiKeysModule, IdentityModule, AudioModule, RateLimitModule],
+  imports: [
+    AuditCoreModule,
+    ApiKeysModule,
+    IdentityModule,
+    AudioModule,
+    RateLimitModule,
+    BillingModule,
+    UsageModule,
+  ],
   controllers: [CreativeMediaController],
   providers: [CreativeMediaService, TranslateAuthGuard],
   exports: [CreativeMediaService],

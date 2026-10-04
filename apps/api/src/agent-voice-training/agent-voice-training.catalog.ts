@@ -33,7 +33,7 @@ export function agentVoiceTrainingCatalog() {
         name: 'Multilingual speak preview',
         status: 'shipped' as AgentVoiceTrainingCapabilityStatus,
         api: 'POST /v1/agent-voice-training/personas/:id/preview',
-        notes: 'Preview how the agent would speak a line in a selected language.',
+        notes: 'Synthesizes preview audio via VerbaLab TTS (shared credit pool) for the selected language.',
       },
       {
         id: 'sdk-export',

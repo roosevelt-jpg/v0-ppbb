@@ -285,6 +285,53 @@ export class BillingService {
     }
   }
 
+  /** Commercial-license gate (Starter+) for paid creative / agent exports. */
+  async assertCommercial(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    const plan = planFromId(org.plan);
+    if (!plan.commercialLicense) {
+      throw new ApiException(
+        'plan_required',
+        'Commercial use requires Starter or higher. Upgrade under Billing.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+  }
+
+  /** Entitlements unlocked by the org's current plan (what charging buys). */
+  async entitlements(organizationId: string) {
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    const plan = planFromId(org.plan);
+    const usage = await this.usage.summary(organizationId);
+    const creditsUsed = usage.creditsUsed ?? usage.characters;
+    return {
+      plan: plan.id,
+      planName: plan.name,
+      monthlyCredits: plan.monthlyCredits,
+      creditsUsed,
+      creditsRemaining: Math.max(plan.monthlyCredits - creditsUsed, 0),
+      commercialLicense: plan.commercialLicense,
+      instantVoiceCloning: plan.instantVoiceCloning,
+      professionalVoiceCloning: plan.professionalVoiceCloning,
+      professionalVoiceSlots: plan.professionalVoiceSlots,
+      customVoiceSlots: plan.customVoiceSlots,
+      seats: plan.seats,
+      concurrency: plan.concurrency,
+      canUseApi: true,
+      canUseCreative: true,
+      canUseAgents: true,
+      canCloneInstant: plan.instantVoiceCloning,
+      canCloneProfessional: plan.professionalVoiceCloning,
+      canCommercialPublish: plan.commercialLicense,
+      pricingModel: 'elevenlabs-mirrored-shared-credits',
+    };
+  }
+
   async ensureCustomer(organizationId: string, email?: string) {
     const stripe = this.requireStripe();
     const org = await this.prisma.organization.findUniqueOrThrow({
