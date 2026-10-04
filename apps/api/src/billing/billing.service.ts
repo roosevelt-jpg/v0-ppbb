@@ -51,12 +51,12 @@ export class BillingService {
     );
   }
 
-  /** Public plan + credit-rate catalog (ElevenLabs-mirrored). */
+  /** Public plan + credit-rate catalog (VerbaLab shared-credits). */
   catalog() {
     return {
-      model: 'elevenlabs-mirrored',
+      model: 'verbalab-shared-credits',
       currency: 'USD',
-      note: 'Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — same structure as ElevenLabs Creative Platform.',
+      note: 'Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — one shared VerbaLab Creative Platform credit pool.',
       plans: planCatalog().map((p) => ({
         id: p.id,
         name: p.name,
@@ -164,7 +164,7 @@ export class BillingService {
       connectChargesEnabled: org.stripeConnectChargesEnabled,
       marketplacePaymentsConfigured: this.isMarketplacePaymentsConfigured(),
       platformFeeBps: this.platformFeeBps(),
-      pricingModel: 'elevenlabs-mirrored-shared-credits',
+      pricingModel: 'verbalab-shared-credits',
     };
   }
 
@@ -189,7 +189,7 @@ export class BillingService {
   }
 
   /**
-   * Enforce shared monthly credits (ElevenLabs-style).
+   * Enforce shared monthly credits (shared-credit).
    * `upcomingCredits` may be characters for TTS/translate (1:1) or precomputed credits.
    */
   async assertWithinQuota(organizationId: string, upcomingCredits: number) {
@@ -202,7 +202,7 @@ export class BillingService {
     if (used + upcomingCredits > org.characterQuota) {
       throw new ApiException(
         'quota_exceeded',
-        `Monthly credit quota exceeded (${used}/${org.characterQuota} credits). Upgrade under Billing — plans mirror ElevenLabs Free→Business.`,
+        `Monthly credit quota exceeded (${used}/${org.characterQuota} credits). Upgrade under Billing — upgrade under Billing (Free → Business).`,
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
@@ -254,7 +254,7 @@ export class BillingService {
 
   /**
    * Feature gate for commercial / marketplace surfaces.
-   * ElevenLabs: Instant cloning + commercial from Starter — we require Starter+ (paid).
+   * external vendor: Instant cloning + commercial from Starter — we require Starter+ (paid).
    */
   async assertPro(organizationId: string) {
     await this.assertBillingHealthy(organizationId);
@@ -328,7 +328,7 @@ export class BillingService {
       canCloneInstant: plan.instantVoiceCloning,
       canCloneProfessional: plan.professionalVoiceCloning,
       canCommercialPublish: plan.commercialLicense,
-      pricingModel: 'elevenlabs-mirrored-shared-credits',
+      pricingModel: 'verbalab-shared-credits',
     };
   }
 

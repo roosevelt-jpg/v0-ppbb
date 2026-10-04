@@ -45,7 +45,7 @@ export const SPEED_TIERS = [
 type SpeedTierId = (typeof SPEED_TIERS)[number]['id'];
 
 /**
- * USD unit costs aligned to ElevenLabs API pricing (elevenlabs.io/pricing/api):
+ * USD unit costs aligned to external vendor API pricing (VerbaLab plan ladder/api):
  * TTS Multilingual $0.10 / 1k chars · Flash $0.05 / 1k · STT $0.22 / hour ≈ $0.00367 / min.
  * Speed tiers (eco→ultra) still scale cost for productivity latency.
  */

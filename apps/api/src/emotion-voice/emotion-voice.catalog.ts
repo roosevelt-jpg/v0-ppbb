@@ -15,7 +15,7 @@ export function emotionVoiceEngineCatalog() {
   return {
     product: 'VerbaLab Emotion Voice',
     note:
-      'Emotion-conditioned synthesis façade over Neural TTS. Soft prosody + voice recommendations for OpenAI/own voices; ElevenLabs style settings on clone:{id} when available. Not trained expressive TTS / Hume / Azure Neural Emotion. Distinct from Speech Emotion Intelligence detection.',
+      'Emotion-conditioned synthesis façade over Neural TTS. Soft prosody + voice recommendations for OpenAI/own voices; expressive vendor settings on clone:{id} when available. Not trained expressive TTS / Hume / Azure Neural Emotion. Distinct from Speech Emotion Intelligence detection.',
     capabilities: [
       {
         id: 'emotion-profiles',
@@ -30,7 +30,7 @@ export function emotionVoiceEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/emotion-voice/synthesize',
         notes:
-          'Shipped soft prosody + preferred voice; clone voices may pass ElevenLabs style settings. Native emotion-conditioned OpenAI models deferred.',
+          'Shipped soft prosody + preferred voice; clone voices may pass expressive vendor settings. Native emotion-conditioned OpenAI models deferred.',
       },
       {
         id: 'streaming',

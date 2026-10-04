@@ -1694,17 +1694,17 @@ export const openApiDocument = {
         responses: { '200': { description: 'Complete path via Dialogflow or Twilio' } },
       },
     },
-    '/v1/voice-bridges/elevenlabs/v1/voices': {
+    '/v1/voice-bridges/compatible-tts/v1/voices': {
       get: {
-        summary: 'ElevenLabs-shaped voices list',
-        operationId: 'elevenLabsCompatibleVoices',
+        summary: 'Drop-in TTS voices list',
+        operationId: 'compatibleTtsVoices',
         responses: { '200': { description: 'voices[]' } },
       },
     },
-    '/v1/voice-bridges/elevenlabs/v1/text-to-speech/{voiceId}': {
+    '/v1/voice-bridges/compatible-tts/v1/text-to-speech/{voiceId}': {
       post: {
-        summary: 'ElevenLabs-shaped TTS path → VerbaLab Own AI',
-        operationId: 'elevenLabsCompatibleTts',
+        summary: 'Drop-in TTS path → VerbaLab Own AI',
+        operationId: 'compatibleTtsSynthesize',
         security: [{ ApiKeyAuth: [] }],
         parameters: [
           { name: 'voiceId', in: 'path', required: true, schema: { type: 'string' } },
@@ -4243,7 +4243,7 @@ export const openApiDocument = {
         responses: {
           '200': {
             description:
-              'Voice/language pack capabilities, Stripe honesty, ElevenLabs / celebrity / CDN denials',
+              'Voice/language pack capabilities, Stripe honesty, celebrity / CDN denials',
           },
         },
       },
@@ -10092,7 +10092,7 @@ export const openApiDocument = {
             },
           },
           '503': {
-            description: 'OPENAI_API_KEY / ELEVENLABS_API_KEY not configured',
+            description: 'OPENAI_API_KEY / EXTERNAL_VOICE_CLONE_API_KEY not configured',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
           },
         },
@@ -10132,13 +10132,13 @@ export const openApiDocument = {
     },
     '/v1/voice-clones/{id}/review': {
       post: {
-        summary: 'Abuse-review approve/reject (Pro). Approve calls ElevenLabs (or fixture).',
+        summary: 'Abuse-review approve/reject (Pro). Approve calls external IVC vendor (or fixture).',
         operationId: 'reviewVoiceClone',
         security: [{ ClerkAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
           '200': { description: 'Updated' },
-          '503': { description: 'ElevenLabs not configured' },
+          '503': { description: 'External voice clone vendor not configured' },
         },
       },
     },

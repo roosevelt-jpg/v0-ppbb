@@ -28,7 +28,7 @@ model Organization {
   clerkOrgId           String?  @unique @map("clerk_org_id")
   name                 String
   plan                 String   @default("free")
-  /// Monthly shared credit pool (ElevenLabs-style). Column name kept for compatibility.
+  /// Monthly shared credit pool (shared-credit). Column name kept for compatibility.
   characterQuota       Int      @default(10000) @map("character_quota")
   dataRegion           String?  @map("data_region")
   stripeCustomerId     String?  @unique @map("stripe_customer_id")
@@ -1107,7 +1107,7 @@ model VoiceStudioProfile {
 }
 
 /**
- * Vendor voice clone (ElevenLabs) with consent + abuse review (VL-064).
+ * Vendor voice clone (external vendor) with consent + abuse review (VL-064).
  * Do not train cloning models in-house.
  */
 model VoiceClone {
@@ -1116,7 +1116,7 @@ model VoiceClone {
   workspaceId        String    @map("workspace_id")
   name               String
   status             String    @default("pending_review")
-  /// instant = ElevenLabs IVC (VL-064/171); professional = stricter enrollment (same vendor path today)
+  /// instant = external vendor IVC (VL-064/171); professional = stricter enrollment (same vendor path today)
   cloneMode          String    @default("instant") @map("clone_mode")
   consentAttested    Boolean   @map("consent_attested")
   consentNotes       String    @map("consent_notes")
@@ -1136,7 +1136,7 @@ model VoiceClone {
   watermarkRequired  Boolean   @default(true) @map("watermark_required")
   sampleStorageKeys  Json      @map("sample_storage_keys")
   sampleCount        Int       @default(0) @map("sample_count")
-  provider           String    @default("elevenlabs")
+  provider           String    @default("compatible-tts")
   providerVoiceId    String?   @map("provider_voice_id")
   reviewNotes        String?   @map("review_notes")
   reviewedBy         String?   @map("reviewed_by")

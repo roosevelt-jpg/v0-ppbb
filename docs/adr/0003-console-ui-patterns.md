@@ -1,4 +1,4 @@
-# ADR-0003: ElevenLabs-inspired product UI
+# ADR-0003: console product UI
 
 - **Status:** Accepted
 - **Date:** 2026-09-06
@@ -6,7 +6,7 @@
 
 ## Context
 
-The Phase 1 console started as a dark green shell. The product direction asked for UI/UX inspired by https://elevenlabs.io/.
+The Phase 1 console started as a dark green shell. The product direction asked for UI/UX inspired by https://external-vendor.example/.
 
 ## Decision
 

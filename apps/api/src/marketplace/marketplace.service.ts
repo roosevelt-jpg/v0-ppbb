@@ -86,7 +86,7 @@ export class MarketplaceService {
   }
 
   async listPublished(_organizationId: string, kind?: string) {
-    // Catalog browse is free for all signed-in plans (ElevenLabs-style discovery).
+    // Catalog browse is free for all signed-in plans (shared-credit discovery).
     const filter = kind ? this.requireKind(kind) : undefined;
     const rows = await this.prisma.marketplaceListing.findMany({
       where: {

@@ -6,7 +6,7 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { BillingService } from '../src/billing/billing.service';
 import { VoiceClonesService } from '../src/voice-clones/voice-clones.service';
-import { FixtureVoiceCloneAdapter } from '../src/voice-clones/elevenlabs-voice-clone.adapter';
+import { FixtureVoiceCloneAdapter } from '../src/voice-clones/legacy-vendor-voice-clone.adapter';
 import { AudioService } from '../src/audio/audio.service';
 import { ApiExceptionFilter } from '../src/common/errors/api-exception.filter';
 
@@ -164,7 +164,7 @@ describe('Voice cloning (VL-064)', () => {
       workspaceId,
       userId,
     });
-    expect(spoken.provider).toBe('fixture_elevenlabs');
+    expect(spoken.provider).toBe('fixture_legacy_vendor_ivc');
     expect(spoken.watermarkApplied).toBe(true);
     expect(spoken.audio.toString('utf8')).toContain('FIXTURE_CLONE');
 

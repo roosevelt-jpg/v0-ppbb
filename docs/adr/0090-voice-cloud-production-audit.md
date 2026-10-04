@@ -8,7 +8,7 @@
 
 Library Phase 36 asks to validate the entire Voice Cloud: no TODOs/placeholders/mocks, integrated APIs/billing/marketplace/analytics/monitoring/security, load/streaming/performance/security/accessibility testing, and readiness/architecture/coverage/deployment reports. It also claims Voice Cloud has become a comprehensive enterprise voice platform comparable to hyperscaler cloud organization.
 
-Production Audit phases are **review gates**, not feature factories. Competitor-parity or ElevenLabs/Resemble/Krisp/Soundraw marketing is rejected under honesty rules (ADR-0081–0089). Inventing k6/axe platforms is also rejected (same pattern as ADR-0068 / ADR-0079).
+Production Audit phases are **review gates**, not feature factories. Competitor-parity or external vendor/Resemble/Krisp/Soundraw marketing is rejected under honesty rules (ADR-0081–0089). Inventing k6/axe platforms is also rejected (same pattern as ADR-0068 / ADR-0079).
 
 ## Decision
 

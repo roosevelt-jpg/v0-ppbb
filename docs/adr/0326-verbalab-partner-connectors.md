@@ -27,4 +27,4 @@ Ship **Partner Connectors** (`/partner-connectors`, `/v1/partner-connectors/*`):
 
 ## Consequences
 
-External video and agent platforms can integrate VerbaLab as the African Own AI layer without renting ElevenLabs/OpenAI for those modalities.
+External video and agent platforms can integrate VerbaLab as the African Own AI layer without renting external vendor/OpenAI for those modalities.

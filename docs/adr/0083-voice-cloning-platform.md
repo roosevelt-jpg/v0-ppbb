@@ -8,13 +8,13 @@
 
 Library Phase 29 asks for professional + instant cloning, secure enrollment, verification, ownership, licensing, permissions, enterprise library, consent management, plus REST/realtime/SDK/dashboard/monitoring/analytics.
 
-VL-064 already ships ElevenLabs Instant Voice Cloning with consent attestation, abuse review, and watermark. Regenerating that path or skipping trust gates would violate Volume 3 safety guidance. True multi-hour professional clone training is a buy/vendor depth issue.
+VL-064 already ships Instant Voice Cloning (external vendor) with consent attestation, abuse review, and watermark. Regenerating that path or skipping trust gates would violate Volume 3 safety guidance. True multi-hour professional clone training is a buy/vendor depth issue.
 
 ## Decision
 
 1. **Product hub** `/v1/voice-cloning/*` over `VoiceClonesService` — do not fork synthesis.  
 2. **Extend schema** with `cloneMode`, ownership, license, permissions, enrollment verification.  
-3. **Instant** = existing 1+ sample consent path; **professional** = ≥3 samples + ownership attestation on the same ElevenLabs IVC path (honest partial).  
+3. **Instant** = existing 1+ sample consent path; **professional** = ≥3 samples + ownership attestation on the same external vendor IVC path (honest partial).  
 4. **Ship** consent policy endpoint, library, ownership/license/permissions patches, enrollment verify, enroll SSE progress, analytics, `/voice-cloning` console, GraphQL/SDK/CLI.  
 5. **Keep** watermark + pending_review gates mandatory; audit all governance mutations.  
 6. **Defer** NIST PAD/anti-spoof biometrics (Phase 33) and marketplace voice SKUs (Phase 34).

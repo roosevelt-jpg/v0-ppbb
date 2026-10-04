@@ -9,7 +9,7 @@
 
 It ships an honest **discovery hub + Plugin→Voice/Language marketplaces + Creator Economy** over existing VL-090+/VL-177/runtime surfaces, with **FabricPolicyGate** on publish/install (and sandbox Policy gates on plugin/agent/workflow run), **Stripe-only** real-money paths, and **no raw card storage**.
 
-It is **not** a payment-processor OS, tax/1099 engine, Zapier/iPaaS OS, Hugging Face hub, ElevenLabs voice CDN, LangGraph/AutoGPT OS, or Digital Twin Platform.
+It is **not** a payment-processor OS, tax/1099 engine, Zapier/iPaaS OS, Hugging Face hub, external vendor voice CDN, LangGraph/AutoGPT OS, or Digital Twin Platform.
 
 ## Checklist
 

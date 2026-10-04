@@ -1,6 +1,6 @@
 # Voice platform bridges
 
-Use **VerbaLab Own AI** TTS, STT, and agents inside VAPI, Twilio, Amazon, Google, ElevenLabs-shaped clients, SIP trunks, and WebRTC — without claiming we host AWS/Google media planes.
+Use **VerbaLab Own AI** TTS, STT, and agents inside VAPI, Twilio, Amazon, Google, Drop-in TTS clients, SIP trunks, and WebRTC — without claiming we host AWS/Google media planes.
 
 ## Console
 
@@ -19,7 +19,7 @@ Use **VerbaLab Own AI** TTS, STT, and agents inside VAPI, Twilio, Amazon, Google
 | **Google Speech** | Speech–shaped recognize (Echo STT). |
 | **Dialogflow** | CX/ES fulfillment webhook. |
 | **Google Voice** | No consumer plugin API — complete path via Dialogflow phone or Twilio + bridges. |
-| **ElevenLabs-shaped** | `/elevenlabs/v1/text-to-speech/{voiceId}` + voices list. |
+| **Drop-in TTS** | `/compatible-tts/v1/text-to-speech/{voiceId}` + voices list. |
 | **SIP** | Twilio Elastic SIP / carrier → TwiML inbound or `sip/invite-hook`. |
 | **WebRTC** | VerbaVoice `webrtc` / `signal` / `barge-in` (+ status). |
 

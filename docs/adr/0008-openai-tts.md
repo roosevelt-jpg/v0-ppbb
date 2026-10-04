@@ -6,7 +6,7 @@
 
 ## Context
 
-VL-042 needs vendor TTS with a voice catalog. Roadmap options: Azure TTS or ElevenLabs. STT (VL-041) already uses OpenAI.
+VL-042 needs vendor TTS with a voice catalog. Roadmap options: Azure TTS or external vendor. STT (VL-041) already uses OpenAI.
 
 ## Decision
 
@@ -19,5 +19,5 @@ VL-042 needs vendor TTS with a voice catalog. Roadmap options: Azure TTS or Elev
 
 ## Consequences
 
-- Multilingual African voices are limited to what OpenAI supports; swap to ElevenLabs/Azure later via `TtsProvider` if a contract needs it.
+- Multilingual African voices are limited to what OpenAI supports; swap to external vendor/Azure later via `TtsProvider` if a contract needs it.
 - Binary response (not JSON) for speech audio; errors still use the JSON error envelope when thrown before the body is sent.

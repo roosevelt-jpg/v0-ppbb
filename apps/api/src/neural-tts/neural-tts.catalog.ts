@@ -13,7 +13,7 @@ export function neuralTtsEngineCatalog() {
   return {
     product: 'VerbaLab Neural TTS',
     note:
-      'Neural TTS engine over OpenAI TTS + own rented voices + clone:{id}. Batch synthesize shipped; streaming is chunk SSE after full synthesis — not vendor low-latency token streaming. Not ElevenLabs/Polly/Azure Speech parity.',
+      'Neural TTS engine over OpenAI TTS + own rented voices + clone:{id}. Batch synthesize shipped; streaming is chunk SSE after full synthesis — not vendor low-latency token streaming. Not a third-party voice OS/Polly/Azure Speech parity.',
     capabilities: [
       {
         id: 'batch-tts',
@@ -133,8 +133,8 @@ export function neuralTtsEngineCatalog() {
         modes: ['batch', 'chunk_sse'],
       },
       {
-        id: 'elevenlabs_clone',
-        name: 'ElevenLabs Instant Voice Cloning',
+        id: 'vendor_clone',
+        name: 'Instant Voice Cloning (external vendor)',
         role: 'clone',
         modes: ['batch', 'chunk_sse'],
       },

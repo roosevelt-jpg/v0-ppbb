@@ -1,8 +1,8 @@
 /**
- * Shared credit costs — mirrored from ElevenLabs Creative Platform product rates.
+ * Shared credit costs — for VerbaLab Creative Platform product rates.
  * All products draw from one monthly credit pool (Organization.characterQuota).
  *
- * Approximate public rates (elevenlabs.io/pricing):
+ * Approximate credit rates:
  * - TTS Multilingual: 1 credit / character
  * - TTS Flash/Turbo API: 0.5 credit / character
  * - STT: 330 credits / minute
@@ -93,7 +93,7 @@ export const CREDIT_RATES: Record<
   ocr: { creditsPerUnit: 50, unit: 'page', note: 'OCR — 50 credits per page' },
 };
 
-/** API USD rates (pay-as-you-go style) — ElevenLabs API pricing page. */
+/** API USD rates (pay-as-you-go style) — external vendor API pricing page. */
 export const API_USD_RATES = {
   ttsFlashPer1kChars: 0.05,
   ttsMultilingualPer1kChars: 0.1,
@@ -125,7 +125,7 @@ export function creditsForTtsCharacters(characters: number, flash = false): numb
 
 export function creditRateCatalog() {
   return {
-    model: 'elevenlabs-mirrored-shared-credits',
+    model: 'verbalab-shared-credits',
     note: 'One monthly credit pool across products. TTS chars, STT minutes, music, SFX, dubbing, and VerbaLab extras all debit the same quota.',
     rates: CREDIT_RATES,
     apiUsd: API_USD_RATES,

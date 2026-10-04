@@ -93,7 +93,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | VL-061 | Live interpreter | Done | `POST /v1/interpret` STT→MT→TTS compose; console `/interpret` (ADR-0016). Live needs OpenAI + MT keys. |
 | VL-062 | Knowledge + RAG | Done | pgvector corpus; upload/chunk/embed; `POST /v1/knowledge/query` + citations; console `/knowledge` (ADR-0018). Live needs OpenAI. |
 | VL-063 | Embeddings API | Done | Gateway OpenAI embeddings + `POST /v1/embeddings`; meters tokens (ADR-0017). Live needs `OPENAI_API_KEY`. |
-| VL-064 | Voice cloning (vendor, legal gate) | Done | ElevenLabs + consent + abuse review + watermark; `clone:{id}` on speech (ADR-0042). Live needs `ELEVENLABS_API_KEY`. |
+| VL-064 | Voice cloning (vendor, legal gate) | Done | external vendor + consent + abuse review + watermark; `clone:{id}` on speech (ADR-0042). Live needs `EXTERNAL_VOICE_CLONE_API_KEY`. |
 
 ---
 
@@ -286,7 +286,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | VL-254 | Agent Marketplace (Phase 121) | Done | `/agent-marketplace` over Agent Runtime; FabricPolicyGate + AgentPolicyGate sandbox run; ADR-0156. Not LangGraph/AutoGPT OS. |
 | VL-255 | Workflow Marketplace (Phase 122) | Done | `/workflow-marketplace` over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate sandbox run; ADR-0157. Not Zapier/Temporal OS. |
 | VL-256 | Connector Marketplace (Phase 123) | Done | `/connector-marketplace` entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS. |
-| VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS. |
+| VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not a third-party voice OS/voice CDN OS. |
 | VL-258 | Creator Economy (Phase 125) | Done | `/creator-economy` over VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | VL-259 | Ecosystem Production Audit (Phase 126) | Done | Audit pack under `docs/ecosystem-cloud-audit/`; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence → Volume 12. |
 | VL-260 | African Intelligence Cloud Foundation (Phase 127) | Done | `/african-intelligence-cloud` hub + catalog; ADR-0162. Extends Language/Knowledge/Intelligence clouds. Not Neo4j/Digital Twin/Global Intelligence OS. |
@@ -433,7 +433,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | 2026-09-06 | Kickoff only. No application code. Library v2 supersedes v1; executable backlog is 58 phases (VL-000–VL-112), not 300. |
 | 2026-09-06 | Phase 0 complete (VL-001, VL-002). `pnpm test` / `typecheck` / `lint` green. Compose Postgres on host 5433. |
 | 2026-09-06 | Phase 1 code shipped (Clerk + Google MT + translate console). Auth/MT live paths **Blocked** until keys added — no fake translator. |
-| 2026-09-06 | VL-030 Done: OpenAPI + `/docs` + `/playground`. Console restyled (ElevenLabs-inspired light monochrome). |
+| 2026-09-06 | VL-030 Done: OpenAPI + `/docs` + `/playground`. Console restyled (console light monochrome). |
 | 2026-09-06 | VL-032 + VL-033 Done: audit log + `@verbalab/sdk`. |
 | 2026-09-06 | VL-031 billing code shipped (Stripe Checkout/Portal/webhooks + quota). Live checkout **Blocked** on Stripe keys. |
 | 2026-09-06 | VL-054 Done: language detection (`source=auto`, `POST /v1/detect`); Google + franc-min (ADR-0014). M5 complete. |
@@ -464,11 +464,11 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | 2026-09-07 | VL-110 Done: model registry seeds bought providers per feature; public live matrix `/v1/models/live` + `/models`; platform-admin externalUrl (W&B). ADR-0039. 150 API tests. |
 | 2026-09-07 | VL-111 Done: training jobs API (`/v1/training-jobs`); manual/Modal/Vertex/fixture launchers; signed GPU callback; dataset link. ADR-0040. 154 API tests. |
 | 2026-09-07 | VL-112 Blocked: foundation model program not started (no Atlas/Baobab shells). Use vendors + fine-tunes. ADR-0041. Executable M0–M11 complete for a small team. |
-| 2026-09-07 | VL-064 Done: ElevenLabs voice cloning with consent attestation, pending_review → approve/reject, watermark on `clone:{id}` speech. ADR-0042. 157 API tests. |
+| 2026-09-07 | VL-064 Done: External vendor voice cloning with consent attestation, pending_review → approve/reject, watermark on `clone:{id}` speech. ADR-0042. 157 API tests. |
 | 2026-09-07 | VL-075 Done: multi-region as residency islands (US/`iad` + EU/`ams`); `organizations.data_region`; public `/v1/regions`; pin enforcement; console `/data`. ADR-0043. 161 API tests. |
 | 2026-09-07 | Polish 1–3: `/coverage` nav + empty states + docs copy; README/setup/`.env.example` DX; `@verbalab/sdk` widened (regions/locales/localize/jobs/ocr/speech). |
 | 2026-09-07 | Polish 4–5: web `/health` + Fly/Docker checks + `pnpm smoke`; Playwright public e2e + gated sign-in→translate. |
-| 2026-09-07 | M12 scheduled (VL-120–124). VL-120 Done: African Voice Studio UX over OpenAI/ElevenLabs (ADR-0044). |
+| 2026-09-07 | M12 scheduled (VL-120–124). VL-120 Done: African Voice Studio UX over third-party AI vendors (ADR-0044). |
 | 2026-09-07 | VL-121 Done: own TTS path — `own:*` catalog + rented HTTP/fixture adapter; OpenAI remains stock default (ADR-0045). |
 | 2026-09-07 | Phase −1 docs: `docs/ENTERPRISE_PRODUCT_BLUEPRINT.md` (system/C4/DDD/contracts/deploy/security/testing). No application code. |
 | 2026-09-07 | Phase 0 Engineering OS: `docs/ENGINEERING_OS.md` + RFC/PRD/Runbook templates. Production monorepo = this repo (no regenerate / no TODOs). |
@@ -584,7 +584,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | 2026-10-03 | VL-254 Done: Agent Marketplace (Phase 121) — publish/install/run over Agent Runtime; FabricPolicyGate + AgentPolicyGate; ADR-0156. Not LangGraph/AutoGPT OS / live tools. |
 | 2026-10-03 | VL-255 Done: Workflow Marketplace (Phase 122) — publish/install/run over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate; ADR-0157. Not Zapier/Temporal OS / live steps. |
 | 2026-10-03 | VL-256 Done: Connector Marketplace (Phase 123) — entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS / live outbound. |
-| 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS / celebrity without rights. |
+| 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not a third-party voice OS/voice CDN OS / celebrity without rights. |
 | 2026-10-03 | VL-258 Done: Creator Economy (Phase 125) — royalty math + profiles/invoices over VL-092 Connect; hand-checked scenarios; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | 2026-10-03 | VL-259 Done: Ecosystem Production Audit (Phase 126) — evidence pack; ADR-0161. Volume 11 closed. Digital Twin / African Intelligence deferred to Volume 12. |
 | 2026-10-03 | VL-260–269 Done: African Intelligence Cloud hubs (Phases 127–136) — foundation, language registry, cultural intelligence, knowledge graph, six domain engines; ADR-0162–0171. Honesty for consent/medical/finance/government. |
@@ -615,7 +615,7 @@ Last updated: 2026-10-03 (Volume 25 AI Internet VL-394–409 + credentials readi
 | 2026-10-03 | VL-384-392 Done: DCIV hubs (Phases 251-259); ADR-0287-0295. Demo public-sector platforms; high-stakes production flags false. |
 | 2026-10-03 | VL-393 Done: DCIV Production Audit (Phase 260); ADR-0296. Volume 24 closed — v2.0 phase-broken roadmap complete (260 phases). AI Internet vision paragraph not packaged as phases. |
 
-| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not OpenAI/ElevenLabs/Google). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
+| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not third-party AI vendors). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
 
 ## M25 — AI Internet (v2 261–300)
 

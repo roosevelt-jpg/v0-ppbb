@@ -9,7 +9,7 @@ export function videoVoiceCatalog() {
     console: '/video-voice',
     honesty: {
       ownedModels: true,
-      elevenLabsOfAfrica: true,
+      verbalabOwnAi: true,
       vendorRentalDefault: false,
       consentRequired: true,
       watermarkRequired: true,

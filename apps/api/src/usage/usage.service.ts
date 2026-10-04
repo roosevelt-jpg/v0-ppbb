@@ -233,7 +233,7 @@ export class UsageService {
       periodStart: start.toISOString(),
       requests: translateEvents.length + sttEvents.length + ttsEvents.length,
       characters,
-      /** Shared ElevenLabs-style credit consumption across products. */
+      /** Shared shared-credit credit consumption across products. */
       creditsUsed,
       creditsBreakdown,
       translate: {

@@ -1,4 +1,4 @@
-# ADR-0042: Voice cloning via ElevenLabs (consent + review)
+# ADR-0042: Voice cloning via external vendor (consent + review)
 
 - Status: Accepted
 - Date: 2026-09-07
@@ -10,15 +10,15 @@ Roadmap wants optional vendor voice cloning. Training cloning models in-house is
 
 ## Decision
 
-1. **Buy ElevenLabs** Instant Voice Cloning (`ELEVENLABS_API_KEY`). No in-house clone training.
+1. **Buy external vendor** Instant Voice Cloning (`EXTERNAL_VOICE_CLONE_API_KEY`). No in-house clone training.
 2. **Consent gate:** create requires `consentAttested=true` + non-empty `consentNotes`; samples stored under `voices/{org}/…`.
-3. **Abuse review:** new clones start `pending_review`; owner/admin must approve (calls ElevenLabs / fixture) or reject before use.
+3. **Abuse review:** new clones start `pending_review`; owner/admin must approve (calls external vendor / fixture) or reject before use.
 4. **Watermark:** approved clones always `watermarkRequired`; speech returns `X-VerbaLab-Watermark: required`.
 5. **API:** Clerk ` /v1/voice-clones`; speak with `voice=clone:{id}` on `POST /v1/audio/speech` (TranslateAuth). Pro + owner/admin for create/review.
-6. **CI:** `VOICE_CLONE_FIXTURE=1` or test fixture adapter — no fake live ElevenLabs success without a key.
+6. **CI:** `VOICE_CLONE_FIXTURE=1` or test fixture adapter — no fake live external vendor success without a key.
 
 ## Consequences
 
 - Legal review remains an org process; the product enforces attestation + human review hooks.
-- Missing `ELEVENLABS_API_KEY` → approve fails with `provider_not_configured` (unless fixture).
+- Missing `EXTERNAL_VOICE_CLONE_API_KEY` → approve fails with `provider_not_configured` (unless fixture).
 - Stock OpenAI TTS unchanged for non-clone voices.

@@ -247,7 +247,7 @@ export class ModelKeysService {
       },
       models: this.modelsCatalog(),
       notVendorKeys: {
-        note: 'These are VerbaLab-owned keys. Do not use OpenAI/ElevenLabs/Google keys as the product default.',
+        note: 'These are VerbaLab-owned keys. Do not use third-party AI vendors keys as the product default.',
       },
       dominance: {
         note:

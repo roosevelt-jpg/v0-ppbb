@@ -119,7 +119,7 @@ export function ModelKeysClient() {
         VerbaLab model keys
       </h1>
       <p style={{ color: 'var(--muted)' }}>
-        Own-model auth for Translate FM / Echo / Voice FM / Atlas — not OpenAI or ElevenLabs keys.
+        Own-model auth for Translate FM / Echo / Voice FM / Atlas — not OpenAI or external vendor keys.
         Secrets are shown once.
       </p>
 

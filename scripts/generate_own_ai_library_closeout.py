@@ -605,7 +605,7 @@ def generate_video_voice() -> None:
     blurb: 'Clone + dub voices for video in African languages (VerbaLab Voice FM).',
     honesty: {
       ownedModels: true,
-      elevenLabsOfAfrica: true,
+      verbalabOwnAi: true,
       vendorRentalDefault: false,
       consentRequired: true,
       watermarkRequired: true,
@@ -731,7 +731,7 @@ export function VideoVoiceClient() {
       <h1>Video Voice</h1>
       <p>
         Clone voices and dub video scripts into African languages on VerbaLab Voice FM — the
-        ElevenLabs of Africa.
+        VerbaLab Own AI.
       </p>
       <p>
         <Link href="/voice-cloning">Voice Cloning</Link> · <Link href="/voice-fm">Voice FM</Link> ·{' '}
@@ -1247,7 +1247,7 @@ def update_progress() -> None:
         "| VL-022 | Translation API (text) | Done | Wired to VerbaLab Translate FM (`VERBALAB_MT_URL`); fixture via `VERBALAB_OWN_AI_FIXTURE`. |",
     )
     text = text.replace(
-        "| VL-023 | Console: translate UI | Blocked | Pages built; requires Clerk to use. ElevenLabs-inspired light UI applied. |",
+        "| VL-023 | Console: translate UI | Blocked | Pages built; requires Clerk to use. console light UI applied. |",
         "| VL-023 | Console: translate UI | Done | Translate console wired; auth credentials are deploy-time. |",
     )
     text = text.replace(
@@ -1266,7 +1266,7 @@ def update_progress() -> None:
     if "Own AI pivot" not in text.split("## Changelog")[-1] if "## Changelog" in text else True:
         text = text.rstrip() + """
 
-| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not OpenAI/ElevenLabs/Google). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
+| 2026-10-03 | Own AI pivot: Gateway primary = VerbaLab-owned models (not third-party AI vendors). VL-112/122/123/124 + VL-226–234 Done. Video Voice + AI Internet foundation. African language seed expansion. ADR-0298. Credentials = `VERBALAB_*` deploy env. |
 """
     path.write_text(text)
 
@@ -1281,8 +1281,8 @@ def write_adr_0298() -> None:
 
 ## Context
 
-VerbaLab is the ElevenLabs of Africa: we own Voice FM, Translate FM, Echo, Atlas, and related families.
-Renting OpenAI / Google / ElevenLabs as the default product path contradicts the company strategy.
+VerbaLab is the VerbaLab Own AI: we own Voice FM, Translate FM, Echo, Atlas, and related families.
+Renting OpenAI / Google / external vendor as the default product path contradicts the company strategy.
 
 ## Decision
 
@@ -1290,7 +1290,7 @@ Renting OpenAI / Google / ElevenLabs as the default product path contradicts the
 2. Live inference uses `VERBALAB_MODEL_BASE_URL` / modality URLs + `VERBALAB_MODEL_API_KEY`.
 3. `VERBALAB_OWN_AI_FIXTURE=1` for local/CI — never claim live GPU without endpoints.
 4. Vendor adapters remain in-tree only behind `VERBALAB_ALLOW_VENDOR_FALLBACK=1`.
-5. Voice cloning primary path is VerbaLab Voice FM (`VERBALAB_CLONE_URL`), not ElevenLabs.
+5. Voice cloning primary path is VerbaLab Voice FM (`VERBALAB_CLONE_URL`), not a third-party voice OS.
 6. Foundation model hubs (Atlas, Baobab, Echo, Voice/Vision/Vector/Reason FM, Edge, Fusion, Translate FM) are product surfaces over own endpoints.
 7. Weight binaries are **not** stored in the monorepo; they are deployed as VerbaLab model services.
 

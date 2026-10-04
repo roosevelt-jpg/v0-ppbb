@@ -13,7 +13,7 @@ This guide points at the **existing** production paths. Speech Cloud ships insid
 2. Ensure Postgres is reachable; Redis (`REDIS_URL`) for rate limits/jobs — do not use `JOBS_INLINE=1` in production.
 3. Configure Clerk + `CORS_ORIGIN`.
 4. Configure `OPENAI_API_KEY` for live Whisper STT / OpenAI TTS.
-5. Optional: ElevenLabs for clones; `OWN_TTS_URL` for own TTS; Stripe for billing entitlements.
+5. Optional: external vendor for clones; `OWN_TTS_URL` for own TTS; Stripe for billing entitlements.
 6. Optional: `DOCUMENT_STORAGE_DIR` for call recording uploads / documents.
 
 ## Post-deploy smoke

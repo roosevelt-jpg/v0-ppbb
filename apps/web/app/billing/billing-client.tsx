@@ -180,8 +180,7 @@ export function BillingClient() {
         Billing
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0', maxWidth: '46rem' }}>
-        Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — priced to mirror ElevenLabs
-        Creative Platform plans. Your card stays on file for auto-debit; VerbaLab never stores raw card numbers.
+        Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — with one VerbaLab Creative Platform credit pool. Your card stays on file for auto-debit; VerbaLab never stores raw card numbers.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}

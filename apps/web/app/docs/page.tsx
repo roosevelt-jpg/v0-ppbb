@@ -115,7 +115,7 @@ export default function DocsPage() {
         />
         <Endpoint title="GET/POST /v1/voice-clones" body="List / create clones (Clerk; Pro + consent for create)." />
         <Endpoint title="GET /v1/voice-clones/{id}" body="Get clone profile." />
-        <Endpoint title="POST /v1/voice-clones/{id}/review" body="Approve/reject pending_review (approve → ElevenLabs or fixture)." />
+        <Endpoint title="POST /v1/voice-clones/{id}/review" body="Approve/reject pending_review (approve → external vendor or fixture)." />
         <Endpoint title="POST /v1/voice-clones/{id}/disable" body="Disable clone for abuse/policy." />
         <Endpoint title="POST /v1/audio/speech" body="TTS; stock OpenAI, own:* rented open-weight, or voice=clone:{id} (watermark)." />
         <Endpoint

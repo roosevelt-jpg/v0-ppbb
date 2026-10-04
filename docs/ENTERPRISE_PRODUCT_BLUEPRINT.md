@@ -11,7 +11,7 @@
 
 ## 1. System Context
 
-VerbaLab sits between **enterprise buyers / developers** and **vendor AI + identity + billing**. Customers never call Google/OpenAI/ElevenLabs/Stripe/Clerk directly for product workflows; they call VerbaLab’s `/v1` API or use the console.
+VerbaLab sits between **enterprise buyers / developers** and **vendor AI + identity + billing**. Customers never call Google/third-party AI vendors/Stripe/Clerk directly for product workflows; they call VerbaLab’s `/v1` API or use the console.
 
 ```mermaid
 C4Context

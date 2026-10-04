@@ -72,7 +72,7 @@ describe('Billing (VL-031)', () => {
     await app.close();
   });
 
-  it('defaults new orgs to free plan credit quota (ElevenLabs Free = 10k)', async () => {
+  it('defaults new orgs to free plan credit quota (Free = 10k)', async () => {
     const org = await seedOrg(prisma, 'freeDefault');
     const summary = await billing.getSummary(org.id);
     expect(summary.plan).toBe('free');
@@ -80,7 +80,7 @@ describe('Billing (VL-031)', () => {
     expect(summary.monthlyCredits).toBe(PLANS.free.monthlyCredits);
     expect(summary.creditsUsed).toBe(0);
     expect(summary.charactersUsed).toBe(0);
-    expect(summary.pricingModel).toBe('elevenlabs-mirrored-shared-credits');
+    expect(summary.pricingModel).toBe('verbalab-shared-credits');
   });
 
   it('rejects translate when monthly quota is exceeded', async () => {

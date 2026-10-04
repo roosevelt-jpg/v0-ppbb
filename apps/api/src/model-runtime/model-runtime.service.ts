@@ -210,7 +210,7 @@ export class ModelRuntimeService {
         governmentIntelligence: '/government-intelligence',
       },
       honestToSayOutLoud: [
-        'VerbaLab Own AI runs locally in-process across MT/STT/TTS/chat/embed/OCR/detect/clone without rented OpenAI/ElevenLabs/Google.',
+        'VerbaLab Own AI runs locally in-process across MT/STT/TTS/chat/embed/OCR/detect/clone without rented third-party AI vendors.',
         `African quality eval: Own AI exact-match ${(evalReport.ownWinRate * 100).toFixed(1)}% vs vendor baseline stub ${(evalReport.baselineWinRate * 100).toFixed(1)}% on ${evalReport.total} lexicon cases (incl. reverse pairs).`,
         'Gov / bank / hospital production unlocks are explicit checklist gates wired into Enterprise Nation + Government Intelligence (default locked until residency, DPA, and sector safety flags are set).',
         `Neural weights deploy status: ${weights.status} (${weights.mode}) via VERBALAB_WEIGHTS_URL — not claimed as git-shipped SOTA weights.`,

@@ -4,7 +4,7 @@ Local Own AI runtime (all modalities), African quality eval, neural weight deplo
 
 ## What's honest to say out loud
 
-1. **Local Own AI runs in-process** — MT / STT / TTS / chat / embed / OCR / detect / clone without rented OpenAI / ElevenLabs / Google.
+1. **Local Own AI runs in-process** — MT / STT / TTS / chat / embed / OCR / detect / clone without rented third-party AI vendors.
 2. **African quality is measured** — `GET /v1/model-runtime/eval` reports exact-match Own AI vs a weak English-centric vendor baseline stub on forward + reverse lexicon packs.
 3. **Gov / bank / hospital unlocks are gated** — checklist defaults locked; wired into Enterprise Nation Platform + Government Intelligence.
 4. **Neural weights are deploy artifacts** — `VERBALAB_WEIGHTS_URL` (+ `manifest.json`) probed at runtime; unreachable URL keeps local lexicon active. Not git-shipped SOTA.

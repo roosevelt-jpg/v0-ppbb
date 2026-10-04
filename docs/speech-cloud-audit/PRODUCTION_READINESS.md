@@ -36,7 +36,7 @@ Live-mic WebSocket · neural diarization / NIST biometrics · trained SER · ech
 
 ## Remaining ops dependencies
 
-- `DATABASE_URL`, `REDIS_URL`, Clerk, `OPENAI_API_KEY` (Whisper/TTS), optional ElevenLabs, Stripe as applicable
+- `DATABASE_URL`, `REDIS_URL`, Clerk, `OPENAI_API_KEY` (Whisper/TTS), optional external vendor, Stripe as applicable
 - Fly token or EKS cluster for production traffic
 
 ## Volume close

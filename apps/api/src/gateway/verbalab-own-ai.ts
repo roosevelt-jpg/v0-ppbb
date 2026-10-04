@@ -1,9 +1,9 @@
 /**
  * VerbaLab Own AI — primary inference path.
  *
- * Product posture: VerbaLab owns its models (ElevenLabs-of-Africa).
+ * Product posture: VerbaLab owns its models (VerbaLab-Own-AI).
  * Live inference hits VerbaLab-hosted endpoints (credentials later).
- * Vendors (OpenAI/Google/ElevenLabs) are optional legacy fallback only when
+ * Vendors (OpenAI/Google/external vendor) are optional legacy fallback only when
  * VERBALAB_ALLOW_VENDOR_FALLBACK=1.
  *
  * Env:

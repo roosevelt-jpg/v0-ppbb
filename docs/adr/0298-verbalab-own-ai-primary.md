@@ -5,8 +5,8 @@
 
 ## Context
 
-VerbaLab is the ElevenLabs of Africa: we own Voice FM, Translate FM, Echo, Atlas, and related families.
-Renting OpenAI / Google / ElevenLabs as the default product path contradicts the company strategy.
+VerbaLab is the VerbaLab Own AI: we own Voice FM, Translate FM, Echo, Atlas, and related families.
+Renting OpenAI / Google / external vendor as the default product path contradicts the company strategy.
 
 ## Decision
 
@@ -14,7 +14,7 @@ Renting OpenAI / Google / ElevenLabs as the default product path contradicts the
 2. Live inference uses `VERBALAB_MODEL_BASE_URL` / modality URLs + `VERBALAB_MODEL_API_KEY`.
 3. `VERBALAB_OWN_AI_FIXTURE=1` for local/CI — never claim live GPU without endpoints.
 4. Vendor adapters remain in-tree only behind `VERBALAB_ALLOW_VENDOR_FALLBACK=1`.
-5. Voice cloning primary path is VerbaLab Voice FM (`VERBALAB_CLONE_URL`), not ElevenLabs.
+5. Voice cloning primary path is VerbaLab Voice FM (`VERBALAB_CLONE_URL`), not a third-party voice OS.
 6. Foundation model hubs (Atlas, Baobab, Echo, Voice/Vision/Vector/Reason FM, Edge, Fusion, Translate FM) are product surfaces over own endpoints.
 7. Weight binaries are **not** stored in the monorepo; they are deployed as VerbaLab model services.
 

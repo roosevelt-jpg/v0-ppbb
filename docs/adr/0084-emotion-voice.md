@@ -13,7 +13,7 @@ VerbaLab already has Neural TTS (VL-171) and Speech Emotion *detection* (VL-154)
 ## Decision
 
 1. Ship **Emotion Voice** under `/v1/emotion-voice/*` as a synthesis façade.  
-2. **Profiles** map library labels → preferred voice + soft prosody transform + optional ElevenLabs style settings for `clone:{id}`.  
+2. **Profiles** map library labels → preferred voice + soft prosody transform + optional expressive vendor settings for `clone:{id}`.  
 3. **Never** inject spoken stage directions into the text payload.  
 4. **Honest statuses:** synthesis capabilities are `partial`; `trainedExpressiveModel: false`.  
 5. Keep VL-154 Emotion Intelligence unchanged; cross-link only.  

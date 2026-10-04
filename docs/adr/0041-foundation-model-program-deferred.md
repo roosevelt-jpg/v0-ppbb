@@ -7,11 +7,11 @@
 
 ## Context
 
-Roadmap VL-112 asks for named foundation models (Atlas, Baobab, Echo, …). VerbaLab’s company posture is **own models** (ElevenLabs of Africa), not renting peer platforms as the product default.
+Roadmap VL-112 asks for named foundation models (Atlas, Baobab, Echo, …). VerbaLab’s company posture is **own models** (VerbaLab Own AI), not renting peer platforms as the product default.
 
 ## Decision
 
-1. **2026-10-03 (ADR-0298):** VL-112 / FM hubs are **active** as VerbaLab-owned model products. Gateway primary path is VerbaLab Own AI endpoints (`VERBALAB_*`). Weight binaries deploy as VerbaLab model services — not rented OpenAI/ElevenLabs/Google defaults.
+1. **2026-10-03 (ADR-0298):** VL-112 / FM hubs are **active** as VerbaLab-owned model products. Gateway primary path is VerbaLab Own AI endpoints (`VERBALAB_*`). Weight binaries deploy as VerbaLab model services — not rented third-party AI vendors defaults.
 2. **Honesty retained:** do not claim competitive SOTA without eval evidence against live VerbaLab endpoints.
 3. **Historical note:** Earlier “do not start / buy vendors” posture applied before the own-model program was authorized.
 4. Platform hubs (ADR-0135+) remain valid under owned-model serving.

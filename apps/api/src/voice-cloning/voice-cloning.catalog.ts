@@ -13,7 +13,7 @@ export function voiceCloningEngineCatalog() {
   return {
     product: 'VerbaLab Voice Cloning',
     note:
-      'Enterprise cloning over ElevenLabs Instant Voice Cloning with mandatory consent, ownership, abuse review, and watermark (ADR-0042/0083). Professional mode = stricter enrollment on the same vendor path — not a separate trained pro model. NIST voice biometrics deferred to Phase 33.',
+      'Enterprise cloning over Instant Voice Cloning (external vendor) with mandatory consent, ownership, abuse review, and watermark (ADR-0042/0083). Professional mode = stricter enrollment on the same vendor path — not a separate trained pro model. NIST voice biometrics deferred to Phase 33.',
     capabilities: [
       {
         id: 'instant-cloning',
@@ -28,7 +28,7 @@ export function voiceCloningEngineCatalog() {
         status: 'shipped',
         api: 'POST /v1/voice-cloning/enroll',
         notes:
-          'Shipped cloneMode=professional (≥3 samples + ownership attestation) on ElevenLabs IVC. Multi-hour pro training path deferred.',
+          'Shipped cloneMode=professional (≥3 samples + ownership attestation) on external vendor IVC. Multi-hour pro training path deferred.',
       },
       {
         id: 'secure-enrollment',
@@ -105,8 +105,8 @@ export function voiceCloningEngineCatalog() {
     ] satisfies CloningCapability[],
     engines: [
       {
-        id: 'elevenlabs_ivc',
-        name: 'ElevenLabs Instant Voice Cloning',
+        id: 'vendor_ivc',
+        name: 'Instant Voice Cloning (external vendor)',
         role: 'primary',
         modes: ['instant', 'professional_enrollment'],
       },

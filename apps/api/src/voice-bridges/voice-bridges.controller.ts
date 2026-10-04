@@ -163,21 +163,21 @@ export class VoiceBridgesController {
     return this.bridges.googleVoiceStatus();
   }
 
-  @Get('elevenlabs/v1/voices')
-  elevenVoices() {
-    return this.bridges.elevenLabsVoices();
+  @Get('compatible-tts/v1/voices')
+  compatibleTtsVoices() {
+    return this.bridges.compatibleTtsVoices();
   }
 
-  @Post('elevenlabs/v1/text-to-speech/:voiceId')
+  @Post('compatible-tts/v1/text-to-speech/:voiceId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(TranslateAuthGuard, RateLimitGuard)
-  async elevenTts(
+  async compatibleTtsSynthesize(
     @Req() req: AuthedReq,
     @Res() res: Response,
     @Param('voiceId') voiceId: string,
     @Body() body: Record<string, unknown>,
   ) {
-    const speech = await this.bridges.elevenLabsTts(voiceId, body ?? {}, orgMeta(req));
+    const speech = await this.bridges.compatibleTts(voiceId, body ?? {}, orgMeta(req));
     res.setHeader('Content-Type', speech.mimeType);
     res.setHeader('X-VerbaLab-Provider', speech.provider);
     res.setHeader('X-VerbaLab-Characters', String(speech.characters));

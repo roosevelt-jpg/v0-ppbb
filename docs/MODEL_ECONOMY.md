@@ -2,7 +2,7 @@
 
 Monetize VerbaLab models by **use case** and **speed tier**. Faster models cost more; eco tiers cost less — efficiency vs productivity.
 
-Base USD rates mirror ElevenLabs API pricing (TTS $0.05–$0.10 / 1k chars, STT $0.22 / hour, music $0.15 / min). Subscription credits live in `docs/BILLING.md`.
+Base USD rates use VerbaLab API pricing (TTS $0.05–$0.10 / 1k chars, STT $0.22 / hour, music $0.15 / min). Subscription credits live in `docs/BILLING.md`.
 
 ## Speed tiers
 

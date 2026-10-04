@@ -60,7 +60,7 @@ describe('Creative Media (VerbaCreative parity)', () => {
     await app.close();
   });
 
-  it('exposes engine with shipped ElevenCreative-class capabilities', async () => {
+  it('exposes engine with shipped creative-suite-class capabilities', async () => {
     const res = await request(app.getHttpServer()).get('/v1/creative-media/engine').expect(200);
     expect(res.body.product).toContain('VerbaCreative');
     const ids = (res.body.capabilities as Array<{ id: string; status: string }>).map((c) => c.id);

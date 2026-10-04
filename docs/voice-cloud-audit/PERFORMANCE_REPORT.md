@@ -16,7 +16,7 @@
 ## What we did **not** claim
 
 - No k6/Locust multi-region soak or stress certificate.
-- No published p95 SLA for OpenAI/ElevenLabs TTS (depends on vendor).
+- No published p95 SLA for third-party AI vendors TTS (depends on vendor).
 - No vendor token-streaming realtime certification (chunk SSE after full synthesis).
 - No cluster-wide voice latency product (in-process metrics remain per instance).
 

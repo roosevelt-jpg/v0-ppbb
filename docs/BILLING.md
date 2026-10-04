@@ -1,6 +1,6 @@
-# Billing & usage (ElevenLabs-mirrored)
+# Billing & usage (VerbaLab shared-credits)
 
-VerbaLab subscription billing uses a **shared monthly credit pool** across products, structured like [ElevenLabs Creative Platform pricing](https://elevenlabs.io/pricing).
+VerbaLab subscription billing uses a **shared monthly credit pool** across products, structured like [VerbaLab Creative Platform pricing](https://VerbaLab plan ladder).
 
 ## Plans
 

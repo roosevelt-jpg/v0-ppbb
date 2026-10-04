@@ -120,7 +120,7 @@ export function findVoiceLanguagePackEntry(key: string): VoiceLanguageCatalogEnt
 
 /**
  * Library Phase 124 → Voice & Language Marketplace (VL-257).
- * Buy/sell/publish voice + language pack entitlements — not ElevenLabs / voice CDN OS.
+ * Buy/sell/publish voice + language pack entitlements — not a third-party voice OS / voice CDN OS.
  * Extends VL-177 voice marketplace + Volume 1 language packs. Volume 11: Stripe-only.
  */
 export function voiceLanguageMarketplaceEngineCatalog() {
@@ -237,7 +237,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
       extendsVolume1LanguagePacks: true,
       regeneratesVoiceCloud: false,
       regeneratesVoiceMarketplace: false,
-      elevenLabsOs: false,
+      thirdPartyVoiceOs: false,
       voiceCdnOs: false,
       celebrityWithoutRights: false,
       crossTenantCloneSynthesis: false,
@@ -247,7 +247,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
       realMoneyRiskCategory: true,
     },
     honesty: {
-      elevenLabsOs: false,
+      thirdPartyVoiceOs: false,
       voiceCdnOs: false,
       celebrityWithoutRights: false,
       crossTenantCloneSynthesis: false,

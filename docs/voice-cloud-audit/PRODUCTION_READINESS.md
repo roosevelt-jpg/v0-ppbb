@@ -9,7 +9,7 @@
 
 It is a **voice synthesis hub** (neural TTS + cloning + emotion/studio/enhancement + biometrics + marketplace + analytics) that can support African studio, licensed clone, and entitlement workflows **within those limits**.
 
-It is **not** ElevenLabs + Resemble + Krisp + Soundraw + NIST biometrics + enterprise DAW combined.
+It is **not** external vendor + Resemble + Krisp + Soundraw + NIST biometrics + enterprise DAW combined.
 
 ## Checklist
 
@@ -17,7 +17,7 @@ It is **not** ElevenLabs + Resemble + Krisp + Soundraw + NIST biometrics + enter
 | --- | --- |
 | No TODO / FIXME / implement-later in Voice Cloud source trees | Pass (audit scan) |
 | No silent placeholder stubs for Voice hubs | Pass |
-| Vendor TTS / clone adapters real with env gating | Pass — live paths Blocked without TTS / ElevenLabs keys (honest) |
+| Vendor TTS / clone adapters real with env gating | Pass — live paths Blocked without TTS / external vendor keys (honest) |
 | Test fixtures used only in tests | Pass |
 | Hub + product catalogs integrated | Pass |
 | Billing metering for TTS | Pass (shared `usage_events`) |
@@ -38,7 +38,7 @@ Vendor token streaming TTS · multi-hour professional clone training · trained 
 
 ## Remaining ops dependencies
 
-- `DATABASE_URL`, `REDIS_URL`, Clerk, TTS keys (`OPENAI_API_KEY` / own TTS), optional ElevenLabs, Stripe as applicable
+- `DATABASE_URL`, `REDIS_URL`, Clerk, TTS keys (`OPENAI_API_KEY` / own TTS), optional external vendor, Stripe as applicable
 - Fly token or EKS cluster for production traffic
 
 ## Volume close

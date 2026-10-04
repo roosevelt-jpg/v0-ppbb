@@ -7,10 +7,10 @@ import { AuditService } from '../audit/audit.service';
 import { BillingService } from '../billing/billing.service';
 import { LocalStorageService } from '../documents/local-storage.service';
 import {
-  ElevenLabsVoiceCloneAdapter,
+  LegacyVendorVoiceCloneAdapter,
   FixtureVoiceCloneAdapter,
   type VoiceCloneSample,
-} from './elevenlabs-voice-clone.adapter';
+} from './legacy-vendor-voice-clone.adapter';
 import { createVerbalabVoiceCloneAdapter } from './verbalab-voice-clone.adapter';
 import { allowVendorFallback } from '../gateway/verbalab-own-ai';
 
@@ -57,7 +57,7 @@ export class VoiceClonesService {
       return own;
     }
     // Legacy vendor only when explicitly allowed.
-    return new ElevenLabsVoiceCloneAdapter(process.env.ELEVENLABS_API_KEY ?? '');
+    return new LegacyVendorVoiceCloneAdapter(process.env.EXTERNAL_VOICE_CLONE_API_KEY ?? '');
   }
 
   serialize(row: {
@@ -241,7 +241,7 @@ export class VoiceClonesService {
         watermarkRequired: true,
         sampleStorageKeys: keys as Prisma.InputJsonValue,
         sampleCount: keys.length,
-        provider: 'elevenlabs',
+        provider: 'legacy_vendor_ivc',
         createdByUserId: input.userId,
       },
     });

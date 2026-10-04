@@ -8,7 +8,7 @@ import {
 } from '../src/billing/credits';
 import { PLANS, planCatalog, planMeets, isPaidPlan } from '../src/billing/plans';
 
-describe('ElevenLabs-mirrored billing credits + plans', () => {
+describe('VerbaLab shared-credits billing credits + plans', () => {
   it('exposes Free→Business ladder with EL-class credit pools', () => {
     const ids = planCatalog().map((p) => p.id);
     expect(ids).toEqual([

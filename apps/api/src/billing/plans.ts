@@ -1,8 +1,8 @@
 /**
- * Subscription plans mirrored from ElevenLabs public Creative Platform pricing
+ * Subscription plans for VerbaLab public Creative Platform pricing
  * (credits, USD list prices, commercial/clone entitlements). VerbaLab brand + African residency.
  *
- * Source snapshot: elevenlabs.io/pricing — Free / Starter / Creator / Pro / Scale / Business.
+ * Plan ladder — Free / Starter / Creator / Pro / Scale / Business.
  */
 
 export type PlanId =
@@ -17,7 +17,7 @@ export type PlanId =
 export type PlanDefinition = {
   id: PlanId;
   name: string;
-  /** Monthly shared credit pool (ElevenLabs-style). Stored on Organization.characterQuota. */
+  /** Monthly shared credit pool (shared-credit). Stored on Organization.characterQuota. */
   characterQuota: number;
   /** Alias — same as characterQuota (credits). */
   monthlyCredits: number;
@@ -107,7 +107,7 @@ function starterPlan(): PlanDefinition {
     customVoiceSlots: 10,
     priority: 1,
     stripePriceEnv: 'STRIPE_PRICE_ID_STARTER',
-    blurb: 'Commercial license + Instant Voice Cloning — ElevenLabs Starter parity ($5/mo).',
+    blurb: 'Commercial license + Instant Voice Cloning — Starter tier ($5/mo).',
     highlights: [
       '30k credits / month',
       'Commercial license',

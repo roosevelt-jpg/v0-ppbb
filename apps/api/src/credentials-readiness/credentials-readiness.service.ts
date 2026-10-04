@@ -34,7 +34,7 @@ export class CredentialsReadinessService {
           createServing: 'POST /v1/model-keys',
           prefixes: ['vmod_root_', 'vmod_live_', 'vmod_test_'],
         },
-        note: 'You mint these inside VerbaLab — not from OpenAI/ElevenLabs.',
+        note: 'You mint these inside VerbaLab — not from third-party AI vendors.',
       },
       verbalabModels: {
         ready:

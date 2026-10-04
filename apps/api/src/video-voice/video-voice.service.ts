@@ -86,7 +86,7 @@ export class VideoVoiceService {
 
   /**
    * End-to-end dubbing job: optional STT → translate → TTS.
-   * Metered as dubbing minutes (ElevenLabs-style package), not separate STT/TTS debits.
+   * Metered as dubbing minutes (shared-credit package), not separate STT/TTS debits.
    */
   async dub(
     input: {

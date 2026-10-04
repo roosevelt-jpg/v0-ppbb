@@ -9,7 +9,7 @@ export type CreativeCapability = {
   notes: string;
 };
 
-/** VerbaCreative media suite — parity surface for ElevenCreative-class products. */
+/** VerbaCreative media suite — parity surface for creative-suite-class products. */
 export function creativeMediaEngineCatalog() {
   return {
     product: 'VerbaCreative Media',
@@ -130,7 +130,7 @@ export function creativeMediaEngineCatalog() {
       },
     ] satisfies CreativeCapability[],
     honesty: {
-      note: 'Creative media APIs are on-platform synthesizers plus partner connectors — not a claim of ElevenLabs model weights.',
+      note: 'Creative media APIs are on-platform synthesizers plus partner connectors — not a claim of third-party model weights.',
       partnerVideoConnectors: true,
       proceduralAudioBeds: true,
       imageVideoPartial: true,

@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { TtsOutput } from '../gateway/tts-provider';
-import type { VoiceCloneCreateResult, VoiceCloneSample } from './elevenlabs-voice-clone.adapter';
+import type { VoiceCloneCreateResult, VoiceCloneSample } from './legacy-vendor-voice-clone.adapter';
 
 function cloneUrl(): string {
   const specific = process.env.VERBALAB_CLONE_URL?.trim();
@@ -16,7 +16,7 @@ function apiKey(): string {
 
 /**
  * VerbaLab-owned voice cloning (video dubbing / creator cloning).
- * Primary path — not ElevenLabs rental.
+ * Primary path — not a third-party voice OS rental.
  */
 export class VerbalabVoiceCloneAdapter {
   readonly name = 'verbalab_own_clone';

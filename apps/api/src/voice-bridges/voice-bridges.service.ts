@@ -195,18 +195,18 @@ export class VoiceBridgesService {
         };
       case 'google-voice':
         return { title, ...this.googleVoiceStatus() };
-      case 'elevenlabs':
+      case 'compatible-tts':
         return {
           title,
           platform: id,
           example: {
             method: 'POST',
-            url: `${root}/v1/voice-bridges/elevenlabs/v1/text-to-speech/alloy`,
+            url: `${root}/v1/voice-bridges/compatible-tts/v1/text-to-speech/alloy`,
             headers: { ...auth, 'Content-Type': 'application/json' },
             body: { text: 'Habari kutoka VerbaLab', language_code: 'sw' },
           },
-          voices: `${root}/v1/voice-bridges/elevenlabs/v1/voices`,
-          note: 'ElevenLabs-shaped TTS path → VerbaLab Own AI (not ElevenLabs hosted product).',
+          voices: `${root}/v1/voice-bridges/compatible-tts/v1/voices`,
+          note: 'Drop-in TTS path → VerbaLab Own AI (not a third-party hosted TTS product).',
         };
       case 'sip':
         return { title, ...this.sipTrunk(baseUrl) };
@@ -566,7 +566,7 @@ export class VoiceBridgesService {
     };
   }
 
-  async elevenLabsTts(voiceId: string, body: Record<string, unknown>, meta: OrgMeta) {
+  async compatibleTts(voiceId: string, body: Record<string, unknown>, meta: OrgMeta) {
     const text = String(body.text ?? '').trim();
     if (!text) {
       throw new ApiException('validation_error', 'text required', HttpStatus.BAD_REQUEST);
@@ -585,7 +585,7 @@ export class VoiceBridgesService {
     return speech;
   }
 
-  elevenLabsVoices() {
+  compatibleTtsVoices() {
     const voices = this.gateway.listVoices();
     return {
       voices: voices.map((v) => ({

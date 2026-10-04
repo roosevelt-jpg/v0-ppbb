@@ -30,4 +30,4 @@
 
 ## Rejected architectures
 
-Payment-processor OS · tax engine OS · card vault · Zapier/iPaaS OS · Hugging Face hub · ElevenLabs CDN · LangGraph/AutoGPT OS · Digital Twin Platform (Volume 12+)
+Payment-processor OS · tax engine OS · card vault · Zapier/iPaaS OS · Hugging Face hub · external vendor CDN · LangGraph/AutoGPT OS · Digital Twin Platform (Volume 12+)

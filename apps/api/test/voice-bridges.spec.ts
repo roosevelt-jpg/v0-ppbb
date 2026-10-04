@@ -25,7 +25,7 @@ describe('voice platform bridges', () => {
       'google-speech',
       'dialogflow',
       'google-voice',
-      'elevenlabs',
+      'compatible-tts',
       'sip',
       'webrtc',
     ]) {
@@ -64,15 +64,15 @@ describe('voice platform bridges', () => {
       expect(snip.platform, p.id).toBe(p.id);
       expect(snip.title, p.id).toContain(p.name);
       expect(snip.title.toLowerCase(), p.id).not.toContain(
-        p.id === 'vapi' ? 'elevenlabs' : '___never___',
+        p.id === 'vapi' ? 'compatible-tts' : '___never___',
       );
     }
-    const eleven = service.integrationSnippet('elevenlabs', 'https://api.example.com') as {
+    const dropIn = service.integrationSnippet('compatible-tts', 'https://api.example.com') as {
       title: string;
       platform: string;
       example?: { url?: string };
     };
-    expect(eleven.title).toBe('ElevenLabs-shaped clients integration snippet');
-    expect(eleven.example?.url).toContain('/elevenlabs/');
+    expect(dropIn.title).toBe('Drop-in TTS clients integration snippet');
+    expect(dropIn.example?.url).toContain('/compatible-tts/');
   });
 });

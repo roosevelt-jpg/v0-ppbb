@@ -17,7 +17,7 @@ export function voiceBridgesCatalog() {
     id: 'voice-bridges',
     title: 'Voice platform bridges',
     blurb:
-      'Use VerbaLab Own AI TTS/STT/agents inside VAPI, Twilio, Amazon, Google, ElevenLabs-shaped clients, SIP trunks, and WebRTC.',
+      'Use VerbaLab Own AI TTS/STT/agents inside VAPI, Twilio, Amazon, Google, Drop-in TTS clients, SIP trunks, and WebRTC.',
     platforms: [
       platform(
         'vapi',
@@ -111,15 +111,15 @@ export function voiceBridgesCatalog() {
         'Complete builder path via Dialogflow phone gateway or Twilio; not a Google Voice consumer plugin.',
       ),
       platform(
-        'elevenlabs',
-        'ElevenLabs-shaped clients',
+        'compatible-tts',
+        'Drop-in TTS clients',
         ['http'],
         [
-          'POST /v1/voice-bridges/elevenlabs/v1/text-to-speech/{voiceId}',
-          'GET /v1/voice-bridges/elevenlabs/v1/voices',
+          'POST /v1/voice-bridges/compatible-tts/v1/text-to-speech/{voiceId}',
+          'GET /v1/voice-bridges/compatible-tts/v1/voices',
         ],
-        'ElevenLabs-compatible TTS URL shape for tools that hardcode that path pattern.',
-        'Own AI synthesis (+ optional clone adapter) — not ElevenLabs hosted product.',
+        'Drop-in TTS URL shape for tools that hardcode that path pattern.',
+        'Own AI synthesis (+ optional clone adapter) — not a third-party hosted TTS product.',
       ),
       platform(
         'sip',
@@ -172,6 +172,6 @@ export function voiceBridgesHonesty() {
     replacesAwsGoogleMediaPlanes: false,
     ownAiPrimary: true,
     note:
-      'Bridges let builders plug VerbaLab Own AI into VAPI/Twilio/Amazon/Google/ElevenLabs-shaped clients. We do not host AWS Connect media, Google WaveNet weights, or a carrier SBC — those platforms keep their control planes; VerbaLab supplies African voice intelligence.',
+      'Bridges let builders plug VerbaLab Own AI into VAPI/Twilio/Amazon/Google/Drop-in TTS clients. We do not host AWS Connect media, Google WaveNet weights, or a carrier SBC — those platforms keep their control planes; VerbaLab supplies African voice intelligence.',
   };
 }

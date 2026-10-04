@@ -13,7 +13,7 @@ export function voiceMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Voice Marketplace',
     note:
-      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace. Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not ElevenLabs Voice Library / Soundraw parity.',
+      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace. Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not a third-party voice OS Voice Library / Soundraw parity.',
     capabilities: [
       {
         id: 'marketplace',

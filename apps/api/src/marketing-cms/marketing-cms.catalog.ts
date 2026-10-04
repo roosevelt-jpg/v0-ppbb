@@ -45,7 +45,7 @@ export const DEFAULT_DESIGN_SCOPE = {
   northStar:
     'Match and exceed world-class AI voice platforms — owned by Africa, for African languages, accents, and economies.',
   honesty: {
-    notElevenLabsCloneOfAssets: true,
+    notThirdPartyCloneOfAssets: true,
     mirrorsProductUxPatterns: true,
     cmsManagedCopyAndMedia: true,
   },

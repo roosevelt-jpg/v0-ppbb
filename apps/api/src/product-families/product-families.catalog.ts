@@ -107,7 +107,7 @@ function row(
 
 export function productFamiliesHonesty() {
   return {
-    billingModel: 'elevenlabs-mirrored-shared-credits',
+    billingModel: 'verbalab-shared-credits',
     commercialFrom: 'starter',
     professionalVoiceCloningFrom: 'creator',
     imageVideoHonesty: 'Creative image/video endpoints ship SVG stills and storyboards — disclosed as partial.',

@@ -57,7 +57,7 @@ export class GatewayService {
   private skipFineTuneForTests = false;
 
   constructor() {
-    // Primary path: VerbaLab-owned models (ElevenLabs-of-Africa posture).
+    // Primary path: VerbaLab-owned models (VerbaLab-Own-AI posture).
     this.provider = createVerbalabMt();
     this.sttProvider = createVerbalabStt();
     this.ttsProvider = createVerbalabTts();

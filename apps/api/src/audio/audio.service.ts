@@ -125,7 +125,7 @@ export class AudioService {
     apiKeyId?: string;
     userId?: string;
     ip?: string;
-    /** Optional ElevenLabs expressive settings for clone:{id} only (VL-173). */
+    /** Optional external vendor expressive settings for clone:{id} only (VL-173). */
     expressiveSettings?: {
       stability: number;
       similarity_boost: number;
