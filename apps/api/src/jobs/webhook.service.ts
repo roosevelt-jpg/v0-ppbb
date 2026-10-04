@@ -36,6 +36,27 @@ export class WebhookService {
     return timingSafeEqual(a, b);
   }
 
+  /** Deliver to the org's configured partner webhook URL when set. */
+  async deliverPartnerEvent(input: {
+    organizationId: string;
+    event: string;
+    data: unknown;
+  }): Promise<{ ok: boolean; status?: number; error?: string; skipped?: boolean }> {
+    const org = await this.prisma.organization.findUnique({
+      where: { id: input.organizationId },
+      select: { partnerWebhookUrl: true },
+    });
+    if (!org?.partnerWebhookUrl) {
+      return { ok: true, skipped: true };
+    }
+    return this.deliver({
+      organizationId: input.organizationId,
+      webhookUrl: org.partnerWebhookUrl,
+      event: input.event,
+      data: input.data,
+    });
+  }
+
   async deliver(input: {
     organizationId: string;
     webhookUrl: string;

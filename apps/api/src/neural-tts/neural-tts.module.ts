@@ -8,6 +8,7 @@ import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AudioModule } from '../audio/audio.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     ApiKeysModule,
     IdentityModule,
     AudioModule,
+    RateLimitModule,
   ],
   controllers: [NeuralTtsController],
   providers: [NeuralTtsService, TranslateAuthGuard],

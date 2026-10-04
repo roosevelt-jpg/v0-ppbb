@@ -46,6 +46,8 @@ model Organization {
   lastCheckoutAt       DateTime? @map("last_checkout_at")
   checkoutAttemptCount Int      @default(0) @map("checkout_attempt_count")
   webhookSigningSecret String?  @map("webhook_signing_secret")
+  /// Org-level partner webhook for credits.low / api_key.revoked / bootstrap events
+  partnerWebhookUrl    String?  @map("partner_webhook_url")
   retentionDays        Int?     @map("retention_days")
   persistSourceText    Boolean  @default(true) @map("persist_source_text")
   allowVendorTraining  Boolean  @default(false) @map("allow_vendor_training")
@@ -62,6 +64,7 @@ model Organization {
   usageEvents         UsageEvent[]
   auditEvents         AuditEvent[]
   jobs                Job[]
+  idempotencyRecords  IdempotencyRecord[]
   documents           Document[]
   glossaryTerms       GlossaryTerm[]
   tmEntries           TranslationMemoryEntry[]
@@ -210,6 +213,7 @@ model Job {
   error          String?
   webhookUrl     String?   @map("webhook_url")
   webhookStatus  String?   @map("webhook_status")
+  idempotencyKey String?   @map("idempotency_key")
   attempts       Int       @default(0)
   createdAt      DateTime  @default(now()) @map("created_at")
   startedAt      DateTime? @map("started_at")
@@ -222,6 +226,7 @@ model Job {
 
   @@index([organizationId, createdAt])
   @@index([status])
+  @@unique([organizationId, idempotencyKey])
   @@map("jobs")
 }
 
@@ -1843,4 +1848,23 @@ model AiInternetRecord {
   @@index([organizationId, kind])
   @@index([organizationId, status])
   @@map("ai_internet_records")
+}
+
+/// HTTP Idempotency-Key replay cache for mutating API calls.
+model IdempotencyRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  key            String
+  method         String
+  path           String
+  statusCode     Int      @map("status_code")
+  responseBody   Json     @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at")
+  expiresAt      DateTime @map("expires_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@index([expiresAt])
+  @@map("idempotency_records")
 }

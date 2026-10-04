@@ -16,6 +16,7 @@ import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/trans
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { ApiException } from '../common/errors/api-exception';
 import { clientIp } from '../common/http/client-ip';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 
 @Controller('v1/tts')
 export class NeuralTtsController {
@@ -88,7 +89,7 @@ export class NeuralTtsController {
   }
 
   @Post('synthesize')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   async synthesize(
     @Req()
     req: Request & {
@@ -137,7 +138,7 @@ export class NeuralTtsController {
   }
 
   @Post('stream')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   async stream(
     @Req()
     req: Request & {

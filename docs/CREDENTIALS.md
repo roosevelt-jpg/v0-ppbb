@@ -53,8 +53,11 @@ Separate from model keys: `vl_live_` / `vl_test_` on **API keys** (`/keys`) for 
 2. Copy **Publishable key** → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 3. Copy **Secret key** → `CLERK_SECRET_KEY`
 4. Set sign-in URLs (`NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`, etc.)
-5. **Hide Clerk branding for end users:** Dashboard → Settings → Branding → enable **Remove “Secured by Clerk” branding** (paid plan required in production). Use a **production** Clerk instance (not development) so users never see a Development-mode ribbon. Optional: attach a custom auth domain (`accounts.yourdomain.com`).
-6. VerbaLab UI already brands the auth card (logo + colors) and hides clerk.com footer chrome in CSS; the Dashboard toggle is still required for full vendor-mark removal.
+5. **Production instance:** use `pk_live_` / `sk_live_` so end users never see a Development-mode ribbon.
+6. **Hide Clerk branding for end users:** Dashboard → Settings → Branding → enable **Remove “Secured by Clerk” branding** (paid plan required in production).
+7. **Custom auth domain (optional):** attach `accounts.yourdomain.com` in Clerk, then set `NEXT_PUBLIC_CLERK_DOMAIN` for the web app (also pass as Fly web build-arg / secret).
+8. **Org bootstrap webhooks:** Dashboard → Webhooks → add `https://<api>/v1/clerk/webhooks` for `user.created`, `organization.created`, `organizationMembership.created`. Copy the signing secret → `CLERK_WEBHOOK_SIGNING_SECRET`. On first event VerbaLab creates the org/workspace, Free credits, a `vl_test_` key, and a welcome email.
+9. VerbaLab UI already brands the auth card (logo + colors) and hides clerk.com footer chrome in CSS; the Dashboard toggle is still required for full vendor-mark removal.
 
 Dev already supports test keys / `/dev-login` bypass when configured (local/non-production only — the sign-in page hides that link in production builds).
 
@@ -79,7 +82,7 @@ Dev already supports test keys / `/dev-login` bypass when configured (local/non-
 1. [resend.com](https://resend.com) → API Keys → `RESEND_API_KEY`
 2. Verify a sending domain → set `EMAIL_FROM="VerbaLab <noreply@yourdomain.com>"`
 3. Optional: `EMAIL_ASSET_BASE_URL` (or `WEB_APP_URL`) so branded HTML can load logo/social images from `/email/*`
-3. HTML templates are wired for jobs, usage, member added, workflows, and secure alerts — see [`NOTIFICATIONS.md`](./NOTIFICATIONS.md)
+3. HTML templates are wired for jobs, usage, member added, welcome/bootstrap, workflows, and secure alerts — see [`NOTIFICATIONS.md`](./NOTIFICATIONS.md)
 4. Console: `/notifications` · test send: `POST /v1/notifications/test`
 
 ### Optional legacy vendors

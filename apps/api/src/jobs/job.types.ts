@@ -1,4 +1,43 @@
-export type JobType = 'batch_translate' | 'document_translate' | 'workflow';
+export type JobType =
+  | 'batch_translate'
+  | 'document_translate'
+  | 'workflow'
+  | 'dub'
+  | 'clone';
+
+export type DubJobInput = {
+  text: string;
+  sourceLanguage?: string;
+  targetLanguage: string;
+  voice?: string;
+  mode?: 'auto_watermark' | 'auto' | 'studio_watermark' | 'studio';
+  format?: 'mp3' | 'wav';
+  commercial?: boolean;
+};
+
+export type DubJobResult = {
+  targetLanguage: string;
+  characters: number;
+  provider: string;
+  mode: string;
+  mimeType: string;
+  audioBase64: string;
+  honesty: string;
+};
+
+export type CloneJobInput = {
+  name: string;
+  language?: string;
+  consentConfirmed: boolean;
+  notes?: string;
+};
+
+export type CloneJobResult = {
+  cloneId: string;
+  name: string;
+  status: string;
+  honesty: string;
+};
 
 export type BatchTranslateItem = {
   id: string;

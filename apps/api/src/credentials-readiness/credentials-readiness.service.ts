@@ -16,9 +16,19 @@ export class CredentialsReadinessService {
     return {
       clerk: {
         ready: present(['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY']),
-        env: ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY'],
+        env: [
+          'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+          'CLERK_SECRET_KEY',
+          'CLERK_WEBHOOK_SIGNING_SECRET',
+          'NEXT_PUBLIC_CLERK_DOMAIN',
+        ],
+        productionKeys:
+          Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_live_')) &&
+          Boolean(process.env.CLERK_SECRET_KEY?.startsWith('sk_live_')),
+        webhookSecret: present(['CLERK_WEBHOOK_SIGNING_SECRET']),
+        customDomain: present(['NEXT_PUBLIC_CLERK_DOMAIN']),
         howToGet:
-          'https://dashboard.clerk.com → API Keys; Settings → Branding → Remove “Secured by Clerk” for production (see docs/CREDENTIALS.md)',
+          'https://dashboard.clerk.com → production instance API Keys (pk_live_/sk_live_); Webhooks → endpoint /v1/clerk/webhooks (CLERK_WEBHOOK_SIGNING_SECRET); optional custom auth domain → NEXT_PUBLIC_CLERK_DOMAIN; Settings → Branding → Remove “Secured by Clerk” (docs/CREDENTIALS.md)',
       },
       stripe: {
         ready: present(['STRIPE_SECRET_KEY', 'STRIPE_PRICE_ID_PRO']),
@@ -58,7 +68,8 @@ export class CredentialsReadinessService {
         fixture: process.env.VERBALAB_OWN_AI_FIXTURE === '1',
         localRuntime: process.env.VERBALAB_LOCAL_MODEL_RUNTIME !== '0',
         howToGet:
-          'Local runtime is on by default (/model-runtime). Deploy model pods + VERBALAB_WEIGHTS_URL for neural; mint keys at /model-keys',
+          'Local runtime is on by default (/model-runtime). Deploy model pods + VERBALAB_WEIGHTS_URL for neural hero langs (sw/yo/am/ha/zu/th/vi/hi/ht/qu); mint keys at /model-keys',
+        heroLanguages: ['sw', 'yo', 'am', 'ha', 'zu', 'th', 'vi', 'hi', 'ht', 'qu'],
       },
       enterpriseUnlocks: {
         ready: present(['VERBALAB_REGION', 'VERBALAB_DATA_RESIDENCY']) && present(['VERBALAB_ENTERPRISE_DPA']),

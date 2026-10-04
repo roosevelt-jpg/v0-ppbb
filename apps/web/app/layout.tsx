@@ -56,6 +56,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {isClerkConfigured() ? (
             <ClerkProvider
               appearance={verbalabClerkAppearance}
+              {...(process.env.NEXT_PUBLIC_CLERK_DOMAIN?.trim()
+                ? { domain: process.env.NEXT_PUBLIC_CLERK_DOMAIN.trim() }
+                : {})}
               signInFallbackRedirectUrl="/dashboard"
               signUpFallbackRedirectUrl="/dashboard"
               afterSignOutUrl="/"

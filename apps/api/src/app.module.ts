@@ -1,5 +1,9 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
 import { HealthModule } from './health/health.module';
+import { ClerkWebhooksModule } from './clerk-webhooks/clerk-webhooks.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { IdentityModule } from './identity/identity.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
@@ -535,6 +539,8 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AfricanLanguageRegistryModule,
     WorldLanguageRegistryModule,
     AfricanIntelligenceCloudModule,
+    ClerkWebhooksModule,
+    WebhooksModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -657,6 +663,12 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceClonesModule,
     RegionsModule,
     MarketingCmsModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: IdempotencyInterceptor,
+    },
   ],
 })
 export class AppModule implements NestModule {

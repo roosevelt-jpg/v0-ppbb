@@ -5,12 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { generateApiKeySecret, hashApiKey, looksLikeApiKey } from '../common/crypto/api-keys';
 import { ApiException } from '../common/errors/api-exception';
 import { AuditService } from '../audit/audit.service';
+import { WebhookService } from '../jobs/webhook.service';
 
 @Injectable()
 export class ApiKeysService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly webhooks: WebhookService,
   ) {}
 
   /** Verify a raw `vl_*` secret for WebSocket / bridge auth (throws on failure). */
@@ -159,6 +161,20 @@ export class ApiKeysService {
       apiKeyPrefix: key.prefix,
       metadata: { keyId: key.id, name: key.name, environment: key.environment },
     });
+
+    void this.webhooks
+      .deliverPartnerEvent({
+        organizationId,
+        event: 'api_key.revoked',
+        data: {
+          keyId: key.id,
+          prefix: key.prefix,
+          name: key.name,
+          environment: key.environment,
+          revokedAt: updated.revokedAt,
+        },
+      })
+      .catch(() => undefined);
 
     return { id: updated.id, revokedAt: updated.revokedAt };
   }

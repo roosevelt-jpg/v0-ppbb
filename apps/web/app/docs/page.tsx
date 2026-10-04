@@ -60,8 +60,19 @@ export default function DocsPage() {
         Machine-readable OpenAPI for the VerbaLab API (translate, media, jobs, knowledge, and more). Browse every field
         in the <Link href="/docs/openapi">OpenAPI explorer</Link> (copy paths/values, show/hide). Authenticate product
         calls with <code className="vl-code">Authorization: Bearer vl_live_...</code> or soft-sandbox{' '}
-        <code className="vl-code">vl_test_...</code>. Hub: <Link href="/developers">/developers</Link>.
+        <code className="vl-code">vl_test_...</code>. Start here:{' '}
+        <Link href="/docs/quickstart">60-second quickstart</Link>. Hub: <Link href="/developers">/developers</Link>.
       </p>
+
+      <div className="vl-panel" style={{ marginTop: '1.25rem', padding: '1.2rem 1.25rem', background: 'var(--bg-soft)', border: 'none' }}>
+        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>60-second quickstart</h2>
+        <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Free / test API key → first translate + TTS in under a minute (cURL, TypeScript SDK, Python).
+        </p>
+        <Link href="/docs/quickstart" className="vl-btn vl-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }}>
+          Open quickstart
+        </Link>
+      </div>
 
       <div className="vl-panel" style={{ marginTop: '1.25rem', padding: '1.2rem 1.25rem', background: 'var(--bg-soft)', border: 'none' }}>
         <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>Developer OpenAPI explorer</h2>

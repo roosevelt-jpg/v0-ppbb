@@ -3,6 +3,20 @@
  * Binaries stay off-repo; runtime falls back to local lexicon when unreachable.
  */
 
+/** Hero languages prioritized when neural weights are mounted. */
+export const HERO_WEIGHT_LANGUAGES = [
+  'sw',
+  'yo',
+  'am',
+  'ha',
+  'zu',
+  'th',
+  'vi',
+  'hi',
+  'ht',
+  'qu',
+] as const;
+
 export type WeightsDeployStatus = {
   status: 'absent' | 'ready' | 'unreachable' | 'invalid';
   mode: 'local_lexicon' | 'neural_remote' | 'http_model_pods';
@@ -10,6 +24,7 @@ export type WeightsDeployStatus = {
   manifestUrl: string | null;
   manifest: Record<string, unknown> | null;
   families: string[];
+  heroLanguages: readonly string[];
   honesty: {
     weightBinariesInRepo: false;
     sotaClaimsForbidden: true;
@@ -31,7 +46,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
     weightBinariesInRepo: false as const,
     sotaClaimsForbidden: true as const,
     note:
-      'Weight binaries are deploy artifacts. Absent/unreachable URL keeps local African lexicon runtime active.',
+      'Weight binaries are deploy artifacts. Absent/unreachable URL keeps local lexicon runtime (Africa + strategic global packs). Set VERBALAB_WEIGHTS_URL for neural decode on hero languages: sw/yo/am/ha/zu/th/vi/hi/ht/qu.',
   };
 
   if (!weightsUrl) {
@@ -42,6 +57,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
       manifestUrl: null,
       manifest: null,
       families: [],
+      heroLanguages: HERO_WEIGHT_LANGUAGES,
       honesty,
     };
   }
@@ -69,6 +85,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
         manifestUrl,
         manifest: null,
         families: [],
+        heroLanguages: HERO_WEIGHT_LANGUAGES,
         honesty,
       };
     }
@@ -81,6 +98,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
         manifestUrl,
         manifest: null,
         families: [],
+        heroLanguages: HERO_WEIGHT_LANGUAGES,
         honesty,
       };
     }
@@ -91,6 +109,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
       manifestUrl,
       manifest,
       families: familiesFromManifest(manifest),
+      heroLanguages: HERO_WEIGHT_LANGUAGES,
       honesty,
     };
   } catch {
@@ -101,6 +120,7 @@ export async function probeWeightsDeploy(): Promise<WeightsDeployStatus> {
       manifestUrl,
       manifest: null,
       families: [],
+      heroLanguages: HERO_WEIGHT_LANGUAGES,
       honesty,
     };
   }
@@ -130,7 +150,8 @@ export async function neuralTranslate(input: {
         text: input.text,
         source: input.source,
         target: input.target,
-        model: 'translate-fm-african',
+        model: 'translate-fm',
+        heroLanguages: HERO_WEIGHT_LANGUAGES,
       }),
       signal: AbortSignal.timeout(Number(process.env.MT_TIMEOUT_MS ?? 60_000)),
     });

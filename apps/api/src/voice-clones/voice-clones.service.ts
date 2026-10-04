@@ -138,6 +138,49 @@ export class VoiceClonesService {
     return this.serialize(row);
   }
 
+  /**
+   * Reserve a clone enrollment row for async `POST /v1/jobs` type=clone.
+   * Sample audio must still be uploaded via multipart `POST /v1/voice-clones`.
+   */
+  async reserveAsyncJob(input: {
+    organizationId: string;
+    workspaceId: string;
+    name: string;
+    language?: string;
+    consentNotes: string;
+  }) {
+    const name = input.name.trim();
+    const notes = input.consentNotes.trim();
+    if (!name) {
+      throw new ApiException('validation_error', 'name is required', HttpStatus.BAD_REQUEST);
+    }
+    if (notes.length < 8) {
+      throw new ApiException(
+        'validation_error',
+        'consentNotes must describe the consent basis (min 8 chars)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const row = await this.prisma.voiceClone.create({
+      data: {
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+        name,
+        status: 'awaiting_samples',
+        cloneMode: 'instant',
+        consentAttested: true,
+        consentNotes: notes,
+        consentAttestedAt: new Date(),
+        ownershipAttested: false,
+        ownershipNotes: input.language ? `language:${input.language}` : '',
+        sampleStorageKeys: [],
+        sampleCount: 0,
+        reviewNotes: 'Reserved by async clone job — upload samples to complete enrollment.',
+      },
+    });
+    return this.serialize(row);
+  }
+
   async create(input: {
     organizationId: string;
     workspaceId: string;

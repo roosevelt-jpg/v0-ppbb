@@ -2,6 +2,7 @@ export type EmailTemplateId =
   | 'job_complete'
   | 'usage_threshold'
   | 'member_added'
+  | 'welcome'
   | 'workflow_message'
   | 'secure_alert';
 
@@ -187,6 +188,12 @@ export const EMAIL_TEMPLATE_CATALOG: Array<{
     resendReady: true,
   },
   {
+    id: 'welcome',
+    name: 'Welcome / org bootstrap',
+    trigger: 'Clerk webhook or first org bootstrap mints Free credits + test API key',
+    resendReady: true,
+  },
+  {
     id: 'workflow_message',
     name: 'Workflow notify',
     trigger: 'Workflow / connector notify step',
@@ -282,6 +289,39 @@ export function renderMemberAddedEmail(input: {
   return { id: 'member_added', subject, text, html };
 }
 
+export function renderWelcomeEmail(input: {
+  organizationName: string;
+  name?: string;
+  monthlyCredits: number;
+  apiKeyPrefix?: string;
+  apiKeySecret?: string;
+  consoleUrl?: string;
+  docsUrl?: string;
+  brand?: EmailBrandOptions;
+}): RenderedEmail {
+  const subject = `Welcome to VerbaLab — ${input.organizationName}`;
+  const greet = input.name ? `Hi ${input.name},` : 'Welcome,';
+  const keyLine = input.apiKeySecret
+    ? `Your first test API key (${input.apiKeyPrefix ?? 'vl_test_…'}): ${input.apiKeySecret}. Store it now — it is only shown once.`
+    : input.apiKeyPrefix
+      ? `A test API key (${input.apiKeyPrefix}) is ready in the console under API keys.`
+      : 'Create an API key in the console under API keys.';
+  const text = `${greet} Your Free workspace "${input.organizationName}" is ready with ${input.monthlyCredits.toLocaleString()} monthly credits. ${keyLine} Docs: ${input.docsUrl ?? `${DEFAULT_APP_URL}/docs/quickstart`}`;
+  const html = layout({
+    preheader: text.slice(0, 140),
+    title: 'Your VerbaLab workspace is ready',
+    brand: input.brand,
+    bodyHtml: `
+      <p style="margin:0 0 12px">${escapeHtml(greet)}</p>
+      <p style="margin:0 0 12px">Workspace <strong>${escapeHtml(input.organizationName)}</strong> is on Free with <strong>${escapeHtml(String(input.monthlyCredits.toLocaleString()))}</strong> monthly credits.</p>
+      <p style="margin:0 0 12px;color:#5A6E66">${escapeHtml(keyLine)}</p>
+      <p style="margin:0;color:#5A6E66">Start with translate or TTS in under a minute — see the quickstart.</p>`,
+    ctaLabel: 'Open quickstart',
+    ctaHref: input.docsUrl ?? `${input.consoleUrl ?? DEFAULT_APP_URL}/docs/quickstart`,
+  });
+  return { id: 'welcome', subject, text, html };
+}
+
 export function renderWorkflowMessageEmail(input: {
   subject: string;
   message: string;
@@ -374,6 +414,14 @@ export function previewEmailTemplate(id: EmailTemplateId, brand?: EmailBrandOpti
       return renderMemberAddedEmail({
         organizationName: 'Demo Org',
         role: 'member',
+        brand,
+      });
+    case 'welcome':
+      return renderWelcomeEmail({
+        organizationName: 'Demo Org',
+        name: 'Amina',
+        monthlyCredits: 10_000,
+        apiKeyPrefix: 'vl_test_demo',
         brand,
       });
     case 'workflow_message':

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { ApiKeyGuard, ApiKeyContext } from '../common/guards/api-key.guard';
 import { CurrentApiKey, CurrentSession } from '../common/decorators/auth.decorators';
@@ -6,6 +6,14 @@ import { ApiException } from '../common/errors/api-exception';
 import { JobType } from './job.types';
 import { ClerkAuthGuard, SessionContext } from '../common/guards/clerk-auth.guard';
 import { WebhookService } from './webhook.service';
+
+const JOB_TYPES: JobType[] = [
+  'batch_translate',
+  'document_translate',
+  'workflow',
+  'dub',
+  'clone',
+];
 
 @Controller()
 export class JobsController {
@@ -25,11 +33,12 @@ export class JobsController {
       input?: unknown;
       webhookUrl?: string;
     },
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    if (body.type !== 'batch_translate' && body.type !== 'document_translate' && body.type !== 'workflow') {
+    if (!body.type || !JOB_TYPES.includes(body.type as JobType)) {
       throw new ApiException(
         'validation_error',
-        'type must be batch_translate, document_translate, or workflow',
+        `type must be one of: ${JOB_TYPES.join(', ')}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -40,6 +49,7 @@ export class JobsController {
       type: body.type as JobType,
       payload: body.input,
       webhookUrl: body.webhookUrl,
+      idempotencyKey: idempotencyKey?.trim() || undefined,
     });
   }
 

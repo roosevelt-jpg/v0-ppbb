@@ -75,6 +75,7 @@ describe('Email templates + notifications engine', () => {
     const svc = new NotificationsService(
       { membership: { findMany: async () => [] } } as never,
       { record: async () => ({}) } as never,
+      { deliverPartnerEvent: async () => ({ ok: true, skipped: true }) } as never,
     );
     const engine = svc.engine();
     expect(engine.templates.length).toBe(EMAIL_TEMPLATE_CATALOG.length);

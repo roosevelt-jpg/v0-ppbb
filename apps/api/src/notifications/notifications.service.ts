@@ -12,10 +12,12 @@ import {
   previewEmailTemplate,
   renderJobCompleteEmail,
   renderMemberAddedEmail,
+  renderWelcomeEmail,
   renderSecureAlertEmail,
   renderUsageThresholdEmail,
   renderWorkflowMessageEmail,
 } from './email-templates';
+import { WebhookService } from '../jobs/webhook.service';
 
 @Injectable()
 export class NotificationsService {
@@ -25,6 +27,7 @@ export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly webhooks: WebhookService,
   ) {
     this.provider = new ResendAdapter(
       process.env.RESEND_API_KEY ?? '',
@@ -411,6 +414,18 @@ export class NotificationsService {
             route: 'notifications.usage',
             metadata: { characters, quota: org.characterQuota, emailed: false },
           });
+          void this.webhooks
+            .deliverPartnerEvent({
+              organizationId,
+              event: 'credits.low',
+              data: {
+                thresholdPct: threshold.pct,
+                charactersUsed: characters,
+                quota: org.characterQuota,
+                remaining: Math.max(org.characterQuota - characters, 0),
+              },
+            })
+            .catch(() => undefined);
           continue;
         }
 
@@ -444,6 +459,19 @@ export class NotificationsService {
             },
           });
 
+          void this.webhooks
+            .deliverPartnerEvent({
+              organizationId,
+              event: 'credits.low',
+              data: {
+                thresholdPct: threshold.pct,
+                charactersUsed: characters,
+                quota: org.characterQuota,
+                remaining: Math.max(org.characterQuota - characters, 0),
+              },
+            })
+            .catch(() => undefined);
+
           if (result) {
             await this.audit.record({
               organizationId,
@@ -462,6 +490,53 @@ export class NotificationsService {
       // Fire-and-forget from translate; ignore teardown / disconnect races in tests.
       this.logger.debug(
         `Usage threshold check skipped: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  }
+
+  async notifyWelcome(input: {
+    organizationId: string;
+    organizationName: string;
+    email: string;
+    name?: string;
+    apiKeyPrefix?: string;
+    apiKeySecret?: string;
+    monthlyCredits: number;
+  }) {
+    if (this.disabled() || !input.email) return;
+    try {
+      const brand = await this.emailBrand();
+      const rendered = renderWelcomeEmail({
+        organizationName: input.organizationName,
+        name: input.name,
+        monthlyCredits: input.monthlyCredits,
+        apiKeyPrefix: input.apiKeyPrefix,
+        apiKeySecret: input.apiKeySecret,
+        consoleUrl: this.consoleBase(),
+        docsUrl: `${this.consoleBase()}/docs/quickstart`,
+        brand,
+      });
+      const result = await this.sendEmail({
+        to: input.email,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+      });
+      if (!result) return;
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.welcome_sent',
+        route: 'org.bootstrap',
+        metadata: {
+          email: input.email,
+          emailId: result.id,
+          template: rendered.id,
+          apiKeyPrefix: input.apiKeyPrefix ?? null,
+        },
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Welcome notification failed: ${error instanceof Error ? error.message : error}`,
       );
     }
   }
