@@ -55,6 +55,8 @@ export class PartnerConnectorsService {
         kind: p.kind,
         status: p.status,
         protocols: p.protocols,
+        useCases: p.useCases,
+        docs: p.docs,
         install: '/v1/partner-connectors/installations',
         invoke: '/v1/partner-connectors/invoke',
         api: p.api,

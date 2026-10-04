@@ -9,9 +9,9 @@ type Platform = {
   id: string;
   name: string;
   kind: string;
-  protocols: string[];
-  useCases: string[];
-  api: string;
+  protocols?: string[];
+  useCases?: string[];
+  api?: string;
 };
 
 type Tool = { name: string; description: string };
@@ -35,7 +35,22 @@ export function PartnerConnectorsClient() {
     ])
       .then(([engine, toolRes, registry]) => {
         setBlurb(engine.blurb ?? '');
-        setPlatforms(registry.registry?.length ? registry.registry : engine.platforms ?? []);
+        // Prefer engine platforms (full useCases); merge registry install/invoke if present.
+        const enginePlatforms = engine.platforms ?? [];
+        const registryRows = registry.registry ?? [];
+        if (enginePlatforms.length) {
+          const byId = new Map(registryRows.map((r) => [r.id, r]));
+          setPlatforms(
+            enginePlatforms.map((p) => ({
+              ...p,
+              ...(byId.get(p.id) ?? {}),
+              useCases: p.useCases ?? byId.get(p.id)?.useCases ?? [],
+              protocols: p.protocols ?? byId.get(p.id)?.protocols ?? [],
+            })),
+          );
+        } else {
+          setPlatforms(registryRows);
+        }
         setTools((toolRes.tools ?? []).map((t) => ({ name: t.name, description: t.description })));
       })
       .catch((err: Error) => setError(err.message));
@@ -101,9 +116,9 @@ export function PartnerConnectorsClient() {
           {platforms.map((p) => (
             <div key={p.id} style={{ borderTop: '1px solid var(--border, #e4e4e7)', paddingTop: 8 }}>
               <strong>{p.name}</strong> <span style={{ color: 'var(--muted)' }}>({p.kind})</span>
-              <div style={{ fontSize: '0.9rem' }}>{p.useCases.join(' · ')}</div>
+              <div style={{ fontSize: '0.9rem' }}>{(p.useCases ?? []).join(' · ') || '—'}</div>
               <div style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-                {p.protocols.join(', ')} — {p.api}
+                {(p.protocols ?? []).join(', ') || '—'} — {p.api ?? '—'}
               </div>
             </div>
           ))}
