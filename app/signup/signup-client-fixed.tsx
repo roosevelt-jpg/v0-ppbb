@@ -18,6 +18,7 @@ import {
 } from '@/components/address-location-picker'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { formatAuthError } from '@/lib/auth-errors'
+import { isValidPhone } from '@/lib/user-profile'
 import type { LocationData } from '@/lib/types'
 import type { PricingPlan } from '@/lib/pricing-types'
 import {
@@ -335,8 +336,8 @@ export default function SignupClient() {
       if (phone && phone !== formData.phone) {
         setFormData((prev) => ({ ...prev, phone }))
       }
-      if (!phone) {
-        setError('Phone number is required')
+      if (!isValidPhone(phone)) {
+        setError('A valid phone number is required, the same way email is required.')
         return false
       }
       if (!formData.dateOfBirth) {
@@ -566,6 +567,12 @@ export default function SignupClient() {
       }
 
       if (gateway === 'stripe') {
+        if (data.alreadyComplete) {
+          window.location.href = data.resumedWithoutCharge
+            ? '/dashboard/membership?status=resumed'
+            : '/dashboard/membership?status=success'
+          return
+        }
         if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
         setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
         setCheckingOut(false)
@@ -718,6 +725,12 @@ export default function SignupClient() {
     if (currentStep !== 4) return
     if (!(await validateStep(currentStep))) return
 
+    if (!isValidPhone(formData.phone)) {
+      setError('A valid phone number is required, the same way email is required.')
+      setCurrentStep(3)
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
@@ -726,10 +739,34 @@ export default function SignupClient() {
       if (existingUid) {
         const userRef = doc(db, 'users', existingUid)
         const existing = await getDoc(userRef)
+        const { userData, now } = buildUserPayload(existingUid)
+        if (!isValidPhone(String(userData.phone || ''))) {
+          setError('A valid phone number is required, the same way email is required.')
+          setCurrentStep(3)
+          return
+        }
         if (!existing.exists()) {
-          const { userData, now } = buildUserPayload(existingUid)
           await setDoc(userRef, sanitizeForFirestore(userData))
           await persistBusinessDirectory(existingUid, now)
+        } else {
+          await setDoc(
+            userRef,
+            sanitizeForFirestore({
+              phone: userData.phone,
+              whatsappNumber: userData.phone,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              displayName: userData.displayName,
+              country: userData.country,
+              emirate: userData.emirate,
+              city: userData.city,
+              location: userData.location,
+              gender: userData.gender,
+              dateOfBirth: userData.dateOfBirth,
+              updatedAt: now,
+            }),
+            { merge: true }
+          )
         }
         setCreatedUserId(existingUid)
         if (formData.promoCode.trim()) {
@@ -1251,6 +1288,8 @@ export default function SignupClient() {
                           setError('')
                         }}
                         placeholder="+971 50 1234567"
+                        required
+                        aria-required="true"
                         style={{ width: '100%', padding: '0.75rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '16px', boxSizing: 'border-box' }}
                       />
                     </div>

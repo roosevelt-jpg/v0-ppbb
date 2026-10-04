@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (!result.ok) {
       return NextResponse.json(
         { success: false, error: result.error || 'Failed to send login code' },
-        { status: 500 }
+        { status: 503 }
       )
     }
 
@@ -74,12 +74,8 @@ export async function POST(request: NextRequest) {
       success: true,
       email,
       expiresAt: result.expiresAt,
-      emailSkipped: Boolean(result.emailSkipped),
-      message: result.emailSkipped
-        ? result.error
-          ? `Login code was not emailed (${result.error}). You were signed in so the admin panel is not locked. Check Admin → Integrations → Zoho Mail SMTP, and Email activity for this send.`
-          : 'Zoho Mail SMTP is not configured — login code skipped. Configure Admin → Integrations → Zoho Mail SMTP.'
-        : 'Login code sent to your email',
+      emailSkipped: false,
+      message: 'Login code sent to your email',
     })
   } catch (error) {
     console.error('[admin/login/request-otp]', error)

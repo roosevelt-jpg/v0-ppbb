@@ -1,6 +1,7 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { isValidPhone } from '@/lib/user-profile'
 
 export const MEMBERSHIP_PROMO_COLLECTION = 'membershipPromoCodes'
 
@@ -375,6 +376,13 @@ export async function redeemMembershipPromo(input: {
   const userSnap = await userRef.get()
   if (!userSnap.exists) throw new Error('User profile not found')
   const userData = userSnap.data() || {}
+
+  const phoneOnFile = String(userData.phone || userData.whatsappNumber || '')
+  if (!isValidPhone(phoneOnFile)) {
+    throw new Error(
+      'A phone number is required before you can use a membership code, the same way email is required. Add it on your profile and try again.'
+    )
+  }
 
   if (userData.membershipPromoCodeId || userData.promoCodeId) {
     throw new Error('You have already redeemed a membership promo code')

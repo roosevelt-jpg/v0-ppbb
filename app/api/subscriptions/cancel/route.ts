@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe-utils'
+import type Stripe from 'stripe'
+import { getStripeClient } from '@/lib/get-stripe-client'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { verifyIdToken } from '@/lib/admin-access-server'
@@ -70,18 +71,64 @@ export async function POST(req: NextRequest) {
       userStripeSub ||
       (subscriptionId.startsWith('sub_') ? subscriptionId : '')
 
-    if (!stripeId && !docRef) {
+    const customerId = String(
+      data?.stripeCustomerId || userSnap.data()?.stripeCustomerId || ''
+    ).trim()
+
+    if (!stripeId && !customerId && !docRef) {
       return NextResponse.json({ error: 'No active subscription found' }, { status: 404 })
     }
 
-    if (stripe && stripeId) {
-      if (stopRenewalOnly) {
-        const current = await stripe.subscriptions.retrieve(stripeId)
-        if (!current.cancel_at_period_end) {
-          await stripe.subscriptions.update(stripeId, { cancel_at_period_end: true })
+    // Firestore "renewal stopped" is not enough. Stripe must accept the cancel
+    // or the saved card is still debited at period end.
+    if (stripeId || customerId) {
+      const stripe = await getStripeClient()
+      const ids = new Set<string>()
+      if (stripeId) ids.add(stripeId)
+      if (customerId) {
+        const listed = await stripe.subscriptions.list({
+          customer: customerId,
+          status: 'all',
+          limit: 20,
+        })
+        for (const sub of listed.data) {
+          if (['active', 'trialing', 'past_due', 'unpaid'].includes(sub.status)) {
+            ids.add(sub.id)
+          }
         }
-      } else {
-        await stripe.subscriptions.cancel(stripeId)
+      }
+      if (ids.size === 0 && stripeId) ids.add(stripeId)
+
+      for (const id of ids) {
+        const current = await stripe.subscriptions.retrieve(id)
+        if (current.status === 'canceled' || current.status === 'incomplete_expired') continue
+        let updated: Stripe.Subscription
+        if (stopRenewalOnly) {
+          updated = current.cancel_at_period_end
+            ? current
+            : await stripe.subscriptions.update(id, { cancel_at_period_end: true })
+          if (!updated.cancel_at_period_end) {
+            return NextResponse.json(
+              { error: 'Stripe did not stop renewal. Your card was not changed. Try again.' },
+              { status: 502 }
+            )
+          }
+        } else {
+          updated = await stripe.subscriptions.cancel(id)
+        }
+        await db.collection('subscriptions').doc(id).set(
+          {
+            userId: uid,
+            stripeSubscriptionId: id,
+            stripeCustomerId: typeof updated.customer === 'string' ? updated.customer : customerId,
+            gateway: 'stripe',
+            cancelAtPeriodEnd: stopRenewalOnly,
+            status: stopRenewalOnly ? updated.status || 'active' : 'cancelled',
+            ...(stopRenewalOnly ? {} : { cancelledAt: FieldValue.serverTimestamp() }),
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        )
       }
     }
 

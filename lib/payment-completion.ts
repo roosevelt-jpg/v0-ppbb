@@ -14,6 +14,7 @@ import {
   clientSecretForIncompleteSubscription,
   ensureRecurringMembershipPrice,
   membershipRecurringInterval,
+  subscriptionPeriodEndUnix,
 } from '@/lib/stripe-membership-billing'
 
 export function getPublicAppUrl(): string {
@@ -79,6 +80,8 @@ export async function createStripeMembershipIntent(params: {
   mode: 'payment' | 'setup'
   subscriptionId: string
   alreadyComplete?: boolean
+  /** Renewal was turned back on inside a period that is already paid. */
+  resumedWithoutCharge?: boolean
 }> {
   const { getStripeClient } = await import('@/lib/get-stripe-client')
   const stripe = await getStripeClient()
@@ -144,38 +147,50 @@ export async function createStripeMembershipIntent(params: {
   })
 
   let subscription: Stripe.Subscription
+  let resumedWithoutCharge = false
 
   if (existingSubId) {
-    try {
-      const current = await stripe.subscriptions.retrieve(existingSubId)
-      const status = String(current.status || '')
-      // Allow in-place plan change even when renewal was stopped — clear cancel_at_period_end.
-      if (['active', 'trialing', 'past_due'].includes(status)) {
-        const itemId = current.items.data[0]?.id
-        if (itemId) {
-          subscription = await stripe.subscriptions.update(existingSubId, {
-            items: [{ id: itemId, price: priceId }],
-            proration_behavior: 'create_prorations',
-            metadata,
-            expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
-            cancel_at_period_end: false,
-            ...(params.couponId ? { discounts: [{ coupon: params.couponId }] } : {}),
-          })
-        } else {
-          throw new Error('missing subscription item')
-        }
-      } else if (['incomplete', 'incomplete_expired'].includes(status)) {
+    const current = await stripe.subscriptions.retrieve(existingSubId)
+    const status = String(current.status || '')
+    const itemId = current.items.data[0]?.id
+    const currentPriceId = current.items.data[0]?.price?.id
+    const samePlan = Boolean(currentPriceId && currentPriceId === priceId)
+    const periodEnd = subscriptionPeriodEndUnix(current)
+    const stillInPeriod = periodEnd != null && periodEnd * 1000 > Date.now()
+    const live = ['active', 'trialing', 'past_due'].includes(status)
+
+    if (live && itemId && samePlan && current.cancel_at_period_end && stillInPeriod && !params.trialDays) {
+      // They already paid through the current period. Turning renewal back on
+      // must not create another invoice until that period ends.
+      subscription = await stripe.subscriptions.update(existingSubId, {
+        cancel_at_period_end: false,
+        proration_behavior: 'none',
+        metadata,
+        expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+      })
+      resumedWithoutCharge = true
+    } else if (live && itemId && samePlan && !current.cancel_at_period_end && !params.couponId && !params.trialDays) {
+      subscription = current
+      resumedWithoutCharge = true
+    } else if (live && itemId) {
+      subscription = await stripe.subscriptions.update(existingSubId, {
+        items: [{ id: itemId, price: priceId }],
+        proration_behavior: 'create_prorations',
+        metadata,
+        expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+        cancel_at_period_end: false,
+        ...(params.couponId ? { discounts: [{ coupon: params.couponId }] } : {}),
+      })
+    } else if (['incomplete', 'incomplete_expired', 'canceled'].includes(status)) {
+      if (status !== 'canceled') {
         try {
           await stripe.subscriptions.cancel(existingSubId)
         } catch {
-          /* ignore */
+          /* already closed */
         }
-        subscription = await stripe.subscriptions.create(buildCreateParams())
-      } else {
-        subscription = await stripe.subscriptions.create(buildCreateParams())
       }
-    } catch (err) {
-      console.error('[payment-completion] subscription update failed, creating new:', err)
+      subscription = await stripe.subscriptions.create(buildCreateParams())
+    } else {
       subscription = await stripe.subscriptions.create(buildCreateParams())
     }
   } else {
@@ -200,7 +215,9 @@ export async function createStripeMembershipIntent(params: {
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: customerId,
       gateway: 'stripe',
-      status: subscription.status === 'active' ? 'active' : 'incomplete',
+      status: ['active', 'trialing'].includes(String(subscription.status))
+        ? String(subscription.status)
+        : 'incomplete',
       interval,
       cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
       updatedAt: FieldValue.serverTimestamp(),
@@ -208,6 +225,16 @@ export async function createStripeMembershipIntent(params: {
     },
     { merge: true }
   )
+
+  if (resumedWithoutCharge) {
+    return {
+      clientSecret: null,
+      mode: 'payment',
+      subscriptionId: subscription.id,
+      alreadyComplete: true,
+      resumedWithoutCharge: true,
+    }
+  }
 
   // Upgrades that are already active (proration charged on file) need no card form.
   if (['active', 'trialing'].includes(String(subscription.status))) {

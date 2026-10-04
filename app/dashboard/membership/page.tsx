@@ -235,7 +235,11 @@ export default function MembershipPage() {
 
       if (gateway === 'stripe') {
         if (data.alreadyComplete) {
-          setStatusBanner('Plan upgraded. The prorated difference was charged to your card on file.')
+          setStatusBanner(
+            data.resumedWithoutCharge
+              ? 'Automatic renewal is back on. You will not be charged again until the current access period ends.'
+              : 'Plan updated. Any price difference was applied to your card on file.'
+          )
           await refreshProfile()
           return
         }

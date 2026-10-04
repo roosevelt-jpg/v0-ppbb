@@ -22,20 +22,6 @@ export function generateAdminOtpCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, '0')
 }
 
-async function markAdminMfaVerified(uid: string): Promise<void> {
-  const db = getAdminDb()
-  await db
-    .collection('users')
-    .doc(uid)
-    .set(
-      {
-        adminMfaVerifiedAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    )
-}
-
 export async function createAndSendAdminLoginOtp(opts: {
   uid: string
   email: string
@@ -55,18 +41,13 @@ export async function createAndSendAdminLoginOtp(opts: {
     return { ok: false, error: 'Invalid admin account' }
   }
 
-  // If Zoho SMTP is not set up yet, skip email OTP so super-admins are not locked out.
   const zoho = await getZohoSmtpConfig()
   if (!zoho) {
-    await markAdminMfaVerified(uid)
-    console.warn(
-      '[admin-login-otp] Zoho Mail SMTP not configured — skipping email OTP for',
-      email
-    )
+    console.warn('[admin-login-otp] Zoho Mail SMTP not configured — refusing login without a code for', email)
     return {
-      ok: true,
-      emailSkipped: true,
-      expiresAt: new Date(Date.now() + ADMIN_MFA_SESSION_HOURS * 60 * 60 * 1000).toISOString(),
+      ok: false,
+      error:
+        'Login code could not be emailed. Zoho Mail SMTP is not configured, so sign-in stops here. An admin must fix Zoho under Integrations before anyone can enter the admin panel.',
     }
   }
 
@@ -107,18 +88,13 @@ export async function createAndSendAdminLoginOtp(opts: {
   })
 
   if (!result.ok) {
-    // SMTP configured but send failed — still avoid total lockout; skip OTP this time.
-    await markAdminMfaVerified(uid)
-    console.warn(
-      '[admin-login-otp] Email send failed — skipping OTP for',
-      email,
-      result.error
-    )
+    await db.collection(ADMIN_LOGIN_OTP_COLLECTION).doc(uid).delete().catch(() => undefined)
+    console.warn('[admin-login-otp] Email send failed — code was not issued for', email, result.error)
     return {
-      ok: true,
-      emailSkipped: true,
-      error: result.error,
-      expiresAt: new Date(Date.now() + ADMIN_MFA_SESSION_HOURS * 60 * 60 * 1000).toISOString(),
+      ok: false,
+      error: result.error
+        ? `Login code was not emailed (${result.error}). You are not signed in.`
+        : 'Login code was not emailed. You are not signed in.',
     }
   }
 

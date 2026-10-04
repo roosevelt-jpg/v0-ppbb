@@ -12,6 +12,7 @@ import {
 import { createZiinaPaymentIntent } from '@/lib/ziina-client'
 import { createStripeMembershipIntent, getPublicAppUrl } from '@/lib/payment-completion'
 import { planTrialDays, normalizePlanTrialMonths } from '@/lib/pricing-utils'
+import { isValidPhone } from '@/lib/user-profile'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -42,6 +43,20 @@ export async function POST(req: NextRequest) {
         : ''
 
     const db = getAdminDb()
+    const subscriber = await db.collection('users').doc(String(userId)).get()
+    const subscriberPhone = String(
+      subscriber.data()?.phone || subscriber.data()?.whatsappNumber || ''
+    )
+    if (!isValidPhone(subscriberPhone)) {
+      return NextResponse.json(
+        {
+          error:
+            'A phone number is required before you can subscribe, the same way email is required. Add it on your profile and try again.',
+        },
+        { status: 400 }
+      )
+    }
+
     const planDoc = await db.collection('pricingPlans').doc(planId).get()
     if (!planDoc.exists) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
@@ -92,7 +107,7 @@ async function handleStripeCheckout(
   promoCode = ''
 ) {
   try {
-    const trialDays = planTrialDays(plan)
+    let trialDays = planTrialDays(plan)
     const trialMonths = normalizePlanTrialMonths(plan.trialMonths)
 
     let couponId: string | undefined
@@ -168,7 +183,14 @@ async function handleStripeCheckout(
               extraMetadata.discountMonths = String(promo.benefitDurationMonths)
             }
           } else if (promoGrantsFreeAccess(promo) && promo.trialEnabled) {
-            // Free trial promo — billing starts after benefit duration; no coupon needed.
+            // Free trial promo — billing starts after the promo's own duration.
+            const months = Math.floor(Number(promo.benefitDurationMonths) || 0)
+            if (months > 0) {
+              const now = new Date()
+              const trialEnd = new Date(now)
+              trialEnd.setMonth(trialEnd.getMonth() + months)
+              trialDays = Math.max(1, Math.round((trialEnd.getTime() - now.getTime()) / 86400000))
+            }
             extraMetadata.promoCodeId = promo.id
             extraMetadata.promoCode = promo.code
           }
@@ -176,18 +198,20 @@ async function handleStripeCheckout(
       }
     }
 
-    const { clientSecret, mode, subscriptionId, alreadyComplete } = await createStripeMembershipIntent({
-      planId,
-      userId,
-      trialDays,
-      couponId,
-      extraMetadata: Object.keys(extraMetadata).length ? extraMetadata : undefined,
-    })
+    const { clientSecret, mode, subscriptionId, alreadyComplete, resumedWithoutCharge } =
+      await createStripeMembershipIntent({
+        planId,
+        userId,
+        trialDays,
+        couponId,
+        extraMetadata: Object.keys(extraMetadata).length ? extraMetadata : undefined,
+      })
     return NextResponse.json({
       clientSecret,
       mode,
       subscriptionId,
       alreadyComplete: Boolean(alreadyComplete),
+      resumedWithoutCharge: Boolean(resumedWithoutCharge),
       gateway: 'stripe',
       ...(couponId
         ? {

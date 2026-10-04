@@ -188,6 +188,13 @@ function SettingsContent() {
     const current = auth.currentUser
     if (!current || !user) return
 
+    const phone = formData.phone.trim()
+    const phoneDigits = phone.replace(/\D/g, '')
+    if (phoneDigits.length < 8 || phoneDigits.length > 15) {
+      setError('A valid phone number is required, the same way email is required.')
+      return
+    }
+
     setSaving(true)
     setError(null)
     setSuccess(null)
@@ -447,9 +454,12 @@ function SettingsContent() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Phone</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Phone *</label>
                 <input
-                  type="text"
+                  type="tel"
+                  required
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"

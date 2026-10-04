@@ -84,12 +84,10 @@ function AdminLoginForm() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok || !json.success) {
+        await logoutUser()
+        clearAdminMfaSession()
+        setStep(2)
         setError(json.error || 'Failed to send login code. Please try again.')
-        return
-      }
-      if (json.emailSkipped && auth.currentUser) {
-        setAdminMfaSession(auth.currentUser.uid)
-        router.replace(safeReturnUrl)
         return
       }
       if (json.email) setMaskedEmail(maskEmail(String(json.email)))
@@ -186,19 +184,6 @@ function AdminLoginForm() {
         await logoutUser()
         clearAdminMfaSession()
         setError(otpJson.error || 'Could not send login code. Please try again.')
-        setLoading(false)
-        return
-      }
-
-      // Gmail SMTP not configured yet — allow login without email OTP
-      if (otpJson.emailSkipped) {
-        setAdminMfaSession(credential.user.uid)
-        completeLoginAudit(profile)
-        setInfo(
-          String(otpJson.message || '') ||
-            'Signed in without an email code because Zoho Mail did not send it. Check Admin → Integrations → Zoho Mail SMTP.'
-        )
-        router.replace(safeReturnUrl)
         setLoading(false)
         return
       }

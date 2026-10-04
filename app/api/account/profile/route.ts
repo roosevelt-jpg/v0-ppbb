@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
-import { splitFullName } from '@/lib/user-profile'
+import { isValidPhone, splitFullName } from '@/lib/user-profile'
 
 type ProfileBody = {
   fullName?: string
@@ -50,6 +50,12 @@ export async function PATCH(request: NextRequest) {
     }
     if (!email || !isValidEmail(email)) {
       return NextResponse.json({ success: false, error: 'A valid email is required' }, { status: 400 })
+    }
+    if (!isValidPhone(phone)) {
+      return NextResponse.json(
+        { success: false, error: 'A valid phone number is required, the same way email is required.' },
+        { status: 400 }
+      )
     }
 
     const { firstName, lastName } = splitFullName(fullName)

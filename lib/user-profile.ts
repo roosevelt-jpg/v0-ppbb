@@ -9,6 +9,14 @@ type ProfileUser = Pick<
   profilePicture?: string
 }
 
+/** Same bar as email: present, and a real number (8–15 digits). */
+export function isValidPhone(value: unknown): boolean {
+  const raw = typeof value === 'string' ? value.trim() : ''
+  if (!raw) return false
+  const digits = raw.replace(/\D/g, '')
+  return digits.length >= 8 && digits.length <= 15
+}
+
 /** Best available phone from user document (phone, then WhatsApp) */
 export function getUserPhone(user: ProfileUser | null | undefined): string | null {
   if (!user) return null
