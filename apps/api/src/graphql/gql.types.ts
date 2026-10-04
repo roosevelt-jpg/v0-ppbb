@@ -4437,6 +4437,19 @@ export class GqlAfricanLanguageRegistryEngine {
 
 
 @ObjectType()
+export class GqlWorldLanguageRegistryEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => Boolean)
+  coverageComplete!: boolean;
+}
+
+
+@ObjectType()
 export class GqlCulturalIntelligenceEngine {
   @Field()
   product!: string;

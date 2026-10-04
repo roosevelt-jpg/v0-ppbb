@@ -385,6 +385,7 @@ export const CONSOLE_NAV: NavGroup[] = [
     items: [
       { href: '/african-intelligence-cloud', label: 'African Intelligence' },
       { href: '/african-language-registry', label: 'African Lang Registry' },
+      { href: '/world-language-registry', label: 'World Lang Registry' },
       { href: '/cultural-intelligence', label: 'Cultural Intelligence' },
       { href: '/african-knowledge-graph', label: 'Africa Knowledge Graph' },
       { href: '/government-intelligence', label: 'Government Intel' },

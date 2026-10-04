@@ -631,4 +631,257 @@ export const ACCENT_SEEDS: AccentSeed[] = [
     notes: 'Peruvian Spanish spoken proxies.',
   },
 
+
+  {
+    code: 'km-kh',
+    languageCode: 'km',
+    nameEn: 'Khmer (Cambodia) (spoken)',
+    region: 'KH',
+    relatedDialectCode: 'km-kh',
+    cueTerms: ['suostei', 'arkoun', 'baat', 'ot', 'chas'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'lo-la',
+    languageCode: 'lo',
+    nameEn: 'Lao (Laos) (spoken)',
+    region: 'LA',
+    relatedDialectCode: 'lo-la',
+    cueTerms: ['sabaidee', 'khop jai', 'dai', 'bo', 'jai'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'my-mm',
+    languageCode: 'my',
+    nameEn: 'Burmese (Myanmar) (spoken)',
+    region: 'MM',
+    relatedDialectCode: 'my-mm',
+    cueTerms: ['mingalaba', 'kyeizu tin ba de', 'houk ke', 'ma houk'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'jv-id',
+    languageCode: 'jv',
+    nameEn: 'Javanese (Indonesia) (spoken)',
+    region: 'ID',
+    relatedDialectCode: 'jv-id',
+    cueTerms: ['sugeng', 'matur nuwun', 'inggih', 'mboten', 'sampeyan'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'su-id',
+    languageCode: 'su',
+    nameEn: 'Sundanese (Indonesia) (spoken)',
+    region: 'ID',
+    relatedDialectCode: 'su-id',
+    cueTerms: ['wilujeng', 'hatur nuhun', 'muhun', 'teu', 'hideung'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'ceb-ph',
+    languageCode: 'ceb',
+    nameEn: 'Cebuano (Philippines) (spoken)',
+    region: 'PH',
+    relatedDialectCode: 'ceb-ph',
+    cueTerms: ['kumusta', 'salamat', 'oo', 'dili', 'bay'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'hil-ph',
+    languageCode: 'hil',
+    nameEn: 'Hiligaynon (Philippines) (spoken)',
+    region: 'PH',
+    relatedDialectCode: 'hil-ph',
+    cueTerms: ['kumusta', 'salamat', 'huo', 'indi', 'bay'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'war-ph',
+    languageCode: 'war',
+    nameEn: 'Waray (Philippines) (spoken)',
+    region: 'PH',
+    relatedDialectCode: 'war-ph',
+    cueTerms: ['kumusta', 'salamat', 'oo', 'dire', 'bay'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'mr-in',
+    languageCode: 'mr',
+    nameEn: 'Indian Marathi (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'mr-in',
+    cueTerms: ['namaskar', 'dhanyavad', 'ho', 'nahi', 'kay'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'gu-in',
+    languageCode: 'gu',
+    nameEn: 'Indian Gujarati (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'gu-in',
+    cueTerms: ['namaste', 'aabhar', 'ha', 'na', 'kem cho'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'kn-in',
+    languageCode: 'kn',
+    nameEn: 'Indian Kannada (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'kn-in',
+    cueTerms: ['namaskara', 'dhanyavadagalu', 'houdu', 'illa', 'hegiddira'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'ml-in',
+    languageCode: 'ml',
+    nameEn: 'Indian Malayalam (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'ml-in',
+    cueTerms: ['namaskaram', 'nanni', 'athe', 'alla', 'sukhamano'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'pa-in',
+    languageCode: 'pa',
+    nameEn: 'Indian Punjabi (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'pa-in',
+    cueTerms: ['sat sri akal', 'shukria', 'haan', 'nahin', 'ki haal'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'or-in',
+    languageCode: 'or',
+    nameEn: 'Indian Odia (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'or-in',
+    cueTerms: ['namaskar', 'dhanyabad', 'han', 'nahin', 'kemiti achha'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'as-in',
+    languageCode: 'as',
+    nameEn: 'Indian Assamese (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'as-in',
+    cueTerms: ['nomoskar', 'dhonyobad', 'hoy', 'nohoy', 'kene aase'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'ne-np',
+    languageCode: 'ne',
+    nameEn: 'Nepali (Nepal) (spoken)',
+    region: 'NP',
+    relatedDialectCode: 'ne-np',
+    cueTerms: ['namaste', 'dhanyabad', 'ho', 'hoina', 'sanchai'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'si-lk',
+    languageCode: 'si',
+    nameEn: 'Sinhala (Sri Lanka) (spoken)',
+    region: 'LK',
+    relatedDialectCode: 'si-lk',
+    cueTerms: ['ayubowan', 'stutiyi', 'owu', 'nehe', 'kohomada'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'bho-in',
+    languageCode: 'bho',
+    nameEn: 'Indian Bhojpuri (spoken)',
+    region: 'IN',
+    relatedDialectCode: 'bho-in',
+    cueTerms: ['pranam', 'dhanyavad', 'haan', 'na', 'ka haal'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'ay-bo',
+    languageCode: 'ay',
+    nameEn: 'Bolivian Aymara (spoken)',
+    region: 'BO',
+    relatedDialectCode: 'ay-bo',
+    cueTerms: ['kamisaraki', 'jusp'akt'a', 'jisa', 'jani', 'kamisaki'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'nhe-mx',
+    languageCode: 'nhe',
+    nameEn: 'Mexican Nahuatl (spoken)',
+    region: 'MX',
+    relatedDialectCode: 'nhe-mx',
+    cueTerms: ['niltze', 'tlazohcamati', 'quema', 'ahmo', 'quen tika'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'yua-mx',
+    languageCode: 'yua',
+    nameEn: 'Yucatec Maya (spoken)',
+    region: 'MX',
+    relatedDialectCode: 'yua-mx',
+    cueTerms: ['ba'ax ka wa'alik', 'jach dyos bo'otik', 'jaaj', 'ma'', 'bix a bel'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'gcf-gp',
+    languageCode: 'gcf',
+    nameEn: 'Guadeloupean Creole (spoken)',
+    region: 'GP',
+    relatedDialectCode: 'gcf-gp',
+    cueTerms: ['bonjou', 'mesi', 'wi', 'non', 'sa ka fèt'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
+
+  {
+    code: 'pap-aw',
+    languageCode: 'pap',
+    nameEn: 'Aruba Papiamento (spoken)',
+    region: 'AW',
+    relatedDialectCode: 'pap-aw',
+    cueTerms: ['bon dia', 'danki', 'si', 'no', 'kon ta'],
+    notes: 'Spoken lexical proxies for strategic global accent detect.',
+  },
+
 ];

@@ -40,6 +40,36 @@ const CONTINUUM_MAP = [
     poles: ['fr-MA', 'fr-DZ', 'fr-TN', 'fr', 'ary'],
     notes: 'Street French with Darija loanwords and register shifts.',
   },
+  {
+    id: 'hinglish',
+    name: 'Hinglish continuum',
+    poles: ['hi', 'en', 'hi-in', 'en-in'],
+    notes: 'Hindi ↔ Indian English code-switch mid-turn.',
+  },
+  {
+    id: 'taglish',
+    name: 'Taglish continuum',
+    poles: ['tl', 'en', 'tl-ph', 'en-ph'],
+    notes: 'Tagalog ↔ Philippine English with po/opo respect markers.',
+  },
+  {
+    id: 'spanglish-carib',
+    name: 'Caribbean / LatAm Spanglish continuum',
+    poles: ['es', 'en', 'es-pr', 'es-do', 'es-mx'],
+    notes: 'Spanish ↔ English code-switch across Caribbean and US-LatAm speech.',
+  },
+  {
+    id: 'haitian-continuum',
+    name: 'Haitian Kreyol–French continuum',
+    poles: ['ht', 'fr', 'ht-ht'],
+    notes: 'Kreyol everyday register ↔ French formal/legal register.',
+  },
+  {
+    id: 'jamaica-continuum',
+    name: 'Jamaican English–Patwa continuum',
+    poles: ['en', 'jam', 'en-jm', 'jam-jm'],
+    notes: 'Standard Jamaican English ↔ Patwa street register.',
+  },
 ];
 
 @Injectable()

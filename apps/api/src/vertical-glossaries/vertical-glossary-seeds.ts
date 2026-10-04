@@ -37,8 +37,12 @@ const enHa = (s: string, tg: string) => t('en', 'ha', s, tg);
 const enAm = (s: string, tg: string) => t('en', 'am', s, tg);
 const enZu = (s: string, tg: string) => t('en', 'zu', s, tg);
 const enAr = (s: string, tg: string) => t('en', 'ar', s, tg);
+const enTh = (s: string, tg: string) => t('en', 'th', s, tg);
+const enVi = (s: string, tg: string) => t('en', 'vi', s, tg);
+const enHi = (s: string, tg: string) => t('en', 'hi', s, tg);
+const enHt = (s: string, tg: string) => t('en', 'ht', s, tg);
 
-/** Platform starter packs — Africa-first vertical terminology (VL-103). Free-tier installable. */
+/** Platform starter packs — Africa-first + strategic-global vertical terminology (VL-103). Free-tier installable. */
 export const VERTICAL_GLOSSARY_PACKS: VerticalGlossaryPack[] = [
   {
     id: 'public-sector-en-sw',
@@ -294,6 +298,82 @@ export const VERTICAL_GLOSSARY_PACKS: VerticalGlossaryPack[] = [
       enAr('maternity ward', 'جناح الولادة'), enAr('outpatient', 'مريض خارجي'),
       enAr('inpatient', 'مريض داخلي'), enAr('chronic disease', 'مرض مزمن'),
       enAr('mental health', 'الصحة النفسية'),
+    ],
+  },
+  {
+    id: 'public-sector-en-th',
+    vertical: 'public-sector',
+    title: 'Public sector (EN→TH)',
+    description: 'Citizen services terminology for Thai.',
+    sourceLang: 'en',
+    targetLang: 'th',
+    licenseTag: 'proprietary',
+    terms: [
+      enTh('citizen', 'phonlamueang'), enTh('government', 'ratthaban'),
+      enTh('ministry', 'krasuang'), enTh('identity card', 'bat pracham tua'),
+      enTh('passport', 'nangsue doen thang'), enTh('application form', 'baep phor'),
+      enTh('public notice', 'prakat satharana'), enTh('complaint', 'kham rongrian'),
+      enTh('permit', 'bai anuyat'), enTh('tax', 'phasi'),
+      enTh('police station', 'sathani tamruat'), enTh('court', 'san'),
+      enTh('birth certificate', 'bai koeut'), enTh('emergency services', 'borikan chukchoen'),
+      enTh('office hours', 'wela tham ngan'),
+    ],
+  },
+  {
+    id: 'public-sector-en-vi',
+    vertical: 'public-sector',
+    title: 'Public sector (EN→VI)',
+    description: 'Citizen services terminology for Vietnamese.',
+    sourceLang: 'en',
+    targetLang: 'vi',
+    licenseTag: 'proprietary',
+    terms: [
+      enVi('citizen', 'cong dan'), enVi('government', 'chinh phu'),
+      enVi('ministry', 'bo'), enVi('identity card', 'can cuoc cong dan'),
+      enVi('passport', 'ho chieu'), enVi('application form', 'don dang ky'),
+      enVi('public notice', 'thong bao cong'), enVi('complaint', 'khieu nai'),
+      enVi('permit', 'giay phep'), enVi('tax', 'thue'),
+      enVi('police station', 'don canh sat'), enVi('court', 'toa an'),
+      enVi('birth certificate', 'giay khai sinh'), enVi('emergency services', 'dich vu khan cap'),
+      enVi('office hours', 'gio lam viec'),
+    ],
+  },
+  {
+    id: 'public-sector-en-hi',
+    vertical: 'public-sector',
+    title: 'Public sector (EN→HI)',
+    description: 'Citizen services terminology for Hindi.',
+    sourceLang: 'en',
+    targetLang: 'hi',
+    licenseTag: 'proprietary',
+    terms: [
+      enHi('citizen', 'nagarik'), enHi('government', 'sarkar'),
+      enHi('ministry', 'mantralay'), enHi('identity card', 'pehchaan patra'),
+      enHi('passport', 'passport'), enHi('application form', 'aavedan patra'),
+      enHi('public notice', 'sarvajanik suchna'), enHi('complaint', 'shikayat'),
+      enHi('permit', 'anumati'), enHi('tax', 'kar'),
+      enHi('police station', 'thana'), enHi('court', 'adalat'),
+      enHi('birth certificate', 'janam praman patra'), enHi('emergency services', 'apatkalin seva'),
+      enHi('office hours', 'karyalay samay'),
+    ],
+  },
+  {
+    id: 'public-sector-en-ht',
+    vertical: 'public-sector',
+    title: 'Public sector (EN→HT)',
+    description: 'Citizen services terminology for Haitian Creole.',
+    sourceLang: 'en',
+    targetLang: 'ht',
+    licenseTag: 'proprietary',
+    terms: [
+      enHt('citizen', 'sitwayen'), enHt('government', 'gouvènman'),
+      enHt('ministry', 'ministè'), enHt('identity card', 'kat idantite'),
+      enHt('passport', 'paspò'), enHt('application form', 'fòm aplikasyon'),
+      enHt('public notice', 'avi piblik'), enHt('complaint', 'plent'),
+      enHt('permit', 'pèmi'), enHt('tax', 'taks'),
+      enHt('police station', 'komisarya'), enHt('court', 'tribinal'),
+      enHt('birth certificate', 'akt nesans'), enHt('emergency services', 'sèvis ijans'),
+      enHt('office hours', 'èdtan biwo'),
     ],
   },
 ];

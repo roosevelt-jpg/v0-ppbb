@@ -765,4 +765,234 @@ export const DIALECT_SEEDS: DialectSeed[] = [
     notes: 'Cantonese cues (jyutping-ish Latin).',
   },
 
+
+  {
+    code: 'km-kh',
+    languageCode: 'km',
+    nameEn: 'Khmer (Cambodia)',
+    region: 'KH',
+    cueTerms: ['suostei', 'arkoun', 'baat', 'ot', 'chas'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'lo-la',
+    languageCode: 'lo',
+    nameEn: 'Lao (Laos)',
+    region: 'LA',
+    cueTerms: ['sabaidee', 'khop jai', 'dai', 'bo', 'jai'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'my-mm',
+    languageCode: 'my',
+    nameEn: 'Burmese (Myanmar)',
+    region: 'MM',
+    cueTerms: ['mingalaba', 'kyeizu tin ba de', 'houk ke', 'ma houk'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'jv-id',
+    languageCode: 'jv',
+    nameEn: 'Javanese (Indonesia)',
+    region: 'ID',
+    cueTerms: ['sugeng', 'matur nuwun', 'inggih', 'mboten', 'sampeyan'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'su-id',
+    languageCode: 'su',
+    nameEn: 'Sundanese (Indonesia)',
+    region: 'ID',
+    cueTerms: ['wilujeng', 'hatur nuhun', 'muhun', 'teu', 'hideung'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'ceb-ph',
+    languageCode: 'ceb',
+    nameEn: 'Cebuano (Philippines)',
+    region: 'PH',
+    cueTerms: ['kumusta', 'salamat', 'oo', 'dili', 'bay'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'hil-ph',
+    languageCode: 'hil',
+    nameEn: 'Hiligaynon (Philippines)',
+    region: 'PH',
+    cueTerms: ['kumusta', 'salamat', 'huo', 'indi', 'bay'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'war-ph',
+    languageCode: 'war',
+    nameEn: 'Waray (Philippines)',
+    region: 'PH',
+    cueTerms: ['kumusta', 'salamat', 'oo', 'dire', 'bay'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'mr-in',
+    languageCode: 'mr',
+    nameEn: 'Indian Marathi',
+    region: 'IN',
+    cueTerms: ['namaskar', 'dhanyavad', 'ho', 'nahi', 'kay'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'gu-in',
+    languageCode: 'gu',
+    nameEn: 'Indian Gujarati',
+    region: 'IN',
+    cueTerms: ['namaste', 'aabhar', 'ha', 'na', 'kem cho'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'kn-in',
+    languageCode: 'kn',
+    nameEn: 'Indian Kannada',
+    region: 'IN',
+    cueTerms: ['namaskara', 'dhanyavadagalu', 'houdu', 'illa', 'hegiddira'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'ml-in',
+    languageCode: 'ml',
+    nameEn: 'Indian Malayalam',
+    region: 'IN',
+    cueTerms: ['namaskaram', 'nanni', 'athe', 'alla', 'sukhamano'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'pa-in',
+    languageCode: 'pa',
+    nameEn: 'Indian Punjabi',
+    region: 'IN',
+    cueTerms: ['sat sri akal', 'shukria', 'haan', 'nahin', 'ki haal'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'or-in',
+    languageCode: 'or',
+    nameEn: 'Indian Odia',
+    region: 'IN',
+    cueTerms: ['namaskar', 'dhanyabad', 'han', 'nahin', 'kemiti achha'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'as-in',
+    languageCode: 'as',
+    nameEn: 'Indian Assamese',
+    region: 'IN',
+    cueTerms: ['nomoskar', 'dhonyobad', 'hoy', 'nohoy', 'kene aase'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'ne-np',
+    languageCode: 'ne',
+    nameEn: 'Nepali (Nepal)',
+    region: 'NP',
+    cueTerms: ['namaste', 'dhanyabad', 'ho', 'hoina', 'sanchai'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'si-lk',
+    languageCode: 'si',
+    nameEn: 'Sinhala (Sri Lanka)',
+    region: 'LK',
+    cueTerms: ['ayubowan', 'stutiyi', 'owu', 'nehe', 'kohomada'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'bho-in',
+    languageCode: 'bho',
+    nameEn: 'Indian Bhojpuri',
+    region: 'IN',
+    cueTerms: ['pranam', 'dhanyavad', 'haan', 'na', 'ka haal'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'ay-bo',
+    languageCode: 'ay',
+    nameEn: 'Bolivian Aymara',
+    region: 'BO',
+    cueTerms: ['kamisaraki', 'jusp'akt'a', 'jisa', 'jani', 'kamisaki'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'nhe-mx',
+    languageCode: 'nhe',
+    nameEn: 'Mexican Nahuatl',
+    region: 'MX',
+    cueTerms: ['niltze', 'tlazohcamati', 'quema', 'ahmo', 'quen tika'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'yua-mx',
+    languageCode: 'yua',
+    nameEn: 'Yucatec Maya',
+    region: 'MX',
+    cueTerms: ['ba'ax ka wa'alik', 'jach dyos bo'otik', 'jaaj', 'ma'', 'bix a bel'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'gcf-gp',
+    languageCode: 'gcf',
+    nameEn: 'Guadeloupean Creole',
+    region: 'GP',
+    cueTerms: ['bonjou', 'mesi', 'wi', 'non', 'sa ka fèt'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
+
+  {
+    code: 'pap-aw',
+    languageCode: 'pap',
+    nameEn: 'Aruba Papiamento',
+    region: 'AW',
+    cueTerms: ['bon dia', 'danki', 'si', 'no', 'kon ta'],
+    notes: 'Strategic global dialect cues for detect — lexical proxies only.',
+  },
+
 ];

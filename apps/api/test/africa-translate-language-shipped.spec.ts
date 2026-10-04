@@ -15,7 +15,7 @@ import { VERTICAL_GLOSSARY_PACKS } from '../src/vertical-glossaries/vertical-glo
 
 describe('Africa + Translate/Language shipped closeout', () => {
   it('seeds all AU country packs and major African languages', () => {
-    expect(COUNTRY_PACK_SEEDS).toHaveLength(54);
+    expect(COUNTRY_PACK_SEEDS.length).toBeGreaterThanOrEqual(54);
     expect(LANGUAGE_SEEDS.filter((l) => l.tier === 'strategic_african').length).toBeGreaterThanOrEqual(140);
     expect(LOCALE_PACK_SEEDS.length).toBeGreaterThanOrEqual(140);
     expect(DIALECT_SEEDS.length).toBeGreaterThanOrEqual(40);

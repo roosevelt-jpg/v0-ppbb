@@ -4567,6 +4567,41 @@ export const openApiDocument = {
         responses: { '200': { description: 'Family metadata' } },
       },
     },
+    '/v1/world-language-registry/engine': {
+      get: {
+        summary: 'World Language Registry engine catalog',
+        operationId: 'getWorldLanguageRegistryEngine',
+        responses: { '200': { description: 'World Language Registry catalog + honesty' } },
+      },
+    },
+    '/v1/world-language-registry/products': {
+      get: {
+        summary: 'World Language Registry products',
+        operationId: 'listWorldLanguageRegistryProducts',
+        responses: { '200': { description: 'World Language Registry products' } },
+      },
+    },
+    '/v1/world-language-registry/monitoring': {
+      get: {
+        summary: 'World Language Registry monitoring',
+        operationId: 'getWorldLanguageRegistryMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/world-language-registry/languages': {
+      get: {
+        summary: 'List world language registry entries',
+        operationId: 'listWorldLanguageRegistryLanguages',
+        responses: { '200': { description: 'Language seed entries' } },
+      },
+    },
+    '/v1/world-language-registry/families': {
+      get: {
+        summary: 'List world language families',
+        operationId: 'listWorldLanguageRegistryFamilies',
+        responses: { '200': { description: 'Family metadata' } },
+      },
+    },
     '/v1/cultural-intelligence/engine': {
       get: {
         summary: 'Cultural Intelligence engine catalog',

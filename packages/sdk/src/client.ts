@@ -2415,6 +2415,16 @@ export class VerbaLab {
     return this.requestJson('/v1/african-language-registry/engine', { method: 'GET' });
   }
 
+  async worldLanguageRegistryEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/world-language-registry/engine', { method: 'GET' });
+  }
+
   async culturalIntelligenceEngine(): Promise<{
     product: string;
     note: string;

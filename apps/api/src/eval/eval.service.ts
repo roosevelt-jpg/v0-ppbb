@@ -162,6 +162,7 @@ export class EvalService {
     });
 
     const strategic = langs.filter((l) => l.tier === 'strategic_african');
+    const strategicGlobal = langs.filter((l) => l.tier === 'strategic_global');
     const packs = await this.countryPacks.list();
 
     return {
@@ -172,6 +173,7 @@ export class EvalService {
       languages: {
         total: langs.length,
         strategicAfrican: strategic.length,
+        strategicGlobal: strategicGlobal.length,
         codes: langs.map((l) => ({
           code: l.code,
           name: l.nameEn,
@@ -195,9 +197,11 @@ export class EvalService {
         countryPacks: '/v1/country-packs',
         languages: '/v1/languages',
         coverage: '/v1/coverage',
+        worldLanguageRegistry: '/v1/world-language-registry/engine',
+        africanLanguageRegistry: '/v1/african-language-registry/engine',
       },
       note:
-        'Translate is available for registry languages via the vendor gateway. Country packs list African markets with primary languages. Only focusPairs currently have golden sets and scored runs.',
+        'Translate is available for registry languages via the vendor gateway. Country packs cover African markets plus SEA / India / LatAm / Caribbean. Only focusPairs currently have golden sets and scored runs.',
     };
   }
 }

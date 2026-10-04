@@ -64,7 +64,7 @@ export class CountryPacksService implements OnModuleInit {
     });
     return {
       data: rows.map((r) => this.toDto(r)),
-      note: 'Curated African-priority country packs. Compose language locale packs — not CLDR/SKU catalog.',
+      note: 'Curated country packs for African + SEA / India / LatAm / Caribbean markets. Compose language locale packs — not CLDR/SKU catalog.',
     };
   }
 

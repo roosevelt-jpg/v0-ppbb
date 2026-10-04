@@ -1,3 +1,9 @@
+import {
+  GLOBAL_LEX_PACKS,
+  GLOBAL_ACCENT_HINTS,
+  GLOBAL_BEHAVIOR_NOTES,
+} from './global-linguistic-packs';
+
 /**
  * VerbaLab African Linguistic Engine — owned phrase/slang/culture/accent layer.
  * Deterministic, expandable lexicon packs. Neural weights plug in later via
@@ -117,7 +123,7 @@ const PACKS: Record<string, LexEntry[]> = {
   ],
 };
 
-export const ACCENT_HINTS: AccentHint[] = [
+const AFRICA_ACCENT_HINTS: AccentHint[] = [
   { code: 'sw-KE', language: 'sw', label: 'Kenyan Swahili', notes: 'Coastal/urban KE lexicon bias' },
   { code: 'sw-TZ', language: 'sw', label: 'Tanzanian Swahili', notes: 'Standard TZ phrasing bias' },
   { code: 'yo-NG', language: 'yo', label: 'Nigerian Yoruba', notes: 'Tone-aware Yoruba + Naija slang' },
@@ -129,12 +135,16 @@ export const ACCENT_HINTS: AccentHint[] = [
   { code: 'fr-SN', language: 'fr', label: 'Senegalese French', notes: 'West African French' },
 ];
 
-export const BEHAVIOR_NOTES = [
+export const ACCENT_HINTS: AccentHint[] = [...AFRICA_ACCENT_HINTS, ...GLOBAL_ACCENT_HINTS];
+
+const AFRICA_BEHAVIOR_NOTES = [
   { id: 'greet-elders', note: 'Prefer formal greetings with elders; age respect in many communities.' },
   { id: 'indirect-refusal', note: 'Soft refusals common — avoid blunt no in customer service MT.' },
   { id: 'mobile-money', note: 'Banking UX should name M-Pesa/MoMo-style flows where relevant.' },
   { id: 'communal', note: 'Family/community references often preferred over purely individual framing.' },
 ];
+
+export const BEHAVIOR_NOTES = [...AFRICA_BEHAVIOR_NOTES, ...GLOBAL_BEHAVIOR_NOTES];
 
 function withReversePacks(forward: Record<string, LexEntry[]>): Record<string, LexEntry[]> {
   const out: Record<string, LexEntry[]> = { ...forward };
@@ -154,7 +164,7 @@ function withReversePacks(forward: Record<string, LexEntry[]>): Record<string, L
   return out;
 }
 
-const ACTIVE_PACKS = withReversePacks(PACKS);
+const ACTIVE_PACKS = withReversePacks({ ...PACKS, ...GLOBAL_LEX_PACKS });
 
 function packKey(source: string, target: string) {
   return `${source.toLowerCase()}-${target.toLowerCase()}`;
@@ -205,7 +215,7 @@ export function engineManifest() {
   const pairs = Object.keys(ACTIVE_PACKS);
   const entryCount = pairs.reduce((n, k) => n + ACTIVE_PACKS[k]!.length, 0);
   return {
-    id: 'verbalab-african-linguistic-engine',
+    id: 'verbalab-linguistic-engine',
     ownedModels: true,
     neuralWeightsInProcess: Boolean(process.env.VERBALAB_WEIGHTS_URL?.trim()),
     neuralWeightsUrl: process.env.VERBALAB_WEIGHTS_URL?.trim() || null,

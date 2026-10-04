@@ -10,7 +10,16 @@ export type AfricanGrammarPackId =
   | 'af'
   | 'ig'
   | 'wo'
-  | 'ak';
+  | 'ak'
+  | 'th'
+  | 'vi'
+  | 'hi'
+  | 'ta'
+  | 'ht'
+  | 'tl'
+  | 'ms'
+  | 'bn'
+  | 'qu';
 
 type PackRule = {
   pattern: RegExp;
@@ -139,6 +148,80 @@ const PACKS: Record<AfricanGrammarPackId, { name: string; misspellings: Record<s
     },
     rules: [],
   },
+  th: {
+    name: 'Thai',
+    misspellings: {
+      sawadee: 'sawasdee',
+      kobkun: 'khob khun',
+      maipenrai: 'mai pen rai',
+    },
+    rules: [],
+  },
+  vi: {
+    name: 'Vietnamese',
+    misspellings: {
+      xincha: 'xin chao',
+      camon: 'cam on',
+    },
+    rules: [],
+  },
+  hi: {
+    name: 'Hindi',
+    misspellings: {
+      namastay: 'namaste',
+      dhanyavad: 'dhanyavaad',
+    },
+    rules: [],
+  },
+  ta: {
+    name: 'Tamil',
+    misspellings: {
+      vanakam: 'vanakkam',
+      nandree: 'nandri',
+    },
+    rules: [],
+  },
+  ht: {
+    name: 'Haitian Creole',
+    misspellings: {
+      bonjour: 'bonjou',
+      mersi: 'mesi',
+    },
+    rules: [],
+  },
+  tl: {
+    name: 'Tagalog',
+    misspellings: {
+      cumusta: 'kumusta',
+      salamatt: 'salamat',
+    },
+    rules: [],
+  },
+  ms: {
+    name: 'Malay',
+    misspellings: {
+      terimakasih: 'terima kasih',
+      apakhabar: 'apa khabar',
+    },
+    rules: [],
+  },
+  bn: {
+    name: 'Bengali',
+    misspellings: {
+      nomoskar: 'nomoshkar',
+      dhonnobad: 'dhonnobad',
+    },
+    rules: [],
+  },
+  qu: {
+    name: 'Quechua',
+    misspellings: {
+      allillanchu: 'allillanchu',
+      sulpayky: 'sulpayki',
+    },
+    rules: [],
+  },
+
 };
 
 export function listAfricanGrammarPacks(): Array<{ id: AfricanGrammarPackId; name: string }> {

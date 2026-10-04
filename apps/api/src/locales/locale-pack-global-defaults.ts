@@ -63,6 +63,81 @@ const GLOBAL_LOCALE_DEFAULTS: Array<{
   { languageCode: 'gcf', countryHint: 'GP', currencyCode: 'EUR' },
 ];
 
+
+function honorificsFor(languageCode: string): HonorificEntry[] {
+  const map: Record<string, HonorificEntry[]> = {
+    th: [
+      { form: 'คุณ', usage: 'Khun — polite title' },
+      { form: 'ครับ / ค่ะ', usage: 'Politeness particles (krub/ka)' },
+    ],
+    vi: [
+      { form: 'Anh / Chị', usage: 'Age-graded address' },
+      { form: 'Ông / Bà', usage: 'Elder respect' },
+    ],
+    tl: [
+      { form: 'po / opo', usage: 'Respect markers' },
+      { form: 'Ginoo / Ginang', usage: 'Mr. / Mrs.' },
+    ],
+    hi: [
+      { form: 'श्री / श्रीमती', usage: 'Mr. / Mrs.' },
+      { form: 'जी', usage: 'Respect particle (ji)' },
+    ],
+    ta: [{ form: 'திரு / திருமதி', usage: 'Mr. / Mrs.' }],
+    ht: [
+      { form: 'Mesye / Madanm', usage: 'Mr. / Mrs.' },
+      { form: 'tanpri', usage: 'Please (polite)' },
+    ],
+    qu: [{ form: 'Tayta / Mama', usage: 'Respectful elder address' }],
+    es: [
+      { form: 'Señor / Señora', usage: 'Mr. / Mrs.' },
+      { form: 'usted', usage: 'Formal you' },
+    ],
+    pt: [{ form: 'Senhor / Senhora', usage: 'Mr. / Mrs.' }],
+    ur: [{ form: 'جناب / محترمہ', usage: 'Mr. / Mrs. (respectful)' }],
+    bn: [{ form: 'জনাব / বেगम', usage: 'Mr. / Mrs.' }],
+    ms: [{ form: 'Encik / Puan', usage: 'Mr. / Mrs.' }],
+  };
+  return map[languageCode] ?? [];
+}
+
+function doNotTranslateFor(languageCode: string): string[] {
+  const map: Record<string, string[]> = {
+    th: ['Bangkok', 'VerbaLab', 'PromptPay'],
+    vi: ['Ha Noi', 'Ho Chi Minh', 'VerbaLab'],
+    tl: ['Manila', 'VerbaLab', 'GCash'],
+    hi: ['India', 'Aadhaar', 'UPI', 'VerbaLab'],
+    ht: ['Port-au-Prince', 'VerbaLab'],
+    qu: ['Cusco', 'VerbaLab'],
+    jam: ['Kingston', 'VerbaLab'],
+    yue: ['Hong Kong', 'VerbaLab'],
+  };
+  return map[languageCode] ?? ['VerbaLab'];
+}
+
+function culturalNotesFor(languageCode: string, countryHint: string): string {
+  const map: Record<string, string> = {
+    th: 'Thai public copy should preserve krub/ka particles and soften refusals (mai pen rai). Keep royal/monastic titles stable.',
+    vi: 'Vietnamese tones are meaning-bearing; kinship pronouns encode hierarchy — do not flatten casually.',
+    tl: 'Tagalog/Filipino often mixes with English (Taglish); po/opo mark respect in citizen services.',
+    ms: 'Bahasa Melayu formal register differs from particle-heavy colloquial speech.',
+    hi: 'Hinglish is common in product UI; prefer respectful plural address in public-sector Hindi.',
+    ta: 'Tamil respectful plural forms matter in formal address; keep personal names stable across scripts.',
+    bn: 'Bangla script fidelity matters; Islamic greetings common in BD public life.',
+    ur: 'Urdu requires RTL; English often co-presents in formal admin.',
+    ht: 'Kreyol is everyday speech; French remains in legal/formal registers — offer both when needed.',
+    jam: 'Jamaican English sits on a continuum with Patwa; civic UX may need both registers.',
+    qu: 'Andean respectful address and communal framing matter in Quechua-speaking regions.',
+    gn: 'Guarani is co-official in Paraguay; Jopara (mix with Spanish) is everyday speech.',
+    yue: 'Cantonese is spoken everyday language; Traditional Chinese for written UI in HK.',
+    es: `LatAm Spanish varies by country (${countryHint}) — do not force a single national register.`,
+    pt: 'Brazilian Portuguese differs from European Portuguese; prefer BR norms for BR audiences.',
+  };
+  return (
+    map[languageCode] ??
+    `Strategic global locale pack for ${countryHint} — major-market culture hint for underserved voice markets.`
+  );
+}
+
 export function buildGlobalLocalePackDefaults(
   existingLanguageCodes: Set<string>,
 ): LocalePackSeed[] {
@@ -79,10 +154,9 @@ export function buildGlobalLocalePackDefaults(
       numberNotes: 'Western digits in digital UI unless script convention requires otherwise.',
       currencyCode: row.currencyCode,
       currencyNotes: `Representative currency ${row.currencyCode} for ${row.countryHint} audiences.`,
-      honorifics: [],
-      doNotTranslate: ['VerbaLab'],
-      culturalNotes:
-        'Strategic global locale pack — major-market hint for underserved voice markets; deepen cultural notes per deployment.',
+      honorifics: honorificsFor(row.languageCode),
+      doNotTranslate: doNotTranslateFor(row.languageCode),
+      culturalNotes: culturalNotesFor(row.languageCode, row.countryHint),
     });
   }
 

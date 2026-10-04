@@ -88,7 +88,7 @@ export function productFamiliesCatalog(): {
       row('marketplace', 'Resources', 'Marketplace', 'shipped_e2e', 'GET /v1/marketplace/listings', '/marketplace', false, 'starter', 'Free catalog browse + free installs; publish/paid commerce Starter+; links to voice/agent/model markets.', 'Free browse; Starter+ publish/paid'),
       row('enterprise', 'Resources', 'Enterprise', 'shipped_e2e', 'GET /v1/enterprise/overview', '/enterprise', false, null, 'Residency, governance, billing, and admin deep-links.', 'Free+ (enterprise features by plan)'),
       row('trust-center', 'Resources', 'Trust Center', 'shipped_e2e', 'GET /v1/trust-cloud/overview', '/trust-cloud', false, null, 'Trust Cloud hub + compliance/enterprise links; not a certified SOC portal.', 'Free+'),
-      row('coverage', 'Resources', 'Coverage', 'shipped_e2e', 'GET /v1/coverage', '/coverage', false, null, 'Language inventory + African country packs + golden-eval focus pairs.', 'Public'),
+      row('coverage', 'Resources', 'Coverage', 'shipped_e2e', 'GET /v1/coverage', '/coverage', false, null, 'Language inventory + African and strategic-global country packs + golden-eval focus pairs.', 'Public'),
       row('developers', 'Resources', 'Developers', 'shipped_e2e', 'GET /v1/developer/overview', '/developers', false, null, 'Keys, SDK install strings, docs, playground, OpenAPI.', 'Free+'),
       row('docs', 'Resources', 'Docs', 'shipped_e2e', 'GET /v1/openapi.json', '/docs', false, null, 'Docs home + curated endpoints + OpenAPI jump.', 'Public'),
       row('openapi-explorer', 'Resources', 'OpenAPI explorer', 'shipped_e2e', 'GET /v1/openapi.json', '/docs/openapi', false, null, 'Browse schemas and try selected endpoints with API keys.', 'Free+ for authenticated tries'),

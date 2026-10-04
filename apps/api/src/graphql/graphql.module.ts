@@ -156,6 +156,7 @@ import { GovernmentIntelligenceApplicationModule } from '../government-intellige
 import { AfricanKnowledgeGraphApplicationModule } from '../african-knowledge-graph/application/african-knowledge-graph-application.module';
 import { CulturalIntelligenceApplicationModule } from '../cultural-intelligence/application/cultural-intelligence-application.module';
 import { AfricanLanguageRegistryApplicationModule } from '../african-language-registry/application/african-language-registry-application.module';
+import { WorldLanguageRegistryApplicationModule } from '../world-language-registry/application/world-language-registry-application.module';
 import { AfricanIntelligenceCloudApplicationModule } from '../african-intelligence-cloud/application/african-intelligence-cloud-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
@@ -366,6 +367,7 @@ import { GovernmentIntelligenceGraphqlResolver } from './government-intelligence
 import { AfricanKnowledgeGraphGraphqlResolver } from './african-knowledge-graph.resolver';
 import { CulturalIntelligenceGraphqlResolver } from './cultural-intelligence.resolver';
 import { AfricanLanguageRegistryGraphqlResolver } from './african-language-registry.resolver';
+import { WorldLanguageRegistryGraphqlResolver } from './world-language-registry.resolver';
 import { AfricanIntelligenceCloudGraphqlResolver } from './african-intelligence-cloud.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
@@ -596,6 +598,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AfricanKnowledgeGraphApplicationModule,
     CulturalIntelligenceApplicationModule,
     AfricanLanguageRegistryApplicationModule,
+    WorldLanguageRegistryApplicationModule,
     AfricanIntelligenceCloudApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
@@ -814,6 +817,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     AfricanKnowledgeGraphGraphqlResolver,
     CulturalIntelligenceGraphqlResolver,
     AfricanLanguageRegistryGraphqlResolver,
+    WorldLanguageRegistryGraphqlResolver,
     AfricanIntelligenceCloudGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,

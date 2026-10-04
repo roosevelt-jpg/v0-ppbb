@@ -2360,6 +2360,21 @@
     "isStream": false
   },
   {
+    "name": "worldLanguageRegistryEngine",
+    "star": false,
+    "start": 1963,
+    "pathExpr": "/v1/world-language-registry/engine",
+    "http": "GET",
+    "kind": "json",
+    "hasJsonBody": false,
+    "form": false,
+    "pathParams": [],
+    "acceptsQuery": false,
+    "acceptsBody": false,
+    "isBinary": false,
+    "isStream": false
+  },
+  {
     "name": "culturalIntelligenceEngine",
     "star": false,
     "start": 1972,

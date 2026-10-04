@@ -250,6 +250,166 @@ export const OWN_TTS_VOICES: TtsVoice[] = [
     languages: ['pa', 'en'],
     provider: 'own_tts',
   },
+
+  {
+    id: 'own:lo-dao',
+    name: 'Dao (Lao)',
+    gender: 'female',
+    languages: ['lo', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:yue-mei',
+    name: 'Mei (Cantonese)',
+    gender: 'female',
+    languages: ['yue', 'zh', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:mr-isha',
+    name: 'Isha (Marathi)',
+    gender: 'female',
+    languages: ['mr', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:gu-kira',
+    name: 'Kira (Gujarati)',
+    gender: 'female',
+    languages: ['gu', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:kn-ravi',
+    name: 'Ravi (Kannada)',
+    gender: 'male',
+    languages: ['kn', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ml-nisha',
+    name: 'Nisha (Malayalam)',
+    gender: 'female',
+    languages: ['ml', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ne-asmi',
+    name: 'Asmi (Nepali)',
+    gender: 'female',
+    languages: ['ne', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:si-nimal',
+    name: 'Nimal (Sinhala)',
+    gender: 'male',
+    languages: ['si', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ay-lari',
+    name: 'Lari (Aymara)',
+    gender: 'female',
+    languages: ['ay', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:pap-rina',
+    name: 'Rina (Papiamento)',
+    gender: 'female',
+    languages: ['pap', 'nl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:gcf-lya',
+    name: 'Lya (Guadeloupean Creole)',
+    gender: 'female',
+    languages: ['gcf', 'fr', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ceb-jon',
+    name: 'Jon (Cebuano)',
+    gender: 'male',
+    languages: ['ceb', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:as-pori',
+    name: 'Pori (Assamese)',
+    gender: 'female',
+    languages: ['as', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:or-mina',
+    name: 'Mina (Odia)',
+    gender: 'female',
+    languages: ['or', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:bho-raju',
+    name: 'Raju (Bhojpuri)',
+    gender: 'male',
+    languages: ['bho', 'hi', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:nhe-xitl',
+    name: 'Xitlali (Nahuatl)',
+    gender: 'female',
+    languages: ['nhe', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:yua-itzel',
+    name: 'Itzel (Yucatec Maya)',
+    gender: 'female',
+    languages: ['yua', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:war-lena',
+    name: 'Lena (Waray)',
+    gender: 'female',
+    languages: ['war', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:hil-gina',
+    name: 'Gina (Hiligaynon)',
+    gender: 'female',
+    languages: ['hil', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:su-dewi',
+    name: 'Dewi (Sundanese)',
+    gender: 'female',
+    languages: ['su', 'id', 'en'],
+    provider: 'own_tts',
+  },
 ];
 
 const MIME: Record<string, string> = {

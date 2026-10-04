@@ -6,6 +6,8 @@ import { ACCENT_SEEDS } from '../src/accents/accent-seeds';
 import { OWN_TTS_VOICES } from '../src/gateway/own-tts.adapter';
 import { FAMILY_SEEDS } from '../src/registry/family-seeds';
 import { WRITING_SYSTEM_SEEDS } from '../src/registry/writing-system-seeds';
+import { COUNTRY_PACK_SEEDS } from '../src/country-packs/country-pack-seeds';
+import { worldLanguageSeed } from '../src/world-language-registry/world-language-registry.catalog';
 
 describe('Strategic global underserved language coverage', () => {
   it('seeds SEA / India / LatAm / Caribbean languages as strategic_global', () => {
@@ -69,5 +71,25 @@ describe('Strategic global underserved language coverage', () => {
       expect(voiceIds).toContain(id);
     }
     expect(OWN_TTS_VOICES.length).toBeGreaterThanOrEqual(30);
+
+    // Every strategic_global language has dialect + accent + own voice
+    const dialectLangs = new Set(DIALECT_SEEDS.map((d) => d.languageCode));
+    const accentLangs = new Set(ACCENT_SEEDS.map((a) => a.languageCode));
+    const ownVoiceLangs = new Set(
+      OWN_TTS_VOICES.map((v) => v.id.replace(/^own:/, '').split('-')[0]!).filter(Boolean),
+    );
+    for (const lang of GLOBAL_LANGUAGE_SEEDS) {
+      expect(dialectLangs.has(lang.code)).toBe(true);
+      expect(accentLangs.has(lang.code)).toBe(true);
+      expect(ownVoiceLangs.has(lang.code)).toBe(true);
+    }
+  });
+
+  it('wires country packs + world registry for people/culture parity', () => {
+    const packCodes = new Set(COUNTRY_PACK_SEEDS.map((c) => c.code));
+    for (const need of ['TH', 'VN', 'PH', 'IN', 'MX', 'HT', 'JM']) {
+      expect(packCodes.has(need)).toBe(true);
+    }
+    expect(worldLanguageSeed().length).toBeGreaterThanOrEqual(36);
   });
 });

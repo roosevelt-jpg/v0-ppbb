@@ -249,6 +249,7 @@ import { GovernmentIntelligenceModule } from './government-intelligence/governme
 import { AfricanKnowledgeGraphModule } from './african-knowledge-graph/african-knowledge-graph.module';
 import { CulturalIntelligenceModule } from './cultural-intelligence/cultural-intelligence.module';
 import { AfricanLanguageRegistryModule } from './african-language-registry/african-language-registry.module';
+import { WorldLanguageRegistryModule } from './world-language-registry/world-language-registry.module';
 import { AfricanIntelligenceCloudModule } from './african-intelligence-cloud/african-intelligence-cloud.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
@@ -532,6 +533,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AfricanKnowledgeGraphModule,
     CulturalIntelligenceModule,
     AfricanLanguageRegistryModule,
+    WorldLanguageRegistryModule,
     AfricanIntelligenceCloudModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,

@@ -5,6 +5,7 @@ import { AuditService } from '../audit/audit.service';
 import { AudioService } from '../audio/audio.service';
 import { ApiException } from '../common/errors/api-exception';
 import { africanLanguageSeed } from '../african-language-registry/african-language-registry.catalog';
+import { LANGUAGE_SEEDS } from '../languages/language-seeds';
 import {
   agentSpeechModels,
   agentVoiceTrainingCatalog,
@@ -83,6 +84,8 @@ export class AgentVoiceTrainingService {
       status: l.status,
       family: l.family,
     }));
+    const africaCodes = new Set(africa.map((l) => l.code));
+    const beyondCodes = new Set(BEYOND_AFRICA_LANGUAGES.map((l) => l.code));
     const beyond = BEYOND_AFRICA_LANGUAGES.map((l) => ({
       code: l.code,
       name: l.name,
@@ -91,7 +94,28 @@ export class AgentVoiceTrainingService {
       status: 'shipped' as const,
       family: 'global',
     }));
-    const languages = [...africa, ...beyond].filter((l) => {
+    const regionFor = (code: string): string => {
+      if (['th', 'vi', 'tl', 'ms', 'km', 'lo', 'my', 'jv', 'su', 'ceb', 'hil', 'war', 'yue'].includes(code)) {
+        return 'Southeast Asia';
+      }
+      if (['bn', 'ta', 'te', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur', 'ne', 'si', 'bho'].includes(code)) {
+        return 'South Asia';
+      }
+      if (['qu', 'gn', 'ay', 'nhe', 'yua'].includes(code)) return 'Latin America';
+      if (['ht', 'jam', 'pap', 'gcf'].includes(code)) return 'Caribbean';
+      return 'Global';
+    };
+    const strategicGlobal = LANGUAGE_SEEDS.filter(
+      (l) => l.tier === 'strategic_global' && !africaCodes.has(l.code) && !beyondCodes.has(l.code),
+    ).map((l) => ({
+      code: l.code,
+      name: l.nameEn,
+      region: regionFor(l.code),
+      scope: 'strategic_global' as const,
+      status: 'shipped' as const,
+      family: l.familyCode ?? 'global',
+    }));
+    const languages = [...africa, ...beyond, ...strategicGlobal].filter((l) => {
       if (!q) return true;
       return (
         l.code.toLowerCase().includes(q) ||
@@ -104,6 +128,7 @@ export class AgentVoiceTrainingService {
       count: languages.length,
       africaCount: africa.length,
       beyondCount: beyond.length,
+      strategicGlobalCount: strategicGlobal.length,
       note: 'Train agents to speak like VerbaLab models in these languages.',
     };
   }

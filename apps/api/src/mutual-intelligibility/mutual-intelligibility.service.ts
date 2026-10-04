@@ -36,6 +36,30 @@ const SEED: Corridor[] = [
     locales: ['en', 'pt', 'zu', 'xh', 'st', 'tn', 'ny', 'sn'],
     note: 'Southern Africa corridor across Bantu continua + Portuguese/English.',
   },
+  {
+    id: 'asean',
+    name: 'ASEAN corridor',
+    locales: ['en', 'th', 'vi', 'tl', 'ms', 'id', 'km', 'lo', 'my', 'jv'],
+    note: 'Southeast Asia corridor — regional bridges without English-only hops where packs exist.',
+  },
+  {
+    id: 'saarc',
+    name: 'SAARC corridor',
+    locales: ['en', 'hi', 'bn', 'ta', 'te', 'ur', 'ne', 'si', 'pa', 'mr'],
+    note: 'South Asia corridor across Indic and Dravidian languages + English bridge.',
+  },
+  {
+    id: 'mercosur',
+    name: 'Mercosur / Andes corridor',
+    locales: ['es', 'pt', 'qu', 'gn', 'ay', 'en'],
+    note: 'Latin America corridor — Spanish/Portuguese with Andean and Guarani bridges.',
+  },
+  {
+    id: 'caricom',
+    name: 'CARICOM corridor',
+    locales: ['en', 'ht', 'jam', 'pap', 'es', 'fr'],
+    note: 'Caribbean corridor — English/Creole/Spanish/French mutual intelligibility.',
+  },
 ];
 
 @Injectable()

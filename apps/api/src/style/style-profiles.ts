@@ -14,7 +14,11 @@ export type StyleProfileId =
   | 'african_public_sector'
   | 'african_plain'
   | 'east_african_formal'
-  | 'west_african_business';
+  | 'west_african_business'
+  | 'sea_formal'
+  | 'india_plain'
+  | 'latam_business'
+  | 'caribbean_creole';
 
 export type StyleProfile = {
   id: StyleProfileId;
@@ -28,7 +32,8 @@ export type StyleProfile = {
     | 'marketing'
     | 'technical'
     | 'business'
-    | 'african';
+    | 'african'
+    | 'global';
   disclaimer?: string;
 };
 
@@ -138,6 +143,30 @@ export const STYLE_PROFILES: StyleProfile[] = [
     name: 'West African business',
     description: 'Clear business tone for West African English/French bridge contexts.',
     domain: 'african',
+  },
+  {
+    id: 'sea_formal',
+    name: 'Southeast Asia formal',
+    description: 'Polite formal tone for Thai/Vietnamese/Malay/Tagalog public-sector and product copy.',
+    domain: 'global',
+  },
+  {
+    id: 'india_plain',
+    name: 'India plain language',
+    description: 'Clear plain language for multilingual Indian product UI and citizen services.',
+    domain: 'global',
+  },
+  {
+    id: 'latam_business',
+    name: 'LatAm business',
+    description: 'Clear business Spanish/Portuguese tone for Latin American operators.',
+    domain: 'global',
+  },
+  {
+    id: 'caribbean_creole',
+    name: 'Caribbean creole-aware',
+    description: 'Accessible tone that respects English/Creole continua in Caribbean UX.',
+    domain: 'global',
   },
 ];
 

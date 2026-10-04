@@ -84,8 +84,9 @@ describe('Coverage + eval harness (VL-100)', () => {
   it('GET /v1/coverage is public and includes focus pairs', async () => {
     const res = await request(app.getHttpServer()).get('/v1/coverage').expect(200);
     expect(res.body.disclaimer).toMatch(/not market leadership/i);
-    expect(res.body.focusPairs).toHaveLength(3);
+    expect(res.body.focusPairs.length).toBeGreaterThanOrEqual(3);
     expect(res.body.focusPairs.every((p: { hasGolden: boolean }) => p.hasGolden)).toBe(true);
     expect(res.body.languages.strategicAfrican).toBeGreaterThanOrEqual(3);
+    expect(res.body.languages.strategicGlobal).toBeGreaterThanOrEqual(30);
   });
 });
