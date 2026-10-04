@@ -19,6 +19,12 @@ export class LanguagesService implements OnModuleInit {
     await seedFamiliesAndScripts(this.prisma);
 
     for (const lang of LANGUAGE_SEEDS) {
+      const tier =
+        lang.tier === 'strategic_african'
+          ? LanguageTier.strategic_african
+          : lang.tier === 'strategic_global'
+            ? LanguageTier.strategic_global
+            : LanguageTier.vendor;
       await this.prisma.language.upsert({
         where: { code: lang.code },
         create: {
@@ -28,7 +34,7 @@ export class LanguagesService implements OnModuleInit {
           script: lang.script,
           familyCode: lang.familyCode,
           rtl: lang.rtl ?? false,
-          tier: lang.tier === 'strategic_african' ? LanguageTier.strategic_african : LanguageTier.vendor,
+          tier,
         },
         update: {
           nameEn: lang.nameEn,
@@ -36,7 +42,7 @@ export class LanguagesService implements OnModuleInit {
           script: lang.script,
           familyCode: lang.familyCode,
           rtl: lang.rtl ?? false,
-          tier: lang.tier === 'strategic_african' ? LanguageTier.strategic_african : LanguageTier.vendor,
+          tier,
         },
       });
     }

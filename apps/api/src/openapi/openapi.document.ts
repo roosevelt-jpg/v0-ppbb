@@ -181,7 +181,7 @@ export const openApiDocument = {
           nativeName: { type: 'string', nullable: true },
           script: { type: 'string', nullable: true },
           rtl: { type: 'boolean' },
-          tier: { type: 'string', enum: ['vendor', 'strategic_african'] },
+          tier: { type: 'string', enum: ['vendor', 'strategic_african', 'strategic_global'] },
         },
       },
     },

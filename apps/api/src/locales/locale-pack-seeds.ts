@@ -1,4 +1,5 @@
 import { buildAfricaLocalePackDefaults } from './locale-pack-africa-defaults';
+import { buildGlobalLocalePackDefaults } from './locale-pack-global-defaults';
 
 export type HonorificEntry = {
   form: string;
@@ -538,9 +539,12 @@ const CURATED_LOCALE_PACK_SEEDS: LocalePackSeed[] = [
 ];
 
 const curatedCodes = new Set(CURATED_LOCALE_PACK_SEEDS.map((p) => p.languageCode));
+const africaDefaults = buildAfricaLocalePackDefaults(curatedCodes);
+const afterAfrica = new Set([...curatedCodes, ...africaDefaults.map((p) => p.languageCode)]);
 
-/** Seeded locale packs: curated first, then Africa defaults for remaining strategic languages. */
+/** Seeded locale packs: curated, Africa defaults, then strategic global underserved. */
 export const LOCALE_PACK_SEEDS: LocalePackSeed[] = [
   ...CURATED_LOCALE_PACK_SEEDS,
-  ...buildAfricaLocalePackDefaults(curatedCodes),
+  ...africaDefaults,
+  ...buildGlobalLocalePackDefaults(afterAfrica),
 ];

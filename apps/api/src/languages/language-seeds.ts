@@ -1,3 +1,5 @@
+import { GLOBAL_LANGUAGE_SEEDS } from './global-language-seeds';
+
 export type LanguageSeed = {
   code: string;
   nameEn: string;
@@ -5,10 +7,10 @@ export type LanguageSeed = {
   script?: string;
   familyCode?: string;
   rtl?: boolean;
-  tier: 'vendor' | 'strategic_african';
+  tier: 'vendor' | 'strategic_african' | 'strategic_global';
 };
 
-/** ISO 639-1 / BCP-47 subset + curated African set (VL-020 / VL-139). */
+/** Vendor + strategic African + strategic global underserved (VL-020 / VL-139). */
 export const LANGUAGE_SEEDS: LanguageSeed[] = [
   // —— Vendor baseline ——
   { code: 'en', nameEn: 'English', nameNative: 'English', script: 'Latn', familyCode: 'indo_european', tier: 'vendor' },
@@ -203,4 +205,6 @@ export const LANGUAGE_SEEDS: LanguageSeed[] = [
   { code: 'pov', nameEn: 'Guinea-Bissau Creole', nameNative: 'Kriol', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
   { code: 'zdj', nameEn: 'Ngazidja Comorian', nameNative: 'Shingazidja', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
   { code: 'wni', nameEn: 'Ndzwani Comorian', nameNative: 'Shindzwani', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  ...GLOBAL_LANGUAGE_SEEDS,
 ];

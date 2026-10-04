@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { TtsInput, TtsOutput, TtsProvider, TtsVoice } from './tts-provider';
 
-/** Catalog of African-focused voices served by VerbaLab Voice FM (owned TTS; VL-121/228). */
+/** Catalog of Own TTS voices — Africa + strategic global underserved (VL-121/228). */
 export const OWN_TTS_VOICES: TtsVoice[] = [
   {
     id: 'own:sw-aisha',
@@ -100,6 +100,154 @@ export const OWN_TTS_VOICES: TtsVoice[] = [
     name: 'Lema (Oromo)',
     gender: 'female',
     languages: ['om', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:th-mali',
+    name: 'Mali (Thai)',
+    gender: 'female',
+    languages: ['th', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:vi-lan',
+    name: 'Lan (Vietnamese)',
+    gender: 'female',
+    languages: ['vi', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:tl-maya',
+    name: 'Maya (Tagalog)',
+    gender: 'female',
+    languages: ['tl', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ms-siti',
+    name: 'Siti (Malay)',
+    gender: 'female',
+    languages: ['ms', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:bn-riya',
+    name: 'Riya (Bengali)',
+    gender: 'female',
+    languages: ['bn', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ta-priya',
+    name: 'Priya (Tamil)',
+    gender: 'female',
+    languages: ['ta', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:te-arjun',
+    name: 'Arjun (Telugu)',
+    gender: 'male',
+    languages: ['te', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:hi-ananya',
+    name: 'Ananya (Hindi)',
+    gender: 'female',
+    languages: ['hi', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ur-zara',
+    name: 'Zara (Urdu)',
+    gender: 'female',
+    languages: ['ur', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ht-marlene',
+    name: 'Marlene (Haitian Creole)',
+    gender: 'female',
+    languages: ['ht', 'fr', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:jam-devon',
+    name: 'Devon (Jamaican)',
+    gender: 'male',
+    languages: ['jam', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:qu-suma',
+    name: 'Suma (Quechua)',
+    gender: 'female',
+    languages: ['qu', 'es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:gn-kerai',
+    name: 'Kerai (Guarani)',
+    gender: 'female',
+    languages: ['gn', 'es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:es-lucia',
+    name: 'Lucia (ES-LatAm)',
+    gender: 'female',
+    languages: ['es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:pt-bia',
+    name: 'Bia (PT-BR)',
+    gender: 'female',
+    languages: ['pt', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:en-arjun',
+    name: 'Arjun (EN-India)',
+    gender: 'male',
+    languages: ['en', 'hi'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:en-kei',
+    name: 'Kei (EN-Philippines)',
+    gender: 'female',
+    languages: ['en', 'tl'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:jv-sari',
+    name: 'Sari (Javanese)',
+    gender: 'female',
+    languages: ['jv', 'id', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:my-thiri',
+    name: 'Thiri (Burmese)',
+    gender: 'female',
+    languages: ['my', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:km-sophea',
+    name: 'Sophea (Khmer)',
+    gender: 'female',
+    languages: ['km', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:pa-simran',
+    name: 'Simran (Punjabi)',
+    gender: 'female',
+    languages: ['pa', 'en'],
     provider: 'own_tts',
   },
 ];

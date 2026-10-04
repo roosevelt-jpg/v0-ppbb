@@ -21,6 +21,8 @@ enum ApiKeyEnvironment {
 enum LanguageTier {
   vendor
   strategic_african
+  /// Underserved global coverage (SEA, India, LatAm, Caribbean, etc.)
+  strategic_global
 }
 
 model Organization {
