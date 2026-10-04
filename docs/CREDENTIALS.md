@@ -60,7 +60,7 @@ Dev already supports test keys / `/dev-login` bypass when configured.
 
 1. [dashboard.stripe.com](https://dashboard.stripe.com) → Developers → API keys.
 2. **Secret key** → `STRIPE_SECRET_KEY`
-3. Create a Product/Price for Pro → `STRIPE_PRICE_ID_PRO`
+3. Create Products/Prices for Starter/Creator/Pro/Scale/Business → `STRIPE_PRICE_ID_*` (at least `STRIPE_PRICE_ID_PRO`). Plans mirror ElevenLabs credit tiers — see `docs/BILLING.md`.
 4. Webhooks → endpoint `https://<api>/v1/billing/webhook` → `STRIPE_WEBHOOK_SECRET`
 5. Subscribe at least: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`, `payment_intent.payment_failed`, `charge.dispute.created`, `radar.early_fraud_warning.created`, `account.updated`.
 6. Checkout saves the card as the **default payment method** for subscription auto-debit. `POST /v1/billing/setup-card` adds/updates the card without changing plan. Fraud holds lock billing after repeated declines, Radar warnings, or disputes.
