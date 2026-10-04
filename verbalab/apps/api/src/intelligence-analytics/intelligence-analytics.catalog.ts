@@ -13,7 +13,7 @@ export function intelligenceAnalyticsCatalog() {
   return {
     product: 'VerbaLab Intelligence Analytics',
     note:
-      'Usage/quality aggregates for Intelligence Cloud surfaces (VL-191): embeddings, memory, knowledge/vector, context, reasoning, recommendations, prompts, decisions, orchestration, chat. Distinct from Language/Speech/Voice analytics. Not a BI dashboard OS or enterprise reporting suite.',
+      'Usage/quality aggregates for Intelligence Cloud surfaces: embeddings, memory, knowledge/vector, context, reasoning, recommendations, prompts, decisions, orchestration, chat. Distinct from Language/Speech/Voice analytics. Not a BI dashboard OS or enterprise reporting suite.',
     capabilities: [
       {
         id: 'reasoning-analytics',
@@ -46,28 +46,28 @@ export function intelligenceAnalyticsCatalog() {
       {
         id: 'latency',
         name: 'Latency',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/intelligence-analytics/latency',
         notes: 'latencyMs from chat/reason audits when present — not full tracing.',
       },
       {
         id: 'quality',
         name: 'Quality',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/intelligence-analytics/quality',
         notes: 'Prompt eval scores + decision confidence proxies — not human eval lab.',
       },
       {
         id: 'confidence',
         name: 'Confidence',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/intelligence-analytics/quality',
         notes: 'Same quality surface — decision/recommend confidence averages.',
       },
       {
         id: 'model-routing',
         name: 'Model Routing',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/intelligence-analytics/routing',
         notes: 'decision_engine.decided model_selection/routing kind counts.',
       },

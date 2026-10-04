@@ -1,0 +1,3 @@
+export class GetCivilizationIntelligenceDashboardEngineQuery {}
+
+export class ListCivilizationIntelligenceDashboardProductsQuery {}

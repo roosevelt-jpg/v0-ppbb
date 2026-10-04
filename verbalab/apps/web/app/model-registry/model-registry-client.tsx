@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -38,7 +39,7 @@ export function ModelRegistryClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, vers, deps] = await Promise.all([
       apiFetch<Engine>('/v1/model-registry/engine', { token }),
@@ -59,7 +60,7 @@ export function ModelRegistryClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ version: Version }>('/v1/model-registry/versions', {
         token,
@@ -102,7 +103,7 @@ export function ModelRegistryClient() {
         Model Registry
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Cards, versions, approvals, and deploy plans over VL-110 — not MLflow or a traffic-mesh
+        Cards, versions, approvals, and deploy plans over — not MLflow or a traffic-mesh
         canary OS. <Link href="/models">Live models</Link> ·{' '}
         <Link href="/foundation-model-cloud">Foundation Model Cloud</Link>.
       </p>
@@ -126,7 +127,7 @@ export function ModelRegistryClient() {
               <li>trafficMeshOs: {String(engine.honesty.trafficMeshOs)}</li>
               <li>automaticWeightDeploy: {String(engine.honesty.automaticWeightDeploy)}</li>
               <li>regeneratesVl110: {String(engine.honesty.regeneratesVl110)}</li>
-              <li>VL-110 features in live matrix: {engine.liveSummary.featureCount}</li>
+              <li>features in live matrix: {engine.liveSummary.featureCount}</li>
             </ul>
           </section>
 

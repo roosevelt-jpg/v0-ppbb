@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = {
@@ -48,7 +49,7 @@ export function EnterpriseSearchClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         setEngine(await apiFetch<Engine>('/v1/enterprise-search/engine', { token }));
       } catch (err) {
@@ -61,7 +62,7 @@ export function EnterpriseSearchClient() {
     setSearching(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ hits: Hit[] }>('/v1/enterprise-search/search', {
         token,
@@ -146,7 +147,7 @@ export function EnterpriseSearchClient() {
             <h2 style={label}>Honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Org/workspace scoped {engine.honesty.orgWorkspaceScoped ? 'yes' : 'no'} · Extends
-              VL-062 {engine.honesty.extendsVl062 ? 'yes' : 'no'} · Elastic OS{' '}
+              {engine.honesty.extendsVl062 ? 'yes' : 'no'} · Elastic OS{' '}
               {engine.honesty.elasticOs ? 'yes' : 'no'} · BM25 parity{' '}
               {engine.honesty.bm25Parity ? 'yes' : 'no'} · Image{' '}
               {engine.honesty.imageSearch ? 'yes' : 'no'} · Voice{' '}

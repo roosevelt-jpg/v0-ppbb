@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-label="VerbaVoice">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d241c"/>
+      <stop offset="55%" stop-color="#1a6b52"/>
+      <stop offset="100%" stop-color="#0a1a14"/>
+    </linearGradient>
+    <radialGradient id="r" cx="70%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#6fcf9c" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#6fcf9c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="720" fill="url(#g)"/>
+  <rect width="1200" height="720" fill="url(#r)"/>
+  <g fill="none" stroke="#e8fff4" stroke-opacity="0.35" stroke-width="3">
+    <path d="M0 420 C 180 300, 320 540, 500 400 S 820 260, 1200 380"/>
+    <path d="M0 470 C 220 360, 360 560, 540 450 S 860 320, 1200 430"/>
+    <path d="M0 520 C 200 420, 380 580, 560 500 S 900 360, 1200 480"/>
+  </g>
+  <circle cx="220" cy="180" r="90" fill="#ffffff" fill-opacity="0.08"/>
+  <circle cx="980" cy="520" r="140" fill="#ffffff" fill-opacity="0.06"/>
+  <text x="64" y="660" fill="#f4f7f5" font-family="Arial, sans-serif" font-size="36" font-weight="700">VerbaVoice</text>
+</svg>

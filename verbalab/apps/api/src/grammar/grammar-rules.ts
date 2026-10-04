@@ -1,3 +1,5 @@
+import { applyAfricanGrammarRules } from './african-grammar-rules';
+
 export type GrammarIssueType =
   | 'spelling'
   | 'grammar'
@@ -115,15 +117,21 @@ function collectMatches(text: string, re: RegExp): RegExpExecArray[] {
 }
 
 /**
- * Deterministic grammar/spelling heuristics (VL-133).
- * English-leaning; not a full grammar engine.
+ * Deterministic grammar/spelling heuristics (VL-133 / Africa packs).
+ * English baseline + curated African language packs; not a full grammar engine.
  */
-export function applyGrammarRules(text: string): {
+export function applyGrammarRules(
+  text: string,
+  language?: string,
+): {
   corrected: string;
   issues: GrammarIssue[];
+  africanPack?: string | null;
 } {
-  const issues: GrammarIssue[] = [];
-  let corrected = text;
+  const african = applyAfricanGrammarRules(text, language);
+  const issues: GrammarIssue[] = [...african.issues];
+  let corrected = african.pack ? african.corrected : text;
+  const useEnglish = !african.pack;
 
   for (const match of collectMatches(corrected, / {2,}/g)) {
     issues.push({
@@ -151,57 +159,59 @@ export function applyGrammarRules(text: string): {
   }
   corrected = corrected.replace(/\b([A-Za-zÀ-ÿ']+)\s+\1\b/gi, '$1');
 
-  for (const [wrong, right] of Object.entries(COMMON_MISSPELLINGS)) {
-    const re = new RegExp(`\\b${wrong}\\b`, 'gi');
-    for (const match of collectMatches(corrected, re)) {
-      const original = match[0];
-      const suggestion =
-        original[0] === original[0]!.toUpperCase() && original[0] !== original[0]!.toLowerCase()
+  if (useEnglish) {
+    for (const [wrong, right] of Object.entries(COMMON_MISSPELLINGS)) {
+      const re = new RegExp(`\\b${wrong}\\b`, 'gi');
+      for (const match of collectMatches(corrected, re)) {
+        const original = match[0];
+        const suggestion =
+          original[0] === original[0]!.toUpperCase() && original[0] !== original[0]!.toLowerCase()
+            ? right.charAt(0).toUpperCase() + right.slice(1)
+            : right;
+        issues.push({
+          type: 'spelling',
+          severity: 'error',
+          message: `Possible misspelling of "${suggestion}".`,
+          original,
+          suggestion,
+          offset: match.index,
+          length: original.length,
+        });
+      }
+      corrected = corrected.replace(new RegExp(`\\b${wrong}\\b`, 'gi'), (m) =>
+        m[0] === m[0]!.toUpperCase() && m[0] !== m[0]!.toLowerCase()
           ? right.charAt(0).toUpperCase() + right.slice(1)
-          : right;
+          : right,
+      );
+    }
+
+    for (const match of collectMatches(corrected, /\bi\b/g)) {
       issues.push({
-        type: 'spelling',
+        type: 'capitalization',
         severity: 'error',
-        message: `Possible misspelling of "${suggestion}".`,
-        original,
-        suggestion,
+        message: 'Capitalize the pronoun "I".',
+        original: 'i',
+        suggestion: 'I',
         offset: match.index,
-        length: original.length,
+        length: 1,
       });
     }
-    corrected = corrected.replace(new RegExp(`\\b${wrong}\\b`, 'gi'), (m) =>
-      m[0] === m[0]!.toUpperCase() && m[0] !== m[0]!.toLowerCase()
-        ? right.charAt(0).toUpperCase() + right.slice(1)
-        : right,
-    );
-  }
+    corrected = corrected.replace(/\bi\b/g, 'I');
 
-  for (const match of collectMatches(corrected, /\bi\b/g)) {
-    issues.push({
-      type: 'capitalization',
-      severity: 'error',
-      message: 'Capitalize the pronoun "I".',
-      original: 'i',
-      suggestion: 'I',
-      offset: match.index,
-      length: 1,
-    });
-  }
-  corrected = corrected.replace(/\bi\b/g, 'I');
-
-  for (const rule of SUBJECT_VERB) {
-    for (const match of collectMatches(corrected, rule.pattern)) {
-      issues.push({
-        type: 'grammar',
-        severity: 'error',
-        message: rule.message,
-        original: match[0],
-        suggestion: rule.replacement,
-        offset: match.index,
-        length: match[0].length,
-      });
+    for (const rule of SUBJECT_VERB) {
+      for (const match of collectMatches(corrected, rule.pattern)) {
+        issues.push({
+          type: 'grammar',
+          severity: 'error',
+          message: rule.message,
+          original: match[0],
+          suggestion: rule.replacement,
+          offset: match.index,
+          length: match[0].length,
+        });
+      }
+      corrected = corrected.replace(new RegExp(rule.pattern.source, rule.pattern.flags), rule.replacement);
     }
-    corrected = corrected.replace(new RegExp(rule.pattern.source, rule.pattern.flags), rule.replacement);
   }
 
   const trimmed = corrected.trim();
@@ -214,5 +224,5 @@ export function applyGrammarRules(text: string): {
     });
   }
 
-  return { corrected: corrected.trimEnd(), issues };
+  return { corrected: corrected.trimEnd(), issues, africanPack: african.pack };
 }

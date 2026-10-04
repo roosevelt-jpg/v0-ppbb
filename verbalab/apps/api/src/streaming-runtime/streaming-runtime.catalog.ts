@@ -68,7 +68,7 @@ export function streamingSurfaces(): StreamSurface[] {
       transport: 'sse',
       api: 'POST /v1/streaming-runtime/stream',
       existing: false,
-      notes: 'Sandbox token-chunk SSE via Streaming Runtime hub (VL-208). Full OpenAI token stream OS deferred.',
+      notes: 'Sandbox token-chunk SSE via Streaming Runtime hub. Full OpenAI token stream OS deferred.',
     },
     {
       id: 'video-stream',
@@ -124,7 +124,7 @@ export function streamingRuntimeCatalog() {
   return {
     product: 'VerbaLab Streaming Runtime',
     note:
-      'Streaming Runtime (VL-208). Catalogs speech/voice/translation SSE already shipped in product clouds, plus a sandbox LLM/token chunk SSE on this hub. Primary transport is SSE. WebSockets, gRPC, and video streaming OS deferred. Does not regenerate translate/speech/TTS streams.',
+      'Streaming Runtime. Catalogs speech/voice/translation SSE already shipped in product clouds, plus a sandbox LLM/token chunk SSE on this hub. Primary transport is SSE. WebSockets, gRPC, and video streaming OS deferred. Does not regenerate translate/speech/TTS streams.',
     capabilities: [
       {
         id: 'speech-streaming',
@@ -208,7 +208,7 @@ export function streamingRuntimeCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/streaming-runtime/analytics',
-        notes: 'Session aggregates — ≠ VL-212.',
+        notes: 'Session aggregates — ≠',
       },
       {
         id: 'rest',

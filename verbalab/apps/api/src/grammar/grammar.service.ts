@@ -11,6 +11,7 @@ import {
   GrammarIssueSeverity,
   GrammarIssueType,
 } from './grammar-rules';
+import { applyAfricanGrammarRules } from './african-grammar-rules';
 import { grammarIntelligenceCatalog } from './grammar-intelligence.catalog';
 import { StyleService } from '../style/style.service';
 import { isStyleProfileId } from '../style/style-profiles';
@@ -60,16 +61,24 @@ export class GrammarService {
       language = detected.language;
     }
 
-    const rules = applySpellRules(text);
+    const african = applyAfricanGrammarRules(text, language);
+    const base = language === 'en' || language.startsWith('en') || !african.pack
+      ? applySpellRules(text)
+      : { corrected: text, issues: [] as typeof african.issues };
+    const corrected = african.pack ? african.corrected : base.corrected;
+    const issues = african.pack ? african.issues : base.issues;
     const result = {
       language,
       original: text,
-      corrected: rules.corrected,
-      changed: rules.corrected !== text,
-      issues: rules.issues,
-      issueCount: rules.issues.length,
+      corrected,
+      changed: corrected !== text,
+      issues,
+      issueCount: issues.length,
       provider: 'rules' as const,
-      note: 'Curated misspelling list only — not a full dictionary or Grammarly spell engine.',
+      africanPack: african.pack,
+      note: african.pack
+        ? `Curated ${african.pack} spelling pack — not a full dictionary product.`
+        : 'Curated misspelling list only — not a full dictionary or Grammarly spell engine.',
     };
 
     await this.recordAudit(
@@ -102,7 +111,7 @@ export class GrammarService {
       issueCount: full.issueCount,
       provider: full.provider,
       model: full.model,
-      note: 'Sentence correction via grammar pipeline (VL-142).',
+      note: 'Sentence correction via grammar pipeline.',
     };
   }
 
@@ -163,7 +172,7 @@ export class GrammarService {
       suggestions,
       suggestionCount: suggestions.length,
       providers: { grammar: grammar.provider, style: style.provider },
-      note: 'Combined grammar + style writing suggestions (VL-142). Domain profiles are tone-only.',
+      note: 'Combined grammar + style writing suggestions. Domain profiles are tone-only.',
     };
   }
 
@@ -233,7 +242,7 @@ export class GrammarService {
       languageConfidence = detected.confidence;
     }
 
-    const rules = applyGrammarRules(text);
+    const rules = applyGrammarRules(text, language);
     let corrected = rules.corrected;
     let issues = [...rules.issues];
     let provider: 'rules' | 'llm' | 'rules+llm' = 'rules';
@@ -260,9 +269,11 @@ export class GrammarService {
 
     const note =
       provider === 'rules'
-        ? language === 'en' || language.startsWith('en')
-          ? 'Deterministic English-leaning rules only — not a full grammar engine. Set OPENAI_API_KEY for LLM assist.'
-          : `Rules-only pass for language "${language}" (English-leaning heuristics). Set OPENAI_API_KEY for broader LLM assist.`
+        ? rules.africanPack
+          ? `Deterministic ${rules.africanPack} grammar pack + shared heuristics — not a full morphological engine. Set OPENAI_API_KEY for LLM assist.`
+          : language === 'en' || language.startsWith('en')
+            ? 'Deterministic English-leaning rules only — not a full grammar engine. Set OPENAI_API_KEY for LLM assist.'
+            : `Rules-only pass for language "${language}" (shared heuristics; no dedicated pack). Set OPENAI_API_KEY for broader LLM assist.`
         : 'LLM-assisted grammar check with deterministic rules baseline. Not Grammarly parity.';
 
     const result = {
@@ -276,6 +287,7 @@ export class GrammarService {
       issueCount: issues.length,
       provider,
       model,
+      africanPack: rules.africanPack ?? null,
       note,
     };
 

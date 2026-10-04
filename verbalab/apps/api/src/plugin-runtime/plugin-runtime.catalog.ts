@@ -50,7 +50,7 @@ export function pluginRuntimeCeilings() {
     ),
     mode: pluginRuntimeMode(),
     liveCodeExecution: false,
-    note: 'Sandbox plugin runtime. Live arbitrary code / network plugin execution is forbidden in VL-221.',
+    note: 'Sandbox plugin runtime. Live arbitrary code / network plugin execution is forbidden in',
   };
 }
 
@@ -62,7 +62,7 @@ export function pluginRuntimeCatalog() {
   return {
     product: 'VerbaLab Plugin Runtime',
     note:
-      'Plugin Runtime (VL-221). Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only — not arbitrary JS/WASM or live network plugins. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime (VL-222) is wired as a hard gate via PluginPolicyGate.',
+      'Plugin Runtime. Registry of sandboxed plugins with hard permission allowlists, lifecycle, versioning, dependency declarations, and marketplace listing counts. Invoke runs simulated sandbox handlers only — not arbitrary JS/WASM or live network plugins. Extends existing marketplace; does not invent a browser/VS Code extension OS. Policy Runtime is wired as a hard gate via PluginPolicyGate.',
     capabilities: [
       {
         id: 'plugin-registry',
@@ -95,9 +95,10 @@ export function pluginRuntimeCatalog() {
       {
         id: 'plugin-marketplace',
         name: 'Plugin Marketplace',
-        status: 'partial',
-        api: 'GET /v1/plugin-runtime/marketplace',
-        notes: 'Counts listings kind=plugin when present (may be 0; marketplace kinds today are glossary/prompt/dataset).',
+        status: 'shipped',
+        api: 'GET /v1/plugin-marketplace/engine',
+        notes:
+          'dedicated Plugin Marketplace. Runtime still exposes listing counts at GET /v1/plugin-runtime/marketplace.',
       },
       {
         id: 'plugin-dependencies',

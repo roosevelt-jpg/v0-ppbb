@@ -103,7 +103,7 @@ export function gpuPlatformCatalog() {
   return {
     product: 'VerbaLab GPU Platform',
     note:
-      'Sandbox GPU pools/scheduling/quotas/autoscaling with hard instance and spend ceilings (VL-205). Logical allocations only — does not call AWS/GCP/Azure GPU APIs. Not a hyperscaler GPU OS, MIG sharing suite, or distributed training fabric.',
+      'Sandbox GPU pools/scheduling/quotas/autoscaling with hard instance and spend ceilings. Logical allocations only — does not call AWS/GCP/Azure GPU APIs. Not a hyperscaler GPU OS, MIG sharing suite, or distributed training fabric.',
     capabilities: [
       {
         id: 'nvidia',

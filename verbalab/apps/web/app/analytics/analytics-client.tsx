@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Catalog = {
@@ -88,7 +89,7 @@ export function AnalyticsClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         await load(token);
       } catch (err) {
@@ -100,7 +101,7 @@ export function AnalyticsClient() {
   async function loadEnterpriseReport() {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const report = await apiFetch<{ note: string; generatedAt: string }>(
         '/v1/analytics/reports/enterprise',

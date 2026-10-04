@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -45,7 +46,7 @@ export function KnowledgeIntelligenceClient() {
   const [discover, setDiscover] = useState<Discover | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ins] = await Promise.all([
       apiFetch<Engine>('/v1/knowledge-intelligence/engine', { token }),
@@ -63,7 +64,7 @@ export function KnowledgeIntelligenceClient() {
   const runDiscover = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<Discover>('/v1/knowledge-intelligence/discover', {
         token,

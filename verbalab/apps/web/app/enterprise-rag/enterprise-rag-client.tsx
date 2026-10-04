@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -45,7 +46,7 @@ export function EnterpriseRagClient() {
   const [answer, setAnswer] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/enterprise-rag/engine', { token }),
@@ -64,7 +65,7 @@ export function EnterpriseRagClient() {
     setError(null);
     setAnswer(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<RetrieveResult>('/v1/enterprise-rag/retrieve', {
         token,
@@ -81,7 +82,7 @@ export function EnterpriseRagClient() {
   const ask = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         answer: string;
@@ -120,7 +121,7 @@ export function EnterpriseRagClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Grounded answers over the{' '}
         <Link href="/knowledge-base">Knowledge Base</Link> with citations and hybrid retrieval.
-        Extends VL-062. Not a LangChain / agentic RAG OS — hand-check retrieved context on real
+        Extends Not a LangChain / agentic RAG OS — hand-check retrieved context on real
         docs.
       </p>
 
@@ -221,7 +222,7 @@ export function EnterpriseRagClient() {
         {' · '}
         <Link href="/enterprise-search">Enterprise Search</Link>
         {' · '}
-        <Link href="/knowledge">VL-062 Knowledge</Link>
+        <Link href="/knowledge">Knowledge</Link>
       </p>
     </AppShell>
   );

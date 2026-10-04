@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -52,7 +53,7 @@ export function VoiceCloningClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, pol, lib, stats] = await Promise.all([
       apiFetch<Engine>('/v1/voice-cloning/engine', { token }),
@@ -86,7 +87,7 @@ export function VoiceCloningClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Enterprise cloning with explicit consent, ownership attestation, abuse review, licensing,
-        permissions, and required watermarking. Extends VL-064 — does not skip trust gates.
+        permissions, and required watermarking. Extends — does not skip trust gates.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

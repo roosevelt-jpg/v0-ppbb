@@ -13,12 +13,12 @@ export function aiOrchestrationCatalog() {
   return {
     product: 'VerbaLab AI Orchestration',
     note:
-      'Load-bearing orchestration over the AI Gateway + engines (VL-190). Runs real e2e pipelines (detect→translate, translate→chat, decide→act, tool/model chains). Extends VL-083 workflows. Not a multi-cloud agent OS, LangGraph OS, or distributed AI fabric.',
+      'Load-bearing orchestration over the AI Gateway + engines. Runs real e2e pipelines (detect→translate, translate→chat, decide→act, tool/model chains). Extends workflows. Not a multi-cloud agent OS, LangGraph OS, or distributed AI fabric.',
     capabilities: [
       {
         id: 'multi-model-execution',
         name: 'Multi Model Execution',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-orchestration/run',
         notes: 'pipeline=model_chain — sequential gateway chat calls. Not cross-vendor mesh.',
       },
@@ -27,14 +27,14 @@ export function aiOrchestrationCatalog() {
         name: 'Multi Cloud Routing',
         status: 'deferred',
         api: null,
-        notes: 'Multi-cloud agent OS / geo mesh deferred (VL-190 out of scope).',
+        notes: 'Multi-cloud agent OS / geo mesh deferred (out of scope).',
       },
       {
         id: 'workflow-orchestration',
         name: 'Workflow Orchestration',
         status: 'shipped',
         api: 'POST /v1/ai-orchestration/run',
-        notes: 'Named pipelines + VL-083 /v1/workflows job steps.',
+        notes: 'Named pipelines + /v1/workflows job steps.',
       },
       {
         id: 'agent-collaboration',
@@ -53,7 +53,7 @@ export function aiOrchestrationCatalog() {
       {
         id: 'model-chaining',
         name: 'Model Chaining',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-orchestration/run',
         notes: 'pipeline=model_chain — draft then refine via chat gateway.',
       },
@@ -146,13 +146,13 @@ export const ORCH_PIPELINES = [
     id: 'model_chain',
     name: 'Model chain (draft→refine)',
     steps: ['chat', 'chat'],
-    status: 'partial' as const,
+    status: 'shipped' as const,
   },
   {
     id: 'assemble_chat',
     name: 'Assemble context then chat',
     steps: ['assemble', 'chat'],
-    status: 'partial' as const,
+    status: 'shipped' as const,
   },
   {
     id: 'multi_cloud',

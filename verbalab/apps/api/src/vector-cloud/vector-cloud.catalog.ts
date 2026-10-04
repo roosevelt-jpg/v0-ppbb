@@ -13,7 +13,7 @@ export function vectorCloudCatalog() {
   return {
     product: 'VerbaLab Vector Cloud',
     note:
-      'Enterprise vector search over Postgres pgvector knowledge_chunks (VL-062). Workspace = namespace; collection = knowledge. Not a managed vector DB OS (Pinecone/Weaviate/Qdrant parity deferred).',
+      'Enterprise vector search over Postgres pgvector knowledge_chunks. Workspace = namespace; collection = knowledge. Not a managed vector DB OS (Pinecone/Weaviate/Qdrant parity deferred).',
     capabilities: [
       {
         id: 'vector-storage',
@@ -46,7 +46,7 @@ export function vectorCloudCatalog() {
       {
         id: 'metadata-filter',
         name: 'Metadata Search / Filtering',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/vector-cloud/search',
         notes: 'Filter by documentId. Arbitrary JSON metadata filters deferred.',
       },
@@ -60,23 +60,23 @@ export function vectorCloudCatalog() {
       {
         id: 'collections',
         name: 'Collections',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/vector-cloud/collections',
-        notes: 'Single knowledge collection per workspace today.',
+        notes: 'Knowledge collection per workspace (logical). Multi-index OS deferred.',
       },
       {
         id: 'index-management',
         name: 'Index Management',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/vector-cloud/indexes',
-        notes: 'HNSW cosine index from VL-062 migration — create/drop API deferred.',
+        notes: 'HNSW cosine index from — create/drop API deferred.',
       },
       {
         id: 'hybrid-search',
         name: 'Hybrid Search',
-        status: 'deferred',
-        api: null,
-        notes: 'Dense+sparse / BM25 hybrid deferred.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'Keyword+semantic RRF hybrid via Enterprise Search. Pinecone/BM25 OS deferred.',
       },
       {
         id: 'sharding',
@@ -111,6 +111,7 @@ export function vectorCloudCatalog() {
       managedVectorDbOs: false,
       pineconeParity: false,
       hybridBm25: false,
+      hybridRrfViaEnterpriseSearch: true,
       customSharding: false,
     },
     links: {

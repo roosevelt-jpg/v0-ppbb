@@ -16,3 +16,8 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+scripts/__pycache__/
+
+# Local secrets (never commit)
+.local/
+**/firebase-adminsdk*.json

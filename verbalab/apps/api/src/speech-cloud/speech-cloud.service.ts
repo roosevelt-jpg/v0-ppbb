@@ -74,6 +74,8 @@ export class SpeechCloudService {
         audio: '/audio',
         interpret: '/interpret',
         voice: '/voice',
+        voiceBiometrics: '/voice-biometrics',
+        voiceStudio: '/voice-studio',
         accents: '/accents',
         accentIntelligence: '/accent-intelligence',
         emotion: '/emotion-intelligence',

@@ -54,7 +54,7 @@ export function workflowRuntimeCeilings() {
     ),
     mode: workflowRuntimeMode(),
     liveStepExecution: false,
-    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in VL-220.',
+    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in',
   };
 }
 
@@ -66,7 +66,7 @@ export function workflowRuntimeCatalog() {
   return {
     product: 'VerbaLab Workflow Runtime',
     note:
-      'Workflow Runtime (VL-220). Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime (VL-222) is wired as a hard gate via WorkflowPolicyGate.',
+      'Workflow Runtime. Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime is wired as a hard gate via WorkflowPolicyGate.',
     capabilities: [
       {
         id: 'workflow-execution',

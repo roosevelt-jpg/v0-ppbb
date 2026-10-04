@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, getStoredWorkspaceId, setStoredWorkspaceId } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { isClerkConfigured } from '@/lib/clerk-config';
 
 type WorkspaceRow = {
@@ -21,7 +22,7 @@ export function WorkspaceSwitcher() {
 
   const load = useCallback(async () => {
     if (!isClerkConfigured()) return;
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) return;
     const res = await apiFetch<{ data: WorkspaceRow[] }>('/v1/workspaces', { token });
     setWorkspaces(res.data);
@@ -57,7 +58,7 @@ export function WorkspaceSwitcher() {
     if (!name?.trim()) return;
     setCreating(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) return;
       const created = await apiFetch<WorkspaceRow>('/v1/workspaces', {
         method: 'POST',

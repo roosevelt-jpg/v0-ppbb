@@ -47,6 +47,7 @@ model Organization {
   memberships         Membership[]
   workspaces          Workspace[]
   apiKeys             ApiKey[]
+  modelApiKeys        ModelApiKey[]
   translationRequests TranslationRequest[]
   usageEvents         UsageEvent[]
   auditEvents         AuditEvent[]
@@ -1629,4 +1630,202 @@ model CostSpendEvent {
   @@map("cost_spend_events")
 }
 
+/// Marketing / product-site CMS settings (theme defaults, brand, design scope).
+model CmsSiteSettings {
+  id                 String   @id @default("default")
+  brandName          String   @default("VerbaLab") @map("brand_name")
+  tagline            String   @default("")
+  defaultTheme       String   @default("system") @map("default_theme")
+  primaryColor       String   @default("#1a6b52") @map("primary_color")
+  accentColor        String   @default("#6fcf9c") @map("accent_color")
+  designScope        Json     @default("{}") @map("design_scope")
+  socialLinks        Json     @default("{}") @map("social_links")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
+  @@map("cms_site_settings")
+}
+
+/// CMS page (marketing or product marketing surfaces).
+model CmsPage {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @default("")
+  status      String   @default("published")
+  seo         Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  blocks CmsBlock[]
+  assets CmsAsset[]
+
+  @@map("cms_pages")
+}
+
+/// Ordered content blocks for a CMS page (hero, products, logos, etc.).
+model CmsBlock {
+  id        String   @id @default(cuid())
+  pageId    String   @map("page_id")
+  type      String
+  sortOrder Int      @default(0) @map("sort_order")
+  content   Json     @default("{}")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  page CmsPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
+  @@map("cms_blocks")
+}
+
+/// CMS media assets referenced by blocks.
+model CmsAsset {
+  id        String   @id @default(cuid())
+  pageId    String?  @map("page_id")
+  key       String
+  url       String
+  alt       String   @default("")
+  kind      String   @default("image")
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  page CmsPage? @relation(fields: [pageId], references: [id], onDelete: SetNull)
+
+  @@unique([key])
+  @@index([pageId])
+  @@map("cms_assets")
+}
+
+/// Volume 21 VCOS — internal corporate operating records (governance, strategy, portfolio, …).
+/// Tooling only: does not constitute real corporate governance or legal counsel.
+model VcosRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("vcos_records")
+}
+
+/// Volume 22 VGAS records (standards/certification/assessment/partner).
+/// Not evidence of external industry-standard adoption or third-party accreditation.
+model VgasRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  verifyCode     String?  @unique @map("verify_code")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("vgas_records")
+}
+
+/// Volume 23 AI Economy records (marketplace/commerce/ledger/dashboard).
+/// Not evidence of world-largest economy status, funding-portal operation, or autonomous payouts.
+model AieRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("aie_records")
+}
+
+/// Volume 24 Digital Civilization records (public-sector/city/enterprise demos).
+/// Not evidence that VerbaLab operates national infrastructure or production gov systems.
+model DcivRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("dciv_records")
+}
+
+/// VerbaLab-owned model API keys (`vmod_live_` / `vmod_test_` / `vmod_root_`).
+/// Authenticates calls to VerbaLab model services — not third-party vendor keys.
+model ModelApiKey {
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  workspaceId    String?           @map("workspace_id")
+  createdById    String?           @map("created_by_id")
+  name           String
+  prefix         String
+  secretHash     String            @map("secret_hash")
+  /// live | test | root
+  kind           String            @default("live")
+  /// modalities this key may call: mt,stt,tts,chat,embed,ocr,clone,* 
+  scopes         String[]          @default(["*"])
+  revokedAt      DateTime?         @map("revoked_at")
+  lastUsedAt     DateTime?         @map("last_used_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([organizationId])
+  @@index([secretHash])
+  @@map("model_api_keys")
+}
+
+/// Volume 25 AI Internet records (DNS/discovery/federation/trust/payments).
+/// Not evidence that VerbaLab operates a global AI Internet or Global OS.
+model AiInternetRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("ai_internet_records")
+}

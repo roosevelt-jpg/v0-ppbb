@@ -2961,7 +2961,7 @@ export const openApiDocument = {
         responses: {
           '200': {
             description:
-              'Cards/versions/deploy capabilities + VL-110 live summary (not MLflow/mesh OS)',
+              'Cards/versions/deploy capabilities + live summary (not MLflow/mesh OS)',
           },
         },
       },
@@ -2977,7 +2977,7 @@ export const openApiDocument = {
     },
     '/v1/model-registry/cards': {
       get: {
-        summary: 'Model cards from VL-110 entries',
+        summary: 'Model cards from entries',
         operationId: 'listModelRegistryCards',
         responses: {
           '200': { description: 'Lightweight cards derived from registry metadata' },
@@ -3161,6 +3161,1982 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ecosystem-cloud/products': {
+      get: {
+        summary: 'Ecosystem Cloud product catalog',
+        operationId: 'listEcosystemCloudProducts',
+        responses: {
+          '200': {
+            description:
+              'Marketplace/monetization hub catalog, honesty, Stripe safety, deferred marketplaces',
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/engine': {
+      get: {
+        summary: 'Ecosystem Cloud engine (alias of products)',
+        operationId: 'getEcosystemCloudEngine',
+        responses: {
+          '200': { description: 'Ecosystem catalog + honesty' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/routing': {
+      get: {
+        summary: 'Ecosystem Cloud marketplace routing table',
+        operationId: 'getEcosystemCloudRouting',
+        responses: {
+          '200': { description: 'Static marketplace/monetization route catalog' },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/overview': {
+      get: {
+        summary: 'Ecosystem Cloud org overview',
+        operationId: 'getEcosystemCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, deferred marketplaces, real-money safety notes' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ecosystem-cloud/monitoring': {
+      get: {
+        summary: 'Ecosystem Cloud foundation monitoring',
+        operationId: 'getEcosystemCloudMonitoring',
+        responses: {
+          '200': { description: 'Product status snapshot + honesty' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/engine': {
+      get: {
+        summary: 'Plugin Marketplace engine catalog',
+        operationId: 'getPluginMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Plugin marketplace capabilities, sandbox/Policy honesty, deferred monetization depth',
+          },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/products': {
+      get: {
+        summary: 'Plugin Marketplace products (alias of engine)',
+        operationId: 'listPluginMarketplaceProducts',
+        responses: {
+          '200': { description: 'Plugin marketplace catalog + honesty' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings': {
+      get: {
+        summary: 'List plugin marketplace listings',
+        operationId: 'listPluginMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Published or mine plugin listings' },
+        },
+      },
+      post: {
+        summary: 'Publish a Plugin Runtime plugin as a marketplace listing',
+        operationId: 'publishPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '201': { description: 'Listing created' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a plugin listing into Plugin Runtime (sandboxed)',
+        operationId: 'installPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Installed sandboxed plugin' },
+          '403': { description: 'Policy/sandbox deny' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace plugin (Policy-gated sandbox invoke)',
+        operationId: 'runPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox invoke result' },
+          '403': { description: 'Policy deny or not installed' },
+        },
+      },
+    },
+    '/v1/plugin-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List plugin listing reviews',
+        operationId: 'listPluginMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a plugin listing review',
+        operationId: 'reviewPluginMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/plugin-marketplace/analytics': {
+      get: {
+        summary: 'Plugin marketplace analytics',
+        operationId: 'getPluginMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/plugin-marketplace/monitoring': {
+      get: {
+        summary: 'Plugin marketplace monitoring',
+        operationId: 'getPluginMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/model-marketplace/engine': {
+      get: {
+        summary: 'Model Marketplace engine catalog',
+        operationId: 'getModelMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Model marketplace capabilities, Stripe honesty, Hugging Face / weight-hosting denials',
+          },
+        },
+      },
+    },
+    '/v1/model-marketplace/products': {
+      get: {
+        summary: 'Model Marketplace products (alias of engine)',
+        operationId: 'listModelMarketplaceProducts',
+        responses: { '200': { description: 'Model marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/model-marketplace/listings': {
+      get: {
+        summary: 'List model marketplace listings',
+        operationId: 'listModelMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine model listings' } },
+      },
+      post: {
+        summary: 'Publish a Model Registry card as a marketplace listing',
+        operationId: 'publishModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a model listing license entitlement',
+        operationId: 'installModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'License entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/model-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List model listing reviews',
+        operationId: 'listModelMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a model listing review',
+        operationId: 'reviewModelMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/model-marketplace/sales': {
+      get: {
+        summary: 'Model marketplace publisher sales',
+        operationId: 'listModelMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/model-marketplace/analytics': {
+      get: {
+        summary: 'Model marketplace analytics',
+        operationId: 'getModelMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/model-marketplace/monitoring': {
+      get: {
+        summary: 'Model marketplace monitoring',
+        operationId: 'getModelMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/dataset-marketplace/engine': {
+      get: {
+        summary: 'Dataset Marketplace engine catalog',
+        operationId: 'getDatasetMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Dataset marketplace capabilities, Stripe honesty, Label Studio / Dataset Cloud denials',
+          },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/products': {
+      get: {
+        summary: 'Dataset Marketplace products (alias of engine)',
+        operationId: 'listDatasetMarketplaceProducts',
+        responses: { '200': { description: 'Dataset marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings': {
+      get: {
+        summary: 'List dataset marketplace listings',
+        operationId: 'listDatasetMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine dataset listings' } },
+      },
+      post: {
+        summary: 'Publish a TM corpus or DatasetAsset as a marketplace listing',
+        operationId: 'publishDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a dataset listing (TM copy or asset entitlement)',
+        operationId: 'installDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Dataset installed / entitlement granted' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/dataset-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List dataset listing reviews',
+        operationId: 'listDatasetMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a dataset listing review',
+        operationId: 'reviewDatasetMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/dataset-marketplace/sales': {
+      get: {
+        summary: 'Dataset marketplace publisher sales',
+        operationId: 'listDatasetMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/dataset-marketplace/analytics': {
+      get: {
+        summary: 'Dataset marketplace analytics',
+        operationId: 'getDatasetMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/dataset-marketplace/monitoring': {
+      get: {
+        summary: 'Dataset marketplace monitoring',
+        operationId: 'getDatasetMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/prompt-marketplace/engine': {
+      get: {
+        summary: 'Prompt Marketplace engine catalog',
+        operationId: 'getPromptMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Prompt marketplace capabilities, Stripe honesty, prompt-mesh / auto-prompt research denials',
+          },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/products': {
+      get: {
+        summary: 'Prompt Marketplace products (alias of engine)',
+        operationId: 'listPromptMarketplaceProducts',
+        responses: { '200': { description: 'Prompt marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings': {
+      get: {
+        summary: 'List prompt marketplace listings',
+        operationId: 'listPromptMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine prompt listings' } },
+      },
+      post: {
+        summary: 'Publish managed prompts as a marketplace listing',
+        operationId: 'publishPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/test': {
+      post: {
+        summary: 'Dry-run validate a prompt listing snapshot',
+        operationId: 'testPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Dry-run test results' } },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a prompt listing into the buyer workspace',
+        operationId: 'installPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Prompt versions installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/prompt-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List prompt listing reviews',
+        operationId: 'listPromptMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a prompt listing review',
+        operationId: 'reviewPromptMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/prompt-marketplace/sales': {
+      get: {
+        summary: 'Prompt marketplace publisher sales',
+        operationId: 'listPromptMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/prompt-marketplace/analytics': {
+      get: {
+        summary: 'Prompt marketplace analytics',
+        operationId: 'getPromptMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/prompt-marketplace/monitoring': {
+      get: {
+        summary: 'Prompt marketplace monitoring',
+        operationId: 'getPromptMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/agent-marketplace/engine': {
+      get: {
+        summary: 'Agent Marketplace engine catalog',
+        operationId: 'getAgentMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Agent marketplace capabilities, Stripe honesty, sandbox + Policy hard-gate denials',
+          },
+        },
+      },
+    },
+    '/v1/agent-marketplace/products': {
+      get: {
+        summary: 'Agent Marketplace products (alias of engine)',
+        operationId: 'listAgentMarketplaceProducts',
+        responses: { '200': { description: 'Agent marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/listings': {
+      get: {
+        summary: 'List agent marketplace listings',
+        operationId: 'listAgentMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine agent listings' } },
+      },
+      post: {
+        summary: 'Publish an Agent Runtime agent as a marketplace listing',
+        operationId: 'publishAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install an agent listing into Agent Runtime (sandboxed)',
+        operationId: 'installAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandboxed agent installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace agent (Policy-gated sandbox)',
+        operationId: 'runAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result (may be denied)' },
+          '403': { description: 'Not installed or policy deny' },
+        },
+      },
+    },
+    '/v1/agent-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List agent listing reviews',
+        operationId: 'listAgentMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert an agent listing review',
+        operationId: 'reviewAgentMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/agent-marketplace/sales': {
+      get: {
+        summary: 'Agent marketplace publisher sales',
+        operationId: 'listAgentMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/agent-marketplace/analytics': {
+      get: {
+        summary: 'Agent marketplace analytics',
+        operationId: 'getAgentMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/agent-marketplace/monitoring': {
+      get: {
+        summary: 'Agent marketplace monitoring',
+        operationId: 'getAgentMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/workflow-marketplace/engine': {
+      get: {
+        summary: 'Workflow Marketplace engine catalog',
+        operationId: 'getWorkflowMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Workflow marketplace capabilities, Stripe honesty, sandbox + Policy hard-gate denials',
+          },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/products': {
+      get: {
+        summary: 'Workflow Marketplace products (alias of engine)',
+        operationId: 'listWorkflowMarketplaceProducts',
+        responses: { '200': { description: 'Workflow marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/workflow-marketplace/listings': {
+      get: {
+        summary: 'List workflow marketplace listings',
+        operationId: 'listWorkflowMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine workflow listings' } },
+      },
+      post: {
+        summary: 'Publish a Workflow Runtime definition as a marketplace listing',
+        operationId: 'publishWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a workflow listing into Workflow Runtime (sandboxed)',
+        operationId: 'installWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandboxed workflow installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/run': {
+      post: {
+        summary: 'Run an installed marketplace workflow (Policy-gated sandbox)',
+        operationId: 'runWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sandbox run result (may be denied)' },
+          '403': { description: 'Not installed or policy deny' },
+        },
+      },
+    },
+    '/v1/workflow-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List workflow listing reviews',
+        operationId: 'listWorkflowMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a workflow listing review',
+        operationId: 'reviewWorkflowMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/workflow-marketplace/sales': {
+      get: {
+        summary: 'Workflow marketplace publisher sales',
+        operationId: 'listWorkflowMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/workflow-marketplace/analytics': {
+      get: {
+        summary: 'Workflow marketplace analytics',
+        operationId: 'getWorkflowMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/workflow-marketplace/monitoring': {
+      get: {
+        summary: 'Workflow marketplace monitoring',
+        operationId: 'getWorkflowMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/partner-connectors/engine': {
+      get: {
+        summary: 'Partner Connectors engine (MCP/CLI/REST for video+LLM platforms)',
+        operationId: 'getPartnerConnectorsEngine',
+        responses: { '200': { description: 'Platforms, tools, MCP, honesty' } },
+      },
+    },
+    '/v1/partner-connectors/platforms': {
+      get: {
+        summary: 'List partner platforms (Higgsfield, Claude, Runway, …)',
+        operationId: 'listPartnerConnectorsPlatforms',
+        responses: { '200': { description: 'Partner platforms' } },
+      },
+    },
+    '/v1/partner-connectors/tools': {
+      get: {
+        summary: 'List partner/MCP Own AI tools',
+        operationId: 'listPartnerConnectorsTools',
+        responses: { '200': { description: 'Tool schemas' } },
+      },
+    },
+    '/v1/partner-connectors/invoke': {
+      post: {
+        summary: 'Invoke a partner Own AI tool',
+        operationId: 'invokePartnerConnectorTool',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Tool result' } },
+      },
+    },
+    '/v1/partner-connectors/mcp': {
+      post: {
+        summary: 'MCP JSON-RPC endpoint (tools/list, tools/call)',
+        operationId: 'partnerConnectorsMcp',
+        responses: { '200': { description: 'JSON-RPC result' } },
+      },
+    },
+    '/v1/partner-connectors/mcp/manifest': {
+      get: {
+        summary: 'MCP server manifest for Claude/Cursor',
+        operationId: 'getPartnerConnectorsMcpManifest',
+        responses: { '200': { description: 'MCP manifest' } },
+      },
+    },
+    '/v1/connector-marketplace/engine': {
+      get: {
+        summary: 'Connector Marketplace engine catalog',
+        operationId: 'getConnectorMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Connector marketplace capabilities, Stripe honesty, iPaaS / live-outbound denials',
+          },
+        },
+      },
+    },
+    '/v1/connector-marketplace/products': {
+      get: {
+        summary: 'Connector Marketplace products (alias of engine)',
+        operationId: 'listConnectorMarketplaceProducts',
+        responses: { '200': { description: 'Connector marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/connector-marketplace/listings': {
+      get: {
+        summary: 'List connector marketplace listings',
+        operationId: 'listConnectorMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine connector listings' } },
+      },
+      post: {
+        summary: 'Publish a connector catalog key as a marketplace listing',
+        operationId: 'publishConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/connector-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a connector listing entitlement',
+        operationId: 'installConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Connector entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/connector-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List connector listing reviews',
+        operationId: 'listConnectorMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a connector listing review',
+        operationId: 'reviewConnectorMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/connector-marketplace/sales': {
+      get: {
+        summary: 'Connector marketplace publisher sales',
+        operationId: 'listConnectorMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/connector-marketplace/analytics': {
+      get: {
+        summary: 'Connector marketplace analytics',
+        operationId: 'getConnectorMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/connector-marketplace/monitoring': {
+      get: {
+        summary: 'Connector marketplace monitoring',
+        operationId: 'getConnectorMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/voice-language-marketplace/engine': {
+      get: {
+        summary: 'Voice & Language Marketplace engine catalog',
+        operationId: 'getVoiceLanguageMarketplaceEngine',
+        responses: {
+          '200': {
+            description:
+              'Voice/language pack capabilities, Stripe honesty, ElevenLabs / celebrity / CDN denials',
+          },
+        },
+      },
+    },
+    '/v1/voice-language-marketplace/products': {
+      get: {
+        summary: 'Voice & Language Marketplace products (alias of engine)',
+        operationId: 'listVoiceLanguageMarketplaceProducts',
+        responses: { '200': { description: 'Voice/language marketplace catalog + honesty' } },
+      },
+    },
+    '/v1/voice-language-marketplace/listings': {
+      get: {
+        summary: 'List voice/language marketplace listings',
+        operationId: 'listVoiceLanguageMarketplaceListings',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Published or mine pack listings' } },
+      },
+      post: {
+        summary: 'Publish a voice/language pack catalog key as a marketplace listing',
+        operationId: 'publishVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '201': { description: 'Listing created' } },
+      },
+    },
+    '/v1/voice-language-marketplace/listings/{id}/install': {
+      post: {
+        summary: 'Install a voice/language pack listing entitlement',
+        operationId: 'installVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Pack entitlement installed' },
+          '403': { description: 'Policy deny' },
+        },
+      },
+    },
+    '/v1/voice-language-marketplace/listings/{id}/reviews': {
+      get: {
+        summary: 'List voice/language listing reviews',
+        operationId: 'listVoiceLanguageMarketplaceReviews',
+        responses: { '200': { description: 'Reviews' } },
+      },
+      post: {
+        summary: 'Upsert a voice/language listing review',
+        operationId: 'reviewVoiceLanguageMarketplaceListing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Review saved' } },
+      },
+    },
+    '/v1/voice-language-marketplace/sales': {
+      get: {
+        summary: 'Voice/language marketplace publisher sales',
+        operationId: 'listVoiceLanguageMarketplaceSales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts + fee honesty' } },
+      },
+    },
+    '/v1/voice-language-marketplace/analytics': {
+      get: {
+        summary: 'Voice/language marketplace analytics',
+        operationId: 'getVoiceLanguageMarketplaceAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/voice-language-marketplace/monitoring': {
+      get: {
+        summary: 'Voice/language marketplace monitoring',
+        operationId: 'getVoiceLanguageMarketplaceMonitoring',
+        responses: { '200': { description: 'Capability status snapshot' } },
+      },
+    },
+    '/v1/creator-economy/engine': {
+      get: {
+        summary: 'Creator Economy engine catalog',
+        operationId: 'getCreatorEconomyEngine',
+        responses: {
+          '200': {
+            description:
+              'Creator Economy capabilities, royalty hand-checks, Stripe honesty, tax/dispute gaps',
+          },
+        },
+      },
+    },
+    '/v1/creator-economy/products': {
+      get: {
+        summary: 'Creator Economy products (alias of engine)',
+        operationId: 'listCreatorEconomyProducts',
+        responses: { '200': { description: 'Creator Economy catalog + honesty' } },
+      },
+    },
+    '/v1/creator-economy/royalty/scenarios': {
+      get: {
+        summary: 'Hand-checkable royalty split scenarios',
+        operationId: 'getCreatorEconomyRoyaltyScenarios',
+        responses: { '200': { description: 'Scenario table with computed pass/fail' } },
+      },
+    },
+    '/v1/creator-economy/royalty/preview': {
+      post: {
+        summary: 'Preview royalty split for an amount',
+        operationId: 'previewCreatorEconomyRoyalty',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Fee + publisher net preview' } },
+      },
+    },
+    '/v1/creator-economy/sales': {
+      get: {
+        summary: 'Aggregated marketplace sales for the org',
+        operationId: 'listCreatorEconomySales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts' } },
+      },
+    },
+    '/v1/creator-economy/invoices': {
+      get: {
+        summary: 'Invoice-style views over MarketplaceSale',
+        operationId: 'listCreatorEconomyInvoices',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Invoice-style receipts' } },
+      },
+    },
+    '/v1/creator-economy/profiles/creator': {
+      get: {
+        summary: 'Creator/publisher profile',
+        operationId: 'getCreatorEconomyCreatorProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Creator profile + Connect readiness' } },
+      },
+    },
+    '/v1/creator-economy/profiles/organization': {
+      get: {
+        summary: 'Organization economy profile',
+        operationId: 'getCreatorEconomyOrganizationProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Org buyer/publisher summary' } },
+      },
+    },
+    '/v1/creator-economy/profiles/partner': {
+      get: {
+        summary: 'Partner / Connect readiness',
+        operationId: 'getCreatorEconomyPartnerProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Stripe Connect Express partner status' } },
+      },
+    },
+    '/v1/creator-economy/licensing': {
+      get: {
+        summary: 'Workspace marketplace entitlements',
+        operationId: 'listCreatorEconomyLicensing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Installed entitlements' } },
+      },
+    },
+    '/v1/creator-economy/tax': {
+      get: {
+        summary: 'Tax reporting honesty (gaps)',
+        operationId: 'getCreatorEconomyTax',
+        responses: { '200': { description: 'Explicit tax coverage gaps' } },
+      },
+    },
+    '/v1/creator-economy/disputes': {
+      get: {
+        summary: 'Dispute/chargeback honesty (gaps)',
+        operationId: 'getCreatorEconomyDisputes',
+        responses: { '200': { description: 'Explicit dispute coverage gaps' } },
+      },
+    },
+    '/v1/creator-economy/analytics': {
+      get: {
+        summary: 'Creator Economy analytics',
+        operationId: 'getCreatorEconomyAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/creator-economy/monitoring': {
+      get: {
+        summary: 'Creator Economy monitoring',
+        operationId: 'getCreatorEconomyMonitoring',
+        responses: { '200': { description: 'Capability + hand-check snapshot' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/engine': {
+      get: {
+        summary: 'African Intelligence Cloud engine catalog',
+        operationId: 'getAfricanIntelligenceCloudEngine',
+        responses: { '200': { description: 'African Intelligence Cloud catalog + honesty' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/products': {
+      get: {
+        summary: 'African Intelligence Cloud products',
+        operationId: 'listAfricanIntelligenceCloudProducts',
+        responses: { '200': { description: 'African Intelligence Cloud products' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/monitoring': {
+      get: {
+        summary: 'African Intelligence Cloud monitoring',
+        operationId: 'getAfricanIntelligenceCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/routing': {
+      get: {
+        summary: 'African Intelligence routing table',
+        operationId: 'getAfricanIntelligenceCloudRouting',
+        responses: { '200': { description: 'Static routing catalog' } },
+      },
+    },
+    '/v1/african-intelligence-cloud/overview': {
+      get: {
+        summary: 'African Intelligence Cloud org overview',
+        operationId: 'getAfricanIntelligenceCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage + product catalog' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/african-language-registry/engine': {
+      get: {
+        summary: 'African Language Registry engine catalog',
+        operationId: 'getAfricanLanguageRegistryEngine',
+        responses: { '200': { description: 'African Language Registry catalog + honesty' } },
+      },
+    },
+    '/v1/african-language-registry/products': {
+      get: {
+        summary: 'African Language Registry products',
+        operationId: 'listAfricanLanguageRegistryProducts',
+        responses: { '200': { description: 'African Language Registry products' } },
+      },
+    },
+    '/v1/african-language-registry/monitoring': {
+      get: {
+        summary: 'African Language Registry monitoring',
+        operationId: 'getAfricanLanguageRegistryMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-language-registry/languages': {
+      get: {
+        summary: 'List African language registry entries',
+        operationId: 'listAfricanLanguageRegistryLanguages',
+        responses: { '200': { description: 'Language seed entries' } },
+      },
+    },
+    '/v1/african-language-registry/families': {
+      get: {
+        summary: 'List language families',
+        operationId: 'listAfricanLanguageRegistryFamilies',
+        responses: { '200': { description: 'Family metadata' } },
+      },
+    },
+    '/v1/cultural-intelligence/engine': {
+      get: {
+        summary: 'Cultural Intelligence engine catalog',
+        operationId: 'getCulturalIntelligenceEngine',
+        responses: { '200': { description: 'Cultural Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/cultural-intelligence/products': {
+      get: {
+        summary: 'Cultural Intelligence products',
+        operationId: 'listCulturalIntelligenceProducts',
+        responses: { '200': { description: 'Cultural Intelligence products' } },
+      },
+    },
+    '/v1/cultural-intelligence/monitoring': {
+      get: {
+        summary: 'Cultural Intelligence monitoring',
+        operationId: 'getCulturalIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/cultural-intelligence/entries': {
+      get: {
+        summary: 'List cultural intelligence entries',
+        operationId: 'listCulturalIntelligenceEntries',
+        responses: { '200': { description: 'Cultural entries with consent fields' } },
+      },
+    },
+    '/v1/african-knowledge-graph/engine': {
+      get: {
+        summary: 'African Knowledge Graph engine catalog',
+        operationId: 'getAfricanKnowledgeGraphEngine',
+        responses: { '200': { description: 'African Knowledge Graph catalog + honesty' } },
+      },
+    },
+    '/v1/african-knowledge-graph/products': {
+      get: {
+        summary: 'African Knowledge Graph products',
+        operationId: 'listAfricanKnowledgeGraphProducts',
+        responses: { '200': { description: 'African Knowledge Graph products' } },
+      },
+    },
+    '/v1/african-knowledge-graph/monitoring': {
+      get: {
+        summary: 'African Knowledge Graph monitoring',
+        operationId: 'getAfricanKnowledgeGraphMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/african-knowledge-graph/nodes': {
+      get: {
+        summary: 'List African knowledge graph nodes',
+        operationId: 'listAfricanKnowledgeGraphNodes',
+        responses: { '200': { description: 'Graph nodes' } },
+      },
+    },
+    '/v1/african-knowledge-graph/edges': {
+      get: {
+        summary: 'List African knowledge graph edges',
+        operationId: 'listAfricanKnowledgeGraphEdges',
+        responses: { '200': { description: 'Graph edges' } },
+      },
+    },
+    '/v1/african-knowledge-graph/query': {
+      get: {
+        summary: 'Query African knowledge graph',
+        operationId: 'queryAfricanKnowledgeGraph',
+        responses: { '200': { description: 'Filtered nodes/edges' } },
+      },
+    },
+    '/v1/government-intelligence/engine': {
+      get: {
+        summary: 'Government Intelligence engine catalog',
+        operationId: 'getGovernmentIntelligenceEngine',
+        responses: { '200': { description: 'Government Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/government-intelligence/products': {
+      get: {
+        summary: 'Government Intelligence products',
+        operationId: 'listGovernmentIntelligenceProducts',
+        responses: { '200': { description: 'Government Intelligence products' } },
+      },
+    },
+    '/v1/government-intelligence/monitoring': {
+      get: {
+        summary: 'Government Intelligence monitoring',
+        operationId: 'getGovernmentIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/government-intelligence/terms': {
+      get: {
+        summary: 'List Government Intelligence terms',
+        operationId: 'listGovernmentIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/government-intelligence/query': {
+      get: {
+        summary: 'Query Government Intelligence terms',
+        operationId: 'queryGovernmentIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/healthcare-intelligence/engine': {
+      get: {
+        summary: 'Healthcare Intelligence engine catalog',
+        operationId: 'getHealthcareIntelligenceEngine',
+        responses: { '200': { description: 'Healthcare Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/healthcare-intelligence/products': {
+      get: {
+        summary: 'Healthcare Intelligence products',
+        operationId: 'listHealthcareIntelligenceProducts',
+        responses: { '200': { description: 'Healthcare Intelligence products' } },
+      },
+    },
+    '/v1/healthcare-intelligence/monitoring': {
+      get: {
+        summary: 'Healthcare Intelligence monitoring',
+        operationId: 'getHealthcareIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/healthcare-intelligence/terms': {
+      get: {
+        summary: 'List Healthcare Intelligence terms',
+        operationId: 'listHealthcareIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/healthcare-intelligence/query': {
+      get: {
+        summary: 'Query Healthcare Intelligence terms',
+        operationId: 'queryHealthcareIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/financial-intelligence/engine': {
+      get: {
+        summary: 'Financial Intelligence engine catalog',
+        operationId: 'getFinancialIntelligenceEngine',
+        responses: { '200': { description: 'Financial Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/financial-intelligence/products': {
+      get: {
+        summary: 'Financial Intelligence products',
+        operationId: 'listFinancialIntelligenceProducts',
+        responses: { '200': { description: 'Financial Intelligence products' } },
+      },
+    },
+    '/v1/financial-intelligence/monitoring': {
+      get: {
+        summary: 'Financial Intelligence monitoring',
+        operationId: 'getFinancialIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/financial-intelligence/terms': {
+      get: {
+        summary: 'List Financial Intelligence terms',
+        operationId: 'listFinancialIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/financial-intelligence/query': {
+      get: {
+        summary: 'Query Financial Intelligence terms',
+        operationId: 'queryFinancialIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/education-intelligence/engine': {
+      get: {
+        summary: 'Education Intelligence engine catalog',
+        operationId: 'getEducationIntelligenceEngine',
+        responses: { '200': { description: 'Education Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/education-intelligence/products': {
+      get: {
+        summary: 'Education Intelligence products',
+        operationId: 'listEducationIntelligenceProducts',
+        responses: { '200': { description: 'Education Intelligence products' } },
+      },
+    },
+    '/v1/education-intelligence/monitoring': {
+      get: {
+        summary: 'Education Intelligence monitoring',
+        operationId: 'getEducationIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/education-intelligence/terms': {
+      get: {
+        summary: 'List Education Intelligence terms',
+        operationId: 'listEducationIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/education-intelligence/query': {
+      get: {
+        summary: 'Query Education Intelligence terms',
+        operationId: 'queryEducationIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/agricultural-intelligence/engine': {
+      get: {
+        summary: 'Agricultural Intelligence engine catalog',
+        operationId: 'getAgriculturalIntelligenceEngine',
+        responses: { '200': { description: 'Agricultural Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/agricultural-intelligence/products': {
+      get: {
+        summary: 'Agricultural Intelligence products',
+        operationId: 'listAgriculturalIntelligenceProducts',
+        responses: { '200': { description: 'Agricultural Intelligence products' } },
+      },
+    },
+    '/v1/agricultural-intelligence/monitoring': {
+      get: {
+        summary: 'Agricultural Intelligence monitoring',
+        operationId: 'getAgriculturalIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/agricultural-intelligence/terms': {
+      get: {
+        summary: 'List Agricultural Intelligence terms',
+        operationId: 'listAgriculturalIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/agricultural-intelligence/query': {
+      get: {
+        summary: 'Query Agricultural Intelligence terms',
+        operationId: 'queryAgriculturalIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/engine': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence engine catalog',
+        operationId: 'getTourismHeritageIntelligenceEngine',
+        responses: { '200': { description: 'Tourism & Heritage Intelligence catalog + honesty' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/products': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence products',
+        operationId: 'listTourismHeritageIntelligenceProducts',
+        responses: { '200': { description: 'Tourism & Heritage Intelligence products' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/monitoring': {
+      get: {
+        summary: 'Tourism & Heritage Intelligence monitoring',
+        operationId: 'getTourismHeritageIntelligenceMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/terms': {
+      get: {
+        summary: 'List Tourism & Heritage Intelligence terms',
+        operationId: 'listTourismHeritageIntelligenceTerms',
+        responses: { '200': { description: 'Domain terms' } },
+      },
+    },
+    '/v1/tourism-heritage-intelligence/query': {
+      get: {
+        summary: 'Query Tourism & Heritage Intelligence terms',
+        operationId: 'queryTourismHeritageIntelligenceTerms',
+        responses: { '200': { description: 'Filtered domain terms' } },
+      },
+    },
+    '/v1/research-cloud/engine': {
+      get: {
+        summary: 'Research Cloud engine catalog',
+        operationId: 'getResearchCloudEngine',
+        responses: { '200': { description: 'Research Cloud catalog + honesty' } },
+      },
+    },
+    '/v1/research-cloud/products': {
+      get: {
+        summary: 'Research Cloud products',
+        operationId: 'listResearchCloudProducts',
+        responses: { '200': { description: 'Research Cloud products' } },
+      },
+    },
+    '/v1/research-cloud/monitoring': {
+      get: {
+        summary: 'Research Cloud monitoring',
+        operationId: 'getResearchCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/research-cloud/routing': {
+      get: {
+        summary: 'Research Cloud routing table',
+        operationId: 'getResearchCloudRouting',
+        responses: { '200': { description: 'Static routing catalog' } },
+      },
+    },
+    '/v1/research-cloud/overview': {
+      get: {
+        summary: 'Research Cloud org overview',
+        operationId: 'getResearchCloudOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage + product catalog' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/experiment-platform/engine': {
+      get: {
+        summary: 'Experiment Platform engine catalog',
+        operationId: 'getExperimentPlatformEngine',
+        responses: { '200': { description: 'Experiment Platform catalog + honesty' } },
+      },
+    },
+    '/v1/experiment-platform/products': {
+      get: {
+        summary: 'Experiment Platform products',
+        operationId: 'listExperimentPlatformProducts',
+        responses: { '200': { description: 'Experiment Platform products' } },
+      },
+    },
+    '/v1/experiment-platform/monitoring': {
+      get: {
+        summary: 'Experiment Platform monitoring',
+        operationId: 'getExperimentPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/experiment-platform/runs': {
+      get: {
+        summary: 'List experiment runs',
+        operationId: 'listExperimentPlatformRuns',
+        responses: { '200': { description: 'List experiment runs' } },
+      },
+    },
+    '/v1/experiment-platform/query': {
+      get: {
+        summary: 'Query Experiment Platform',
+        operationId: 'queryExperimentPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/synthetic-data-platform/engine': {
+      get: {
+        summary: 'Synthetic Data Platform engine catalog',
+        operationId: 'getSyntheticDataPlatformEngine',
+        responses: { '200': { description: 'Synthetic Data Platform catalog + honesty' } },
+      },
+    },
+    '/v1/synthetic-data-platform/products': {
+      get: {
+        summary: 'Synthetic Data Platform products',
+        operationId: 'listSyntheticDataPlatformProducts',
+        responses: { '200': { description: 'Synthetic Data Platform products' } },
+      },
+    },
+    '/v1/synthetic-data-platform/monitoring': {
+      get: {
+        summary: 'Synthetic Data Platform monitoring',
+        operationId: 'getSyntheticDataPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/synthetic-data-platform/artifacts': {
+      get: {
+        summary: 'List synthetic artifacts',
+        operationId: 'listSyntheticDataPlatformArtifacts',
+        responses: { '200': { description: 'List synthetic artifacts' } },
+      },
+    },
+    '/v1/synthetic-data-platform/query': {
+      get: {
+        summary: 'Query Synthetic Data Platform',
+        operationId: 'querySyntheticDataPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/benchmark-platform/engine': {
+      get: {
+        summary: 'Benchmark Platform engine catalog',
+        operationId: 'getBenchmarkPlatformEngine',
+        responses: { '200': { description: 'Benchmark Platform catalog + honesty' } },
+      },
+    },
+    '/v1/benchmark-platform/products': {
+      get: {
+        summary: 'Benchmark Platform products',
+        operationId: 'listBenchmarkPlatformProducts',
+        responses: { '200': { description: 'Benchmark Platform products' } },
+      },
+    },
+    '/v1/benchmark-platform/monitoring': {
+      get: {
+        summary: 'Benchmark Platform monitoring',
+        operationId: 'getBenchmarkPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/benchmark-platform/leaderboard': {
+      get: {
+        summary: 'List benchmark leaderboard rows',
+        operationId: 'listBenchmarkPlatformLeaderboard',
+        responses: { '200': { description: 'List benchmark leaderboard rows' } },
+      },
+    },
+    '/v1/benchmark-platform/query': {
+      get: {
+        summary: 'Query Benchmark Platform',
+        operationId: 'queryBenchmarkPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/evaluation-platform/engine': {
+      get: {
+        summary: 'Evaluation Platform engine catalog',
+        operationId: 'getEvaluationPlatformEngine',
+        responses: { '200': { description: 'Evaluation Platform catalog + honesty' } },
+      },
+    },
+    '/v1/evaluation-platform/products': {
+      get: {
+        summary: 'Evaluation Platform products',
+        operationId: 'listEvaluationPlatformProducts',
+        responses: { '200': { description: 'Evaluation Platform products' } },
+      },
+    },
+    '/v1/evaluation-platform/monitoring': {
+      get: {
+        summary: 'Evaluation Platform monitoring',
+        operationId: 'getEvaluationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/evaluation-platform/capabilities': {
+      get: {
+        summary: 'List evaluation capabilities',
+        operationId: 'listEvaluationPlatformCapabilities',
+        responses: { '200': { description: 'List evaluation capabilities' } },
+      },
+    },
+    '/v1/evaluation-platform/query': {
+      get: {
+        summary: 'Query Evaluation Platform',
+        operationId: 'queryEvaluationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-publication-platform/engine': {
+      get: {
+        summary: 'AI Publication Platform engine catalog',
+        operationId: 'getAiPublicationPlatformEngine',
+        responses: { '200': { description: 'AI Publication Platform catalog + honesty' } },
+      },
+    },
+    '/v1/ai-publication-platform/products': {
+      get: {
+        summary: 'AI Publication Platform products',
+        operationId: 'listAiPublicationPlatformProducts',
+        responses: { '200': { description: 'AI Publication Platform products' } },
+      },
+    },
+    '/v1/ai-publication-platform/monitoring': {
+      get: {
+        summary: 'AI Publication Platform monitoring',
+        operationId: 'getAiPublicationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-publication-platform/publications': {
+      get: {
+        summary: 'List publications',
+        operationId: 'listAiPublicationPlatformPublications',
+        responses: { '200': { description: 'List publications' } },
+      },
+    },
+    '/v1/ai-publication-platform/query': {
+      get: {
+        summary: 'Query AI Publication Platform',
+        operationId: 'queryAiPublicationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/patent-innovation-platform/engine': {
+      get: {
+        summary: 'Patent & Innovation Platform engine catalog',
+        operationId: 'getPatentInnovationPlatformEngine',
+        responses: { '200': { description: 'Patent & Innovation Platform catalog + honesty' } },
+      },
+    },
+    '/v1/patent-innovation-platform/products': {
+      get: {
+        summary: 'Patent & Innovation Platform products',
+        operationId: 'listPatentInnovationPlatformProducts',
+        responses: { '200': { description: 'Patent & Innovation Platform products' } },
+      },
+    },
+    '/v1/patent-innovation-platform/monitoring': {
+      get: {
+        summary: 'Patent & Innovation Platform monitoring',
+        operationId: 'getPatentInnovationPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/patent-innovation-platform/portfolio': {
+      get: {
+        summary: 'List IP portfolio items',
+        operationId: 'listPatentInnovationPlatformPortfolio',
+        responses: { '200': { description: 'List IP portfolio items' } },
+      },
+    },
+    '/v1/patent-innovation-platform/query': {
+      get: {
+        summary: 'Query Patent & Innovation Platform',
+        operationId: 'queryPatentInnovationPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/open-science-platform/engine': {
+      get: {
+        summary: 'Open Science Platform engine catalog',
+        operationId: 'getOpenSciencePlatformEngine',
+        responses: { '200': { description: 'Open Science Platform catalog + honesty' } },
+      },
+    },
+    '/v1/open-science-platform/products': {
+      get: {
+        summary: 'Open Science Platform products',
+        operationId: 'listOpenSciencePlatformProducts',
+        responses: { '200': { description: 'Open Science Platform products' } },
+      },
+    },
+    '/v1/open-science-platform/monitoring': {
+      get: {
+        summary: 'Open Science Platform monitoring',
+        operationId: 'getOpenSciencePlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/open-science-platform/releases': {
+      get: {
+        summary: 'List open-science release candidates',
+        operationId: 'listOpenSciencePlatformReleases',
+        responses: { '200': { description: 'List open-science release candidates' } },
+      },
+    },
+    '/v1/open-science-platform/query': {
+      get: {
+        summary: 'Query Open Science Platform',
+        operationId: 'queryOpenSciencePlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/open-science-platform/check': {
+      get: {
+        summary: 'Check open-science release consent gate',
+        operationId: 'checkOpenScienceRelease',
+        responses: { '200': { description: 'allowed + reason' } },
+      },
+    },
+    '/v1/open-science-platform/release': {
+      get: {
+        summary: 'Attempt open-science release (consent gated)',
+        operationId: 'releaseOpenScienceCandidate',
+        responses: {
+          '200': { description: 'Released' },
+          '400': { description: 'Blocked by consent gate' },
+        },
+      },
+    },
+    '/v1/research-analytics/engine': {
+      get: {
+        summary: 'Research Analytics engine catalog',
+        operationId: 'getResearchAnalyticsEngine',
+        responses: { '200': { description: 'Research Analytics catalog + honesty' } },
+      },
+    },
+    '/v1/research-analytics/products': {
+      get: {
+        summary: 'Research Analytics products',
+        operationId: 'listResearchAnalyticsProducts',
+        responses: { '200': { description: 'Research Analytics products' } },
+      },
+    },
+    '/v1/research-analytics/monitoring': {
+      get: {
+        summary: 'Research Analytics monitoring',
+        operationId: 'getResearchAnalyticsMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/research-analytics/snapshot': {
+      get: {
+        summary: 'Research analytics snapshot',
+        operationId: 'listResearchAnalyticsSnapshot',
+        responses: { '200': { description: 'Research analytics snapshot' } },
+      },
+    },
+    '/v1/research-analytics/query': {
+      get: {
+        summary: 'Query Research Analytics',
+        operationId: 'queryResearchAnalytics',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/products': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud product catalog',
+        operationId: 'listMlopsLlmopsCloudProducts',
+        responses: { '200': { description: 'Product catalog' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/engine': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud engine (alias of products)',
+        operationId: 'getMlopsLlmopsCloudEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/routing': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud routing table',
+        operationId: 'getMlopsLlmopsCloudRouting',
+        responses: { '200': { description: 'Routing table' } },
+      },
+    },
+    '/v1/mlops-llmops-cloud/overview': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud authenticated overview',
+        operationId: 'getMlopsLlmopsCloudOverview',
+        responses: {
+          '200': { description: 'Overview' },
+          '401': { description: 'Unauthorized' },
+        },
+      },
+    },
+    '/v1/mlops-llmops-cloud/monitoring': {
+      get: {
+        summary: 'MLOps & LLMOps Cloud monitoring snapshot',
+        operationId: 'getMlopsLlmopsCloudMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+
+    '/v1/dataset-pipeline/engine': {
+      get: {
+        summary: 'Dataset Pipeline engine catalog',
+        operationId: 'getDatasetPipelineEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/dataset-pipeline/products': {
+      get: {
+        summary: 'Dataset Pipeline products alias',
+        operationId: 'listDatasetPipelineProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/dataset-pipeline/monitoring': {
+      get: {
+        summary: 'Dataset Pipeline monitoring',
+        operationId: 'getDatasetPipelineMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/dataset-pipeline/runs': {
+      get: {
+        summary: 'List Dataset Pipeline runs',
+        operationId: 'listDatasetPipelineRuns',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/dataset-pipeline/query': {
+      get: {
+        summary: 'Query Dataset Pipeline',
+        operationId: 'queryDatasetPipeline',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/training-pipeline/engine': {
+      get: {
+        summary: 'Training Pipeline engine catalog',
+        operationId: 'getTrainingPipelineEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/training-pipeline/products': {
+      get: {
+        summary: 'Training Pipeline products alias',
+        operationId: 'listTrainingPipelineProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/training-pipeline/monitoring': {
+      get: {
+        summary: 'Training Pipeline monitoring',
+        operationId: 'getTrainingPipelineMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/training-pipeline/jobs': {
+      get: {
+        summary: 'List Training Pipeline jobs',
+        operationId: 'listTrainingPipelineJobs',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/training-pipeline/query': {
+      get: {
+        summary: 'Query Training Pipeline',
+        operationId: 'queryTrainingPipeline',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/continuous-evaluation/engine': {
+      get: {
+        summary: 'Continuous Evaluation engine catalog',
+        operationId: 'getContinuousEvaluationEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-evaluation/products': {
+      get: {
+        summary: 'Continuous Evaluation products alias',
+        operationId: 'listContinuousEvaluationProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-evaluation/monitoring': {
+      get: {
+        summary: 'Continuous Evaluation monitoring',
+        operationId: 'getContinuousEvaluationMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/continuous-evaluation/gates': {
+      get: {
+        summary: 'List Continuous Evaluation gates',
+        operationId: 'listContinuousEvaluationGates',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-evaluation/query': {
+      get: {
+        summary: 'Query Continuous Evaluation',
+        operationId: 'queryContinuousEvaluation',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-evaluation/gate-status': {
+      get: {
+        summary: 'Continuous Evaluation gate status for promote',
+        operationId: 'getContinuousEvaluationGateStatus',
+        responses: { '200': { description: 'Gate status' } },
+      },
+    },
+
+    '/v1/promptops-platform/engine': {
+      get: {
+        summary: 'PromptOps Platform engine catalog',
+        operationId: 'getPromptopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/promptops-platform/products': {
+      get: {
+        summary: 'PromptOps Platform products alias',
+        operationId: 'listPromptopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/promptops-platform/monitoring': {
+      get: {
+        summary: 'PromptOps Platform monitoring',
+        operationId: 'getPromptopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/promptops-platform/prompts': {
+      get: {
+        summary: 'List PromptOps Platform prompts',
+        operationId: 'listPromptopsPlatformPrompts',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/promptops-platform/query': {
+      get: {
+        summary: 'Query PromptOps Platform',
+        operationId: 'queryPromptopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/ragops-platform/engine': {
+      get: {
+        summary: 'RAGOps Platform engine catalog',
+        operationId: 'getRagopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ragops-platform/products': {
+      get: {
+        summary: 'RAGOps Platform products alias',
+        operationId: 'listRagopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ragops-platform/monitoring': {
+      get: {
+        summary: 'RAGOps Platform monitoring',
+        operationId: 'getRagopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ragops-platform/pipelines': {
+      get: {
+        summary: 'List RAGOps Platform pipelines',
+        operationId: 'listRagopsPlatformPipelines',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ragops-platform/query': {
+      get: {
+        summary: 'Query RAGOps Platform',
+        operationId: 'queryRagopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/agentops-platform/engine': {
+      get: {
+        summary: 'AgentOps Platform engine catalog',
+        operationId: 'getAgentopsPlatformEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/agentops-platform/products': {
+      get: {
+        summary: 'AgentOps Platform products alias',
+        operationId: 'listAgentopsPlatformProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/agentops-platform/monitoring': {
+      get: {
+        summary: 'AgentOps Platform monitoring',
+        operationId: 'getAgentopsPlatformMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/agentops-platform/agents': {
+      get: {
+        summary: 'List AgentOps Platform agents',
+        operationId: 'listAgentopsPlatformAgents',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/agentops-platform/query': {
+      get: {
+        summary: 'Query AgentOps Platform',
+        operationId: 'queryAgentopsPlatform',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
+    '/v1/ai-drift-detection/engine': {
+      get: {
+        summary: 'AI Drift Detection engine catalog',
+        operationId: 'getAiDriftDetectionEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-drift-detection/products': {
+      get: {
+        summary: 'AI Drift Detection products alias',
+        operationId: 'listAiDriftDetectionProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-drift-detection/monitoring': {
+      get: {
+        summary: 'AI Drift Detection monitoring',
+        operationId: 'getAiDriftDetectionMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-drift-detection/signals': {
+      get: {
+        summary: 'List AI Drift Detection signals',
+        operationId: 'listAiDriftDetectionSignals',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-drift-detection/query': {
+      get: {
+        summary: 'Query AI Drift Detection',
+        operationId: 'queryAiDriftDetection',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-drift-detection/check': {
+      get: {
+        summary: 'Drift clear check for Continuous Learning promote',
+        operationId: 'checkAiDriftDetection',
+        responses: { '200': { description: 'Drift clear status' } },
+      },
+    },
+
+    '/v1/continuous-learning/engine': {
+      get: {
+        summary: 'Continuous Learning engine catalog',
+        operationId: 'getContinuousLearningEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-learning/products': {
+      get: {
+        summary: 'Continuous Learning products alias',
+        operationId: 'listContinuousLearningProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/continuous-learning/monitoring': {
+      get: {
+        summary: 'Continuous Learning monitoring',
+        operationId: 'getContinuousLearningMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/continuous-learning/feedback': {
+      get: {
+        summary: 'List Continuous Learning feedback',
+        operationId: 'listContinuousLearningFeedback',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-learning/query': {
+      get: {
+        summary: 'Query Continuous Learning',
+        operationId: 'queryContinuousLearning',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/continuous-learning/promote-check': {
+      get: {
+        summary: 'Continuous Learning promote gate check',
+        operationId: 'checkContinuousLearningPromote',
+        responses: { '200': { description: 'Promote check result' } },
+      },
+    },
+    '/v1/continuous-learning/promote': {
+      get: {
+        summary: 'Attempt Continuous Learning promote (gated)',
+        operationId: 'promoteContinuousLearning',
+        responses: {
+          '200': { description: 'Promoted' },
+          '400': { description: 'Gate failed' },
+        },
+      },
+    },
+
+    '/v1/ai-operations-dashboard/engine': {
+      get: {
+        summary: 'AI Operations Dashboard engine catalog',
+        operationId: 'getAiOperationsDashboardEngine',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/products': {
+      get: {
+        summary: 'AI Operations Dashboard products alias',
+        operationId: 'listAiOperationsDashboardProducts',
+        responses: { '200': { description: 'Engine catalog' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/monitoring': {
+      get: {
+        summary: 'AI Operations Dashboard monitoring',
+        operationId: 'getAiOperationsDashboardMonitoring',
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/snapshot': {
+      get: {
+        summary: 'List AI Operations Dashboard snapshot',
+        operationId: 'listAiOperationsDashboardSnapshot',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+    '/v1/ai-operations-dashboard/query': {
+      get: {
+        summary: 'Query AI Operations Dashboard',
+        operationId: 'queryAiOperationsDashboard',
+        responses: { '200': { description: 'Filtered catalog rows' } },
+      },
+    },
+
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',
@@ -4281,7 +6257,7 @@ export const openApiDocument = {
         summary: 'Prompt Runtime registry façade',
         operationId: 'getPromptRuntimeRegistry',
         security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
-        responses: { '200': { description: 'VL-086 registry rows' } },
+        responses: { '200': { description: 'registry rows' } },
       },
     },
     '/v1/prompt-runtime/templates': {
@@ -6122,7 +8098,7 @@ export const openApiDocument = {
       get: {
         summary: 'Knowledge Memory scopes',
         operationId: 'listKnowledgeMemoryScopes',
-        responses: { '200': { description: 'Scope map onto VL-183 Memory Cloud' } },
+        responses: { '200': { description: 'Scope map onto Memory Cloud' } },
       },
     },
     '/v1/knowledge-memory/memories': {
@@ -7710,7 +9686,7 @@ export const openApiDocument = {
                     type: 'string',
                     example: 'alloy',
                     description:
-                      'Stock OpenAI voice id, own:* rented African TTS (VL-121), or clone:{voiceCloneId}',
+                      'Stock OpenAI voice id, own:* rented African TTS, or clone:{voiceCloneId}',
                   },
                   language: { type: 'string' },
                   format: { type: 'string', enum: ['mp3', 'wav', 'opus', 'aac', 'flac'] },
@@ -8015,6 +9991,3832 @@ export const openApiDocument = {
         responses: { '200': { description: 'Localized content + serialized file' } },
       },
     },
+    '/v1/trust-cloud/products': {
+      get: {
+        summary: 'Trust Cloud products',
+        operationId: 'listTrustCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/engine': {
+      get: {
+        summary: 'Trust Cloud engine alias',
+        operationId: 'getTrustCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/routing': {
+      get: {
+        summary: 'Trust Cloud routing',
+        operationId: 'getTrustCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/overview': {
+      get: {
+        summary: 'Trust Cloud overview',
+        operationId: 'getTrustCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-cloud/monitoring': {
+      get: {
+        summary: 'Trust Cloud monitoring',
+        operationId: 'getTrustCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/engine': {
+      get: {
+        summary: 'AI Safety Platform engine',
+        operationId: 'getAiSafetyPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/products': {
+      get: {
+        summary: 'AI Safety Platform products',
+        operationId: 'listAiSafetyPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/monitoring': {
+      get: {
+        summary: 'AI Safety Platform monitoring',
+        operationId: 'getAiSafetyPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/detections': {
+      get: {
+        summary: 'AI Safety Platform detections',
+        operationId: 'listAiSafetyPlatformDetections',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/query': {
+      get: {
+        summary: 'Query AI Safety Platform',
+        operationId: 'queryAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/check': {
+      get: {
+        summary: 'Check AI Safety Platform',
+        operationId: 'checkAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-safety-platform/evaluate': {
+      get: {
+        summary: 'Evaluate AI Safety Platform',
+        operationId: 'evaluateAiSafetyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/engine': {
+      get: {
+        summary: 'AI Governance Platform engine',
+        operationId: 'getAiGovernancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/products': {
+      get: {
+        summary: 'AI Governance Platform products',
+        operationId: 'listAiGovernancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/monitoring': {
+      get: {
+        summary: 'AI Governance Platform monitoring',
+        operationId: 'getAiGovernancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals': {
+      get: {
+        summary: 'AI Governance Platform approvals',
+        operationId: 'listAiGovernancePlatformApprovals',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/query': {
+      get: {
+        summary: 'Query AI Governance Platform',
+        operationId: 'queryAiGovernancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/check': {
+      get: {
+        summary: 'Check AI Governance Platform',
+        operationId: 'checkAiGovernancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals/{id}/approve': {
+      post: {
+        summary: 'Approve governance approval',
+        operationId: 'approveAiGovernancePlatformApproval',
+        responses: { '200': { description: 'Updated approval' }, '201': { description: 'Updated approval' } },
+      },
+    },
+    '/v1/ai-governance-platform/approvals/{id}/reject': {
+      post: {
+        summary: 'Reject governance approval',
+        operationId: 'rejectAiGovernancePlatformApproval',
+        responses: { '200': { description: 'Updated approval' }, '201': { description: 'Updated approval' } },
+      },
+    },
+    '/v1/ai-governance-platform/status/{id}': {
+      get: {
+        summary: 'Governance approval status',
+        operationId: 'getAiGovernancePlatformStatus',
+        responses: { '200': { description: 'Approval status' } },
+      },
+    },
+    '/v1/explainability-platform/engine': {
+      get: {
+        summary: 'Explainability Platform engine',
+        operationId: 'getExplainabilityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/products': {
+      get: {
+        summary: 'Explainability Platform products',
+        operationId: 'listExplainabilityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/monitoring': {
+      get: {
+        summary: 'Explainability Platform monitoring',
+        operationId: 'getExplainabilityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/explanations': {
+      get: {
+        summary: 'List Explainability Platform rows',
+        operationId: 'listExplainabilityPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/explainability-platform/query': {
+      get: {
+        summary: 'Query Explainability Platform',
+        operationId: 'queryExplainabilityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/engine': {
+      get: {
+        summary: 'Privacy Platform engine',
+        operationId: 'getPrivacyPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/products': {
+      get: {
+        summary: 'Privacy Platform products',
+        operationId: 'listPrivacyPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/monitoring': {
+      get: {
+        summary: 'Privacy Platform monitoring',
+        operationId: 'getPrivacyPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/assets': {
+      get: {
+        summary: 'Privacy Platform assets',
+        operationId: 'listPrivacyPlatformAssets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/query': {
+      get: {
+        summary: 'Query Privacy Platform',
+        operationId: 'queryPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/check': {
+      get: {
+        summary: 'Check Privacy Platform',
+        operationId: 'checkPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/consent-check': {
+      get: {
+        summary: 'Consent check Privacy Platform',
+        operationId: 'consentCheckPrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/privacy-platform/release': {
+      get: {
+        summary: 'Release Privacy Platform',
+        operationId: 'releasePrivacyPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/engine': {
+      get: {
+        summary: 'Compliance Platform engine',
+        operationId: 'getCompliancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/products': {
+      get: {
+        summary: 'Compliance Platform products',
+        operationId: 'listCompliancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/monitoring': {
+      get: {
+        summary: 'Compliance Platform monitoring',
+        operationId: 'getCompliancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/controls': {
+      get: {
+        summary: 'List Compliance Platform rows',
+        operationId: 'listCompliancePlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/compliance-platform/query': {
+      get: {
+        summary: 'Query Compliance Platform',
+        operationId: 'queryCompliancePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/engine': {
+      get: {
+        summary: 'Risk Intelligence engine',
+        operationId: 'getRiskIntelligenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/products': {
+      get: {
+        summary: 'Risk Intelligence products',
+        operationId: 'listRiskIntelligenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/monitoring': {
+      get: {
+        summary: 'Risk Intelligence monitoring',
+        operationId: 'getRiskIntelligenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/scores': {
+      get: {
+        summary: 'List Risk Intelligence rows',
+        operationId: 'listRiskIntelligenceRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/risk-intelligence/query': {
+      get: {
+        summary: 'Query Risk Intelligence',
+        operationId: 'queryRiskIntelligence',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/engine': {
+      get: {
+        summary: 'Identity Federation engine',
+        operationId: 'getIdentityFederationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/products': {
+      get: {
+        summary: 'Identity Federation products',
+        operationId: 'listIdentityFederationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/monitoring': {
+      get: {
+        summary: 'Identity Federation monitoring',
+        operationId: 'getIdentityFederationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/federation': {
+      get: {
+        summary: 'List Identity Federation rows',
+        operationId: 'listIdentityFederationRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/identity-federation/query': {
+      get: {
+        summary: 'Query Identity Federation',
+        operationId: 'queryIdentityFederation',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/engine': {
+      get: {
+        summary: 'Trust Analytics engine',
+        operationId: 'getTrustAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/products': {
+      get: {
+        summary: 'Trust Analytics products',
+        operationId: 'listTrustAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/monitoring': {
+      get: {
+        summary: 'Trust Analytics monitoring',
+        operationId: 'getTrustAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/snapshot': {
+      get: {
+        summary: 'List Trust Analytics rows',
+        operationId: 'listTrustAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/trust-analytics/query': {
+      get: {
+        summary: 'Query Trust Analytics',
+        operationId: 'queryTrustAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/platform-engineering-cloud/products': {
+      get: {
+        summary: 'Platform Engineering products',
+        operationId: 'listPlatformEngineeringCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/engine': {
+      get: {
+        summary: 'Platform Engineering engine alias',
+        operationId: 'getPlatformEngineeringCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/routing': {
+      get: {
+        summary: 'Platform Engineering routing',
+        operationId: 'getPlatformEngineeringCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/overview': {
+      get: {
+        summary: 'Platform Engineering overview',
+        operationId: 'getPlatformEngineeringCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-cloud/monitoring': {
+      get: {
+        summary: 'Platform Engineering monitoring',
+        operationId: 'getPlatformEngineeringCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/engine': {
+      get: {
+        summary: 'Internal Developer Portal engine',
+        operationId: 'getInternalDeveloperPortalEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/products': {
+      get: {
+        summary: 'Internal Developer Portal products',
+        operationId: 'listInternalDeveloperPortalProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/monitoring': {
+      get: {
+        summary: 'Internal Developer Portal monitoring',
+        operationId: 'getInternalDeveloperPortalMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/portal': {
+      get: {
+        summary: 'List Internal Developer Portal rows',
+        operationId: 'listInternalDeveloperPortalRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/internal-developer-portal/query': {
+      get: {
+        summary: 'Query Internal Developer Portal',
+        operationId: 'queryInternalDeveloperPortal',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/engine': {
+      get: {
+        summary: 'Service Catalog engine',
+        operationId: 'getServiceCatalogEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/products': {
+      get: {
+        summary: 'Service Catalog products',
+        operationId: 'listServiceCatalogProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/monitoring': {
+      get: {
+        summary: 'Service Catalog monitoring',
+        operationId: 'getServiceCatalogMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/services': {
+      get: {
+        summary: 'List Service Catalog rows',
+        operationId: 'listServiceCatalogRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/service-catalog/query': {
+      get: {
+        summary: 'Query Service Catalog',
+        operationId: 'queryServiceCatalog',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/engine': {
+      get: {
+        summary: 'Golden Path Platform engine',
+        operationId: 'getGoldenPathPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/products': {
+      get: {
+        summary: 'Golden Path Platform products',
+        operationId: 'listGoldenPathPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/monitoring': {
+      get: {
+        summary: 'Golden Path Platform monitoring',
+        operationId: 'getGoldenPathPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/templates': {
+      get: {
+        summary: 'List Golden Path Platform rows',
+        operationId: 'listGoldenPathPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/golden-path-platform/query': {
+      get: {
+        summary: 'Query Golden Path Platform',
+        operationId: 'queryGoldenPathPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/engine': {
+      get: {
+        summary: 'GitOps Platform engine',
+        operationId: 'getGitopsPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/products': {
+      get: {
+        summary: 'GitOps Platform products',
+        operationId: 'listGitopsPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/monitoring': {
+      get: {
+        summary: 'GitOps Platform monitoring',
+        operationId: 'getGitopsPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/readiness': {
+      get: {
+        summary: 'List GitOps Platform rows',
+        operationId: 'listGitopsPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gitops-platform/query': {
+      get: {
+        summary: 'Query GitOps Platform',
+        operationId: 'queryGitopsPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/engine': {
+      get: {
+        summary: 'Release Engineering engine',
+        operationId: 'getReleaseEngineeringEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/products': {
+      get: {
+        summary: 'Release Engineering products',
+        operationId: 'listReleaseEngineeringProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/monitoring': {
+      get: {
+        summary: 'Release Engineering monitoring',
+        operationId: 'getReleaseEngineeringMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/releases': {
+      get: {
+        summary: 'List Release Engineering rows',
+        operationId: 'listReleaseEngineeringRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/release-engineering/query': {
+      get: {
+        summary: 'Query Release Engineering',
+        operationId: 'queryReleaseEngineering',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/engine': {
+      get: {
+        summary: 'Reliability Engineering engine',
+        operationId: 'getReliabilityEngineeringEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/products': {
+      get: {
+        summary: 'Reliability Engineering products',
+        operationId: 'listReliabilityEngineeringProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/monitoring': {
+      get: {
+        summary: 'Reliability Engineering monitoring',
+        operationId: 'getReliabilityEngineeringMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/reliability': {
+      get: {
+        summary: 'List Reliability Engineering rows',
+        operationId: 'listReliabilityEngineeringRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reliability-engineering/query': {
+      get: {
+        summary: 'Query Reliability Engineering',
+        operationId: 'queryReliabilityEngineering',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/engine': {
+      get: {
+        summary: 'FinOps Platform engine',
+        operationId: 'getFinopsPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/products': {
+      get: {
+        summary: 'FinOps Platform products',
+        operationId: 'listFinopsPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/monitoring': {
+      get: {
+        summary: 'FinOps Platform monitoring',
+        operationId: 'getFinopsPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/costs': {
+      get: {
+        summary: 'FinOps Platform costs',
+        operationId: 'listFinopsPlatformCosts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/budgets': {
+      get: {
+        summary: 'FinOps Platform budgets',
+        operationId: 'listFinopsPlatformBudgets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/alerts': {
+      get: {
+        summary: 'FinOps Platform alerts',
+        operationId: 'listFinopsPlatformAlerts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/finops-platform/query': {
+      get: {
+        summary: 'Query FinOps Platform',
+        operationId: 'queryFinopsPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/engine': {
+      get: {
+        summary: 'Supply Chain Security engine',
+        operationId: 'getSupplyChainSecurityEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/products': {
+      get: {
+        summary: 'Supply Chain Security products',
+        operationId: 'listSupplyChainSecurityProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/monitoring': {
+      get: {
+        summary: 'Supply Chain Security monitoring',
+        operationId: 'getSupplyChainSecurityMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/findings': {
+      get: {
+        summary: 'Supply Chain Security findings',
+        operationId: 'listSupplyChainSecurityFindings',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/scan': {
+      get: {
+        summary: 'Scan Supply Chain Security',
+        operationId: 'scanSupplyChainSecurity',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/supply-chain-security/query': {
+      get: {
+        summary: 'Query Supply Chain Security',
+        operationId: 'querySupplyChainSecurity',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/engine': {
+      get: {
+        summary: 'Developer Experience Platform engine',
+        operationId: 'getDeveloperExperiencePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/products': {
+      get: {
+        summary: 'Developer Experience Platform products',
+        operationId: 'listDeveloperExperiencePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/monitoring': {
+      get: {
+        summary: 'Developer Experience Platform monitoring',
+        operationId: 'getDeveloperExperiencePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/devex': {
+      get: {
+        summary: 'List Developer Experience Platform rows',
+        operationId: 'listDeveloperExperiencePlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/developer-experience-platform/query': {
+      get: {
+        summary: 'Query Developer Experience Platform',
+        operationId: 'queryDeveloperExperiencePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/engine': {
+      get: {
+        summary: 'Platform Engineering Analytics engine',
+        operationId: 'getPlatformEngineeringAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/products': {
+      get: {
+        summary: 'Platform Engineering Analytics products',
+        operationId: 'listPlatformEngineeringAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/monitoring': {
+      get: {
+        summary: 'Platform Engineering Analytics monitoring',
+        operationId: 'getPlatformEngineeringAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/snapshot': {
+      get: {
+        summary: 'List Platform Engineering Analytics rows',
+        operationId: 'listPlatformEngineeringAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/platform-engineering-analytics/query': {
+      get: {
+        summary: 'Query Platform Engineering Analytics',
+        operationId: 'queryPlatformEngineeringAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/control-plane-cloud/products': {
+      get: {
+        summary: 'Control Plane products',
+        operationId: 'listControlPlaneCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/engine': {
+      get: {
+        summary: 'Control Plane engine alias',
+        operationId: 'getControlPlaneCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/routing': {
+      get: {
+        summary: 'Control Plane routing',
+        operationId: 'getControlPlaneCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/overview': {
+      get: {
+        summary: 'Control Plane overview',
+        operationId: 'getControlPlaneCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-cloud/monitoring': {
+      get: {
+        summary: 'Control Plane monitoring',
+        operationId: 'getControlPlaneCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/engine': {
+      get: {
+        summary: 'Organization Control engine',
+        operationId: 'getOrganizationControlEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/products': {
+      get: {
+        summary: 'Organization Control products',
+        operationId: 'listOrganizationControlProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/monitoring': {
+      get: {
+        summary: 'Organization Control monitoring',
+        operationId: 'getOrganizationControlMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/organizations': {
+      get: {
+        summary: 'Organization Control organizations',
+        operationId: 'listOrganizationControlOrganizations',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/roles': {
+      get: {
+        summary: 'Organization Control roles',
+        operationId: 'listOrganizationControlRoles',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/organization-control/query': {
+      get: {
+        summary: 'Query Organization Control',
+        operationId: 'queryOrganizationControl',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/engine': {
+      get: {
+        summary: 'Global Configuration Platform engine',
+        operationId: 'getGlobalConfigurationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/products': {
+      get: {
+        summary: 'Global Configuration Platform products',
+        operationId: 'listGlobalConfigurationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/monitoring': {
+      get: {
+        summary: 'Global Configuration Platform monitoring',
+        operationId: 'getGlobalConfigurationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/configurations': {
+      get: {
+        summary: 'List Global Configuration Platform rows',
+        operationId: 'listGlobalConfigurationPlatformRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-configuration-platform/query': {
+      get: {
+        summary: 'Query Global Configuration Platform',
+        operationId: 'queryGlobalConfigurationPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/engine': {
+      get: {
+        summary: 'Global Policy Engine engine',
+        operationId: 'getGlobalPolicyEngineEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/products': {
+      get: {
+        summary: 'Global Policy Engine products',
+        operationId: 'listGlobalPolicyEngineProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/monitoring': {
+      get: {
+        summary: 'Global Policy Engine monitoring',
+        operationId: 'getGlobalPolicyEngineMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/policies': {
+      get: {
+        summary: 'List Global Policy Engine rows',
+        operationId: 'listGlobalPolicyEngineRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-policy-engine/query': {
+      get: {
+        summary: 'Query Global Policy Engine',
+        operationId: 'queryGlobalPolicyEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/engine': {
+      get: {
+        summary: 'Global Deployment Controller engine',
+        operationId: 'getGlobalDeploymentControllerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/products': {
+      get: {
+        summary: 'Global Deployment Controller products',
+        operationId: 'listGlobalDeploymentControllerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/monitoring': {
+      get: {
+        summary: 'Global Deployment Controller monitoring',
+        operationId: 'getGlobalDeploymentControllerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/deployments': {
+      get: {
+        summary: 'Global Deployment Controller deployments',
+        operationId: 'listGlobalDeploymentControllerDeployments',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/rollback': {
+      get: {
+        summary: 'Global Deployment Controller rollback',
+        operationId: 'listGlobalDeploymentControllerRollbacks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/query': {
+      get: {
+        summary: 'Query Global Deployment Controller',
+        operationId: 'queryGlobalDeploymentController',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-deployment-controller/promote': {
+      post: {
+        summary: 'Promote deployment (production requires authorization)',
+        operationId: 'promoteGlobalDeploymentController',
+        responses: { '200': { description: 'OK' }, '201': { description: 'Created' } },
+      },
+    },
+    '/v1/global-routing-controller/engine': {
+      get: {
+        summary: 'Global Routing Controller engine',
+        operationId: 'getGlobalRoutingControllerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/products': {
+      get: {
+        summary: 'Global Routing Controller products',
+        operationId: 'listGlobalRoutingControllerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/monitoring': {
+      get: {
+        summary: 'Global Routing Controller monitoring',
+        operationId: 'getGlobalRoutingControllerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/routes': {
+      get: {
+        summary: 'List Global Routing Controller rows',
+        operationId: 'listGlobalRoutingControllerRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-routing-controller/query': {
+      get: {
+        summary: 'Query Global Routing Controller',
+        operationId: 'queryGlobalRoutingController',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/engine': {
+      get: {
+        summary: 'Secrets & Certificate Platform engine',
+        operationId: 'getSecretsCertificatePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/products': {
+      get: {
+        summary: 'Secrets & Certificate Platform products',
+        operationId: 'listSecretsCertificatePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/monitoring': {
+      get: {
+        summary: 'Secrets & Certificate Platform monitoring',
+        operationId: 'getSecretsCertificatePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/secrets': {
+      get: {
+        summary: 'Secrets & Certificate Platform secrets metadata',
+        operationId: 'listSecretsCertificatePlatformSecrets',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/metadata': {
+      get: {
+        summary: 'Secrets & Certificate Platform metadata',
+        operationId: 'listSecretsCertificatePlatformMetadata',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/audit': {
+      get: {
+        summary: 'Secrets & Certificate Platform audit',
+        operationId: 'listSecretsCertificatePlatformAudit',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/secrets-certificate-platform/query': {
+      get: {
+        summary: 'Query Secrets & Certificate Platform',
+        operationId: 'querySecretsCertificatePlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/engine': {
+      get: {
+        summary: 'Global Scheduler engine',
+        operationId: 'getGlobalSchedulerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/products': {
+      get: {
+        summary: 'Global Scheduler products',
+        operationId: 'listGlobalSchedulerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/monitoring': {
+      get: {
+        summary: 'Global Scheduler monitoring',
+        operationId: 'getGlobalSchedulerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/schedules': {
+      get: {
+        summary: 'List Global Scheduler rows',
+        operationId: 'listGlobalSchedulerRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-scheduler/query': {
+      get: {
+        summary: 'Query Global Scheduler',
+        operationId: 'queryGlobalScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/engine': {
+      get: {
+        summary: 'Control Plane Analytics engine',
+        operationId: 'getControlPlaneAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/products': {
+      get: {
+        summary: 'Control Plane Analytics products',
+        operationId: 'listControlPlaneAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/monitoring': {
+      get: {
+        summary: 'Control Plane Analytics monitoring',
+        operationId: 'getControlPlaneAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/snapshot': {
+      get: {
+        summary: 'List Control Plane Analytics rows',
+        operationId: 'listControlPlaneAnalyticsRows',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/control-plane-analytics/query': {
+      get: {
+        summary: 'Query Control Plane Analytics',
+        operationId: 'queryControlPlaneAnalytics',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/data-plane-cloud/products': {
+      get: {
+        summary: 'Data Plane products',
+        operationId: 'listDataPlaneCloudProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/engine': {
+      get: {
+        summary: 'Data Plane engine alias',
+        operationId: 'getDataPlaneCloudEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/routing': {
+      get: {
+        summary: 'Data Plane routing',
+        operationId: 'getDataPlaneCloudRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/overview': {
+      get: {
+        summary: 'Data Plane overview',
+        operationId: 'getDataPlaneCloudOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-cloud/monitoring': {
+      get: {
+        summary: 'Data Plane monitoring',
+        operationId: 'getDataPlaneCloudMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/engine': {
+      get: {
+        summary: 'Translation Runtime engine',
+        operationId: 'getTranslationRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/products': {
+      get: {
+        summary: 'Translation Runtime products',
+        operationId: 'listTranslationRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/monitoring': {
+      get: {
+        summary: 'Translation Runtime monitoring',
+        operationId: 'getTranslationRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/routes': {
+      get: {
+        summary: 'Translation Runtime routes',
+        operationId: 'listTranslationRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/route': {
+      get: {
+        summary: 'Route via Translation Runtime',
+        operationId: 'routeTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/execute': {
+      get: {
+        summary: 'Execute via Translation Runtime',
+        operationId: 'executeTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/translation-runtime/query': {
+      get: {
+        summary: 'Query Translation Runtime',
+        operationId: 'queryTranslationRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/engine': {
+      get: {
+        summary: 'Speech Runtime engine',
+        operationId: 'getSpeechRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/products': {
+      get: {
+        summary: 'Speech Runtime products',
+        operationId: 'listSpeechRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/monitoring': {
+      get: {
+        summary: 'Speech Runtime monitoring',
+        operationId: 'getSpeechRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/routes': {
+      get: {
+        summary: 'Speech Runtime routes',
+        operationId: 'listSpeechRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/route': {
+      get: {
+        summary: 'Route via Speech Runtime',
+        operationId: 'routeSpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/execute': {
+      get: {
+        summary: 'Execute via Speech Runtime',
+        operationId: 'executeSpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/speech-runtime/query': {
+      get: {
+        summary: 'Query Speech Runtime',
+        operationId: 'querySpeechRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/engine': {
+      get: {
+        summary: 'Voice Runtime engine',
+        operationId: 'getVoiceRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/products': {
+      get: {
+        summary: 'Voice Runtime products',
+        operationId: 'listVoiceRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/monitoring': {
+      get: {
+        summary: 'Voice Runtime monitoring',
+        operationId: 'getVoiceRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/routes': {
+      get: {
+        summary: 'Voice Runtime routes',
+        operationId: 'listVoiceRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/route': {
+      get: {
+        summary: 'Route via Voice Runtime',
+        operationId: 'routeVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/execute': {
+      get: {
+        summary: 'Execute via Voice Runtime',
+        operationId: 'executeVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/voice-runtime/query': {
+      get: {
+        summary: 'Query Voice Runtime',
+        operationId: 'queryVoiceRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/engine': {
+      get: {
+        summary: 'Vision Runtime engine',
+        operationId: 'getVisionRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/products': {
+      get: {
+        summary: 'Vision Runtime products',
+        operationId: 'listVisionRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/monitoring': {
+      get: {
+        summary: 'Vision Runtime monitoring',
+        operationId: 'getVisionRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/routes': {
+      get: {
+        summary: 'Vision Runtime routes',
+        operationId: 'listVisionRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/route': {
+      get: {
+        summary: 'Route via Vision Runtime',
+        operationId: 'routeVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/execute': {
+      get: {
+        summary: 'Execute via Vision Runtime',
+        operationId: 'executeVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vision-runtime/query': {
+      get: {
+        summary: 'Query Vision Runtime',
+        operationId: 'queryVisionRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/engine': {
+      get: {
+        summary: 'Knowledge Runtime engine',
+        operationId: 'getKnowledgeRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/products': {
+      get: {
+        summary: 'Knowledge Runtime products',
+        operationId: 'listKnowledgeRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/monitoring': {
+      get: {
+        summary: 'Knowledge Runtime monitoring',
+        operationId: 'getKnowledgeRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/routes': {
+      get: {
+        summary: 'Knowledge Runtime routes',
+        operationId: 'listKnowledgeRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/route': {
+      get: {
+        summary: 'Route via Knowledge Runtime',
+        operationId: 'routeKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/execute': {
+      get: {
+        summary: 'Execute via Knowledge Runtime',
+        operationId: 'executeKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-runtime/query': {
+      get: {
+        summary: 'Query Knowledge Runtime',
+        operationId: 'queryKnowledgeRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/engine': {
+      get: {
+        summary: 'Embedding Runtime engine',
+        operationId: 'getEmbeddingRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/products': {
+      get: {
+        summary: 'Embedding Runtime products',
+        operationId: 'listEmbeddingRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/monitoring': {
+      get: {
+        summary: 'Embedding Runtime monitoring',
+        operationId: 'getEmbeddingRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/routes': {
+      get: {
+        summary: 'Embedding Runtime routes',
+        operationId: 'listEmbeddingRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/route': {
+      get: {
+        summary: 'Route via Embedding Runtime',
+        operationId: 'routeEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/execute': {
+      get: {
+        summary: 'Execute via Embedding Runtime',
+        operationId: 'executeEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/embedding-runtime/query': {
+      get: {
+        summary: 'Query Embedding Runtime',
+        operationId: 'queryEmbeddingRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/engine': {
+      get: {
+        summary: 'Data Plane Streaming engine',
+        operationId: 'getDataPlaneStreamingEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/products': {
+      get: {
+        summary: 'Data Plane Streaming products',
+        operationId: 'listDataPlaneStreamingProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/monitoring': {
+      get: {
+        summary: 'Data Plane Streaming monitoring',
+        operationId: 'getDataPlaneStreamingMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/routes': {
+      get: {
+        summary: 'Data Plane Streaming routes',
+        operationId: 'listDataPlaneStreamingRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/route': {
+      get: {
+        summary: 'Route via Data Plane Streaming',
+        operationId: 'routeDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/execute': {
+      get: {
+        summary: 'Execute via Data Plane Streaming',
+        operationId: 'executeDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/data-plane-streaming/query': {
+      get: {
+        summary: 'Query Data Plane Streaming',
+        operationId: 'queryDataPlaneStreaming',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/engine': {
+      get: {
+        summary: 'GPU Runtime engine',
+        operationId: 'getGpuRuntimeEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/products': {
+      get: {
+        summary: 'GPU Runtime products',
+        operationId: 'listGpuRuntimeProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/monitoring': {
+      get: {
+        summary: 'GPU Runtime monitoring',
+        operationId: 'getGpuRuntimeMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/routes': {
+      get: {
+        summary: 'GPU Runtime routes',
+        operationId: 'listGpuRuntimeRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/route': {
+      get: {
+        summary: 'Route via GPU Runtime',
+        operationId: 'routeGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/execute': {
+      get: {
+        summary: 'Execute via GPU Runtime',
+        operationId: 'executeGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/gpu-runtime/query': {
+      get: {
+        summary: 'Query GPU Runtime',
+        operationId: 'queryGpuRuntime',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/vaios/products': {
+      get: {
+        summary: 'VAIOS products',
+        operationId: 'listVaiosProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/engine': {
+      get: {
+        summary: 'VAIOS engine alias',
+        operationId: 'getVaiosEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/routing': {
+      get: {
+        summary: 'VAIOS routing',
+        operationId: 'getVaiosRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/overview': {
+      get: {
+        summary: 'VAIOS overview',
+        operationId: 'getVaiosOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/vaios/monitoring': {
+      get: {
+        summary: 'VAIOS monitoring',
+        operationId: 'getVaiosMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/engine': {
+      get: {
+        summary: 'AI Scheduler engine',
+        operationId: 'getAiSchedulerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/products': {
+      get: {
+        summary: 'AI Scheduler products',
+        operationId: 'listAiSchedulerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/monitoring': {
+      get: {
+        summary: 'AI Scheduler monitoring',
+        operationId: 'getAiSchedulerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/routes': {
+      get: {
+        summary: 'AI Scheduler routes',
+        operationId: 'listAiSchedulerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/route': {
+      get: {
+        summary: 'Route via AI Scheduler',
+        operationId: 'routeAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/execute': {
+      get: {
+        summary: 'Execute via AI Scheduler',
+        operationId: 'executeAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-scheduler/query': {
+      get: {
+        summary: 'Query AI Scheduler',
+        operationId: 'queryAiScheduler',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/engine': {
+      get: {
+        summary: 'Runtime Manager engine',
+        operationId: 'getRuntimeManagerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/products': {
+      get: {
+        summary: 'Runtime Manager products',
+        operationId: 'listRuntimeManagerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/monitoring': {
+      get: {
+        summary: 'Runtime Manager monitoring',
+        operationId: 'getRuntimeManagerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/routes': {
+      get: {
+        summary: 'Runtime Manager routes',
+        operationId: 'listRuntimeManagerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/route': {
+      get: {
+        summary: 'Route via Runtime Manager',
+        operationId: 'routeRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/execute': {
+      get: {
+        summary: 'Execute via Runtime Manager',
+        operationId: 'executeRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/runtime-manager/query': {
+      get: {
+        summary: 'Query Runtime Manager',
+        operationId: 'queryRuntimeManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/engine': {
+      get: {
+        summary: 'Resource Manager engine',
+        operationId: 'getResourceManagerEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/products': {
+      get: {
+        summary: 'Resource Manager products',
+        operationId: 'listResourceManagerProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/monitoring': {
+      get: {
+        summary: 'Resource Manager monitoring',
+        operationId: 'getResourceManagerMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/routes': {
+      get: {
+        summary: 'Resource Manager routes',
+        operationId: 'listResourceManagerRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/route': {
+      get: {
+        summary: 'Route via Resource Manager',
+        operationId: 'routeResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/execute': {
+      get: {
+        summary: 'Execute via Resource Manager',
+        operationId: 'executeResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/resource-manager/query': {
+      get: {
+        summary: 'Query Resource Manager',
+        operationId: 'queryResourceManager',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/engine': {
+      get: {
+        summary: 'Workflow Operating System engine',
+        operationId: 'getWorkflowOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/products': {
+      get: {
+        summary: 'Workflow Operating System products',
+        operationId: 'listWorkflowOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/monitoring': {
+      get: {
+        summary: 'Workflow Operating System monitoring',
+        operationId: 'getWorkflowOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/routes': {
+      get: {
+        summary: 'Workflow Operating System routes',
+        operationId: 'listWorkflowOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/route': {
+      get: {
+        summary: 'Route via Workflow Operating System',
+        operationId: 'routeWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/execute': {
+      get: {
+        summary: 'Execute via Workflow Operating System',
+        operationId: 'executeWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/workflow-operating-system/query': {
+      get: {
+        summary: 'Query Workflow Operating System',
+        operationId: 'queryWorkflowOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/engine': {
+      get: {
+        summary: 'Agent Operating System engine',
+        operationId: 'getAgentOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/products': {
+      get: {
+        summary: 'Agent Operating System products',
+        operationId: 'listAgentOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/monitoring': {
+      get: {
+        summary: 'Agent Operating System monitoring',
+        operationId: 'getAgentOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/routes': {
+      get: {
+        summary: 'Agent Operating System routes',
+        operationId: 'listAgentOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/route': {
+      get: {
+        summary: 'Route via Agent Operating System',
+        operationId: 'routeAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/execute': {
+      get: {
+        summary: 'Execute via Agent Operating System',
+        operationId: 'executeAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/agent-operating-system/query': {
+      get: {
+        summary: 'Query Agent Operating System',
+        operationId: 'queryAgentOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/engine': {
+      get: {
+        summary: 'AI Memory Operating System engine',
+        operationId: 'getAiMemoryOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/products': {
+      get: {
+        summary: 'AI Memory Operating System products',
+        operationId: 'listAiMemoryOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/monitoring': {
+      get: {
+        summary: 'AI Memory Operating System monitoring',
+        operationId: 'getAiMemoryOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/routes': {
+      get: {
+        summary: 'AI Memory Operating System routes',
+        operationId: 'listAiMemoryOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/route': {
+      get: {
+        summary: 'Route via AI Memory Operating System',
+        operationId: 'routeAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/execute': {
+      get: {
+        summary: 'Execute via AI Memory Operating System',
+        operationId: 'executeAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-memory-operating-system/query': {
+      get: {
+        summary: 'Query AI Memory Operating System',
+        operationId: 'queryAiMemoryOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/engine': {
+      get: {
+        summary: 'Knowledge Operating System engine',
+        operationId: 'getKnowledgeOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/products': {
+      get: {
+        summary: 'Knowledge Operating System products',
+        operationId: 'listKnowledgeOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/monitoring': {
+      get: {
+        summary: 'Knowledge Operating System monitoring',
+        operationId: 'getKnowledgeOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/routes': {
+      get: {
+        summary: 'Knowledge Operating System routes',
+        operationId: 'listKnowledgeOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/route': {
+      get: {
+        summary: 'Route via Knowledge Operating System',
+        operationId: 'routeKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/execute': {
+      get: {
+        summary: 'Execute via Knowledge Operating System',
+        operationId: 'executeKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/knowledge-operating-system/query': {
+      get: {
+        summary: 'Query Knowledge Operating System',
+        operationId: 'queryKnowledgeOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/engine': {
+      get: {
+        summary: 'Plugin Operating System engine',
+        operationId: 'getPluginOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/products': {
+      get: {
+        summary: 'Plugin Operating System products',
+        operationId: 'listPluginOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/monitoring': {
+      get: {
+        summary: 'Plugin Operating System monitoring',
+        operationId: 'getPluginOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/routes': {
+      get: {
+        summary: 'Plugin Operating System routes',
+        operationId: 'listPluginOperatingSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/route': {
+      get: {
+        summary: 'Route via Plugin Operating System',
+        operationId: 'routePluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/execute': {
+      get: {
+        summary: 'Execute via Plugin Operating System',
+        operationId: 'executePluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/plugin-operating-system/query': {
+      get: {
+        summary: 'Query Plugin Operating System',
+        operationId: 'queryPluginOperatingSystem',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/enterprise-engineering-system/products': {
+      get: {
+        summary: 'EES products',
+        operationId: 'listEnterpriseEngineeringSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/engine': {
+      get: {
+        summary: 'EES engine alias',
+        operationId: 'getEnterpriseEngineeringSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/routing': {
+      get: {
+        summary: 'EES routing',
+        operationId: 'getEnterpriseEngineeringSystemRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/overview': {
+      get: {
+        summary: 'EES overview',
+        operationId: 'getEnterpriseEngineeringSystemOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-engineering-system/monitoring': {
+      get: {
+        summary: 'EES monitoring',
+        operationId: 'getEnterpriseEngineeringSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/engine': {
+      get: {
+        summary: 'Engineering Governance engine',
+        operationId: 'getEngineeringGovernanceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/products': {
+      get: {
+        summary: 'Engineering Governance products',
+        operationId: 'listEngineeringGovernanceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/monitoring': {
+      get: {
+        summary: 'Engineering Governance monitoring',
+        operationId: 'getEngineeringGovernanceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/routes': {
+      get: {
+        summary: 'Engineering Governance routes',
+        operationId: 'listEngineeringGovernanceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/route': {
+      get: {
+        summary: 'Route via Engineering Governance',
+        operationId: 'routeEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/execute': {
+      get: {
+        summary: 'Execute via Engineering Governance',
+        operationId: 'executeEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-governance/query': {
+      get: {
+        summary: 'Query Engineering Governance',
+        operationId: 'queryEngineeringGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/engine': {
+      get: {
+        summary: 'Architecture Governance engine',
+        operationId: 'getArchitectureGovernanceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/products': {
+      get: {
+        summary: 'Architecture Governance products',
+        operationId: 'listArchitectureGovernanceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/monitoring': {
+      get: {
+        summary: 'Architecture Governance monitoring',
+        operationId: 'getArchitectureGovernanceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/routes': {
+      get: {
+        summary: 'Architecture Governance routes',
+        operationId: 'listArchitectureGovernanceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/route': {
+      get: {
+        summary: 'Route via Architecture Governance',
+        operationId: 'routeArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/execute': {
+      get: {
+        summary: 'Execute via Architecture Governance',
+        operationId: 'executeArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/query': {
+      get: {
+        summary: 'Query Architecture Governance',
+        operationId: 'queryArchitectureGovernance',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/architecture-governance/adr-series': {
+      get: {
+        summary: 'ADR series note',
+        operationId: 'getArchitectureGovernanceAdrSeries',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/engine': {
+      get: {
+        summary: 'Repository Standards engine',
+        operationId: 'getRepositoryStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/products': {
+      get: {
+        summary: 'Repository Standards products',
+        operationId: 'listRepositoryStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/monitoring': {
+      get: {
+        summary: 'Repository Standards monitoring',
+        operationId: 'getRepositoryStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/routes': {
+      get: {
+        summary: 'Repository Standards routes',
+        operationId: 'listRepositoryStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/route': {
+      get: {
+        summary: 'Route via Repository Standards',
+        operationId: 'routeRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/execute': {
+      get: {
+        summary: 'Execute via Repository Standards',
+        operationId: 'executeRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/repository-standards/query': {
+      get: {
+        summary: 'Query Repository Standards',
+        operationId: 'queryRepositoryStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/engine': {
+      get: {
+        summary: 'Engineering Quality Platform engine',
+        operationId: 'getEngineeringQualityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/products': {
+      get: {
+        summary: 'Engineering Quality Platform products',
+        operationId: 'listEngineeringQualityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/monitoring': {
+      get: {
+        summary: 'Engineering Quality Platform monitoring',
+        operationId: 'getEngineeringQualityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/routes': {
+      get: {
+        summary: 'Engineering Quality Platform routes',
+        operationId: 'listEngineeringQualityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/route': {
+      get: {
+        summary: 'Route via Engineering Quality Platform',
+        operationId: 'routeEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/execute': {
+      get: {
+        summary: 'Execute via Engineering Quality Platform',
+        operationId: 'executeEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/engineering-quality-platform/query': {
+      get: {
+        summary: 'Query Engineering Quality Platform',
+        operationId: 'queryEngineeringQualityPlatform',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/engine': {
+      get: {
+        summary: 'AI Engineering Standards engine',
+        operationId: 'getAiEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/products': {
+      get: {
+        summary: 'AI Engineering Standards products',
+        operationId: 'listAiEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/monitoring': {
+      get: {
+        summary: 'AI Engineering Standards monitoring',
+        operationId: 'getAiEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/routes': {
+      get: {
+        summary: 'AI Engineering Standards routes',
+        operationId: 'listAiEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/route': {
+      get: {
+        summary: 'Route via AI Engineering Standards',
+        operationId: 'routeAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via AI Engineering Standards',
+        operationId: 'executeAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/query': {
+      get: {
+        summary: 'Query AI Engineering Standards',
+        operationId: 'queryAiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/checks': {
+      get: {
+        summary: 'AI engineering retroactive checks',
+        operationId: 'listAiEngineeringStandardsChecks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-engineering-standards/check/list': {
+      get: {
+        summary: 'AI engineering check list',
+        operationId: 'listAiEngineeringStandardsCheckList',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/engine': {
+      get: {
+        summary: 'API Engineering Standards engine',
+        operationId: 'getApiEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/products': {
+      get: {
+        summary: 'API Engineering Standards products',
+        operationId: 'listApiEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/monitoring': {
+      get: {
+        summary: 'API Engineering Standards monitoring',
+        operationId: 'getApiEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/routes': {
+      get: {
+        summary: 'API Engineering Standards routes',
+        operationId: 'listApiEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/route': {
+      get: {
+        summary: 'Route via API Engineering Standards',
+        operationId: 'routeApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via API Engineering Standards',
+        operationId: 'executeApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/api-engineering-standards/query': {
+      get: {
+        summary: 'Query API Engineering Standards',
+        operationId: 'queryApiEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/engine': {
+      get: {
+        summary: 'Database Engineering Standards engine',
+        operationId: 'getDatabaseEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/products': {
+      get: {
+        summary: 'Database Engineering Standards products',
+        operationId: 'listDatabaseEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/monitoring': {
+      get: {
+        summary: 'Database Engineering Standards monitoring',
+        operationId: 'getDatabaseEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/routes': {
+      get: {
+        summary: 'Database Engineering Standards routes',
+        operationId: 'listDatabaseEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/route': {
+      get: {
+        summary: 'Route via Database Engineering Standards',
+        operationId: 'routeDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via Database Engineering Standards',
+        operationId: 'executeDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/database-engineering-standards/query': {
+      get: {
+        summary: 'Query Database Engineering Standards',
+        operationId: 'queryDatabaseEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/engine': {
+      get: {
+        summary: 'Infrastructure Engineering Standards engine',
+        operationId: 'getInfrastructureEngineeringStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/products': {
+      get: {
+        summary: 'Infrastructure Engineering Standards products',
+        operationId: 'listInfrastructureEngineeringStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/monitoring': {
+      get: {
+        summary: 'Infrastructure Engineering Standards monitoring',
+        operationId: 'getInfrastructureEngineeringStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/routes': {
+      get: {
+        summary: 'Infrastructure Engineering Standards routes',
+        operationId: 'listInfrastructureEngineeringStandardsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/route': {
+      get: {
+        summary: 'Route via Infrastructure Engineering Standards',
+        operationId: 'routeInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/execute': {
+      get: {
+        summary: 'Execute via Infrastructure Engineering Standards',
+        operationId: 'executeInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/infrastructure-engineering-standards/query': {
+      get: {
+        summary: 'Query Infrastructure Engineering Standards',
+        operationId: 'queryInfrastructureEngineeringStandards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/corporate-operating-system/products': {
+      get: {
+        summary: 'VCOS products',
+        operationId: 'listCorporateOperatingSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/engine': {
+      get: {
+        summary: 'VCOS engine',
+        operationId: 'getCorporateOperatingSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/routing': {
+      get: {
+        summary: 'VCOS routing',
+        operationId: 'getCorporateOperatingSystemRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/overview': {
+      get: {
+        summary: 'VCOS overview',
+        operationId: 'getCorporateOperatingSystemOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/constitution': {
+      get: {
+        summary: 'Digital Constitution',
+        operationId: 'getCorporateOperatingSystemConstitution',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/records': {
+      get: {
+        summary: 'VCOS records',
+        operationId: 'listCorporateOperatingSystemRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-operating-system/monitoring': {
+      get: {
+        summary: 'VCOS monitoring',
+        operationId: 'getCorporateOperatingSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/engine': {
+      get: {
+        summary: 'Corporate Governance Platform engine',
+        operationId: 'getCorporateGovernancePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/products': {
+      get: {
+        summary: 'Corporate Governance Platform products',
+        operationId: 'listCorporateGovernancePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/monitoring': {
+      get: {
+        summary: 'Corporate Governance Platform monitoring',
+        operationId: 'getCorporateGovernancePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/routes': {
+      get: {
+        summary: 'Corporate Governance Platform routes',
+        operationId: 'listCorporateGovernancePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-governance-platform/records': {
+      get: {
+        summary: 'Corporate Governance Platform records',
+        operationId: 'listCorporateGovernancePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/engine': {
+      get: {
+        summary: 'Strategic Planning Platform engine',
+        operationId: 'getStrategicPlanningPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/products': {
+      get: {
+        summary: 'Strategic Planning Platform products',
+        operationId: 'listStrategicPlanningPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/monitoring': {
+      get: {
+        summary: 'Strategic Planning Platform monitoring',
+        operationId: 'getStrategicPlanningPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/routes': {
+      get: {
+        summary: 'Strategic Planning Platform routes',
+        operationId: 'listStrategicPlanningPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/strategic-planning-platform/records': {
+      get: {
+        summary: 'Strategic Planning Platform records',
+        operationId: 'listStrategicPlanningPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/engine': {
+      get: {
+        summary: 'Enterprise Portfolio Management engine',
+        operationId: 'getEnterprisePortfolioManagementEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/products': {
+      get: {
+        summary: 'Enterprise Portfolio Management products',
+        operationId: 'listEnterprisePortfolioManagementProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/monitoring': {
+      get: {
+        summary: 'Enterprise Portfolio Management monitoring',
+        operationId: 'getEnterprisePortfolioManagementMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/routes': {
+      get: {
+        summary: 'Enterprise Portfolio Management routes',
+        operationId: 'listEnterprisePortfolioManagementRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-portfolio-management/records': {
+      get: {
+        summary: 'Enterprise Portfolio Management records',
+        operationId: 'listEnterprisePortfolioManagementRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/engine': {
+      get: {
+        summary: 'Business Architecture engine',
+        operationId: 'getBusinessArchitectureEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/products': {
+      get: {
+        summary: 'Business Architecture products',
+        operationId: 'listBusinessArchitectureProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/monitoring': {
+      get: {
+        summary: 'Business Architecture monitoring',
+        operationId: 'getBusinessArchitectureMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/routes': {
+      get: {
+        summary: 'Business Architecture routes',
+        operationId: 'listBusinessArchitectureRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/business-architecture/records': {
+      get: {
+        summary: 'Business Architecture records',
+        operationId: 'listBusinessArchitectureRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/engine': {
+      get: {
+        summary: 'Enterprise Architecture Repository engine',
+        operationId: 'getEnterpriseArchitectureRepositoryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/products': {
+      get: {
+        summary: 'Enterprise Architecture Repository products',
+        operationId: 'listEnterpriseArchitectureRepositoryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/monitoring': {
+      get: {
+        summary: 'Enterprise Architecture Repository monitoring',
+        operationId: 'getEnterpriseArchitectureRepositoryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/routes': {
+      get: {
+        summary: 'Enterprise Architecture Repository routes',
+        operationId: 'listEnterpriseArchitectureRepositoryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-architecture-repository/records': {
+      get: {
+        summary: 'Enterprise Architecture Repository records',
+        operationId: 'listEnterpriseArchitectureRepositoryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/engine': {
+      get: {
+        summary: 'Corporate Knowledge System engine',
+        operationId: 'getCorporateKnowledgeSystemEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/products': {
+      get: {
+        summary: 'Corporate Knowledge System products',
+        operationId: 'listCorporateKnowledgeSystemProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/monitoring': {
+      get: {
+        summary: 'Corporate Knowledge System monitoring',
+        operationId: 'getCorporateKnowledgeSystemMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/routes': {
+      get: {
+        summary: 'Corporate Knowledge System routes',
+        operationId: 'listCorporateKnowledgeSystemRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-knowledge-system/records': {
+      get: {
+        summary: 'Corporate Knowledge System records',
+        operationId: 'listCorporateKnowledgeSystemRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/engine': {
+      get: {
+        summary: 'Executive Intelligence Platform engine',
+        operationId: 'getExecutiveIntelligencePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/products': {
+      get: {
+        summary: 'Executive Intelligence Platform products',
+        operationId: 'listExecutiveIntelligencePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/monitoring': {
+      get: {
+        summary: 'Executive Intelligence Platform monitoring',
+        operationId: 'getExecutiveIntelligencePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/routes': {
+      get: {
+        summary: 'Executive Intelligence Platform routes',
+        operationId: 'listExecutiveIntelligencePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/executive-intelligence-platform/records': {
+      get: {
+        summary: 'Executive Intelligence Platform records',
+        operationId: 'listExecutiveIntelligencePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/engine': {
+      get: {
+        summary: 'Corporate Risk Platform engine',
+        operationId: 'getCorporateRiskPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/products': {
+      get: {
+        summary: 'Corporate Risk Platform products',
+        operationId: 'listCorporateRiskPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/monitoring': {
+      get: {
+        summary: 'Corporate Risk Platform monitoring',
+        operationId: 'getCorporateRiskPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/routes': {
+      get: {
+        summary: 'Corporate Risk Platform routes',
+        operationId: 'listCorporateRiskPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/corporate-risk-platform/records': {
+      get: {
+        summary: 'Corporate Risk Platform records',
+        operationId: 'listCorporateRiskPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/global-ai-standards/engine': {
+      get: {
+        summary: 'Global AI Standards engine',
+        operationId: 'getGlobalAiStandardsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/products': {
+      get: {
+        summary: 'Global AI Standards products',
+        operationId: 'listGlobalAiStandardsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/monitoring': {
+      get: {
+        summary: 'Global AI Standards monitoring',
+        operationId: 'getGlobalAiStandardsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/records': {
+      get: {
+        summary: 'Global AI Standards records',
+        operationId: 'listGlobalAiStandardsRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/routing': {
+      get: {
+        summary: 'VGAS routing',
+        operationId: 'getGlobalAiStandardsRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/overview': {
+      get: {
+        summary: 'VGAS overview',
+        operationId: 'getGlobalAiStandardsOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/verify/{code}': {
+      get: {
+        summary: 'Verify certificate',
+        operationId: 'verifyGlobalAiStandardsCertificate',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-standards/iso-process': {
+      get: {
+        summary: 'VGAS ISO process maturity and recognition pathway',
+        operationId: 'getGlobalAiStandardsIsoProcess',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/engine': {
+      get: {
+        summary: 'AI Certification Platform engine',
+        operationId: 'getAiCertificationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/products': {
+      get: {
+        summary: 'AI Certification Platform products',
+        operationId: 'listAiCertificationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/monitoring': {
+      get: {
+        summary: 'AI Certification Platform monitoring',
+        operationId: 'getAiCertificationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/records': {
+      get: {
+        summary: 'AI Certification Platform records',
+        operationId: 'listAiCertificationPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/routes': {
+      get: {
+        summary: 'AI Certification Platform routes',
+        operationId: 'listAiCertificationPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-certification-platform/scheme': {
+      get: {
+        summary: 'AI Certification Platform ISO-aligned scheme',
+        operationId: 'getAiCertificationPlatformScheme',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/engine': {
+      get: {
+        summary: 'AI Compliance Framework engine',
+        operationId: 'getAiComplianceFrameworkEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/products': {
+      get: {
+        summary: 'AI Compliance Framework products',
+        operationId: 'listAiComplianceFrameworkProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/monitoring': {
+      get: {
+        summary: 'AI Compliance Framework monitoring',
+        operationId: 'getAiComplianceFrameworkMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/records': {
+      get: {
+        summary: 'AI Compliance Framework records',
+        operationId: 'listAiComplianceFrameworkRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-compliance-framework/routes': {
+      get: {
+        summary: 'AI Compliance Framework routes',
+        operationId: 'listAiComplianceFrameworkRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/engine': {
+      get: {
+        summary: 'Reference Architectures engine',
+        operationId: 'getReferenceArchitecturesEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/products': {
+      get: {
+        summary: 'Reference Architectures products',
+        operationId: 'listReferenceArchitecturesProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/monitoring': {
+      get: {
+        summary: 'Reference Architectures monitoring',
+        operationId: 'getReferenceArchitecturesMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/records': {
+      get: {
+        summary: 'Reference Architectures records',
+        operationId: 'listReferenceArchitecturesRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/reference-architectures/routes': {
+      get: {
+        summary: 'Reference Architectures routes',
+        operationId: 'listReferenceArchitecturesRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/engine': {
+      get: {
+        summary: 'Best Practices Library engine',
+        operationId: 'getBestPracticesLibraryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/products': {
+      get: {
+        summary: 'Best Practices Library products',
+        operationId: 'listBestPracticesLibraryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/monitoring': {
+      get: {
+        summary: 'Best Practices Library monitoring',
+        operationId: 'getBestPracticesLibraryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/records': {
+      get: {
+        summary: 'Best Practices Library records',
+        operationId: 'listBestPracticesLibraryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/best-practices-library/routes': {
+      get: {
+        summary: 'Best Practices Library routes',
+        operationId: 'listBestPracticesLibraryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/engine': {
+      get: {
+        summary: 'Enterprise Assessment Platform engine',
+        operationId: 'getEnterpriseAssessmentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/products': {
+      get: {
+        summary: 'Enterprise Assessment Platform products',
+        operationId: 'listEnterpriseAssessmentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/monitoring': {
+      get: {
+        summary: 'Enterprise Assessment Platform monitoring',
+        operationId: 'getEnterpriseAssessmentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/records': {
+      get: {
+        summary: 'Enterprise Assessment Platform records',
+        operationId: 'listEnterpriseAssessmentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-assessment-platform/routes': {
+      get: {
+        summary: 'Enterprise Assessment Platform routes',
+        operationId: 'listEnterpriseAssessmentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/engine': {
+      get: {
+        summary: 'Standards Repository engine',
+        operationId: 'getStandardsRepositoryEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/products': {
+      get: {
+        summary: 'Standards Repository products',
+        operationId: 'listStandardsRepositoryProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/monitoring': {
+      get: {
+        summary: 'Standards Repository monitoring',
+        operationId: 'getStandardsRepositoryMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/records': {
+      get: {
+        summary: 'Standards Repository records',
+        operationId: 'listStandardsRepositoryRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-repository/routes': {
+      get: {
+        summary: 'Standards Repository routes',
+        operationId: 'listStandardsRepositoryRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/engine': {
+      get: {
+        summary: 'Global Partner Program engine',
+        operationId: 'getGlobalPartnerProgramEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/products': {
+      get: {
+        summary: 'Global Partner Program products',
+        operationId: 'listGlobalPartnerProgramProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/monitoring': {
+      get: {
+        summary: 'Global Partner Program monitoring',
+        operationId: 'getGlobalPartnerProgramMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/records': {
+      get: {
+        summary: 'Global Partner Program records',
+        operationId: 'listGlobalPartnerProgramRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-partner-program/routes': {
+      get: {
+        summary: 'Global Partner Program routes',
+        operationId: 'listGlobalPartnerProgramRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/engine': {
+      get: {
+        summary: 'Standards Analytics engine',
+        operationId: 'getStandardsAnalyticsEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/products': {
+      get: {
+        summary: 'Standards Analytics products',
+        operationId: 'listStandardsAnalyticsProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/monitoring': {
+      get: {
+        summary: 'Standards Analytics monitoring',
+        operationId: 'getStandardsAnalyticsMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/records': {
+      get: {
+        summary: 'Standards Analytics records',
+        operationId: 'listStandardsAnalyticsRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/standards-analytics/routes': {
+      get: {
+        summary: 'Standards Analytics routes',
+        operationId: 'listStandardsAnalyticsRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/ai-economy/products': {
+      get: {
+        summary: 'AIE products',
+        operationId: 'listAiEconomyProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/engine': {
+      get: {
+        summary: 'AIE engine',
+        operationId: 'getAiEconomyEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/routing': {
+      get: {
+        summary: 'AIE routing',
+        operationId: 'getAiEconomyRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/guards': {
+      get: {
+        summary: 'AIE money/securities guards',
+        operationId: 'getAiEconomyGuards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/overview': {
+      get: {
+        summary: 'AIE overview',
+        operationId: 'getAiEconomyOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/records': {
+      get: {
+        summary: 'AIE records',
+        operationId: 'listAiEconomyRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-economy/monitoring': {
+      get: {
+        summary: 'AIE monitoring',
+        operationId: 'getAiEconomyMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/engine': {
+      get: {
+        summary: 'AI Commerce Platform engine',
+        operationId: 'getAiCommercePlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/products': {
+      get: {
+        summary: 'AI Commerce Platform products',
+        operationId: 'listAiCommercePlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/monitoring': {
+      get: {
+        summary: 'AI Commerce Platform monitoring',
+        operationId: 'getAiCommercePlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/routes': {
+      get: {
+        summary: 'AI Commerce Platform routes',
+        operationId: 'listAiCommercePlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-commerce-platform/records': {
+      get: {
+        summary: 'AI Commerce Platform records',
+        operationId: 'listAiCommercePlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/engine': {
+      get: {
+        summary: 'AI Licensing Platform engine',
+        operationId: 'getAiLicensingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/products': {
+      get: {
+        summary: 'AI Licensing Platform products',
+        operationId: 'listAiLicensingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/monitoring': {
+      get: {
+        summary: 'AI Licensing Platform monitoring',
+        operationId: 'getAiLicensingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/routes': {
+      get: {
+        summary: 'AI Licensing Platform routes',
+        operationId: 'listAiLicensingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-licensing-platform/records': {
+      get: {
+        summary: 'AI Licensing Platform records',
+        operationId: 'listAiLicensingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/engine': {
+      get: {
+        summary: 'Revenue Sharing Platform engine',
+        operationId: 'getRevenueSharingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/products': {
+      get: {
+        summary: 'Revenue Sharing Platform products',
+        operationId: 'listRevenueSharingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/monitoring': {
+      get: {
+        summary: 'Revenue Sharing Platform monitoring',
+        operationId: 'getRevenueSharingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/routes': {
+      get: {
+        summary: 'Revenue Sharing Platform routes',
+        operationId: 'listRevenueSharingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/revenue-sharing-platform/records': {
+      get: {
+        summary: 'Revenue Sharing Platform records',
+        operationId: 'listRevenueSharingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/engine': {
+      get: {
+        summary: 'AI Talent Platform engine',
+        operationId: 'getAiTalentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/products': {
+      get: {
+        summary: 'AI Talent Platform products',
+        operationId: 'listAiTalentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/monitoring': {
+      get: {
+        summary: 'AI Talent Platform monitoring',
+        operationId: 'getAiTalentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/routes': {
+      get: {
+        summary: 'AI Talent Platform routes',
+        operationId: 'listAiTalentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-talent-platform/records': {
+      get: {
+        summary: 'AI Talent Platform records',
+        operationId: 'listAiTalentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/engine': {
+      get: {
+        summary: 'Research Funding Platform engine',
+        operationId: 'getResearchFundingPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/products': {
+      get: {
+        summary: 'Research Funding Platform products',
+        operationId: 'listResearchFundingPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/monitoring': {
+      get: {
+        summary: 'Research Funding Platform monitoring',
+        operationId: 'getResearchFundingPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/routes': {
+      get: {
+        summary: 'Research Funding Platform routes',
+        operationId: 'listResearchFundingPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/research-funding-platform/records': {
+      get: {
+        summary: 'Research Funding Platform records',
+        operationId: 'listResearchFundingPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/engine': {
+      get: {
+        summary: 'Global Community Platform engine',
+        operationId: 'getGlobalCommunityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/products': {
+      get: {
+        summary: 'Global Community Platform products',
+        operationId: 'listGlobalCommunityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/monitoring': {
+      get: {
+        summary: 'Global Community Platform monitoring',
+        operationId: 'getGlobalCommunityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/routes': {
+      get: {
+        summary: 'Global Community Platform routes',
+        operationId: 'listGlobalCommunityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-community-platform/records': {
+      get: {
+        summary: 'Global Community Platform records',
+        operationId: 'listGlobalCommunityPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/engine': {
+      get: {
+        summary: 'AI Investment Platform engine',
+        operationId: 'getAiInvestmentPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/products': {
+      get: {
+        summary: 'AI Investment Platform products',
+        operationId: 'listAiInvestmentPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/monitoring': {
+      get: {
+        summary: 'AI Investment Platform monitoring',
+        operationId: 'getAiInvestmentPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/routes': {
+      get: {
+        summary: 'AI Investment Platform routes',
+        operationId: 'listAiInvestmentPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/ai-investment-platform/records': {
+      get: {
+        summary: 'AI Investment Platform records',
+        operationId: 'listAiInvestmentPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/engine': {
+      get: {
+        summary: 'Economic Intelligence engine',
+        operationId: 'getEconomicIntelligenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/products': {
+      get: {
+        summary: 'Economic Intelligence products',
+        operationId: 'listEconomicIntelligenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/monitoring': {
+      get: {
+        summary: 'Economic Intelligence monitoring',
+        operationId: 'getEconomicIntelligenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/routes': {
+      get: {
+        summary: 'Economic Intelligence routes',
+        operationId: 'listEconomicIntelligenceRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/economic-intelligence/records': {
+      get: {
+        summary: 'Economic Intelligence records',
+        operationId: 'listEconomicIntelligenceRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/digital-civilization/products': {
+      get: {
+        summary: 'DCIV products',
+        operationId: 'listDigitalCivilizationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/engine': {
+      get: {
+        summary: 'DCIV engine',
+        operationId: 'getDigitalCivilizationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/routing': {
+      get: {
+        summary: 'DCIV routing',
+        operationId: 'getDigitalCivilizationRouting',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/guards': {
+      get: {
+        summary: 'DCIV public-sector guards',
+        operationId: 'getDigitalCivilizationGuards',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/overview': {
+      get: {
+        summary: 'DCIV overview',
+        operationId: 'getDigitalCivilizationOverview',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/records': {
+      get: {
+        summary: 'DCIV records',
+        operationId: 'listDigitalCivilizationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/digital-civilization/monitoring': {
+      get: {
+        summary: 'DCIV monitoring',
+        operationId: 'getDigitalCivilizationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/engine': {
+      get: {
+        summary: 'National AI Platform engine',
+        operationId: 'getNationalAiPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/products': {
+      get: {
+        summary: 'National AI Platform products',
+        operationId: 'listNationalAiPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/monitoring': {
+      get: {
+        summary: 'National AI Platform monitoring',
+        operationId: 'getNationalAiPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/routes': {
+      get: {
+        summary: 'National AI Platform routes',
+        operationId: 'listNationalAiPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/national-ai-platform/records': {
+      get: {
+        summary: 'National AI Platform records',
+        operationId: 'listNationalAiPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/engine': {
+      get: {
+        summary: 'Smart City Platform engine',
+        operationId: 'getSmartCityPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/products': {
+      get: {
+        summary: 'Smart City Platform products',
+        operationId: 'listSmartCityPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/monitoring': {
+      get: {
+        summary: 'Smart City Platform monitoring',
+        operationId: 'getSmartCityPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/routes': {
+      get: {
+        summary: 'Smart City Platform routes',
+        operationId: 'listSmartCityPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/smart-city-platform/records': {
+      get: {
+        summary: 'Smart City Platform records',
+        operationId: 'listSmartCityPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/engine': {
+      get: {
+        summary: 'Enterprise Nation Platform engine',
+        operationId: 'getEnterpriseNationPlatformEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/products': {
+      get: {
+        summary: 'Enterprise Nation Platform products',
+        operationId: 'listEnterpriseNationPlatformProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/monitoring': {
+      get: {
+        summary: 'Enterprise Nation Platform monitoring',
+        operationId: 'getEnterpriseNationPlatformMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/routes': {
+      get: {
+        summary: 'Enterprise Nation Platform routes',
+        operationId: 'listEnterpriseNationPlatformRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/enterprise-nation-platform/records': {
+      get: {
+        summary: 'Enterprise Nation Platform records',
+        operationId: 'listEnterpriseNationPlatformRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/engine': {
+      get: {
+        summary: 'Global Language Preservation engine',
+        operationId: 'getGlobalLanguagePreservationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/products': {
+      get: {
+        summary: 'Global Language Preservation products',
+        operationId: 'listGlobalLanguagePreservationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/monitoring': {
+      get: {
+        summary: 'Global Language Preservation monitoring',
+        operationId: 'getGlobalLanguagePreservationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/routes': {
+      get: {
+        summary: 'Global Language Preservation routes',
+        operationId: 'listGlobalLanguagePreservationRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-language-preservation/records': {
+      get: {
+        summary: 'Global Language Preservation records',
+        operationId: 'listGlobalLanguagePreservationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/engine': {
+      get: {
+        summary: 'Universal Translation Grid engine',
+        operationId: 'getUniversalTranslationGridEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/products': {
+      get: {
+        summary: 'Universal Translation Grid products',
+        operationId: 'listUniversalTranslationGridProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/monitoring': {
+      get: {
+        summary: 'Universal Translation Grid monitoring',
+        operationId: 'getUniversalTranslationGridMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/routes': {
+      get: {
+        summary: 'Universal Translation Grid routes',
+        operationId: 'listUniversalTranslationGridRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/universal-translation-grid/records': {
+      get: {
+        summary: 'Universal Translation Grid records',
+        operationId: 'listUniversalTranslationGridRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/engine': {
+      get: {
+        summary: 'Global Knowledge Network engine',
+        operationId: 'getGlobalKnowledgeNetworkEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/products': {
+      get: {
+        summary: 'Global Knowledge Network products',
+        operationId: 'listGlobalKnowledgeNetworkProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/monitoring': {
+      get: {
+        summary: 'Global Knowledge Network monitoring',
+        operationId: 'getGlobalKnowledgeNetworkMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/routes': {
+      get: {
+        summary: 'Global Knowledge Network routes',
+        operationId: 'listGlobalKnowledgeNetworkRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-knowledge-network/records': {
+      get: {
+        summary: 'Global Knowledge Network records',
+        operationId: 'listGlobalKnowledgeNetworkRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/engine': {
+      get: {
+        summary: 'Global AI Federation engine',
+        operationId: 'getGlobalAiFederationEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/products': {
+      get: {
+        summary: 'Global AI Federation products',
+        operationId: 'listGlobalAiFederationProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/monitoring': {
+      get: {
+        summary: 'Global AI Federation monitoring',
+        operationId: 'getGlobalAiFederationMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/routes': {
+      get: {
+        summary: 'Global AI Federation routes',
+        operationId: 'listGlobalAiFederationRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/global-ai-federation/records': {
+      get: {
+        summary: 'Global AI Federation records',
+        operationId: 'listGlobalAiFederationRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/engine': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard engine',
+        operationId: 'getCivilizationIntelligenceDashboardEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/products': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard products',
+        operationId: 'listCivilizationIntelligenceDashboardProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/monitoring': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard monitoring',
+        operationId: 'getCivilizationIntelligenceDashboardMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/routes': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard routes',
+        operationId: 'listCivilizationIntelligenceDashboardRoutes',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/civilization-intelligence-dashboard/records': {
+      get: {
+        summary: 'Civilization Intelligence Dashboard records',
+        operationId: 'listCivilizationIntelligenceDashboardRecords',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
+    '/v1/library-reference/products': {
+      get: {
+        summary: 'Library reference products',
+        operationId: 'listLibraryReferenceProducts',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/engine': {
+      get: {
+        summary: 'Library reference engine',
+        operationId: 'getLibraryReferenceEngine',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/index': {
+      get: {
+        summary: 'Master phase index',
+        operationId: 'getLibraryReferenceIndex',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/risks': {
+      get: {
+        summary: 'Deeper risk notes summary',
+        operationId: 'getLibraryReferenceRisks',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/vision': {
+      get: {
+        summary: 'AI Internet vision (non-executable)',
+        operationId: 'getLibraryReferenceVision',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/documents/{slug}': {
+      get: {
+        summary: 'Library reference markdown document',
+        operationId: 'getLibraryReferenceDocument',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+    '/v1/library-reference/monitoring': {
+      get: {
+        summary: 'Library reference monitoring',
+        operationId: 'getLibraryReferenceMonitoring',
+        responses: { '200': { description: 'OK' } },
+      },
+    },
+
     '/v1/localize/file': {
       post: {
         summary: 'Translate an uploaded .json/.yaml file',

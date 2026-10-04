@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type VoiceStatus = {
@@ -36,7 +37,7 @@ export function VoiceClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setStatus(await apiFetch<VoiceStatus>('/v1/voice/status', { token }));
   }, [getToken]);
@@ -51,7 +52,7 @@ export function VoiceClient() {
     setError(null);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<SimResult>('/v1/voice/simulate', {
         method: 'POST',

@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Candidate = {
@@ -64,7 +65,7 @@ export function FinetunesClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
         await refresh(token);
       } catch (err) {
@@ -78,7 +79,7 @@ export function FinetunesClient() {
     setMessage(null);
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const job = await apiFetch<{ id: string }>('/v1/finetunes/jobs', {
         method: 'POST',
@@ -109,7 +110,7 @@ export function FinetunesClient() {
   async function retire(id: string) {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/finetunes/models/${id}/retire`, { method: 'POST', token });
       await refresh(token);

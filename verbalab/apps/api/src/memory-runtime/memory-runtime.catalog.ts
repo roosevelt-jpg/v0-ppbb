@@ -58,7 +58,7 @@ export function memoryRuntimeCatalog() {
   return {
     product: 'VerbaLab Memory Runtime',
     note:
-      'Memory Runtime (VL-215). Kernel-layer short/long-term/semantic/workspace/org/conversation/agent memory over VL-183 MemoryRecord (metadata.layer=kernel). Versioning, eviction, heuristic compression, sandbox snapshots/sync. Not Mem0 OS, not infinite personalization, not multi-region replication. Does not regenerate Memory Cloud or Knowledge Memory.',
+      'Memory Runtime. Kernel-layer short/long-term/semantic/workspace/org/conversation/agent memory over MemoryRecord (metadata.layer=kernel). Versioning, eviction, heuristic compression, sandbox snapshots/sync. Not Mem0 OS, not infinite personalization, not multi-region replication. Does not regenerate Memory Cloud or Knowledge Memory.',
     capabilities: [
       {
         id: 'short-term-memory',
@@ -107,7 +107,7 @@ export function memoryRuntimeCatalog() {
         name: 'Agent Memory',
         status: 'partial',
         api: 'POST /v1/memory-runtime/put',
-        notes: 'scope=agent + agentId — Agent Runtime VL-219 writes via /v1/agent-runtime/memory.',
+        notes: 'scope=agent + agentId — Agent Runtime writes via /v1/agent-runtime/memory.',
       },
       {
         id: 'context-compression',

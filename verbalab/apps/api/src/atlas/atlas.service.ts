@@ -21,7 +21,7 @@ export class AtlasService {
         noFakeTrainedWeights: true,
         scaffoldNotModel: true,
         note:
-          'Atlas is a family scaffold. Inference continues through Gateway vendors until trained weights exist.',
+          'Atlas is a VerbaLab-owned model family. Inference uses VerbaLab Own AI endpoints (VERBALAB_CHAT_URL / MODEL_BASE_URL).',
       },
     };
   }
@@ -74,7 +74,7 @@ export class AtlasService {
       },
       docs: '/docs/ATLAS.md',
       note:
-        'Atlas scaffold (VL-225). Capability map + MLOps handoffs — not trained competitive weights.',
+        'Atlas scaffold. Capability map + MLOps handoffs — not trained competitive weights.',
     };
   }
 
@@ -87,7 +87,7 @@ export class AtlasService {
       })),
       honesty: atlasHonesty(),
       note:
-        'Atlas monitoring (VL-225). Scaffold shipped; trained weights and domain specialists deferred.',
+        'Atlas monitoring. Scaffold shipped; trained weights and domain specialists deferred.',
     };
   }
 }

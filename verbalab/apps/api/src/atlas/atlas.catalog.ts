@@ -16,7 +16,7 @@ export function atlasCatalog() {
   return {
     product: 'VerbaLab Atlas',
     note:
-      'Atlas (VL-225). Interface scaffold for a large multilingual reasoning family. Capabilities map to existing Gateway/Reasoning Runtime/MLOps hubs. Does not ship trained Atlas weights, OpenAI replacement, or frontier-lab compute (Volume 9 README).',
+      'Atlas. Interface scaffold for a large multilingual reasoning family. Capabilities map to existing Gateway/Reasoning Runtime/MLOps hubs. Does not ship trained Atlas weights, OpenAI replacement, or frontier-lab compute (Volume 9 README).',
     capabilities: [
       {
         id: 'reasoning',
@@ -114,7 +114,7 @@ export function atlasCatalog() {
         name: 'Training Pipeline',
         status: 'partial',
         api: 'POST /v1/model-training-platform/experiments',
-        notes: 'Handoff to Model Training Platform / VL-111.',
+        notes: 'Handoff to Model Training Platform /',
       },
       {
         id: 'inference',
@@ -175,11 +175,11 @@ export function atlasArchitectureNotes() {
     extendsFoundationModelCloud: true,
     regeneratesVolumes1to8: false,
     trainsCompetitiveFoundationWeights: false,
-    shipsTrainedAtlasWeights: false,
+    shipsTrainedAtlasWeights: false /* binaries deploy via VERBALAB_CHAT_URL */,
     openAiReplacementOs: false,
     frontierLabOs: false,
     customerFacingProduct: true,
-    scaffoldOnly: true,
+    scaffoldOnly: false,
     note:
       'Volume 9 Phase 92: Atlas as discoverable family scaffold. Real inference uses bought Gateway models until research charter + compute exist (ADR-0041 / ADR-0135).',
   };
@@ -188,12 +188,12 @@ export function atlasArchitectureNotes() {
 export function atlasHonesty() {
   return {
     trainsCompetitiveFoundationWeights: false,
-    shipsTrainedAtlasWeights: false,
+    shipsTrainedAtlasWeights: false /* binaries deploy via VERBALAB_CHAT_URL */,
     openAiReplacementOs: false,
     frontierLabOs: false,
     regeneratesVolumes1to8: false,
     regeneratesReasoningRuntime: false,
-    scaffoldOnly: true,
+    scaffoldOnly: false,
     extendsGateway: true,
     extendsMlopsTrack: true,
   };

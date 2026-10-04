@@ -85,18 +85,24 @@ describe('Style Intelligence Phase 11 (VL-143)', () => {
     expect(readFileSync(join(root, 'docs/STYLE.md'), 'utf8')).toContain('/transfer');
   });
 
-  it('exposes intelligence catalog with partial marketing/legal', async () => {
+  it('exposes intelligence catalog with shipped marketing/legal + African styles', async () => {
     const res = await request(app.getHttpServer()).get('/v1/style/intelligence').expect(200);
     expect(res.body.product).toMatch(/Style/i);
     expect(
       res.body.capabilities.some((c: { id: string; status: string }) => c.id === 'tone_detection' && c.status === 'shipped'),
     ).toBe(true);
     expect(
-      res.body.capabilities.some((c: { id: string; status: string }) => c.id === 'marketing' && c.status === 'partial'),
+      res.body.capabilities.some((c: { id: string; status: string }) => c.id === 'marketing' && c.status === 'shipped'),
     ).toBe(true);
     expect(
-      res.body.capabilities.some((c: { id: string; status: string }) => c.id === 'style_transfer' && c.status === 'partial'),
+      res.body.capabilities.some((c: { id: string; status: string }) => c.id === 'style_transfer' && c.status === 'shipped'),
     ).toBe(true);
+    expect(
+      res.body.capabilities.some(
+        (c: { id: string; status: string }) => c.id === 'african_public_sector' && c.status === 'shipped',
+      ),
+    ).toBe(true);
+    expect(res.body.capabilities.every((c: { status: string }) => c.status !== 'partial')).toBe(true);
   });
 
   it('lists expanded profiles including formal/business/marketing/technical', async () => {
@@ -112,6 +118,10 @@ describe('Style Intelligence Phase 11 (VL-143)', () => {
         'medical',
         'legal',
         'government',
+        'african_public_sector',
+        'african_plain',
+        'east_african_formal',
+        'west_african_business',
         'casual',
       ]),
     );

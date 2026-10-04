@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type OrgRow = {
@@ -37,7 +38,7 @@ export function AdminClient() {
   const [busy, setBusy] = useState(false);
 
   const checkStatus = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const status = await apiFetch<{ admin: boolean }>('/v1/admin/status', { token });
     setIsAdmin(status.admin);
@@ -45,7 +46,7 @@ export function AdminClient() {
 
   const search = useCallback(
     async (query: string) => {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<OrgRow[]>(
         `/v1/admin/organizations${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ''}`,
@@ -74,7 +75,7 @@ export function AdminClient() {
     setError(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const detail = await apiFetch<OrgDetail>(`/v1/admin/organizations/${id}`, { token });
       setSelected(detail);
@@ -89,7 +90,7 @@ export function AdminClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/admin/organizations/${id}/revoke-keys`, { method: 'POST', token });
       await openOrg(id);
@@ -105,7 +106,7 @@ export function AdminClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/admin/organizations/${id}/disable`, {
         method: 'POST',
