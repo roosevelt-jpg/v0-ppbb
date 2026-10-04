@@ -15,10 +15,34 @@ async function bootstrap() {
 
   const corsOriginEnv =
     process.env.CORS_ORIGIN ?? 'http://localhost:3000,http://127.0.0.1:3000';
-  const corsOrigin = corsOriginEnv.includes(',')
-    ? corsOriginEnv.split(',').map((s) => s.trim()).filter(Boolean)
-    : corsOriginEnv;
-  app.enableCors({ origin: corsOrigin });
+  const corsOrigins = corsOriginEnv
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const allowQuickTunnels =
+    process.env.CLERK_SECRET_KEY?.startsWith('sk_test_') ||
+    process.env.ALLOW_QUICK_TUNNEL_CORS === '1';
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      if (
+        allowQuickTunnels &&
+        (/^https:\/\/[a-z0-9-]+\.trycloudflare\.com$/i.test(origin) ||
+          /^https:\/\/[a-z0-9-]+\.loca\.lt$/i.test(origin))
+      ) {
+        callback(null, true);
+        return;
+      }
+      callback(null, false);
+    },
+  });
 
   const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3001);
   await app.listen(port, '0.0.0.0');

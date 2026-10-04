@@ -153,7 +153,9 @@ export function MarketingHomePage() {
       <div className="vl-mkt" style={{ padding: '3rem 1.5rem' }}>
         <p>Could not load marketing CMS: {error}</p>
         <p>
-          Ensure API is on :3001, then open <Link href="/cms">/cms</Link> after login to reseed.
+          API base is <code>{API_URL}</code>. Ensure the API is reachable from this browser (preview
+          needs a public tunnel URL, not localhost), then open <Link href="/cms">/cms</Link> after
+          login to reseed.
         </p>
       </div>
     );
