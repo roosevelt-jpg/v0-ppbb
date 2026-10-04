@@ -44,6 +44,11 @@ export const SPEED_TIERS = [
 
 type SpeedTierId = (typeof SPEED_TIERS)[number]['id'];
 
+/**
+ * USD unit costs aligned to ElevenLabs API pricing (elevenlabs.io/pricing/api):
+ * TTS Multilingual $0.10 / 1k chars · Flash $0.05 / 1k · STT $0.22 / hour ≈ $0.00367 / min.
+ * Speed tiers (eco→ultra) still scale cost for productivity latency.
+ */
 const USE_CASES = [
   {
     id: 'meeting-stt',
@@ -51,7 +56,7 @@ const USE_CASES = [
     modality: 'stt',
     family: 'echo',
     unit: 'audio_minute',
-    baseUsdPerUnit: 0.006,
+    baseUsdPerUnit: 0.00367, // $0.22/hr Scribe-class
     api: 'POST /v1/meeting-transcription/transcribe',
     productivity: 'Searchable meeting notes across African languages',
   },
@@ -61,7 +66,7 @@ const USE_CASES = [
     modality: 'stt',
     family: 'echo',
     unit: 'audio_minute',
-    baseUsdPerUnit: 0.005,
+    baseUsdPerUnit: 0.00367,
     api: 'POST /v1/voice-recorder-plugin/transcribe',
     productivity: 'Record on phone → transcript for CRM and ops',
   },
@@ -71,9 +76,19 @@ const USE_CASES = [
     modality: 'stt',
     family: 'echo',
     unit: 'audio_minute',
-    baseUsdPerUnit: 0.007,
+    baseUsdPerUnit: 0.00367,
     api: 'POST /v1/speech/recognize',
     productivity: 'QA and coaching at scale',
+  },
+  {
+    id: 'stt-realtime',
+    name: 'Realtime speech recognition',
+    modality: 'stt',
+    family: 'echo',
+    unit: 'audio_minute',
+    baseUsdPerUnit: 0.0065, // $0.39/hr realtime
+    api: 'POST /v1/speech/recognize',
+    productivity: 'Live captions and voice agents',
   },
   {
     id: 'voice-assist',
@@ -101,9 +116,19 @@ const USE_CASES = [
     modality: 'tts',
     family: 'voice-fm',
     unit: '1k_chars',
-    baseUsdPerUnit: 0.008,
+    baseUsdPerUnit: 0.1, // Multilingual v2/v3 API
     api: 'POST /v1/audio/speech',
     productivity: 'Natural African speech for products and media',
+  },
+  {
+    id: 'tts-flash',
+    name: 'Flash / Turbo TTS',
+    modality: 'tts',
+    family: 'voice-fm',
+    unit: '1k_chars',
+    baseUsdPerUnit: 0.05,
+    api: 'POST /v1/tts/synthesize',
+    productivity: 'Low-latency spoken replies',
   },
   {
     id: 'translate',
@@ -111,9 +136,9 @@ const USE_CASES = [
     modality: 'translate',
     family: 'translate-fm',
     unit: '1k_chars',
-    baseUsdPerUnit: 0.003,
+    baseUsdPerUnit: 0.05,
     api: 'POST /v1/translate',
-    productivity: 'Primary MT for African language pairs',
+    productivity: 'Primary MT for African language pairs (shared credit pool)',
   },
   {
     id: 'media-caption',
@@ -121,9 +146,29 @@ const USE_CASES = [
     modality: 'stt',
     family: 'echo',
     unit: 'audio_minute',
-    baseUsdPerUnit: 0.0065,
+    baseUsdPerUnit: 0.00367,
     api: 'POST /v1/speech/recognize',
     productivity: 'Captions for radio, video, and social',
+  },
+  {
+    id: 'music',
+    name: 'AI Music',
+    modality: 'music',
+    family: 'creative',
+    unit: 'audio_minute',
+    baseUsdPerUnit: 0.15,
+    api: 'POST /v1/creative-media/music',
+    productivity: 'Beds and motifs for African ads and podcasts',
+  },
+  {
+    id: 'sfx',
+    name: 'Sound effects',
+    modality: 'sfx',
+    family: 'creative',
+    unit: 'generation',
+    baseUsdPerUnit: 0.12,
+    api: 'POST /v1/creative-media/sound-effects',
+    productivity: 'SFX generations from the shared credit pool',
   },
 ] as const;
 

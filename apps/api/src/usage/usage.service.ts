@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  creditsFor,
+  creditsForSttSeconds,
+  creditsForTtsCharacters,
+} from '../billing/credits';
 
 @Injectable()
 export class UsageService {
@@ -167,34 +172,53 @@ export class UsageService {
     const chatTokens = chatEvents.reduce((sum, event) => sum + event.units, 0);
     const embeddingTokens = embeddingEvents.reduce((sum, event) => sum + event.units, 0);
 
+    const creditsBreakdown = {
+      translate: creditsFor('translate', characters),
+      tts: creditsForTtsCharacters(ttsCharacters, false),
+      stt: creditsForSttSeconds(sttSeconds, false),
+      ocr: creditsFor('ocr', ocrPages),
+      chat: creditsFor('chat', chatTokens),
+      embeddings: creditsFor('embeddings', embeddingTokens),
+    };
+    const creditsUsed = Object.values(creditsBreakdown).reduce((a, b) => a + b, 0);
+
     return {
       periodStart: start.toISOString(),
-      requests: translateEvents.length,
+      requests: translateEvents.length + sttEvents.length + ttsEvents.length,
       characters,
+      /** Shared ElevenLabs-style credit consumption across products. */
+      creditsUsed,
+      creditsBreakdown,
       translate: {
         requests: translateEvents.length,
         characters,
+        credits: creditsBreakdown.translate,
       },
       stt: {
         requests: sttEvents.length,
         seconds: sttSeconds,
         minutes: Math.round((sttSeconds / 60) * 1000) / 1000,
+        credits: creditsBreakdown.stt,
       },
       tts: {
         requests: ttsEvents.length,
         characters: ttsCharacters,
+        credits: creditsBreakdown.tts,
       },
       ocr: {
         requests: ocrEvents.length,
         pages: ocrPages,
+        credits: creditsBreakdown.ocr,
       },
       chat: {
         requests: chatEvents.length,
         tokens: chatTokens,
+        credits: creditsBreakdown.chat,
       },
       embeddings: {
         requests: embeddingEvents.length,
         tokens: embeddingTokens,
+        credits: creditsBreakdown.embeddings,
       },
     };
   }

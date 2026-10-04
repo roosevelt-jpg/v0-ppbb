@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Req, UseGuards } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { Request } from 'express';
 import { BillingService } from './billing.service';
@@ -11,6 +11,11 @@ import { ApiException } from '../common/errors/api-exception';
 export class BillingController {
   constructor(private readonly billing: BillingService) {}
 
+  @Get('plans')
+  plans() {
+    return this.billing.catalog();
+  }
+
   @Get('summary')
   @UseGuards(ClerkAuthGuard)
   summary(@CurrentSession() session: SessionContext) {
@@ -19,7 +24,11 @@ export class BillingController {
 
   @Post('checkout')
   @UseGuards(ClerkAuthGuard)
-  checkout(@CurrentSession() session: SessionContext, @Req() req: Request) {
+  checkout(
+    @CurrentSession() session: SessionContext,
+    @Req() req: Request,
+    @Body() body?: { planId?: string },
+  ) {
     if (session.role !== 'owner' && session.role !== 'admin') {
       throw new ApiException(
         'forbidden',
@@ -31,6 +40,7 @@ export class BillingController {
       organizationId: session.organizationId,
       userId: session.userId,
       ip: clientIp(req),
+      planId: body?.planId,
     });
   }
 

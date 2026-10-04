@@ -28,7 +28,8 @@ model Organization {
   clerkOrgId           String?  @unique @map("clerk_org_id")
   name                 String
   plan                 String   @default("free")
-  characterQuota       Int      @default(50000) @map("character_quota")
+  /// Monthly shared credit pool (ElevenLabs-style). Column name kept for compatibility.
+  characterQuota       Int      @default(10000) @map("character_quota")
   dataRegion           String?  @map("data_region")
   stripeCustomerId     String?  @unique @map("stripe_customer_id")
   stripeSubscriptionId String?  @unique @map("stripe_subscription_id")

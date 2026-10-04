@@ -4,7 +4,16 @@ import { ModuleRef } from '@nestjs/core';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiException } from '../common/errors/api-exception';
-import { planFromId, type PlanId } from './plans';
+import {
+  isPaidPlan,
+  planCatalog,
+  planFromId,
+  planIdFromStripePrice,
+  planMeets,
+  stripePriceIdForPlan,
+  type PlanId,
+} from './plans';
+import { creditRateCatalog } from './credits';
 import { BILLING_FRAUD, isBillingBlocked } from './billing-fraud';
 import { UsageService } from '../usage/usage.service';
 import { AuditService } from '../audit/audit.service';
@@ -26,13 +35,47 @@ export class BillingService {
   }
 
   isConfigured(): boolean {
+    const anyPrice = Boolean(
+      process.env.STRIPE_PRICE_ID_PRO ||
+        process.env.STRIPE_PRICE_ID_STARTER ||
+        process.env.STRIPE_PRICE_ID_CREATOR ||
+        process.env.STRIPE_PRICE_ID_SCALE ||
+        process.env.STRIPE_PRICE_ID_BUSINESS,
+    );
     return Boolean(
       this.stripe &&
-        process.env.STRIPE_PRICE_ID_PRO &&
+        anyPrice &&
         process.env.STRIPE_WEBHOOK_SECRET &&
         process.env.BILLING_SUCCESS_URL &&
         process.env.BILLING_CANCEL_URL,
     );
+  }
+
+  /** Public plan + credit-rate catalog (ElevenLabs-mirrored). */
+  catalog() {
+    return {
+      model: 'elevenlabs-mirrored',
+      currency: 'USD',
+      note: 'Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — same structure as ElevenLabs Creative Platform.',
+      plans: planCatalog().map((p) => ({
+        id: p.id,
+        name: p.name,
+        monthlyCredits: p.monthlyCredits,
+        priceUsdMonthly: p.priceUsdMonthly,
+        priceUsdAnnualEffective: p.priceUsdAnnualEffective,
+        seats: p.seats,
+        concurrency: p.concurrency,
+        commercialLicense: p.commercialLicense,
+        instantVoiceCloning: p.instantVoiceCloning,
+        professionalVoiceCloning: p.professionalVoiceCloning,
+        professionalVoiceSlots: p.professionalVoiceSlots,
+        customVoiceSlots: p.customVoiceSlots,
+        blurb: p.blurb,
+        highlights: p.highlights,
+        stripeConfigured: Boolean(p.stripePriceEnv && process.env[p.stripePriceEnv]),
+      })),
+      credits: creditRateCatalog(),
+    };
   }
 
   /** Live marketplace Checkout (destination charge + application fee). */
@@ -87,15 +130,28 @@ export class BillingService {
       void this.syncDefaultPaymentMethod(organizationId).catch(() => undefined);
     }
 
+    const creditsUsed = usage.creditsUsed ?? usage.characters;
     return {
       plan: org.plan,
       planName: plan.name,
       billingStatus: org.billingStatus,
+      /** @deprecated prefer monthlyCredits — kept for older clients */
       characterQuota: org.characterQuota,
       charactersUsed: usage.characters,
-      charactersRemaining: Math.max(org.characterQuota - usage.characters, 0),
+      charactersRemaining: Math.max(org.characterQuota - creditsUsed, 0),
+      monthlyCredits: org.characterQuota,
+      creditsUsed,
+      creditsRemaining: Math.max(org.characterQuota - creditsUsed, 0),
+      creditsBreakdown: usage.creditsBreakdown,
+      priceUsdMonthly: plan.priceUsdMonthly,
+      seats: plan.seats,
+      concurrency: plan.concurrency,
+      commercialLicense: plan.commercialLicense,
+      instantVoiceCloning: plan.instantVoiceCloning,
+      professionalVoiceCloning: plan.professionalVoiceCloning,
       periodStart: usage.periodStart,
       requests: usage.requests,
+      usage,
       stripeConfigured: this.isConfigured(),
       hasCustomer: Boolean(org.stripeCustomerId),
       hasDefaultPaymentMethod,
@@ -108,6 +164,7 @@ export class BillingService {
       connectChargesEnabled: org.stripeConnectChargesEnabled,
       marketplacePaymentsConfigured: this.isMarketplacePaymentsConfigured(),
       platformFeeBps: this.platformFeeBps(),
+      pricingModel: 'elevenlabs-mirrored-shared-credits',
     };
   }
 
@@ -131,19 +188,29 @@ export class BillingService {
     }
   }
 
-  async assertWithinQuota(organizationId: string, upcomingCharacters: number) {
+  /**
+   * Enforce shared monthly credits (ElevenLabs-style).
+   * `upcomingCredits` may be characters for TTS/translate (1:1) or precomputed credits.
+   */
+  async assertWithinQuota(organizationId: string, upcomingCredits: number) {
     await this.assertBillingHealthy(organizationId);
     const org = await this.prisma.organization.findUniqueOrThrow({
       where: { id: organizationId },
     });
     const usage = await this.usage.summary(organizationId);
-    if (usage.characters + upcomingCharacters > org.characterQuota) {
+    const used = usage.creditsUsed ?? usage.characters;
+    if (used + upcomingCredits > org.characterQuota) {
       throw new ApiException(
         'quota_exceeded',
-        `Monthly character quota exceeded (${usage.characters}/${org.characterQuota}). Upgrade to Pro.`,
+        `Monthly credit quota exceeded (${used}/${org.characterQuota} credits). Upgrade under Billing — plans mirror ElevenLabs Free→Business.`,
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
+  }
+
+  /** Alias for credit-aware callers. */
+  assertWithinCredits(organizationId: string, upcomingCredits: number) {
+    return this.assertWithinQuota(organizationId, upcomingCredits);
   }
 
   private async assertCheckoutNotAbusive(organizationId: string) {
@@ -185,16 +252,34 @@ export class BillingService {
     });
   }
 
-  /** Feature gate for Pro-only surfaces (marketplace publish/install). */
+  /**
+   * Feature gate for commercial / marketplace surfaces.
+   * ElevenLabs: Instant cloning + commercial from Starter — we require Starter+ (paid).
+   */
   async assertPro(organizationId: string) {
     await this.assertBillingHealthy(organizationId);
     const org = await this.prisma.organization.findUniqueOrThrow({
       where: { id: organizationId },
     });
-    if (org.plan !== 'pro') {
+    if (!isPaidPlan(org.plan)) {
       throw new ApiException(
         'plan_required',
-        'Marketplace requires a Pro plan. Upgrade under Billing.',
+        'This feature requires a paid plan (Starter or higher). Upgrade under Billing.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+  }
+
+  /** Gate for Professional Voice Cloning / Creator+ features. */
+  async assertCreator(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    if (!planMeets(org.plan, 'creator')) {
+      throw new ApiException(
+        'plan_required',
+        'Professional Voice Cloning requires Creator or higher.',
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
@@ -427,6 +512,7 @@ export class BillingService {
     userId: string;
     email?: string;
     ip?: string;
+    planId?: string;
   }) {
     if (!this.isConfigured()) {
       throw new ApiException(
@@ -436,10 +522,30 @@ export class BillingService {
       );
     }
 
+    const requested = (input.planId ?? 'pro') as PlanId;
+    const plan = planFromId(requested);
+    if (plan.id === 'free' || plan.id === 'enterprise') {
+      throw new ApiException(
+        'validation_error',
+        plan.id === 'enterprise'
+          ? 'Enterprise is custom — contact sales.'
+          : 'Cannot checkout the Free plan.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const priceId = stripePriceIdForPlan(plan.id) ?? process.env.STRIPE_PRICE_ID_PRO;
+    if (!priceId) {
+      throw new ApiException(
+        'billing_not_configured',
+        `Stripe price missing for plan ${plan.id}. Set ${plan.stripePriceEnv ?? 'STRIPE_PRICE_ID_PRO'}.`,
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
     await this.assertCheckoutNotAbusive(input.organizationId);
 
     const stripe = this.requireStripe();
-    const priceId = process.env.STRIPE_PRICE_ID_PRO!;
     const customerId = await this.ensureCustomer(input.organizationId, input.email);
 
     const session = await stripe.checkout.sessions.create({
@@ -449,14 +555,18 @@ export class BillingService {
       success_url: process.env.BILLING_SUCCESS_URL!,
       cancel_url: process.env.BILLING_CANCEL_URL!,
       client_reference_id: input.organizationId,
-      metadata: { organizationId: input.organizationId, purpose: 'pro_upgrade' },
+      metadata: {
+        organizationId: input.organizationId,
+        purpose: 'plan_upgrade',
+        planId: plan.id,
+      },
       payment_method_types: ['card'],
       payment_method_collection: 'always',
       billing_address_collection: 'required',
       customer_update: { address: 'auto', name: 'auto' },
       // Card stays on file and is used for every renewal / auto-debit.
       subscription_data: {
-        metadata: { organizationId: input.organizationId },
+        metadata: { organizationId: input.organizationId, planId: plan.id },
         payment_settings: {
           save_default_payment_method: 'on_subscription',
           payment_method_types: ['card'],
@@ -470,10 +580,10 @@ export class BillingService {
       action: 'billing.checkout_started',
       route: 'POST /v1/billing/checkout',
       ip: input.ip,
-      metadata: { sessionId: session.id, autoDebit: true },
+      metadata: { sessionId: session.id, autoDebit: true, planId: plan.id },
     });
 
-    return { url: session.url, autoDebit: true };
+    return { url: session.url, autoDebit: true, planId: plan.id };
   }
 
   /** Checkout in setup mode — add/update card for always-on auto-debit without changing plan. */
@@ -745,9 +855,10 @@ export class BillingService {
         if (!organizationId) break;
 
         if (session.mode === 'subscription') {
+          const planFromMeta = (session.metadata?.planId as PlanId | undefined) ?? 'pro';
           await this.applyEntitlement({
             organizationId,
-            plan: 'pro',
+            plan: planFromId(planFromMeta).id,
             stripeCustomerId:
               typeof session.customer === 'string' ? session.customer : session.customer?.id,
             stripeSubscriptionId:
@@ -820,9 +931,14 @@ export class BillingService {
               : subscription.status === 'past_due' || subscription.status === 'unpaid'
                 ? subscription.status
                 : subscription.status;
+          const priceId = subscription.items?.data?.[0]?.price?.id;
+          const fromMeta = subscription.metadata?.planId
+            ? planFromId(subscription.metadata.planId).id
+            : null;
+          const resolvedPlan = fromMeta && fromMeta !== 'free' ? fromMeta : planIdFromStripePrice(priceId) ?? 'pro';
           await this.applyEntitlement({
             organizationId,
-            plan: 'pro',
+            plan: resolvedPlan,
             stripeSubscriptionId: subscription.id,
             billingStatus: status,
           });
