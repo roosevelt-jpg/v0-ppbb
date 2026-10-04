@@ -25,9 +25,21 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request & { requestId?: string }>();
     const requestId = request?.requestId ?? randomUUID();
-    if (response?.setHeader) {
+
+    const send = (status: number, payload: Record<string, unknown>) => {
+      if (response.headersSent || response.writableEnded) {
+        structuredLog.error('api.exception_after_headers', {
+          event: 'api.exception_after_headers',
+          request_id: requestId,
+          status,
+          path: request?.path,
+          message: String((payload.error as { message?: string } | undefined)?.message ?? ''),
+        });
+        return;
+      }
       response.setHeader('x-request-id', requestId);
-    }
+      response.status(status).json(payload);
+    };
 
     if (exception instanceof ApiException) {
       const status = exception.getStatus();
@@ -41,7 +53,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
         });
         captureApiException(exception, { request_id: requestId, code: exception.code });
       }
-      response.status(status).json({
+      send(status, {
         error: {
           code: exception.code,
           message: exception.message,
@@ -73,7 +85,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
         captureApiException(exception, { request_id: requestId, status });
       }
 
-      response.status(status).json({
+      send(status, {
         error: {
           code: status === HttpStatus.UNAUTHORIZED ? 'unauthorized' : 'http_error',
           message,
@@ -90,7 +102,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       message,
     });
     captureApiException(exception, { request_id: requestId });
-    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    send(HttpStatus.INTERNAL_SERVER_ERROR, {
       error: {
         code: 'internal_error',
         message,
