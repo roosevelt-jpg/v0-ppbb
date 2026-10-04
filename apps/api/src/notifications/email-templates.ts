@@ -12,12 +12,54 @@ export type RenderedEmail = {
   html: string;
 };
 
+const DEFAULT_APP_URL = 'https://app.verbalab.ai';
+
+const SOCIAL_LINKS = [
+  { id: 'x', label: 'X', href: 'https://x.com', file: 'social-x.png' },
+  { id: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com', file: 'social-linkedin.png' },
+  { id: 'github', label: 'GitHub', href: 'https://github.com/roosevelt-jpg/verbalab', file: 'social-github.png' },
+  { id: 'youtube', label: 'YouTube', href: 'https://www.youtube.com', file: 'social-youtube.png' },
+  { id: 'instagram', label: 'Instagram', href: 'https://www.instagram.com', file: 'social-instagram.png' },
+  { id: 'facebook', label: 'Facebook', href: 'https://www.facebook.com', file: 'social-facebook.png' },
+] as const;
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/** Absolute base for hosted email images (`/email/*` on the web app). */
+export function emailAssetBaseUrl(): string {
+  const raw =
+    process.env.EMAIL_ASSET_BASE_URL ??
+    process.env.WEB_APP_URL ??
+    process.env.NEXT_PUBLIC_APP_URL ??
+    DEFAULT_APP_URL;
+  return raw.replace(/\/$/, '');
+}
+
+function assetUrl(file: string): string {
+  return `${emailAssetBaseUrl()}/email/${file}`;
+}
+
+function socialFooterHtml(): string {
+  const icons = SOCIAL_LINKS.map(
+    (s) => `
+      <a href="${escapeHtml(s.href)}" style="display:inline-block;margin:0 6px;text-decoration:none" aria-label="${escapeHtml(s.label)}">
+        <img src="${escapeHtml(assetUrl(s.file))}" width="28" height="28" alt="${escapeHtml(s.label)}" style="display:block;border:0;outline:none" />
+      </a>`,
+  ).join('');
+  return `
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto">
+      <tr>
+        <td align="center" style="padding:0">
+          ${icons}
+        </td>
+      </tr>
+    </table>`;
 }
 
 function layout(input: {
@@ -28,38 +70,67 @@ function layout(input: {
   ctaHref?: string;
   footerNote?: string;
 }): string {
+  const logoSrc = assetUrl('verbalab-logo.png');
   const cta =
     input.ctaLabel && input.ctaHref
-      ? `<p style="margin:24px 0 0">
+      ? `<p style="margin:28px 0 0">
           <a href="${escapeHtml(input.ctaHref)}"
-             style="display:inline-block;background:#0B3D2E;color:#F7F3E8;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:600">
+             style="display:inline-block;background:#0B3D2E;color:#F4F7F5;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;font-size:15px;letter-spacing:0.01em">
             ${escapeHtml(input.ctaLabel)}
           </a>
         </p>`
       : '';
+  const footerNote = escapeHtml(
+    input.footerNote ?? 'Africa-resident language infrastructure · verbalab.ai',
+  );
+
   return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#F4F1EA;font-family:Georgia,'Times New Roman',serif;color:#1A1A1A">
-    <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(input.preheader)}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F4F1EA;padding:24px 12px">
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>${escapeHtml(input.title)}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#E8F0EC;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#14201C;-webkit-font-smoothing:antialiased">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all">${escapeHtml(input.preheader)}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#E8F0EC;padding:32px 12px">
       <tr>
         <td align="center">
-          <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #E4DDD0">
+          <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;width:100%;background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid #D5E3DB">
+            <!-- Brand header -->
             <tr>
-              <td style="background:linear-gradient(135deg,#0B3D2E,#1F6F54);padding:20px 28px;color:#F7F3E8">
-                <div style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.85">VerbaLab</div>
-                <div style="font-size:22px;font-weight:700;margin-top:6px">${escapeHtml(input.title)}</div>
+              <td align="center" style="background:#0B3D2E;padding:22px 28px">
+                <a href="${escapeHtml(emailAssetBaseUrl())}" style="text-decoration:none;display:inline-block" aria-label="VerbaLab">
+                  <img src="${escapeHtml(logoSrc)}" width="180" height="36" alt="VerbaLab" style="display:block;border:0;outline:none;height:auto;max-width:180px" />
+                </a>
               </td>
             </tr>
+            <!-- Title band -->
             <tr>
-              <td style="padding:28px;font-size:16px;line-height:1.55">
+              <td style="padding:28px 28px 0;background:#FFFFFF">
+                <h1 style="margin:0;font-size:22px;line-height:1.3;font-weight:700;color:#0B3D2E;letter-spacing:-0.01em">${escapeHtml(input.title)}</h1>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding:16px 28px 32px;font-size:16px;line-height:1.6;color:#14201C;background:#FFFFFF">
                 ${input.bodyHtml}
                 ${cta}
               </td>
             </tr>
+            <!-- Social footer -->
             <tr>
-              <td style="padding:0 28px 24px;font-size:12px;color:#6B6458;line-height:1.45">
-                ${escapeHtml(input.footerNote ?? 'Africa-resident language infrastructure · verbalab.ai')}
+              <td align="center" style="background:#F3F8F5;border-top:1px solid #D5E3DB;padding:22px 28px 12px">
+                ${socialFooterHtml()}
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="background:#F3F8F5;padding:4px 28px 22px;font-size:12px;line-height:1.5;color:#5A6E66">
+                <p style="margin:0 0 6px">${footerNote}</p>
+                <p style="margin:0">
+                  <a href="${escapeHtml(emailAssetBaseUrl())}" style="color:#0B3D2E;text-decoration:none;font-weight:600">verbalab.ai</a>
+                </p>
               </td>
             </tr>
           </table>
@@ -128,17 +199,17 @@ export function renderJobCompleteEmail(input: {
     bodyHtml: `
       <p style="margin:0 0 12px">Your VerbaLab async job finished.</p>
       <table role="presentation" style="width:100%;font-size:14px;border-collapse:collapse">
-        <tr><td style="padding:6px 0;color:#6B6458">Job</td><td style="padding:6px 0"><code>${escapeHtml(input.jobId)}</code></td></tr>
-        <tr><td style="padding:6px 0;color:#6B6458">Type</td><td style="padding:6px 0">${escapeHtml(input.type)}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B6458">Status</td><td style="padding:6px 0">${escapeHtml(input.status)}</td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66;width:96px">Job</td><td style="padding:6px 0"><code style="font-size:13px">${escapeHtml(input.jobId)}</code></td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66">Type</td><td style="padding:6px 0">${escapeHtml(input.type)}</td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66">Status</td><td style="padding:6px 0">${escapeHtml(input.status)}</td></tr>
         ${
           input.error
-            ? `<tr><td style="padding:6px 0;color:#6B6458">Error</td><td style="padding:6px 0">${escapeHtml(input.error)}</td></tr>`
+            ? `<tr><td style="padding:6px 0;color:#5A6E66">Error</td><td style="padding:6px 0">${escapeHtml(input.error)}</td></tr>`
             : ''
         }
       </table>`,
     ctaLabel: 'Open console',
-    ctaHref: input.consoleUrl ?? 'https://app.verbalab.ai',
+    ctaHref: input.consoleUrl ?? DEFAULT_APP_URL,
   });
   return { id: 'job_complete', subject, text, html };
 }
@@ -158,9 +229,9 @@ export function renderUsageThresholdEmail(input: {
     bodyHtml: `
       <p style="margin:0 0 12px"><strong>${escapeHtml(input.organizationName)}</strong> is approaching its monthly character quota.</p>
       <p style="margin:0;font-size:28px;font-weight:700;color:#0B3D2E">${input.pct}%</p>
-      <p style="margin:8px 0 0;color:#6B6458">${input.characters.toLocaleString()} / ${input.quota.toLocaleString()} characters</p>`,
+      <p style="margin:8px 0 0;color:#5A6E66">${input.characters.toLocaleString()} / ${input.quota.toLocaleString()} characters</p>`,
     ctaLabel: 'Review usage',
-    ctaHref: input.consoleUrl ?? 'https://app.verbalab.ai/usage',
+    ctaHref: input.consoleUrl ?? `${DEFAULT_APP_URL}/usage`,
   });
   return { id: 'usage_threshold', subject, text, html };
 }
@@ -177,9 +248,9 @@ export function renderMemberAddedEmail(input: {
     title: 'Welcome to the workspace',
     bodyHtml: `
       <p style="margin:0 0 12px">You now have <strong>${escapeHtml(input.role)}</strong> access to <strong>${escapeHtml(input.organizationName)}</strong>.</p>
-      <p style="margin:0;color:#6B6458">Sign in with this email. Invites remain managed in Clerk — this message confirms membership sync.</p>`,
+      <p style="margin:0;color:#5A6E66">Sign in with this email. Invites remain managed in Clerk — this message confirms membership sync.</p>`,
     ctaLabel: 'Open VerbaLab',
-    ctaHref: input.consoleUrl ?? 'https://app.verbalab.ai',
+    ctaHref: input.consoleUrl ?? DEFAULT_APP_URL,
   });
   return { id: 'member_added', subject, text, html };
 }
@@ -198,11 +269,11 @@ export function renderWorkflowMessageEmail(input: {
       <p style="margin:0;white-space:pre-wrap">${escapeHtml(input.message)}</p>
       ${
         input.jobId
-          ? `<p style="margin:16px 0 0;color:#6B6458;font-size:13px">Workflow job <code>${escapeHtml(input.jobId)}</code></p>`
+          ? `<p style="margin:16px 0 0;color:#5A6E66;font-size:13px">Workflow job <code style="font-size:12px">${escapeHtml(input.jobId)}</code></p>`
           : ''
       }`,
     ctaLabel: 'Open console',
-    ctaHref: input.consoleUrl ?? 'https://app.verbalab.ai',
+    ctaHref: input.consoleUrl ?? DEFAULT_APP_URL,
   });
   return { id: 'workflow_message', subject: input.subject, text, html };
 }
@@ -234,18 +305,18 @@ export function renderSecureAlertEmail(input: {
     bodyHtml: `
       <p style="margin:0 0 12px">A consented VerbaLab security protocol delivered this transcript summary.</p>
       <table role="presentation" style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:16px">
-        <tr><td style="padding:6px 0;color:#6B6458">Protocol</td><td style="padding:6px 0">${escapeHtml(input.protocol)}</td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66;width:96px">Protocol</td><td style="padding:6px 0">${escapeHtml(input.protocol)}</td></tr>
         ${
           input.trustedName
-            ? `<tr><td style="padding:6px 0;color:#6B6458">For</td><td style="padding:6px 0">${escapeHtml(input.trustedName)}</td></tr>`
+            ? `<tr><td style="padding:6px 0;color:#5A6E66">For</td><td style="padding:6px 0">${escapeHtml(input.trustedName)}</td></tr>`
             : ''
         }
-        <tr><td style="padding:6px 0;color:#6B6458">Language</td><td style="padding:6px 0">${escapeHtml(input.language ?? 'auto')}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B6458">Receipt</td><td style="padding:6px 0"><code>${escapeHtml(input.receiptToken)}</code></td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66">Language</td><td style="padding:6px 0">${escapeHtml(input.language ?? 'auto')}</td></tr>
+        <tr><td style="padding:6px 0;color:#5A6E66">Receipt</td><td style="padding:6px 0"><code style="font-size:13px">${escapeHtml(input.receiptToken)}</code></td></tr>
       </table>
-      <div style="background:#F7F3E8;border-radius:12px;padding:16px;white-space:pre-wrap">${escapeHtml(input.summary)}</div>`,
+      <div style="background:#F3F8F5;border:1px solid #D5E3DB;border-radius:10px;padding:16px;white-space:pre-wrap">${escapeHtml(input.summary)}</div>`,
     ctaLabel: 'Verify receipt',
-    ctaHref: input.consoleUrl ?? 'https://app.verbalab.ai/secure-transcript-alerts',
+    ctaHref: input.consoleUrl ?? `${DEFAULT_APP_URL}/secure-transcript-alerts`,
     footerNote: 'Sent only with an explicit consent token. Africa-resident by default.',
   });
   return { id: 'secure_alert', subject, text, html };

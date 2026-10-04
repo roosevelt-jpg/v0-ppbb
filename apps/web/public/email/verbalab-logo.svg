@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="72" viewBox="0 0 360 72" role="img" aria-label="VerbaLab">
+  <rect width="360" height="72" rx="12" fill="#0B3D2E"/>
+  <circle cx="36" cy="36" r="22" fill="#F4F7F5"/>
+  <circle cx="36" cy="36" r="16" fill="#0B3D2E"/>
+  <path d="M28 28 L36 48 L44 28" fill="none" stroke="#F4F7F5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="70" y="45" fill="#F4F7F5" font-family="'Segoe UI',Tahoma,Geneva,Verdana,sans-serif" font-size="28" font-weight="700" letter-spacing="1">VerbaLab</text>
+</svg>

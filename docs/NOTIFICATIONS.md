@@ -16,6 +16,8 @@
 # apps/api/.env
 RESEND_API_KEY=re_xxxxxxxx
 EMAIL_FROM="VerbaLab <noreply@your-verified-domain.com>"
+# Optional: absolute host for logo/social images in HTML (defaults to WEB_APP_URL / app.verbalab.ai)
+# EMAIL_ASSET_BASE_URL=https://app.verbalab.ai
 # NOTIFICATIONS_DISABLED=1   # only to kill sends
 ```
 
@@ -37,6 +39,16 @@ EMAIL_FROM="VerbaLab <noreply@your-verified-domain.com>"
 | `secure_alert` | Secure Transcript Alerts |
 
 Each render returns **subject + text + html**. Resend sends both `text` and `html`.
+
+### Branding
+
+Every HTML message uses a shared layout:
+
+- **Header:** VerbaLab logo (`apps/web/public/email/verbalab-logo.png`) on the brand green band
+- **Body:** title, content, primary CTA
+- **Footer:** social icon row (X, LinkedIn, GitHub, YouTube, Instagram, Facebook) + short residency note
+
+Image URLs are absolute: `{EMAIL_ASSET_BASE_URL|WEB_APP_URL|https://app.verbalab.ai}/email/...`. Serve the web app (or CDN) so those paths resolve in inbox clients.
 
 ## API
 

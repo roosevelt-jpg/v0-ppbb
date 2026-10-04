@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   EMAIL_TEMPLATE_CATALOG,
+  emailAssetBaseUrl,
   previewEmailTemplate,
   renderJobCompleteEmail,
   renderSecureAlertEmail,
@@ -8,14 +9,43 @@ import {
 import { NotificationsService } from '../src/notifications/notifications.service';
 
 describe('Email templates + notifications engine', () => {
+  const prevAsset = process.env.EMAIL_ASSET_BASE_URL;
+  const prevWeb = process.env.WEB_APP_URL;
+  const prevNext = process.env.NEXT_PUBLIC_APP_URL;
+
+  afterEach(() => {
+    if (prevAsset === undefined) delete process.env.EMAIL_ASSET_BASE_URL;
+    else process.env.EMAIL_ASSET_BASE_URL = prevAsset;
+    if (prevWeb === undefined) delete process.env.WEB_APP_URL;
+    else process.env.WEB_APP_URL = prevWeb;
+    if (prevNext === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+    else process.env.NEXT_PUBLIC_APP_URL = prevNext;
+  });
+
   it('renders HTML for every catalog template', () => {
     for (const row of EMAIL_TEMPLATE_CATALOG) {
       const preview = previewEmailTemplate(row.id);
       expect(preview.html).toContain('<!doctype html>');
       expect(preview.html).toContain('VerbaLab');
+      expect(preview.html).toContain('/email/verbalab-logo.png');
+      expect(preview.html).toContain('alt="VerbaLab"');
+      expect(preview.html).toContain('/email/social-x.png');
+      expect(preview.html).toContain('/email/social-linkedin.png');
+      expect(preview.html).toContain('/email/social-github.png');
+      expect(preview.html).toContain('https://x.com');
       expect(preview.text.length).toBeGreaterThan(10);
       expect(preview.subject.length).toBeGreaterThan(3);
     }
+  });
+
+  it('uses EMAIL_ASSET_BASE_URL for logo and social icons', () => {
+    process.env.EMAIL_ASSET_BASE_URL = 'https://cdn.example.test';
+    delete process.env.WEB_APP_URL;
+    delete process.env.NEXT_PUBLIC_APP_URL;
+    expect(emailAssetBaseUrl()).toBe('https://cdn.example.test');
+    const html = previewEmailTemplate('member_added').html;
+    expect(html).toContain('https://cdn.example.test/email/verbalab-logo.png');
+    expect(html).toContain('https://cdn.example.test/email/social-instagram.png');
   });
 
   it('includes failure detail in job emails', () => {
