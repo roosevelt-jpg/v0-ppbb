@@ -951,7 +951,7 @@ export const DIALECT_SEEDS: DialectSeed[] = [
     languageCode: 'ay',
     nameEn: 'Bolivian Aymara',
     region: 'BO',
-    cueTerms: ['kamisaraki', 'jusp'akt'a', 'jisa', 'jani', 'kamisaki'],
+    cueTerms: ['kamisaraki', "jusp'akt'a", 'jisa', 'jani', 'kamisaki'],
     notes: 'Strategic global dialect cues for detect — lexical proxies only.',
   },
 
@@ -971,7 +971,7 @@ export const DIALECT_SEEDS: DialectSeed[] = [
     languageCode: 'yua',
     nameEn: 'Yucatec Maya',
     region: 'MX',
-    cueTerms: ['ba'ax ka wa'alik', 'jach dyos bo'otik', 'jaaj', 'ma'', 'bix a bel'],
+    cueTerms: ["ba'ax ka wa'alik", "jach dyos bo'otik", 'jaaj', "ma'", 'bix a bel'],
     notes: 'Strategic global dialect cues for detect — lexical proxies only.',
   },
 

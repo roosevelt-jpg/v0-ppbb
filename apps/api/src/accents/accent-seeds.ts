@@ -836,7 +836,7 @@ export const ACCENT_SEEDS: AccentSeed[] = [
     nameEn: 'Bolivian Aymara (spoken)',
     region: 'BO',
     relatedDialectCode: 'ay-bo',
-    cueTerms: ['kamisaraki', 'jusp'akt'a', 'jisa', 'jani', 'kamisaki'],
+    cueTerms: ['kamisaraki', "jusp'akt'a", 'jisa', 'jani', 'kamisaki'],
     notes: 'Spoken lexical proxies for strategic global accent detect.',
   },
 
@@ -858,7 +858,7 @@ export const ACCENT_SEEDS: AccentSeed[] = [
     nameEn: 'Yucatec Maya (spoken)',
     region: 'MX',
     relatedDialectCode: 'yua-mx',
-    cueTerms: ['ba'ax ka wa'alik', 'jach dyos bo'otik', 'jaaj', 'ma'', 'bix a bel'],
+    cueTerms: ["ba'ax ka wa'alik", "jach dyos bo'otik", 'jaaj', "ma'", 'bix a bel'],
     notes: 'Spoken lexical proxies for strategic global accent detect.',
   },
 
