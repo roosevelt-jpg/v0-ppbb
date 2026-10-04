@@ -1,4 +1,4 @@
-export type FamilyId = 'VerbaCreative' | 'VerbaAgents' | 'VerbaAPI';
+export type FamilyId = 'VerbaCreative' | 'VerbaAgents' | 'VerbaAPI' | 'Resources';
 export type ReadinessStatus = 'shipped_e2e' | 'partial' | 'marketing_only' | 'broken';
 
 export type ProductReadiness = {
@@ -14,7 +14,7 @@ export type ProductReadiness = {
   unlocksWithPlan: string;
 };
 
-/** Canonical readiness for billed VerbaCreative / VerbaAgents / VerbaAPI surfaces. */
+/** Canonical readiness for VerbaCreative / VerbaAgents / VerbaAPI / Resources surfaces. */
 export function productFamiliesCatalog(): {
   product: string;
   note: string;
@@ -24,8 +24,8 @@ export function productFamiliesCatalog(): {
   return {
     product: 'VerbaLab product families',
     note:
-      'Honest readiness for VerbaCreative, VerbaAgents, and VerbaAPI. Paid plans unlock shared monthly credits + commercial/PVC gates — capabilities match what is shipped_e2e or clearly disclosed as partial.',
-    families: ['VerbaCreative', 'VerbaAgents', 'VerbaAPI'],
+      'Honest readiness for VerbaCreative, VerbaAgents, VerbaAPI, and Resources. Paid plans unlock shared monthly credits + commercial/PVC gates — capabilities match what is shipped_e2e or clearly disclosed as partial.',
+    families: ['VerbaCreative', 'VerbaAgents', 'VerbaAPI', 'Resources'],
     products: [
       // VerbaCreative
       row('text-to-speech', 'VerbaCreative', 'Text to Speech', 'shipped_e2e', 'POST /v1/audio/speech', '/voice-studio', true, null, 'Neural TTS + Voice Studio; shared TTS character credits.', 'Free+ credits; commercial export Starter+'),
@@ -75,6 +75,16 @@ export function productFamiliesCatalog(): {
       row('ios-sdk', 'VerbaAPI', 'iOS SDK', 'partial', null, '/docs', false, null, 'Monorepo SPM package — not a published remote CocoaPod.', 'N/A'),
       row('android-sdk', 'VerbaAPI', 'Android SDK', 'partial', null, '/docs', false, null, 'Local Gradle/mavenLocal — Maven Central aspirational.', 'N/A'),
       row('api-key', 'VerbaAPI', 'API Keys', 'shipped_e2e', 'POST /v1/api-keys', '/keys', false, null, 'Create/manage vl_live_/vl_test_ keys.', 'Free+'),
+
+      // Resources
+      row('playground', 'Resources', 'Playground', 'shipped_e2e', 'POST /v1/translate|detect|/v1/audio/speech', '/playground', true, null, 'Public translate/detect/TTS playground with API keys.', 'Free+ credits on metered calls'),
+      row('marketplace', 'Resources', 'Marketplace', 'shipped_e2e', 'GET /v1/marketplace/listings', '/marketplace', false, 'starter', 'Free catalog browse + free installs; publish/paid commerce Starter+; links to voice/agent/model markets.', 'Free browse; Starter+ publish/paid'),
+      row('enterprise', 'Resources', 'Enterprise', 'shipped_e2e', 'GET /v1/enterprise/overview', '/enterprise', false, null, 'Residency, governance, billing, and admin deep-links.', 'Free+ (enterprise features by plan)'),
+      row('trust-center', 'Resources', 'Trust Center', 'shipped_e2e', 'GET /v1/trust-cloud/overview', '/trust-cloud', false, null, 'Trust Cloud hub + compliance/enterprise links; not a certified SOC portal.', 'Free+'),
+      row('coverage', 'Resources', 'Coverage', 'shipped_e2e', 'GET /v1/coverage', '/coverage', false, null, 'Language inventory + African country packs + golden-eval focus pairs.', 'Public'),
+      row('developers', 'Resources', 'Developers', 'shipped_e2e', 'GET /v1/developer/overview', '/developers', false, null, 'Keys, SDK install strings, docs, playground, OpenAPI.', 'Free+'),
+      row('docs', 'Resources', 'Docs', 'shipped_e2e', 'GET /v1/openapi.json', '/docs', false, null, 'Docs home + curated endpoints + OpenAPI jump.', 'Public'),
+      row('openapi-explorer', 'Resources', 'OpenAPI explorer', 'shipped_e2e', 'GET /v1/openapi.json', '/docs/openapi', false, null, 'Browse schemas and try selected endpoints with API keys.', 'Free+ for authenticated tries'),
     ],
   };
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
@@ -88,15 +89,27 @@ export function MarketplaceClient() {
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
-    const kindQuery = filterKind === 'all' ? '' : `&kind=${filterKind}`;
-    const [published, myListings, myInstalls, mySales, connectStatus] = await Promise.all([
-      apiFetch<Listing[]>(`/v1/marketplace/listings?${kindQuery.replace(/^&/, '')}`, { token }),
-      apiFetch<Listing[]>(`/v1/marketplace/listings?mine=1${kindQuery}`, { token }),
-      apiFetch<Install[]>('/v1/marketplace/installs', { token }),
-      apiFetch<Sale[]>('/v1/marketplace/sales', { token }),
-      apiFetch<ConnectStatus>('/v1/marketplace/connect/status', { token }),
-    ]);
+    const kindQuery = filterKind === 'all' ? '' : `kind=${filterKind}`;
+    const published = await apiFetch<Listing[]>(
+      `/v1/marketplace/listings${kindQuery ? `?${kindQuery}` : ''}`,
+      { token },
+    );
     setCatalog(published);
+
+    const soft = async <T,>(path: string, fallback: T): Promise<T> => {
+      try {
+        return await apiFetch<T>(path, { token });
+      } catch {
+        return fallback;
+      }
+    };
+    const mineQ = kindQuery ? `?mine=1&${kindQuery}` : '?mine=1';
+    const [myListings, myInstalls, mySales, connectStatus] = await Promise.all([
+      soft<Listing[]>(`/v1/marketplace/listings${mineQ}`, []),
+      soft<Install[]>('/v1/marketplace/installs', []),
+      soft<Sale[]>('/v1/marketplace/sales', []),
+      soft<ConnectStatus | null>('/v1/marketplace/connect/status', null),
+    ]);
     setMine(myListings);
     setInstalls(myInstalls);
     setSales(mySales);
@@ -220,9 +233,17 @@ export function MarketplaceClient() {
     <AppShell>
       <main style={{ maxWidth: 920, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
         <h1 style={{ fontSize: '1.75rem', marginBottom: '0.35rem' }}>Marketplace</h1>
-        <p style={{ color: '#555', marginBottom: '1.5rem' }}>
-          Publish and install glossary, prompt, and dataset packs. Paid listings share revenue via
-          Stripe Connect (platform fee {connect ? `${connect.platformFeeBps / 100}%` : '20%'}).
+        <p style={{ color: '#555', marginBottom: '0.75rem' }}>
+          Browse free glossary, prompt, and dataset packs on any plan. Publish paid listings and Stripe Connect
+          payouts require Starter+ (platform fee {connect ? `${connect.platformFeeBps / 100}%` : '20%'}).
+        </p>
+        <p style={{ color: '#666', marginBottom: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Link href="/voice-marketplace">Voice marketplace</Link>
+          <Link href="/agent-marketplace">Agent marketplace</Link>
+          <Link href="/model-marketplace">Model marketplace</Link>
+          <Link href="/dataset-marketplace">Dataset marketplace</Link>
+          <Link href="/plugin-marketplace">Plugin marketplace</Link>
+          <Link href="/billing">Billing / upgrade</Link>
         </p>
 
         {error ? (

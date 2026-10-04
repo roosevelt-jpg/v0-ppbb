@@ -31,7 +31,7 @@ export class ProductFamiliesController {
     if (!normalized) {
       throw new ApiException(
         'not_found',
-        'family must be VerbaCreative, VerbaAgents, or VerbaAPI',
+        'family must be VerbaCreative, VerbaAgents, VerbaAPI, or Resources',
         HttpStatus.NOT_FOUND,
       );
     }
@@ -44,5 +44,6 @@ function normalizeFamily(raw: string): FamilyId | null {
   if (key === 'verbacreative' || key === 'creative') return 'VerbaCreative';
   if (key === 'verbaagents' || key === 'agents') return 'VerbaAgents';
   if (key === 'verbaapi' || key === 'api') return 'VerbaAPI';
+  if (key === 'resources' || key === 'resource') return 'Resources';
   return null;
 }

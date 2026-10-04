@@ -42,7 +42,9 @@ type Overview = {
 export function ProductFamiliesClient() {
   const { getToken, isLoaded } = useAuth();
   const [overview, setOverview] = useState<Overview | null>(null);
-  const [family, setFamily] = useState<'all' | 'VerbaCreative' | 'VerbaAgents' | 'VerbaAPI'>('all');
+  const [family, setFamily] = useState<'all' | 'VerbaCreative' | 'VerbaAgents' | 'VerbaAPI' | 'Resources'>(
+    'all',
+  );
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -65,7 +67,8 @@ export function ProductFamiliesClient() {
         <div>
           <h1 style={{ margin: 0, fontFamily: 'var(--font-display)' }}>Product family readiness</h1>
           <p style={{ color: 'var(--muted)', margin: '0.4rem 0 0' }}>
-            VerbaCreative · VerbaAgents · VerbaAPI — what charging unlocks, with honesty on partial surfaces.
+            VerbaCreative · VerbaAgents · VerbaAPI · Resources — what charging unlocks, with honesty on
+            partial surfaces.
           </p>
         </div>
 
@@ -91,7 +94,7 @@ export function ProductFamiliesClient() {
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {(['all', 'VerbaCreative', 'VerbaAgents', 'VerbaAPI'] as const).map((f) => (
+              {(['all', 'VerbaCreative', 'VerbaAgents', 'VerbaAPI', 'Resources'] as const).map((f) => (
                 <button
                   key={f}
                   type="button"

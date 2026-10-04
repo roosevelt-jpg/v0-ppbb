@@ -17,7 +17,12 @@ export class TrustCloudService {
       product: 'VerbaLab Trust Cloud',
       products: trustCloudProductCatalog(),
       architecture: trustCloudArchitectureNotes(),
-      honesty: trustCloudHonesty(),
+      honesty: {
+        ...trustCloudHonesty(),
+        certificationsProduct: false,
+        note:
+          'Compliance tooling and attestations helpers are not third-party certifications (SOC 2 / ISO).',
+      },
       safety: {
         policyRuntimeIntegrated: true,
         traditionalKnowledgeConsentRequired: true,
@@ -28,9 +33,17 @@ export class TrustCloudService {
         note:
           'Volume 15 README: Compliance tooling is not certification; AI Safety wires to Policy Runtime; Privacy enforces Volume 12 TK consent; Governance requires human sign-off. Platform Engineering deferred.',
       },
+      links: {
+        complianceAttestations: '/compliance-attestations',
+        enterprise: '/enterprise',
+        dataPolicies: '/data',
+        aiSafetyPlatform: '/ai-safety-platform',
+        privacyPlatform: '/privacy-platform',
+        compliancePlatform: '/compliance-platform',
+      },
       docs: '/docs/TRUST_CLOUD.md',
       note:
-        'Trust Cloud Foundation. Enforcement/governance layer over existing systems. Not Okta/GRC/certification/SIEM/Platform Engineering OS.',
+        'Trust Center / Trust Cloud. Enforcement/governance layer over existing systems. Not Okta/GRC/certification/SIEM/Platform Engineering OS.',
     };
   }
 

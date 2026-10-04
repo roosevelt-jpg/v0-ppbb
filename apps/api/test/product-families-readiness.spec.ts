@@ -6,15 +6,16 @@ import {
 import { creditsFor } from '../src/billing/credits';
 
 describe('product family readiness + dubbing credits', () => {
-  it('covers VerbaCreative, VerbaAgents, and VerbaAPI with no broken footer cores', () => {
+  it('covers VerbaCreative, VerbaAgents, VerbaAPI, and Resources with no broken footer cores', () => {
     const catalog = productFamiliesCatalog();
-    expect(catalog.families).toEqual(['VerbaCreative', 'VerbaAgents', 'VerbaAPI']);
+    expect(catalog.families).toEqual(['VerbaCreative', 'VerbaAgents', 'VerbaAPI', 'Resources']);
     const byFamily = Object.fromEntries(
       catalog.families.map((f) => [f, catalog.products.filter((p) => p.family === f)]),
     );
     expect(byFamily.VerbaCreative.length).toBeGreaterThanOrEqual(14);
     expect(byFamily.VerbaAgents.length).toBeGreaterThanOrEqual(14);
     expect(byFamily.VerbaAPI.length).toBeGreaterThanOrEqual(12);
+    expect(byFamily.Resources.length).toBe(8);
 
     const broken = catalog.products.filter((p) => p.status === 'broken');
     expect(broken).toEqual([]);
@@ -31,6 +32,14 @@ describe('product family readiness + dubbing credits', () => {
       'voice-agents',
       'text-to-sound-effects',
       'ai-music-generator',
+      'playground',
+      'marketplace',
+      'enterprise',
+      'trust-center',
+      'coverage',
+      'developers',
+      'docs',
+      'openapi-explorer',
     ];
     for (const slug of mustShip) {
       const row = catalog.products.find((p) => p.slug === slug);

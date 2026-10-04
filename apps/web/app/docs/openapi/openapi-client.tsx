@@ -42,6 +42,11 @@ export function OpenApiClient() {
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<'endpoints' | 'json'>('endpoints');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState('');
+  const [tryBody, setTryBody] = useState('{\n  "text": "Habari Nairobi",\n  "source": "sw",\n  "target": "en"\n}');
+  const [tryBusy, setTryBusy] = useState(false);
+  const [tryResult, setTryResult] = useState<string | null>(null);
+  const [tryError, setTryError] = useState<string | null>(null);
 
   useEffect(() => {
     void fetch(`${API_URL}/v1/openapi.json`)
@@ -106,6 +111,68 @@ export function OpenApiClient() {
       }
     : null;
 
+  async function trySelected() {
+    if (!selected) return;
+    setTryBusy(true);
+    setTryError(null);
+    setTryResult(null);
+    try {
+      const path = selected.path.replace(/\{[^}]+\}/g, 'example');
+      const needsAuth = Array.isArray(selected.operation.security)
+        ? selected.operation.security.length > 0
+        : true;
+      if (needsAuth && selected.method !== 'get') {
+        if (!apiKey.startsWith('vl_live_') && !apiKey.startsWith('vl_test_')) {
+          throw new Error('Paste a vl_live_ or vl_test_ API key to try authenticated endpoints');
+        }
+      }
+      const init: RequestInit = {
+        method: selected.method.toUpperCase(),
+        headers: {
+          ...(apiKey
+            ? { Authorization: `Bearer ${apiKey}` }
+            : {}),
+          ...(selected.method === 'get' || selected.method === 'delete'
+            ? {}
+            : { 'Content-Type': 'application/json' }),
+        },
+      };
+      if (selected.method !== 'get' && selected.method !== 'head' && tryBody.trim()) {
+        JSON.parse(tryBody); // validate
+        init.body = tryBody;
+      }
+      const res = await fetch(`${API_URL}${path}`, init);
+      const contentType = res.headers.get('content-type') ?? '';
+      if (contentType.includes('application/json') || contentType.includes('text/')) {
+        const text = await res.text();
+        try {
+          setTryResult(JSON.stringify(JSON.parse(text), null, 2));
+        } catch {
+          setTryResult(text.slice(0, 4000));
+        }
+      } else {
+        const buf = await res.arrayBuffer();
+        setTryResult(
+          JSON.stringify(
+            {
+              status: res.status,
+              contentType,
+              bytes: buf.byteLength,
+              note: 'Binary response (e.g. audio). Use Playground speech mode to preview TTS.',
+            },
+            null,
+            2,
+          ),
+        );
+      }
+      if (!res.ok) setTryError(`HTTP ${res.status}`);
+    } catch (err) {
+      setTryError(err instanceof Error ? err.message : 'Try request failed');
+    } finally {
+      setTryBusy(false);
+    }
+  }
+
   return (
     <div className="vl-fade-up" style={{ maxWidth: '72rem', margin: '0 auto', padding: '2.25rem 1.5rem 4rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
@@ -147,8 +214,8 @@ export function OpenApiClient() {
         OpenAPI explorer
       </h1>
       <p style={{ color: 'var(--muted)', lineHeight: 1.65, maxWidth: '42rem' }}>
-        Browse every VerbaLab API field as structured JSON. Expand nodes, copy paths or values, and hide values when
-        sharing your screen. Spec:{' '}
+        Browse every VerbaLab API field as structured JSON, then try selected endpoints with a{' '}
+        <code className="vl-code">vl_*</code> API key. Spec:{' '}
         <code className="vl-code">
           {spec?.info?.title ?? 'VerbaLab API'} {spec?.info?.version ? `v${spec.info.version}` : ''}
         </code>
@@ -273,6 +340,48 @@ export function OpenApiClient() {
                         <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>
                           operationId: <code className="vl-code">{selected.operation.operationId}</code>
                         </p>
+                      ) : null}
+                    </div>
+                    <div className="vl-panel" style={{ padding: '1.1rem 1.25rem', display: 'grid', gap: '0.75rem' }}>
+                      <strong>Try it out</strong>
+                      <label className="vl-label" style={{ display: 'grid', gap: '0.35rem' }}>
+                        API key (optional for public GETs)
+                        <input
+                          className="vl-field vl-code"
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          placeholder="vl_live_... or vl_test_..."
+                        />
+                      </label>
+                      {selected.method !== 'get' && selected.method !== 'head' ? (
+                        <label className="vl-label" style={{ display: 'grid', gap: '0.35rem' }}>
+                          JSON body
+                          <textarea
+                            className="vl-field vl-code"
+                            rows={8}
+                            value={tryBody}
+                            onChange={(e) => setTryBody(e.target.value)}
+                          />
+                        </label>
+                      ) : null}
+                      <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>
+                        Path params like {'{id}'} are filled with <code className="vl-code">example</code>. Prefer
+                        concrete playground flows for multipart uploads.
+                      </p>
+                      <button
+                        type="button"
+                        className="vl-btn vl-btn-primary"
+                        disabled={tryBusy}
+                        onClick={() => void trySelected()}
+                        style={{ justifySelf: 'start' }}
+                      >
+                        {tryBusy ? 'Calling…' : `Try ${selected.method.toUpperCase()} ${selected.path}`}
+                      </button>
+                      {tryError ? <p style={{ color: 'var(--bad)', margin: 0 }}>{tryError}</p> : null}
+                      {tryResult ? (
+                        <pre className="vl-code" style={{ margin: 0, overflow: 'auto', maxHeight: 320 }}>
+                          {tryResult}
+                        </pre>
                       ) : null}
                     </div>
                     <JsonExplorer
