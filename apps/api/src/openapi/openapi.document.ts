@@ -1572,6 +1572,55 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/sovereign-voice-os/engine': {
+      get: {
+        summary: 'Sovereign Voice OS engine (five government/enterprise pillars)',
+        operationId: 'getSovereignVoiceOsEngine',
+        responses: { '200': { description: 'Pillars, honesty, buyers' } },
+      },
+    },
+    '/v1/sovereign-voice-os/compose': {
+      post: {
+        summary: 'Compose a national Sovereign Voice OS deployment recipe',
+        operationId: 'composeSovereignVoiceOs',
+        responses: { '200': { description: 'Ordered pillar bootstrap steps' } },
+      },
+    },
+    '/v1/national-voice-runtime/engine': {
+      get: {
+        summary: 'National Voice Sovereignty Runtime catalog',
+        operationId: 'getNationalVoiceRuntimeEngine',
+        responses: { '200': { description: 'Zones control plane' } },
+      },
+    },
+    '/v1/civic-voice-evidence/engine': {
+      get: {
+        summary: 'Civic Voice Evidence Chain catalog',
+        operationId: 'getCivicVoiceEvidenceEngine',
+        responses: { '200': { description: 'Evidence ledger' } },
+      },
+    },
+    '/v1/mutual-intelligibility/engine': {
+      get: {
+        summary: 'African Mutual-Intelligibility Fabric catalog',
+        operationId: 'getMutualIntelligibilityEngine',
+        responses: { '200': { description: 'Corridors' } },
+      },
+    },
+    '/v1/institutional-voice/engine': {
+      get: {
+        summary: 'Policy-Bound Institutional Voice catalog',
+        operationId: 'getInstitutionalVoiceEngine',
+        responses: { '200': { description: 'Agency corpus voice' } },
+      },
+    },
+    '/v1/offline-mesh-voice/engine': {
+      get: {
+        summary: 'Offline Mesh Voice catalog',
+        operationId: 'getOfflineMeshVoiceEngine',
+        responses: { '200': { description: 'Mesh control plane' } },
+      },
+    },
     '/v1/voice-bridges/engine': {
       get: {
         summary: 'Voice platform bridges catalog (VAPI, Twilio, Amazon, Google, SIP, WebRTC)',

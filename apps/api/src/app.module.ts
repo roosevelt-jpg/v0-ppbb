@@ -31,6 +31,12 @@ import { AdminModule } from './admin/admin.module';
 import { ConnectorsModule } from './connectors/connectors.module';
 import { PartnerConnectorsModule } from './partner-connectors/partner-connectors.module';
 import { VoiceBridgesModule } from './voice-bridges/voice-bridges.module';
+import { NationalVoiceRuntimeModule } from './national-voice-runtime/national-voice-runtime.module';
+import { CivicVoiceEvidenceModule } from './civic-voice-evidence/civic-voice-evidence.module';
+import { MutualIntelligibilityModule } from './mutual-intelligibility/mutual-intelligibility.module';
+import { InstitutionalVoiceModule } from './institutional-voice/institutional-voice.module';
+import { OfflineMeshVoiceModule } from './offline-mesh-voice/offline-mesh-voice.module';
+import { SovereignVoiceOsModule } from './sovereign-voice-os/sovereign-voice-os.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { VoiceModule } from './voice/voice.module';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -630,6 +636,12 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ConnectorsModule,
     PartnerConnectorsModule,
     VoiceBridgesModule,
+    NationalVoiceRuntimeModule,
+    CivicVoiceEvidenceModule,
+    MutualIntelligibilityModule,
+    InstitutionalVoiceModule,
+    OfflineMeshVoiceModule,
+    SovereignVoiceOsModule,
     WorkflowsModule,
     VoiceModule,
     AnalyticsModule,

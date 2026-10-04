@@ -112,6 +112,43 @@ export const CONSOLE_NAV: NavGroup[] = [
     ],
   },
   {
+    id: 'sovereign',
+    label: 'Sovereign Voice',
+    collapsible: true,
+    items: [
+      {
+        href: '/sovereign-voice-os',
+        label: 'Sovereign Voice OS',
+        keywords: ['government', 'ministry', 'sovereign', 'os', 'procurement'],
+      },
+      {
+        href: '/national-voice-runtime',
+        label: 'National Runtime',
+        keywords: ['zone', 'residency', 'kill-switch', 'ministry', 'country'],
+      },
+      {
+        href: '/civic-voice-evidence',
+        label: 'Evidence Chain',
+        keywords: ['court', 'hash', 'provenance', 'deepfake', 'consent', 'watermark'],
+      },
+      {
+        href: '/mutual-intelligibility',
+        label: 'Mutual Intelligibility',
+        keywords: ['ecowas', 'eac', 'sadc', 'corridor', 'dialect'],
+      },
+      {
+        href: '/institutional-voice',
+        label: 'Institutional Voice',
+        keywords: ['policy', 'gazette', 'ministry', 'agency', 'constrained'],
+      },
+      {
+        href: '/offline-mesh-voice',
+        label: 'Offline Mesh',
+        keywords: ['clinic', 'border', 'disaster', 'edge', 'offline', 'mesh'],
+      },
+    ],
+  },
+  {
     id: 'create',
     label: 'Create & ops',
     items: [
