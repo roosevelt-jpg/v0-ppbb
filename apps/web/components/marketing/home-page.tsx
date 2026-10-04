@@ -183,6 +183,7 @@ export function MarketingHomePage() {
     links?: Array<{ label: string; href: string }>;
     ctaPrimary?: { label: string; href: string };
     ctaSecondary?: { label: string; href: string };
+    consoleCta?: { label: string; href: string };
   };
 
   return (
@@ -211,6 +212,11 @@ export function MarketingHomePage() {
         </nav>
         <div className="vl-mkt-nav-actions">
           <ThemeSwitcher />
+          {navContent.consoleCta ? (
+            <Link href={navContent.consoleCta.href} className="vl-mkt-link">
+              {navContent.consoleCta.label}
+            </Link>
+          ) : null}
           {navContent.ctaSecondary ? (
             <Link href={navContent.ctaSecondary.href} className="vl-mkt-link">
               {navContent.ctaSecondary.label}

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { CmsBlockEditor, blockTypeLabel, type EditableBlock } from './cms-block-editor';
 
 type Settings = {
   brandName: string;
@@ -40,6 +41,8 @@ type PrefillEditor = {
   contentJson: string;
 };
 
+type AssetDraft = { key: string; url: string; alt: string };
+
 const PRODUCT_PREVIEW: Record<string, string> = {
   'product-translate': '/translate',
   'product-voice': '/voice-studio',
@@ -65,6 +68,8 @@ export function CmsAdminClient() {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [editor, setEditor] = useState<PrefillEditor | null>(null);
+  const [homeEditor, setHomeEditor] = useState<EditableBlock | null>(null);
+  const [assetDrafts, setAssetDrafts] = useState<AssetDraft[]>([]);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -77,6 +82,9 @@ export function CmsAdminClient() {
     setSettings(s);
     setPages(p);
     setHome(h);
+    setAssetDrafts(
+      Object.values(h.assetMap).map((a) => ({ key: a.key, url: a.url, alt: a.alt })),
+    );
   }, [getToken]);
 
   useEffect(() => {
@@ -121,7 +129,9 @@ export function CmsAdminClient() {
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/cms/reseed-home', { token, method: 'POST', body: '{}' });
       await load();
-      setStatus('Reseeded home + pending-review use-case/product pages (approved pages kept).');
+      setStatus(
+        'Reseeded pending-review pages (approved homepage/footer and approved content pages kept).',
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Reseed failed');
     } finally {
@@ -154,6 +164,7 @@ export function CmsAdminClient() {
     setBusy(true);
     setError(null);
     setStatus(null);
+    setHomeEditor(null);
     try {
       const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
@@ -176,6 +187,21 @@ export function CmsAdminClient() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function openHomeBlock(block: HomePayload['page']['blocks'][number]) {
+    setEditor(null);
+    setHomeEditor({
+      pageSlug: 'home',
+      blockId: block.id,
+      type: block.type,
+      sortOrder: block.sortOrder,
+      content: structuredClone(block.content),
+    });
+    setStatus(`Editing homepage · ${blockTypeLabel(block.type)}.`);
+    requestAnimationFrame(() => {
+      document.getElementById('cms-home-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   async function savePrefillEditor() {
@@ -217,6 +243,67 @@ export function CmsAdminClient() {
     }
   }
 
+  async function saveHomeBlock() {
+    if (!homeEditor) return;
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      await apiFetch('/v1/cms/blocks', {
+        token,
+        method: 'POST',
+        body: JSON.stringify({
+          pageSlug: homeEditor.pageSlug,
+          blockId: homeEditor.blockId,
+          type: homeEditor.type,
+          sortOrder: homeEditor.sortOrder,
+          content: homeEditor.content,
+          published: true,
+        }),
+      });
+      await apiFetch('/v1/cms/pages/home/review', {
+        token,
+        method: 'POST',
+        body: JSON.stringify({ reviewStatus: 'pending_review' }),
+      });
+      await load();
+      setStatus(`Saved homepage · ${blockTypeLabel(homeEditor.type)} — pending review.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveAsset(draft: AssetDraft) {
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      await apiFetch('/v1/cms/assets', {
+        token,
+        method: 'POST',
+        body: JSON.stringify({
+          pageSlug: 'home',
+          key: draft.key,
+          url: draft.url,
+          alt: draft.alt,
+          kind: 'image',
+        }),
+      });
+      await load();
+      setStatus(`Saved asset ${draft.key}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Asset save failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <AppShell>
       <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
@@ -233,9 +320,9 @@ export function CmsAdminClient() {
       >
         Marketing content
       </h1>
-      <p style={{ color: 'var(--muted)', margin: '0 0 1.35rem', maxWidth: '42rem' }}>
-        Every use-case and product surface ships prefilled. Review pending pages here, approve when ready, or reseed
-        defaults for anything still pending review.
+      <p style={{ color: 'var(--muted)', margin: '0 0 1.35rem', maxWidth: '46rem' }}>
+        Edit every homepage section and footer column here. Use-case and product surfaces ship prefilled — review,
+        approve, or reseed anything still pending.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
@@ -305,6 +392,59 @@ export function CmsAdminClient() {
             </div>
           </section>
 
+          {home ? (
+            <section id="cms-home-blocks" className="vl-panel" style={{ padding: '1.2rem' }}>
+              <h2 style={{ margin: '0 0 0.35rem', fontSize: '1rem' }}>Homepage & footer</h2>
+              <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', fontSize: '0.88rem' }}>
+                Every section rendered on <code>/</code> — including nav, hero, all mid-page blocks, and the footer —
+                is editable below.
+              </p>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.55rem' }}>
+                {home.page.blocks.map((b) => (
+                  <li
+                    key={b.id}
+                    style={{
+                      display: 'flex',
+                      gap: '0.65rem',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderTop: '1px solid var(--line)',
+                      paddingTop: '0.55rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.9rem' }}>
+                      <code style={{ color: 'var(--muted)' }}>{b.sortOrder}</code>{' '}
+                      <strong>{blockTypeLabel(b.type)}</strong>{' '}
+                      <span style={{ color: 'var(--muted)' }}>({b.type})</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="vl-btn vl-btn-secondary"
+                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                      disabled={busy}
+                      onClick={() => openHomeBlock(b)}
+                    >
+                      Edit
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {homeEditor ? (
+            <div id="cms-home-editor">
+              <CmsBlockEditor
+                editor={homeEditor}
+                busy={busy}
+                onChange={setHomeEditor}
+                onSave={() => void saveHomeBlock()}
+                onClose={() => setHomeEditor(null)}
+              />
+            </div>
+          ) : null}
+
           <section className="vl-panel" style={{ padding: '1.2rem' }}>
             <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Pages to review</h2>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.75rem' }}>
@@ -312,6 +452,7 @@ export function CmsAdminClient() {
                 const review = p.seo?.reviewStatus ?? 'pending_review';
                 const href = previewHrefForSlug(p.slug);
                 const canEditPrefill = p.slug.startsWith('product-') || p.slug.startsWith('use-case-');
+                const isHome = p.slug === 'home';
                 return (
                   <li
                     key={p.id}
@@ -333,8 +474,21 @@ export function CmsAdminClient() {
                     ) : null}
                     <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
                       {href ? (
-                        <a href={href} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}>
+                        <a
+                          href={href}
+                          className="vl-btn vl-btn-secondary"
+                          style={{ textDecoration: 'none', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                        >
                           Preview
+                        </a>
+                      ) : null}
+                      {isHome ? (
+                        <a
+                          href="#cms-home-blocks"
+                          className="vl-btn vl-btn-secondary"
+                          style={{ textDecoration: 'none', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
+                        >
+                          Edit homepage & footer
                         </a>
                       ) : null}
                       {canEditPrefill ? (
@@ -388,7 +542,12 @@ export function CmsAdminClient() {
                 spellCheck={false}
               />
               <div style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap' }}>
-                <button type="button" className="vl-btn vl-btn-primary" disabled={busy} onClick={() => void savePrefillEditor()}>
+                <button
+                  type="button"
+                  className="vl-btn vl-btn-primary"
+                  disabled={busy}
+                  onClick={() => void savePrefillEditor()}
+                >
                   Save for later review
                 </button>
                 <button type="button" className="vl-btn vl-btn-secondary" disabled={busy} onClick={() => setEditor(null)}>
@@ -399,47 +558,72 @@ export function CmsAdminClient() {
           ) : null}
 
           {home ? (
-            <>
-              <section className="vl-panel" style={{ padding: '1.2rem' }}>
-                <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Home blocks</h2>
-                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.45rem' }}>
-                  {home.page.blocks.map((b) => (
-                    <li key={b.id} style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
-                      <code>{b.sortOrder}</code> · <strong style={{ color: 'var(--ink)' }}>{b.type}</strong>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-              <section className="vl-panel" style={{ padding: '1.2rem' }}>
-                <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Assets</h2>
-                <div className="vl-hub-grid">
-                  {Object.values(home.assetMap).map((a) => (
-                    <div key={a.key} className="vl-hub-card" style={{ cursor: 'default' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={a.url} alt={a.alt} style={{ width: '100%', borderRadius: 10, marginBottom: 8 }} />
-                      <h3 style={{ fontSize: '0.9rem' }}>{a.key}</h3>
-                      <p>{a.url}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-              <section className="vl-panel" style={{ padding: '1.2rem' }}>
-                <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Design scope</h2>
-                <pre
-                  className="vl-code"
-                  style={{
-                    margin: 0,
-                    padding: '1rem',
-                    background: 'var(--bg-soft)',
-                    borderRadius: 12,
-                    overflow: 'auto',
-                    maxHeight: 320,
-                  }}
-                >
-                  {JSON.stringify(home.settings.designScope, null, 2)}
-                </pre>
-              </section>
-            </>
+            <section className="vl-panel" style={{ padding: '1.2rem' }}>
+              <h2 style={{ margin: '0 0 0.35rem', fontSize: '1rem' }}>Homepage assets</h2>
+              <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', fontSize: '0.88rem' }}>
+                Image slots referenced by hero/products/use-case blocks (keys like <code>hero.atmosphere</code>).
+              </p>
+              <div className="vl-hub-grid">
+                {assetDrafts.map((a, idx) => (
+                  <div key={a.key} className="vl-hub-card" style={{ cursor: 'default', display: 'grid', gap: '0.55rem' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.url} alt={a.alt} style={{ width: '100%', borderRadius: 10 }} />
+                    <strong style={{ fontSize: '0.9rem' }}>{a.key}</strong>
+                    <label className="vl-label">
+                      URL
+                      <input
+                        className="vl-field"
+                        value={a.url}
+                        onChange={(e) => {
+                          const next = [...assetDrafts];
+                          next[idx] = { ...a, url: e.target.value };
+                          setAssetDrafts(next);
+                        }}
+                      />
+                    </label>
+                    <label className="vl-label">
+                      Alt text
+                      <input
+                        className="vl-field"
+                        value={a.alt}
+                        onChange={(e) => {
+                          const next = [...assetDrafts];
+                          next[idx] = { ...a, alt: e.target.value };
+                          setAssetDrafts(next);
+                        }}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="vl-btn vl-btn-secondary"
+                      disabled={busy}
+                      onClick={() => void saveAsset(a)}
+                    >
+                      Save asset
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {home ? (
+            <section className="vl-panel" style={{ padding: '1.2rem' }}>
+              <h2 style={{ margin: '0 0 0.75rem', fontSize: '1rem' }}>Design scope</h2>
+              <pre
+                className="vl-code"
+                style={{
+                  margin: 0,
+                  padding: '1rem',
+                  background: 'var(--bg-soft)',
+                  borderRadius: 12,
+                  overflow: 'auto',
+                  maxHeight: 320,
+                }}
+              >
+                {JSON.stringify(home.settings.designScope, null, 2)}
+              </pre>
+            </section>
           ) : null}
         </div>
       ) : null}

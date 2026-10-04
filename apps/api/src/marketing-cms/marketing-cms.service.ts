@@ -184,10 +184,11 @@ export class MarketingCmsService implements OnModuleInit {
     }
     const current = existing.content as { columns?: unknown[]; tabs?: unknown[] };
     const next = seed.content as { columns?: unknown[]; tabs?: unknown[] };
+    // Additive-only sync: never wipe admin edits — only fill in when catalog grew.
     const needsFooterSync =
       type === 'footer' && (current.columns?.length ?? 0) < (next.columns?.length ?? 0);
     const needsHubsSync =
-      type === 'product_hubs' && JSON.stringify(current.tabs ?? []) !== JSON.stringify(next.tabs ?? []);
+      type === 'product_hubs' && (current.tabs?.length ?? 0) < (next.tabs?.length ?? 0);
     if (needsFooterSync || needsHubsSync) {
       await this.prisma.cmsBlock.update({
         where: { id: existing.id },
@@ -338,7 +339,13 @@ export class MarketingCmsService implements OnModuleInit {
   }
 
   async reseedHome() {
-    await this.ensureSeeded({ replaceHome: true, replaceContentPages: false });
+    await this.ensureSeeded({ replaceHome: false, replaceContentPages: false });
+    // Refresh home only when still pending review — approved homepage/footer edits stay.
+    const homePage = await this.prisma.cmsPage.findUnique({ where: { slug: 'home' } });
+    const homeReview = (homePage?.seo as Record<string, unknown> | null)?.reviewStatus;
+    if (homePage && homeReview !== 'approved') {
+      await this.ensureSeeded({ replaceHome: true, replaceContentPages: false });
+    }
     // Always refresh content pages that are still pending_review (safe for admin edits that were approved).
     for (const pageSeed of DEFAULT_CONTENT_PAGES) {
       const page = await this.prisma.cmsPage.findUnique({ where: { slug: pageSeed.slug } });
