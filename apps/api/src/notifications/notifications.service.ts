@@ -3,6 +3,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { EmailProvider, SendEmailInput, SendEmailResult } from './email-provider';
 import { ResendAdapter } from './resend.adapter';
+import {
+  EMAIL_TEMPLATE_CATALOG,
+  EmailTemplateId,
+  previewEmailTemplate,
+  renderJobCompleteEmail,
+  renderMemberAddedEmail,
+  renderSecureAlertEmail,
+  renderUsageThresholdEmail,
+  renderWorkflowMessageEmail,
+} from './email-templates';
 
 @Injectable()
 export class NotificationsService {
@@ -30,6 +40,54 @@ export class NotificationsService {
 
   private disabled(): boolean {
     return process.env.NOTIFICATIONS_DISABLED === '1';
+  }
+
+  private consoleBase() {
+    return (process.env.WEB_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.verbalab.ai').replace(
+      /\/$/,
+      '',
+    );
+  }
+
+  engine() {
+    return {
+      id: 'notifications',
+      title: 'Notifications & email',
+      provider: 'resend',
+      configured: this.isConfigured(),
+      disabled: this.disabled(),
+      smsConfigured: this.isSmsConfigured(),
+      env: {
+        RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
+        EMAIL_FROM: Boolean(process.env.EMAIL_FROM),
+        NOTIFICATIONS_DISABLED: this.disabled(),
+        TWILIO: this.isSmsConfigured(),
+      },
+      templates: EMAIL_TEMPLATE_CATALOG,
+      triggers: [
+        'job.succeeded / job.failed → owners/admins',
+        'usage 80% / 100% quota → owners/admins',
+        'member added → member email',
+        'workflow/connector notify step → owners/admins',
+        'secure transcript alerts → trusted contact',
+      ],
+      jobs: {
+        queue: 'BullMQ (Redis) or JOBS_INLINE=1 in-process worker',
+        cronOs: false,
+        note: 'Async jobs are queue workers, not a Nest cron fleet. Global Scheduler catalogs schedules; it does not replace BullMQ.',
+      },
+      docs: '/docs/NOTIFICATIONS.md',
+    };
+  }
+
+  templates() {
+    return { templates: EMAIL_TEMPLATE_CATALOG, count: EMAIL_TEMPLATE_CATALOG.length };
+  }
+
+  previewTemplate(id: string) {
+    const known = EMAIL_TEMPLATE_CATALOG.some((t) => t.id === id);
+    const templateId = (known ? id : 'workflow_message') as EmailTemplateId;
+    return { template: previewEmailTemplate(templateId) };
   }
 
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult | null> {
@@ -86,10 +144,22 @@ export class NotificationsService {
 
     if (input.channel === 'email') {
       try {
+        const meta = input.metadata ?? {};
+        const rendered = renderSecureAlertEmail({
+          protocol: String(meta.protocol ?? 'trusted-contact'),
+          trustedName: meta.trustedName ? String(meta.trustedName) : undefined,
+          language: meta.language ? String(meta.language) : undefined,
+          receiptToken: String(meta.receiptToken ?? meta.alertId ?? 'pending'),
+          summary: input.message.includes('Transcript summary:')
+            ? input.message.split('Transcript summary:\n').slice(1).join('\n').trim() || input.message
+            : input.message,
+          consoleUrl: `${this.consoleBase()}/secure-transcript-alerts`,
+        });
         const result = await this.sendEmail({
           to: input.to,
-          subject: input.subject,
-          text: input.message,
+          subject: input.subject || rendered.subject,
+          text: rendered.text,
+          html: rendered.html,
         });
         const deliveryId = result?.id ?? `email_queued_${Date.now()}`;
         const status = result ? ('sent' as const) : ('queued' as const);
@@ -101,6 +171,7 @@ export class NotificationsService {
             to: input.to,
             status,
             deliveryId,
+            template: 'secure_alert',
             ...(input.metadata ?? {}),
           } as never,
         });
@@ -216,23 +287,33 @@ export class NotificationsService {
     const recipients = await this.ownerAdminEmails(input.organizationId);
     if (recipients.length === 0) return;
 
-    const subject =
-      input.status === 'succeeded'
-        ? `VerbaLab job succeeded (${input.type})`
-        : `VerbaLab job failed (${input.type})`;
-    const text =
-      input.status === 'succeeded'
-        ? `Job ${input.jobId} (${input.type}) completed successfully.`
-        : `Job ${input.jobId} (${input.type}) failed: ${input.error ?? 'unknown error'}`;
+    const rendered = renderJobCompleteEmail({
+      jobId: input.jobId,
+      type: input.type,
+      status: input.status,
+      error: input.error,
+      consoleUrl: `${this.consoleBase()}/jobs`,
+    });
 
     try {
-      const result = await this.sendEmail({ to: recipients, subject, text });
+      const result = await this.sendEmail({
+        to: recipients,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+      });
       if (!result) return;
       await this.audit.record({
         organizationId: input.organizationId,
         action: 'notification.job_complete_sent',
         route: 'jobs.worker',
-        metadata: { jobId: input.jobId, status: input.status, provider: result.provider, emailId: result.id },
+        metadata: {
+          jobId: input.jobId,
+          status: input.status,
+          provider: result.provider,
+          emailId: result.id,
+          template: rendered.id,
+        },
       });
     } catch (error) {
       this.logger.warn(
@@ -296,10 +377,18 @@ export class NotificationsService {
         }
 
         try {
+          const rendered = renderUsageThresholdEmail({
+            organizationName: org.name,
+            characters,
+            quota: org.characterQuota,
+            pct: threshold.pct,
+            consoleUrl: `${this.consoleBase()}/usage`,
+          });
           const result = await this.sendEmail({
             to: recipients,
-            subject: `VerbaLab usage at ${threshold.pct}% — ${org.name}`,
-            text: `Your organization "${org.name}" has used ${characters.toLocaleString()} of ${org.characterQuota.toLocaleString()} monthly characters (${threshold.pct}% threshold).`,
+            subject: rendered.subject,
+            text: rendered.text,
+            html: rendered.html,
           });
 
           await this.audit.record({
@@ -311,6 +400,7 @@ export class NotificationsService {
               quota: org.characterQuota,
               emailed: Boolean(result),
               emailId: result?.id,
+              template: rendered.id,
             },
           });
 
@@ -319,7 +409,7 @@ export class NotificationsService {
               organizationId,
               action: 'notification.usage_threshold_sent',
               route: 'notifications.usage',
-              metadata: { threshold: threshold.pct, emailId: result.id },
+              metadata: { threshold: threshold.pct, emailId: result.id, template: rendered.id },
             });
           }
         } catch (error) {
@@ -345,17 +435,28 @@ export class NotificationsService {
     if (this.disabled() || !input.email) return;
 
     try {
+      const rendered = renderMemberAddedEmail({
+        organizationName: input.organizationName,
+        role: input.role,
+        consoleUrl: this.consoleBase(),
+      });
       const result = await this.sendEmail({
         to: input.email,
-        subject: `You've been added to ${input.organizationName} on VerbaLab`,
-        text: `You now have ${input.role} access to "${input.organizationName}" on VerbaLab. Sign in with the same email to open the console. (Invites are managed in Clerk; this message confirms membership sync.)`,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       });
       if (!result) return;
       await this.audit.record({
         organizationId: input.organizationId,
         action: 'notification.member_added_sent',
         route: 'identity.ensureSession',
-        metadata: { email: input.email, role: input.role, emailId: result.id },
+        metadata: {
+          email: input.email,
+          role: input.role,
+          emailId: result.id,
+          template: rendered.id,
+        },
       });
     } catch (error) {
       this.logger.warn(
@@ -377,10 +478,17 @@ export class NotificationsService {
     if (recipients.length === 0) return null;
 
     try {
+      const rendered = renderWorkflowMessageEmail({
+        subject: input.subject,
+        message: input.message,
+        jobId: input.jobId,
+        consoleUrl: `${this.consoleBase()}/workflows`,
+      });
       const result = await this.sendEmail({
         to: recipients,
-        subject: input.subject,
-        text: input.message,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       });
       if (!result) return null;
       await this.audit.record({
@@ -392,6 +500,7 @@ export class NotificationsService {
           stepId: input.stepId,
           provider: result.provider,
           emailId: result.id,
+          template: rendered.id,
         },
       });
       return result;
@@ -401,6 +510,45 @@ export class NotificationsService {
       );
       throw error;
     }
+  }
+
+  async sendTestEmail(input: {
+    organizationId: string;
+    to: string;
+    templateId?: string;
+    userId?: string;
+  }) {
+    if (!this.isConfigured() && this.provider.name === 'resend') {
+      return {
+        sent: false,
+        note: 'Set RESEND_API_KEY and EMAIL_FROM first',
+        engine: this.engine(),
+      };
+    }
+    const preview = this.previewTemplate(input.templateId ?? 'member_added').template;
+    const result = await this.sendEmail({
+      to: input.to,
+      subject: `[TEST] ${preview.subject}`,
+      text: preview.text,
+      html: preview.html,
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'notification.test_sent',
+      route: 'POST /v1/notifications/test',
+      metadata: {
+        to: input.to,
+        template: preview.id,
+        emailId: result?.id ?? null,
+      } as never,
+    });
+    return {
+      sent: Boolean(result),
+      emailId: result?.id ?? null,
+      provider: result?.provider ?? 'resend',
+      template: preview.id,
+    };
   }
 
   private async ownerAdminEmails(organizationId: string): Promise<string[]> {

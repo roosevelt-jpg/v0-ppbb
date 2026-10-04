@@ -237,7 +237,12 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/billing', label: 'Billing' },
       { href: '/keys', label: 'API keys' },
       { href: '/model-keys', label: 'Model keys', keywords: ['vmod', 'own ai', 'voice fm'] },
-      { href: '/credentials-readiness', label: 'Credentials', keywords: ['stripe', 'clerk', 'deploy'] },
+      {
+        href: '/notifications',
+        label: 'Notifications',
+        keywords: ['email', 'resend', 'alerts', 'templates', 'sms'],
+      },
+      { href: '/credentials-readiness', label: 'Credentials', keywords: ['stripe', 'clerk', 'deploy', 'resend'] },
       { href: '/developers', label: 'Developers' },
       { href: '/identity', label: 'Identity' },
       { href: '/data', label: 'Data & residency' },

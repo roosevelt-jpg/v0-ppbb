@@ -75,6 +75,9 @@ Dev already supports test keys / `/dev-login` bypass when configured.
 ### Resend (email)
 
 1. [resend.com](https://resend.com) → API Keys → `RESEND_API_KEY`
+2. Verify a sending domain → set `EMAIL_FROM="VerbaLab <noreply@yourdomain.com>"`
+3. HTML templates are wired for jobs, usage, member added, workflows, and secure alerts — see [`NOTIFICATIONS.md`](./NOTIFICATIONS.md)
+4. Console: `/notifications` · test send: `POST /v1/notifications/test`
 
 ### Optional legacy vendors
 

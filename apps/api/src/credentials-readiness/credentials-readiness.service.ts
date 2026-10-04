@@ -79,8 +79,8 @@ export class CredentialsReadinessService {
         howToGet: 'fly auth login && fly tokens create deploy',
       },
       resend: {
-        ready: present(['RESEND_API_KEY']),
-        env: ['RESEND_API_KEY'],
+        ready: present(['RESEND_API_KEY', 'EMAIL_FROM']),
+        env: ['RESEND_API_KEY', 'EMAIL_FROM'],
         howToGet: 'https://resend.com/api-keys',
       },
       docs: {

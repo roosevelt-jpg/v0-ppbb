@@ -6,6 +6,9 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuditCoreModule } from '../audit/audit-core.module';
 import { SpeechRecognitionModule } from '../speech-recognition/speech-recognition.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ApiKeysModule } from '../api-keys/api-keys.module';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
+import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
 
 @Module({
   imports: [
@@ -14,9 +17,11 @@ import { NotificationsModule } from '../notifications/notifications.module';
     AuditCoreModule,
     SpeechRecognitionModule,
     NotificationsModule,
+    ApiKeysModule,
+    RateLimitModule,
   ],
   controllers: [SecureTranscriptAlertsController],
-  providers: [SecureTranscriptAlertsService],
+  providers: [SecureTranscriptAlertsService, TranslateAuthGuard],
   exports: [SecureTranscriptAlertsService],
 })
 export class SecureTranscriptAlertsModule {}

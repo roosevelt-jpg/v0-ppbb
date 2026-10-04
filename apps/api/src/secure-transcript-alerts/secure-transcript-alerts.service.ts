@@ -207,7 +207,13 @@ export class SecureTranscriptAlertsService {
       subject,
       message,
       consentToken: input.consentToken,
-      metadata: { alertId, protocol },
+      metadata: {
+        alertId,
+        protocol,
+        receiptToken,
+        trustedName: input.trustedName,
+        language,
+      },
     });
 
     const record: AlertRecord = {
