@@ -2501,6 +2501,101 @@ export const openApiDocument = {
         responses: { '200': { description: 'Org audit-derived usage' } },
       },
     },
+    '/v1/agent-voice-training/engine': {
+      get: {
+        summary: 'Agent Voice Training engine catalog',
+        operationId: 'getAgentVoiceTrainingEngine',
+        responses: { '200': { description: 'Capabilities, models, honesty' } },
+      },
+    },
+    '/v1/agent-voice-training/models': {
+      get: {
+        summary: 'List VerbaLab speech models for agent personas',
+        operationId: 'listAgentVoiceTrainingModels',
+        responses: { '200': { description: 'Speech/voice model catalog' } },
+      },
+    },
+    '/v1/agent-voice-training/languages': {
+      get: {
+        summary: 'Africa + beyond languages for agent speech training',
+        operationId: 'listAgentVoiceTrainingLanguages',
+        parameters: [
+          { name: 'q', in: 'query', required: false, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Language list' } },
+      },
+    },
+    '/v1/agent-voice-training/overview': {
+      get: {
+        summary: 'Agent Voice Training hub overview',
+        operationId: 'getAgentVoiceTrainingOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Engine + personas + activity' } },
+      },
+    },
+    '/v1/agent-voice-training/activity': {
+      get: {
+        summary: 'Agent Voice Training audit activity',
+        operationId: 'getAgentVoiceTrainingActivity',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Recent events' } },
+      },
+    },
+    '/v1/agent-voice-training/personas': {
+      get: {
+        summary: 'List agent speech personas',
+        operationId: 'listAgentSpeechPersonas',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Personas' } },
+      },
+      post: {
+        summary: 'Create an agent speech persona',
+        operationId: 'createAgentSpeechPersona',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Created persona' } },
+      },
+    },
+    '/v1/agent-voice-training/personas/{id}/train': {
+      post: {
+        summary: 'Train an agent speech persona to ready',
+        operationId: 'trainAgentSpeechPersona',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Trained persona' } },
+      },
+    },
+    '/v1/agent-voice-training/personas/{id}/preview': {
+      post: {
+        summary: 'Preview multilingual speak line (TTS)',
+        operationId: 'previewAgentSpeechPersona',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Preview audio metadata + base64' } },
+      },
+    },
+    '/v1/agent-voice-training/personas/{id}/sdk': {
+      get: {
+        summary: 'Export agent builder SDK pack for a persona',
+        operationId: 'exportAgentSpeechPersonaSdk',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'SDK pack JSON' } },
+      },
+    },
+    '/v1/agent-voice-training/export-pack': {
+      post: {
+        summary: 'Export training pack for a persona',
+        operationId: 'exportAgentVoiceTrainingPack',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Training pack' } },
+      },
+    },
     '/v1/meeting-transcription/engine': {
       get: {
         summary: 'Meeting Transcription engine catalog',

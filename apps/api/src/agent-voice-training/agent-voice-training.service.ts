@@ -219,7 +219,7 @@ export class AgentVoiceTrainingService {
       style,
       systemPrompt,
       status: 'draft',
-      sampleLine: SAMPLE_LINES[languages[0] ?? 'en'] ?? SAMPLE_LINES.en,
+      sampleLine: SAMPLE_LINES[languages[0] ?? 'en'] ?? SAMPLE_LINES.en ?? 'Hello! I am glad to help you today.',
       createdAt: new Date().toISOString(),
     };
     this.personas.set(persona.id, persona);
