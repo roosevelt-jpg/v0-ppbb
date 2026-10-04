@@ -6,7 +6,7 @@ import { isDevAuthAllowed, mintDevBearer } from '@/lib/dev-auth-server';
  * Local/test-only login that does NOT use Clerk's browser OTP UI.
  * Sets a signed cookie + returns a bearer for API calls. sk_test_ only.
  */
-export async function POST() {
+export async function POST(request: Request) {
   const secretKey = process.env.CLERK_SECRET_KEY?.trim();
   if (!isDevAuthAllowed(secretKey)) {
     return NextResponse.json(
@@ -57,14 +57,18 @@ export async function POST() {
     ok: true,
     email,
     bearer,
-    redirectTo: '/vaios',
+    redirectTo: '/cms',
     note: 'Clerk OTP bypass cookie set. No email code required.',
   });
+
+  // HTTPS tunnels (cloudflared) need Secure cookies; plain localhost does not.
+  const proto = request.headers.get('x-forwarded-proto') ?? new URL(request.url).protocol.replace(':', '');
+  const secure = proto === 'https';
 
   res.cookies.set(DEV_AUTH_COOKIE, bearer, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: false,
+    secure,
     path: '/',
     maxAge: 60 * 60 * 12,
   });
