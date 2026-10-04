@@ -414,6 +414,7 @@ await client.audio.speech({
           title: 'VerbaAgents',
           links: [
             { label: 'Voice Agents', href: '/products/voice-agents' },
+            { label: 'Agent Voice Training', href: '/products/agent-voice-training' },
             { label: 'Conversational AI', href: '/products/conversational-ai' },
             { label: 'Integrations', href: '/products/integrations' },
             { label: 'Telecommunications', href: '/products/telecommunications' },

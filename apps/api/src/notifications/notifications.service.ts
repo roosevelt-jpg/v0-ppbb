@@ -5,7 +5,10 @@ import { EmailProvider, SendEmailInput, SendEmailResult } from './email-provider
 import { ResendAdapter } from './resend.adapter';
 import {
   EMAIL_TEMPLATE_CATALOG,
+  EmailBrandOptions,
   EmailTemplateId,
+  defaultCopyrightText,
+  emailAssetBaseUrl,
   previewEmailTemplate,
   renderJobCompleteEmail,
   renderMemberAddedEmail,
@@ -49,6 +52,36 @@ export class NotificationsService {
     );
   }
 
+  private absoluteAssetUrl(pathOrUrl: string | null | undefined): string | undefined {
+    const value = (pathOrUrl ?? '').trim();
+    if (!value) return undefined;
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    const base = emailAssetBaseUrl();
+    return `${base}${value.startsWith('/') ? value : `/${value}`}`;
+  }
+
+  /** Brand assets from CMS site settings (falls back to defaults). */
+  async emailBrand(): Promise<EmailBrandOptions> {
+    try {
+      const settings = await this.prisma.cmsSiteSettings.findUnique({ where: { id: 'default' } });
+      const brandName = settings?.brandName?.trim() || 'VerbaLab';
+      return {
+        brandName,
+        logoUrl:
+          this.absoluteAssetUrl(settings?.emailLogoUrl) ??
+          this.absoluteAssetUrl(settings?.headerLogoUrl) ??
+          `${emailAssetBaseUrl()}/email/verbalab-logo.png`,
+        copyrightText: settings?.copyrightText?.trim() || defaultCopyrightText(brandName),
+      };
+    } catch {
+      return {
+        brandName: 'VerbaLab',
+        logoUrl: `${emailAssetBaseUrl()}/email/verbalab-logo.png`,
+        copyrightText: defaultCopyrightText(),
+      };
+    }
+  }
+
   engine() {
     return {
       id: 'notifications',
@@ -84,10 +117,11 @@ export class NotificationsService {
     return { templates: EMAIL_TEMPLATE_CATALOG, count: EMAIL_TEMPLATE_CATALOG.length };
   }
 
-  previewTemplate(id: string) {
+  async previewTemplate(id: string) {
     const known = EMAIL_TEMPLATE_CATALOG.some((t) => t.id === id);
     const templateId = (known ? id : 'workflow_message') as EmailTemplateId;
-    return { template: previewEmailTemplate(templateId) };
+    const brand = await this.emailBrand();
+    return { template: previewEmailTemplate(templateId, brand) };
   }
 
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult | null> {
@@ -145,6 +179,7 @@ export class NotificationsService {
     if (input.channel === 'email') {
       try {
         const meta = input.metadata ?? {};
+        const brand = await this.emailBrand();
         const rendered = renderSecureAlertEmail({
           protocol: String(meta.protocol ?? 'trusted-contact'),
           trustedName: meta.trustedName ? String(meta.trustedName) : undefined,
@@ -154,6 +189,7 @@ export class NotificationsService {
             ? input.message.split('Transcript summary:\n').slice(1).join('\n').trim() || input.message
             : input.message,
           consoleUrl: `${this.consoleBase()}/secure-transcript-alerts`,
+          brand,
         });
         const result = await this.sendEmail({
           to: input.to,
@@ -287,12 +323,14 @@ export class NotificationsService {
     const recipients = await this.ownerAdminEmails(input.organizationId);
     if (recipients.length === 0) return;
 
+    const brand = await this.emailBrand();
     const rendered = renderJobCompleteEmail({
       jobId: input.jobId,
       type: input.type,
       status: input.status,
       error: input.error,
       consoleUrl: `${this.consoleBase()}/jobs`,
+      brand,
     });
 
     try {
@@ -377,12 +415,14 @@ export class NotificationsService {
         }
 
         try {
+          const brand = await this.emailBrand();
           const rendered = renderUsageThresholdEmail({
             organizationName: org.name,
             characters,
             quota: org.characterQuota,
             pct: threshold.pct,
             consoleUrl: `${this.consoleBase()}/usage`,
+            brand,
           });
           const result = await this.sendEmail({
             to: recipients,
@@ -435,10 +475,12 @@ export class NotificationsService {
     if (this.disabled() || !input.email) return;
 
     try {
+      const brand = await this.emailBrand();
       const rendered = renderMemberAddedEmail({
         organizationName: input.organizationName,
         role: input.role,
         consoleUrl: this.consoleBase(),
+        brand,
       });
       const result = await this.sendEmail({
         to: input.email,
@@ -478,11 +520,13 @@ export class NotificationsService {
     if (recipients.length === 0) return null;
 
     try {
+      const brand = await this.emailBrand();
       const rendered = renderWorkflowMessageEmail({
         subject: input.subject,
         message: input.message,
         jobId: input.jobId,
         consoleUrl: `${this.consoleBase()}/workflows`,
+        brand,
       });
       const result = await this.sendEmail({
         to: recipients,
@@ -525,7 +569,7 @@ export class NotificationsService {
         engine: this.engine(),
       };
     }
-    const preview = this.previewTemplate(input.templateId ?? 'member_added').template;
+    const preview = (await this.previewTemplate(input.templateId ?? 'member_added')).template;
     const result = await this.sendEmail({
       to: input.to,
       subject: `[TEST] ${preview.subject}`,

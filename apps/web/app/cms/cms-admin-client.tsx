@@ -13,6 +13,11 @@ type Settings = {
   defaultTheme: string;
   primaryColor: string;
   accentColor: string;
+  headerLogoUrl: string;
+  footerLogoUrl: string;
+  faviconUrl: string;
+  emailLogoUrl: string;
+  copyrightText: string;
   designScope: Record<string, unknown>;
 };
 
@@ -79,7 +84,14 @@ export function CmsAdminClient() {
       apiFetch<PageRow[]>('/v1/cms/pages', { token }),
       apiFetch<HomePayload>('/v1/cms/pages/home', { token }),
     ]);
-    setSettings(s);
+    setSettings({
+      headerLogoUrl: '/email/verbalab-logo.png',
+      footerLogoUrl: '/email/verbalab-mark.png',
+      faviconUrl: '/email/verbalab-mark.png',
+      emailLogoUrl: '/email/verbalab-logo.png',
+      copyrightText: '',
+      ...s,
+    });
     setPages(p);
     setHome(h);
     setAssetDrafts(
@@ -109,6 +121,11 @@ export function CmsAdminClient() {
           defaultTheme: settings.defaultTheme,
           primaryColor: settings.primaryColor,
           accentColor: settings.accentColor,
+          headerLogoUrl: settings.headerLogoUrl,
+          footerLogoUrl: settings.footerLogoUrl,
+          faviconUrl: settings.faviconUrl,
+          emailLogoUrl: settings.emailLogoUrl,
+          copyrightText: settings.copyrightText,
         }),
       });
       setSettings(next);
@@ -379,6 +396,58 @@ export function CmsAdminClient() {
                 />
               </label>
             </div>
+            <h3 style={{ margin: '0.35rem 0 0', fontSize: '0.92rem' }}>Brand assets</h3>
+            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>
+              Absolute URLs or site paths (e.g. <code>/email/verbalab-logo.png</code>). Applied to header, footer,
+              favicon, and Resend email logo.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <label className="vl-label">
+                Header logo URL
+                <input
+                  className="vl-field"
+                  value={settings.headerLogoUrl ?? ''}
+                  onChange={(e) => setSettings({ ...settings, headerLogoUrl: e.target.value })}
+                  placeholder="/email/verbalab-logo.png"
+                />
+              </label>
+              <label className="vl-label">
+                Footer logo URL
+                <input
+                  className="vl-field"
+                  value={settings.footerLogoUrl ?? ''}
+                  onChange={(e) => setSettings({ ...settings, footerLogoUrl: e.target.value })}
+                  placeholder="/email/verbalab-mark.png"
+                />
+              </label>
+              <label className="vl-label">
+                Favicon URL
+                <input
+                  className="vl-field"
+                  value={settings.faviconUrl ?? ''}
+                  onChange={(e) => setSettings({ ...settings, faviconUrl: e.target.value })}
+                  placeholder="/email/verbalab-mark.png"
+                />
+              </label>
+              <label className="vl-label">
+                Email logo URL
+                <input
+                  className="vl-field"
+                  value={settings.emailLogoUrl ?? ''}
+                  onChange={(e) => setSettings({ ...settings, emailLogoUrl: e.target.value })}
+                  placeholder="/email/verbalab-logo.png"
+                />
+              </label>
+            </div>
+            <label className="vl-label">
+              Copyright (footer + email bar)
+              <input
+                className="vl-field"
+                value={settings.copyrightText ?? ''}
+                onChange={(e) => setSettings({ ...settings, copyrightText: e.target.value })}
+                placeholder={`© ${new Date().getFullYear()} VerbaLab. All rights reserved.`}
+              />
+            </label>
             <div style={{ display: 'flex', gap: '0.55rem', flexWrap: 'wrap' }}>
               <button type="button" className="vl-btn vl-btn-primary" disabled={busy} onClick={() => void saveSettings()}>
                 Save settings

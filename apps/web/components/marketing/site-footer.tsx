@@ -20,6 +20,8 @@ export type FooterColumn = {
 export type SiteFooterContent = {
   brand?: string;
   blurb?: string;
+  logoUrl?: string;
+  copyright?: string;
   links?: FooterLink[];
   columns?: FooterColumn[];
 };
@@ -62,6 +64,7 @@ export const DEFAULT_SITE_FOOTER: SiteFooterContent = {
       title: 'VerbaAgents',
       links: [
         { label: 'Voice Agents', href: '/products/voice-agents' },
+        { label: 'Agent Voice Training', href: '/products/agent-voice-training' },
         { label: 'Conversational AI', href: '/products/conversational-ai' },
         { label: 'Integrations', href: '/products/integrations' },
         { label: 'Telecommunications', href: '/products/telecommunications' },
@@ -159,10 +162,17 @@ function FooterAnchor({ link }: { link: FooterLink }) {
 
 type SiteFooterProps = {
   content?: SiteFooterContent;
+  logoUrl?: string;
+  copyright?: string;
   className?: string;
 };
 
-export function SiteFooter({ content = DEFAULT_SITE_FOOTER, className = 'vl-mkt-footer' }: SiteFooterProps) {
+export function SiteFooter({
+  content = DEFAULT_SITE_FOOTER,
+  logoUrl,
+  copyright: copyrightProp,
+  className = 'vl-mkt-footer',
+}: SiteFooterProps) {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const [isAuthed, setIsAuthed] = useState(false);
 
@@ -190,11 +200,23 @@ export function SiteFooter({ content = DEFAULT_SITE_FOOTER, className = 'vl-mkt-
     }))
     .filter((col) => col.links.length > 0);
 
+  const brand = content.brand ?? DEFAULT_SITE_FOOTER.brand ?? 'VerbaLab';
+  const footerLogo = logoUrl ?? content.logoUrl;
+  const copyright =
+    copyrightProp?.trim() ||
+    content.copyright?.trim() ||
+    `© ${new Date().getFullYear()} ${brand}. All rights reserved.`;
+
   return (
     <footer className={className}>
       <div className="vl-mkt-footer-brand">
-        <strong>{content.brand}</strong>
-        <span>{content.blurb}</span>
+        {footerLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={footerLogo} alt={brand} className="vl-mkt-footer-logo" />
+        ) : (
+          <strong>{brand}</strong>
+        )}
+        <span>{content.blurb ?? DEFAULT_SITE_FOOTER.blurb}</span>
       </div>
       {columns.length ? (
         <div className="vl-mkt-footer-cols">
@@ -214,6 +236,7 @@ export function SiteFooter({ content = DEFAULT_SITE_FOOTER, className = 'vl-mkt-
           ))}
         </div>
       )}
+      <div className="vl-mkt-footer-copyright">{copyright}</div>
     </footer>
   );
 }

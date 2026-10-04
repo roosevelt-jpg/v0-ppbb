@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ThemeSwitcher } from '@/components/theme-provider';
-import { SiteFooter } from '@/components/marketing/site-footer';
+import { DEFAULT_SITE_FOOTER, SiteFooter } from '@/components/marketing/site-footer';
 
 type MarketingShellProps = {
   brandName?: string;
+  headerLogoUrl?: string;
+  footerLogoUrl?: string;
+  copyrightText?: string;
   navLinks?: ReactNode;
   actions?: ReactNode;
   className?: string;
@@ -25,6 +28,9 @@ const DEFAULT_ACTIONS = (
 
 export function MarketingShell({
   brandName = 'VerbaLab',
+  headerLogoUrl,
+  footerLogoUrl,
+  copyrightText,
   navLinks,
   actions = DEFAULT_ACTIONS,
   className,
@@ -37,7 +43,12 @@ export function MarketingShell({
     <div className={rootClass}>
       <header className="vl-mkt-nav">
         <Link href="/" className="vl-mkt-brand">
-          {brandName}
+          {headerLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={headerLogoUrl} alt={brandName} className="vl-mkt-brand-logo" />
+          ) : (
+            brandName
+          )}
         </Link>
         {navLinks ? (
           <nav className="vl-mkt-nav-links" aria-label="Marketing">
@@ -50,7 +61,13 @@ export function MarketingShell({
         </div>
       </header>
       {children}
-      {showFooter ? <SiteFooter /> : null}
+      {showFooter ? (
+        <SiteFooter
+          content={{ ...DEFAULT_SITE_FOOTER, brand: brandName }}
+          logoUrl={footerLogoUrl}
+          copyright={copyrightText}
+        />
+      ) : null}
     </div>
   );
 }

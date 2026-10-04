@@ -541,7 +541,27 @@ export const PRODUCT_PAGES: ProductPage[] = [
     features: ['Voice-first agent runtime', 'STT + TTS in the loop', 'Vertical playbooks', 'Observability and guardrails'],
     audiences: ['CX leaders', 'Product teams', 'Governments'],
     keywords: ['voice agents', 'African conversational AI', 'dialect agents'],
-    consoleHref: '/chat',
+    consoleHref: '/agent-voice-training',
+  }),
+  p({
+    slug: 'agent-voice-training',
+    linkName: 'Agent Voice Training',
+    family: 'VerbaAgents',
+    title: 'Train Agents to Speak Like VerbaLab',
+    description:
+      'For AI agent builders: train personas on VerbaLab speech models so agents speak naturally across African languages and beyond.',
+    kicker: 'VerbaAgents',
+    headline: 'Your agents, our voices — every language we support',
+    lede: 'Attach Atlas TTS, Echo STT, and VerbaVoice to your agents. Export SDK packs and preview speech in Swahili, Yoruba, French, Arabic, and more.',
+    features: [
+      'Persona training on VerbaLab models',
+      'Africa + global language coverage',
+      'Multilingual speak preview',
+      'SDK export for LangChain and custom runtimes',
+    ],
+    audiences: ['Agent builders', 'Platform teams', 'CX product'],
+    keywords: ['train AI agents', 'African TTS agents', 'agent voice persona', 'VerbaLab models'],
+    consoleHref: '/agent-voice-training',
   }),
   p({
     slug: 'conversational-ai',

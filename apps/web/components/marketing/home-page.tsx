@@ -16,6 +16,11 @@ type CmsPagePayload = {
     defaultTheme: string;
     primaryColor: string;
     accentColor: string;
+    headerLogoUrl?: string;
+    footerLogoUrl?: string;
+    faviconUrl?: string;
+    emailLogoUrl?: string;
+    copyrightText?: string;
     designScope: Record<string, unknown>;
   };
   page: { slug: string; title: string; description: string; blocks: CmsBlock[] };
@@ -159,7 +164,16 @@ export function MarketingHomePage() {
 
       <header className="vl-mkt-nav">
         <Link href="/" className="vl-mkt-brand">
-          {data.settings.brandName}
+          {data.settings.headerLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={data.settings.headerLogoUrl}
+              alt={data.settings.brandName}
+              className="vl-mkt-brand-logo"
+            />
+          ) : (
+            data.settings.brandName
+          )}
         </Link>
         <nav className="vl-mkt-nav-links" aria-label="Marketing">
           {asArray<{ label: string; href: string }>(navContent.links).map((link) =>
@@ -630,7 +644,14 @@ export function MarketingHomePage() {
           );
         }
         if (block.type === 'footer') {
-          return <SiteFooter key={block.id} content={block.content as SiteFooterContent} />;
+          return (
+            <SiteFooter
+              key={block.id}
+              content={block.content as SiteFooterContent}
+              logoUrl={data.settings.footerLogoUrl}
+              copyright={data.settings.copyrightText}
+            />
+          );
         }
         return null;
       })}

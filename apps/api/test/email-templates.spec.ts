@@ -33,6 +33,8 @@ describe('Email templates + notifications engine', () => {
       expect(preview.html).toContain('/email/social-linkedin.png');
       expect(preview.html).toContain('/email/social-github.png');
       expect(preview.html).toContain('https://x.com');
+      expect(preview.html).toContain('All rights reserved');
+      expect(preview.html).toMatch(/©\s*\d{4}/);
       expect(preview.text.length).toBeGreaterThan(10);
       expect(preview.subject.length).toBeGreaterThan(3);
     }

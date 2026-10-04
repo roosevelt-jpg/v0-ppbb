@@ -46,6 +46,11 @@ export class MarketingCmsController {
       defaultTheme?: string;
       primaryColor?: string;
       accentColor?: string;
+      headerLogoUrl?: string;
+      footerLogoUrl?: string;
+      faviconUrl?: string;
+      emailLogoUrl?: string;
+      copyrightText?: string;
       designScope?: Prisma.InputJsonValue;
       socialLinks?: Prisma.InputJsonValue;
     },

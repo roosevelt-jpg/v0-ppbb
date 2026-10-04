@@ -292,6 +292,7 @@ import { AfricaInstitutionsModule } from './africa-institutions/africa-instituti
 import { SecureTranscriptAlertsModule } from './secure-transcript-alerts/secure-transcript-alerts.module';
 import { JusticeLanguageAccessModule } from './justice-language-access/justice-language-access.module';
 import { CivicTruthGuardModule } from './civic-truth-guard/civic-truth-guard.module';
+import { AgentVoiceTrainingModule } from './agent-voice-training/agent-voice-training.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -573,6 +574,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     SecureTranscriptAlertsModule,
     JusticeLanguageAccessModule,
     CivicTruthGuardModule,
+    AgentVoiceTrainingModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,

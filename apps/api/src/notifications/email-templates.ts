@@ -62,6 +62,16 @@ function socialFooterHtml(): string {
     </table>`;
 }
 
+export type EmailBrandOptions = {
+  brandName?: string;
+  logoUrl?: string;
+  copyrightText?: string;
+};
+
+export function defaultCopyrightText(brandName = 'VerbaLab'): string {
+  return `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`;
+}
+
 function layout(input: {
   preheader: string;
   title: string;
@@ -69,8 +79,13 @@ function layout(input: {
   ctaLabel?: string;
   ctaHref?: string;
   footerNote?: string;
+  brand?: EmailBrandOptions;
 }): string {
-  const logoSrc = assetUrl('verbalab-logo.png');
+  const brandName = input.brand?.brandName?.trim() || 'VerbaLab';
+  const logoSrc = input.brand?.logoUrl?.trim() || assetUrl('verbalab-logo.png');
+  const copyright = escapeHtml(
+    input.brand?.copyrightText?.trim() || defaultCopyrightText(brandName),
+  );
   const cta =
     input.ctaLabel && input.ctaHref
       ? `<p style="margin:28px 0 0">
@@ -101,8 +116,8 @@ function layout(input: {
             <!-- Brand header -->
             <tr>
               <td align="center" style="background:#0B3D2E;padding:22px 28px">
-                <a href="${escapeHtml(emailAssetBaseUrl())}" style="text-decoration:none;display:inline-block" aria-label="VerbaLab">
-                  <img src="${escapeHtml(logoSrc)}" width="180" height="36" alt="VerbaLab" style="display:block;border:0;outline:none;height:auto;max-width:180px" />
+                <a href="${escapeHtml(emailAssetBaseUrl())}" style="text-decoration:none;display:inline-block" aria-label="${escapeHtml(brandName)}">
+                  <img src="${escapeHtml(logoSrc)}" width="180" height="36" alt="${escapeHtml(brandName)}" style="display:block;border:0;outline:none;height:auto;max-width:180px" />
                 </a>
               </td>
             </tr>
@@ -126,11 +141,17 @@ function layout(input: {
               </td>
             </tr>
             <tr>
-              <td align="center" style="background:#F3F8F5;padding:4px 28px 22px;font-size:12px;line-height:1.5;color:#5A6E66">
+              <td align="center" style="background:#F3F8F5;padding:4px 28px 10px;font-size:12px;line-height:1.5;color:#5A6E66">
                 <p style="margin:0 0 6px">${footerNote}</p>
                 <p style="margin:0">
                   <a href="${escapeHtml(emailAssetBaseUrl())}" style="color:#0B3D2E;text-decoration:none;font-weight:600">verbalab.ai</a>
                 </p>
+              </td>
+            </tr>
+            <!-- Copyright bar -->
+            <tr>
+              <td align="center" style="background:#0B3D2E;padding:14px 28px;font-size:11px;line-height:1.45;color:#C5D9CF;letter-spacing:0.02em">
+                ${copyright}
               </td>
             </tr>
           </table>
@@ -185,6 +206,7 @@ export function renderJobCompleteEmail(input: {
   status: 'succeeded' | 'failed';
   error?: string;
   consoleUrl?: string;
+  brand?: EmailBrandOptions;
 }): RenderedEmail {
   const ok = input.status === 'succeeded';
   const subject = ok
@@ -196,6 +218,7 @@ export function renderJobCompleteEmail(input: {
   const html = layout({
     preheader: text,
     title: ok ? 'Job succeeded' : 'Job failed',
+    brand: input.brand,
     bodyHtml: `
       <p style="margin:0 0 12px">Your VerbaLab async job finished.</p>
       <table role="presentation" style="width:100%;font-size:14px;border-collapse:collapse">
@@ -220,12 +243,14 @@ export function renderUsageThresholdEmail(input: {
   quota: number;
   pct: number;
   consoleUrl?: string;
+  brand?: EmailBrandOptions;
 }): RenderedEmail {
   const subject = `VerbaLab usage at ${input.pct}% — ${input.organizationName}`;
   const text = `Your organization "${input.organizationName}" has used ${input.characters.toLocaleString()} of ${input.quota.toLocaleString()} monthly characters (${input.pct}% threshold).`;
   const html = layout({
     preheader: text,
     title: `Usage at ${input.pct}%`,
+    brand: input.brand,
     bodyHtml: `
       <p style="margin:0 0 12px"><strong>${escapeHtml(input.organizationName)}</strong> is approaching its monthly character quota.</p>
       <p style="margin:0;font-size:28px;font-weight:700;color:#0B3D2E">${input.pct}%</p>
@@ -240,12 +265,14 @@ export function renderMemberAddedEmail(input: {
   organizationName: string;
   role: string;
   consoleUrl?: string;
+  brand?: EmailBrandOptions;
 }): RenderedEmail {
   const subject = `You've been added to ${input.organizationName} on VerbaLab`;
   const text = `You now have ${input.role} access to "${input.organizationName}" on VerbaLab. Sign in with the same email to open the console. (Invites are managed in Clerk; this message confirms membership sync.)`;
   const html = layout({
     preheader: text,
     title: 'Welcome to the workspace',
+    brand: input.brand,
     bodyHtml: `
       <p style="margin:0 0 12px">You now have <strong>${escapeHtml(input.role)}</strong> access to <strong>${escapeHtml(input.organizationName)}</strong>.</p>
       <p style="margin:0;color:#5A6E66">Sign in with this email. Invites remain managed in Clerk — this message confirms membership sync.</p>`,
@@ -260,11 +287,13 @@ export function renderWorkflowMessageEmail(input: {
   message: string;
   jobId?: string;
   consoleUrl?: string;
+  brand?: EmailBrandOptions;
 }): RenderedEmail {
   const text = input.message;
   const html = layout({
     preheader: text.slice(0, 120),
     title: input.subject,
+    brand: input.brand,
     bodyHtml: `
       <p style="margin:0;white-space:pre-wrap">${escapeHtml(input.message)}</p>
       ${
@@ -285,6 +314,7 @@ export function renderSecureAlertEmail(input: {
   receiptToken: string;
   summary: string;
   consoleUrl?: string;
+  brand?: EmailBrandOptions;
 }): RenderedEmail {
   const subject = `VerbaLab secure transcript alert (${input.protocol})`;
   const text = [
@@ -302,6 +332,7 @@ export function renderSecureAlertEmail(input: {
   const html = layout({
     preheader: `Secure alert · ${input.protocol}`,
     title: 'Secure transcript alert',
+    brand: input.brand,
     bodyHtml: `
       <p style="margin:0 0 12px">A consented VerbaLab security protocol delivered this transcript summary.</p>
       <table role="presentation" style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:16px">
@@ -322,13 +353,14 @@ export function renderSecureAlertEmail(input: {
   return { id: 'secure_alert', subject, text, html };
 }
 
-export function previewEmailTemplate(id: EmailTemplateId): RenderedEmail {
+export function previewEmailTemplate(id: EmailTemplateId, brand?: EmailBrandOptions): RenderedEmail {
   switch (id) {
     case 'job_complete':
       return renderJobCompleteEmail({
         jobId: 'job_demo_123',
         type: 'batch_translate',
         status: 'succeeded',
+        brand,
       });
     case 'usage_threshold':
       return renderUsageThresholdEmail({
@@ -336,17 +368,20 @@ export function previewEmailTemplate(id: EmailTemplateId): RenderedEmail {
         characters: 40000,
         quota: 50000,
         pct: 80,
+        brand,
       });
     case 'member_added':
       return renderMemberAddedEmail({
         organizationName: 'Demo Org',
         role: 'member',
+        brand,
       });
     case 'workflow_message':
       return renderWorkflowMessageEmail({
         subject: 'Workflow notify',
         message: 'Translation batch finished for Swahili market copy.',
         jobId: 'job_demo_456',
+        brand,
       });
     case 'secure_alert':
       return renderSecureAlertEmail({
@@ -355,11 +390,13 @@ export function previewEmailTemplate(id: EmailTemplateId): RenderedEmail {
         language: 'sw',
         receiptToken: 'vsta.demo.receipt',
         summary: 'Habari — I need help. Please call me.',
+        brand,
       });
     default:
       return renderWorkflowMessageEmail({
         subject: 'VerbaLab',
         message: 'Unknown template',
+        brand,
       });
   }
 }

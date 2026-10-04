@@ -77,13 +77,29 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
       const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Sign in required');
       const method = action.method ?? 'POST';
-      const path = action.path.startsWith('/v1/') ? action.path : `${apiBase}/${action.path}`;
+      const pathParams = new Set<string>();
+      const resolvedPath = action.path.replace(/\{([a-zA-Z0-9_]+)\}/g, (_m, key: string) => {
+        pathParams.add(key);
+        const value = values[key]?.trim();
+        if (!value) throw new Error(`${key} is required in the path`);
+        return encodeURIComponent(value);
+      });
+      const path = resolvedPath.startsWith('/v1/') ? resolvedPath : `${apiBase}/${resolvedPath}`;
+      const bodyValues = Object.fromEntries(
+        Object.entries(values).filter(([key]) => !pathParams.has(key)),
+      );
       let out: unknown;
       if (method === 'GET') {
-        out = await apiFetch<unknown>(path, { method: 'GET', token });
+        const qs = new URLSearchParams();
+        for (const [key, value] of Object.entries(bodyValues)) {
+          if (value) qs.set(key, value);
+        }
+        const suffix = qs.toString() ? `?${qs.toString()}` : '';
+        out = await apiFetch<unknown>(`${path}${suffix}`, { method: 'GET', token });
       } else if (hasFileField) {
         const form = new FormData();
         for (const field of action.fields ?? []) {
+          if (pathParams.has(field.name)) continue;
           if (field.type === 'file') {
             const file = files[field.name];
             if (!file) throw new Error(`${field.label} is required`);
@@ -100,7 +116,7 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
         out = await apiFetch<unknown>(path, {
           method: 'POST',
           token,
-          body: JSON.stringify(action.buildBody ? action.buildBody(values) : { ...values }),
+          body: JSON.stringify(action.buildBody ? action.buildBody(bodyValues) : { ...bodyValues }),
         });
       }
       setResult(JSON.stringify(out, null, 2));

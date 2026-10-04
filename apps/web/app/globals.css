@@ -688,6 +688,32 @@ html[data-theme='light'] .vl-mkt-atmosphere {
   color: var(--mkt-ink);
 }
 
+.vl-mkt-brand-logo {
+  display: block;
+  height: 1.75rem;
+  width: auto;
+  max-width: 10rem;
+  object-fit: contain;
+}
+
+.vl-mkt-footer-logo {
+  display: block;
+  height: 2rem;
+  width: auto;
+  max-width: 8rem;
+  object-fit: contain;
+  margin-bottom: 0.25rem;
+}
+
+.vl-mkt-footer-copyright {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--mkt-ink) 18%, transparent);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  opacity: 0.78;
+}
+
 .vl-mkt-brand {
   font-family: var(--font-display);
   font-weight: 780;

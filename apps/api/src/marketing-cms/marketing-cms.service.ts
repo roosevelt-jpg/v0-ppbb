@@ -63,6 +63,11 @@ export class MarketingCmsService implements OnModuleInit {
         defaultTheme: 'system',
         primaryColor: '#1a6b52',
         accentColor: '#6fcf9c',
+        headerLogoUrl: '/email/verbalab-logo.png',
+        footerLogoUrl: '/email/verbalab-mark.png',
+        faviconUrl: '/email/verbalab-mark.png',
+        emailLogoUrl: '/email/verbalab-logo.png',
+        copyrightText: '',
         designScope: DEFAULT_DESIGN_SCOPE as unknown as Prisma.InputJsonValue,
         socialLinks: { docs: '/docs', console: '/dev-login' } as Prisma.InputJsonValue,
       },
@@ -326,6 +331,11 @@ export class MarketingCmsService implements OnModuleInit {
     defaultTheme?: string;
     primaryColor?: string;
     accentColor?: string;
+    headerLogoUrl?: string;
+    footerLogoUrl?: string;
+    faviconUrl?: string;
+    emailLogoUrl?: string;
+    copyrightText?: string;
     designScope?: Prisma.InputJsonValue;
     socialLinks?: Prisma.InputJsonValue;
   }) {
@@ -337,6 +347,11 @@ export class MarketingCmsService implements OnModuleInit {
         ...(input.defaultTheme != null ? { defaultTheme: input.defaultTheme } : {}),
         ...(input.primaryColor != null ? { primaryColor: input.primaryColor } : {}),
         ...(input.accentColor != null ? { accentColor: input.accentColor } : {}),
+        ...(input.headerLogoUrl != null ? { headerLogoUrl: input.headerLogoUrl } : {}),
+        ...(input.footerLogoUrl != null ? { footerLogoUrl: input.footerLogoUrl } : {}),
+        ...(input.faviconUrl != null ? { faviconUrl: input.faviconUrl } : {}),
+        ...(input.emailLogoUrl != null ? { emailLogoUrl: input.emailLogoUrl } : {}),
+        ...(input.copyrightText != null ? { copyrightText: input.copyrightText } : {}),
         ...(input.designScope != null ? { designScope: input.designScope } : {}),
         ...(input.socialLinks != null ? { socialLinks: input.socialLinks } : {}),
       },

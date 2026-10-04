@@ -44,11 +44,12 @@ Each render returns **subject + text + html**. Resend sends both `text` and `htm
 
 Every HTML message uses a shared layout:
 
-- **Header:** VerbaLab logo (`apps/web/public/email/verbalab-logo.png`) on the brand green band
+- **Header:** VerbaLab logo (`apps/web/public/email/verbalab-logo.png` or CMS `emailLogoUrl`) on the brand green band
 - **Body:** title, content, primary CTA
 - **Footer:** social icon row (X, LinkedIn, GitHub, YouTube, Instagram, Facebook) + short residency note
+- **Copyright bar:** bottom brand bar with `© {year} VerbaLab…` (overridable via CMS `copyrightText`)
 
-Image URLs are absolute: `{EMAIL_ASSET_BASE_URL|WEB_APP_URL|https://app.verbalab.ai}/email/...`. Serve the web app (or CDN) so those paths resolve in inbox clients.
+Image URLs are absolute: `{EMAIL_ASSET_BASE_URL|WEB_APP_URL|https://app.verbalab.ai}/email/...`. Serve the web app (or CDN) so those paths resolve in inbox clients. Admins set header/footer/email logos and favicon under **CMS → Site settings**.
 
 ## API
 
