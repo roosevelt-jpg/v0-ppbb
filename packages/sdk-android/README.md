@@ -37,6 +37,13 @@ val client = VerbaLabClient(
 val translated = client.translate(TranslateRequest(text = "Hello", source = "en", target = "sw"))
 val languages = client.languages()
 val audio = client.speech(mapOf("text" to "Habari", "voice" to "alloy"))
+
+// Phone voice recorder → transcript (requires RECORD_AUDIO)
+val plugin = VoiceRecorderPlugin(client, tier = "standard")
+plugin.startSession(language = "sw")
+plugin.beginRecording(context)
+val result = plugin.stopAndTranscribe(title = "Field note")
+val text = result["transcript"]
 ```
 
 Every method from `@verbalab/sdk` is generated as an extension on `VerbaLabClient`

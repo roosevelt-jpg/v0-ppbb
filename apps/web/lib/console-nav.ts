@@ -196,6 +196,16 @@ export const CONSOLE_NAV: NavGroup[] = [
         label: 'Sovereign Flywheel',
         keywords: ['flywheel', 'fine-tune', 'consent', 'dataset', 'sovereign'],
       },
+      {
+        href: '/model-economy',
+        label: 'Model Economy',
+        keywords: ['pricing', 'speed tier', 'sku', 'monetize', 'eco', 'turbo', 'ultra'],
+      },
+      {
+        href: '/voice-recorder-plugin',
+        label: 'Phone Voice Recorder',
+        keywords: ['phone', 'plugin', 'record', 'transcribe', 'android', 'ios'],
+      },
     ],
   },
   {

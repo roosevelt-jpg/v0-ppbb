@@ -31,6 +31,13 @@ let translated = try await client.translate(
 )
 let languages = try await client.languages()
 let audio = try await client.speech(body: ["text": "Habari", "voice": "alloy"])
+
+// Phone voice recorder → transcript (microphone permission required)
+let plugin = VoiceRecorderPlugin(client: client, tier: "standard")
+try await plugin.startSession(language: "sw")
+try plugin.beginRecording()
+let result = try await plugin.stopAndTranscribe(title: "Field note")
+let text = result["transcript"] as? String
 ```
 
 Every method from `@verbalab/sdk` is generated on `VerbaLabClient` (see `VerbaLabAPI.generated.swift`).

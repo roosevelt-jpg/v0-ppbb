@@ -268,6 +268,14 @@ export class ModelKeysService {
         mint: 'POST /v1/model-keys',
         console: '/model-keys',
       },
+      monetization: {
+        principle: 'faster_costs_more',
+        economy: 'GET /v1/model-economy/catalog',
+        quote: 'POST /v1/model-economy/quote',
+        tiers: ['eco', 'standard', 'turbo', 'ultra'],
+        note: 'Pick a use-case SKU and speed tier — eco is cheapest/slowest, ultra is fastest/highest cost.',
+        console: '/model-economy',
+      },
       families: [
         {
           id: 'atlas',
@@ -286,8 +294,10 @@ export class ModelKeysService {
           slug: 'verbalab-echo-stt',
           api: 'POST /v1/speech/recognize',
           meetingApi: 'POST /v1/meeting-transcription/transcribe',
+          phonePlugin: 'POST /v1/voice-recorder-plugin/transcribe',
           scopes: ['stt', '*'],
-          standout: 'Africa-wide speech recognition for meetings and apps',
+          standout: 'Africa-wide speech recognition for meetings, apps, and phone recorder plugin',
+          speedTiers: ['eco', 'standard', 'turbo', 'ultra'],
         },
         {
           id: 'voice-fm',

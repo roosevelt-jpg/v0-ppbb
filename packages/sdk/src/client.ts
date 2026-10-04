@@ -1168,6 +1168,79 @@ export class VerbaLab {
     });
   }
 
+  async modelEconomyEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/engine', { method: 'GET' });
+  }
+
+  async modelEconomyCatalog(useCase?: string): Promise<Record<string, unknown>> {
+    const q = useCase ? `?useCase=${encodeURIComponent(useCase)}` : '';
+    return this.requestJson<Record<string, unknown>>(`/v1/model-economy/catalog${q}`, {
+      method: 'GET',
+    });
+  }
+
+  async quoteModelEconomy(input: {
+    useCase: string;
+    tier: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/quote', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async estimateModelEconomy(input: {
+    useCase: string;
+    tier: string;
+    units: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/estimate', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voiceRecorderPluginEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-recorder-plugin/engine', {
+      method: 'GET',
+    });
+  }
+
+  async voiceRecorderManifest(platform: 'ios' | 'android' = 'android'): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>(
+      `/v1/voice-recorder-plugin/manifest?platform=${encodeURIComponent(platform)}`,
+      { method: 'GET' },
+    );
+  }
+
+  async createVoiceRecorderSession(input: {
+    platform?: string;
+    language?: string;
+    tier?: string;
+    label?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-recorder-plugin/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voiceRecorderTranscribe(input: {
+    sessionId?: string;
+    file: UploadFile;
+    language?: string;
+    tier?: string;
+    title?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.sessionId) form.append('sessionId', input.sessionId);
+    if (input.language) form.append('language', input.language);
+    if (input.tier) form.append('tier', input.tier);
+    if (input.title) form.append('title', input.title);
+    return this.requestForm('/v1/voice-recorder-plugin/transcribe', form);
+  }
+
   async locales(): Promise<LocalePack[]> {
     const res = await this.requestJson<{ data: LocalePack[] }>('/v1/locales', { method: 'GET' });
     return res.data;

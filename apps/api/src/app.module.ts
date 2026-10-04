@@ -286,6 +286,8 @@ import { EdgeOfflineModule } from './edge-offline/edge-offline.module';
 import { DeveloperGravityModule } from './developer-gravity/developer-gravity.module';
 import { AfricaEvalMatrixModule } from './africa-eval-matrix/africa-eval-matrix.module';
 import { SovereignFlywheelModule } from './sovereign-flywheel/sovereign-flywheel.module';
+import { ModelEconomyModule } from './model-economy/model-economy.module';
+import { VoiceRecorderPluginModule } from './voice-recorder-plugin/voice-recorder-plugin.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -561,6 +563,8 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     DeveloperGravityModule,
     AfricaEvalMatrixModule,
     SovereignFlywheelModule,
+    ModelEconomyModule,
+    VoiceRecorderPluginModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,
