@@ -53,8 +53,10 @@ Separate from model keys: `vl_live_` / `vl_test_` on **API keys** (`/keys`) for 
 2. Copy **Publishable key** → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 3. Copy **Secret key** → `CLERK_SECRET_KEY`
 4. Set sign-in URLs (`NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`, etc.)
+5. **Hide Clerk branding for end users:** Dashboard → Settings → Branding → enable **Remove “Secured by Clerk” branding** (paid plan required in production). Use a **production** Clerk instance (not development) so users never see a Development-mode ribbon. Optional: attach a custom auth domain (`accounts.yourdomain.com`).
+6. VerbaLab UI already brands the auth card (logo + colors) and hides clerk.com footer chrome in CSS; the Dashboard toggle is still required for full vendor-mark removal.
 
-Dev already supports test keys / `/dev-login` bypass when configured.
+Dev already supports test keys / `/dev-login` bypass when configured (local/non-production only — the sign-in page hides that link in production builds).
 
 ### Stripe (billing)
 

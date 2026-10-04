@@ -2329,3 +2329,22 @@ html[data-theme='dark'] .vl-avc-send {
     font-size: 0.74rem;
   }
 }
+
+/* Auth: VerbaLab brand only — hide Clerk vendor chrome on sign-in / sign-up cards */
+.vl-clerk-auth .cl-badge,
+.vl-clerk-auth .cl-footer,
+.vl-clerk-auth .cl-footerAction,
+.vl-clerk-auth .cl-internal-icon,
+.vl-clerk-auth a[href*='clerk.com'],
+.vl-clerk-auth a[href*='clerk.dev'],
+.cl-rootBox a[href*='clerk.com'],
+.cl-rootBox a[href*='clerk.dev'] {
+  display: none !important;
+}
+
+/* Development-mode ribbon Clerk injects on non-production instances */
+.cl-internal-b3fm6y,
+[class*='cl-developmentMode'],
+.cl-form .cl-badge {
+  display: none !important;
+}

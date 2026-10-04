@@ -2,6 +2,7 @@ import { SignUp } from '@clerk/nextjs';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { isClerkConfigured } from '@/lib/clerk-config';
+import { verbalabClerkAppearance } from '@/lib/clerk-appearance';
 
 export default function SignUpPage() {
   if (!isClerkConfigured()) redirect('/setup');
@@ -35,7 +36,13 @@ export default function SignUpPage() {
           generation, Speech, Playground, and API keys. Upgrade anytime for cloning and higher quotas.
         </p>
       </div>
-      <SignUp fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard" />
+      <div className="vl-clerk-auth">
+        <SignUp
+          appearance={verbalabClerkAppearance}
+          fallbackRedirectUrl="/dashboard"
+          forceRedirectUrl="/dashboard"
+        />
+      </div>
       <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
         Already have an account?{' '}
         <Link href="/sign-in" style={{ color: 'var(--brand)', fontWeight: 650 }}>

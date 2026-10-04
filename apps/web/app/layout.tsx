@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { DM_Sans, Syne } from 'next/font/google';
 import './globals.css';
 import { isClerkConfigured } from '@/lib/clerk-config';
+import { verbalabClerkAppearance } from '@/lib/clerk-appearance';
 import { SentryInit } from '@/components/sentry-init';
 import { Providers } from '@/components/providers';
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           {isClerkConfigured() ? (
             <ClerkProvider
+              appearance={verbalabClerkAppearance}
               signInFallbackRedirectUrl="/dashboard"
               signUpFallbackRedirectUrl="/dashboard"
               afterSignOutUrl="/"

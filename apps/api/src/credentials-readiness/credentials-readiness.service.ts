@@ -17,7 +17,8 @@ export class CredentialsReadinessService {
       clerk: {
         ready: present(['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY']),
         env: ['NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'CLERK_SECRET_KEY'],
-        howToGet: 'https://dashboard.clerk.com → API Keys (see docs/CREDENTIALS.md)',
+        howToGet:
+          'https://dashboard.clerk.com → API Keys; Settings → Branding → Remove “Secured by Clerk” for production (see docs/CREDENTIALS.md)',
       },
       stripe: {
         ready: present(['STRIPE_SECRET_KEY', 'STRIPE_PRICE_ID_PRO']),

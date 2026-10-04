@@ -2,6 +2,9 @@ import { SignIn } from '@clerk/nextjs';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { isClerkConfigured } from '@/lib/clerk-config';
+import { verbalabClerkAppearance } from '@/lib/clerk-appearance';
+
+const showLocalReviewBypass = process.env.NODE_ENV !== 'production';
 
 export default function SignInPage() {
   if (!isClerkConfigured()) redirect('/setup');
@@ -35,19 +38,27 @@ export default function SignInPage() {
           chat after you sign in.
         </p>
       </div>
-      <SignIn fallbackRedirectUrl="/dashboard" forceRedirectUrl="/dashboard" />
+      <div className="vl-clerk-auth">
+        <SignIn
+          appearance={verbalabClerkAppearance}
+          fallbackRedirectUrl="/dashboard"
+          forceRedirectUrl="/dashboard"
+        />
+      </div>
       <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
         New here?{' '}
         <Link href="/sign-up" style={{ color: 'var(--brand)', fontWeight: 650 }}>
           Create a free account
         </Link>
       </p>
-      <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
-        Stuck on email OTP?{' '}
-        <Link href="/dev-login" style={{ color: '#0f766e', fontWeight: 650 }}>
-          Enter local review session (no OTP)
-        </Link>
-      </p>
+      {showLocalReviewBypass ? (
+        <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: 0 }}>
+          Stuck on email OTP?{' '}
+          <Link href="/dev-login" style={{ color: '#0f766e', fontWeight: 650 }}>
+            Enter local review session (no OTP)
+          </Link>
+        </p>
+      ) : null}
     </main>
   );
 }
