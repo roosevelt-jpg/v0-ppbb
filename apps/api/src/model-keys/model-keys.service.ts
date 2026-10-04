@@ -239,9 +239,114 @@ export class ModelKeysService {
         env: 'VERBALAB_MODEL_API_KEY',
         usage: 'Set on API + model services for service-to-service auth',
       },
+      productApiKeys: {
+        prefix: ['vl_live_', 'vl_test_'],
+        create: 'POST /v1/keys',
+        console: '/keys',
+        usage: 'Authorization: Bearer vl_live_… for product APIs (STT, meeting transcription, Verba Voice, translate)',
+      },
+      models: this.modelsCatalog(),
       notVendorKeys: {
         note: 'These are VerbaLab-owned keys. Do not use OpenAI/ElevenLabs/Google keys as the product default.',
       },
+      dominance: {
+        note:
+          'VerbaLab model families are the Claude/GPT equivalent for African language intelligence — Atlas, Echo, Voice FM, Translate FM, Baobab, Vector FM, Vision FM.',
+      },
+    };
+  }
+
+  /** Public developer catalog of VerbaLab model families (Claude/GPT-style lineup). */
+  modelsCatalog() {
+    return {
+      title: 'VerbaLab Model Families',
+      compareTo: ['Claude (Anthropic)', 'GPT (OpenAI)', 'Grok Voice (xAI)'],
+      auth: {
+        modelKeys: 'Authorization: Bearer vmod_live_…',
+        productKeys: 'Authorization: Bearer vl_live_…',
+        verify: 'POST /v1/model-keys/verify',
+        mint: 'POST /v1/model-keys',
+        console: '/model-keys',
+      },
+      families: [
+        {
+          id: 'atlas',
+          name: 'Atlas',
+          modality: 'chat',
+          slug: 'verbalab-atlas-chat',
+          api: 'POST /v1/chat/completions',
+          voiceMode: 'POST /v1/verba-voice/turns',
+          scopes: ['chat', '*'],
+          standout: 'African Voice LLM — multilingual chat across the continent',
+        },
+        {
+          id: 'echo',
+          name: 'Echo',
+          modality: 'stt',
+          slug: 'verbalab-echo-stt',
+          api: 'POST /v1/speech/recognize',
+          meetingApi: 'POST /v1/meeting-transcription/transcribe',
+          scopes: ['stt', '*'],
+          standout: 'Africa-wide speech recognition for meetings and apps',
+        },
+        {
+          id: 'voice-fm',
+          name: 'Voice FM',
+          modality: 'tts',
+          slug: 'verbalab-voice-fm',
+          api: 'POST /v1/audio/speech',
+          scopes: ['tts', '*'],
+          standout: 'Neural TTS + cloning for African languages and accents',
+        },
+        {
+          id: 'translate-fm',
+          name: 'Translate FM',
+          modality: 'translate',
+          slug: 'verbalab-translate-fm',
+          api: 'POST /v1/translate',
+          scopes: ['translate', '*'],
+          standout: 'Primary MT for African language pairs',
+        },
+        {
+          id: 'baobab',
+          name: 'Baobab',
+          modality: 'foundation',
+          slug: 'baobab',
+          api: 'GET /v1/baobab/engine',
+          scopes: ['*'],
+          standout: 'African language foundation model family',
+        },
+        {
+          id: 'vector-fm',
+          name: 'Vector FM',
+          modality: 'embeddings',
+          slug: 'verbalab-vector-fm',
+          api: 'POST /v1/embeddings',
+          scopes: ['embeddings', '*'],
+          standout: 'Embeddings tuned for African language search',
+        },
+        {
+          id: 'vision-fm',
+          name: 'Vision FM',
+          modality: 'ocr',
+          slug: 'verbalab-vision-fm',
+          api: 'POST /v1/ocr',
+          scopes: ['ocr', '*'],
+          standout: 'OCR/vision for African scripts and documents',
+        },
+        {
+          id: 'verba-voice',
+          name: 'Verba Voice',
+          modality: 'voice',
+          slug: 'verba-voice',
+          api: 'POST /v1/verba-voice/sessions',
+          scopes: ['stt', 'tts', 'chat', '*'],
+          standout: 'Grok-class conversational voice for African languages',
+        },
+      ],
+      liveMatrix: 'GET /v1/models/live',
+      registry: 'GET /v1/models',
+      docs: '/docs/MODEL_KEYS.md',
     };
   }
 }

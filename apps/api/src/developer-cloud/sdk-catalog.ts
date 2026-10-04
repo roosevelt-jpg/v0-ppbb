@@ -33,6 +33,24 @@ export function sdkCatalog() {
     auth: {
       livePrefix: 'vl_live_',
       testPrefix: 'vl_test_',
+      modelLivePrefix: 'vmod_live_',
+      modelTestPrefix: 'vmod_test_',
+      modelRootPrefix: 'vmod_root_',
+      modelKeysGuide: 'GET /v1/model-keys/guide',
+      modelFamilies: 'GET /v1/model-keys/models',
+      note: 'vl_* for product APIs; vmod_* for VerbaLab model serving (Atlas/Echo/Voice FM).',
+    },
+    products: {
+      meetingTranscription: {
+        base: '/v1/meeting-transcription',
+        docs: '/docs/MEETING_TRANSCRIPTION.md',
+        note: 'Africa-wide meeting STT for Zoom/Meet-class platforms — text + spoken recap.',
+      },
+      verbaVoice: {
+        base: '/v1/verba-voice',
+        docs: '/docs/VERBA_VOICE.md',
+        note: 'Grok-class conversational voice sessions for African languages.',
+      },
     },
   };
 }

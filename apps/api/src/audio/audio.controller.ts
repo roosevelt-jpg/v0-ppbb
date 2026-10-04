@@ -17,6 +17,7 @@ import { memoryStorage } from 'multer';
 import { Request, Response } from 'express';
 import { AudioService, audioMaxBytes } from './audio.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { ApiException } from '../common/errors/api-exception';
 import { clientIp } from '../common/http/client-ip';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
@@ -33,7 +34,7 @@ export class AudioController {
 
   @Post('transcriptions')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -64,7 +65,7 @@ export class AudioController {
   }
 
   @Post('speech')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   async speech(
     @Req()
     req: Request & {

@@ -14,6 +14,7 @@ import { memoryStorage } from 'multer';
 import { Request } from 'express';
 import { ChatService } from './chat.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { clientIp } from '../common/http/client-ip';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { DocumentCodecService } from '../documents/document-codec.service';
@@ -34,7 +35,7 @@ export class ChatController {
 
   @Post('completions')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   completions(
     @Req()
     req: Request & {

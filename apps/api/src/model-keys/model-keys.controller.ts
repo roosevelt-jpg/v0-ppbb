@@ -16,6 +16,11 @@ export class ModelKeysController {
     return this.modelKeys.guide();
   }
 
+  @Get('models')
+  models() {
+    return this.modelKeys.modelsCatalog();
+  }
+
   @Get()
   @UseGuards(ClerkAuthGuard)
   list(@CurrentSession() session: SessionContext) {

@@ -35,6 +35,10 @@ export function ModelKeysClient() {
   const [created, setCreated] = useState<Created | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guide, setGuide] = useState<Record<string, unknown> | null>(null);
+  const [models, setModels] = useState<{
+    title?: string;
+    families?: Array<{ id: string; name: string; modality: string; api: string; standout: string }>;
+  } | null>(null);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -45,6 +49,10 @@ export function ModelKeysClient() {
 
   useEffect(() => {
     void apiFetch<Record<string, unknown>>('/v1/model-keys/guide').then(setGuide);
+    void apiFetch<{
+      title?: string;
+      families?: Array<{ id: string; name: string; modality: string; api: string; standout: string }>;
+    }>('/v1/model-keys/models').then(setModels);
   }, []);
 
   useEffect(() => {
@@ -203,6 +211,25 @@ export function ModelKeysClient() {
         </table>
       )}
 
+      <h2 style={{ marginTop: '2rem' }}>Model families</h2>
+      {models?.families?.length ? (
+        <div className="vl-panel" style={{ padding: '1.1rem', marginBottom: '1.25rem' }}>
+          <p style={{ margin: '0 0 0.75rem', color: 'var(--muted)' }}>
+            {models.title ?? 'VerbaLab models'} — available to developers with model keys.
+          </p>
+          <ul style={{ margin: 0, paddingLeft: '1.1rem', display: 'grid', gap: '0.55rem' }}>
+            {models.families.map((f) => (
+              <li key={f.id}>
+                <strong>{f.name}</strong> · {f.modality} · <code>{f.api}</code>
+                <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{f.standout}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p style={{ color: 'var(--muted)' }}>Loading model catalog…</p>
+      )}
+
       <h2 style={{ marginTop: '2rem' }}>How deploy credentials work</h2>
       {guide ? (
         <div className="vl-panel" style={{ padding: '1.1rem', display: 'grid', gap: '0.85rem' }}>
@@ -225,6 +252,16 @@ export function ModelKeysClient() {
                 `Create: ${String(guide.platformRoot.create ?? '—')}`,
                 `Env: ${String(guide.platformRoot.env ?? '—')}`,
                 `Usage: ${String(guide.platformRoot.usage ?? '—')}`,
+              ]}
+            />
+          ) : null}
+          {isGuideSection(guide.productApiKeys) ? (
+            <GuideBlock
+              title="Product API keys (vl_*)"
+              lines={[
+                `Prefixes: ${asStringList(guide.productApiKeys.prefix).join(', ') || '—'}`,
+                `Create: ${String(guide.productApiKeys.create ?? '—')}`,
+                `Usage: ${String(guide.productApiKeys.usage ?? '—')}`,
               ]}
             />
           ) : null}

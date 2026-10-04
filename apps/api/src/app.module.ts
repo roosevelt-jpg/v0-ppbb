@@ -277,6 +277,8 @@ import { InterpreterMeshModule } from './interpreter-mesh/interpreter-mesh.modul
 import { OralKnowledgeModule } from './oral-knowledge/oral-knowledge.module';
 import { CivicVoiceSealModule } from './civic-voice-seal/civic-voice-seal.module';
 import { IntentPreservingDubModule } from './intent-preserving-dub/intent-preserving-dub.module';
+import { MeetingTranscriptionModule } from './meeting-transcription/meeting-transcription.module';
+import { VerbaVoiceModule } from './verba-voice/verba-voice.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -543,6 +545,8 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     OralKnowledgeModule,
     CivicVoiceSealModule,
     IntentPreservingDubModule,
+    MeetingTranscriptionModule,
+    VerbaVoiceModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,

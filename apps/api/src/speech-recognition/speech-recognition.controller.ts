@@ -19,6 +19,7 @@ import { Request, Response } from 'express';
 import { audioMaxBytes } from '../audio/audio-limits';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { ApiException } from '../common/errors/api-exception';
 import { clientIp } from '../common/http/client-ip';
 import {
@@ -110,7 +111,7 @@ export class SpeechRecognitionController {
 
   @Post('recognize')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -154,7 +155,7 @@ export class SpeechRecognitionController {
   }
 
   @Post('stream')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -207,7 +208,7 @@ export class SpeechRecognitionController {
 
   @Post('subtitles')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),

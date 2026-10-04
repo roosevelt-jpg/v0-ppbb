@@ -78,6 +78,16 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/translate', label: 'Translate', keywords: ['mt', 'localization', 'text'] },
       { href: '/voice-studio', label: 'Voice', keywords: ['tts', 'studio', 'clone', 'ssml'] },
       { href: '/speech', label: 'Speech', keywords: ['stt', 'asr', 'transcription', 'audio'] },
+      {
+        href: '/meeting-transcription',
+        label: 'Meeting Transcription',
+        keywords: ['meetings', 'zoom', 'stt', 'africa', 'subtitles', 'recap'],
+      },
+      {
+        href: '/verba-voice',
+        label: 'Verba Voice',
+        keywords: ['grok', 'realtime', 'voice mode', 'conversational', 'duplex'],
+      },
       { href: '/language', label: 'Language', keywords: ['dialects', 'grammar', 'style'] },
       {
         href: '/chat',
@@ -186,6 +196,16 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/voice-enhancement', label: 'Voice Enhancement' },
       { href: '/emotion-voice', label: 'Emotion Voice' },
       { href: '/speech-recognition', label: 'Speech Recognition' },
+      {
+        href: '/meeting-transcription',
+        label: 'Meeting Transcription',
+        keywords: ['meetings', 'zoom', 'africa stt'],
+      },
+      {
+        href: '/verba-voice',
+        label: 'Verba Voice',
+        keywords: ['grok voice', 'realtime'],
+      },
       { href: '/audio', label: 'Audio studio' },
       { href: '/video-voice', label: 'Video Voice / Dubbing' },
       { href: '/interpret', label: 'Interpreter' },
