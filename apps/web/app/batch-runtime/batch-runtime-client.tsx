@@ -105,7 +105,22 @@ export function BatchRuntimeClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        ) : null}
+        <section
+          style={{
+            borderLeft: '3px solid #b45309',
+            paddingLeft: '0.85rem',
+            marginBottom: '1.75rem',
+            maxWidth: '44rem',
+          }}
+        >
+          <h2 style={label}>Batch status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · maxItems={engine.ceilings.maxItemsPerRun} ·
+            maxRetries={engine.ceilings.maxRetries} · mode={engine.ceilings.mode}
+          </p>
+        </section>
+      ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Kinds</h2>

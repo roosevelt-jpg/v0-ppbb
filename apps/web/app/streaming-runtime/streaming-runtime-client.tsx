@@ -127,7 +127,23 @@ export function StreamingRuntimeClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        ) : null}
+        <section
+          style={{
+            borderLeft: '3px solid #7c3aed',
+            paddingLeft: '0.85rem',
+            marginBottom: '1.75rem',
+            maxWidth: '44rem',
+          }}
+        >
+          <h2 style={label}>Streaming status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · transport=
+            {engine.honesty.primaryTransport} · maxChunks={engine.ceilings.maxChunksPerStream} ·
+            mode={engine.ceilings.mode}
+          </p>
+        </section>
+      ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Surfaces</h2>

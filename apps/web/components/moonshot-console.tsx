@@ -90,8 +90,9 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
             form.append(field.name, file, file.name);
           } else if (field.type === 'checkbox') {
             form.append(field.name, values[field.name] === 'true' ? 'true' : 'false');
-          } else if (values[field.name]) {
-            form.append(field.name, values[field.name]);
+          } else {
+            const value = values[field.name];
+            if (value) form.append(field.name, value);
           }
         }
         out = await apiFetch<unknown>(path, { method: 'POST', token, body: form });

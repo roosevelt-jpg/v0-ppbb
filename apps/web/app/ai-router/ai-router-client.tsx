@@ -97,7 +97,21 @@ export function AiRouterClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        ) : null}
+        <section
+          style={{
+            borderLeft: '3px solid #1d4ed8',
+            paddingLeft: '0.85rem',
+            marginBottom: '1.75rem',
+            maxWidth: '44rem',
+          }}
+        >
+          <h2 style={label}>Router status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · mode={engine.mode}
+          </p>
+        </section>
+      ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Resolve</h2>

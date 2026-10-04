@@ -100,7 +100,23 @@ export function IntelligentCacheClient() {
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {engine ? (
-        ) : null}
+        <section
+          style={{
+            borderLeft: '3px solid #0f766e',
+            paddingLeft: '0.85rem',
+            marginBottom: '1.75rem',
+            maxWidth: '44rem',
+          }}
+        >
+          <h2 style={label}>Cache status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · maxEntries=
+            {engine.ceilings.maxEntriesPerWorkspace} · ttl={engine.ceilings.defaultTtlSec}s · mode=
+            {engine.ceilings.mode}
+          </p>
+        </section>
+      ) : null}
 
       <section style={{ marginBottom: '1.75rem', maxWidth: '48rem' }}>
         <h2 style={label}>Namespaces</h2>
