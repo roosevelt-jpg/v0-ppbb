@@ -24,12 +24,13 @@ export class ApiProtectionInterceptor implements NestInterceptor {
         .slice(0, 16);
 
     if (res && typeof res.setHeader === 'function') {
+      // Header values must be ASCII (Node rejects (R)/emdash/smart quotes).
       res.setHeader('X-VerbaLab-Product', 'VerbaLab Language Intelligence Platform');
       res.setHeader(
         'X-VerbaLab-Trademark',
-        "VerbaLab® — Africa's language AI. Unauthorized cloning prohibited.",
+        "VerbaLab (R) - Africa's language AI. Unauthorized cloning prohibited.",
       );
-      res.setHeader('X-VerbaLab-License', 'Proprietary — see /docs and platform terms');
+      res.setHeader('X-VerbaLab-License', 'Proprietary - see /docs and platform terms');
       res.setHeader('X-VerbaLab-Request-Id', requestId);
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Referrer-Policy', 'no-referrer');

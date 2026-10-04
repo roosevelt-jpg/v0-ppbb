@@ -135,7 +135,8 @@ describe('Africa language dominance surfaces', () => {
       interceptor.intercept(context, { handle: () => of({ ok: true }) }).subscribe({
         complete: () => {
           try {
-            expect(headers['X-VerbaLab-Trademark']).toMatch(/VerbaLab/);
+            expect(headers['X-VerbaLab-Trademark']).toMatch(/VerbaLab \(R\)/);
+            expect(headers['X-VerbaLab-Trademark']).toMatch(/^[\x20-\x7E]+$/);
             expect(headers['X-VerbaLab-Watermark']).toMatch(/^vl:/);
             expect(headers['X-Robots-Tag']).toContain('noindex');
             resolve();
