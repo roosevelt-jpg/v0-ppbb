@@ -294,7 +294,7 @@ export const PRODUCT_PAGES: ProductPage[] = [
     features: ['Voice-first agent runtime', 'STT + TTS in the loop', 'Vertical playbooks', 'Observability and guardrails'],
     audiences: ['CX leaders', 'Product teams', 'Governments'],
     keywords: ['voice agents', 'African conversational AI', 'dialect agents'],
-    consoleHref: '/voice',
+    consoleHref: '/chat',
   }),
   p({
     slug: 'conversational-ai',
@@ -306,9 +306,14 @@ export const PRODUCT_PAGES: ProductPage[] = [
     kicker: 'VerbaAgents',
     headline: 'Conversation with cultural context',
     lede: 'Ship chat agents that respect tone, idiom, and multilingual customers.',
-    features: ['Chat console with African prompts', 'Language-aware replies', 'Workflow actions', 'Audit-friendly logs'],
+    features: [
+      'African Voice LLM chat',
+      'Speak or type in any language',
+      'Jarvis-style voice replies',
+      'Language-aware translate-then-answer',
+    ],
     audiences: ['Support', 'Sales', 'Internal IT'],
-    keywords: ['conversational AI Africa', 'multilingual chatbot', 'VerbaChat'],
+    keywords: ['conversational AI Africa', 'multilingual chatbot', 'VerbaChat', 'African Voice LLM'],
     consoleHref: '/chat',
   }),
   p({

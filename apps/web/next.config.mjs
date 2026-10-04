@@ -14,7 +14,8 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            // Microphone self-only for African Voice LLM STT on /chat.
+            value: 'camera=(), microphone=(self), geolocation=()',
           },
           {
             key: 'Content-Security-Policy',
@@ -23,6 +24,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://*.clerk.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
+              "media-src 'self' blob:",
               "font-src 'self' data:",
               "connect-src 'self' https: http://localhost:3001",
               "frame-ancestors 'none'",

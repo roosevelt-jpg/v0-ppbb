@@ -126,7 +126,7 @@ export function SupportBot() {
           <footer className="vl-support-links">
             <Link href="/docs">Docs</Link>
             <Link href="/docs/openapi">OpenAPI</Link>
-            <Link href="/chat">Chat</Link>
+            <Link href="/chat">African Voice LLM</Link>
             <Link href="/billing">Billing</Link>
           </footer>
         </div>

@@ -6,14 +6,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const site = getSiteUrl();
   const now = new Date();
 
-  const staticRoutes = ['', '/products', '/docs', '/docs/openapi', '/playground', '/coverage', '/sign-up'].map(
-    (path) => ({
-      url: `${site}${path || '/'}`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: path === '' ? 1 : 0.7,
-    }),
-  );
+  const staticRoutes = [
+    '',
+    '/products',
+    '/chat',
+    '/docs',
+    '/docs/openapi',
+    '/playground',
+    '/coverage',
+    '/sign-up',
+  ].map((path) => ({
+    url: `${site}${path || '/'}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: path === '' ? 1 : path === '/chat' ? 0.9 : 0.7,
+  }));
 
   const productRoutes = listProductSlugs().map((slug) => ({
     url: `${site}/products/${slug}`,

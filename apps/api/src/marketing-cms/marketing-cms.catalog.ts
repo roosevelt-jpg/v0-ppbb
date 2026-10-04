@@ -285,7 +285,7 @@ export const DEFAULT_HOME_BLOCKS = [
         { name: 'Speech', href: '/docs' },
         { name: 'Translate', href: '/translate' },
         { name: 'Playground', href: '/playground' },
-        { name: 'Chat', href: '/chat' },
+        { name: 'African Voice LLM', href: '/chat' },
       ],
       code: `import { VerbaLab } from "@verbalab/sdk";
 

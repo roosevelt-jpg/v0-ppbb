@@ -79,7 +79,11 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/voice-studio', label: 'Voice', keywords: ['tts', 'studio', 'clone', 'ssml'] },
       { href: '/speech', label: 'Speech', keywords: ['stt', 'asr', 'transcription', 'audio'] },
       { href: '/language', label: 'Language', keywords: ['dialects', 'grammar', 'style'] },
-      { href: '/chat', label: 'Chat', keywords: ['llm', 'assistant'] },
+      {
+        href: '/chat',
+        label: 'African Voice LLM',
+        keywords: ['llm', 'assistant', 'voice', 'jarvis', 'chat', 'speak'],
+      },
       { href: '/intelligence-cloud', label: 'Intelligence', keywords: ['reasoning', 'memory'] },
       { href: '/agent-intelligence', label: 'Agent Intelligence', keywords: ['agent', 'faq'] },
       { href: '/ai-observability', label: 'AI Observability', keywords: ['monitoring', 'audit'] },

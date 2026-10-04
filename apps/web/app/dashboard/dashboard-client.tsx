@@ -321,7 +321,7 @@ export function DashboardClient() {
                 Usage
               </Link>
               <Link href="/chat" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
-                Product chat
+                African Voice LLM
               </Link>
             </div>
           </section>
