@@ -62,7 +62,9 @@ Dev already supports test keys / `/dev-login` bypass when configured.
 2. **Secret key** → `STRIPE_SECRET_KEY`
 3. Create a Product/Price for Pro → `STRIPE_PRICE_ID_PRO`
 4. Webhooks → endpoint `https://<api>/v1/billing/webhook` → `STRIPE_WEBHOOK_SECRET`
-5. (Optional) Connect for creator payouts.
+5. Subscribe at least: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`, `payment_intent.payment_failed`, `charge.dispute.created`, `radar.early_fraud_warning.created`, `account.updated`.
+6. Checkout saves the card as the **default payment method** for subscription auto-debit. `POST /v1/billing/setup-card` adds/updates the card without changing plan. Fraud holds lock billing after repeated declines, Radar warnings, or disputes.
+7. (Optional) Connect for creator payouts.
 
 ### Fly.io (hosting)
 

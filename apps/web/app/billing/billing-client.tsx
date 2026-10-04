@@ -18,6 +18,12 @@ type BillingSummary = {
   requests: number;
   stripeConfigured: boolean;
   hasCustomer: boolean;
+  hasDefaultPaymentMethod?: boolean;
+  autoDebitEnabled?: boolean;
+  cardBrand?: string | null;
+  cardLast4?: string | null;
+  paymentFailureCount?: number;
+  fraudHold?: boolean;
 };
 
 type MemberRow = {
@@ -32,6 +38,7 @@ export function BillingClient() {
   const [summary, setSummary] = useState<BillingSummary | null>(null);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -47,6 +54,10 @@ export function BillingClient() {
 
   useEffect(() => {
     if (!isLoaded) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') setNotice('Upgrade complete — your card is saved for auto-debit renewals.');
+    if (params.get('card') === 'saved') setNotice('Card saved. Future invoices auto-debit this payment method.');
+    if (params.get('checkout') === 'cancel') setNotice('Checkout canceled — no charge was made.');
     void load().catch((err: Error) => setError(err.message));
   }, [isLoaded, load]);
 
@@ -68,6 +79,24 @@ export function BillingClient() {
     }
   }
 
+  async function saveCard() {
+    setError(null);
+    setBusy(true);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const res = await apiFetch<{ url: string | null }>('/v1/billing/setup-card', {
+        method: 'POST',
+        token,
+      });
+      if (!res.url) throw new Error('Stripe did not return a setup URL');
+      window.location.href = res.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start card setup');
+      setBusy(false);
+    }
+  }
+
   async function openPortal() {
     setError(null);
     setBusy(true);
@@ -85,16 +114,41 @@ export function BillingClient() {
     }
   }
 
+  async function syncCard() {
+    setError(null);
+    setBusy(true);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      await apiFetch('/v1/billing/sync-payment-method', { method: 'POST', token });
+      await load();
+      setNotice('Synced default card from Stripe for auto-debit.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sync failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const cardLabel =
+    summary?.cardBrand && summary?.cardLast4
+      ? `${summary.cardBrand.toUpperCase()} •••• ${summary.cardLast4}`
+      : summary?.hasDefaultPaymentMethod
+        ? 'Card on file'
+        : 'No card on file';
+
   return (
     <AppShell>
       <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.03em', fontSize: '2rem' }}>
         Billing
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
-        Free tier includes a monthly character quota. Upgrade to Pro for higher limits — cards stay with Stripe.
+        Upgrade with Stripe Checkout. Your card is saved as the default payment method and used for every
+        auto-debit renewal — VerbaLab never stores raw card numbers.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
+      {notice ? <p style={{ color: 'var(--brand)' }}>{notice}</p> : null}
 
       {summary ? (
         <div style={{ marginTop: '1.5rem', display: 'grid', gap: '1rem' }}>
@@ -124,12 +178,41 @@ export function BillingClient() {
             <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.45rem' }}>
               Period started: {formatUtc(summary.periodStart)}
             </div>
+
+            <div
+              style={{
+                marginTop: '1rem',
+                padding: '0.9rem 1rem',
+                borderRadius: 12,
+                border: '1px solid var(--line)',
+                background: 'var(--bg-soft)',
+                display: 'grid',
+                gap: '0.35rem',
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>Auto-debit card</div>
+              <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
+                {cardLabel}
+                {summary.autoDebitEnabled ? ' · auto-debit on' : ' · add a card to enable auto-debit'}
+              </div>
+              {summary.fraudHold ? (
+                <div style={{ color: 'var(--bad)', fontSize: '0.9rem' }}>
+                  Fraud hold active — API metering and upgrades are blocked until a valid card clears the hold.
+                </div>
+              ) : null}
+              {(summary.paymentFailureCount ?? 0) > 0 && !summary.fraudHold ? (
+                <div style={{ color: 'var(--bad)', fontSize: '0.9rem' }}>
+                  Payment failures: {summary.paymentFailureCount}. Update your card to resume auto-debit.
+                </div>
+              ) : null}
+            </div>
+
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.1rem', flexWrap: 'wrap' }}>
               {summary.plan !== 'pro' ? (
                 <button
                   type="button"
                   className="vl-btn vl-btn-primary"
-                  disabled={busy || !summary.stripeConfigured}
+                  disabled={busy || !summary.stripeConfigured || summary.fraudHold}
                   onClick={() => void startCheckout()}
                 >
                   Upgrade to Pro
@@ -137,11 +220,27 @@ export function BillingClient() {
               ) : null}
               <button
                 type="button"
+                className="vl-btn vl-btn-primary"
+                disabled={busy || !summary.stripeConfigured || summary.fraudHold}
+                onClick={() => void saveCard()}
+              >
+                {summary.hasDefaultPaymentMethod ? 'Update card on file' : 'Add card for auto-debit'}
+              </button>
+              <button
+                type="button"
                 className="vl-btn vl-btn-secondary"
                 disabled={busy || !summary.stripeConfigured || !summary.hasCustomer}
                 onClick={() => void openPortal()}
               >
-                Manage payment method
+                Manage in Stripe portal
+              </button>
+              <button
+                type="button"
+                className="vl-btn vl-btn-secondary"
+                disabled={busy || !summary.stripeConfigured || !summary.hasCustomer}
+                onClick={() => void syncCard()}
+              >
+                Sync card status
               </button>
             </div>
             {!summary.stripeConfigured ? (
@@ -149,9 +248,17 @@ export function BillingClient() {
                 Stripe is not configured yet. Add <code className="vl-code">STRIPE_SECRET_KEY</code>,{' '}
                 <code className="vl-code">STRIPE_PRICE_ID_PRO</code>,{' '}
                 <code className="vl-code">STRIPE_WEBHOOK_SECRET</code>, and billing URLs to{' '}
-                <code className="vl-code">apps/api/.env</code>.
+                <code className="vl-code">apps/api/.env</code>. Webhooks must include{' '}
+                <code className="vl-code">checkout.session.completed</code>,{' '}
+                <code className="vl-code">invoice.paid</code>,{' '}
+                <code className="vl-code">invoice.payment_failed</code>, and Radar/dispute events.
               </p>
-            ) : null}
+            ) : (
+              <p style={{ color: 'var(--muted)', marginBottom: 0, marginTop: '1rem', fontSize: '0.88rem' }}>
+                Fraud controls: checkout rate limits, payment-failure locks, Radar early-fraud warnings, and
+                dispute holds block abusive billing automatically.
+              </p>
+            )}
           </div>
 
           <div className="vl-panel" style={{ padding: '1.25rem' }}>

@@ -154,7 +154,8 @@ textarea {
   padding: 0.7rem 1.15rem;
   font-weight: 600;
   font-size: 0.925rem;
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
 }
 
 .vl-btn:hover {
@@ -167,29 +168,70 @@ textarea {
   transform: none;
 }
 
+/* Light: black/near-black fills → white text. Dark: light fills → dark text. */
 .vl-btn-primary {
   background: var(--accent);
   color: var(--accent-fg);
 }
 
-.vl-btn-primary:hover {
-  background: #222;
+html[data-theme='light'] .vl-btn-primary,
+:root .vl-btn-primary {
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+html[data-theme='light'] .vl-btn-primary:hover,
+:root .vl-btn-primary:hover {
+  background: #1a1a1a;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .vl-btn-primary {
+  background: #f4f7f5;
+  color: #0a0a0a;
+}
+
+html[data-theme='dark'] .vl-btn-primary:hover {
+  background: #ffffff;
+  color: #0a0a0a;
 }
 
 .vl-btn-secondary {
-  background: var(--bg);
+  background: var(--bg-elevated);
   color: var(--ink);
   border: 1px solid var(--line-strong);
 }
 
 .vl-btn-secondary:hover {
   background: var(--bg-soft);
+  color: var(--ink);
 }
 
 .vl-btn-danger {
   background: transparent;
   color: var(--bad);
   border: 1px solid var(--line);
+}
+
+/* Catch any black/white filled controls that omit text color */
+button[style*='background: #0a0a0a'],
+button[style*='background:#0a0a0a'],
+button[style*='background: black'],
+button[style*='background:black'],
+a[style*='background: #0a0a0a'],
+a[style*='background:#0a0a0a'] {
+  color: #ffffff !important;
+}
+
+button[style*='background: #fff'],
+button[style*='background:#fff'],
+button[style*='background: #ffffff'],
+button[style*='background:#ffffff'],
+a[style*='background: #fff'],
+a[style*='background:#fff'],
+a[style*='background: #ffffff'],
+a[style*='background:#ffffff'] {
+  color: #0a0a0a !important;
 }
 
 .vl-field {
@@ -695,6 +737,18 @@ html[data-theme='dark'] .vl-mkt-cta {
   color: #0a0a0a !important;
 }
 
+.vl-mkt-cta:hover {
+  color: inherit !important;
+}
+
+html[data-theme='light'] .vl-mkt-cta:hover {
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] .vl-mkt-cta:hover {
+  color: #0a0a0a !important;
+}
+
 .vl-mkt-cta-ghost {
   text-decoration: none;
   background: #ffffff !important;
@@ -703,8 +757,9 @@ html[data-theme='dark'] .vl-mkt-cta {
 }
 
 html[data-theme='dark'] .vl-mkt-cta-ghost {
-  background: transparent !important;
-  color: var(--mkt-ink) !important;
+  background: #121614 !important;
+  color: #f4f7f5 !important;
+  border-color: var(--mkt-line) !important;
 }
 
 .vl-mkt-hero {
@@ -1534,6 +1589,132 @@ html[data-theme='light'] .vl-prod-code-block {
   line-height: 1.45;
 }
 
+.vl-prod-media {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  border: 1px solid var(--mkt-line, var(--line));
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  background: var(--mkt-elev, var(--bg-elevated));
+}
+
+.vl-prod-media-copy h2 {
+  margin-bottom: 0.4rem;
+}
+
+.vl-prod-media-copy > p {
+  margin: 0;
+  color: var(--mkt-muted, var(--muted));
+  line-height: 1.5;
+}
+
+.vl-prod-media-audio {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.vl-prod-media-track {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--mkt-muted, var(--muted));
+}
+
+.vl-prod-media-track audio {
+  width: 100%;
+}
+
+.vl-prod-media-frame {
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--mkt-line, var(--line));
+  background: #0f1412;
+  min-height: 14rem;
+}
+
+.vl-prod-media-object,
+.vl-prod-media-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.vl-prod-api-head p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--mkt-muted, var(--muted));
+}
+
+.vl-prod-api-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(14rem, 0.9fr) minmax(0, 1.4fr);
+}
+
+.vl-prod-api-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.vl-prod-api-list button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--mkt-line, var(--line));
+  background: var(--mkt-elev, var(--bg-elevated));
+  color: var(--mkt-ink, var(--ink));
+  border-radius: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.vl-prod-api-list button.is-active,
+.vl-prod-api-list button:hover {
+  border-color: var(--brand);
+}
+
+.vl-prod-api-list code {
+  font-size: 0.82rem;
+}
+
+.vl-prod-api-list code span {
+  color: var(--brand);
+  font-weight: 700;
+  margin-right: 0.35rem;
+}
+
+.vl-prod-api-list small {
+  color: var(--mkt-muted, var(--muted));
+  font-size: 0.78rem;
+}
+
+.vl-prod-api-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.vl-prod-api-sdk summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 860px) {
+  .vl-prod-media,
+  .vl-prod-api-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .vl-prod-close {
   text-align: center;
   padding-bottom: 3rem;
@@ -1976,7 +2157,17 @@ html[data-theme='dark'] .vl-avc {
 
 .vl-avc-send {
   background: var(--brand);
-  color: #fff;
+  color: #ffffff;
+}
+
+html[data-theme='light'] .vl-avc-send {
+  background: #145c46;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .vl-avc-send {
+  background: #6fcf9c;
+  color: #0a0a0a;
 }
 
 .vl-avc-send:disabled,

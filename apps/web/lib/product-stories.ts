@@ -18,6 +18,19 @@ export type ProductDemoKind =
   | 'api'
   | 'console';
 
+export type ProductApiEndpoint = {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  path: string;
+  summary: string;
+};
+
+export type ProductDemoMedia = {
+  poster: string;
+  title: string;
+  caption: string;
+  audioSamples: Array<{ label: string; src: string }>;
+};
+
 export type ProductStory = {
   overview: string;
   howItWorks: string[];
@@ -28,6 +41,8 @@ export type ProductStory = {
   samplePrompt: string;
   sampleCode: string;
   proofPoints: string[];
+  apiEndpoints: ProductApiEndpoint[];
+  media: ProductDemoMedia;
 };
 
 function demoForSlug(slug: string, family: ProductPage['family']): ProductDemoKind {
@@ -383,6 +398,110 @@ function samplePromptFor(product: ProductPage, kind: ProductDemoKind): string {
   }
 }
 
+function apiEndpointsFor(kind: ProductDemoKind, product: ProductPage): ProductApiEndpoint[] {
+  const byKind: Record<ProductDemoKind, ProductApiEndpoint[]> = {
+    tts: [
+      { method: 'GET', path: '/v1/audio/voices', summary: 'List dialect-aware voices' },
+      { method: 'POST', path: '/v1/audio/speech', summary: 'Synthesize speech (auto-debit metered)' },
+      { method: 'GET', path: '/v1/languages', summary: 'Language inventory for scripts' },
+    ],
+    stt: [
+      { method: 'POST', path: '/v1/audio/transcriptions', summary: 'Transcribe audio / mic capture' },
+      { method: 'GET', path: '/v1/languages', summary: 'Supported language codes' },
+      { method: 'POST', path: '/v1/detect', summary: 'Detect language from text residue' },
+    ],
+    translate: [
+      { method: 'POST', path: '/v1/translate', summary: 'Translate text between languages' },
+      { method: 'POST', path: '/v1/detect', summary: 'Detect source language' },
+      { method: 'GET', path: '/v1/languages', summary: 'List translate pairs / locales' },
+    ],
+    detect: [
+      { method: 'POST', path: '/v1/detect', summary: 'Detect language of customer text' },
+      { method: 'GET', path: '/v1/languages', summary: 'Canonical language codes' },
+    ],
+    chat: [
+      { method: 'POST', path: '/v1/chat/completions', summary: 'African Voice LLM chat' },
+      { method: 'POST', path: '/v1/audio/transcriptions', summary: 'Optional voice-in' },
+      { method: 'POST', path: '/v1/audio/speech', summary: 'Optional Jarvis speak-back' },
+    ],
+    languages: [
+      { method: 'GET', path: '/v1/languages', summary: 'Full language inventory' },
+      { method: 'GET', path: '/v1/coverage', summary: 'Coverage snapshot (when enabled)' },
+    ],
+    voices: [
+      { method: 'GET', path: '/v1/audio/voices', summary: 'Voice catalog for TTS/agents' },
+      { method: 'POST', path: '/v1/audio/speech', summary: 'Preview a voice line' },
+    ],
+    coverage: [
+      { method: 'GET', path: '/v1/languages', summary: 'Live language count' },
+      { method: 'GET', path: '/v1/audio/voices', summary: 'Voice coverage by locale' },
+    ],
+    api: [
+      { method: 'GET', path: '/v1/openapi.json', summary: 'OpenAPI document' },
+      { method: 'POST', path: '/v1/translate', summary: 'Example authenticated call' },
+      { method: 'GET', path: '/v1/languages', summary: 'No-auth discovery call' },
+    ],
+    console: [
+      { method: 'GET', path: '/v1/billing/summary', summary: 'Plan + quota for the workspace' },
+      { method: 'GET', path: '/v1/languages', summary: 'Shared language inventory' },
+      { method: 'POST', path: '/v1/translate', summary: 'Typical metered product call' },
+    ],
+  };
+  if (product.slug.includes('billing') || product.slug === 'api-key') {
+    return [
+      { method: 'GET', path: '/v1/billing/summary', summary: 'Plan, card-on-file, auto-debit status' },
+      { method: 'POST', path: '/v1/billing/checkout', summary: 'Upgrade with saved card auto-debit' },
+      { method: 'POST', path: '/v1/billing/setup-card', summary: 'Add/update default payment method' },
+    ];
+  }
+  return byKind[kind];
+}
+
+function mediaFor(kind: ProductDemoKind, product: ProductPage): ProductDemoMedia {
+  if (kind === 'stt') {
+    return {
+      poster: '/demos/stt-demo.svg',
+      title: `${product.linkName} in motion`,
+      caption: 'Illustration of accent-aware transcription — play the sample, then run the live mic demo.',
+      audioSamples: [
+        { label: 'Call sample', src: '/demos/stt-call-sample.wav' },
+        { label: 'Agent reply tone', src: '/demos/voice-agent-reply.wav' },
+      ],
+    };
+  }
+  if (kind === 'chat') {
+    return {
+      poster: '/demos/chat-demo.svg',
+      title: 'Jarvis-style conversation',
+      caption: 'See the chat loop, then try the live African Voice LLM demo below.',
+      audioSamples: [
+        { label: 'Swahili-style sample', src: '/demos/voice-swahili-sample.wav' },
+        { label: 'Spoken reply bed', src: '/demos/voice-agent-reply.wav' },
+      ],
+    };
+  }
+  if (kind === 'tts' || kind === 'voices') {
+    return {
+      poster: '/demos/tts-demo.svg',
+      title: 'Voice illustration',
+      caption: 'Embedded sample tones stand in for dialect voices — run the live demo for real TTS audio.',
+      audioSamples: [
+        { label: 'Swahili bed', src: '/demos/voice-swahili-sample.wav' },
+        { label: 'Yoruba bed', src: '/demos/voice-yoruba-sample.wav' },
+      ],
+    };
+  }
+  return {
+    poster: '/demos/tts-demo.svg',
+    title: `${product.linkName} capability filmstrip`,
+    caption: 'Visual + audio illustration of the product path — live API demo follows.',
+    audioSamples: [
+      { label: 'Platform tone', src: '/demos/voice-agent-reply.wav' },
+      { label: 'Market sample', src: '/demos/voice-swahili-sample.wav' },
+    ],
+  };
+}
+
 /** Rich narrative + demo config for every dedicated product lander. */
 export function getProductStory(product: ProductPage): ProductStory {
   const demoKind = demoForSlug(product.slug, product.family);
@@ -425,5 +544,7 @@ export function getProductStory(product: ProductPage): ProductStory {
       `Console: ${product.consoleHref}`,
       `Built for ${product.audiences.slice(0, 2).join(' & ')}`,
     ],
+    apiEndpoints: apiEndpointsFor(demoKind, product),
+    media: mediaFor(demoKind, product),
   };
 }

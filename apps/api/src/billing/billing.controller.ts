@@ -51,6 +51,37 @@ export class BillingController {
     });
   }
 
+  /** Save / replace card on file for always-on subscription auto-debit. */
+  @Post('setup-card')
+  @UseGuards(ClerkAuthGuard)
+  setupCard(@CurrentSession() session: SessionContext, @Req() req: Request) {
+    if (session.role !== 'owner' && session.role !== 'admin') {
+      throw new ApiException(
+        'forbidden',
+        'Only owners and admins can manage billing',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return this.billing.createSetupCardSession({
+      organizationId: session.organizationId,
+      userId: session.userId,
+      ip: clientIp(req),
+    });
+  }
+
+  @Post('sync-payment-method')
+  @UseGuards(ClerkAuthGuard)
+  syncPaymentMethod(@CurrentSession() session: SessionContext) {
+    if (session.role !== 'owner' && session.role !== 'admin') {
+      throw new ApiException(
+        'forbidden',
+        'Only owners and admins can manage billing',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return this.billing.syncDefaultPaymentMethod(session.organizationId);
+  }
+
   @Post('webhook')
   async webhook(
     @Req() req: Request & { rawBody?: Buffer },

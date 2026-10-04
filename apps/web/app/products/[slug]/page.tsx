@@ -6,6 +6,8 @@ import { buildPageMetadata } from '@/lib/seo';
 import { getProductPage, listProductSlugs, productsByFamily } from '@/lib/product-pages';
 import { getProductStory } from '@/lib/product-stories';
 import { ProductLiveDemo } from './product-live-demo';
+import { ProductDemoMedia } from './product-demo-media';
+import { ProductApiGuide } from './product-api-guide';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -55,7 +57,9 @@ export default async function ProductMarketingPage({ params }: Props) {
           <Link href="/products">All products</Link>
           <Link href="/#products">{product.family}</Link>
           <Link href="/docs">Docs</Link>
+          <a href="#illustrations">Demos</a>
           <a href="#live-demo">Live demo</a>
+          <a href="#api-guide">APIs</a>
         </nav>
         <div className="vl-mkt-nav-actions">
           <ThemeSwitcher />
@@ -146,12 +150,24 @@ export default async function ProductMarketingPage({ params }: Props) {
         </section>
 
         <div className="vl-mkt-section">
+          <ProductDemoMedia media={story.media} />
+        </div>
+
+        <div className="vl-mkt-section">
           <ProductLiveDemo
             demoKind={story.demoKind}
             demoTitle={story.demoTitle}
             demoBlurb={story.demoBlurb}
             samplePrompt={story.samplePrompt}
             consoleHref={product.consoleHref}
+            productName={product.linkName}
+          />
+        </div>
+
+        <div className="vl-mkt-section">
+          <ProductApiGuide
+            endpoints={story.apiEndpoints}
+            sampleCode={story.sampleCode}
             productName={product.linkName}
           />
         </div>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#101411"/>
+  <text x="48" y="90" fill="#dff5e8" font-family="Avenir Next,sans-serif" font-size="42" font-weight="700">Speech → text</text>
+  <text x="48" y="150" fill="#9fceb8" font-family="Avenir Next,sans-serif" font-size="22">Accent-aware transcription in realtime</text>
+  <rect x="48" y="210" width="864" height="220" rx="24" fill="rgba(111,207,156,0.08)" stroke="#6fcf9c" stroke-opacity="0.35"/>
+  <text x="80" y="280" fill="#6fcf9c" font-family="ui-monospace,monospace" font-size="22">"Sannu da zuwa…"</text>
+  <text x="80" y="330" fill="#f4f7f5" font-family="ui-monospace,monospace" font-size="20">→ language: ha · confidence: 0.91</text>
+  <text x="48" y="480" fill="#cfe9db" font-family="Avenir Next,sans-serif" font-size="18">POST /v1/audio/transcriptions</text>
+</svg>
