@@ -81,9 +81,9 @@ export function intelligenceAnalyticsCatalog() {
       {
         id: 'enterprise-reports',
         name: 'Enterprise Reports',
-        status: 'deferred',
-        api: null,
-        notes: 'Enterprise BI / scheduled PDF suite deferred.',
+        status: 'shipped',
+        api: 'GET /v1/intelligence-analytics/enterprise-reports',
+        notes: 'Bundled enterprise JSON report suite (usage/latency/cost/routing). Not scheduled PDF BI OS.',
       },
       {
         id: 'reports',

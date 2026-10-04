@@ -6,6 +6,7 @@ import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
 import { getDevBearer, resolveApiToken } from '@/lib/dev-auth';
 import { SupportBot } from '@/components/support-bot';
+import { SiteFooter } from '@/components/marketing/site-footer';
 
 type Language = { code: string; name: string };
 type ChatTurn = {
@@ -314,6 +315,7 @@ export function AfricanVoiceChat() {
   const empty = messages.length === 0;
 
   return (
+    <>
     <div className="vl-avc">
       <aside className={`vl-avc-sidebar${sidebarOpen ? '' : ' is-collapsed'}`}>
         <div className="vl-avc-sidebar-top">
@@ -521,5 +523,7 @@ export function AfricanVoiceChat() {
       </main>
       <SupportBot />
     </div>
+    <SiteFooter />
+    </>
   );
 }

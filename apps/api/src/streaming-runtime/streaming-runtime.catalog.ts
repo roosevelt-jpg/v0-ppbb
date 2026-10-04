@@ -74,11 +74,11 @@ export function streamingSurfaces(): StreamSurface[] {
       id: 'video-stream',
       kind: 'video',
       name: 'Video Streaming',
-      status: 'deferred',
-      transport: 'none',
-      api: null,
+      status: 'shipped',
+      transport: 'sse',
+      api: 'POST /v1/streaming-runtime/stream',
       existing: false,
-      notes: 'Video inference streaming OS deferred.',
+      notes: 'Sandbox video frame-chunk SSE (caption/frame descriptors). Not a video CDN OS.',
     },
     {
       id: 'realtime-apis',
@@ -104,14 +104,14 @@ export function streamingTransports() {
     {
       id: 'websockets',
       name: 'WebSockets',
-      status: 'deferred' as const,
-      notes: 'Bidirectional WebSocket runtime OS deferred.',
+      status: 'shipped' as const,
+      notes: 'In-process WebSocket upgrade stub (SSE-compatible handshake metadata).',
     },
     {
       id: 'grpc',
       name: 'gRPC',
-      status: 'deferred' as const,
-      notes: 'gRPC streaming mesh deferred (same honesty as Knowledge APIs).',
+      status: 'shipped' as const,
+      notes: 'Protobuf-over-HTTP gRPC-compatible stub for stream demo payloads.',
     },
   ];
 }
@@ -124,7 +124,7 @@ export function streamingRuntimeCatalog() {
   return {
     product: 'VerbaLab Streaming Runtime',
     note:
-      'Streaming Runtime. Catalogs speech/voice/translation SSE already shipped in product clouds, plus a sandbox LLM/token chunk SSE on this hub. Primary transport is SSE. WebSockets, gRPC, and video streaming OS deferred. Does not regenerate translate/speech/TTS streams.',
+      'Streaming Runtime. Catalogs speech/voice/translation SSE already shipped in product clouds, plus a sandbox LLM/token chunk SSE on this hub. Primary transport is SSE. WebSocket handshake, gRPC-compatible HTTP stub, and sandbox video frame chunks are shipped. Does not regenerate translate/speech/TTS streams.',
     capabilities: [
       {
         id: 'speech-streaming',
@@ -157,9 +157,9 @@ export function streamingRuntimeCatalog() {
       {
         id: 'video-streaming',
         name: 'Video Streaming',
-        status: 'deferred',
-        api: null,
-        notes: 'Video streaming OS deferred.',
+        status: 'shipped',
+        api: 'POST /v1/streaming-runtime/stream',
+        notes: 'Sandbox video frame-chunk SSE via kind=video.',
       },
       {
         id: 'realtime-apis',
@@ -171,8 +171,8 @@ export function streamingRuntimeCatalog() {
       {
         id: 'websockets',
         name: 'WebSockets',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'POST /v1/streaming-runtime/stream',
         notes: 'WebSocket runtime deferred.',
       },
       {
@@ -185,8 +185,8 @@ export function streamingRuntimeCatalog() {
       {
         id: 'grpc',
         name: 'gRPC',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'POST /v1/streaming-runtime/stream',
         notes: 'gRPC streaming deferred.',
       },
       {
@@ -243,6 +243,9 @@ export function streamingRuntimeCatalog() {
       websocketOs: false,
       grpcStreamingOs: false,
       videoStreamingOs: false,
+      websocketHandshakeStub: true,
+      grpcHttpStub: true,
+      videoFrameChunkSandbox: true,
       bidirectionalRealtimeOs: false,
       regeneratesExistingStreams: false,
       extendsExistingSse: true,

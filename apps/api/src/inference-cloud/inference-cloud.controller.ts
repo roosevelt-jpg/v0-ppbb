@@ -17,4 +17,15 @@ export class InferenceCloudController {
   overview(@CurrentSession() session: SessionContext) {
     return this.inferenceCloud.overview(session);
   }
+
+
+  @Get('autoscaling')
+  autoscaling() {
+    return this.inferenceCloud.autoscaling();
+  }
+
+  @Get('regions')
+  regions() {
+    return this.inferenceCloud.regions();
+  }
 }

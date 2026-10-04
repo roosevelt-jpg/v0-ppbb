@@ -99,12 +99,11 @@ export function voiceAnalyticsCatalog() {
         api: 'GET /v1/voice-analytics/monitoring',
         notes: 'Snapshot + shared observability request IDs.',
       },
-      {
-        id: 'bi-dashboard',
+      { id: 'bi-dashboard',
         name: 'BI Dashboard Product',
-        status: 'deferred',
-        api: null,
-        notes: 'Looker/Amplitude-grade voice BI product deferred.',
+        status: 'shipped',
+        api: 'GET /v1/voice-analytics/bi',
+        notes: 'In-process BI dashboard aggregate over voice analytics endpoints.',
       },
     ] satisfies VoiceAnalyticsCapability[],
     honesty: {

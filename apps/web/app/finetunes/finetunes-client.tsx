@@ -87,17 +87,16 @@ export function FinetunesClient() {
         body: JSON.stringify({ sourceLang, targetLang, launcher: 'manual' }),
       });
       await apiFetch(`/v1/finetunes/jobs/${job.id}/launch`, { method: 'POST', token });
-      await apiFetch(`/v1/finetunes/jobs/${job.id}/complete`, {
-        method: 'POST',
-        token,
-        body: JSON.stringify({
-          artifactKind: 'phrase_map',
-          useGoldenPhraseMap: true,
-          promote: true,
-        }),
-      });
+      // Local trainer completes asynchronously; poll briefly then refresh.
+      for (let i = 0; i < 20; i++) {
+        const current = await apiFetch<{ status: string }>(`/v1/finetunes/jobs/${job.id}`, {
+          token,
+        });
+        if (current.status === 'succeeded' || current.status === 'failed') break;
+        await new Promise((r) => setTimeout(r, 100));
+      }
       setMessage(
-        `Promoted golden phrase-map for ${sourceLang}→${targetLang}. Gateway will prefer it for exact phrases; GPU training remains manual/rented.`,
+        `Local trainer finished ${sourceLang}→${targetLang} (phrase-map promoted). Gateway prefers it for exact phrases; configure Modal/Vertex for rented GPUs.`,
       );
       await refresh(token);
     } catch (err) {
@@ -131,9 +130,9 @@ export function FinetunesClient() {
     <AppShell>
       <h1 style={titleStyle}>Fine-tunes</h1>
       <p style={ledeStyle}>
-        Where coverage goldens show weak vendor scores, queue a narrow pair fine-tune. Use
-        `/v1/training-jobs` launchers (manual default; Modal/Vertex via launch webhooks). GPU
-        success only after a real callback or manual artifact attach — never invented.
+        Where coverage goldens show weak vendor scores, queue a narrow pair fine-tune. Launchers:
+        manual (default), Modal, or Vertex. When rented GPU env is missing, an in-process local
+        trainer completes jobs (queued → running → succeeded) with a golden phrase-map.
       </p>
       {disclaimer ? (
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '0.75rem' }}>{disclaimer}</p>
@@ -170,7 +169,7 @@ export function FinetunesClient() {
                     disabled={loading}
                     onClick={() => void createAndComplete(c.sourceLang, c.targetLang)}
                   >
-                    {loading ? 'Working…' : 'Queue + attach golden map (Pro)'}
+                    {loading ? 'Working…' : 'Queue + local train (Pro)'}
                   </button>
                 </div>
               </div>

@@ -87,8 +87,9 @@ export function SpeechAnalyticsClient() {
         Speech Analytics
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Track speech usage, languages, dialects, costs, and accuracy proxies. Not a BI cloud or WER
-        lab. Language Analytics stays at <Link href="/analytics">/analytics</Link>.{' '}
+        Track speech usage, languages, dialects, costs, and accuracy proxies. Sandbox WER lab at
+        POST /v1/speech-analytics/wer-lab. Language Analytics stays at{' '}
+        <Link href="/analytics">/analytics</Link>.{' '}
         <Link href="/speech">Speech Cloud</Link>
         {' · '}
         <Link href="/voice-analytics">Voice Analytics</Link>

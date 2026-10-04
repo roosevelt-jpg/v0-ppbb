@@ -135,8 +135,9 @@ export function researchAreasCatalog(): Array<{
     {
       id: 'quantumAiResearchReadiness',
       name: 'Quantum AI Research Readiness',
-      status: 'deferred',
-      notes: 'Readiness notes only — not a quantum computing OS.',
+      status: 'shipped',
+      notes:
+        'GET /v1/research-cloud/quantum — Quantum AI research readiness notes; not a quantum computing OS.',
     },
     { id: 'syntheticData', name: 'Synthetic Data', status: 'shipped', notes: 'modality catalog.' },
     { id: 'evaluation', name: 'Evaluation', status: 'shipped', notes: 'evaluation catalog.' },

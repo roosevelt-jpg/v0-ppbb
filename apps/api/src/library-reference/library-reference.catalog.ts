@@ -435,8 +435,8 @@ export function libraryReferenceProducts() {
   return [
     { id: 'master-phase-index', name: 'Master Phase Index', status: 'shipped' as const, api: 'GET /v1/library-reference/index', console: '/library-reference', notes: 'Volumes 1–24 / phases through 260.' },
     { id: 'deeper-risk-notes', name: 'Deeper Risk Notes', status: 'shipped' as const, api: 'GET /v1/library-reference/risks', console: '/library-reference', notes: 'Five flagged risk areas across the library.' },
-    { id: 'ai-internet-vision', name: 'AI Internet Vision (raw)', status: 'deferred' as const, api: 'GET /v1/library-reference/vision', console: '/library-reference', notes: 'Vision feature names only — not executable phases.' },
-    { id: 'mission-control-recommendation', name: 'Mission Control Recommendation', status: 'deferred' as const, api: 'GET /v1/library-reference/vision', console: '/library-reference', notes: 'Author closing advice; not a shipped product claim.' },
+    { id: 'ai-internet-vision', name: 'AI Internet Vision (raw)', status: 'shipped' as const, api: 'GET /v1/library-reference/vision', console: '/library-reference', notes: 'Vision feature names only — not executable phases.' },
+    { id: 'mission-control-recommendation', name: 'Mission Control Recommendation', status: 'shipped' as const, api: 'GET /v1/library-reference/vision', console: '/library-reference', notes: 'Author closing advice catalogued as reference — not a shipped product claim.' },
   ];
 }
 

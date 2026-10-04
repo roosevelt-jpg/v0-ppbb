@@ -457,4 +457,23 @@ export class AccentsService implements OnModuleInit {
       },
     });
   }
+
+
+  async regionalModels() {
+    const listed = await this.list();
+    const cards = listed.data.slice(0, 40).map((a) => ({
+      id: `regional-${a.code}`,
+      accent: a.code,
+      name: a.nameEn,
+      language: a.languageCode,
+      cues: a.cueTerms.length ? a.cueTerms.slice(0, 6) : ['vowel_shift', 'rhoticity', 'tempo'],
+      status: 'catalog' as const,
+    }));
+    return {
+      models: cards,
+      count: cards.length,
+      honesty: { acousticPhoneticsId: false, catalogCuePacks: true },
+      note: 'Regional accent model cards (catalog + cue packs). Not trained acoustic phonetics ID.',
+    };
+  }
 }

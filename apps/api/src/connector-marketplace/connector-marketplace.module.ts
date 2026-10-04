@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConnectorMarketplaceController } from './connector-marketplace.controller';
 import { ConnectorMarketplaceService } from './connector-marketplace.service';
 import { IdentityModule } from '../identity/identity.module';
@@ -8,6 +8,8 @@ import { BillingModule } from '../billing/billing.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { PolicyFabricModule } from '../policy-fabric/policy-fabric.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { ConnectorsModule } from '../connectors/connectors.module';
+import { PartnerConnectorsModule } from '../partner-connectors/partner-connectors.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     BillingModule,
     ApiKeysModule,
     PolicyFabricModule,
+    forwardRef(() => ConnectorsModule),
+    PartnerConnectorsModule,
   ],
   controllers: [ConnectorMarketplaceController],
   providers: [ConnectorMarketplaceService, TranslateAuthGuard],

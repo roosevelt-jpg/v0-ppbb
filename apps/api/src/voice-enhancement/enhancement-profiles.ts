@@ -14,16 +14,17 @@ export type EnhancementProfileId =
   | 'broadcast'
   | 'meeting_cleanup'
   | 'voice_restoration'
+  | 'echo_cancellation'
   | 'upscale';
 
 export type EnhancementProfile = {
   id: EnhancementProfileId;
   name: string;
-  category: 'cleanup' | 'broadcast' | 'restore' | 'upscale';
+  category: 'cleanup' | 'broadcast' | 'restore' | 'upscale' | 'echo';
   description: string;
   steps: string[];
   spectralMl: false;
-  echoCancellation: false;
+  echoCancellation: boolean;
 };
 
 export const ENHANCEMENT_PROFILES: EnhancementProfile[] = [
@@ -81,6 +82,16 @@ export const ENHANCEMENT_PROFILES: EnhancementProfile[] = [
     steps: ['restore_enhance'],
     spectralMl: false,
     echoCancellation: false,
+  },
+  {
+    id: 'echo_cancellation',
+    name: 'Echo Cancellation',
+    category: 'echo',
+    description:
+      'Gate + high-pass + soft limit to suppress delayed reflections. Not a live AEC vendor SDK.',
+    steps: ['enhance_strong', 'soft_limit'],
+    spectralMl: false,
+    echoCancellation: true,
   },
   {
     id: 'upscale',

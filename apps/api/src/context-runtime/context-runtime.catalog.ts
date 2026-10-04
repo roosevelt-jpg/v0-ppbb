@@ -135,9 +135,9 @@ export function contextRuntimeCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Streaming context push deferred.',
+        status: 'shipped',
+        api: 'GET /v1/context-runtime/realtime',
+        notes: 'In-process SSE context push bus. Not a dedicated realtime mesh.',
       },
       {
         id: 'rest',
@@ -185,7 +185,7 @@ export function contextRuntimeCatalog() {
     honesty: {
       infiniteContextWindow: false,
       llmSummarization: false,
-      realtimePush: false,
+      realtimePush: true,
       regeneratesContextEngine: false,
       extendsContextEngine: true,
       orgWorkspaceScoped: true,

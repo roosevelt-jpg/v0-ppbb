@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ThemeSwitcher } from '@/components/theme-provider';
+import { MarketingShell } from '@/components/marketing/marketing-shell';
 import { buildPageMetadata } from '@/lib/seo';
 import { getProductPage, listProductSlugs, productsByFamily } from '@/lib/product-pages';
 import { getProductStory } from '@/lib/product-stories';
@@ -48,30 +48,19 @@ export default async function ProductMarketingPage({ params }: Props) {
     .slice(0, 4);
 
   return (
-    <div className="vl-mkt vl-prod-page">
-      <header className="vl-mkt-nav">
-        <Link href="/" className="vl-mkt-brand">
-          VerbaLab
-        </Link>
-        <nav className="vl-mkt-nav-links">
+    <MarketingShell
+      className="vl-prod-page"
+      navLinks={
+        <>
           <Link href="/products">All products</Link>
           <Link href="/#products">{product.family}</Link>
           <Link href="/docs">Docs</Link>
           <a href="#illustrations">Demos</a>
           <a href="#live-demo">Live demo</a>
           <a href="#api-guide">APIs</a>
-        </nav>
-        <div className="vl-mkt-nav-actions">
-          <ThemeSwitcher />
-          <Link href="/sign-in" className="vl-mkt-link">
-            Log in
-          </Link>
-          <Link href="/dev-login" className="vl-btn vl-btn-primary vl-mkt-cta">
-            Open console
-          </Link>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <main>
         <section className="vl-mkt-section vl-prod-hero">
           <p className="vl-mkt-kicker">{product.kicker}</p>
@@ -225,6 +214,6 @@ export default async function ProductMarketingPage({ params }: Props) {
           </div>
         </section>
       </main>
-    </div>
+    </MarketingShell>
   );
 }

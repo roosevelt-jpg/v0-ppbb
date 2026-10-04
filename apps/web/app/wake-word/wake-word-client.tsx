@@ -116,7 +116,8 @@ export function WakeWordClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Detect wake phrases, spot keywords, and fire enterprise trigger phrases from text or
-        audio→STT. Not Porcupine on-device DNN. <Link href="/speech">Speech Cloud</Link>
+        audio→STT. On-device wake model card at GET /v1/wake-word/on-device (sandbox — not Porcupine
+        always-on runtime). <Link href="/speech">Speech Cloud</Link>
         {' · '}
         <Link href="/call-intelligence">Call Intelligence</Link>
         {' · '}

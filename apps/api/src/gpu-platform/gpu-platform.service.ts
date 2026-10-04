@@ -101,6 +101,9 @@ export class GpuPlatformService {
       instances?: number;
       purpose?: string;
       reservationHours?: number;
+      share?: boolean;
+      gpuCount?: number;
+      mode?: string;
     },
   ) {
     const mode = gpuProvisionMode();
@@ -164,6 +167,16 @@ export class GpuPlatformService {
           sandboxLogicalOnly: true,
           callsCloudGpuApis: false,
           accelerator: pool.accelerator,
+          share: Boolean(input.share),
+          gpuCount: Math.max(1, Math.min(input.gpuCount ?? input.instances ?? 1, 8)),
+          allocationMode:
+            input.mode === 'distributed'
+              ? 'distributed'
+              : (input.gpuCount ?? 0) > 1
+                ? 'multi_gpu'
+                : input.share
+                  ? 'shared'
+                  : 'exclusive',
         },
       },
     });
@@ -397,7 +410,7 @@ export class GpuPlatformService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       note: 'GPU Platform monitoring snapshot.',
     };

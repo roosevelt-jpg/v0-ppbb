@@ -347,7 +347,7 @@ export class IntelligenceAnalyticsService {
       estimatedCostUsd: overview.estimatedCostUsd,
       eventsLast24h: recent,
       regeneratesSpeechAnalytics: engine.honesty.regeneratesSpeechAnalytics,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'Intelligence Analytics monitoring snapshot.',
     };
   }
@@ -387,5 +387,31 @@ export class IntelligenceAnalyticsService {
     }
 
     return { periodStart, periodEnd };
+  }
+
+
+  async enterpriseReports(input: PeriodInput) {
+    const [overview, usage, latency, costs, routing, report] = await Promise.all([
+      this.overview(input),
+      this.usage(input),
+      this.latency(input),
+      this.costs(input),
+      this.routing(input),
+      this.report(input),
+    ]);
+    return {
+      suite: 'enterprise-reports',
+      generatedAt: new Date().toISOString(),
+      sections: {
+        overview,
+        usage,
+        latency,
+        costs,
+        routing,
+        report,
+      },
+      honesty: { biDashboardOs: false, scheduledPdfSuite: false },
+      note: 'Bundled enterprise JSON report suite. Not scheduled PDF BI OS.',
+    };
   }
 }

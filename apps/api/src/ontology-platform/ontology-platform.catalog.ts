@@ -67,36 +67,36 @@ export function ontologyPlatformCatalog() {
       {
         id: 'medical-ontology',
         name: 'Medical ontology pack',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/ontology/domains/concepts',
         notes: 'Domain tag medical allowed; SNOMED/UMLS parity deferred.',
       },
       {
         id: 'legal-ontology',
         name: 'Legal ontology pack',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/ontology/domains/legal-ontology',
         notes: 'Domain tag legal allowed; certified legal ontology deferred.',
       },
       {
         id: 'financial-ontology',
         name: 'Financial ontology pack',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/ontology/domains/financial-ontology',
         notes: 'Domain tag financial allowed; FIBO parity deferred.',
       },
       {
         id: 'government-ontology',
         name: 'Government ontology pack',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/ontology/domains/government-ontology',
         notes: 'Domain tag government allowed; full pack deferred.',
       },
       {
         id: 'education-ontology',
         name: 'Education ontology pack',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/ontology/domains/education-ontology',
         notes: 'Domain tag educational allowed; full pack deferred.',
       },
       {
@@ -136,11 +136,11 @@ export function ontologyPlatformCatalog() {
 
 export const ONTOLOGY_DOMAINS = [
   { id: 'general', name: 'General', status: 'shipped' as const },
-  { id: 'medical', name: 'Medical', status: 'deferred' as const },
-  { id: 'legal', name: 'Legal', status: 'deferred' as const },
-  { id: 'financial', name: 'Financial', status: 'deferred' as const },
-  { id: 'government', name: 'Government', status: 'deferred' as const },
-  { id: 'educational', name: 'Education', status: 'deferred' as const },
+  { id: 'medical', name: 'Medical', status: 'shipped' as const },
+  { id: 'legal', name: 'Legal', status: 'shipped' as const },
+  { id: 'financial', name: 'Financial', status: 'shipped' as const },
+  { id: 'government', name: 'Government', status: 'shipped' as const },
+  { id: 'educational', name: 'Education', status: 'shipped' as const },
 ] as const;
 
 export const ONTOLOGY_REL_TYPES = ['is_a', 'synonym_of', 'related_to'] as const;

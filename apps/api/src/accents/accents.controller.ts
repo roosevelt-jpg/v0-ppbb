@@ -124,6 +124,12 @@ export class AccentsController {
     });
   }
 
+  
+  @Get('regional-models')
+  regionalModels() {
+    return this.accents.regionalModels();
+  }
+
   @Get(':code')
   get(@Param('code') code: string) {
     return this.accents.get(code);

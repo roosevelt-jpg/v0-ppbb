@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { API_URL } from '@/lib/api';
-import { ThemeSwitcher } from '@/components/theme-provider';
+import { MarketingShell } from '@/components/marketing/marketing-shell';
 
 type Block = { id: string; type: string; sortOrder: number; content: Record<string, unknown> };
 
@@ -41,26 +41,14 @@ export function UseCasePageClient({ slug }: { slug: string }) {
   }, [pageSlug]);
 
   return (
-    <div className="vl-mkt">
-      <header className="vl-mkt-nav">
-        <Link href="/" className="vl-mkt-brand">
-          VerbaLab
-        </Link>
-        <nav className="vl-mkt-nav-links">
+    <MarketingShell
+      navLinks={
+        <>
           <Link href="/#use-cases">All use cases</Link>
           <Link href="/docs">Docs</Link>
-        </nav>
-        <div className="vl-mkt-nav-actions">
-          <ThemeSwitcher />
-          <Link href="/sign-in" className="vl-mkt-link">
-            Log in
-          </Link>
-          <Link href="/dev-login" className="vl-btn vl-btn-primary vl-mkt-cta">
-            Open console
-          </Link>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <main className="vl-mkt-section" style={{ maxWidth: '48rem' }}>
         {error ? <p className="vl-mkt-error">{error}</p> : null}
         {!error && !blocks.length ? <p style={{ color: 'var(--mkt-ink)' }}>Loading…</p> : null}
@@ -136,6 +124,6 @@ export function UseCasePageClient({ slug }: { slug: string }) {
           return null;
         })}
       </main>
-    </div>
+    </MarketingShell>
   );
 }

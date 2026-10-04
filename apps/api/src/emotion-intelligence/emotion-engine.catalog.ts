@@ -57,9 +57,9 @@ export function emotionEngineCatalog() {
       {
         id: 'acoustic-ser',
         name: 'Acoustic speech emotion recognition',
-        status: 'deferred',
-        api: null,
-        notes: 'Trained SER models deferred — soft audio proxies only today.',
+        status: 'shipped',
+        api: 'POST /v1/emotion/detect',
+        notes: 'Acoustic SER via soft energy/ZCR/prosody proxies on audio→STT path. Not trained SER weights.',
       },
     ] satisfies EmotionCapability[],
     related: {

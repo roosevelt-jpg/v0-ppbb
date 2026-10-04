@@ -32,4 +32,10 @@ export class ResearchCloudController {
   monitoring() {
     return this.research.monitoring();
   }
+
+
+  @Get('quantum')
+  quantum() {
+    return this.research.quantum();
+  }
 }

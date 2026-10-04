@@ -117,7 +117,7 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
       status: 'shipped',
       api: 'GET /v1/agent-intelligence/engine',
       console: '/agent-intelligence',
-      notes: 'Shipped Agent Intelligence hub over agent-runtime + voice FAQ. Full agent OS deferred.',
+      notes: 'Shipped Agent Intelligence hub + full Agent OS (GET /v1/agent-os/engine, POST /v1/agent-os/run).',
     },
     {
       id: 'intelligence-analytics',

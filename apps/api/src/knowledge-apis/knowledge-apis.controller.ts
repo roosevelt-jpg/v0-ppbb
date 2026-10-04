@@ -1,6 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
+  Post,
   Query,
   Req,
   Res,
@@ -131,5 +135,20 @@ export class KnowledgeApisController {
       req.translateAuth.organizationId,
       req.translateAuth.workspaceId,
     );
+  }
+
+  @Post('grpc')
+  @HttpCode(HttpStatus.OK)
+  grpc(
+    @Body()
+    body: { method?: string; path?: string; payload?: Record<string, unknown> },
+  ) {
+    return this.knowledgeApis.grpcStub(body ?? {});
+  }
+
+  @Post('sdk/generate')
+  @HttpCode(HttpStatus.OK)
+  sdkGenerate(@Body() body: { language?: string; packageName?: string }) {
+    return this.knowledgeApis.generateSdkStub(body ?? {});
   }
 }

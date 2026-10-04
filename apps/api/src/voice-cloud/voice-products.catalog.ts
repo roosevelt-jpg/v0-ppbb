@@ -74,13 +74,12 @@ export function voiceProductCatalog(): VoiceProductRow[] {
       notes:
         'Shipped emotion/domain synthesis profiles: soft prosody + voice pick + clone style settings + chunk SSE. Trained expressive TTS deferred. Distinct from detection.',
     },
-    {
-      id: 'voice-conversion',
+    { id: 'voice-conversion',
       name: 'Voice Conversion',
-      status: 'deferred',
-      api: null,
+      status: 'shipped',
+      api: 'POST /v1/voice-enhancement/convert',
       console: null,
-      notes: 'Timbre/style conversion between speakers deferred. Not shipped as a product surface.',
+      notes: 'Sandbox voice conversion via enhancement convert profile.',
     },
     {
       id: 'voice-enhancement',

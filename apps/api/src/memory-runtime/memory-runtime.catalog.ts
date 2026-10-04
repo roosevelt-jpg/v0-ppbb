@@ -147,9 +147,9 @@ export function memoryRuntimeCatalog() {
       {
         id: 'memory-replication',
         name: 'Memory Replication',
-        status: 'deferred',
-        api: null,
-        notes: 'Multi-region replication listed for roadmap tracking.',
+        status: 'shipped',
+        api: 'POST /v1/memory-runtime/replicate',
+        notes: 'Sandbox multi-region replication plan metadata. Not a multi-region memory OS.',
       },
       {
         id: 'memory-snapshots',
@@ -182,9 +182,9 @@ export function memoryRuntimeCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Dedicated realtime memory bus deferred; monitoring is poll.',
+        status: 'shipped',
+        api: 'GET /v1/memory-runtime/realtime',
+        notes: 'In-process SSE memory bus (heartbeat + recent puts). Not a dedicated pub/sub mesh.',
       },
       {
         id: 'monitoring',

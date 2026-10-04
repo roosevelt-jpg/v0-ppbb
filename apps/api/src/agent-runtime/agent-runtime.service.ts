@@ -309,7 +309,7 @@ export class AgentRuntimeService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const agents = [];
+    const agents: AgentRecord[] = [];
     for (const id of ids.slice(0, 6)) {
       agents.push(await this.requireAgent(input, id));
     }
@@ -488,6 +488,45 @@ export class AgentRuntimeService {
       safety: engine.safety,
       honesty: engine.honesty,
     };
+  }
+
+  /**
+   * SSE realtime bus: heartbeat + recent agent run/lifecycle events for the workspace.
+   */
+  async writeRealtime(input: AuthCtx, res: import('express').Response) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process agent realtime bus (SSE). Not a dedicated pub/sub mesh.',
+    });
+
+    const agents = await this.listAgents(input);
+    write('agents', { count: agents.agents.length, agents: agents.agents.slice(0, 20) });
+
+    const recent = await this.findByType(input, 'agent_run', 10);
+    for (const row of recent) {
+      write('event', {
+        type: 'agent_run',
+        id: row.id,
+        at: row.createdAt.toISOString(),
+        payload: this.parseJson(row.content),
+      });
+    }
+
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 
   private async executeSandboxed(

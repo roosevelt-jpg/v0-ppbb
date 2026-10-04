@@ -35,6 +35,11 @@ export class ConnectorMarketplaceController {
     return this.marketplace.engine();
   }
 
+  @Get('registry')
+  registry() {
+    return this.marketplace.registry();
+  }
+
   @Get('products')
   products() {
     return this.marketplace.engine();
@@ -135,6 +140,32 @@ export class ConnectorMarketplaceController {
       userId: req.sessionAuth?.userId,
       role: this.role(req),
       listingId: id,
+      ip: clientIp(req),
+    });
+  }
+
+  @Post('listings/:id/invoke')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  invoke(
+    @Req() req: AuthedReq,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      payload?: Record<string, unknown>;
+      tool?: string;
+      arguments?: Record<string, unknown>;
+    },
+  ) {
+    return this.marketplace.invoke({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      userId: req.sessionAuth?.userId,
+      role: this.role(req),
+      listingId: id,
+      payload: body?.payload,
+      tool: body?.tool,
+      arguments: body?.arguments,
       ip: clientIp(req),
     });
   }

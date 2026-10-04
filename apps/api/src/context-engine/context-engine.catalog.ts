@@ -13,7 +13,7 @@ export function contextEngineCatalog() {
   return {
     product: 'VerbaLab Context Engine',
     note:
-      'Assembles workspace/language/user/org/project/conversation/document/historical/KG context for AI requests. Compression is char-budget truncation, not LLM summarization. Not an infinite context window product. Realtime push deferred.',
+      'Assembles workspace/language/user/org/project/conversation/document/historical/KG context for AI requests. Compression is char-budget truncation, not LLM summarization. Not an infinite context window product. Realtime push via in-process SSE.',
     capabilities: [
       {
         id: 'conversation-context',
@@ -88,9 +88,9 @@ export function contextEngineCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Streaming context push deferred.',
+        status: 'shipped',
+        api: 'GET /v1/context-engine/realtime',
+        notes: 'In-process SSE context push bus. Not a dedicated realtime mesh.',
       },
       {
         id: 'monitoring',
@@ -103,7 +103,7 @@ export function contextEngineCatalog() {
     honesty: {
       infiniteContextWindow: false,
       llmSummarization: false,
-      realtimePush: false,
+      realtimePush: true,
       orchestratesExisting: true,
     },
     links: {

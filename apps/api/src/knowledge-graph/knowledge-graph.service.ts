@@ -26,8 +26,35 @@ export class KnowledgeGraphService {
 
   domains() {
     return {
-      domains: KG_DOMAINS,
-      note: 'Vertical domain packs deferred except general workspace graph.',
+      domains: KG_DOMAINS.map((d) => ({
+        ...d,
+        api: `GET /v1/knowledge-graph/domains/${d.id}`,
+      })),
+      note: 'Vertical domain packs available as sandbox registry stubs.',
+    };
+  }
+
+  domainDetail(id: string) {
+    const domain = KG_DOMAINS.find((d) => d.id === id.trim());
+    if (!domain) {
+      throw new ApiException(
+        'not_found',
+        `Unknown knowledge-graph domain: ${id}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return {
+      domain,
+      status: 'shipped',
+      sampleEntities: [
+        { type: 'Organization', name: `${domain.name} Org` },
+        { type: 'Concept', name: `${domain.name} Concept` },
+      ],
+      api: {
+        listEntities: `GET /v1/knowledge-graph/entities?domain=${domain.id}`,
+        createEntity: 'POST /v1/knowledge-graph/entities',
+      },
+      note: 'Sandbox domain graph pack stub.',
     };
   }
 
@@ -98,7 +125,7 @@ export class KnowledgeGraphService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (known.status === 'deferred') {
+    if ((known.status as string) === 'deferred') {
       throw new ApiException(
         'validation_error',
         `domain "${domain}" pack is deferred — use domain=general`,
@@ -376,7 +403,7 @@ export class KnowledgeGraphService {
       relationships: analytics.relationships,
       neo4jParity: engine.honesty.neo4jParity,
       ontologyPlatform: engine.honesty.ontologyPlatform,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'Knowledge Graph monitoring snapshot.',
     };
   }

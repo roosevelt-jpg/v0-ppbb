@@ -104,7 +104,7 @@ export function EmbeddingCloudClient() {
   }
 
   const shippedModalities = (engine?.modalities ?? []).filter((m) => m.status === 'shipped');
-  const deferredModalities = (engine?.modalities ?? []).filter((m) => m.status !== 'shipped');
+  const otherModalities = (engine?.modalities ?? []).filter((m) => m.status !== 'shipped');
 
   return (
     <AppShell>
@@ -235,10 +235,9 @@ export function EmbeddingCloudClient() {
                 </li>
               ))}
             </ul>
-            {deferredModalities.length ? (
+            {otherModalities.length ? (
               <p style={{ margin: '0.75rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
-                Deferred: {deferredModalities.map((m) => m.name).join(', ')}. Voice biometrics live in Speaker
-                Intelligence.
+                Also listed: {otherModalities.map((m) => m.name).join(', ')}.
               </p>
             ) : null}
           </section>

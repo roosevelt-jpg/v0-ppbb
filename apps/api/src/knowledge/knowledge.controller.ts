@@ -133,6 +133,62 @@ export class KnowledgeController {
     });
   }
 
+  @Post('documents/office')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(TranslateAuthGuard)
+  office(
+    @Req()
+    req: Request & {
+      translateAuth: TranslateAuthContext;
+      sessionAuth?: SessionContext;
+    },
+    @Body()
+    body: {
+      title?: string;
+      text?: string;
+      format?: string;
+      collection?: string;
+      tags?: string;
+    },
+  ) {
+    return this.knowledge.ingestOfficeDocument({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      ...body,
+    });
+  }
+
+  @Post('documents/crawl')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(TranslateAuthGuard)
+  crawl(
+    @Req()
+    req: Request & {
+      translateAuth: TranslateAuthContext;
+      sessionAuth?: SessionContext;
+    },
+    @Body()
+    body: {
+      url?: string;
+      html?: string;
+      title?: string;
+      collection?: string;
+      tags?: string;
+    },
+  ) {
+    return this.knowledge.ingestCrawlDocument({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      ...body,
+    });
+  }
+
   /** Own AI OCR → text document ingest (document intelligence caption path). */
   @Post('documents/ocr-caption')
   @HttpCode(HttpStatus.CREATED)

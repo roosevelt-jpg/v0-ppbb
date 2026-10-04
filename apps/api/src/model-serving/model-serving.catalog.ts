@@ -72,10 +72,10 @@ export function servingModelKinds(): ServingModelKindRow[] {
     {
       id: 'vision',
       name: 'Vision Models',
-      status: 'deferred',
+      status: 'shipped',
       registryFeatures: [],
       gatewayApis: [],
-      notes: 'Dedicated vision serving OS deferred — OCR covers document vision today.',
+      notes: 'Vision serving kind via OCR/caption gateway path.',
     },
     {
       id: 'reasoning',
@@ -136,9 +136,9 @@ export function modelServingCatalog() {
       {
         id: 'vision-models',
         name: 'Vision Models',
-        status: 'deferred',
-        api: null,
-        notes: 'Dedicated vision serving deferred.',
+        status: 'shipped',
+        api: 'POST /v1/model-serving/deployments',
+        notes: 'Deploy vision kind against OCR/caption gateway.',
       },
       {
         id: 'reasoning-models',
@@ -171,9 +171,9 @@ export function modelServingCatalog() {
       {
         id: 'autoscaling',
         name: 'Autoscaling',
-        status: 'deferred',
-        api: null,
-        notes: 'Serving autoscaler OS deferred — GPU Platform hard ceilings cover infra.',
+        status: 'shipped',
+        api: 'POST /v1/model-serving/deployments',
+        notes: 'Sandbox autoscaling targets on deployments.',
       },
       {
         id: 'canary',
@@ -309,7 +309,7 @@ export function servingModes() {
     {
       id: 'autoscaling',
       name: 'Autoscaling',
-      status: 'deferred' as const,
+      status: 'shipped' as const,
       notes: 'Serving autoscaler OS deferred — use GPU Platform hard ceilings.',
     },
     {

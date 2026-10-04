@@ -5,7 +5,11 @@ import { AuditService } from '../audit/audit.service';
 import { BillingService } from '../billing/billing.service';
 import { ApiException } from '../common/errors/api-exception';
 import { FabricPolicyGate } from '../policy-fabric/fabric-policy.gate';
+import { ConnectorsService } from '../connectors/connectors.service';
+import { PartnerConnectorsService } from '../partner-connectors/partner-connectors.service';
+import { isConnectorType } from '../connectors/connectors.types';
 import {
+  CONNECTOR_CATALOG,
   CONNECTOR_MARKETPLACE_CATEGORIES,
   findConnectorCatalogEntry,
   connectorMarketplaceEngineCatalog,
@@ -40,10 +44,33 @@ export class ConnectorMarketplaceService {
     private readonly audit: AuditService,
     private readonly billing: BillingService,
     private readonly fabricGate: FabricPolicyGate,
+    private readonly connectors: ConnectorsService,
+    private readonly partnerConnectors: PartnerConnectorsService,
   ) {}
 
   engine() {
     return connectorMarketplaceEngineCatalog();
+  }
+
+  /** Built-in listing registry (catalog SKUs + install/invoke routes). */
+  registry() {
+    const catalog = this.engine();
+    return {
+      registry: CONNECTOR_CATALOG.map((c) => ({
+        key: c.key,
+        name: c.name,
+        category: c.category,
+        status: c.status,
+        api: c.api,
+        install: '/v1/connector-marketplace/listings/:id/install',
+        invoke: '/v1/connector-marketplace/listings/:id/invoke',
+        connectorInvoke: c.api,
+        notes: c.notes,
+      })),
+      count: CONNECTOR_CATALOG.length,
+      honesty: catalog.honesty,
+      note: 'Connector Marketplace listing registry — install entitlements, invoke via Connectors/Partner paths.',
+    };
   }
 
   private assertOwnerOrAdmin(role: string) {
@@ -541,11 +568,101 @@ export class ConnectorMarketplaceService {
         liveConnectorExecution: false,
         storesRawCardData: false,
         note:
-          'Connector entitlement only — Slack uses existing /v1/connectors/slack paths; generic SKUs are metadata entitlements, not live iPaaS outbound.',
+          'Connector entitlement installed. Invoke via POST /v1/connector-marketplace/listings/:id/invoke or /v1/connectors/:type/invoke — not an iPaaS OS.',
+        invokePath: `/v1/connector-marketplace/listings/${listing.id}/invoke`,
       },
       sale,
       honesty: this.engine().honesty,
       note: 'Installed connector entitlement.',
+    };
+  }
+
+  async invoke(input: {
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    role: string;
+    listingId: string;
+    payload?: Record<string, unknown>;
+    tool?: string;
+    arguments?: Record<string, unknown>;
+    ip?: string;
+  }) {
+    this.assertOwnerOrAdmin(input.role);
+
+    const install = await this.prisma.marketplaceInstall.findFirst({
+      where: {
+        listingId: input.listingId,
+        installerOrgId: input.organizationId,
+        installerWorkspaceId: input.workspaceId,
+      },
+      include: { listing: true },
+    });
+    if (!install || !this.isHubListing(install.listing.snapshot)) {
+      throw new ApiException(
+        'not_found',
+        'Listing not installed in this workspace — install first',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const snap = this.parseSnapshot(install.listing.snapshot);
+    const entry = findConnectorCatalogEntry(snap.connectorKey);
+    const key = snap.connectorKey.toLowerCase();
+
+    if (key.startsWith('partner.') || key === 'partner.custom') {
+      const platformId = key.replace(/^partner\./, '') || 'custom';
+      const out = await this.partnerConnectors.invoke(
+        input.tool ?? 'verbalab_translate',
+        input.arguments ?? input.payload ?? {},
+        { platformId },
+      );
+      return {
+        ok: out.ok,
+        route: 'partner-connectors',
+        connectorKey: snap.connectorKey,
+        result: out,
+        honesty: this.engine().honesty,
+      };
+    }
+
+    const typeHint = key.includes('.') ? key.split('.')[0]! : key;
+    const type = isConnectorType(typeHint)
+      ? typeHint
+      : key === 'email.generic'
+        ? 'email'
+        : key === 'slack'
+          ? 'slack'
+          : null;
+
+    if (type) {
+      const out = await this.connectors.invoke({
+        type,
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+        userId: input.userId,
+        payload: input.payload ?? input.arguments ?? {},
+        ip: input.ip,
+      });
+      return {
+        ok: out.ok,
+        route: `connectors/${type}`,
+        connectorKey: snap.connectorKey,
+        connectorApi: entry?.api ?? `/v1/connectors/${type}/invoke`,
+        result: out,
+        honesty: this.engine().honesty,
+      };
+    }
+
+    return {
+      ok: true,
+      route: 'entitlement-metadata',
+      connectorKey: snap.connectorKey,
+      result: {
+        note: 'Generic catalog SKU — no live outbound type. Entitlement recorded; use a typed connector (slack/webhook/http/discord/email) or partner invoke.',
+        connectorApi: snap.connectorApi,
+      },
+      honesty: this.engine().honesty,
     };
   }
 

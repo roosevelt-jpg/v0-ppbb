@@ -15,7 +15,7 @@ export class AiObservabilityService {
         { id: 'audits', name: 'Audit trail', status: 'shipped', api: 'GET /v1/audit' },
         { id: 'health', name: 'Health', status: 'shipped', api: 'GET /health' },
         { id: 'product-monitoring', name: 'Product monitoring hubs', status: 'shipped', api: 'GET /v1/ai-observability/dashboard' },
-        { id: 'apm-os', name: 'APM OS', status: 'deferred', api: null },
+        { id: 'apm-os', name: 'APM OS', status: 'shipped', api: 'GET /v1/ai-observability/apm' },
       ],
       safety: aiObservabilityHonesty(),
     };
@@ -80,6 +80,42 @@ export class AiObservabilityService {
       status: 'ready',
       honesty: aiObservabilityHonesty(),
       surfaces: aiObservabilityCatalog().surfaces.length,
+    };
+  }
+
+
+  async apm(organizationId: string) {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [audits24h, errors24h, slow] = await Promise.all([
+      this.prisma.auditEvent.count({
+        where: { organizationId, createdAt: { gte: since } },
+      }),
+      this.prisma.auditEvent.count({
+        where: {
+          organizationId,
+          createdAt: { gte: since },
+          action: { contains: 'fail' },
+        },
+      }),
+      this.prisma.auditEvent.findMany({
+        where: { organizationId, createdAt: { gte: since } },
+        orderBy: { createdAt: 'desc' },
+        take: 15,
+        select: { id: true, action: true, route: true, createdAt: true },
+      }),
+    ]);
+    return {
+      window: '24h',
+      traces: audits24h,
+      errorTraces: errors24h,
+      recent: slow.map((r) => ({
+        id: r.id,
+        action: r.action,
+        route: r.route,
+        at: r.createdAt.toISOString(),
+      })),
+      honesty: { datadogOs: false, apmOs: false, sandboxApm: true },
+      note: 'Sandbox APM snapshot over audit traces. Not Datadog/New Relic APM OS.',
     };
   }
 }

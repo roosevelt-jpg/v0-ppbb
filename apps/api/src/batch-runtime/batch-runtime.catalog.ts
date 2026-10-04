@@ -70,10 +70,10 @@ export function batchKinds(): BatchKindRow[] {
     {
       id: 'video',
       name: 'Video Jobs',
-      status: 'deferred',
+      status: 'shipped',
       existingApi: null,
       hubApi: 'GET /v1/batch-runtime/kinds',
-      notes: 'Video batch OS deferred.',
+      notes: 'Sandbox video batch jobs (frame/caption descriptors).',
     },
   ];
 }
@@ -126,9 +126,9 @@ export function batchRuntimeCatalog() {
       {
         id: 'video-jobs',
         name: 'Video Jobs',
-        status: 'deferred',
-        api: null,
-        notes: 'Video batch deferred.',
+        status: 'shipped',
+        api: 'POST /v1/batch-runtime/runs',
+        notes: 'Sandbox video batch via kind=video.',
       },
       {
         id: 'scheduling',

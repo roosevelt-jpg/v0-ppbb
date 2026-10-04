@@ -67,7 +67,7 @@ export function aiPublicationPlatformEngineCatalog() {
       { id: 'datasets', name: 'Datasets', status: 'shipped' as PublicationStatus, api: 'GET /v1/ai-publication-platform/publications', notes: 'Dataset publication slots.' },
       { id: 'benchmarks', name: 'Benchmarks', status: 'shipped' as PublicationStatus, api: 'GET /v1/ai-publication-platform/publications', notes: 'Benchmark cards.' },
       { id: 'repro', name: 'Reproducibility packages', status: 'shipped' as PublicationStatus, api: 'GET /v1/ai-publication-platform/publications', notes: 'Repro packs.' },
-      { id: 'doi', name: 'DOI integration', status: 'deferred' as PublicationStatus, api: null, notes: 'doiRegistryOs=false — stub field only.' },
+      { id: 'doi', name: 'DOI integration', status: 'shipped' as PublicationStatus, api: 'POST /v1/ai-publication-platform/doi', notes: 'Sandbox DOI stub assignment on publications. doiRegistryOs=false — not a DOI registry OS.' },
     ],
     architecture: {
       style: 'nest_modular_monolith',

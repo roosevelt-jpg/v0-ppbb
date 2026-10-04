@@ -31,10 +31,11 @@ export function PartnerConnectorsClient() {
     void Promise.all([
       apiFetch<{ blurb?: string; platforms?: Platform[] }>('/v1/partner-connectors/engine'),
       apiFetch<{ tools?: Tool[] }>('/v1/partner-connectors/tools'),
+      apiFetch<{ registry?: Platform[] }>('/v1/partner-connectors/registry'),
     ])
-      .then(([engine, toolRes]) => {
+      .then(([engine, toolRes, registry]) => {
         setBlurb(engine.blurb ?? '');
-        setPlatforms(engine.platforms ?? []);
+        setPlatforms(registry.registry?.length ? registry.registry : engine.platforms ?? []);
         setTools((toolRes.tools ?? []).map((t) => ({ name: t.name, description: t.description })));
       })
       .catch((err: Error) => setError(err.message));

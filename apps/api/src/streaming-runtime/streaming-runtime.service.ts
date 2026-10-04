@@ -81,13 +81,7 @@ export class StreamingRuntimeService {
   ) {
     this.assertEnabled();
     const kind = this.normalizeKind(input.kind ?? 'llm');
-    if (kind === 'video') {
-      throw new ApiException(
-        'validation_error',
-        'Video streaming is deferred',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    // video kind is sandbox frame-chunk SSE
     const surface = streamingSurfaces().find((s) => s.kind === kind);
     const row = await this.prisma.streamingSession.create({
       data: {
@@ -205,16 +199,8 @@ export class StreamingRuntimeService {
       surfaceApi: surface?.api ?? null,
       existingSurface: surface?.existing ?? false,
       honesty: streamingRuntimeCatalog().honesty,
-      note: 'Sandbox SSE.',
+      note: kind === 'video' ? 'Sandbox video frame-chunk SSE.' : 'Sandbox SSE.',
     });
-
-    if (kind === 'video') {
-      write('error', { message: 'Video streaming is deferred', code: 'deferred' });
-      write('done', { ok: false, deferred: true });
-      await this.finishSession(sessionId, 0, 'failed');
-      res.end();
-      return;
-    }
 
     if (surface?.existing && (kind === 'speech' || kind === 'voice')) {
       write('redirect', {
@@ -243,9 +229,18 @@ export class StreamingRuntimeService {
       (input.text ?? '').trim() ||
       (kind === 'translation'
         ? 'Habari dunia — sandbox translation stream.'
-        : 'Hello from VerbaLab Streaming Runtime sandbox.');
+        : kind === 'video'
+          ? 'frame:0 skyline | frame:1 speaker | frame:2 caption'
+          : 'Hello from VerbaLab Streaming Runtime sandbox.');
 
-    const tokens = this.tokenize(text, ceilings.maxChunksPerStream);
+    const tokens =
+      kind === 'video'
+        ? text
+            .split('|')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .slice(0, ceilings.maxChunksPerStream)
+        : this.tokenize(text, ceilings.maxChunksPerStream);
     const delay = Math.min(50, Math.max(0, input.chunkDelayMs ?? 0));
 
     let i = 0;
@@ -346,9 +341,48 @@ export class StreamingRuntimeService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       note: 'Streaming Runtime monitoring snapshot.',
+    };
+  }
+
+  wsHandshake() {
+    return {
+      status: 'shipped',
+      transport: 'websocket',
+      upgrade: {
+        path: '/v1/streaming-runtime/ws',
+        protocol: 'verbalab.streaming.v1',
+        note: 'In-process handshake metadata. Clients may fall back to SSE POST /v1/streaming-runtime/stream.',
+      },
+      honesty: streamingRuntimeCatalog().honesty,
+      docs: '/docs/STREAMING_RUNTIME.md',
+    };
+  }
+
+  grpcStub(body: { kind?: string; text?: string; frames?: string[] }) {
+    const kind = (body.kind ?? 'llm').toLowerCase();
+    const payload =
+      Array.isArray(body.frames) && body.frames.length
+        ? body.frames
+        : ((body.text ?? 'grpc sandbox frame').split(/\s+/).slice(0, 16));
+    return {
+      status: 'shipped',
+      transport: 'grpc-compatible-http',
+      contentType: 'application/json',
+      kind,
+      messages: payload.map((token, index) => ({
+        index,
+        token,
+        encoding: 'json-protobuf-stub',
+      })),
+      honesty: {
+        ...streamingRuntimeCatalog().honesty,
+        grpcStreamingOs: false,
+        protobufOverHttpStub: true,
+      },
+      note: 'Protobuf-over-HTTP gRPC-compatible stub — not a full gRPC mesh.',
     };
   }
 

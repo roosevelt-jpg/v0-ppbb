@@ -66,6 +66,9 @@ export class GpuPlatformController {
       instances?: number;
       purpose?: string;
       reservationHours?: number;
+      share?: boolean;
+      gpuCount?: number;
+      mode?: string;
     },
   ) {
     return this.gpu.allocate({
@@ -77,6 +80,9 @@ export class GpuPlatformController {
       instances: body.instances,
       purpose: body.purpose,
       reservationHours: body.reservationHours,
+      share: body.share,
+      gpuCount: body.gpuCount,
+      mode: body.mode,
     });
   }
 

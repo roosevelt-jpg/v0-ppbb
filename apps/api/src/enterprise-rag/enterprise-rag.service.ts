@@ -419,9 +419,67 @@ export class EnterpriseRagService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
+    };
+  }
+
+
+  async agentic(input: {
+    question: string;
+    mode?: string;
+    k?: number;
+    maxChars?: number;
+    collection?: string;
+    tag?: string;
+    contentKind?: string;
+    documentId?: string;
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId?: string;
+    userId?: string;
+    ip?: string;
+  }) {
+    const question = input.question?.trim();
+    if (!question) {
+      throw new ApiException('validation_error', 'question is required', HttpStatus.BAD_REQUEST);
+    }
+    const hop1 = await this.retrieve({ ...input, query: question, k: input.k ?? 4 });
+    const followUp = hop1.passages[0]?.content
+      ? `${question} — focus: ${hop1.passages[0].content.slice(0, 120)}`
+      : question;
+    const hop2 = await this.retrieve({ ...input, query: followUp, k: input.k ?? 4 });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'enterprise_rag.agentic',
+      route: 'POST /v1/enterprise-rag/agentic',
+      ip: input.ip,
+      metadata: { hops: 2, hop1: hop1.passages.length, hop2: hop2.passages.length },
+    });
+    return {
+      question,
+      hops: [
+        { hop: 1, query: question, passages: hop1.passages, citations: hop1.citations },
+        { hop: 2, query: followUp, passages: hop2.passages, citations: hop2.citations },
+      ],
+      honesty: { agenticRagOs: false, maxHops: 2 },
+      note: 'Sandbox multi-hop retrieve loop (2 hops). Not tool-calling agentic RAG OS.',
+    };
+  }
+
+  langchainAdapter() {
+    return {
+      adapter: 'langchain-compatible-metadata',
+      status: 'shipped',
+      surfaces: {
+        retrieve: 'POST /v1/enterprise-rag/retrieve',
+        query: 'POST /v1/enterprise-rag/query',
+        agentic: 'POST /v1/enterprise-rag/agentic',
+      },
+      honesty: { langchainOs: false, llamaIndexOs: false },
+      note: 'LangChain-compatible adapter metadata over Nest RAG hub. Not framework OS parity.',
     };
   }
 }

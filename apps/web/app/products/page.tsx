@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ThemeSwitcher } from '@/components/theme-provider';
+import { MarketingShell } from '@/components/marketing/marketing-shell';
 import { buildPageMetadata } from '@/lib/seo';
 import { productsByFamily, type ProductFamily } from '@/lib/product-pages';
 
@@ -20,27 +20,15 @@ export default function ProductsIndexPage() {
   const groups = productsByFamily();
 
   return (
-    <div className="vl-mkt">
-      <header className="vl-mkt-nav">
-        <Link href="/" className="vl-mkt-brand">
-          VerbaLab
-        </Link>
-        <nav className="vl-mkt-nav-links">
+    <MarketingShell
+      navLinks={
+        <>
           <Link href="/#products">Platform</Link>
           <Link href="/docs">Docs</Link>
           <Link href="/coverage">Coverage</Link>
-        </nav>
-        <div className="vl-mkt-nav-actions">
-          <ThemeSwitcher />
-          <Link href="/sign-in" className="vl-mkt-link">
-            Log in
-          </Link>
-          <Link href="/dev-login" className="vl-btn vl-btn-primary vl-mkt-cta">
-            Open console
-          </Link>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <main className="vl-mkt-section">
         <p className="vl-mkt-kicker">Product directory</p>
         <h1 className="vl-mkt-headline" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
@@ -84,6 +72,6 @@ export default function ProductsIndexPage() {
           </section>
         ))}
       </main>
-    </div>
+    </MarketingShell>
   );
 }

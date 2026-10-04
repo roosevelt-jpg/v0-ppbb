@@ -1163,6 +1163,38 @@ html[data-theme='dark'] .vl-mkt-footer {
   text-decoration: underline;
 }
 
+.vl-console-footer {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem 2.5rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--bg-soft);
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+.vl-console-footer .vl-mkt-footer-brand strong {
+  color: var(--ink);
+}
+
+.vl-console-footer .vl-mkt-footer-cols h4 {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.vl-console-footer a {
+  display: block;
+  margin: 0 0 0.4rem;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.vl-console-footer a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 900px) {
   .vl-mkt-nav-links {
     display: none;

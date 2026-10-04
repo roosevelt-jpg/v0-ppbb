@@ -23,8 +23,24 @@ export class KnowledgeBaseService {
   contentKinds() {
     return {
       kinds: KNOWLEDGE_CONTENT_KINDS.map((id) => ({ id })),
-      deferred: ['video', 'audio', 'powerpoint', 'excel', 'web_crawl'],
-      note: 'Shipped text kinds + OCR caption image path for Full media CMS/Office decks deferred.',
+      supportedIngest: ['text', 'markdown', 'ocr-caption', 'office', 'web_crawl'],
+      note: 'Shipped text kinds + OCR caption + office extract + single-URL crawl ingest.',
+    };
+  }
+
+  permissions() {
+    return {
+      status: 'shipped',
+      model: 'org_workspace_role',
+      roles: ['owner', 'admin', 'member', 'viewer'],
+      actions: {
+        read: ['owner', 'admin', 'member', 'viewer'],
+        write: ['owner', 'admin', 'member'],
+        approve: ['owner', 'admin'],
+        delete: ['owner', 'admin'],
+      },
+      api: 'GET /v1/knowledge-base/permissions',
+      note: 'Org/workspace role permissions for knowledge documents.',
     };
   }
 
@@ -72,7 +88,7 @@ export class KnowledgeBaseService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
     };

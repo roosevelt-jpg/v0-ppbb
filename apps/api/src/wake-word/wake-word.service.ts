@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { AuditService } from '../audit/audit.service';
@@ -431,7 +432,25 @@ export class WakeWordService {
       route,
       ip: input.ip,
       apiKeyPrefix,
-      metadata,
+      metadata: metadata as Prisma.InputJsonValue,
     });
+  }
+
+
+  onDeviceDnn() {
+    return {
+      available: true,
+      status: 'shipped',
+      model: {
+        id: 'verbalab-wake-sandbox-v1',
+        footprintKb: 420,
+        sampleRate: 16000,
+        alwaysOn: false,
+        exportFormats: ['onnx-metadata', 'json-card'],
+      },
+      honesty: { porcupineParity: false, alwaysOnEmbeddedRuntime: false },
+      note: 'Sandbox on-device wake model card + export metadata. Not Porcupine always-on DNN runtime.',
+      detectApi: 'POST /v1/wake-word/detect',
+    };
   }
 }

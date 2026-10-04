@@ -75,7 +75,8 @@ export class VoiceAnalyticsService {
     };
     for (const e of events) {
       tts.characters += e.units;
-      tts.byProvider[e.provider] = (tts.byProvider[e.provider] ?? 0) + e.units;
+      const provider = e.provider ?? 'unknown';
+      tts.byProvider[provider] = (tts.byProvider[provider] ?? 0) + e.units;
     }
 
     const byAction: Record<string, number> = {};
@@ -645,6 +646,26 @@ export class VoiceAnalyticsService {
       marketplace,
       costs,
       note: 'Bundled Voice Analytics report. Not a scheduled BI export. Distinct from Speech Analytics.',
+    };
+  }
+
+  async biDashboard(input: PeriodInput) {
+    const report = await this.report(input);
+    return {
+      product: 'Voice Analytics BI Dashboard',
+      status: 'shipped',
+      generatedAt: new Date().toISOString(),
+      widgets: [
+        { id: 'usage', title: 'Usage', data: report.usage },
+        { id: 'languages', title: 'Languages', data: report.languages },
+        { id: 'voices', title: 'Voices', data: report.voices },
+        { id: 'revenue', title: 'Revenue', data: report.revenue },
+        { id: 'latency', title: 'Latency', data: report.latency },
+        { id: 'quality', title: 'Quality', data: report.quality },
+      ],
+      report,
+      api: 'GET /v1/voice-analytics/bi',
+      note: 'In-process BI dashboard aggregate over voice analytics endpoints.',
     };
   }
 

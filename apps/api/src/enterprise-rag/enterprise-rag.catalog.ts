@@ -116,16 +116,16 @@ export function enterpriseRagCatalog() {
       {
         id: 'agentic-rag',
         name: 'Agentic / multi-hop RAG',
-        status: 'deferred',
-        api: null,
-        notes: 'Tool-calling / multi-hop agent loops deferred.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-rag/agentic',
+        notes: 'Sandbox multi-hop retrieve loop (2 hops max). Not a tool-calling agentic RAG OS.',
       },
       {
         id: 'langchain-os',
         name: 'LangChain / LlamaIndex OS',
-        status: 'deferred',
-        api: null,
-        notes: 'Framework parity deferred — bounded Nest hub only.',
+        status: 'shipped',
+        api: 'GET /v1/enterprise-rag/adapters/langchain',
+        notes: 'LangChain-compatible adapter metadata over Nest RAG hub. Not LangChain/LlamaIndex OS parity.',
       },
     ] satisfies EnterpriseRagCapability[],
     honesty: {

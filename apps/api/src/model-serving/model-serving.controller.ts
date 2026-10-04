@@ -90,6 +90,24 @@ export class ModelServingController {
     });
   }
 
+  @Post('deployments/:id/scale')
+  @UseGuards(TranslateAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  scale(
+    @Req() req: AuthedReq,
+    @Param('id') id: string,
+    @Body() body: { targetReplicas?: number; minReplicas?: number; maxReplicas?: number },
+  ) {
+    return this.serving.scale({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      id,
+      ...body,
+    });
+  }
+
   @Post('deployments/:id/traffic')
   @UseGuards(TranslateAuthGuard)
   @HttpCode(HttpStatus.OK)

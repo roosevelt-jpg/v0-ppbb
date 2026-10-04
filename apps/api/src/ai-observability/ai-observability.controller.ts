@@ -28,4 +28,11 @@ export class AiObservabilityController {
   monitoring() {
     return this.service.monitoring();
   }
+
+
+  @Get('apm')
+  @UseGuards(ClerkAuthGuard)
+  apm(@CurrentSession() session: SessionContext) {
+    return this.service.apm(session.organizationId);
+  }
 }

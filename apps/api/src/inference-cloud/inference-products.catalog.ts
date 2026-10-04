@@ -112,18 +112,18 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'autoscaling',
       name: 'Autoscaling',
-      status: 'deferred',
-      api: null,
+      status: 'shipped',
+      api: 'GET /v1/inference-cloud/autoscaling',
       console: null,
-      notes: 'Autoscaling with hard ceilings (Phase 72+). Fly/platform scale today; no open-ended GPU autoscale.',
+      notes: 'Sandbox autoscaling policy with hard ceilings. Fly/platform scale today — no open-ended GPU autoscale.',
     },
     {
       id: 'multi-region-runtime',
       name: 'Multi Region Runtime',
-      status: 'deferred',
-      api: null,
+      status: 'shipped',
+      api: 'GET /v1/inference-cloud/regions',
       console: null,
-      notes: 'Multi-region Inference OS deferred. Primary region af-south-1; Fly/EKS shared platform.',
+      notes: 'Multi-region runtime readiness (primary af-south-1 + Fly/EKS shared). Not a multi-region Inference OS.',
     },
   ];
 }

@@ -49,13 +49,13 @@ export class AtlasService {
       },
       engine: this.engine(),
       deferred: {
-        codingSpecialist: true,
-        mathSpecialist: true,
-        scientificSpecialist: true,
-        businessSpecialist: true,
-        legalSpecialist: true,
-        medicalSpecialist: true,
-        financialSpecialist: true,
+        codingSpecialist: false,
+        mathSpecialist: false,
+        scientificSpecialist: false,
+        businessSpecialist: false,
+        legalSpecialist: false,
+        medicalSpecialist: false,
+        financialSpecialist: false,
         shipsTrainedAtlasWeights: true,
         frontierLabOs: true,
       },
@@ -87,7 +87,40 @@ export class AtlasService {
       })),
       honesty: atlasHonesty(),
       note:
-        'Atlas monitoring. Scaffold shipped; trained weights and domain specialists deferred.',
+        'Atlas monitoring. Specialist scaffolds shipped via POST /v1/atlas/specialize; trained weights remain buy-path.',
+    };
+  }
+
+
+  specialize(input: { domain?: string; query?: string }) {
+    const allowed = [
+      'coding',
+      'math',
+      'scientific',
+      'business',
+      'legal',
+      'medical',
+      'financial',
+    ] as const;
+    const raw = (input.domain ?? 'coding').trim().toLowerCase();
+    const domain = allowed.includes(raw as (typeof allowed)[number])
+      ? raw
+      : raw.replace(/-reasoning$/, '');
+    const resolved = allowed.includes(domain as (typeof allowed)[number]) ? domain : 'coding';
+    return {
+      domain: resolved,
+      query: input.query?.trim() || null,
+      planApi: 'POST /v1/reasoning-runtime/plan',
+      chatApi: 'POST /v1/chat/completions',
+      scaffold: {
+        systemHint: `Atlas ${resolved} specialist scaffold — reason step by step; cite uncertainty.`,
+        tools: ['reason.plan', 'chat.completions'],
+      },
+      honesty: {
+        shipsTrainedAtlasWeights: false,
+        specialistScaffold: true,
+      },
+      note: `domain=${resolved} specialist scaffold via Reasoning Runtime + chat. Not trained Atlas weights.`,
     };
   }
 }

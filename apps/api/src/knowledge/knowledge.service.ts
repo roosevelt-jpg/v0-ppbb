@@ -616,4 +616,108 @@ export class KnowledgeService {
       },
     };
   }
+
+  async ingestOfficeDocument(input: {
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId?: string;
+    userId?: string;
+    ip?: string;
+    title?: string;
+    text?: string;
+    format?: string;
+    collection?: string;
+    tags?: string;
+  }) {
+    const format = (input.format ?? 'pptx').toLowerCase();
+    const title = (input.title ?? `office-${format}`).slice(0, 120);
+    const body = (input.text ?? '').trim() || `(empty ${format} extract)`;
+    const content = `# ${title}\n\nSource format: ${format}\n\n${body}\n`;
+    const fakeFile = {
+      fieldname: 'file',
+      originalname: `${title}.md`,
+      encoding: '7bit',
+      mimetype: 'text/markdown',
+      size: Buffer.byteLength(content),
+      buffer: Buffer.from(content, 'utf8'),
+      destination: '',
+      filename: '',
+      path: '',
+      stream: undefined as never,
+    } as Express.Multer.File;
+    return this.upload({
+      file: fakeFile,
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      apiKeyId: input.apiKeyId,
+      userId: input.userId,
+      ip: input.ip,
+      collection: input.collection,
+      tags: input.tags ?? `office,${format}`,
+      contentKind: 'document',
+    });
+  }
+
+  async ingestCrawlDocument(input: {
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId?: string;
+    userId?: string;
+    ip?: string;
+    url?: string;
+    html?: string;
+    title?: string;
+    collection?: string;
+    tags?: string;
+  }) {
+    const url = (input.url ?? '').trim();
+    if (!url && !(input.html ?? '').trim()) {
+      throw new ApiException('validation_error', 'url or html is required', HttpStatus.BAD_REQUEST);
+    }
+    let html = (input.html ?? '').trim();
+    let title = (input.title ?? '').trim();
+    if (!html && url) {
+      try {
+        const res = await fetch(url, { redirect: 'follow' });
+        html = await res.text();
+        if (!title) title = url;
+      } catch (err) {
+        html = `<!-- fetch failed for ${url}: ${err instanceof Error ? err.message : 'error'} -->`;
+        title = title || url;
+      }
+    }
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 50_000);
+    const docTitle = (title || url || 'web-page').slice(0, 120);
+    const content = `# ${docTitle}\n\nSource: ${url || 'inline-html'}\n\n${text}\n`;
+    const fakeFile = {
+      fieldname: 'file',
+      originalname: `${docTitle.replace(/[^a-zA-Z0-9._-]+/g, '-')}.md`,
+      encoding: '7bit',
+      mimetype: 'text/markdown',
+      size: Buffer.byteLength(content),
+      buffer: Buffer.from(content, 'utf8'),
+      destination: '',
+      filename: '',
+      path: '',
+      stream: undefined as never,
+    } as Express.Multer.File;
+    return this.upload({
+      file: fakeFile,
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      apiKeyId: input.apiKeyId,
+      userId: input.userId,
+      ip: input.ip,
+      collection: input.collection,
+      tags: input.tags ?? 'web,crawl',
+      contentKind: 'document',
+    });
+  }
+
 }

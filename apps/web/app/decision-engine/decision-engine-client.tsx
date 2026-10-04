@@ -85,7 +85,8 @@ export function DecisionEngineClient() {
         AI Decision Engine
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Bounded policy/routing helpers — not an enterprise BRMS.{' '}
+        Bounded policy/routing helpers plus sandbox kind=enterprise_brms rule tables — not
+        Drools/Pega parity.{' '}
         <Link href="/intelligence-cloud">Intelligence Cloud</Link> ·{' '}
         <Link href="/enterprise">Enterprise</Link>.
       </p>

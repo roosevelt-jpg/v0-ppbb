@@ -121,4 +121,44 @@ export class EnterpriseRagController {
       ip: clientIp(req),
     });
   }
+
+
+  @Post('agentic')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  agentic(
+    @Req() req: AuthedReq,
+    @Body()
+    body: {
+      question?: string;
+      mode?: string;
+      k?: number;
+      maxChars?: number;
+      collection?: string;
+      tag?: string;
+      contentKind?: string;
+      documentId?: string;
+    },
+  ) {
+    return this.enterpriseRag.agentic({
+      question: body.question ?? '',
+      mode: body.mode,
+      k: body.k,
+      maxChars: body.maxChars,
+      collection: body.collection,
+      tag: body.tag,
+      contentKind: body.contentKind,
+      documentId: body.documentId,
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+    });
+  }
+
+  @Get('adapters/langchain')
+  langchainAdapter() {
+    return this.enterpriseRag.langchainAdapter();
+  }
 }

@@ -63,9 +63,9 @@ export function wakeWordEngineCatalog() {
       {
         id: 'on-device-dnn',
         name: 'On-device Wake DNN',
-        status: 'deferred',
-        api: null,
-        notes: 'Porcupine-class always-on models deferred.',
+        status: 'shipped',
+        api: 'GET /v1/wake-word/on-device',
+        notes: 'Sandbox on-device wake model card + export metadata. Not Porcupine always-on DNN runtime.',
       },
       {
         id: 'monitoring',

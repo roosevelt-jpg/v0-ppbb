@@ -46,9 +46,9 @@ export function accentEngineCatalog() {
       {
         id: 'regional-models',
         name: 'Regional Accent Models',
-        status: 'deferred',
-        api: null,
-        notes: 'Acoustic / phonetics regional models — buy path / later depth. Not claimed.',
+        status: 'shipped',
+        api: 'GET /v1/accents/regional-models',
+        notes: 'Regional accent model cards (catalog + cue packs). Acoustic phonetics ID remains buy-path depth.',
       },
       {
         id: 'accent-analytics',

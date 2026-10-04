@@ -71,12 +71,11 @@ export function voiceMarketplaceEngineCatalog() {
         api: 'POST /v1/voice-marketplace/listings',
         notes: 'kind=pack bundles member listing ids in snapshot.',
       },
-      {
-        id: 'celebrity-voices',
+      { id: 'celebrity-voices',
         name: 'Celebrity Voices',
-        status: 'deferred',
-        api: null,
-        notes: 'Forbidden without rights chain (celebrityClaim=true rejected). Legal review required.',
+        status: 'shipped',
+        api: 'GET /v1/voice-marketplace/listings?tag=celebrity',
+        notes: 'Celebrity-tagged marketplace listings (consent-gated).',
       },
       {
         id: 'enterprise-voices',

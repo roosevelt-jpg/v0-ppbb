@@ -120,9 +120,10 @@ export function workflowRuntimeCatalog() {
       {
         id: 'distributed-execution',
         name: 'Distributed Execution',
-        status: 'deferred',
-        api: null,
-        notes: 'Not a distributed workflow OS (Temporal/Airflow parity deferred).',
+        status: 'shipped',
+        api: 'POST /v1/workflow-runtime/run',
+        notes:
+          'mode=distributed — in-process worker-slot fan-out with worker ids on steps. Not Temporal/Airflow parity.',
       },
       {
         id: 'workflow-versioning',
@@ -196,6 +197,7 @@ export function workflowRuntimeCatalog() {
       temporalOs: false,
       airflowOs: false,
       distributedWorkflowOs: false,
+      inProcessDistributedWorkers: true,
       regeneratesVolumes1to7: false,
       regeneratesWorkflowsProduct: false,
       extendsWorkflowsProduct: true,

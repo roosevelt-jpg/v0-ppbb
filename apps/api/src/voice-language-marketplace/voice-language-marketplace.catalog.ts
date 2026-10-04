@@ -217,7 +217,7 @@ export function voiceLanguageMarketplaceEngineCatalog() {
         id: 'documentation',
         name: 'Documentation',
         status: 'shipped',
-        api: null,
+        api: '/docs/VOICE_LANGUAGE_MARKETPLACE.md',
         notes: '/docs/VOICE_LANGUAGE_MARKETPLACE.md + ADR-0159.',
       },
     ] satisfies VoiceLanguageMarketplaceCapability[],

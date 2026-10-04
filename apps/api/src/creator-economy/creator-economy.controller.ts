@@ -109,13 +109,15 @@ export class CreatorEconomyController {
   }
 
   @Get('tax')
-  tax() {
-    return this.economy.taxReporting();
+  @UseGuards(TranslateAuthGuard)
+  tax(@Req() req: AuthedReq) {
+    return this.economy.taxReporting(req.translateAuth.organizationId);
   }
 
   @Get('disputes')
-  disputes() {
-    return this.economy.disputes();
+  @UseGuards(TranslateAuthGuard)
+  disputes(@Req() req: AuthedReq) {
+    return this.economy.disputes(req.translateAuth.organizationId);
   }
 
   @Get('analytics')

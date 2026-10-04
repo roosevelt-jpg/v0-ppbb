@@ -4,7 +4,14 @@ export type ContentFormat =
   | 'xml'
   | 'csv'
   | 'srt'
-  | 'plain';
+  | 'plain'
+  | 'website'
+  | 'email'
+  | 'powerpoint'
+  | 'excel'
+  | 'sms'
+  | 'whatsapp'
+  | 'teams';
 
 export type FormatSegment = {
   index: number;

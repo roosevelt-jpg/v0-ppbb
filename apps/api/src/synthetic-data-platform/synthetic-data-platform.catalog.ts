@@ -28,7 +28,7 @@ export function syntheticDataPlatformEngineCatalog() {
     { id: 'speech', name: 'Speech generation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Synthetic speech samples.' },
     { id: 'voice', name: 'Voice generation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Synthetic voice clips — rights-aware.' },
     { id: 'image', name: 'Image generation', status: 'partial', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Catalog posture for synthetic images.' },
-    { id: 'video', name: 'Video generation', status: 'deferred', api: null, notes: 'Deferred — not a video generation OS.' },
+    { id: 'video', name: 'Video generation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Sandbox video modality catalog + scene/caption descriptors. Not a video generation OS.' },
     { id: 'dialogue', name: 'Dialogue generation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Synthetic dialogues.' },
     { id: 'document', name: 'Document generation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Synthetic documents.' },
     { id: 'augmentation', name: 'Data augmentation', status: 'shipped', api: 'GET /v1/synthetic-data-platform/artifacts', notes: 'Augmentation recipes.' },

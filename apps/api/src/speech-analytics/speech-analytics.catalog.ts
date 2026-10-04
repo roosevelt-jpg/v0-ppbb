@@ -95,9 +95,9 @@ export function speechAnalyticsCatalog() {
       {
         id: 'wer-lab',
         name: 'WER Evaluation Lab',
-        status: 'deferred',
-        api: null,
-        notes: 'Golden-set WER / human eval harness deferred.',
+        status: 'shipped',
+        api: 'POST /v1/speech-analytics/wer-lab',
+        notes: 'Sandbox golden-set WER harness — reference vs hypothesis word error rate. Not a human eval lab OS.',
       },
     ] satisfies SpeechAnalyticsCapability[],
     links: {

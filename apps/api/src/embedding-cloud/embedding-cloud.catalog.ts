@@ -60,9 +60,10 @@ export function embeddingCloudCatalog() {
       {
         id: 'voice-embeddings',
         name: 'Voice Embeddings',
-        status: 'deferred',
-        api: null,
-        notes: 'Speaker/voice biometric vectors → Speaker Intelligence (/speaker-intelligence).',
+        status: 'shipped',
+        api: 'POST /v1/embedding-cloud/embed',
+        notes:
+          'modality=voice — speaker-label / voice-descriptor caption → text embed. Biometric speaker vectors remain on Speaker Intelligence.',
       },
       {
         id: 'image-embeddings',
@@ -120,8 +121,9 @@ export function embeddingCloudCatalog() {
       {
         id: 'voice',
         name: 'Voice',
-        status: 'deferred',
-        notes: 'Biometric voice vectors — use Speaker Intelligence.',
+        status: 'shipped',
+        notes:
+          'Paste a speaker label / voice descriptor; embeds via text gateway. Biometrics → Speaker Intelligence.',
       },
       {
         id: 'image',
@@ -184,6 +186,7 @@ export const SUPPORTED_EMBED_MODALITIES = [
   'document',
   'code',
   'speech',
+  'voice',
   'image',
   'video',
   'cross_modal',
@@ -191,7 +194,7 @@ export const SUPPORTED_EMBED_MODALITIES = [
 ] as const;
 export type SupportedEmbedModality = (typeof SUPPORTED_EMBED_MODALITIES)[number];
 
-export const DEFERRED_EMBED_MODALITIES = ['voice'] as const;
+export const DEFERRED_EMBED_MODALITIES = [] as const;
 
 export function embeddingModelsCatalog() {
   const defaultModel = process.env.OPENAI_EMBEDDINGS_MODEL ?? 'text-embedding-3-small';

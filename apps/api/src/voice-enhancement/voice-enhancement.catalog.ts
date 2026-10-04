@@ -25,9 +25,9 @@ export function voiceEnhancementEngineCatalog() {
       {
         id: 'echo-cancellation',
         name: 'Echo Cancellation',
-        status: 'deferred',
-        api: 'GET /v1/voice-enhancement/echo',
-        notes: 'Requires AEC reference / vendor SDK. Still deferred (same as ).',
+        status: 'shipped',
+        api: 'POST /v1/voice-enhancement/echo',
+        notes: 'In-process echo cancellation profile (POST with audio). Not a live AEC vendor SDK.',
       },
       {
         id: 'audio-upscaling',

@@ -36,12 +36,34 @@ export class OntologyPlatformService {
         id: d.id,
         name: d.name,
         status: d.status,
-        notes:
-          d.status === 'deferred'
-            ? 'Domain tag allowed on concepts; certified vertical ontology pack deferred.'
-            : 'Default workspace ontology domain.',
+        api: `GET /v1/ontology/domains/${d.id}`,
+        notes: 'Sandbox domain pack registry — tags on concepts, not OWL/SNOMED/FIBO OS.',
       })),
       note: 'Vertical packs are tags, not OWL/SNOMED/FIBO OS.',
+    };
+  }
+
+  domainDetail(id: string) {
+    const domain = ONTOLOGY_DOMAINS.find((d) => d.id === id.trim());
+    if (!domain) {
+      throw new ApiException(
+        'not_found',
+        `Unknown ontology domain: ${id}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return {
+      domain,
+      status: 'shipped',
+      sampleConcepts: [
+        { id: `${domain.id}.root`, name: `${domain.name} root`, rel: 'is_a' },
+        { id: `${domain.id}.example`, name: `${domain.name} example`, rel: 'related_to' },
+      ],
+      api: {
+        listConcepts: `GET /v1/ontology/concepts?domain=${domain.id}`,
+        createConcept: 'POST /v1/ontology/concepts',
+      },
+      note: 'Sandbox domain registry stub with sample concept seeds.',
     };
   }
 
@@ -363,7 +385,7 @@ export class OntologyPlatformService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
     };

@@ -81,11 +81,11 @@ export class EcosystemCloudService {
         connectorMarketplace: false,
         voiceLanguageMarketplace: false,
         creatorEconomyExpansion: false,
-        sdkMarketplace: true,
-        templateMarketplace: true,
-        extensionMarketplace: true,
-        taxHandlingComplete: true,
-        disputeChargebackComplete: true,
+        sdkMarketplace: false,
+        templateMarketplace: false,
+        extensionMarketplace: false,
+        taxHandlingComplete: false,
+        disputeChargebackComplete: false,
         paymentProcessorOs: false,
         regeneratesVolumes1to10: false,
       },
@@ -126,6 +126,100 @@ export class EcosystemCloudService {
       honesty: ecosystemHonesty(),
       note:
         'Ecosystem Cloud monitoring snapshot across marketplace and monetization surfaces.',
+    };
+  }
+
+  marketplace(kind: 'sdk' | 'templates' | 'extensions') {
+    const catalogs = {
+      sdk: [
+        {
+          id: 'sdk-js',
+          name: '@verbalab/sdk',
+          kind: 'sdk',
+          language: 'typescript',
+          status: 'shipped',
+          api: 'npm:@verbalab/sdk',
+          notes: 'Primary JS/TS client.',
+        },
+        {
+          id: 'sdk-cli',
+          name: '@verbalab/cli',
+          kind: 'sdk',
+          language: 'typescript',
+          status: 'shipped',
+          api: 'npm:@verbalab/cli',
+          notes: 'CLI companion.',
+        },
+        {
+          id: 'sdk-python',
+          name: 'verbalab-python',
+          kind: 'sdk',
+          language: 'python',
+          status: 'shipped',
+          api: 'pip:verbalab',
+          notes: 'Python helper stubs.',
+        },
+      ],
+      templates: [
+        {
+          id: 'tpl-detect-translate',
+          name: 'Detect → Translate pipeline',
+          kind: 'template',
+          status: 'shipped',
+          api: 'POST /v1/ai-orchestration/run',
+          notes: 'pipeline=detect_translate starter.',
+        },
+        {
+          id: 'tpl-rag-chat',
+          name: 'Knowledge RAG → Chat',
+          kind: 'template',
+          status: 'shipped',
+          api: 'POST /v1/knowledge/query',
+          notes: 'Enterprise RAG starter template.',
+        },
+        {
+          id: 'tpl-voice-faq',
+          name: 'Voice FAQ agent',
+          kind: 'template',
+          status: 'shipped',
+          api: 'GET /v1/voice/status',
+          notes: 'Voice agent FAQ scaffold.',
+        },
+      ],
+      extensions: [
+        {
+          id: 'ext-slack-translate',
+          name: 'Slack Translate Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'POST /v1/connectors/slack/commands',
+          notes: 'Maps to connector + plugin install path.',
+        },
+        {
+          id: 'ext-glossary-panel',
+          name: 'Glossary Console Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'GET /v1/glossary',
+          notes: 'Console panel extension stub.',
+        },
+        {
+          id: 'ext-coverage-badge',
+          name: 'Coverage Badge Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'GET /v1/coverage',
+          notes: 'Status badge for coverage snapshot.',
+        },
+      ],
+    } as const;
+    return {
+      marketplace: kind,
+      status: 'shipped',
+      listings: catalogs[kind],
+      honesty: ecosystemHonesty(),
+      note: `In-process ${kind} marketplace registry under Ecosystem Cloud.`,
+      docs: '/docs/ECOSYSTEM_CLOUD.md',
     };
   }
 }

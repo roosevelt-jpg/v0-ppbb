@@ -99,7 +99,7 @@ export function voiceStudioEngineCatalog() {
         id: 'professional-dashboard',
         name: 'Professional Dashboard',
         status: 'shipped',
-        api: null,
+        api: '/voice-studio',
         notes: 'Console /voice-studio (+ legacy African studio /audio).',
       },
       {

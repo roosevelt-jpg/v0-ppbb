@@ -41,9 +41,14 @@ describe('Knowledge + Intelligence Cloud shipped closeout', () => {
   });
 
   it('agent intelligence + ai observability engines load', () => {
-    const agent = new AgentIntelligenceService({} as never).engine();
-    expect(agent.honesty.fullAgentOs).toBe(false);
+    const agentOs = {
+      agentOsEngine: () => ({ id: 'agent-os', fullAgentOs: true, multiAgentOs: true }),
+    };
+    const agent = new AgentIntelligenceService({} as never, agentOs as never).engine();
+    expect(agent.honesty.fullAgentOs).toBe(true);
+    expect(agent.honesty.multiAgentOs).toBe(true);
     expect(agent.capabilities.some((c: { id: string }) => c.id === 'partner-tools')).toBe(true);
+    expect(agent.capabilities.some((c: { id: string; status: string }) => c.id === 'full-agent-os' && c.status === 'shipped')).toBe(true);
 
     const obs = new AiObservabilityService({} as never).engine();
     expect(obs.honesty.datadogOs).toBe(false);

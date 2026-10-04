@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { AgentOperatingSystemService } from '../agent-operating-system/agent-operating-system.service';
 import {
   agentIntelligenceCatalog,
   agentIntelligenceHonesty,
@@ -8,7 +9,10 @@ import {
 
 @Injectable()
 export class AgentIntelligenceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly agentOs: AgentOperatingSystemService,
+  ) {}
 
   engine() {
     return {
@@ -41,10 +45,17 @@ export class AgentIntelligenceService {
         {
           id: 'full-agent-os',
           name: 'Full agent OS',
-          status: 'deferred',
-          api: null,
+          status: 'shipped',
+          api: 'POST /v1/agent-os/run',
+        },
+        {
+          id: 'multi-agent-os',
+          name: 'Multi-agent OS',
+          status: 'shipped',
+          api: 'GET /v1/agent-os/engine',
         },
       ],
+      agentOs: this.agentOs.agentOsEngine(),
       safety: agentIntelligenceHonesty(),
     };
   }
@@ -88,10 +99,12 @@ export class AgentIntelligenceService {
       activity: await this.activity(session.organizationId),
       links: {
         self: '/agent-intelligence',
+        agentOs: '/agent-intelligence',
         agentRuntime: '/agent-runtime',
         orchestration: '/ai-orchestration',
         voice: '/voice',
         partnerConnectors: '/partner-connectors',
+        agentOperatingSystem: '/agent-operating-system',
       },
       docs: '/docs/AGENT_INTELLIGENCE.md',
     };

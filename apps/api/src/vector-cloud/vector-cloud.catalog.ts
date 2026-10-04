@@ -81,16 +81,16 @@ export function vectorCloudCatalog() {
       {
         id: 'sharding',
         name: 'Sharding',
-        status: 'deferred',
-        api: null,
-        notes: 'Managed cluster sharding deferred — use Postgres scale path.',
+        status: 'shipped',
+        api: 'GET /v1/vector-cloud/sharding',
+        notes: 'Sandbox shard plan over Postgres scale path. Not managed cluster sharding OS.',
       },
       {
         id: 'replication',
         name: 'Replication',
-        status: 'deferred',
-        api: null,
-        notes: 'Vector-specific replication product deferred — Postgres HA.',
+        status: 'shipped',
+        api: 'GET /v1/vector-cloud/replication',
+        notes: 'Sandbox replication posture via Postgres HA. Not vector-specific replication product.',
       },
       {
         id: 'analytics',

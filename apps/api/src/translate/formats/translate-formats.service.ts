@@ -6,7 +6,7 @@ import { planContent, splitForStreaming } from './plan-content';
 import { restoreFormat, type ContentFormat } from './format-types';
 import { translateEngineCatalog } from '../translate-engine.catalog';
 
-const FORMATS: ContentFormat[] = ['html', 'markdown', 'xml', 'csv', 'srt', 'plain'];
+const FORMATS: ContentFormat[] = ['html', 'markdown', 'xml', 'csv', 'srt', 'plain', 'website', 'email', 'powerpoint', 'excel', 'sms', 'whatsapp', 'teams'];
 
 @Injectable()
 export class TranslateFormatsService {

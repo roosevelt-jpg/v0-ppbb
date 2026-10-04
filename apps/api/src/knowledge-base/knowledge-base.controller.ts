@@ -35,6 +35,11 @@ export class KnowledgeBaseController {
     return this.knowledgeBase.contentKinds();
   }
 
+  @Get('permissions')
+  permissions() {
+    return this.knowledgeBase.permissions();
+  }
+
   @Get('collections')
   @UseGuards(TranslateAuthGuard)
   collections(@Req() req: AuthedReq) {

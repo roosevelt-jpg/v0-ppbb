@@ -44,23 +44,37 @@ export class EnterpriseSearchService {
           id === 'hybrid'
             ? 'Light RRF of keyword + semantic — not BM25/Elastic hybrid OS.'
             : id === 'semantic'
-              ? 'pgvector cosine via /'
-              : 'ILIKE substring match on chunk content.',
+              ? 'pgvector cosine via Knowledge embeddings'
+              : id === 'image'
+                ? 'Caption/OCR text path — filter contentKind=image when present.'
+                : id === 'voice'
+                  ? 'Speech transcript query path — paste STT text as query.'
+                  : id === 'translation'
+                    ? 'Cross-lingual via translated query text then hybrid search.'
+                    : 'ILIKE substring match on chunk content.',
       })),
-      deferred: ['image', 'voice', 'translation_os', 'bm25_parity'],
-      note: 'Enterprise Search modes for',
+      deferred: ['bm25_parity'],
+      note: 'Enterprise Search modes including sandbox image/voice/translation paths.',
     };
   }
 
   private assertMode(mode: string): EnterpriseSearchMode {
-    if (mode !== 'keyword' && mode !== 'semantic' && mode !== 'hybrid') {
+    const allowed: EnterpriseSearchMode[] = [
+      'keyword',
+      'semantic',
+      'hybrid',
+      'image',
+      'voice',
+      'translation',
+    ];
+    if (!allowed.includes(mode as EnterpriseSearchMode)) {
       throw new ApiException(
         'validation_error',
-        'mode must be keyword, semantic, or hybrid',
+        `mode must be one of: ${allowed.join(', ')}`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    return mode;
+    return mode as EnterpriseSearchMode;
   }
 
   private docFilter(input: {
@@ -250,16 +264,28 @@ export class EnterpriseSearchService {
     }
     const mode = this.assertMode(input.mode ?? 'hybrid');
     const k = Math.min(Math.max(input.k ?? 8, 1), 20);
+    const contentKind =
+      mode === 'image'
+        ? input.contentKind ?? 'image'
+        : mode === 'voice'
+          ? input.contentKind ?? 'audio'
+          : input.contentKind;
 
     let raw: Omit<SearchHit, 'rank'>[] = [];
     if (mode === 'keyword') {
-      raw = await this.keywordHits({ ...input, query, k });
+      raw = await this.keywordHits({ ...input, query, k, contentKind });
     } else if (mode === 'semantic') {
-      raw = await this.semanticHits({ ...input, query, k });
+      raw = await this.semanticHits({ ...input, query, k, contentKind });
+    } else if (mode === 'image' || mode === 'voice' || mode === 'translation') {
+      const [kw, sem] = await Promise.all([
+        this.keywordHits({ ...input, query, k, contentKind }),
+        this.semanticHits({ ...input, query, k, contentKind }),
+      ]);
+      raw = this.rrfMerge(kw, sem, k);
     } else {
       const [kw, sem] = await Promise.all([
-        this.keywordHits({ ...input, query, k }),
-        this.semanticHits({ ...input, query, k }),
+        this.keywordHits({ ...input, query, k, contentKind }),
+        this.semanticHits({ ...input, query, k, contentKind }),
       ]);
       raw = this.rrfMerge(kw, sem, k);
     }
@@ -290,17 +316,23 @@ export class EnterpriseSearchService {
       filters: {
         collection: input.collection ?? null,
         tag: input.tag ?? null,
-        contentKind: input.contentKind ?? null,
+        contentKind: contentKind ?? null,
         documentId: input.documentId ?? null,
       },
       hits,
       honesty: this.engine().honesty,
       note:
-        mode === 'hybrid'
-          ? 'Light hybrid RRF over keyword + pgvector semantic. Not Elastic/BM25 OS.'
-          : mode === 'semantic'
-            ? 'Semantic search via pgvector over chunks.'
-            : 'Keyword ILIKE search over workspace knowledge chunks.',
+        mode === 'image'
+          ? 'Sandbox image search via caption/OCR text over knowledge chunks. Not multimodal encoder OS.'
+          : mode === 'voice'
+            ? 'Sandbox voice search via STT transcript query text. Not live mic search OS.'
+            : mode === 'translation'
+              ? 'Sandbox translation search — pass already-translated query text for cross-lingual retrieval.'
+              : mode === 'hybrid'
+                ? 'Light hybrid RRF over keyword + pgvector semantic. Not Elastic/BM25 OS.'
+                : mode === 'semantic'
+                  ? 'Semantic search via pgvector over chunks.'
+                  : 'Keyword ILIKE search over workspace knowledge chunks.',
     };
   }
 
@@ -384,7 +416,7 @@ export class EnterpriseSearchService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
     };

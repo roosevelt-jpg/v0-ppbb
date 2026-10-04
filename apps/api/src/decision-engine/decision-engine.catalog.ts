@@ -102,9 +102,9 @@ export function decisionEngineCatalog() {
       {
         id: 'enterprise-brms',
         name: 'Enterprise BRMS',
-        status: 'deferred',
-        api: null,
-        notes: 'Drools/Pega parity deferred (out of scope).',
+        status: 'shipped',
+        api: 'POST /v1/decision-engine/decide',
+        notes: 'kind=enterprise_brms — sandbox ordered rule-table decisions. Not Drools/Pega BRMS parity.',
       },
     ] satisfies DecisionCapability[],
     honesty: {
@@ -148,6 +148,7 @@ export const DECISION_KINDS = [
   'tool_selection',
   'workflow',
   'cost',
+  'enterprise_brms',
 ] as const;
 
 export type DecisionKind = (typeof DECISION_KINDS)[number];

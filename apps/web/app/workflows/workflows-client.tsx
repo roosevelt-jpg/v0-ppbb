@@ -14,9 +14,11 @@ type Workflow = {
 };
 
 const EXAMPLE = `[
-  { "id": "s1", "op": "transcribe", "documentId": "doc_…" },
+  { "id": "s1", "op": "stt", "documentId": "doc_…" },
   { "id": "s2", "op": "translate", "source": "auto", "target": "sw", "text": "{{s1.text}}" },
-  { "id": "s3", "op": "notify", "channel": "email", "message": "Done: {{s2.text}}" }
+  { "id": "s3", "op": "summarize", "text": "{{s2.text}}", "maxSentences": 2 },
+  { "id": "s4", "op": "classify", "text": "{{s3.text}}", "labels": ["support", "sales", "other"] },
+  { "id": "s5", "op": "notify", "channel": "email", "message": "Class {{s4.label}}: {{s3.text}}" }
 ]`;
 
 export function WorkflowsClient() {
@@ -89,7 +91,8 @@ export function WorkflowsClient() {
         Workflows
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
-        Directed steps as JSON, executed by the job runner. Ops: transcribe, translate, notify. Not Temporal.
+        Directed steps as JSON, executed by the job runner. Ops: transcribe, translate, notify, embed,
+        summarize, webhook, classify, agent_run, tts, stt.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}

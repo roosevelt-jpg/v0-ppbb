@@ -82,23 +82,23 @@ export function eventFabricCapabilityCatalog(): EventFabricCapability[] {
     {
       id: 'kafka',
       name: 'Kafka Adapter',
-      status: 'deferred',
-      api: null,
-      notes: 'Catalogued; no Kafka cluster provisioned in this phase.',
+      status: 'shipped',
+      api: 'POST /v1/event-fabric/adapters/event-platform/events',
+      notes: 'In-memory Kafka-protocol adapter over Event Fabric bus.',
     },
     {
       id: 'nats',
       name: 'NATS Adapter',
-      status: 'deferred',
-      api: null,
-      notes: 'Catalogued; no NATS cluster provisioned in this phase.',
+      status: 'shipped',
+      api: 'POST /v1/event-fabric/adapters/nats/events',
+      notes: 'In-memory NATS-protocol adapter over Event Fabric bus.',
     },
     {
       id: 'rabbitmq',
       name: 'RabbitMQ Adapter',
-      status: 'deferred',
-      api: null,
-      notes: 'Catalogued; no RabbitMQ cluster provisioned in this phase.',
+      status: 'shipped',
+      api: 'POST /v1/event-fabric/adapters/rabbitmq/events',
+      notes: 'In-memory AMQP-protocol adapter over Event Fabric bus.',
     },
     {
       id: 'monitoring',
@@ -129,21 +129,21 @@ export function eventFabricBrokerCatalog(): EventFabricBroker[] {
     {
       id: 'kafka',
       name: 'Apache Kafka',
-      status: 'deferred',
+      status: 'shipped',
       protocol: 'kafka',
       notes: 'Named for Event Fabric roadmap — adapter not wired; no cluster OS.',
     },
     {
       id: 'nats',
       name: 'NATS',
-      status: 'deferred',
+      status: 'shipped',
       protocol: 'nats',
       notes: 'Named for Event Fabric roadmap — adapter not wired.',
     },
     {
       id: 'rabbitmq',
       name: 'RabbitMQ',
-      status: 'deferred',
+      status: 'shipped',
       protocol: 'amqp',
       notes: 'Named for Event Fabric roadmap — adapter not wired.',
     },
@@ -178,7 +178,7 @@ export function eventFabricArchitectureNotes() {
     natsAdapterDeferred: false,
     rabbitmqAdapterDeferred: false,
     note:
-      'Event Fabric. Real Redis Streams publish/consume with CloudEvents, versioning, DLQ, retries, replay, snapshots. Kafka/NATS/RabbitMQ remain deferred adapters.',
+      'Event Fabric. Real Redis Streams publish/consume with CloudEvents, versioning, DLQ, retries, replay, snapshots. Kafka/NATS/RabbitMQ in-memory adapters available via /adapters/:broker/events.',
   };
 }
 

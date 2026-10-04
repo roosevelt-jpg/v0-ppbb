@@ -87,13 +87,6 @@ export class BatchRuntimeService {
   ) {
     this.assertEnabled();
     const kind = this.normalizeKind(input.kind ?? 'translation');
-    if (kind === 'video') {
-      throw new ApiException(
-        'validation_error',
-        'Video batch jobs are deferred',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     if (kind === 'training') {
       throw new ApiException(
         'validation_error',
@@ -471,7 +464,7 @@ export class BatchRuntimeService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       note: 'Batch Runtime monitoring snapshot.',
     };

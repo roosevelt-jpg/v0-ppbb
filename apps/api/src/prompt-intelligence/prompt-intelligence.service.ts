@@ -330,12 +330,57 @@ export class PromptIntelligenceService {
       registryKeys: registry.items.length,
       usingFallback: registry.items.filter((i) => i.usingFallback).length,
       autoPromptResearchLab: engine.honesty.autoPromptResearchLab,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       fallbackBodies: PROMPT_KEYS.map((key) => ({
         key,
         preview: defaultPromptBody(key).slice(0, 80),
       })),
       note: 'Prompt Intelligence monitoring snapshot.',
+    };
+  }
+
+
+  async optimize(
+    input: AuthCtx & { key?: string; body?: string; version?: number },
+  ) {
+    const key = this.requireKey(input.key);
+    const resolved = await this.resolveBody({ ...input, key });
+    const body = resolved.body;
+    const suggestions: string[] = [];
+    let optimized = body.trim();
+    if (body !== body.trim()) {
+      suggestions.push('Trim leading/trailing whitespace');
+    }
+    if (!/^you are|^act as|^system:/i.test(optimized)) {
+      optimized = `You are a helpful assistant.\n\n${optimized}`;
+      suggestions.push('Prefixed with a clear system role line');
+    }
+    if (![...optimized].length || [...optimized].length < 40) {
+      suggestions.push('Expand instructions with constraints and output format');
+      optimized = `${optimized}\n\nRespond clearly. Prefer short bullet answers when listing.`;
+    }
+    if (/ignore (all )?(previous|prior) instructions/i.test(optimized)) {
+      suggestions.push('Removed injection-like phrase');
+      optimized = optimized.replace(/ignore (all )?(previous|prior) instructions/gi, '[redacted]');
+    }
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'prompt_intelligence.optimized',
+      route: 'POST /v1/prompt-intelligence/optimize',
+      ip: input.ip,
+      metadata: { key, suggestionCount: suggestions.length },
+    });
+    return {
+      key,
+      source: resolved.source,
+      version: resolved.version,
+      originalChars: [...body].length,
+      optimizedChars: [...optimized].length,
+      optimized,
+      suggestions,
+      honesty: { autoPromptResearchLab: false, heuristicOnly: true },
+      note: 'Sandbox heuristic prompt rewrite. Not an evolutionary auto-prompt research lab.',
     };
   }
 }

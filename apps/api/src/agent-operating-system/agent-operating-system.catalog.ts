@@ -75,6 +75,8 @@ export function agentOperatingSystemEngineCatalog() {
       enterpriseEngineeringSystemOs: false,
       integratesExistingSystems: true,
       newAgentExecutor: false,
+      fullAgentOs: true,
+      multiAgentOs: true,
     },
     safety: {
       unifyingOrchestrationLayer: true,

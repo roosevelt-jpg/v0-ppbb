@@ -452,4 +452,29 @@ export class ContextRuntimeService {
     });
     return `cr:${createHash('sha256').update(payload).digest('hex').slice(0, 24)}`;
   }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process context-runtime push bus (SSE).',
+    });
+    write('scopes', { scopes: ['conversation', 'document', 'workspace', 'org'] });
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
+  }
 }

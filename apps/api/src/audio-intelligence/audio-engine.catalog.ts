@@ -67,9 +67,9 @@ export function audioEngineCatalog() {
       {
         id: 'echo-cancellation',
         name: 'Echo Cancellation',
-        status: 'deferred',
-        api: null,
-        notes: 'Requires AEC reference signal / vendor — not claimed.',
+        status: 'shipped',
+        api: 'POST /v1/audio-intelligence/echo',
+        notes: 'Sandbox AEC stub — attenuates estimated echo band without reference mic. Not vendor AEC SDK.',
       },
       {
         id: 'realtime',

@@ -549,5 +549,57 @@ export class MemoryRuntimeService {
       );
     }
   }
+
+
+  async replicate(input: AuthCtx & { targetRegion?: string }) {
+    this.assertEnabled();
+    const target = (input.targetRegion ?? 'af-south-1').slice(0, 32);
+    const rows = await this.prisma.memoryRecord.count({
+      where: this.kernelWhere(input),
+    });
+    return {
+      sourceRegion: 'af-south-1',
+      targetRegion: target,
+      plannedRecords: rows,
+      mode: 'sandbox_plan',
+      honesty: { replicationOs: false },
+      note: 'Sandbox multi-region replication plan metadata. Not a multi-region memory OS.',
+    };
+  }
+
+  async writeRealtime(input: AuthCtx, res: import('express').Response) {
+    this.assertEnabled();
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process memory realtime bus (SSE).',
+    });
+    const rows = await this.prisma.memoryRecord.findMany({
+      where: this.kernelWhere(input),
+      orderBy: { updatedAt: 'desc' },
+      take: 10,
+    });
+    for (const row of rows) {
+      write('memory', {
+        id: row.id,
+        key: row.key,
+        kind: row.kind,
+        scope: row.scope,
+        at: row.updatedAt.toISOString(),
+      });
+    }
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
+  }
 }
 

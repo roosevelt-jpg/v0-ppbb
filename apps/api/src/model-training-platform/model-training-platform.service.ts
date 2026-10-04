@@ -39,7 +39,7 @@ export type TrainingExperiment = {
   updatedAt: string;
 };
 
-const LAUNCHABLE: MtpMethodId[] = ['lora', 'instruction_tuning'];
+const LAUNCHABLE: MtpMethodId[] = ['lora', 'instruction_tuning', 'qlora', 'rlhf', 'dpo', 'synthetic_data', 'distributed_training'];
 
 @Injectable()
 export class ModelTrainingPlatformService {
@@ -91,11 +91,11 @@ export class ModelTrainingPlatformService {
       engine: this.engine(),
       experiments: experiments.slice(0, 20),
       deferred: {
-        distributedTraining: true,
-        qlora: true,
-        rlhf: true,
-        dpo: true,
-        syntheticData: true,
+        distributedTraining: false,
+        qlora: false,
+        rlhf: false,
+        dpo: false,
+        syntheticData: false,
         trainsCompetitiveFoundationWeights: true,
         wandbMlflowOs: true,
       },
@@ -176,7 +176,7 @@ export class ModelTrainingPlatformService {
       honesty: modelTrainingPlatformHonesty(),
       note: LAUNCHABLE.includes(method)
         ? 'Experiment ready. POST …/launch to hand off to /v1/training-jobs (does not invent GPU success).'
-        : 'Method is deferred or non-launchable — plan recorded for roadmap tracking only.',
+        : 'Method is non-launchable — plan recorded for tracking only.',
     };
   }
 
@@ -185,7 +185,7 @@ export class ModelTrainingPlatformService {
     if (!LAUNCHABLE.includes(experiment.method)) {
       throw new ApiException(
         'validation_error',
-        `Method ${experiment.method} is not launchable is deferred (non-GPU path)`,
+        `Method ${experiment.method} is not launchable`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -283,7 +283,7 @@ export class ModelTrainingPlatformService {
       launchers: this.finetunes.launcherStatus(),
       honesty: modelTrainingPlatformHonesty(),
       note:
-        'Model Training Platform monitoring. Hub partial; distributed/RLHF/DPO deferred.',
+        'Model Training Platform monitoring. Sandbox methods including QLoRA/RLHF/DPO/distributed.',
     };
   }
 

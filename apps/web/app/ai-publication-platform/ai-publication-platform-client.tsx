@@ -29,7 +29,7 @@ export function AiPublicationPlatformClient() {
         AI Publication Platform
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        DOI field is optional stub — doiRegistryOs=false.
+        DOI stub assignment via POST /v1/ai-publication-platform/doi — doiRegistryOs=false.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

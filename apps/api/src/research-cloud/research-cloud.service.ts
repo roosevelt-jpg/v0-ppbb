@@ -112,4 +112,23 @@ export class ResearchCloudService {
       note: 'Research Cloud monitoring snapshot.',
     };
   }
+
+
+  quantum() {
+    return {
+      id: 'quantumAiResearchReadiness',
+      status: 'shipped',
+      readiness: {
+        classicalSimulators: true,
+        quantumHardwareOs: false,
+        notes: [
+          'Track quantum ML literature readiness only.',
+          'No quantum circuit runtime or hardware scheduling.',
+        ],
+      },
+      honesty: { quantumComputingOs: false },
+      api: 'GET /v1/research-cloud/quantum',
+      note: 'Quantum AI research readiness notes — not a quantum computing OS.',
+    };
+  }
 }

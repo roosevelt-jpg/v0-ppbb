@@ -67,9 +67,9 @@ export function promptIntelligenceCatalog() {
       {
         id: 'prompt-optimization',
         name: 'Prompt Optimization',
-        status: 'deferred',
-        api: null,
-        notes: 'Auto-prompt research / evolutionary optimizers deferred (out of scope).',
+        status: 'shipped',
+        api: 'POST /v1/prompt-intelligence/optimize',
+        notes: 'Sandbox prompt rewrite suggestions (heuristics). Not an evolutionary auto-prompt research lab.',
       },
       {
         id: 'prompt-approval',

@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { ApiException } from '../common/errors/api-exception';
 import {
-  DEFERRED_EMBED_MODALITIES,
   SUPPORTED_EMBED_MODALITIES,
   SupportedEmbedModality,
   embeddingCloudCatalog,
@@ -149,7 +148,7 @@ export class EmbeddingCloudService {
       requests: analytics.requests,
       tokens: analytics.tokens,
       averageLatencyMs: analytics.averageLatencyMs,
-      deferredModalities: engine.modalities.filter((m) => m.status === 'deferred').map((m) => m.id),
+      deferredModalities: engine.modalities.filter((m) => (m.status as string) === 'deferred').map((m) => m.id),
       note: 'Embedding Cloud monitoring snapshot.',
     };
   }
@@ -162,13 +161,6 @@ export class EmbeddingCloudService {
     const modality = raw.trim().toLowerCase().replace('-', '_');
     if ((SUPPORTED_EMBED_MODALITIES as readonly string[]).includes(modality)) {
       return modality as SupportedEmbedModality;
-    }
-    if ((DEFERRED_EMBED_MODALITIES as readonly string[]).includes(modality)) {
-      throw new ApiException(
-        'validation_error',
-        `modality '${modality}' is deferred — use Speaker Intelligence for voice biometrics`,
-        HttpStatus.BAD_REQUEST,
-      );
     }
     throw new ApiException(
       'validation_error',

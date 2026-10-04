@@ -45,6 +45,26 @@ export class PartnerConnectorsService {
     return { platforms: rows, count: rows.length, honesty: partnerConnectorsHonesty() };
   }
 
+  /** Listing registry for partner platforms (install + invoke ready). */
+  registry(kind?: string) {
+    const { platforms, count, honesty } = this.platforms(kind);
+    return {
+      registry: platforms.map((p) => ({
+        id: p.id,
+        name: p.name,
+        kind: p.kind,
+        status: p.status,
+        protocols: p.protocols,
+        install: '/v1/partner-connectors/installations',
+        invoke: '/v1/partner-connectors/invoke',
+        api: p.api,
+      })),
+      count,
+      honesty,
+      note: 'Partner listing registry — each entry supports install + invoke.',
+    };
+  }
+
   platform(id: string) {
     const row = PARTNER_PLATFORMS.find((p) => p.id === id);
     if (!row) return null;

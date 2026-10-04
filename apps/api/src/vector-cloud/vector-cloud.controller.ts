@@ -89,4 +89,15 @@ export class VectorCloudController {
       ip: clientIp(req),
     });
   }
+
+
+  @Get('sharding')
+  sharding() {
+    return this.vectorCloud.sharding();
+  }
+
+  @Get('replication')
+  replication() {
+    return this.vectorCloud.replication();
+  }
 }

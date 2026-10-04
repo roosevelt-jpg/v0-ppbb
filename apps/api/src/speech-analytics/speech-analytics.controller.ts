@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import type { Request } from 'express';
 import { SpeechAnalyticsService } from './speech-analytics.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
@@ -179,6 +179,22 @@ export class SpeechAnalyticsController {
       workspaceId: req.translateAuth.workspaceId,
       from,
       to,
+    });
+  }
+
+
+  @Post('wer-lab')
+  @UseGuards(TranslateAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  werLab(
+    @Req() req: Request & { translateAuth: TranslateAuthContext },
+    @Body() body: { reference?: string; hypothesis?: string },
+  ) {
+    return this.analytics.werLab({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      reference: body.reference,
+      hypothesis: body.hypothesis,
     });
   }
 }

@@ -22,6 +22,11 @@ export class PartnerConnectorsController {
     return this.service.platforms(kind);
   }
 
+  @Get('registry')
+  registry(@Query('kind') kind?: string) {
+    return this.service.registry(kind);
+  }
+
   @Get('platforms/:id')
   platform(@Param('id') id: string) {
     const row = this.service.platform(id);

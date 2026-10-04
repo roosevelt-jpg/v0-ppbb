@@ -36,6 +36,11 @@ export class OntologyPlatformController {
     return this.ontology.domains();
   }
 
+  @Get('domains/:id')
+  domain(@Param('id') id: string) {
+    return this.ontology.domainDetail(id);
+  }
+
   @Get('analytics')
   @UseGuards(TranslateAuthGuard)
   analytics(@Req() req: AuthedReq) {

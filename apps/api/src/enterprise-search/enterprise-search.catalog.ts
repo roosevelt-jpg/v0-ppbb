@@ -74,23 +74,23 @@ export function enterpriseSearchCatalog() {
       {
         id: 'translation-search',
         name: 'Translation search',
-        status: 'deferred',
-        api: null,
-        notes: 'Cross-lingual retrieval deferred — use Language Cloud + RAG later.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=translation — cross-lingual query via translated query text then hybrid search.',
       },
       {
         id: 'image-search',
         name: 'Image search',
-        status: 'deferred',
-        api: null,
-        notes: 'Multimodal image search deferred.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=image — caption/OCR text path over knowledge chunks (contentKind=image). Not multimodal encoder OS.',
       },
       {
         id: 'voice-search',
         name: 'Voice search',
-        status: 'deferred',
-        api: null,
-        notes: 'Speech-to-query deferred — use Speech Cloud STT + search later.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=voice — speech transcript query path (paste STT text). Not live mic search OS.',
       },
       {
         id: 'analytics',
@@ -118,7 +118,7 @@ export function enterpriseSearchCatalog() {
       extendsVl062: true,
       extendsVectorCloud: true,
     },
-    modes: ['keyword', 'semantic', 'hybrid'] as const,
+    modes: ['keyword', 'semantic', 'hybrid', 'image', 'voice', 'translation'] as const,
     links: {
       hub: '/knowledge-cloud',
       console: '/enterprise-search',
@@ -132,4 +132,4 @@ export function enterpriseSearchCatalog() {
   };
 }
 
-export type EnterpriseSearchMode = 'keyword' | 'semantic' | 'hybrid';
+export type EnterpriseSearchMode = 'keyword' | 'semantic' | 'hybrid' | 'image' | 'voice' | 'translation';

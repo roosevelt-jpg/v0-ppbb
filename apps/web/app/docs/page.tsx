@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { SiteFooter } from '@/components/marketing/site-footer';
 
 export default function DocsPage() {
   const [specUrl, setSpecUrl] = useState(`${API_URL}/v1/openapi.json`);
@@ -21,6 +22,7 @@ export default function DocsPage() {
   }, []);
 
   return (
+    <>
     <div className="vl-fade-up" style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.25rem 1.5rem 4rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
         <Link href="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 760, textDecoration: 'none', fontSize: '1.15rem' }}>
@@ -250,6 +252,8 @@ VERBALAB_BASE_URL=${API_URL}`}
         )}
       </div>
     </div>
+    <SiteFooter />
+    </>
   );
 }
 

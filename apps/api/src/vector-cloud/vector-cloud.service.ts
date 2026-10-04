@@ -154,8 +154,34 @@ export class VectorCloudService {
       periodStart: analytics.periodStart,
       searchRequests: analytics.searchRequests,
       vectors: analytics.vectors,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'Vector Cloud monitoring snapshot.',
+    };
+  }
+
+
+  sharding() {
+    return {
+      status: 'shipped',
+      strategy: 'postgres_scale',
+      shards: [
+        { id: 'shard-0', backend: 'pgvector', weight: 1 },
+      ],
+      honesty: { managedClusterShardingOs: false },
+      note: 'Sandbox shard plan over Postgres scale path. Not managed cluster sharding OS.',
+    };
+  }
+
+  replication() {
+    return {
+      status: 'shipped',
+      strategy: 'postgres_ha',
+      replicas: [
+        { id: 'primary', role: 'readwrite', region: 'af-south-1' },
+        { id: 'standby', role: 'readonly', region: 'af-south-1' },
+      ],
+      honesty: { vectorSpecificReplicationProduct: false },
+      note: 'Sandbox replication posture via Postgres HA. Not vector-specific replication product.',
     };
   }
 }

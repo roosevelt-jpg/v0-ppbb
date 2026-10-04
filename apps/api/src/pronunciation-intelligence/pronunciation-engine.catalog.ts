@@ -88,9 +88,9 @@ export function pronunciationEngineCatalog() {
       {
         id: 'forced-alignment',
         name: 'Forced Alignment Phonemes',
-        status: 'deferred',
-        api: null,
-        notes: 'True phoneme timing / WhisperX-style alignment deferred.',
+        status: 'shipped',
+        api: 'POST /v1/pronunciation/align',
+        notes: 'Sandbox grapheme/phoneme timing alignment over dictionary heuristics. Not WhisperX-class forced alignment.',
       },
     ] satisfies PronunciationCapability[],
     links: {

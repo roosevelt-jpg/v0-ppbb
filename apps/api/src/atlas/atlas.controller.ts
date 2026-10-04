@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AtlasService } from './atlas.service';
 import { ClerkAuthGuard, SessionContext } from '../common/guards/clerk-auth.guard';
 import { CurrentSession } from '../common/decorators/auth.decorators';
@@ -26,5 +26,12 @@ export class AtlasController {
   @Get('monitoring')
   monitoring() {
     return this.atlas.monitoring();
+  }
+
+
+  @Post('specialize')
+  @HttpCode(HttpStatus.OK)
+  specialize(@Body() body: { domain?: string; query?: string }) {
+    return this.atlas.specialize({ domain: body.domain, query: body.query });
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AiPublicationPlatformService } from './ai-publication-platform.service';
 
 @Controller('v1/ai-publication-platform')
@@ -28,5 +28,15 @@ export class AiPublicationPlatformController {
   @Get('query')
   query(@Query('q') q?: string) {
     return this.service.query(q);
+  }
+
+
+  @Post('doi')
+  @HttpCode(HttpStatus.OK)
+  doi(@Body() body: { publicationId?: string; title?: string }) {
+    return this.service.assignDoi({
+      publicationId: body.publicationId,
+      title: body.title,
+    });
   }
 }

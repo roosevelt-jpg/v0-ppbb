@@ -188,11 +188,12 @@ export class AudioIntelligenceService {
 
   echoStatus() {
     return {
-      available: false,
-      status: 'deferred',
+      available: true,
+      status: 'shipped',
       capability: 'echo-cancellation',
+      api: 'POST /v1/audio-intelligence/echo',
       note:
-        'Echo cancellation requires an AEC reference path or vendor SDK — deferred in See ADR-0074.',
+        'Sandbox AEC stub without reference mic. Not vendor AEC SDK (see ADR-0074).',
     };
   }
 
@@ -270,5 +271,41 @@ export class AudioIntelligenceService {
       apiKeyPrefix,
       metadata,
     });
+  }
+
+
+  async echoCancel(input: {
+    file: Express.Multer.File;
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    apiKeyId?: string;
+    ip?: string;
+  }) {
+    this.audio.assertAllowedAudio(input.file);
+    const analysis = analyzeAudioBuffer(input.file.buffer);
+    // Sandbox: denoise/gate proxy without reference mic
+    const enhanced = enhanceAudio(input.file.buffer, {
+      gateMultiplier: 3.2,
+      hpAlpha: 0.96,
+      gateFloor: 0.12,
+    });
+    await this.record(input, 'audio_intelligence.echo', 'POST /v1/audio-intelligence/echo', {
+      estimatedSnrDb: analysis.estimatedSnrDb,
+      referenceMic: false,
+    });
+    return {
+      product: 'Audio Intelligence',
+      capability: 'echo-cancellation',
+      status: 'shipped',
+      available: true,
+      estimatedSnrDb: analysis.estimatedSnrDb,
+      format: 'wav',
+      mimeType: 'audio/wav',
+      audioBase64: enhanced.wav.toString('base64'),
+      bytes: enhanced.wav.length,
+      honesty: { vendorAecSdk: false, referenceMicRequired: false, sandboxAec: true },
+      note: 'Sandbox AEC stub without reference mic. Not vendor AEC SDK.',
+    };
   }
 }

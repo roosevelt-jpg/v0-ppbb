@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
 import { useEffect, useMemo, useState } from 'react';
-import { API_URL, apiFetch } from '@/lib/api';
-import { getDevBearer, resolveApiToken } from '@/lib/dev-auth';
+import { API_URL } from '@/lib/api';
+import { getDevBearer } from '@/lib/dev-auth';
 import { ThemeSwitcher } from '@/components/theme-provider';
+import { SiteFooter, type SiteFooterContent } from '@/components/marketing/site-footer';
 
 type CmsAsset = { key: string; url: string; alt: string };
 type CmsBlock = { id: string; type: string; sortOrder: number; content: Record<string, unknown> };
@@ -22,29 +22,11 @@ type CmsPagePayload = {
   assetMap: Record<string, CmsAsset>;
 };
 
-type FooterLink = {
-  label: string;
-  href: string;
-  adminOnly?: boolean;
-  authOnly?: boolean;
-};
-
-/** Company links that must stay hidden until a user/admin session exists. */
-const AUTH_GATED_FOOTER_HREFS = new Set(['/cms', '/dashboard', '/dev-login']);
-const AUTH_GATED_FOOTER_LABELS = new Set(['CMS', 'Console', 'Dashboard', 'Brand & Press']);
-
 function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function isAuthGatedFooterLink(link: FooterLink): boolean {
-  if (link.authOnly || link.adminOnly) return true;
-  if (AUTH_GATED_FOOTER_HREFS.has(link.href)) return true;
-  return AUTH_GATED_FOOTER_LABELS.has(link.label);
-}
-
 export function MarketingHomePage() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [data, setData] = useState<CmsPagePayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [text, setText] = useState('');
@@ -52,7 +34,6 @@ export function MarketingHomePage() {
   const [busy, setBusy] = useState(false);
   const [playError, setPlayError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     void fetch(`${API_URL}/v1/cms/pages/home`)
@@ -78,22 +59,6 @@ export function MarketingHomePage() {
       })
       .catch((err: Error) => setError(err.message));
   }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    let cancelled = false;
-    void (async () => {
-      try {
-        const token = await resolveApiToken(getToken);
-        if (!cancelled) setIsAuthed(Boolean(token) || Boolean(isSignedIn) || Boolean(getDevBearer()));
-      } catch {
-        if (!cancelled) setIsAuthed(Boolean(isSignedIn) || Boolean(getDevBearer()));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isLoaded, isSignedIn, getToken]);
 
   const blocks = data?.page.blocks ?? [];
   const assetMap = data?.assetMap ?? {};
@@ -665,55 +630,7 @@ export function MarketingHomePage() {
           );
         }
         if (block.type === 'footer') {
-          const c = block.content as {
-            brand?: string;
-            blurb?: string;
-            links?: FooterLink[];
-            columns?: Array<{ title: string; links: FooterLink[] }>;
-          };
-          const links = (c.links ?? []).filter((link) => !isAuthGatedFooterLink(link) || isAuthed);
-          const columns = (c.columns ?? [])
-            .map((col) => ({
-              ...col,
-              links: col.links.filter((link) => !isAuthGatedFooterLink(link) || isAuthed),
-            }))
-            .filter((col) => col.links.length > 0);
-          return (
-            <footer key={block.id} className="vl-mkt-footer">
-              <div className="vl-mkt-footer-brand">
-                <strong>{c.brand}</strong>
-                <span>{c.blurb}</span>
-              </div>
-              {columns.length ? (
-                <div className="vl-mkt-footer-cols">
-                  {columns.map((col) => (
-                    <div key={col.title}>
-                      <h4>{col.title}</h4>
-                      {col.links.map((link) =>
-                        link.href.startsWith('#') ? (
-                          <a key={`${col.title}-${link.href}-${link.label}`} href={link.href}>
-                            {link.label}
-                          </a>
-                        ) : (
-                          <Link key={`${col.title}-${link.href}-${link.label}`} href={link.href}>
-                            {link.label}
-                          </Link>
-                        ),
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div>
-                  {links.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </footer>
-          );
+          return <SiteFooter key={block.id} content={block.content as SiteFooterContent} />;
         }
         return null;
       })}

@@ -121,20 +121,30 @@ describe('Fine-tunes (VL-104)', () => {
       role: 'owner',
       jobId: created.id,
     });
-    expect(launched.status).toBe('awaiting_gpu');
-    expect(launched.externalJobId).toMatch(/^manual:/);
+    expect(launched.status).toBe('running');
+    expect(launched.externalJobId).toMatch(/^local:/);
 
-    const completed = await finetunes.completeJob({
-      organizationId: org.id,
-      userId: org.memberships[0].userId,
-      role: 'owner',
-      jobId: created.id,
-      artifactKind: 'phrase_map',
-      useGoldenPhraseMap: true,
-      promote: true,
-    });
-    expect(completed.job.status).toBe('succeeded');
-    expect(completed.model?.status).toBe('ready');
+    const start = Date.now();
+    let completedJob = await finetunes.getJob(org.id, created.id);
+    while (
+      completedJob.status !== 'succeeded' &&
+      completedJob.status !== 'failed' &&
+      Date.now() - start < 5000
+    ) {
+      await new Promise((r) => setTimeout(r, 25));
+      completedJob = await finetunes.getJob(org.id, created.id);
+    }
+    expect(completedJob.status).toBe('succeeded');
+    const models = await finetunes.listModels();
+    const ready = models.find(
+      (m) =>
+        m.fineTuneJobId === created.id &&
+        m.status === 'ready' &&
+        m.sourceLang === 'en' &&
+        m.targetLang === 'sw',
+    );
+    expect(ready?.status).toBe('ready');
+    const completed = { job: completedJob, model: ready! };
 
     const hit = await gateway.translate({
       text: 'Hello',

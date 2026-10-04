@@ -41,4 +41,22 @@ export class AiPublicationPlatformService {
       note: 'AI Publication Platform monitoring snapshot.',
     };
   }
+
+
+  assignDoi(input: { publicationId?: string; title?: string }) {
+    const id = (input.publicationId ?? 'pub-sandbox').slice(0, 64);
+    const slug = (input.title ?? id)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 48) || 'item';
+    const doi = `10.sandbox/verbalab.${slug}.${Date.now().toString(36)}`;
+    return {
+      publicationId: id,
+      doi,
+      registered: false,
+      honesty: { doiRegistryOs: false, stubAssignment: true },
+      note: 'Sandbox DOI stub assignment. Not a DOI registry OS.',
+    };
+  }
 }

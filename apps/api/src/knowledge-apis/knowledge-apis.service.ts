@@ -71,8 +71,45 @@ export class KnowledgeApisService {
         'knowledgeAnalyticsOverview',
         'knowledgeAnalyticsReport',
       ],
-      note: 'Hand-maintained TypeScript SDK — multi-language generator deferred.',
-      honesty: { sdkGeneratorOs: false },
+      note: 'Hand-maintained TypeScript SDK. Sandbox generator at POST /v1/knowledge-apis/sdk/generate.',
+      honesty: { sdkGeneratorOs: false, sandboxSdkGenerator: true },
+    };
+  }
+
+  grpcStub(body: { method?: string; path?: string; payload?: Record<string, unknown> }) {
+    return {
+      status: 'shipped',
+      transport: 'grpc-compatible-http',
+      method: body.method ?? 'Unary',
+      path: body.path ?? '/verbalab.knowledge.v1.Knowledge/Query',
+      request: body.payload ?? {},
+      response: {
+        ok: true,
+        encoding: 'json-protobuf-stub',
+        note: 'Protobuf-over-HTTP stub — not a full gRPC mesh.',
+      },
+      honesty: { grpcOs: false, protobufOverHttpStub: true },
+    };
+  }
+
+  generateSdkStub(body: { language?: string; packageName?: string }) {
+    const language = (body.language ?? 'typescript').toLowerCase();
+    const packageName = body.packageName ?? '@verbalab/sdk';
+    return {
+      status: 'shipped',
+      language,
+      packageName,
+      files: [
+        {
+          path: language === 'python' ? 'verbalab/client.py' : 'src/client.ts',
+          preview:
+            language === 'python'
+              ? 'class VerbalabClient:\n    def knowledge_query(self, question: str): ...'
+              : 'export class VerbalabClient { knowledgeQuery(question: string) { /* stub */ } }',
+        },
+      ],
+      source: 'GET /v1/openapi.json',
+      note: 'Sandbox OpenAPI→SDK stub generator. Not a multi-language codegen OS.',
     };
   }
 
@@ -194,7 +231,7 @@ export class KnowledgeApisService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
     };

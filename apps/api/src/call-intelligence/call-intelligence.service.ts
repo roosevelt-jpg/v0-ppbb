@@ -411,6 +411,46 @@ export class CallIntelligenceService {
       metadata,
     });
   }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process call agent-assist bus (SSE). Not live dialer/CCaaS.',
+    });
+    const recent = await this.prisma.auditEvent.findMany({
+      where: {
+        organizationId: input.organizationId,
+        action: { startsWith: 'call_intelligence.' },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { id: true, action: true, createdAt: true },
+    });
+    for (const row of recent) {
+      write('event', {
+        id: row.id,
+        action: row.action,
+        at: row.createdAt.toISOString(),
+      });
+    }
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
+  }
 }
 
 function normalizeDirection(value?: string): string {

@@ -151,9 +151,9 @@ export function agentRuntimeCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Realtime agent bus deferred.',
+        status: 'shipped',
+        api: 'GET /v1/agent-runtime/realtime',
+        notes: 'SSE heartbeat + recent agent events for the org/workspace.',
       },
       {
         id: 'monitoring',

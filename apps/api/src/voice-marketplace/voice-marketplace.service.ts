@@ -103,16 +103,24 @@ export class VoiceMarketplaceService {
     };
   }
 
-  async listPublished(_organizationId: string, kind?: string) {
+  async listPublished(_organizationId: string, kind?: string, tag?: string) {
+    const celebrity = tag?.toLowerCase() === 'celebrity';
     const rows = await this.prisma.voiceListing.findMany({
       where: {
         status: 'published',
         ...(kind ? { kind } : {}),
+        ...(celebrity ? { celebrityClaim: true } : {}),
       },
       include: { publisherOrg: { select: { name: true } } },
       orderBy: { createdAt: 'desc' },
     });
-    return { listings: rows.map((r) => this.serialize(r)) };
+    return {
+      listings: rows.map((r) => this.serialize(r)),
+      filter: { kind: kind ?? null, tag: tag ?? null },
+      note: celebrity
+        ? 'Celebrity-tagged listings (consent-gated celebrityClaim=true).'
+        : undefined,
+    };
   }
 
   async listMine(organizationId: string) {

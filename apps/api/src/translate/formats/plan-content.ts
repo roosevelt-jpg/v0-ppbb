@@ -7,9 +7,12 @@ import { planSrt } from './srt.codec';
 export function planContent(format: ContentFormat, content: string): FormatPlan {
   switch (format) {
     case 'html':
-      return planHtml(content);
+    case 'website':
+      return { ...planHtml(content), format };
     case 'xml':
-      return planXml(content);
+    case 'powerpoint':
+    case 'excel':
+      return { ...planXml(content), format };
     case 'markdown':
       return planMarkdown(content);
     case 'csv':
@@ -17,10 +20,20 @@ export function planContent(format: ContentFormat, content: string): FormatPlan 
     case 'srt':
       return planSrt(content);
     case 'plain':
+    case 'email':
+    case 'sms':
+    case 'whatsapp':
+    case 'teams':
       return {
-        format: 'plain',
+        format,
         skeleton: '__VLT0__',
         segments: [{ index: 0, text: content }],
+        note:
+          format === 'sms'
+            ? 'SMS-length path (caller should keep payloads short).'
+            : format === 'email'
+              ? 'Email body/text translation path.'
+              : undefined,
       };
     default: {
       const _exhaustive: never = format;

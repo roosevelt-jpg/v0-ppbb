@@ -4,11 +4,13 @@ export function partnerConnectorsHonesty() {
     partnerConnectorApis: true,
     mcpServer: true,
     cliSdkRest: true,
+    listingRegistry: true,
+    installInvokePaths: true,
     liveHiggsfieldContractSigned: false,
     liveClaudePluginStoreListing: false,
     zapierIpaasOs: false,
     note:
-      'Ships VerbaLab-owned partner connector contracts + MCP/CLI/REST over Own AI. Named platforms are first-class integration targets; signed production partnerships remain deploy/business steps.',
+      'Ships VerbaLab-owned partner connector contracts + MCP/CLI/REST over Own AI with listing registry and install/invoke paths. Named platforms are first-class integration targets; signed production partnerships remain deploy/business steps.',
   };
 }
 
@@ -149,6 +151,7 @@ export function partnerConnectorsCatalog() {
     endpoints: {
       engine: '/v1/partner-connectors/engine',
       platforms: '/v1/partner-connectors/platforms',
+      registry: '/v1/partner-connectors/registry',
       tools: '/v1/partner-connectors/tools',
       invoke: '/v1/partner-connectors/invoke',
       mcp: '/v1/partner-connectors/mcp',

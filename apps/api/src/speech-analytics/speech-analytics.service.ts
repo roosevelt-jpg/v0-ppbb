@@ -60,14 +60,15 @@ export class SpeechAnalyticsService {
     const stt = { requests: 0, seconds: 0, byProvider: {} as Record<string, number> };
     const tts = { requests: 0, characters: 0, byProvider: {} as Record<string, number> };
     for (const e of events) {
+      const providerKey = e.provider ?? 'unknown';
       if (e.feature === 'stt') {
         stt.requests += 1;
         stt.seconds += e.units;
-        stt.byProvider[e.provider] = (stt.byProvider[e.provider] ?? 0) + e.units;
+        stt.byProvider[providerKey] = (stt.byProvider[providerKey] ?? 0) + e.units;
       } else {
         tts.requests += 1;
         tts.characters += e.units;
-        tts.byProvider[e.provider] = (tts.byProvider[e.provider] ?? 0) + e.units;
+        tts.byProvider[providerKey] = (tts.byProvider[providerKey] ?? 0) + e.units;
       }
     }
 
@@ -544,5 +545,52 @@ export class SpeechAnalyticsService {
     }
 
     return { periodStart, periodEnd };
+  }
+
+
+  async werLab(input: {
+    organizationId: string;
+    workspaceId?: string;
+    reference?: string;
+    hypothesis?: string;
+  }) {
+    const ref = (input.reference ?? '').trim();
+    const hyp = (input.hypothesis ?? '').trim();
+    if (!ref || !hyp) {
+      throw new ApiException(
+        'validation_error',
+        'reference and hypothesis are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const refTok = ref.toLowerCase().split(/\s+/).filter(Boolean);
+    const hypTok = hyp.toLowerCase().split(/\s+/).filter(Boolean);
+    // Levenshtein distance on tokens
+    const n = refTok.length;
+    const m = hypTok.length;
+    const dp: number[][] = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+    for (let i = 0; i <= n; i++) dp[i]![0] = i;
+    for (let j = 0; j <= m; j++) dp[0]![j] = j;
+    for (let i = 1; i <= n; i++) {
+      for (let j = 1; j <= m; j++) {
+        const cost = refTok[i - 1] === hypTok[j - 1] ? 0 : 1;
+        dp[i]![j] = Math.min(
+          (dp[i - 1]![j] ?? 0) + 1,
+          (dp[i]![j - 1] ?? 0) + 1,
+          (dp[i - 1]![j - 1] ?? 0) + cost,
+        );
+      }
+    }
+    const edits = dp[n]![m] ?? 0;
+    const wer = n === 0 ? (m === 0 ? 0 : 1) : edits / n;
+    return {
+      referenceTokens: n,
+      hypothesisTokens: m,
+      edits,
+      wer: Number(wer.toFixed(4)),
+      accuracy: Number(Math.max(0, 1 - wer).toFixed(4)),
+      honesty: { humanEvalLab: false, goldenSetSandbox: true },
+      note: 'Sandbox golden-set WER harness. Not a human eval lab OS.',
+    };
   }
 }

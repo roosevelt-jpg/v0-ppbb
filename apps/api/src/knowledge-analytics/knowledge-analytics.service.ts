@@ -421,6 +421,26 @@ export class KnowledgeAnalyticsService {
     };
   }
 
+  async enterpriseReport(input: PeriodInput) {
+    const report = await this.report(input);
+    return {
+      ...report,
+      product: 'Knowledge Analytics Enterprise Report',
+      sections: [
+        'overview',
+        'growth',
+        'usage',
+        'quality',
+        'search',
+        'gaps',
+        'confidence',
+        'relationships',
+      ],
+      export: { format: 'json', api: 'GET /v1/knowledge-analytics/enterprise-report' },
+      note: 'Enterprise report bundle over knowledge analytics surfaces.',
+    };
+  }
+
   async monitoring(input: PeriodInput) {
     const [overview, engine] = await Promise.all([
       this.overview(input),
@@ -442,7 +462,7 @@ export class KnowledgeAnalyticsService {
       eventsLast24h: recent,
       regeneratesIntelligenceAnalytics: engine.honesty.regeneratesIntelligenceAnalytics,
       biDashboardOs: engine.honesty.biDashboardOs,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'Knowledge Analytics monitoring snapshot.',
     };
   }

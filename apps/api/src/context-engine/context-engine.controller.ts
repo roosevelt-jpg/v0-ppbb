@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
-import type { Request } from 'express';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { ContextEngineService } from './context-engine.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
@@ -87,5 +87,18 @@ export class ContextEngineController {
       documentK: body.documentK,
       memoryLimit: body.memoryLimit,
     });
+  }
+
+
+  @Get('realtime')
+  @UseGuards(TranslateAuthGuard)
+  realtime(@Req() req: AuthedReq, @Res() res: Response) {
+    return this.contextEngine.writeRealtime(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+      },
+      res,
+    );
   }
 }

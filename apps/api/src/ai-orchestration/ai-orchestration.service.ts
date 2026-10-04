@@ -60,7 +60,7 @@ export class AiOrchestrationService {
         workflowsConsole: '/workflows',
         note: 'JSON job workflows remain available for transcribe→translate→notify.',
       },
-      note: 'Named e2e pipelines for Multi-cloud deferred.',
+      note: 'Named e2e pipelines including multi-cloud preference routing and in-process agent collab.',
     };
   }
 
@@ -71,13 +71,6 @@ export class AiOrchestrationService {
       throw new ApiException(
         'validation_error',
         `pipeline must be one of: ${ORCH_PIPELINES.map((p) => p.id).join(', ')}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (found.status === 'deferred') {
-      throw new ApiException(
-        'validation_error',
-        `pipeline=${id} is deferred — not a multi-cloud agent OS`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -202,7 +195,7 @@ export class AiOrchestrationService {
       query,
       maxChars: 2000,
       promptKey: 'rag',
-      include: { documents: true, memory: true, prompt: true, language: true },
+      include: { documents: true, prompt: true, language: true },
     });
     return {
       id: 'assemble',
@@ -344,12 +337,70 @@ export class AiOrchestrationService {
           workingText = String(chatted.output.content ?? workingText);
           break;
         }
-        case 'multi_cloud':
-          throw new ApiException(
-            'validation_error',
-            'pipeline=multi_cloud is deferred',
-            HttpStatus.BAD_REQUEST,
+        case 'multi_cloud': {
+          const primary = await this.runChat(
+            input,
+            workingText,
+            input.model ?? process.env.OPENAI_CHAT_MODEL ?? 'gpt-4o-mini',
           );
+          steps.push({ ...primary, id: 'primary_provider' });
+          let content = String(primary.output.content ?? '');
+          const needsFallback =
+            !primary.ok || content.trim().length === 0 || /error|unavailable|rate.?limit/i.test(content);
+          if (needsFallback) {
+            const fallbackModel =
+              process.env.OPENROUTER_CHAT_MODEL ?? 'openrouter/auto';
+            const fallback = await this.runChat(input, workingText, fallbackModel);
+            steps.push({ ...fallback, id: 'fallback_provider', op: 'chat_fallback' });
+            content = String(fallback.output.content ?? content);
+          } else {
+            steps.push({
+              id: 'fallback_provider',
+              op: 'chat_fallback',
+              ok: true,
+              durationMs: 0,
+              output: {
+                skipped: true,
+                reason: 'primary_provider_ok',
+                preferredFallback: process.env.OPENROUTER_CHAT_MODEL ?? 'openrouter/auto',
+              },
+            });
+          }
+          workingText = content || workingText;
+          break;
+        }
+        case 'agent_collab': {
+          const draft = await this.runChat(
+            input,
+            `Agent A (drafter): produce a short draft answer.\n${workingText}`,
+            input.model,
+          );
+          steps.push({ ...draft, id: 'agent_a_draft' });
+          const critic = await this.runChat(
+            input,
+            `Agent B (critic): improve clarity and correctness of this draft. Return only the revised answer.\nDraft:\n${draft.output.content}`,
+            input.model,
+          );
+          steps.push({ ...critic, id: 'agent_b_critic' });
+          workingText = String(critic.output.content ?? workingText);
+          break;
+        }
+        case 'distributed_ai': {
+          const [detected, decided] = await Promise.all([
+            this.runDetect(workingText),
+            this.runDecide(input, workingText, 'routing'),
+          ]);
+          steps.push({ ...detected, id: 'fanout_detect' });
+          steps.push({ ...decided, id: 'fanout_decide' });
+          const merge = await this.runChat(
+            input,
+            `Merge fan-out signals into one answer.\nDetected language: ${detected.output.language}\nDecision: ${decided.output.decision}\nUser text:\n${workingText}`,
+            input.model,
+          );
+          steps.push({ ...merge, id: 'fanout_merge' });
+          workingText = String(merge.output.content ?? workingText);
+          break;
+        }
       }
     } catch (err) {
       if (err instanceof ApiException) throw err;
@@ -380,7 +431,7 @@ export class AiOrchestrationService {
         loadBearingE2e: true,
         executesRealRequests: true,
       },
-      note: 'Load-bearing e2e orchestration via gateway/engines. Not a multi-cloud agent OS.',
+      note: 'Load-bearing e2e orchestration via gateway/engines including in-process multi-provider routing and agent collab.',
     };
   }
 
@@ -413,7 +464,7 @@ export class AiOrchestrationService {
       periodStart: analytics.periodStart,
       runs: analytics.runs,
       multiCloudAgentOs: engine.honesty.multiCloudAgentOs,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'AI Orchestration monitoring snapshot.',
     };
   }

@@ -95,9 +95,9 @@ export function callIntelligenceEngineCatalog() {
       {
         id: 'realtime-ccaas',
         name: 'Realtime CCaaS Streaming',
-        status: 'deferred',
-        api: null,
-        notes: 'Live agent-assist WebSocket / dialer integration deferred.',
+        status: 'shipped',
+        api: 'GET /v1/call-intelligence/realtime',
+        notes: 'In-process SSE agent-assist bus over call analytics events. Not live dialer/CCaaS WebSocket OS.',
       },
       {
         id: 'monitoring',

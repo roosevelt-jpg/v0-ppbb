@@ -91,7 +91,8 @@ export function AccentIntelligenceClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Cue-based accent detection and classification with confidence and analytics. Dialects live in{' '}
         <Link href="/dialects">Language Cloud</Link>. Registry at <Link href="/accents">/accents</Link>.
-        Not acoustic regional models.
+        Regional model cards at GET /v1/accents/regional-models (catalog cue packs — not trained
+        acoustic phonetics ID).
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

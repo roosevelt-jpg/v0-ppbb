@@ -25,9 +25,10 @@ export function aiOrchestrationCatalog() {
       {
         id: 'multi-cloud-routing',
         name: 'Multi Cloud Routing',
-        status: 'deferred',
-        api: null,
-        notes: 'Multi-cloud agent OS / geo mesh deferred (out of scope).',
+        status: 'shipped',
+        api: 'POST /v1/ai-orchestration/run',
+        notes:
+          'pipeline=multi_cloud — sequential provider preference (primary chat then OpenRouter fallback). In-process routing, not a geo mesh OS.',
       },
       {
         id: 'workflow-orchestration',
@@ -39,9 +40,10 @@ export function aiOrchestrationCatalog() {
       {
         id: 'agent-collaboration',
         name: 'Agent Collaboration',
-        status: 'deferred',
-        api: null,
-        notes: 'Multi-agent collaboration OS deferred.',
+        status: 'shipped',
+        api: 'POST /v1/ai-orchestration/run',
+        notes:
+          'pipeline=agent_collab — draft + critic chat agents in-process. Not a LangGraph multi-agent OS.',
       },
       {
         id: 'tool-chaining',
@@ -67,9 +69,10 @@ export function aiOrchestrationCatalog() {
       {
         id: 'distributed-ai',
         name: 'Distributed AI',
-        status: 'deferred',
-        api: null,
-        notes: 'Distributed AI fabric deferred.',
+        status: 'shipped',
+        api: 'POST /v1/ai-orchestration/run',
+        notes:
+          'pipeline=distributed_ai — parallel detect+decide then merge via chat. In-process fan-out, not a distributed fabric OS.',
       },
       {
         id: 'analytics',
@@ -157,8 +160,20 @@ export const ORCH_PIPELINES = [
   {
     id: 'multi_cloud',
     name: 'Multi-cloud routing',
-    steps: [],
-    status: 'deferred' as const,
+    steps: ['chat', 'chat_fallback'],
+    status: 'shipped' as const,
+  },
+  {
+    id: 'agent_collab',
+    name: 'Agent collaboration (draft→critic)',
+    steps: ['chat', 'chat'],
+    status: 'shipped' as const,
+  },
+  {
+    id: 'distributed_ai',
+    name: 'Distributed AI fan-out',
+    steps: ['detect', 'decide', 'chat'],
+    status: 'shipped' as const,
   },
 ] as const;
 

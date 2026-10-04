@@ -67,7 +67,7 @@ export class ContextEngineService {
         { id: 'knowledgeGraph', status: 'shipped', from: 'entity name list' },
         { id: 'prompt', status: 'shipped', from: 'prompts resolve (chat/rag)' },
       ],
-      note: 'Context sources assembled by Realtime deferred.',
+      note: 'Context sources assembled; realtime push via GET /v1/context-engine/realtime.',
     };
   }
 
@@ -402,8 +402,36 @@ export class ContextEngineService {
       assemblies: analytics.assemblies,
       infiniteContextWindow: engine.honesty.infiniteContextWindow,
       realtimePush: engine.honesty.realtimePush,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       note: 'Context Engine monitoring snapshot.',
     };
+  }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process context-engine push bus (SSE).',
+    });
+    write('sources', {
+      count: this.engine().capabilities.length,
+      ids: this.engine().capabilities.map((c) => c.id).slice(0, 12),
+    });
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 }

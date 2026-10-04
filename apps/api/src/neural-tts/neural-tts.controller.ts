@@ -47,6 +47,7 @@ export class NeuralTtsController {
     @Query('accent') accent?: string,
     @Query('category') category?: string,
     @Query('ageGroup') ageGroup?: string,
+    @Query('age') age?: string,
     @Query('enterprise') enterprise?: string,
   ) {
     return this.tts.listVoices({
@@ -56,7 +57,7 @@ export class NeuralTtsController {
       dialect,
       accent,
       category,
-      ageGroup,
+      ageGroup: ageGroup || (age === 'child' ? 'child' : age === 'adult' ? 'adult' : age),
       enterprise,
     });
   }

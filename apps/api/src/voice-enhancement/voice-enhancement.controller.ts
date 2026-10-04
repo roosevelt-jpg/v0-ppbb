@@ -57,6 +57,52 @@ export class VoiceEnhancementController {
     return this.enhancement.echoStatus();
   }
 
+  @Post('echo')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: audioMaxBytes() },
+    }),
+  )
+  cancelEcho(
+    @Req() req: AuthedReq,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body() body: { referenceMs?: string },
+  ) {
+    if (!file) {
+      throw new ApiException('validation_error', 'file is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.enhancement.cancelEcho(this.auth(req), {
+      file,
+      referenceMs: body.referenceMs ? Number(body.referenceMs) : undefined,
+    });
+  }
+
+  @Post('convert')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: audioMaxBytes() },
+    }),
+  )
+  convert(
+    @Req() req: AuthedReq,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body() body: { targetTimbre?: string },
+  ) {
+    if (!file) {
+      throw new ApiException('validation_error', 'file is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.enhancement.convertVoice(this.auth(req), {
+      file,
+      targetTimbre: body.targetTimbre,
+    });
+  }
+
   @Get('engine/analytics')
   @UseGuards(TranslateAuthGuard)
   analytics(@Req() req: AuthedReq) {

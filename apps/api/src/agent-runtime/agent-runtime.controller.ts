@@ -7,9 +7,10 @@ import {
   Param,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { AgentRuntimeService } from './agent-runtime.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
@@ -182,5 +183,17 @@ export class AgentRuntimeController {
       organizationId: req.translateAuth.organizationId,
       workspaceId: req.translateAuth.workspaceId,
     });
+  }
+
+  @Get('realtime')
+  @UseGuards(TranslateAuthGuard)
+  realtime(@Req() req: AuthedReq, @Res() res: Response) {
+    return this.runtime.writeRealtime(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+      },
+      res,
+    );
   }
 }

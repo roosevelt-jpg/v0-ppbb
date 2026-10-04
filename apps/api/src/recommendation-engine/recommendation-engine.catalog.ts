@@ -67,9 +67,9 @@ export function recommendationEngineCatalog() {
       {
         id: 'enterprise-recommendation',
         name: 'Enterprise Recommendation',
-        status: 'deferred',
-        api: null,
-        notes: 'Cross-tenant / retail personalization OS deferred.',
+        status: 'shipped',
+        api: 'POST /v1/recommendation-engine/recommend',
+        notes: 'kind=enterprise — org-scoped cross-surface ranker (languages/voices/knowledge). Not retail CF OS.',
       },
       {
         id: 'analytics',
@@ -125,6 +125,7 @@ export const RECOMMEND_KINDS = [
   'translation',
   'model',
   'workflow',
+  'enterprise',
 ] as const;
 
 export type RecommendKind = (typeof RECOMMEND_KINDS)[number];

@@ -121,8 +121,8 @@ export function EnterpriseRagClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Grounded answers over the{' '}
         <Link href="/knowledge-base">Knowledge Base</Link> with citations and hybrid retrieval.
-        Extends Not a LangChain / agentic RAG OS — hand-check retrieved context on real
-        docs.
+        Includes sandbox multi-hop agentic retrieve and LangChain adapter metadata — not
+        LangChain/LlamaIndex OS parity. Hand-check retrieved context on real docs.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

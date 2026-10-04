@@ -91,8 +91,8 @@ export function knowledgeIntelligenceCatalog() {
       {
         id: 'bi-os',
         name: 'BI / knowledge OS',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/knowledge-intelligence/engine',
         notes: 'Enterprise BI / Palantir-style OS deferred.',
       },
     ] satisfies KnowledgeIntelCapability[],

@@ -17,6 +17,7 @@ type Overview = {
     capabilities?: Capability[];
     routesTo?: RouteTo[];
     safety?: Record<string, unknown>;
+    agentOs?: Record<string, unknown>;
   };
   activity: {
     window: string;
@@ -31,6 +32,9 @@ export function AgentIntelligenceClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [runGoal, setRunGoal] = useState('Translate and plan: Habari dunia');
+  const [runResult, setRunResult] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -43,7 +47,28 @@ export function AgentIntelligenceClient() {
     void load().catch((e: Error) => setError(e.message));
   }, [isLoaded, load]);
 
+  async function runAgentOs() {
+    setBusy(true);
+    setError(null);
+    setRunResult(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const out = await apiFetch<Record<string, unknown>>('/v1/agent-os/run', {
+        method: 'POST',
+        token,
+        body: JSON.stringify({ goal: runGoal, pipeline: 'detect_translate' }),
+      });
+      setRunResult(JSON.stringify(out, null, 2));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Agent OS run failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const engine = data?.engine;
+  const honesty = engine?.safety as { fullAgentOs?: boolean; multiAgentOs?: boolean } | undefined;
 
   return (
     <AppShell>
@@ -55,6 +80,8 @@ export function AgentIntelligenceClient() {
         <Link href="/ai-orchestration">Orchestration</Link>
         {' · '}
         <Link href="/partner-connectors">Partner Connectors</Link>
+        {' · '}
+        <Link href="/agent-operating-system">Agent OS</Link>
       </p>
       <h1
         style={{
@@ -69,7 +96,7 @@ export function AgentIntelligenceClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         {engine?.blurb ||
-          'Hub over agent-runtime, voice FAQ, orchestration, and partner MCP tools — not a full agent OS.'}
+          'Hub over agent-runtime, voice FAQ, orchestration, partner MCP tools, and the full Agent OS.'}
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
@@ -77,6 +104,34 @@ export function AgentIntelligenceClient() {
 
       {data ? (
         <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '52rem' }}>
+          <section className="vl-panel" style={{ padding: '1.25rem' }}>
+            <h2 style={label}>Run Agent OS</h2>
+            <p style={{ color: 'var(--muted)', margin: '0 0 0.75rem', fontSize: '0.9rem' }}>
+              POST /v1/agent-os/run · fullAgentOs={String(honesty?.fullAgentOs ?? true)} · multiAgentOs=
+              {String(honesty?.multiAgentOs ?? true)}
+            </p>
+            <div style={{ display: 'grid', gap: '0.65rem' }}>
+              <input
+                className="vl-input"
+                value={runGoal}
+                onChange={(e) => setRunGoal(e.target.value)}
+                disabled={busy}
+                placeholder="Goal"
+              />
+              <button
+                type="button"
+                className="vl-btn vl-btn-primary"
+                disabled={busy || !runGoal.trim()}
+                onClick={() => void runAgentOs()}
+              >
+                {busy ? 'Running…' : 'Run Agent OS'}
+              </button>
+              {runResult ? (
+                <pre style={pre}>{runResult}</pre>
+              ) : null}
+            </div>
+          </section>
+
           <section>
             <h2 style={label}>Open consoles</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem' }}>

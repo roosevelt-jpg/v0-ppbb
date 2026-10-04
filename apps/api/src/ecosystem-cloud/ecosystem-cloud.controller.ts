@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, NotFoundException } from '@nestjs/common';
 import { EcosystemCloudService } from './ecosystem-cloud.service';
 import { ClerkAuthGuard, SessionContext } from '../common/guards/clerk-auth.guard';
 import { CurrentSession } from '../common/decorators/auth.decorators';
@@ -20,6 +20,15 @@ export class EcosystemCloudController {
   @Get('routing')
   routing() {
     return this.ecosystem.routing();
+  }
+
+  @Get('marketplaces/:kind')
+  marketplace(@Param('kind') kind: string) {
+    const normalized = kind === 'template' ? 'templates' : kind === 'extension' ? 'extensions' : kind;
+    if (normalized !== 'sdk' && normalized !== 'templates' && normalized !== 'extensions') {
+      throw new NotFoundException(`Unknown marketplace kind: ${kind}`);
+    }
+    return this.ecosystem.marketplace(normalized);
   }
 
   @Get('overview')

@@ -93,6 +93,14 @@ export const LANGUAGE_SEEDS: LanguageSeed[] = [
   { code: 'rif', nameEn: 'Tarifit', nameNative: 'Tarifit', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
   { code: 'tmh', nameEn: 'Tamasheq', nameNative: 'Tamasheq', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
 
+  // —— North Africa Arabic varieties (ISO 639-3) ——
+  { code: 'mey', nameEn: 'Hassaniya Arabic', nameNative: 'حسانية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'ary', nameEn: 'Moroccan Arabic', nameNative: 'الدارجة المغربية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'arq', nameEn: 'Algerian Arabic', nameNative: 'الدارجة الجزائرية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'aeb', nameEn: 'Tunisian Arabic', nameNative: 'تونسي', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'ayl', nameEn: 'Libyan Arabic', nameNative: 'ليبي', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'apd', nameEn: 'Sudanese Arabic', nameNative: 'عربي سوداني', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+
   // —— Horn of Africa ——
   { code: 'aa', nameEn: 'Afar', nameNative: 'Qafar', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
   { code: 'tig', nameEn: 'Tigre', nameNative: 'ትግረ', script: 'Ethi', familyCode: 'afro_asiatic', tier: 'strategic_african' },

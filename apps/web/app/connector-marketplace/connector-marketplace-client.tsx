@@ -44,11 +44,26 @@ export function ConnectorMarketplaceClient() {
       try {
         const token = await resolveApiToken(getToken);
         if (!token) throw new Error('Not signed in');
-        const [eng, list] = await Promise.all([
+        const [eng, list, registry] = await Promise.all([
           apiFetch<Engine>('/v1/connector-marketplace/engine', { token }),
           apiFetch<{ listings: Listing[] }>('/v1/connector-marketplace/listings', { token }).catch(() => ({ listings: [] as Listing[] })),
+          apiFetch<{ registry?: Array<{ key: string; name: string; status?: string; notes?: string; api?: string | null }> }>(
+            '/v1/connector-marketplace/registry',
+            { token },
+          ).catch(() => ({ registry: [] })),
         ]);
-        setEngine(eng);
+        setEngine({
+          ...eng,
+          products: [
+            ...(eng.products ?? []),
+            ...(registry.registry ?? []).map((r) => ({
+              id: r.key,
+              name: r.name,
+              status: String(r.status ?? 'shipped'),
+              notes: [r.api, r.notes].filter(Boolean).join(' · '),
+            })),
+          ],
+        });
         setListings(list.listings ?? []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load');
@@ -80,7 +95,8 @@ export function ConnectorMarketplaceClient() {
         Connector Marketplace
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Metadata entitlements for connector integrations across business systems.
+        Listing registry with install + invoke paths for connector SKUs. Invoke routes to
+        /v1/connectors and partner connectors — not an iPaaS OS.
       </p>
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!engine && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}

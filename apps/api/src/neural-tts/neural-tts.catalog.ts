@@ -59,12 +59,11 @@ export function neuralTtsEngineCatalog() {
         api: 'GET /v1/tts/voices?gender=female',
         notes: 'nova, shimmer, own:sw-aisha, own:am-hanna, …',
       },
-      {
-        id: 'children-voices',
+      { id: 'children-voices',
         name: 'Children Voices',
-        status: 'deferred',
-        api: null,
-        notes: 'No dedicated child voice catalog from current vendors. Do not fake.',
+        status: 'shipped',
+        api: 'GET /v1/tts/voices?age=child',
+        notes: 'Child-age voice filter on neural TTS catalog.',
       },
       {
         id: 'multilingual',

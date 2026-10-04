@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import type { Request, Response } from 'express';
@@ -193,5 +181,17 @@ export class PronunciationIntelligenceController {
       userId: req.sessionAuth?.userId,
       ip: clientIp(req),
     };
+  }
+
+
+  @Post('align')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
+  align(@Body() body: { text?: string; language?: string; durationSeconds?: number }) {
+    return this.pronunciation.align({
+      text: body.text,
+      language: body.language,
+      durationSeconds: body.durationSeconds,
+    });
   }
 }
