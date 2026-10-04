@@ -18,7 +18,9 @@ type Overview = {
   };
   usage: { characters: number; requests: number };
   sdk: {
-    typescript: { name: string; version: string; install: string };
+    typescript: { name: string; version: string; install: string; note?: string };
+    ios?: { name: string; version: string; install: string; path?: string; note?: string };
+    android?: { name: string; version: string; install: string; path?: string; note?: string };
     cli: { name: string; bin: string; install: string; commands: string[] };
   };
   applications: { mappedTo: string; data: { id: string; name: string; isCurrent: boolean }[] };
@@ -57,7 +59,7 @@ export function DevelopersClient() {
         Developers
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '40rem' }}>
-        Integrate VerbaLab with API keys, the TypeScript SDK, CLI, OpenAPI, and the playground. Soft{' '}
+        Integrate VerbaLab with API keys, TypeScript / iOS / Android SDKs, CLI, OpenAPI, and the playground. Soft{' '}
         <code className="vl-code">vl_test_</code> keys share this cluster and quota — not a separate sandbox plane.
       </p>
 
@@ -100,7 +102,7 @@ export function DevelopersClient() {
           </section>
 
           <section>
-            <h2 style={sectionLabel}>SDK & CLI</h2>
+            <h2 style={sectionLabel}>SDKs & CLI</h2>
             <pre
               className="vl-code"
               style={{
@@ -111,14 +113,27 @@ export function DevelopersClient() {
                 overflow: 'auto',
                 whiteSpace: 'pre-wrap',
               }}
-            >{`${data.sdk.typescript.install}
-${data.sdk.cli.install}
+            >{`# TypeScript
+${data.sdk.typescript.install}
 
+# iOS (Swift Package)
+${data.sdk.ios?.install ?? 'Xcode → Add Package → packages/sdk-ios'}
+
+# Android (Kotlin)
+${data.sdk.android?.install ?? 'implementation("ai.verbalab:sdk:0.1.0")'}
+
+# CLI
+${data.sdk.cli.install}
 # ${data.sdk.cli.bin} ${data.sdk.cli.commands.join(' | ')}
+
 export VERBALAB_API_KEY=vl_live_...
 export VERBALAB_API_URL=${API_URL}`}</pre>
-            <p style={{ margin: '0.65rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              {data.sdk.typescript.name}@{data.sdk.typescript.version} · {data.sdk.cli.name}
+            <p style={{ margin: '0.65rem 0 0', color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
+              {data.sdk.typescript.name}@{data.sdk.typescript.version}
+              {data.sdk.ios ? ` · ${data.sdk.ios.name}@${data.sdk.ios.version}` : ''}
+              {data.sdk.android ? ` · ${data.sdk.android.name}@${data.sdk.android.version}` : ''}
+              {' · '}
+              {data.sdk.cli.name}. Full API coverage on every platform — see <Link href="/docs">/docs</Link>.
             </p>
           </section>
 

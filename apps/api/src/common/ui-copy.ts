@@ -6,6 +6,10 @@ export function hidePhaseIds(text: string): string {
   return text
     .replace(/\s*\(VL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\)/gi, '')
     .replace(/\bVL-\d{3}(?:\s*[–—-]\s*(?:VL-)?\d{3})?\b\.?\s*/gi, '')
+    // Internal architecture decision records — keep in docs/adr/, never in product UI
+    .replace(/\s*\(ADR-\d{3,4}\)/gi, '')
+    .replace(/\s*\+\s*ADR-\d{3,4}\b\.?/gi, '')
+    .replace(/\bADR-\d{3,4}\b\.?\s*/gi, '')
     .replace(/\(Phase\s+(\d+)\s*\/\s*\)/gi, '(Phase $1)')
     // Internal honesty / denial flags (never show to end users)
     .replace(/\b[a-z][a-zA-Z0-9]*(?:Os|OS)\s*=\s*(?:false|true)\b\.?/g, '')

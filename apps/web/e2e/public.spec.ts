@@ -12,6 +12,10 @@ test.describe('Public console surfaces', () => {
     await expect(page.getByRole('heading', { name: 'API documentation' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'POST /v1/translate' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open explorer' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'SDKs for every platform' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'iOS (Swift)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Android (Kotlin)' })).toBeVisible();
+    await expect(page.getByText('ADR-0030')).toHaveCount(0);
   });
 
   test('OpenAPI explorer renders structured JSON controls', async ({ page }) => {

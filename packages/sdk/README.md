@@ -2,6 +2,8 @@
 
 TypeScript client for the VerbaLab API.
 
+Mobile developers: use the generated **iOS** (`packages/sdk-ios`) and **Android** (`packages/sdk-android`) SDKs — regenerate with `node packages/sdk-mobile/generate.mjs` after client changes.
+
 ```ts
 import { VerbaLab } from '@verbalab/sdk';
 

@@ -69,6 +69,14 @@ describe('hidePhaseIds — console copy', () => {
     );
   });
 
+  it('strips ADR decision ids from console copy', () => {
+    expect(hidePhaseIds('Versioned prompts with rollback (ADR-0030). Console /prompts.')).toBe(
+      'Versioned prompts with rollback. Console /prompts.',
+    );
+    expect(hidePhaseIds('Product doc + ADR-0122.')).toBe('Product doc');
+    expect(hidePhaseIds('See ADR-0086.')).toBe('See');
+  });
+
   it('strips honesty denial tokens from console copy', () => {
     expect(hidePhaseIds('GitOps readiness. argoCdOs=false; fluxOs=false.')).toBe(
       'GitOps readiness.',
