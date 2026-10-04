@@ -1,0 +1,261 @@
+[
+  {
+    "id": "dialect-continuum",
+    "className": "DialectContinuum",
+    "title": "Dialect Continuum Engine",
+    "blurb": "Tracks code-switching and dialect drift mid-utterance — Maghrebi Arabic, Pidgin, Sheng, street French — and replies in the right mix.",
+    "route": "dialect-continuum",
+    "keywords": [
+      "dialect",
+      "code-switch",
+      "maghrebi",
+      "pidgin",
+      "sheng"
+    ],
+    "capabilities": [
+      [
+        "spectrum-detect",
+        "Dialect spectrum detection",
+        "POST /v1/dialect-continuum/detect"
+      ],
+      [
+        "drift-track",
+        "Mid-turn drift tracking",
+        "POST /v1/dialect-continuum/track"
+      ],
+      [
+        "reply-mix",
+        "Reply-in-mix generation",
+        "POST /v1/dialect-continuum/reply"
+      ],
+      [
+        "continuum-map",
+        "Regional continuum map",
+        "GET /v1/dialect-continuum/map"
+      ]
+    ],
+    "actions": [
+      "detect",
+      "track",
+      "reply"
+    ]
+  },
+  {
+    "id": "voice-trust-graph",
+    "className": "VoiceTrustGraph",
+    "title": "Voice Trust Graph",
+    "blurb": "Living consent graph for who may clone whom, for which use, in which country, with kinship witnesses and auto-revocation.",
+    "route": "voice-trust-graph",
+    "keywords": [
+      "consent",
+      "clone",
+      "kinship",
+      "trust",
+      "revocation"
+    ],
+    "capabilities": [
+      [
+        "graph-nodes",
+        "Person and community nodes",
+        "POST /v1/voice-trust-graph/nodes"
+      ],
+      [
+        "consent-edges",
+        "Consent edges with scope",
+        "POST /v1/voice-trust-graph/consent"
+      ],
+      [
+        "witness",
+        "Kinship / community witnesses",
+        "POST /v1/voice-trust-graph/witness"
+      ],
+      [
+        "revoke",
+        "Auto-revocation & lineage",
+        "POST /v1/voice-trust-graph/revoke"
+      ],
+      [
+        "check",
+        "Clone authorization check",
+        "POST /v1/voice-trust-graph/check"
+      ]
+    ],
+    "actions": [
+      "nodes",
+      "consent",
+      "witness",
+      "revoke",
+      "check"
+    ]
+  },
+  {
+    "id": "interpreter-mesh",
+    "className": "InterpreterMesh",
+    "title": "Interpreter Mesh",
+    "blurb": "One live session, many listeners — each hears a different language/dialect/register from a shared semantic backbone.",
+    "route": "interpreter-mesh",
+    "keywords": [
+      "simultaneous",
+      "interpret",
+      "mesh",
+      "live",
+      "multilingual"
+    ],
+    "capabilities": [
+      [
+        "session",
+        "Mesh session create",
+        "POST /v1/interpreter-mesh/sessions"
+      ],
+      [
+        "listen",
+        "Listener dialect channel",
+        "POST /v1/interpreter-mesh/listen"
+      ],
+      [
+        "broadcast",
+        "Speaker utterance ingest",
+        "POST /v1/interpreter-mesh/broadcast"
+      ],
+      [
+        "backbone",
+        "Shared semantic backbone",
+        "GET /v1/interpreter-mesh/backbone"
+      ]
+    ],
+    "actions": [
+      "sessions",
+      "listen",
+      "broadcast"
+    ]
+  },
+  {
+    "id": "oral-knowledge",
+    "className": "OralKnowledge",
+    "title": "Oral-First Knowledge OS",
+    "blurb": "Ingest radio, WhatsApp voice notes, market chatter, elders’ speech into citeable oral knowledge without forcing literacy first.",
+    "route": "oral-knowledge",
+    "keywords": [
+      "oral",
+      "radio",
+      "whatsapp",
+      "elders",
+      "voice notes"
+    ],
+    "capabilities": [
+      [
+        "ingest-audio",
+        "Oral ingest from audio/text",
+        "POST /v1/oral-knowledge/ingest"
+      ],
+      [
+        "cite",
+        "Cite back to oral source",
+        "POST /v1/oral-knowledge/cite"
+      ],
+      [
+        "query",
+        "Ask oral knowledge",
+        "POST /v1/oral-knowledge/query"
+      ],
+      [
+        "collections",
+        "Community collections",
+        "GET /v1/oral-knowledge/collections"
+      ]
+    ],
+    "actions": [
+      "ingest",
+      "cite",
+      "query"
+    ]
+  },
+  {
+    "id": "civic-voice-seal",
+    "className": "CivicVoiceSeal",
+    "title": "Civic Voice Seal",
+    "blurb": "Verifiable seal for public voices — authentic now, or synthetic/revoked — checked in under a second on a listener device.",
+    "route": "civic-voice-seal",
+    "keywords": [
+      "deepfake",
+      "seal",
+      "civic",
+      "authenticity",
+      "watermark"
+    ],
+    "capabilities": [
+      [
+        "issue",
+        "Issue civic voice seal",
+        "POST /v1/civic-voice-seal/issue"
+      ],
+      [
+        "verify",
+        "Verify seal in <1s path",
+        "POST /v1/civic-voice-seal/verify"
+      ],
+      [
+        "challenge",
+        "Continuous challenge",
+        "POST /v1/civic-voice-seal/challenge"
+      ],
+      [
+        "revoke-seal",
+        "Revoke public seal",
+        "POST /v1/civic-voice-seal/revoke"
+      ],
+      [
+        "directory",
+        "Public seal directory",
+        "GET /v1/civic-voice-seal/directory"
+      ]
+    ],
+    "actions": [
+      "issue",
+      "verify",
+      "challenge",
+      "revoke"
+    ]
+  },
+  {
+    "id": "intent-preserving-dub",
+    "className": "IntentPreservingDub",
+    "title": "Intent-Preserving Dub",
+    "blurb": "Dub that preserves joke timing, insult severity, prayer register, gender norms, and power distance — social effect, not word overlap.",
+    "route": "intent-preserving-dub",
+    "keywords": [
+      "dub",
+      "pragmatics",
+      "register",
+      "intent",
+      "localization"
+    ],
+    "capabilities": [
+      [
+        "analyze",
+        "Pragmatic intent analysis",
+        "POST /v1/intent-preserving-dub/analyze"
+      ],
+      [
+        "dub",
+        "Intent-preserving dub render",
+        "POST /v1/intent-preserving-dub/dub"
+      ],
+      [
+        "score",
+        "Social-effect score",
+        "POST /v1/intent-preserving-dub/score"
+      ],
+      [
+        "profiles",
+        "Register / culture profiles",
+        "GET /v1/intent-preserving-dub/profiles"
+      ]
+    ],
+    "actions": [
+      "analyze",
+      "dub",
+      "score"
+    ]
+  }
+]

@@ -105,6 +105,43 @@ export const CONSOLE_NAV: NavGroup[] = [
     ],
   },
   {
+    id: 'frontier',
+    label: 'Frontier',
+    collapsible: true,
+    items: [
+      {
+        href: '/dialect-continuum',
+        label: 'Dialect Continuum',
+        keywords: ['dialect', 'code-switch', 'maghrebi', 'pidgin', 'sheng'],
+      },
+      {
+        href: '/voice-trust-graph',
+        label: 'Voice Trust Graph',
+        keywords: ['consent', 'clone', 'kinship', 'trust'],
+      },
+      {
+        href: '/interpreter-mesh',
+        label: 'Interpreter Mesh',
+        keywords: ['simultaneous', 'interpret', 'live', 'mesh'],
+      },
+      {
+        href: '/oral-knowledge',
+        label: 'Oral Knowledge OS',
+        keywords: ['oral', 'radio', 'whatsapp', 'elders'],
+      },
+      {
+        href: '/civic-voice-seal',
+        label: 'Civic Voice Seal',
+        keywords: ['deepfake', 'seal', 'authenticity', 'watermark'],
+      },
+      {
+        href: '/intent-preserving-dub',
+        label: 'Intent-Preserving Dub',
+        keywords: ['dub', 'pragmatics', 'register', 'intent'],
+      },
+    ],
+  },
+  {
     id: 'account',
     label: 'Account',
     items: [

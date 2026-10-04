@@ -271,6 +271,12 @@ import { DecisionEngineModule } from './decision-engine/decision-engine.module';
 import { AiOrchestrationModule } from './ai-orchestration/ai-orchestration.module';
 import { IntelligenceAnalyticsModule } from './intelligence-analytics/intelligence-analytics.module';
 import { AgentIntelligenceModule } from './agent-intelligence/agent-intelligence.module';
+import { DialectContinuumModule } from './dialect-continuum/dialect-continuum.module';
+import { VoiceTrustGraphModule } from './voice-trust-graph/voice-trust-graph.module';
+import { InterpreterMeshModule } from './interpreter-mesh/interpreter-mesh.module';
+import { OralKnowledgeModule } from './oral-knowledge/oral-knowledge.module';
+import { CivicVoiceSealModule } from './civic-voice-seal/civic-voice-seal.module';
+import { IntentPreservingDubModule } from './intent-preserving-dub/intent-preserving-dub.module';
 import { AiObservabilityModule } from './ai-observability/ai-observability.module';
 import { NeuralTtsModule } from './neural-tts/neural-tts.module';
 import { VoiceCloningModule } from './voice-cloning/voice-cloning.module';
@@ -531,6 +537,12 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiOrchestrationModule,
     IntelligenceAnalyticsModule,
     AgentIntelligenceModule,
+    DialectContinuumModule,
+    VoiceTrustGraphModule,
+    InterpreterMeshModule,
+    OralKnowledgeModule,
+    CivicVoiceSealModule,
+    IntentPreservingDubModule,
     AiObservabilityModule,
     NeuralTtsModule,
     VoiceCloningModule,
