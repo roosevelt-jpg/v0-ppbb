@@ -12,7 +12,12 @@ export type MoonshotAction = {
   label: string;
   path: string;
   method?: 'POST' | 'GET';
-  fields?: Array<{ name: string; label: string; placeholder?: string; type?: 'text' | 'textarea' | 'checkbox' }>;
+  fields?: Array<{
+    name: string;
+    label: string;
+    placeholder?: string;
+    type?: 'text' | 'textarea' | 'checkbox' | 'file';
+  }>;
   buildBody?: (values: Record<string, string>) => Record<string, unknown>;
 };
 
@@ -28,6 +33,7 @@ type Engine = {
   note?: string;
   honesty?: Record<string, unknown>;
   capabilities?: CatalogRow[];
+  residency?: Record<string, unknown>;
   [key: string]: unknown;
 };
 
@@ -40,6 +46,7 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
   const [busy, setBusy] = useState(false);
   const [activeAction, setActiveAction] = useState(actions[0]?.id ?? '');
   const [values, setValues] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File | null>>({});
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
@@ -58,6 +65,7 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
   }, [isLoaded, load]);
 
   const action = actions.find((a) => a.id === activeAction) ?? actions[0];
+  const hasFileField = Boolean(action?.fields?.some((f) => f.type === 'file'));
 
   async function onRun(event: FormEvent) {
     event.preventDefault();
@@ -70,14 +78,30 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
       if (!token) throw new Error('Sign in required');
       const method = action.method ?? 'POST';
       const path = action.path.startsWith('/v1/') ? action.path : `${apiBase}/${action.path}`;
-      const out =
-        method === 'GET'
-          ? await apiFetch<unknown>(path, { method: 'GET', token })
-          : await apiFetch<unknown>(path, {
-              method: 'POST',
-              token,
-              body: JSON.stringify(action.buildBody ? action.buildBody(values) : { ...values }),
-            });
+      let out: unknown;
+      if (method === 'GET') {
+        out = await apiFetch<unknown>(path, { method: 'GET', token });
+      } else if (hasFileField) {
+        const form = new FormData();
+        for (const field of action.fields ?? []) {
+          if (field.type === 'file') {
+            const file = files[field.name];
+            if (!file) throw new Error(`${field.label} is required`);
+            form.append(field.name, file, file.name);
+          } else if (field.type === 'checkbox') {
+            form.append(field.name, values[field.name] === 'true' ? 'true' : 'false');
+          } else if (values[field.name]) {
+            form.append(field.name, values[field.name]);
+          }
+        }
+        out = await apiFetch<unknown>(path, { method: 'POST', token, body: form });
+      } else {
+        out = await apiFetch<unknown>(path, {
+          method: 'POST',
+          token,
+          body: JSON.stringify(action.buildBody ? action.buildBody(values) : { ...values }),
+        });
+      }
       setResult(JSON.stringify(out, null, 2));
       await load();
     } catch (err) {
@@ -86,6 +110,11 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
       setBusy(false);
     }
   }
+
+  const residency =
+    engine?.residency && typeof engine.residency === 'object'
+      ? (engine.residency as { verbalabRegion?: string; flyRegion?: string; primaryRegion?: string })
+      : null;
 
   return (
     <AppShell>
@@ -113,6 +142,9 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
             label: 'Activity',
             value: String((overview?.activity as { count?: number } | undefined)?.count ?? 0),
           },
+          ...(residency?.verbalabRegion
+            ? [{ label: 'Residency', value: `${residency.verbalabRegion}${residency.flyRegion ? `/${residency.flyRegion}` : ''}` }]
+            : []),
         ]}
       />
 
@@ -147,6 +179,18 @@ export function MoonshotConsole({ title, apiBase, actions }: Props) {
                     }
                   />
                   {field.label}
+                </label>
+              ) : field.type === 'file' ? (
+                <label key={field.name} style={{ display: 'grid', gap: '0.3rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>{field.label}</span>
+                  <input
+                    className="vl-input"
+                    type="file"
+                    accept="audio/*,video/*"
+                    onChange={(e) =>
+                      setFiles((f) => ({ ...f, [field.name]: e.target.files?.[0] ?? null }))
+                    }
+                  />
                 </label>
               ) : field.type === 'textarea' ? (
                 <label key={field.name} style={{ display: 'grid', gap: '0.3rem' }}>

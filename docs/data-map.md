@@ -4,7 +4,7 @@ Living inventory of personal / customer data processed by VerbaLab AI. Update wh
 
 | Store / system | Purpose | Data categories | Retention | Processors / notes |
 | --- | --- | --- | --- | --- |
-| `organizations` | Tenant account, plan, governance flags | Org name, Stripe IDs, retention / persist / training flags, optional `data_region` residency pin | Until org delete | VerbaLab DB for **that residency island** (US/EU are separate DBs; no cross-region replica) |
+| `organizations` | Tenant account, plan, governance flags | Org name, Stripe IDs, retention / persist / training flags, `data_region` residency pin (default `af`) | Until org delete | VerbaLab DB for **that residency island** (Africa primary; US/EU are separate DBs; no cross-region replica) |
 | `users` / `memberships` | Identity + RBAC | Clerk user id, email, name, role | User lifetime; membership cascades with org | Clerk (IdP) + VerbaLab DB |
 | `api_keys` | API auth | Key hash + prefix (secret shown once) | Until revoke / org delete | VerbaLab DB |
 | `usage_events` | Billing / usage / analytics | Meter type, quantity, period | Org policy / delete | VerbaLab DB |

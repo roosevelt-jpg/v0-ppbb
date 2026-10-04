@@ -1386,7 +1386,7 @@ export const openApiDocument = {
         responses: {
           '200': {
             description:
-              'Catalog of US/EU islands; each is a separate deploy + database (not a mesh)',
+              'Catalog of Africa (primary) / US / EU islands; each is a separate deploy + database (not a mesh)',
           },
         },
       },
@@ -1403,7 +1403,7 @@ export const openApiDocument = {
       patch: {
         summary: 'Set organization data residency pin (owner only)',
         description:
-          'Pinning does not migrate data. A pin that mismatches VERBALAB_REGION yields residency_mismatch on authenticated routes.',
+          'Pinning does not migrate data. A pin that mismatches VERBALAB_REGION yields residency_mismatch on authenticated routes. Default for new orgs is af (Africa).',
         operationId: 'setOrganizationResidency',
         security: [{ ClerkAuth: [] }],
         requestBody: {
@@ -1417,8 +1417,8 @@ export const openApiDocument = {
                   dataRegion: {
                     type: 'string',
                     nullable: true,
-                    enum: ['us', 'eu'],
-                    description: 'Residency island code, or null to clear the pin',
+                    enum: ['af', 'us', 'eu'],
+                    description: 'Residency island code (af = Africa primary), or null to clear the pin',
                   },
                 },
               },
@@ -2350,6 +2350,129 @@ export const openApiDocument = {
         operationId: 'getWakeWordAnalytics',
         security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
         responses: { '200': { description: 'Org audit-derived usage' } },
+      },
+    },
+    '/v1/meeting-transcription/engine': {
+      get: {
+        summary: 'Meeting Transcription engine catalog',
+        operationId: 'getMeetingTranscriptionEngine',
+        responses: { '200': { description: 'Africa-wide meeting STT capabilities' } },
+      },
+    },
+    '/v1/meeting-transcription/languages': {
+      get: {
+        summary: 'Africa-wide meeting STT language list',
+        operationId: 'listMeetingTranscriptionLanguages',
+        responses: { '200': { description: 'Language codes with meeting=true' } },
+      },
+    },
+    '/v1/meeting-transcription/overview': {
+      get: {
+        summary: 'Meeting Transcription hub overview',
+        operationId: 'getMeetingTranscriptionOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Engine + activity' } },
+      },
+    },
+    '/v1/meeting-transcription/sessions': {
+      post: {
+        summary: 'Start a meeting transcription session',
+        operationId: 'createMeetingTranscriptionSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created session' } },
+      },
+    },
+    '/v1/meeting-transcription/sessions/{id}': {
+      get: {
+        summary: 'Get meeting session + transcripts',
+        operationId: 'getMeetingTranscriptionSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Session detail' } },
+      },
+    },
+    '/v1/meeting-transcription/transcribe': {
+      post: {
+        summary: 'Transcribe meeting audio (multipart file)',
+        operationId: 'transcribeMeetingAudio',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Transcript (+ optional translation)' } },
+      },
+    },
+    '/v1/meeting-transcription/recap': {
+      post: {
+        summary: 'Spoken meeting recap',
+        operationId: 'recapMeetingTranscription',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Summary + optional audio' } },
+      },
+    },
+    '/v1/verba-voice/engine': {
+      get: {
+        summary: 'Verba Voice engine catalog',
+        operationId: 'getVerbaVoiceEngine',
+        responses: { '200': { description: 'Conversational voice capabilities' } },
+      },
+    },
+    '/v1/verba-voice/overview': {
+      get: {
+        summary: 'Verba Voice hub overview',
+        operationId: 'getVerbaVoiceOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Engine + activity' } },
+      },
+    },
+    '/v1/verba-voice/sessions': {
+      post: {
+        summary: 'Open a Verba Voice session',
+        operationId: 'createVerbaVoiceSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created voice session' } },
+      },
+    },
+    '/v1/verba-voice/sessions/{id}': {
+      get: {
+        summary: 'Get Verba Voice session + turns',
+        operationId: 'getVerbaVoiceSession',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Session detail' } },
+      },
+    },
+    '/v1/verba-voice/sessions/{id}/events': {
+      get: {
+        summary: 'Verba Voice session events (JSON or SSE stream=1)',
+        operationId: 'getVerbaVoiceEvents',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Event list or SSE' } },
+      },
+    },
+    '/v1/verba-voice/text-turns': {
+      post: {
+        summary: 'Text turn with spoken reply',
+        operationId: 'verbaVoiceTextTurn',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Assistant text + audio' } },
+      },
+    },
+    '/v1/verba-voice/turns': {
+      post: {
+        summary: 'Audio turn (STT → Atlas → TTS)',
+        operationId: 'verbaVoiceAudioTurn',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Transcript + spoken reply' } },
+      },
+    },
+    '/v1/model-keys/guide': {
+      get: {
+        summary: 'Model keys developer guide',
+        operationId: 'getModelKeysGuide',
+        responses: { '200': { description: 'vmod_* / vl_* auth guide' } },
+      },
+    },
+    '/v1/model-keys/models': {
+      get: {
+        summary: 'VerbaLab model family catalog',
+        operationId: 'listModelKeyFamilies',
+        responses: { '200': { description: 'Atlas/Echo/Voice FM and related families' } },
       },
     },
     '/v1/call-intelligence/engine': {

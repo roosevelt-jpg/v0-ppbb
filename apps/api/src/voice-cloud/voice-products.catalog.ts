@@ -74,6 +74,15 @@ export function voiceProductCatalog(): VoiceProductRow[] {
       notes:
         'Shipped emotion/domain synthesis profiles: soft prosody + voice pick + clone style settings + chunk SSE. Trained expressive TTS deferred. Distinct from detection.',
     },
+    {
+      id: 'verba-voice',
+      name: 'Verba Voice',
+      status: 'shipped',
+      api: 'GET /v1/verba-voice/engine',
+      console: '/verba-voice',
+      notes:
+        'Grok-class conversational voice for African languages. Sessions + text/audio turns. Africa residency (af / jnb).',
+    },
     { id: 'voice-conversion',
       name: 'Voice Conversion',
       status: 'shipped',

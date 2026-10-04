@@ -197,10 +197,11 @@ Library v2 names dozens of “Clouds.” VerbaLab maps them to **modules + vendo
 
 | Island | Fly region | Env |
 | --- | --- | --- |
-| US | `iad` | `VERBALAB_REGION=us` |
+| Africa (primary) | `jnb` | `VERBALAB_REGION=af` |
 | EU | `ams` | `VERBALAB_REGION=eu` |
+| US | `iad` | `VERBALAB_REGION=us` |
 
-Each island: own Fly apps + `DATABASE_URL` + Redis. Org `data_region` pin enforced.
+Each island: own Fly apps + `DATABASE_URL` + Redis. Org `data_region` pin enforced (new orgs default to `af`).
 
 ---
 

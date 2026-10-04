@@ -927,6 +927,101 @@ export class VerbaLab {
     return this.requestJson<RegionsResponse>('/v1/regions', { method: 'GET' });
   }
 
+  async modelKeyGuide(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-keys/guide', { method: 'GET' });
+  }
+
+  async modelFamilies(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-keys/models', { method: 'GET' });
+  }
+
+  async meetingTranscriptionEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/engine', {
+      method: 'GET',
+    });
+  }
+
+  async meetingTranscriptionLanguages(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/languages', {
+      method: 'GET',
+    });
+  }
+
+  async createMeetingSession(input: {
+    title?: string;
+    language?: string;
+    translateTo?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async transcribeMeeting(input: {
+    file: UploadFile;
+    language?: string;
+    translateTo?: string;
+    sessionId?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.language) form.append('language', input.language);
+    if (input.translateTo) form.append('translateTo', input.translateTo);
+    if (input.sessionId) form.append('sessionId', input.sessionId);
+    return this.requestForm('/v1/meeting-transcription/transcribe', form);
+  }
+
+  async meetingRecap(input: {
+    text: string;
+    language?: string;
+    voice?: string;
+    speak?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/recap', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/engine', { method: 'GET' });
+  }
+
+  async createVerbaVoiceSession(input: {
+    language?: string;
+    voice?: string;
+    systemPrompt?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceTextTurn(input: {
+    sessionId: string;
+    text: string;
+    language?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/text-turns', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceTurn(input: {
+    sessionId: string;
+    file: UploadFile;
+    language?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    form.append('sessionId', input.sessionId);
+    if (input.language) form.append('language', input.language);
+    return this.requestForm('/v1/verba-voice/turns', form);
+  }
+
   async locales(): Promise<LocalePack[]> {
     const res = await this.requestJson<{ data: LocalePack[] }>('/v1/locales', { method: 'GET' });
     return res.data;

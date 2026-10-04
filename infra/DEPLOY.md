@@ -109,21 +109,26 @@ Deferred. Ship one production pair first; add Fly preview apps later if needed.
 ## Multi-region residency (VL-075)
 
 Each region is a **separate deploy + database** (residency island), not a mesh.
+**Primary cloud residency is Africa** (`jnb` / Johannesburg).
 
 | Island | Fly configs | `VERBALAB_REGION` | Fly `primary_region` |
 | --- | --- | --- | --- |
-| US (default) | `infra/fly/api.toml`, `web.toml` | `us` | `iad` |
+| Africa (default) | `infra/fly/api.toml`, `web.toml` | `af` | `jnb` |
 | EU | `infra/fly/api.eu.toml`, `web.eu.toml` | `eu` | `ams` |
+| US | `infra/fly/api.us.toml`, `web.us.toml` | `us` | `iad` |
 
 ```bash
+# Primary Africa island (default)
+fly deploy -c infra/fly/api.toml --dockerfile apps/api/Dockerfile
+fly deploy -c infra/fly/web.toml --dockerfile apps/web/Dockerfile \
+  --build-arg NEXT_PUBLIC_API_URL=https://verbalab-api.fly.dev \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+
+# Optional EU island
 fly apps create verbalab-api-eu
 fly apps create verbalab-web-eu
-# Attach a *separate* EU Postgres + Redis, then:
 fly secrets set -a verbalab-api-eu DATABASE_URL='...' REDIS_URL='...' VERBALAB_REGION=eu ...
 fly deploy -c infra/fly/api.eu.toml --dockerfile apps/api/Dockerfile
-fly deploy -c infra/fly/web.eu.toml --dockerfile apps/web/Dockerfile \
-  --build-arg NEXT_PUBLIC_API_URL=https://verbalab-api-eu.fly.dev \
-  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
 ```
 
-Orgs may pin `dataRegion` via `PATCH /v1/organization/residency`. A pin to `eu` rejects API calls on the US island (`residency_mismatch`). **Pinning does not migrate data.**
+New organizations default to `dataRegion=af`. Orgs may pin via `PATCH /v1/organization/residency`. A pin that mismatches the deploy island rejects authenticated calls (`residency_mismatch`). **Pinning does not migrate data.**

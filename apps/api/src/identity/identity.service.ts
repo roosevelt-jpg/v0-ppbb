@@ -47,6 +47,7 @@ export class IdentityService {
         data: {
           clerkOrgId: input.clerkOrgId,
           name: input.orgName ?? 'Organization',
+          dataRegion: 'af',
           memberships: {
             create: { userId: user.id, role: MembershipRole.owner },
           },
@@ -70,6 +71,7 @@ export class IdentityService {
         organization = await this.prisma.organization.create({
           data: {
             name: input.orgName ?? `${input.name ?? 'Personal'} workspace`,
+            dataRegion: 'af',
             memberships: {
               create: { userId: user.id, role: MembershipRole.owner },
             },

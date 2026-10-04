@@ -161,7 +161,8 @@ export function DataClient() {
         Data
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
-        Retention, residency, export, and deletion. See the DPA data map in the repo docs.
+        Retention, residency, export, and deletion. Primary cloud residency is Africa (Johannesburg);
+        new organizations default to the Africa island. See the DPA data map in the repo docs.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
@@ -172,8 +173,8 @@ export function DataClient() {
           <section className="vl-panel" style={{ padding: '1.25rem' }}>
             <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Data residency</h2>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: '0.4rem 0 1rem' }}>
-              Each region is a separate deploy and database — not a global mesh. Pinning does not migrate existing
-              data. Owners only.
+              Africa (`af` / Johannesburg) is the primary residency island. EU and US are optional separate
+              deploys — not a global mesh. Pinning does not migrate existing data. Owners only.
             </p>
             {residency ? (
               <>

@@ -89,7 +89,7 @@ export class RegionsService {
       if (!isRegionCode(input.dataRegion)) {
         throw new ApiException(
           'validation_error',
-          'dataRegion must be us, eu, or null',
+          'dataRegion must be af, us, eu, or null',
           HttpStatus.BAD_REQUEST,
         );
       }

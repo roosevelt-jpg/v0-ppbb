@@ -39,6 +39,12 @@ export function meetingTranscriptionCatalog() {
       'Transcribe meetings across every VerbaLab African language — text transcripts, subtitles, optional translation, and spoken recap for meeting platforms.',
     honesty: meetingTranscriptionHonesty(),
     docs: '/docs/MEETING_TRANSCRIPTION.md',
+    residency: {
+      primaryRegion: 'af-south-1',
+      verbalabRegion: 'af',
+      flyRegion: 'jnb',
+      deployment: 'Africa primary island; optional EU/US residency islands',
+    },
     capabilities: [
       {
         id: 'languages',

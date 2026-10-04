@@ -29,6 +29,10 @@ Africa-wide meeting speech-to-text for developers building Zoom / Google Meet / 
 
 `/meeting-transcription`
 
+## Residency
+
+Primary cloud residency is **Africa** (`VERBALAB_REGION=af`, Fly `jnb`). New orgs default to `dataRegion=af`.
+
 ## Protection
 
 Metered routes use `RateLimitGuard`. All API responses carry VerbaLab trademark / watermark headers.

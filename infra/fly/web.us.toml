@@ -1,7 +1,7 @@
-# Fly.io — Web Africa residency island (primary). Create with: fly apps create verbalab-web
-# Deploy from repo root: fly deploy -c infra/fly/web.toml --dockerfile apps/web/Dockerfile
-app = 'verbalab-web'
-primary_region = 'jnb'
+# Fly.io — Web US residency island. Point NEXT_PUBLIC_API_URL at verbalab-api-us.
+# fly apps create verbalab-web-us
+app = 'verbalab-web-us'
+primary_region = 'iad'
 
 [build]
   dockerfile = 'apps/web/Dockerfile'
@@ -9,7 +9,7 @@ primary_region = 'jnb'
 [env]
   NODE_ENV = 'production'
   PORT = '3000'
-  VERBALAB_REGION = 'af'
+  VERBALAB_REGION = 'us'
 
 [http_service]
   internal_port = 3000

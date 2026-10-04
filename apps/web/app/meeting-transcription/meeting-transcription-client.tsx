@@ -26,6 +26,17 @@ export function MeetingTranscriptionClient() {
           ],
         },
         {
+          id: 'transcribe',
+          label: 'Transcribe audio',
+          path: 'transcribe',
+          fields: [
+            { name: 'file', label: 'Meeting audio', type: 'file' },
+            { name: 'language', label: 'Source language', placeholder: 'sw' },
+            { name: 'translateTo', label: 'Translate to', placeholder: 'en' },
+            { name: 'sessionId', label: 'Session id (optional)', placeholder: 'from start session' },
+          ],
+        },
+        {
           id: 'recap',
           label: 'Spoken recap',
           path: 'recap',

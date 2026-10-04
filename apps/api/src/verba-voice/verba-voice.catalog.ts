@@ -17,6 +17,12 @@ export function verbaVoiceCatalog() {
       'Grok-class conversational voice for African languages — open a session, stream turns as audio or text, hear Atlas reply in Voice FM.',
     honesty: verbaVoiceHonesty(),
     docs: '/docs/VERBA_VOICE.md',
+    residency: {
+      primaryRegion: 'af-south-1',
+      verbalabRegion: 'af',
+      flyRegion: 'jnb',
+      deployment: 'Africa primary island; optional EU/US residency islands',
+    },
     capabilities: [
       {
         id: 'sessions',

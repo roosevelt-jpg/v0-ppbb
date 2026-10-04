@@ -32,6 +32,16 @@ export function VerbaVoiceClient() {
             { name: 'language', label: 'Language', placeholder: 'sw' },
           ],
         },
+        {
+          id: 'turns',
+          label: 'Audio turn',
+          path: 'turns',
+          fields: [
+            { name: 'sessionId', label: 'Session id', placeholder: 'from open session' },
+            { name: 'file', label: 'Voice clip', type: 'file' },
+            { name: 'language', label: 'Language', placeholder: 'sw' },
+          ],
+        },
       ]}
     />
   );

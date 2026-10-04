@@ -82,7 +82,7 @@ Add to `apps/api/.env` and `apps/web/.env.local` (see `.env.example`):
 | `OPENAI_API_KEY` | api | Audio, chat, embeddings, RAG |
 | `ELEVENLABS_API_KEY` | api | Voice cloning |
 | `STRIPE_*` | api | Billing |
-| `VERBALAB_REGION` | api | Residency island (`us` / `eu`) |
+| `VERBALAB_REGION` | api | Residency island (`af` default / `eu` / `us`) |
 
 Without Clerk/Google, open http://localhost:3000/setup. API tests still pass (fixtures). Live MT: `TRANSLATE_LIVE=1 pnpm --filter @verbalab/api test`.
 

@@ -142,6 +142,24 @@ export function speechProductCatalog(): SpeechProductRow[] {
         'Shipped wake/keyword/trigger spotting via text/STT. Porcupine on-device DNN deferred.',
     },
     {
+      id: 'meeting-transcription',
+      name: 'Meeting Transcription',
+      status: 'shipped',
+      api: 'GET /v1/meeting-transcription/engine',
+      console: '/meeting-transcription',
+      notes:
+        'Africa-wide meeting STT for Zoom/Meet-class platforms — sessions, transcribe+translate, spoken recap. Residency: af-south-1 / VERBALAB_REGION=af.',
+    },
+    {
+      id: 'verba-voice',
+      name: 'Verba Voice',
+      status: 'shipped',
+      api: 'GET /v1/verba-voice/engine',
+      console: '/verba-voice',
+      notes:
+        'Grok-class conversational voice sessions (STT→Atlas→TTS). WebRTC duplex deferred. Africa residency default.',
+    },
+    {
       id: 'call-intelligence',
       name: 'Call Intelligence',
       status: 'shipped',

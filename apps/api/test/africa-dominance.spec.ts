@@ -4,6 +4,13 @@ import { VerbaVoiceService } from '../src/verba-voice/verba-voice.service';
 import { ModelKeysService } from '../src/model-keys/model-keys.service';
 import { meetingTranscriptionLanguages } from '../src/meeting-transcription/meeting-transcription.catalog';
 import { ApiProtectionInterceptor } from '../src/common/security/api-protection.interceptor';
+import {
+  currentRegionCode,
+  DEFAULT_REGION_CODE,
+  regionCatalog,
+} from '../src/regions/regions.catalog';
+import { speechProductCatalog } from '../src/speech-cloud/speech-products.catalog';
+import { voiceProductCatalog } from '../src/voice-cloud/voice-products.catalog';
 import { of } from 'rxjs';
 
 const auth = {
@@ -94,6 +101,20 @@ describe('Africa language dominance surfaces', () => {
     const guide = svc.guide();
     expect(guide.models.families.length).toBe(catalog.families.length);
     expect(guide.productApiKeys.prefix).toContain('vl_live_');
+  });
+
+  it('defaults cloud residency to Africa and wires products into speech/voice hubs', () => {
+    const prev = process.env.VERBALAB_REGION;
+    delete process.env.VERBALAB_REGION;
+    expect(DEFAULT_REGION_CODE).toBe('af');
+    expect(currentRegionCode()).toBe('af');
+    expect(regionCatalog().map((r) => r.code)).toEqual(expect.arrayContaining(['af', 'us', 'eu']));
+    expect(regionCatalog().find((r) => r.code === 'af')?.flyRegion).toBe('jnb');
+    expect(speechProductCatalog().some((p) => p.id === 'meeting-transcription')).toBe(true);
+    expect(speechProductCatalog().some((p) => p.id === 'verba-voice')).toBe(true);
+    expect(voiceProductCatalog().some((p) => p.id === 'verba-voice')).toBe(true);
+    if (prev === undefined) delete process.env.VERBALAB_REGION;
+    else process.env.VERBALAB_REGION = prev;
   });
 
   it('watermarks API responses with trademark headers', () =>

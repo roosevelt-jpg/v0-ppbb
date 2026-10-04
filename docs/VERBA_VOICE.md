@@ -21,6 +21,10 @@ Grok-class conversational voice for African languages — session API for develo
 
 Turn-based voice sessions ship today (STT → Atlas → Voice FM). Full-duplex WebRTC barge-in is deferred (`POST /v1/verba-voice/webrtc`).
 
+## Residency
+
+Primary cloud residency is **Africa** (`VERBALAB_REGION=af`, Fly `jnb`). New orgs default to `dataRegion=af`.
+
 ## Console
 
 `/verba-voice`
