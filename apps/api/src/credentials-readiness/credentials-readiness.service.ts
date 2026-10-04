@@ -118,22 +118,42 @@ export class CredentialsReadinessService {
   }
 
   async listRecords(session: SessionContext) {
-    return { data: await this.store.list(session.organizationId, 'credentials') };
+    const rows = await this.store.list(session.organizationId, 'credentials');
+    return {
+      data: rows.map((row) => ({
+        id: row.id,
+        kind: row.kind,
+        title: row.title,
+        summary: row.summary,
+        content: row.content,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+      })),
+    };
   }
 
   async createRecord(
     session: SessionContext,
     body: { kind: string; title: string; summary?: string; content?: Record<string, unknown> },
   ) {
+    const row = await this.store.create(session.organizationId, {
+      domain: 'credentials',
+      kind: body.kind,
+      title: body.title,
+      summary: body.summary,
+      content: body.content,
+      ownerLabel: session.userId ?? 'console',
+    });
     return {
-      data: await this.store.create(session.organizationId, {
-        domain: 'credentials',
-        kind: body.kind,
-        title: body.title,
-        summary: body.summary,
-        content: body.content,
-        ownerLabel: session.userId ?? 'console',
-      }),
+      data: {
+        id: row.id,
+        kind: row.kind,
+        title: row.title,
+        summary: row.summary,
+        content: row.content,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+      },
     };
   }
 

@@ -7,7 +7,7 @@ export function credentialsreadinessCatalog() {
     vl: 'Shipped.',
     phase: 275,
     domain: 'credentials',
-    blurb: 'Production credentials checklist — Stripe, Clerk, VerbaLab model endpoints added later.',
+    blurb: 'Production credentials checklist — Stripe, Clerk, VerbaLab model keys, Fly, and residency unlocks.',
     honesty: aiInternetHonesty(),
   };
 }

@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime, formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type BillingSummary = {
@@ -102,7 +103,7 @@ export function BillingClient() {
             style={{
               padding: '1.35rem',
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
               gap: '1rem',
               background: 'var(--bg-soft)',
               border: 'none',
@@ -111,6 +112,7 @@ export function BillingClient() {
             <Stat label="Plan" value={summary.planName} />
             <Stat label="Used" value={`${summary.charactersUsed.toLocaleString()} chars`} />
             <Stat label="Quota" value={`${summary.characterQuota.toLocaleString()} / mo`} />
+            <Stat label="Requests" value={summary.requests.toLocaleString()} />
           </div>
 
           <div className="vl-panel" style={{ padding: '1.25rem' }}>
@@ -118,6 +120,9 @@ export function BillingClient() {
               Status: <strong style={{ color: 'var(--ink)' }}>{summary.billingStatus}</strong>
               {' · '}
               Remaining this period: {summary.charactersRemaining.toLocaleString()} characters
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.45rem' }}>
+              Period started: {formatUtc(summary.periodStart)}
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.1rem', flexWrap: 'wrap' }}>
               {summary.plan !== 'pro' ? (
@@ -177,6 +182,9 @@ export function BillingClient() {
                     <div>
                       <div style={{ fontWeight: 600 }}>{m.user.name ?? m.user.email ?? m.user.id}</div>
                       <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{m.user.email}</div>
+                      <div style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
+                        Joined {formatDateTime(m.createdAt)}
+                      </div>
                     </div>
                     <div className="vl-code" style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
                       {m.role}

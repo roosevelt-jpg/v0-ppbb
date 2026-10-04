@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type Surface = { id: string; api: string; console: string | null };
@@ -147,7 +148,7 @@ export function AiObservabilityClient() {
                   <li key={r.id} style={{ borderTop: '1px solid var(--line)', padding: '0.4rem 0', fontSize: '0.88rem' }}>
                     <code>{r.action}</code>
                     {r.route ? <span style={{ color: 'var(--muted)' }}> · {r.route}</span> : null}
-                    <span style={{ color: 'var(--muted)' }}> · {new Date(r.at).toLocaleString()}</span>
+                    <span style={{ color: 'var(--muted)' }}> · {formatDateTime(r.at)}</span>
                   </li>
                 ))}
               </ul>

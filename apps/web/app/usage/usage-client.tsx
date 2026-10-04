@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type Summary = {
@@ -61,7 +62,7 @@ export function UsageClient() {
           <Stat label="Embeddings requests" value={String(summary.embeddings?.requests ?? 0)} />
           <Stat label="Embeddings tokens" value={String(summary.embeddings?.tokens ?? 0)} />
           <div style={{ gridColumn: '1 / -1', color: 'var(--muted)', fontSize: '0.85rem' }}>
-            Period start: {new Date(summary.periodStart).toUTCString()}
+            Period start: {formatUtc(summary.periodStart)}
           </div>
         </div>
       ) : !error ? (

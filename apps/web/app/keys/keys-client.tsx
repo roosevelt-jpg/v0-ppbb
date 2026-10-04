@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type ApiKeyRow = {
@@ -27,7 +28,7 @@ export function KeysClient() {
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
-    if (!token) return;
+    if (!token) throw new Error('Not signed in');
     const rows = await apiFetch<ApiKeyRow[]>('/v1/api-keys', { token });
     setKeys(rows);
   }, [getToken]);
@@ -145,7 +146,8 @@ export function KeysClient() {
                 </div>
                 <div className="vl-code" style={{ color: 'var(--muted)', marginTop: '0.2rem' }}>
                   {key.prefix}…{key.revokedAt ? ' · revoked' : ''}
-                  {key.lastUsedAt ? ` · last used ${new Date(key.lastUsedAt).toLocaleString()}` : ' · never used'}
+                  {` · created ${formatDateTime(key.createdAt)}`}
+                  {key.lastUsedAt ? ` · last used ${formatDateTime(key.lastUsedAt)}` : ' · never used'}
                 </div>
               </div>
               {!key.revokedAt ? (

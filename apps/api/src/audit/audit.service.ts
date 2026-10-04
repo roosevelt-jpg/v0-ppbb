@@ -78,7 +78,7 @@ export class AuditService {
       ip: event.ip,
       apiKeyPrefix: event.apiKeyPrefix,
       metadata: event.metadata,
-      createdAt: event.createdAt,
+      createdAt: event.createdAt.toISOString(),
       user: event.user
         ? { id: event.user.id, email: event.user.email, name: event.user.name }
         : null,

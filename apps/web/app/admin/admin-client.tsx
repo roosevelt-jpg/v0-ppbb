@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime, formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type OrgRow = {
@@ -184,7 +185,7 @@ export function AdminClient() {
                       <div style={{ fontWeight: 650 }}>{row.name}</div>
                       <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
                         {row.plan} · {row.memberCount} members · {row.apiKeyCount} keys
-                        {row.disabledAt ? ' · DISABLED' : ''}
+                        {row.disabledAt ? ` · DISABLED ${formatDateTime(row.disabledAt)}` : ''}
                       </div>
                     </div>
                     <div className="vl-code" style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
@@ -201,8 +202,13 @@ export function AdminClient() {
               <h2 style={{ margin: 0, fontSize: '1.15rem' }}>{selected.name}</h2>
               <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
                 Usage this period: {selected.usage.characters.toLocaleString()} chars ·{' '}
-                {selected.usage.requests} translate requests
-                {selected.disabledAt ? ` · Disabled: ${selected.disabledReason ?? 'yes'}` : ''}
+                {selected.usage.requests} translate requests · period start{' '}
+                {formatUtc(selected.usage.periodStart)}
+                {selected.disabledAt
+                  ? ` · Disabled ${formatDateTime(selected.disabledAt)}${
+                      selected.disabledReason ? ` (${selected.disabledReason})` : ''
+                    }`
+                  : ''}
               </p>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <button

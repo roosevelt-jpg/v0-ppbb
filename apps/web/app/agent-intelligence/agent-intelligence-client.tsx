@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; api: string | null };
@@ -121,7 +122,7 @@ export function AgentIntelligenceClient() {
                 {data.activity.events.map((e) => (
                   <li key={e.id} style={{ borderTop: '1px solid var(--line)', padding: '0.4rem 0', fontSize: '0.88rem' }}>
                     <code>{e.action}</code>
-                    <span style={{ color: 'var(--muted)' }}> · {new Date(e.at).toLocaleString()}</span>
+                    <span style={{ color: 'var(--muted)' }}> · {formatDateTime(e.at)}</span>
                   </li>
                 ))}
               </ul>

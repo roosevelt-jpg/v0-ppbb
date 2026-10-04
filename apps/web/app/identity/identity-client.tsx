@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type MemberRow = {
@@ -168,6 +169,9 @@ export function IdentityClient() {
                         {isSelf ? ' (you)' : ''}
                       </div>
                       <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{m.user.email}</div>
+                      <div style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
+                        Joined {formatDateTime(m.createdAt)}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                       {canManage && !isSelf ? (

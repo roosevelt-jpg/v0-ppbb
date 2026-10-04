@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
+import { formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
 
 type Catalog = {
@@ -107,7 +108,7 @@ export function AnalyticsClient() {
         '/v1/analytics/reports/enterprise',
         { token },
       );
-      setReportNote(`Report generated ${new Date(report.generatedAt).toUTCString()}. ${report.note}`);
+      setReportNote(`Report generated ${formatUtc(report.generatedAt)}. ${report.note}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Report failed');
     }
@@ -252,7 +253,7 @@ export function AnalyticsClient() {
           </section>
 
           <p style={{ color: 'var(--muted)', fontSize: '0.85rem', margin: 0 }}>
-            Period: {new Date(data.periodStart).toUTCString()} → {new Date(data.periodEnd).toUTCString()}
+            Period: {formatUtc(data.periodStart)} → {formatUtc(data.periodEnd)}
           </p>
         </div>
       ) : !error ? (
