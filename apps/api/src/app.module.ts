@@ -90,6 +90,7 @@ import { AiDnsModule } from './ai-dns/ai-dns.module';
 import { AiInternetStoreModule } from './ai-internet-store/ai-internet-store.module';
 import { AiInternetModule } from './ai-internet/ai-internet.module';
 import { VideoVoiceModule } from './video-voice/video-voice.module';
+import { CreativeMediaModule } from './creative-media/creative-media.module';
 import { SpeechDepthModule } from './speech-depth/speech-depth.module';
 import { TranslateFmModule } from './translate-fm/translate-fm.module';
 import { FusionModule } from './fusion/fusion.module';
@@ -349,6 +350,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiInternetStoreModule,
     AiInternetModule,
     VideoVoiceModule,
+    CreativeMediaModule,
     SpeechDepthModule,
     TranslateFmModule,
     FusionModule,

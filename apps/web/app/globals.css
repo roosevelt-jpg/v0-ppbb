@@ -1075,8 +1075,14 @@ html[data-theme='dark'] .vl-mkt-footer {
 
 .vl-mkt-footer-cols {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .vl-mkt-footer-cols {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .vl-mkt-footer-cols h4 {

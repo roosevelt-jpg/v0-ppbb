@@ -156,7 +156,44 @@ export class MarketingCmsService implements OnModuleInit {
       });
     }
 
+    // Keep footer / product hubs aligned with catalog (ElevenLabs-parity columns) without wiping custom blocks.
+    await this.syncSeededBlockType(home.id, 'footer');
+    await this.syncSeededBlockType(home.id, 'product_hubs');
+
     this.log.log('Marketing CMS seed ensured (home + use-case + product prefills)');
+  }
+
+  private async syncSeededBlockType(pageId: string, type: string) {
+    const seed = DEFAULT_HOME_BLOCKS.find((b) => b.type === type);
+    if (!seed) return;
+    const existing = await this.prisma.cmsBlock.findFirst({
+      where: { pageId, type },
+      orderBy: { sortOrder: 'asc' },
+    });
+    if (!existing) {
+      await this.prisma.cmsBlock.create({
+        data: {
+          pageId,
+          type: seed.type,
+          sortOrder: seed.sortOrder,
+          content: seed.content as unknown as Prisma.InputJsonValue,
+          published: true,
+        },
+      });
+      return;
+    }
+    const current = existing.content as { columns?: unknown[]; tabs?: unknown[] };
+    const next = seed.content as { columns?: unknown[]; tabs?: unknown[] };
+    const needsFooterSync =
+      type === 'footer' && (current.columns?.length ?? 0) < (next.columns?.length ?? 0);
+    const needsHubsSync =
+      type === 'product_hubs' && JSON.stringify(current.tabs ?? []) !== JSON.stringify(next.tabs ?? []);
+    if (needsFooterSync || needsHubsSync) {
+      await this.prisma.cmsBlock.update({
+        where: { id: existing.id },
+        data: { content: seed.content as unknown as Prisma.InputJsonValue },
+      });
+    }
   }
 
   async getSettings() {
