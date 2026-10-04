@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { ApiKeyEnvironment } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { generateApiKeySecret } from '../common/crypto/api-keys';
+import { generateApiKeySecret, hashApiKey, looksLikeApiKey } from '../common/crypto/api-keys';
 import { ApiException } from '../common/errors/api-exception';
 import { AuditService } from '../audit/audit.service';
 
@@ -12,6 +12,45 @@ export class ApiKeysService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  /** Verify a raw `vl_*` secret for WebSocket / bridge auth (throws on failure). */
+  async verify(token: string): Promise<{
+    apiKeyId: string;
+    organizationId: string;
+    workspaceId: string;
+    prefix: string;
+  }> {
+    if (!looksLikeApiKey(token)) {
+      throw new ApiException('unauthorized', 'Invalid API key', HttpStatus.UNAUTHORIZED);
+    }
+    const secretHash = hashApiKey(token);
+    const key = await this.prisma.apiKey.findFirst({
+      where: { secretHash, revokedAt: null },
+      include: { organization: { select: { disabledAt: true } } },
+    });
+    if (!key) {
+      throw new ApiException('unauthorized', 'Invalid or revoked API key', HttpStatus.UNAUTHORIZED);
+    }
+    if (key.organization.disabledAt) {
+      throw new ApiException(
+        'org_disabled',
+        'Organization is disabled. Contact support.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    void this.prisma.apiKey
+      .update({
+        where: { id: key.id },
+        data: { lastUsedAt: new Date() },
+      })
+      .catch(() => undefined);
+    return {
+      apiKeyId: key.id,
+      organizationId: key.organizationId,
+      workspaceId: key.workspaceId,
+      prefix: key.prefix,
+    };
+  }
 
   async create(input: {
     organizationId: string;

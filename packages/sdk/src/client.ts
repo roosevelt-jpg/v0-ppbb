@@ -2281,6 +2281,20 @@ export class VerbaLab {
     return this.requestJson('/v1/partner-connectors/mcp/manifest', { method: 'GET' });
   }
 
+  async voiceBridgesEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/voice-bridges/engine', { method: 'GET' });
+  }
+
+  async voiceBridgePlatform(id: string): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/voice-bridges/platforms/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    });
+  }
+
+  async vapiAssistantSnippet(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/voice-bridges/vapi/assistant-snippet', { method: 'GET' });
+  }
+
   async voiceLanguageMarketplaceEngine(): Promise<{
     product: string;
     note: string;

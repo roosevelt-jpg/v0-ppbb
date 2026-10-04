@@ -30,6 +30,7 @@ describe('product family readiness + dubbing credits', () => {
       'api-key',
       'conversational-ai',
       'voice-agents',
+      'voice-bridges',
       'text-to-sound-effects',
       'ai-music-generator',
       'playground',

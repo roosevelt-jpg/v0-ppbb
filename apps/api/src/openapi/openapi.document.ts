@@ -1572,6 +1572,155 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/voice-bridges/engine': {
+      get: {
+        summary: 'Voice platform bridges catalog (VAPI, Twilio, Amazon, Google, SIP, WebRTC)',
+        operationId: 'getVoiceBridgesEngine',
+        responses: { '200': { description: 'Platforms, honesty, score' } },
+      },
+    },
+    '/v1/voice-bridges/platforms/{id}': {
+      get: {
+        summary: 'Single voice bridge platform detail',
+        operationId: 'getVoiceBridgePlatform',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Platform bridge' }, '404': { description: 'Unknown' } },
+      },
+    },
+    '/v1/voice-bridges/vapi/assistant-snippet': {
+      get: {
+        summary: 'VAPI assistant config snippet pointing at VerbaLab custom voice/STT',
+        operationId: 'getVapiAssistantSnippet',
+        responses: { '200': { description: 'VAPI assistant JSON' } },
+      },
+    },
+    '/v1/voice-bridges/vapi/tts': {
+      post: {
+        summary: 'VAPI custom-voice TTS (raw PCM16 mono)',
+        operationId: 'vapiCustomVoiceTts',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'PCM16 audio bytes' } },
+      },
+    },
+    '/v1/voice-bridges/vapi/stt': {
+      post: {
+        summary: 'VAPI custom-transcriber HTTP (multipart or audioBase64)',
+        operationId: 'vapiCustomTranscriberHttp',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'transcriber-response JSON' } },
+      },
+    },
+    '/v1/voice-bridges/twilio/status': {
+      get: {
+        summary: 'Twilio + SIP bridge status URLs',
+        operationId: 'getVoiceBridgesTwilioStatus',
+        responses: { '200': { description: 'Webhook URLs' } },
+      },
+    },
+    '/v1/voice-bridges/amazon/polly/voices': {
+      get: {
+        summary: 'Polly-shaped voice catalog (VerbaLab Own AI)',
+        operationId: 'listPollyCompatibleVoices',
+        responses: { '200': { description: 'Voices' } },
+      },
+    },
+    '/v1/voice-bridges/amazon/polly/speech': {
+      post: {
+        summary: 'Polly-shaped SynthesizeSpeech → VerbaLab TTS',
+        operationId: 'pollyCompatibleSpeech',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Audio bytes' } },
+      },
+    },
+    '/v1/voice-bridges/amazon/lex/fulfillment': {
+      post: {
+        summary: 'Amazon Lex fulfillment webhook → VerbaLab MT/TTS',
+        operationId: 'amazonLexFulfillment',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Lex close response' } },
+      },
+    },
+    '/v1/voice-bridges/amazon/connect/contact': {
+      post: {
+        summary: 'Amazon Connect contact-flow Lambda webhook',
+        operationId: 'amazonConnectContact',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Text/SSML/audio reply' } },
+      },
+    },
+    '/v1/voice-bridges/google/texttospeech/v1/synthesize': {
+      post: {
+        summary: 'Google Cloud TTS–shaped synthesize (Own AI audio)',
+        operationId: 'googleCompatibleTts',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'audioContent base64' } },
+      },
+    },
+    '/v1/voice-bridges/google/speech/v1/recognize': {
+      post: {
+        summary: 'Google Cloud Speech–shaped recognize (Echo STT)',
+        operationId: 'googleCompatibleStt',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'results[].alternatives' } },
+      },
+    },
+    '/v1/voice-bridges/google/dialogflow/webhook': {
+      post: {
+        summary: 'Dialogflow CX/ES fulfillment webhook',
+        operationId: 'dialogflowWebhook',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'fulfillmentText (+ optional audio)' } },
+      },
+    },
+    '/v1/voice-bridges/google/voice/status': {
+      get: {
+        summary: 'Google Voice / telephony builder path status',
+        operationId: 'getGoogleVoiceBridgeStatus',
+        responses: { '200': { description: 'Complete path via Dialogflow or Twilio' } },
+      },
+    },
+    '/v1/voice-bridges/elevenlabs/v1/voices': {
+      get: {
+        summary: 'ElevenLabs-shaped voices list',
+        operationId: 'elevenLabsCompatibleVoices',
+        responses: { '200': { description: 'voices[]' } },
+      },
+    },
+    '/v1/voice-bridges/elevenlabs/v1/text-to-speech/{voiceId}': {
+      post: {
+        summary: 'ElevenLabs-shaped TTS path → VerbaLab Own AI',
+        operationId: 'elevenLabsCompatibleTts',
+        security: [{ ApiKeyAuth: [] }],
+        parameters: [
+          { name: 'voiceId', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Audio bytes' } },
+      },
+    },
+    '/v1/voice-bridges/sip/trunk': {
+      get: {
+        summary: 'SIP trunk recipe (Twilio Elastic SIP → VerbaLab)',
+        operationId: 'getSipTrunkRecipe',
+        responses: { '200': { description: 'Termination URLs + steps' } },
+      },
+    },
+    '/v1/voice-bridges/sip/invite-hook': {
+      post: {
+        summary: 'SIP invite metadata → agent reply + audio',
+        operationId: 'sipInviteHook',
+        security: [{ ApiKeyAuth: [] }],
+        responses: { '200': { description: 'replyText + audioBase64' } },
+      },
+    },
+    '/v1/voice-bridges/webrtc/status': {
+      get: {
+        summary: 'WebRTC duplex bridge status (VerbaVoice)',
+        operationId: 'getVoiceBridgesWebrtcStatus',
+        responses: { '200': { description: 'Signaling endpoints + TURN flag' } },
+      },
+    },
     '/v1/workflows': {
       get: {
         summary: 'List saved workflow definitions',

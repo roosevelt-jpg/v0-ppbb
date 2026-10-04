@@ -30,6 +30,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './admin/admin.module';
 import { ConnectorsModule } from './connectors/connectors.module';
 import { PartnerConnectorsModule } from './partner-connectors/partner-connectors.module';
+import { VoiceBridgesModule } from './voice-bridges/voice-bridges.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { VoiceModule } from './voice/voice.module';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -628,6 +629,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AdminModule,
     ConnectorsModule,
     PartnerConnectorsModule,
+    VoiceBridgesModule,
     WorkflowsModule,
     VoiceModule,
     AnalyticsModule,

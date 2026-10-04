@@ -46,10 +46,11 @@ export function productFamiliesCatalog(): {
 
       // VerbaAgents
       row('voice-agents', 'VerbaAgents', 'Voice Agents', 'shipped_e2e', 'POST /v1/voice/simulate', '/voice', true, null, 'FAQ voice agent + Twilio path; STT/TTS in loop.', 'Free+ credits'),
+      row('voice-bridges', 'VerbaAgents', 'Voice Platform Bridges', 'shipped_e2e', 'GET /v1/voice-bridges/engine', '/voice-bridges', true, null, 'VAPI/Twilio/Amazon/Google/SIP/WebRTC bridges — Own AI TTS/STT/agents behind partner-shaped APIs.', 'Free+ credits on TTS/STT'),
       row('agent-voice-training', 'VerbaAgents', 'Agent Voice Training', 'shipped_e2e', 'POST /v1/agent-voice-training/personas/:id/preview', '/agent-voice-training', true, null, 'Persona packs + multilingual speak preview (TTS audio).', 'Free+ TTS credits on preview'),
       row('conversational-ai', 'VerbaAgents', 'Conversational AI', 'shipped_e2e', 'POST /v1/chat/completions', '/chat', true, null, 'African Voice LLM chat with optional speak-back.', 'Free+ chat/TTS credits'),
-      row('integrations', 'VerbaAgents', 'Integrations', 'shipped_e2e', 'POST /v1/connectors/install', '/connectors', false, null, 'Connector catalog + invoke; some installs in-memory.', 'Free+'),
-      row('telecommunications', 'VerbaAgents', 'Telecommunications', 'shipped_e2e', 'POST /v1/call-intelligence/analyze', '/call-intelligence', true, null, 'Call intelligence heuristics + STT paths.', 'Free+ credits'),
+      row('integrations', 'VerbaAgents', 'Integrations', 'shipped_e2e', 'POST /v1/connectors/install', '/connectors', false, null, 'Connector catalog + voice-bridges + partner invoke/MCP.', 'Free+'),
+      row('telecommunications', 'VerbaAgents', 'Telecommunications', 'shipped_e2e', 'POST /v1/voice/twilio/inbound', '/voice-bridges', true, null, 'Twilio TwiML + SIP trunk recipe + call intelligence.', 'Free+ credits'),
       row('financial-services', 'VerbaAgents', 'Financial Services', 'partial', 'GET /v1/financial-intelligence/engine', '/financial-intelligence', false, null, 'Vertical vocab/playbooks — not a full KYC OS.', 'Free+'),
       row('healthcare', 'VerbaAgents', 'Healthcare', 'partial', 'GET /v1/healthcare-intelligence/engine', '/healthcare-intelligence', false, null, 'Vertical vocab/playbooks — not clinical OS.', 'Free+'),
       row('government', 'VerbaAgents', 'Government', 'partial', 'GET /v1/government-intelligence/engine', '/government-intelligence', false, null, 'Vertical vocab/playbooks — not citizen-service OS.', 'Free+'),

@@ -89,6 +89,11 @@ export const CONSOLE_NAV: NavGroup[] = [
         label: 'Verba Voice',
         keywords: ['grok', 'realtime', 'voice mode', 'conversational', 'duplex'],
       },
+      {
+        href: '/voice-bridges',
+        label: 'Voice Bridges',
+        keywords: ['vapi', 'twilio', 'polly', 'lex', 'dialogflow', 'sip', 'webrtc', 'amazon', 'google'],
+      },
       { href: '/language', label: 'Language', keywords: ['dialects', 'grammar', 'style'] },
       {
         href: '/chat',
@@ -117,6 +122,11 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/workflows', label: 'Workflows' },
       { href: '/connectors', label: 'Connectors' },
       { href: '/partner-connectors', label: 'Partner Connectors', keywords: ['mcp', 'higgsfield', 'claude', 'runway'] },
+      {
+        href: '/voice-bridges',
+        label: 'Voice Bridges',
+        keywords: ['vapi', 'twilio', 'sip', 'polly', 'dialogflow'],
+      },
       { href: '/marketplace', label: 'Marketplace' },
     ],
   },
