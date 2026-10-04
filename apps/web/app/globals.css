@@ -1135,30 +1135,30 @@ html[data-theme='dark'] .vl-mkt-footer {
 }
 
 .vl-africa-watermark-svg {
-  width: min(72vw, 640px);
+  width: min(78vw, 720px);
   height: auto;
-  opacity: 0.55;
+  opacity: 0.85;
 }
 
 .vl-africa-land {
   fill: var(--brand);
-  fill-opacity: 0.07;
+  fill-opacity: 0.14;
   stroke: var(--brand);
-  stroke-opacity: 0.18;
-  stroke-width: 1.2;
+  stroke-opacity: 0.32;
+  stroke-width: 1.35;
 }
 
 .vl-africa-arc {
   stroke: var(--brand);
-  stroke-opacity: 0.16;
-  stroke-width: 0.9;
+  stroke-opacity: 0.28;
+  stroke-width: 1;
   stroke-dasharray: 3 3;
   animation: vl-africa-arc-flow 8s linear infinite;
 }
 
 .vl-africa-dot {
   fill: var(--brand);
-  fill-opacity: 0.75;
+  fill-opacity: 0.9;
 }
 
 .vl-africa-pulse {
@@ -1193,11 +1193,11 @@ html[data-theme='dark'] .vl-mkt-footer {
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  opacity: 0.45;
+  opacity: 0.65;
   white-space: nowrap;
 }
 

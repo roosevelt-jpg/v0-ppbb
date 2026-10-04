@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmbeddingsService } from '../embeddings/embeddings.service';
 import { ApiException } from '../common/errors/api-exception';
 import {
+  DEFERRED_EMBED_MODALITIES,
   SUPPORTED_EMBED_MODALITIES,
   SupportedEmbedModality,
   embeddingCloudCatalog,
@@ -106,7 +107,8 @@ export class EmbeddingCloudService {
     const byProvider: Record<string, number> = {};
     for (const e of events) {
       tokens += e.units;
-      byProvider[e.provider] = (byProvider[e.provider] ?? 0) + e.units;
+      const provider = e.provider ?? 'unknown';
+      byProvider[provider] = (byProvider[provider] ?? 0) + e.units;
     }
 
     const byModality: Record<string, number> = {};
@@ -157,24 +159,20 @@ export class EmbeddingCloudService {
     if (typeof raw !== 'string') {
       throw new ApiException('validation_error', 'modality must be a string', HttpStatus.BAD_REQUEST);
     }
-    const modality = raw.trim().toLowerCase();
+    const modality = raw.trim().toLowerCase().replace('-', '_');
     if ((SUPPORTED_EMBED_MODALITIES as readonly string[]).includes(modality)) {
       return modality as SupportedEmbedModality;
     }
-    if (
-      ['speech', 'voice', 'image', 'video', 'cross_modal', 'cross-modal', 'hybrid'].includes(
-        modality,
-      )
-    ) {
+    if ((DEFERRED_EMBED_MODALITIES as readonly string[]).includes(modality)) {
       throw new ApiException(
         'validation_error',
-        `modality '${modality}' is deferred — Embedding Cloud ships text/document/code only`,
+        `modality '${modality}' is deferred — use Speaker Intelligence for voice biometrics`,
         HttpStatus.BAD_REQUEST,
       );
     }
     throw new ApiException(
       'validation_error',
-      `unsupported modality '${modality}' — use text, document, or code`,
+      `unsupported modality '${modality}' — use ${SUPPORTED_EMBED_MODALITIES.join(', ')}`,
       HttpStatus.BAD_REQUEST,
     );
   }
