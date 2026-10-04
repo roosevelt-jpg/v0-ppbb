@@ -27,6 +27,8 @@ type Engine = {
 export function VoiceBridgesClient() {
   const [engine, setEngine] = useState<Engine | null>(null);
   const [snippet, setSnippet] = useState<string | null>(null);
+  const [snippetTitle, setSnippetTitle] = useState('Integration snippet');
+  const [snippetBusy, setSnippetBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState('vapi');
 
@@ -44,30 +46,47 @@ export function VoiceBridgesClient() {
           setError(err instanceof Error ? err.message : 'Failed to load voice bridges');
         }
       }
-      try {
-        const snip = await apiFetch<Record<string, unknown>>(
-          '/v1/voice-bridges/vapi/assistant-snippet',
-        );
-        if (!cancelled) setSnippet(JSON.stringify(snip, null, 2));
-      } catch (err) {
-        if (!cancelled) {
-          setSnippet(
-            JSON.stringify(
-              {
-                error: err instanceof Error ? err.message : 'Failed to load VAPI snippet',
-              },
-              null,
-              2,
-            ),
-          );
-          setError((prev) => prev ?? (err instanceof Error ? err.message : 'snippet failed'));
-        }
-      }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+    setSnippetBusy(true);
+    setSnippet(null);
+    void (async () => {
+      try {
+        const snip = await apiFetch<{ title?: string; platform?: string }>(
+          `/v1/voice-bridges/platforms/${encodeURIComponent(selected)}/snippet`,
+        );
+        if (cancelled) return;
+        setSnippetTitle(snip.title ?? `${selected} integration snippet`);
+        setSnippet(JSON.stringify(snip, null, 2));
+      } catch (err) {
+        if (!cancelled) {
+          setSnippetTitle(`${selected} integration snippet`);
+          setSnippet(
+            JSON.stringify(
+              {
+                platform: selected,
+                error: err instanceof Error ? err.message : 'Failed to load snippet',
+              },
+              null,
+              2,
+            ),
+          );
+        }
+      } finally {
+        if (!cancelled) setSnippetBusy(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
 
   const platforms = engine?.platforms ?? [];
   const active = platforms.find((p) => p.id === selected) ?? platforms[0];
@@ -130,9 +149,7 @@ export function VoiceBridgesClient() {
             </h3>
             <p>{active.setup}</p>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{active.honesty}</p>
-            <p style={{ fontSize: '0.85rem' }}>
-              Protocols: {active.protocols.join(', ')}
-            </p>
+            <p style={{ fontSize: '0.85rem' }}>Protocols: {active.protocols.join(', ')}</p>
             <ul style={{ fontSize: '0.9rem', paddingLeft: '1.2rem' }}>
               {active.endpoints.map((ep) => (
                 <li key={ep}>
@@ -143,7 +160,7 @@ export function VoiceBridgesClient() {
           </section>
         ) : null}
 
-        <h2 style={{ marginTop: '1.5rem', fontSize: '1.15rem' }}>VAPI assistant snippet</h2>
+        <h2 style={{ marginTop: '1.5rem', fontSize: '1.15rem' }}>{snippetTitle}</h2>
         <pre
           style={{
             overflow: 'auto',
@@ -153,7 +170,7 @@ export function VoiceBridgesClient() {
             maxHeight: 360,
           }}
         >
-          {snippet || 'Loading…'}
+          {snippetBusy && !snippet ? 'Loading…' : snippet || 'Loading…'}
         </pre>
 
         {engine?.honesty?.note ? (

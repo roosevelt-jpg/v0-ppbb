@@ -1589,6 +1589,19 @@ export const openApiDocument = {
         responses: { '200': { description: 'Platform bridge' }, '404': { description: 'Unknown' } },
       },
     },
+    '/v1/voice-bridges/platforms/{id}/snippet': {
+      get: {
+        summary: 'Integration snippet/recipe for a voice bridge platform',
+        operationId: 'getVoiceBridgePlatformSnippet',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'Platform-specific curl/config snippet' },
+          '404': { description: 'Unknown platform' },
+        },
+      },
+    },
     '/v1/voice-bridges/vapi/assistant-snippet': {
       get: {
         summary: 'VAPI assistant config snippet pointing at VerbaLab custom voice/STT',

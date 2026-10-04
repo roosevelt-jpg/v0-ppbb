@@ -38,6 +38,11 @@ export class VoiceBridgesController {
     return this.bridges.engine();
   }
 
+  @Get('platforms/:id/snippet')
+  platformSnippet(@Req() req: Request, @Param('id') id: string) {
+    return this.bridges.integrationSnippet(id, publicBase(req));
+  }
+
   @Get('platforms/:id')
   platform(@Param('id') id: string) {
     return this.bridges.platform(id);

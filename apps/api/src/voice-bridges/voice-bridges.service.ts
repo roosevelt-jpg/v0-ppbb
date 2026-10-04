@@ -78,6 +78,151 @@ export class VoiceBridgesService {
     };
   }
 
+  /** Per-platform integration recipe shown in the console when a platform chip is selected. */
+  integrationSnippet(id: string, baseUrl: string) {
+    const row = voiceBridgesCatalog().platforms.find((p) => p.id === id);
+    if (!row) {
+      throw new ApiException('not_found', `Unknown bridge platform: ${id}`, HttpStatus.NOT_FOUND);
+    }
+    const root = baseUrl.replace(/\/$/, '');
+    const auth = { Authorization: 'Bearer vl_live_YOUR_KEY' };
+    const title = `${row.name} integration snippet`;
+
+    switch (id) {
+      case 'vapi':
+        return { title, ...this.vapiAssistantSnippet(baseUrl) };
+      case 'twilio':
+        return { title, ...this.twilioStatus(baseUrl) };
+      case 'amazon-polly':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/amazon/polly/speech`,
+            headers: auth,
+            body: {
+              Text: 'Habari kutoka VerbaLab',
+              VoiceId: 'alloy',
+              OutputFormat: 'mp3',
+              LanguageCode: 'sw-KE',
+            },
+          },
+          voices: `${root}/v1/voice-bridges/amazon/polly/voices`,
+          note: 'Polly-shaped SynthesizeSpeech JSON → VerbaLab Own AI audio.',
+        };
+      case 'amazon-lex':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/amazon/lex/fulfillment`,
+            headers: auth,
+            body: {
+              inputTranscript: 'Hello',
+              sessionState: {
+                intent: { name: 'VerbaLabHelp' },
+                sessionAttributes: { targetLanguage: 'sw', speak: '1' },
+              },
+            },
+          },
+          note: 'Lex fulfillment webhook → MT/TTS close response. Lex NLU stays in AWS.',
+        };
+      case 'amazon-connect':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/amazon/connect/contact`,
+            headers: auth,
+            body: {
+              Details: {
+                Parameters: { text: 'Karibu', targetLanguage: 'sw', voice: 'alloy' },
+              },
+            },
+          },
+          note: 'Connect contact-flow Lambda webhook → text/SSML/audioBase64.',
+        };
+      case 'google-cloud-tts':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/google/texttospeech/v1/synthesize`,
+            headers: auth,
+            body: {
+              input: { text: 'Habari kutoka VerbaLab' },
+              voice: { languageCode: 'sw-KE', name: 'alloy' },
+              audioConfig: { audioEncoding: 'MP3' },
+            },
+          },
+          note: 'Cloud TTS–shaped synthesize; returns audioContent base64 from Own AI.',
+        };
+      case 'google-speech':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/google/speech/v1/recognize`,
+            headers: auth,
+            body: {
+              config: { languageCode: 'sw-KE', encoding: 'LINEAR16', sampleRateHertz: 16000 },
+              audio: { content: '<base64-pcm16-or-wav>' },
+            },
+          },
+          note: 'Speech–shaped recognize → Echo STT. Prefer LINEAR16/WAV base64 in audio.content.',
+        };
+      case 'dialogflow':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/google/dialogflow/webhook`,
+            headers: auth,
+            body: {
+              queryResult: {
+                queryText: 'Hello',
+                parameters: { 'target-language': 'sw', speak: '1' },
+              },
+            },
+          },
+          note: 'Dialogflow CX/ES fulfillment webhook for MT + optional TTS payload.',
+        };
+      case 'google-voice':
+        return { title, ...this.googleVoiceStatus() };
+      case 'elevenlabs':
+        return {
+          title,
+          platform: id,
+          example: {
+            method: 'POST',
+            url: `${root}/v1/voice-bridges/elevenlabs/v1/text-to-speech/alloy`,
+            headers: { ...auth, 'Content-Type': 'application/json' },
+            body: { text: 'Habari kutoka VerbaLab', language_code: 'sw' },
+          },
+          voices: `${root}/v1/voice-bridges/elevenlabs/v1/voices`,
+          note: 'ElevenLabs-shaped TTS path → VerbaLab Own AI (not ElevenLabs hosted product).',
+        };
+      case 'sip':
+        return { title, ...this.sipTrunk(baseUrl) };
+      case 'webrtc':
+        return { title, ...this.webrtcStatus(baseUrl) };
+      default:
+        return {
+          title,
+          platform: id,
+          endpoints: row.endpoints,
+          setup: row.setup,
+          note: row.honesty,
+        };
+    }
+  }
+
   async vapiTts(
     body: Record<string, unknown>,
     meta: OrgMeta,

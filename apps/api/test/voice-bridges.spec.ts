@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { voiceBridgesCatalog, voiceBridgesHonesty } from '../src/voice-bridges/voice-bridges.catalog';
 import { pcm16ToWav } from '../src/voice-bridges/voice-bridges.pcm';
+import { VoiceBridgesService } from '../src/voice-bridges/voice-bridges.service';
 import { productFamiliesCatalog } from '../src/product-families/product-families.catalog';
 
 describe('voice platform bridges', () => {
@@ -48,5 +49,30 @@ describe('voice platform bridges', () => {
     expect(row?.status).toBe('shipped_e2e');
     expect(row?.api).toBe('GET /v1/voice-bridges/engine');
     expect(row?.consoleHref).toBe('/voice-bridges');
+  });
+
+  it('returns a titled snippet whose platform matches each catalog id', () => {
+    const service = new VoiceBridgesService(
+      {} as never,
+      { listVoices: () => [] } as never,
+    );
+    for (const p of voiceBridgesCatalog().platforms) {
+      const snip = service.integrationSnippet(p.id, 'https://api.example.com') as {
+        title: string;
+        platform: string;
+      };
+      expect(snip.platform, p.id).toBe(p.id);
+      expect(snip.title, p.id).toContain(p.name);
+      expect(snip.title.toLowerCase(), p.id).not.toContain(
+        p.id === 'vapi' ? 'elevenlabs' : '___never___',
+      );
+    }
+    const eleven = service.integrationSnippet('elevenlabs', 'https://api.example.com') as {
+      title: string;
+      platform: string;
+      example?: { url?: string };
+    };
+    expect(eleven.title).toBe('ElevenLabs-shaped clients integration snippet');
+    expect(eleven.example?.url).toContain('/elevenlabs/');
   });
 });
