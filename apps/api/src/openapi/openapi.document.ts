@@ -1586,6 +1586,20 @@ export const openApiDocument = {
         responses: { '200': { description: 'Ordered pillar bootstrap steps' } },
       },
     },
+    '/v1/sovereign-voice-os/integrations': {
+      get: {
+        summary: 'Sovereign Voice SDK, MCP plugin, and websocket integration surface',
+        operationId: 'getSovereignVoiceOsIntegrations',
+        responses: { '200': { description: 'Realtime + SDK + MCP wiring' } },
+      },
+    },
+    '/v1/sovereign-voice-os/stream': {
+      get: {
+        summary: 'Sovereign Voice realtime WebSocket channel (upgrade)',
+        operationId: 'sovereignVoiceOsStream',
+        responses: { '101': { description: 'WebSocket upgrade' } },
+      },
+    },
     '/v1/national-voice-runtime/engine': {
       get: {
         summary: 'National Voice Sovereignty Runtime catalog',

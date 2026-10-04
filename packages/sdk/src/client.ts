@@ -2295,6 +2295,78 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-bridges/vapi/assistant-snippet', { method: 'GET' });
   }
 
+  async sovereignVoiceOsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/engine', { method: 'GET' });
+  }
+
+  async sovereignVoiceOsIntegrations(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/integrations', { method: 'GET' });
+  }
+
+  async composeSovereignVoiceOs(input: {
+    countryCode: string;
+    sectors?: string;
+    corridors?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/compose', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async createNationalVoiceZone(input: {
+    countryCode: string;
+    ministry?: string;
+    region?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/national-voice-runtime/zones', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async appendCivicVoiceEvidence(input: {
+    utterance: string;
+    actor?: string;
+    consentId?: string;
+    watermarkTip?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/civic-voice-evidence/append', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async bridgeMutualIntelligibility(input: {
+    corridorId: string;
+    sourceLocale: string;
+    targetLocale: string;
+    text: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/mutual-intelligibility/bridge', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async institutionalVoiceSpeak(input: {
+    agencyId: string;
+    question: string;
+    speak?: boolean | string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/institutional-voice/speak', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async syncOfflineMeshVoice(input: { nodeId: string }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/offline-mesh-voice/sync', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async voiceLanguageMarketplaceEngine(): Promise<{
     product: string;
     note: string;

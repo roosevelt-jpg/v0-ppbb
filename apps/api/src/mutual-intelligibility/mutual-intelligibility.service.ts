@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { ApiException } from '../common/errors/api-exception';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
+import { createVerbalabMt } from '../gateway/verbalab-own-ai';
 import {
   mutualIntelligibilityCatalog,
   mutualIntelligibilityHonesty,
@@ -104,11 +105,19 @@ export class MutualIntelligibilityService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    // Meaning-preserving bridge: Own AI path placeholder — keep semantic skeleton, mark bridge.
-    const bridged =
-      sourceLocale === targetLocale
-        ? text
-        : `[${corridorId}:${sourceLocale}→${targetLocale}] ${text}`;
+    let bridged = text;
+    let path: 'identity' | 'own_ai_corridor' = 'identity';
+    let provider = 'identity';
+    if (sourceLocale !== targetLocale) {
+      const mt = await createVerbalabMt().translate({
+        text,
+        source: sourceLocale,
+        target: targetLocale,
+      });
+      bridged = mt.text;
+      path = 'own_ai_corridor';
+      provider = mt.provider ?? 'verbalab_own_ai';
+    }
     const result = {
       bridgeId: randomUUID(),
       corridorId,
@@ -116,9 +125,10 @@ export class MutualIntelligibilityService {
       targetLocale,
       sourceText: text,
       bridgedText: bridged,
-      path: sourceLocale === targetLocale ? 'identity' : 'corridor_paraphrase',
+      path,
+      provider,
       englishMiddleman: false,
-      note: 'Corridor bridge avoids mandatory English pivot when both locales are in-corridor.',
+      note: 'Corridor bridge uses VerbaLab Own AI without a mandatory English pivot.',
     };
     await this.audit.record({
       organizationId: session.organizationId,

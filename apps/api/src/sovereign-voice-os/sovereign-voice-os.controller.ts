@@ -30,6 +30,11 @@ export class SovereignVoiceOsController {
     return this.service.readiness();
   }
 
+  @Get('integrations')
+  integrations() {
+    return this.service.integrations();
+  }
+
   @Get('overview')
   @UseGuards(ClerkAuthGuard)
   overview(@CurrentSession() session: SessionContext) {

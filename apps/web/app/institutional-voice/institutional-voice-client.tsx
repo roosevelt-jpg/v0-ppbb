@@ -1,84 +1,56 @@
 'use client';
 
-import { MoonshotConsole } from '@/components/moonshot-console';
+import { SovereignStudio, SOVEREIGN_SIBLINGS } from '@/components/sovereign-studio';
 
 export function InstitutionalVoiceClient() {
   return (
-    <MoonshotConsole
-      title="Policy-Bound Institutional Voice"
+    <SovereignStudio
+      title="Institutional Voice"
       apiBase="/v1/institutional-voice"
+      siblingLinks={[...SOVEREIGN_SIBLINGS]}
       actions={[
-  {
-    "id": "agency",
-    "label": "Register agency",
-    "path": "agencies",
-    "fields": [
-      {
-        "name": "agencyId",
-        "label": "Agency id",
-        "placeholder": "moh-ke"
-      },
-      {
-        "name": "name",
-        "label": "Agency name",
-        "placeholder": "Ministry of Health Kenya"
-      },
-      {
-        "name": "voiceId",
-        "label": "Voice id",
-        "placeholder": "alloy"
-      }
-    ]
-  },
-  {
-    "id": "ingest",
-    "label": "Ingest policy",
-    "path": "corpus",
-    "fields": [
-      {
-        "name": "agencyId",
-        "label": "Agency id",
-        "placeholder": "moh-ke"
-      },
-      {
-        "name": "title",
-        "label": "Document title",
-        "placeholder": "Gazette Notice 12/2026"
-      },
-      {
-        "name": "body",
-        "label": "Policy text",
-        "type": "textarea",
-        "placeholder": "Vaccination is free at public clinics\u2026"
-      }
-    ]
-  },
-  {
-    "id": "list",
-    "label": "List corpus",
-    "path": "corpus",
-    "method": "GET",
-    "fields": []
-  },
-  {
-    "id": "speak",
-    "label": "Policy-bound speak",
-    "path": "speak",
-    "fields": [
-      {
-        "name": "agencyId",
-        "label": "Agency id",
-        "placeholder": "moh-ke"
-      },
-      {
-        "name": "question",
-        "label": "Citizen question",
-        "type": "textarea",
-        "placeholder": "Is childhood vaccination free?"
-      }
-    ]
-  }
-]}
+        {
+          id: 'agency',
+          label: 'Register agency',
+          path: 'agencies',
+          fields: [
+            { name: 'agencyId', label: 'Agency', placeholder: 'moh-ke' },
+            { name: 'name', label: 'Name', placeholder: 'Ministry of Health Kenya' },
+            { name: 'voiceId', label: 'Voice', placeholder: 'own:sw-aisha' },
+          ],
+        },
+        {
+          id: 'ingest',
+          label: 'Ingest policy',
+          path: 'corpus',
+          fields: [
+            { name: 'agencyId', label: 'Agency', placeholder: 'moh-ke' },
+            { name: 'title', label: 'Title', placeholder: 'Gazette Notice' },
+            {
+              name: 'body',
+              label: 'Policy text',
+              type: 'textarea',
+              placeholder: 'Vaccination is free at public clinics…',
+            },
+          ],
+        },
+        { id: 'list', label: 'Show corpus', path: 'corpus', method: 'GET', fields: [] },
+        {
+          id: 'speak',
+          label: 'Answer from policy',
+          path: 'speak',
+          fields: [
+            { name: 'agencyId', label: 'Agency', placeholder: 'moh-ke' },
+            {
+              name: 'question',
+              label: 'Question',
+              type: 'textarea',
+              placeholder: 'Is childhood vaccination free?',
+            },
+            { name: 'speak', label: 'Also synthesize audio', placeholder: 'true' },
+          ],
+        },
+      ]}
     />
   );
 }

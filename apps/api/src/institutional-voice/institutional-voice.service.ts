@@ -4,6 +4,7 @@ import { createHash, randomUUID } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { ApiException } from '../common/errors/api-exception';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
+import { createVerbalabTts } from '../gateway/verbalab-own-ai';
 import {
   institutionalVoiceCatalog,
   institutionalVoiceHonesty,
@@ -165,6 +166,24 @@ export class InstitutionalVoiceService {
       ip,
       metadata: { agencyId, docId: best.doc.id, score: best.score },
     });
+    const wantAudio = String(body.speak ?? 'true').toLowerCase() !== 'false';
+    let audio: Record<string, unknown> | undefined;
+    if (wantAudio) {
+      const tts = createVerbalabTts();
+      const voices = tts.listVoices();
+      const voice =
+        agency.voiceId && voices.some((v) => v.id === agency.voiceId)
+          ? agency.voiceId
+          : voices[0]?.id || agency.voiceId || 'own:sw-aisha';
+      const speech = await tts.synthesize({ text: answer, voice, format: 'mp3' });
+      audio = {
+        voice: speech.voice,
+        provider: speech.provider,
+        mimeType: speech.mimeType,
+        characters: speech.characters,
+        audioBase64: speech.audio.toString('base64'),
+      };
+    }
     return {
       allowed: true,
       refused: false,
@@ -172,7 +191,7 @@ export class InstitutionalVoiceService {
       voiceId: agency.voiceId,
       answer,
       citation: { docId: best.doc.id, title: best.doc.title, hash: best.doc.hash, score: best.score },
-      speakHint: { endpoint: 'POST /v1/audio/speech', voice: agency.voiceId, text: answer },
+      audio,
     };
   }
 }

@@ -53,7 +53,8 @@ describe('Sovereign Voice OS pillars', () => {
       text: 'Muraho',
     });
     expect(out.englishMiddleman).toBe(false);
-    expect(out.bridgedText).toContain('eac');
+    expect(out.path).toBe('own_ai_corridor');
+    expect(String(out.bridgedText).length).toBeGreaterThan(0);
   });
 
   it('institutional voice refuses off-policy then allows with corpus', async () => {
@@ -85,5 +86,14 @@ describe('Sovereign Voice OS pillars', () => {
     expect(recipe.steps.length).toBeGreaterThanOrEqual(4);
     expect(svc.pillars().count).toBe(5);
     expect(svc.readiness().checklist.length).toBeGreaterThan(3);
+  });
+
+  it('integrations expose sdk, plugins, and realtime channel', () => {
+    const svc = new SovereignVoiceOsService(audit);
+    const integ = svc.integrations();
+    expect(integ.realtime.websocket).toContain('/v1/sovereign-voice-os/stream');
+    expect(integ.sdk.package).toBe('@verbalab/sdk');
+    expect(integ.sdk.methods).toContain('composeSovereignVoiceOs');
+    expect(integ.plugins.mcpTools).toContain('verbalab_sovereign_compose');
   });
 });

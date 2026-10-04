@@ -17,7 +17,9 @@ export function sovereignVoiceOsCatalog() {
         { id: 'engine', name: 'OS engine + pillar status', status: 'shipped' as const, api: 'GET /v1/sovereign-voice-os/engine' },
         { id: 'readiness', name: 'Buyer readiness checklist', status: 'shipped' as const, api: 'GET /v1/sovereign-voice-os/readiness' },
         { id: 'compose', name: 'Compose deployment recipe', status: 'shipped' as const, api: 'POST /v1/sovereign-voice-os/compose' },
-        { id: 'pillars', name: 'List pillars', status: 'shipped' as const, api: 'GET /v1/sovereign-voice-os/pillars' }
+        { id: 'pillars', name: 'List pillars', status: 'shipped' as const, api: 'GET /v1/sovereign-voice-os/pillars' },
+        { id: 'integrations', name: 'SDK / MCP / websocket integrations', status: 'shipped' as const, api: 'GET /v1/sovereign-voice-os/integrations' },
+        { id: 'stream', name: 'Realtime sovereign channel', status: 'shipped' as const, api: 'WS /v1/sovereign-voice-os/stream' }
     ],
   };
 }

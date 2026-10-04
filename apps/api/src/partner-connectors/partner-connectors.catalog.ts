@@ -137,6 +137,22 @@ export const PARTNER_PLATFORMS: PartnerPlatform[] = [
     docs: '/docs/PARTNER_CONNECTORS.md#custom',
     api: '/v1/partner-connectors/platforms/custom',
   },
+  {
+    id: 'sovereign-gov',
+    name: 'Sovereign government plugins',
+    kind: 'government',
+    status: 'shipped',
+    protocols: ['rest', 'mcp', 'cli', 'sdk', 'websocket'],
+    useCases: [
+      'national voice zones',
+      'civic evidence',
+      'corridor intelligibility',
+      'institutional policy voice',
+      'offline mesh',
+    ],
+    docs: '/docs/SOVEREIGN_VOICE_OS.md',
+    api: '/v1/sovereign-voice-os/integrations',
+  },
 ];
 
 export function partnerConnectorsCatalog() {

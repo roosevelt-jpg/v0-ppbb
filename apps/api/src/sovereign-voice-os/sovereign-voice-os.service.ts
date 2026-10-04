@@ -1,5 +1,5 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { AuditService } from '../audit/audit.service';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
@@ -7,6 +7,7 @@ import {
   sovereignVoiceOsCatalog,
   sovereignVoiceOsHonesty,
 } from './sovereign-voice-os.catalog';
+import { SovereignVoiceOsStreamGateway } from './sovereign-voice-os.stream';
 import { nationalVoiceRuntimeCatalog } from '../national-voice-runtime/national-voice-runtime.catalog';
 import { civicVoiceEvidenceCatalog } from '../civic-voice-evidence/civic-voice-evidence.catalog';
 import { mutualIntelligibilityCatalog } from '../mutual-intelligibility/mutual-intelligibility.catalog';
@@ -48,7 +49,10 @@ const PILLARS = [
 
 @Injectable()
 export class SovereignVoiceOsService {
-  constructor(private readonly audit: AuditService) {}
+  constructor(
+    private readonly audit: AuditService,
+    @Optional() private readonly stream?: SovereignVoiceOsStreamGateway,
+  ) {}
 
   pillars() {
     return {
@@ -93,6 +97,44 @@ export class SovereignVoiceOsService {
         { id: 'mesh', label: 'Offline mesh nodes registered for clinics/borders', required: false },
       ],
       note: 'Procurement-ready checklist — unlocks government / bank / hospital buyers when marked complete in ops.',
+    };
+  }
+
+  integrations() {
+    return {
+      title: 'Sovereign integrations',
+      realtime: {
+        websocket: '/v1/sovereign-voice-os/stream',
+        auth: 'Bearer vl_live_… or console session token',
+        events: ['sovereign.ready', 'sovereign.event', 'sovereign.ping'],
+      },
+      sdk: {
+        package: '@verbalab/sdk',
+        methods: [
+          'sovereignVoiceOsEngine',
+          'composeSovereignVoiceOs',
+          'createNationalVoiceZone',
+          'appendCivicVoiceEvidence',
+          'bridgeMutualIntelligibility',
+          'institutionalVoiceSpeak',
+          'syncOfflineMeshVoice',
+        ],
+      },
+      plugins: {
+        mcpTools: [
+          'verbalab_sovereign_compose',
+          'verbalab_evidence_append',
+          'verbalab_corridor_bridge',
+          'verbalab_institutional_speak',
+        ],
+        partnerInvoke: 'POST /v1/partner-connectors/invoke',
+      },
+      mobile: {
+        ios: 'packages/sdk-ios',
+        android: 'packages/sdk-android',
+        regenerate: 'node packages/sdk-mobile/generate.mjs',
+      },
+      note: 'Same surface builders expect from a world-class voice platform — wired for African sovereignty.',
     };
   }
 
@@ -144,6 +186,12 @@ export class SovereignVoiceOsService {
       action: 'sovereign-voice-os.compose',
       ip,
       metadata: { recipeId: recipe.recipeId, countryCode, sectors, corridors },
+    });
+    this.stream?.broadcast({
+      kind: 'compose',
+      recipeId: recipe.recipeId,
+      countryCode,
+      organizationId: session.organizationId,
     });
     return recipe;
   }
