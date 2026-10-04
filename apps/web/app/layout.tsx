@@ -29,7 +29,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SentryInit />
         <Providers>
-          {isClerkConfigured() ? <ClerkProvider>{children}</ClerkProvider> : children}
+          {isClerkConfigured() ? (
+            <ClerkProvider
+              signInFallbackRedirectUrl="/dashboard"
+              signUpFallbackRedirectUrl="/dashboard"
+              afterSignOutUrl="/"
+            >
+              {children}
+            </ClerkProvider>
+          ) : (
+            children
+          )}
         </Providers>
       </body>
     </html>

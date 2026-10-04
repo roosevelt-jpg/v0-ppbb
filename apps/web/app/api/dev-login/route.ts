@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     ok: true,
     email,
     bearer,
-    redirectTo: '/cms',
+    redirectTo: '/dashboard',
     note: 'Clerk OTP bypass cookie set. No email code required.',
   });
 

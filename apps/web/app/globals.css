@@ -1122,3 +1122,262 @@ html[data-theme='dark'] .vl-mkt-footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* —— Africa map watermark (every page) —— */
+.vl-africa-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.vl-africa-watermark-svg {
+  width: min(72vw, 640px);
+  height: auto;
+  opacity: 0.55;
+}
+
+.vl-africa-land {
+  fill: var(--brand);
+  fill-opacity: 0.07;
+  stroke: var(--brand);
+  stroke-opacity: 0.18;
+  stroke-width: 1.2;
+}
+
+.vl-africa-arc {
+  stroke: var(--brand);
+  stroke-opacity: 0.16;
+  stroke-width: 0.9;
+  stroke-dasharray: 3 3;
+  animation: vl-africa-arc-flow 8s linear infinite;
+}
+
+.vl-africa-dot {
+  fill: var(--brand);
+  fill-opacity: 0.75;
+}
+
+.vl-africa-pulse {
+  fill: var(--brand);
+  fill-opacity: 0.18;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: vl-africa-pulse 2.8s ease-out infinite;
+}
+
+.vl-africa-plotter {
+  animation: vl-africa-fade 1.2s ease both;
+}
+
+.vl-africa-label {
+  fill: var(--brand);
+  fill-opacity: 0.55;
+  font-size: 5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.vl-africa-langs {
+  fill: var(--ink);
+  fill-opacity: 0.35;
+  font-size: 4px;
+}
+
+.vl-africa-watermark-caption {
+  position: absolute;
+  bottom: 1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.45;
+  white-space: nowrap;
+}
+
+@keyframes vl-africa-pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.45;
+  }
+  70% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes vl-africa-arc-flow {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+@keyframes vl-africa-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vl-console,
+.vl-mkt,
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— Support bot —— */
+.vl-support-bot {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  display: grid;
+  justify-items: end;
+  gap: 0.65rem;
+}
+
+.vl-support-fab {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.75rem 1.1rem;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.vl-support-panel {
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(70vh, 32rem);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto auto;
+  gap: 0.55rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+}
+
+.vl-support-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.vl-support-head p {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.vl-support-close {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.vl-support-messages {
+  overflow: auto;
+  display: grid;
+  gap: 0.45rem;
+  min-height: 10rem;
+  max-height: 16rem;
+  padding-right: 0.15rem;
+}
+
+.vl-support-msg {
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.vl-support-msg.is-bot {
+  background: var(--brand-soft);
+  color: var(--ink);
+}
+
+.vl-support-msg.is-user {
+  background: var(--bg-soft);
+  justify-self: end;
+  max-width: 90%;
+}
+
+.vl-support-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.vl-support-quick button {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.vl-support-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+}
+
+.vl-support-form input {
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.65rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.vl-support-form button {
+  border: 0;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vl-support-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.vl-support-links a {
+  color: var(--brand);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.vl-support-links a:hover {
+  text-decoration: underline;
+}
