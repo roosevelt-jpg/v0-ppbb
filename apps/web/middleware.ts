@@ -42,7 +42,15 @@ export default clerkConfigured
       if (isPublicRoute(request) || hasDevAuthCookie(request)) {
         return NextResponse.next();
       }
-      await auth.protect();
+      // Avoid Clerk's protect-rewrite 404 when the "dev browser" cookie is missing
+      // (common on Cloudflare quick tunnels / non-localhost hosts with sk_test_).
+      const session = await auth();
+      if (!session.userId) {
+        const signIn = new URL('/sign-in', request.url);
+        signIn.searchParams.set('redirect_url', request.nextUrl.pathname + request.nextUrl.search);
+        return NextResponse.redirect(signIn);
+      }
+      return NextResponse.next();
     })
   : function middleware() {
       return NextResponse.next();
