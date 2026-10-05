@@ -12,6 +12,7 @@ import type { MoonshotAction } from '@/components/moonshot-console';
 export const SOVEREIGN_SIBLINGS = [
   { href: '/national-voice-runtime', label: 'National Runtime' },
   { href: '/civic-voice-evidence', label: 'Evidence' },
+  { href: '/voice-law-authenticity', label: 'Voice Law Auth' },
   { href: '/mutual-intelligibility', label: 'Corridors' },
   { href: '/institutional-voice', label: 'Institutional' },
   { href: '/offline-mesh-voice', label: 'Offline Mesh' },

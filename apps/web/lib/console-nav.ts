@@ -132,6 +132,11 @@ export const CONSOLE_NAV: NavGroup[] = [
         keywords: ['court', 'hash', 'provenance', 'deepfake', 'consent', 'watermark'],
       },
       {
+        href: '/voice-law-authenticity',
+        label: 'Voice Law Auth',
+        keywords: ['court', 'fake voice', 'deepfake', 'spoof', 'forensic', 'impersonation', 'law'],
+      },
+      {
         href: '/mutual-intelligibility',
         label: 'Mutual Intelligibility',
         keywords: ['ecowas', 'eac', 'sadc', 'corridor', 'dialect'],
@@ -278,6 +283,11 @@ export const CONSOLE_NAV: NavGroup[] = [
         href: '/civic-truth-guard',
         label: 'Civic Truth Guard',
         keywords: ['fake news', 'deepfake', 'misinformation', 'seal', 'authenticity'],
+      },
+      {
+        href: '/voice-law-authenticity',
+        label: 'Voice Law Auth',
+        keywords: ['court', 'fake recording', 'spoof', 'forensic', 'impersonation'],
       },
     ],
   },

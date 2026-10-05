@@ -313,6 +313,7 @@ import { EmotionVoiceModule } from './emotion-voice/emotion-voice.module';
 import { VoiceStudioModule } from './voice-studio/voice-studio.module';
 import { VoiceEnhancementModule } from './voice-enhancement/voice-enhancement.module';
 import { VoiceBiometricsModule } from './voice-biometrics/voice-biometrics.module';
+import { VoiceLawAuthenticityModule } from './voice-law-authenticity/voice-law-authenticity.module';
 import { VoiceMarketplaceModule } from './voice-marketplace/voice-marketplace.module';
 import { VoiceAnalyticsModule } from './voice-analytics/voice-analytics.module';
 import { SpeechRecognitionModule } from './speech-recognition/speech-recognition.module';
@@ -599,6 +600,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceStudioModule,
     VoiceEnhancementModule,
     VoiceBiometricsModule,
+    VoiceLawAuthenticityModule,
     VoiceMarketplaceModule,
     VoiceAnalyticsModule,
     SpeechRecognitionModule,
