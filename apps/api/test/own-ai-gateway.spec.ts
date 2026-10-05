@@ -49,19 +49,24 @@ describe('VerbaLab Own AI gateway', () => {
     });
     expect(out.provider).toBe('verbalab_own_ai');
     expect(out.language).toBe('yo');
+    expect(out.text).toContain('vl-stt-fixture');
+    expect(out.text).not.toContain('a.wav');
   });
 
-  it('synthesizes via Voice FM fixture', async () => {
+  it('synthesizes playable WAV via Voice FM fixture (even if mp3 requested)', async () => {
     const tts = new FixtureVerbalabTtsAdapter();
     const voices = tts.listVoices();
     expect(voices.some((v) => v.id.startsWith('own:'))).toBe(true);
     const out = await tts.synthesize({
       text: 'Karibu',
       voice: voices[0]!.id,
-      format: 'wav',
+      format: 'mp3',
     });
     expect(out.provider).toBe('verbalab_own_ai');
-    expect(out.audio.length).toBeGreaterThan(10);
+    expect(out.format).toBe('wav');
+    expect(out.mimeType).toBe('audio/wav');
+    expect(out.audio.toString('ascii', 0, 4)).toBe('RIFF');
+    expect(out.audio.length).toBeGreaterThan(1000);
   });
 
   it('chats via Atlas fixture', async () => {
@@ -71,6 +76,7 @@ describe('VerbaLab Own AI gateway', () => {
     });
     expect(out.provider).toBe('verbalab_own_ai');
     expect(out.message.content).toContain('Habari');
+    expect(out.message.content).not.toMatch(/^\[vl-atlas\]/);
   });
 
   it('boots GatewayService on own AI primary', async () => {

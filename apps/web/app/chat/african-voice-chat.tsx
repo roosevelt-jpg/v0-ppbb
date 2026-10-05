@@ -15,6 +15,9 @@ type ChatTurn = {
   content: string;
   via?: 'text' | 'voice';
   audioUrl?: string;
+  /** Original mic capture (webm/m4a) — lets users replay what they said. */
+  recordingUrl?: string;
+  recordingFormat?: string;
 };
 type ChatSession = { id: string; title: string; updatedAt: number; messages: ChatTurn[] };
 
@@ -28,6 +31,11 @@ type ChatCompletion = {
 
 const STORAGE_KEY = 'verbalab_african_voice_sessions_v1';
 const DEFAULT_VOICE = 'alloy';
+
+/** Local Own-AI STT fixture markers — not real speech text. */
+function isFixtureTranscript(text: string): boolean {
+  return /^\[vl-stt(-fixture)?:/i.test(text.trim()) || /transcribed voice\.(webm|m4a|wav|mp3)/i.test(text);
+}
 
 function uid() {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -68,6 +76,7 @@ export function AfricanVoiceChat() {
   const [attachOpen, setAttachOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [connecting, setConnecting] = useState<string | null>(null);
+  const [lastCapture, setLastCapture] = useState<{ url: string; format: string; bytes: number } | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -168,30 +177,56 @@ export function AfricanVoiceChat() {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text, input: text, voice: voiceId || DEFAULT_VOICE, format: 'mp3' }),
+      // Prefer wav — local fixture TTS always returns real WAV bytes; mp3 label was a lie before.
+      body: JSON.stringify({ text, input: text, voice: voiceId || DEFAULT_VOICE, format: 'wav' }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body?.error?.message ?? `Voice reply failed (${res.status})`);
     }
-    const blob = await res.blob();
+    const mime = res.headers.get('Content-Type') || 'audio/wav';
+    const raw = await res.arrayBuffer();
+    const blob = new Blob([raw], { type: mime.split(';')[0] });
     const url = URL.createObjectURL(blob);
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.src = '';
     }
     const audio = new Audio(url);
     audioRef.current = audio;
-    void audio.play().catch(() => undefined);
+    try {
+      await audio.play();
+    } catch (err) {
+      URL.revokeObjectURL(url);
+      throw new Error(err instanceof Error ? `Playback blocked: ${err.message}` : 'Playback failed');
+    }
     return url;
   }
 
-  async function sendMessage(text: string, via: 'text' | 'voice' = 'text') {
+  async function sendMessage(
+    text: string,
+    via: 'text' | 'voice' = 'text',
+    extras?: { recordingUrl?: string; recordingFormat?: string },
+  ) {
     const trimmed = text.trim();
     if (!trimmed || loading || !activeId) return;
+    if (isFixtureTranscript(trimmed)) {
+      setError(
+        'Speech-to-text is still in local demo mode, so your recording was not understood. Type your message, or set VERBALAB_STT_URL / enable Whisper (VERBALAB_ALLOW_VENDOR_FALLBACK=1 + OPENAI_API_KEY) for real voice.',
+      );
+      return;
+    }
 
     setError(null);
     setLoading(true);
-    const userTurn: ChatTurn = { id: uid(), role: 'user', content: trimmed, via };
+    const userTurn: ChatTurn = {
+      id: uid(),
+      role: 'user',
+      content: trimmed,
+      via,
+      recordingUrl: extras?.recordingUrl,
+      recordingFormat: extras?.recordingFormat,
+    };
     const nextMessages = [...messages, userTurn];
     patchActive((session) => ({
       ...session,
@@ -216,8 +251,8 @@ export function AfricanVoiceChat() {
       if (autoSpeak && reply) {
         try {
           audioUrl = await speakText(reply, token);
-        } catch {
-          /* keep text reply if TTS fails */
+        } catch (ttsErr) {
+          setError(ttsErr instanceof Error ? ttsErr.message : 'Could not speak the reply');
         }
       }
       const assistantTurn: ChatTurn = {
@@ -288,13 +323,19 @@ export function AfricanVoiceChat() {
   async function finishRecording(mimeType: string) {
     setTranscribing(true);
     setError(null);
+    let recordingUrl: string | undefined;
     try {
       const token = await ensureToken();
       const blob = new Blob(chunksRef.current, { type: mimeType });
+      if (blob.size < 256) {
+        throw new Error('Recording too short — hold the mic a moment longer');
+      }
       const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+      recordingUrl = URL.createObjectURL(blob);
+      if (lastCapture?.url) URL.revokeObjectURL(lastCapture.url);
+      setLastCapture({ url: recordingUrl, format: ext, bytes: blob.size });
       const form = new FormData();
       form.append('file', blob, `voice.${ext}`);
-      if (translateReplyTo) form.append('language', translateReplyTo);
 
       const res = await fetch(`${API_URL}/v1/audio/transcriptions`, {
         method: 'POST',
@@ -304,11 +345,17 @@ export function AfricanVoiceChat() {
       const payload = (await res.json().catch(() => ({}))) as {
         text?: string;
         error?: { message?: string };
+        provider?: string;
       };
       if (!res.ok) throw new Error(payload.error?.message ?? `Transcription failed (${res.status})`);
       const transcript = payload.text?.trim();
       if (!transcript) throw new Error('Could not hear speech — try again closer to the mic');
-      await sendMessage(transcript, 'voice');
+      if (isFixtureTranscript(transcript)) {
+        throw new Error(
+          `Voice saved as .${ext} (${Math.round(blob.size / 1024)} KB), but STT is in local demo mode (${payload.provider ?? 'verbalab_own_ai'}). Use “Play last recording” to hear it, type what you said, or configure VERBALAB_STT_URL / Whisper for real transcription.`,
+        );
+      }
+      await sendMessage(transcript, 'voice', { recordingUrl, recordingFormat: ext });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Voice capture failed');
     } finally {
@@ -317,10 +364,22 @@ export function AfricanVoiceChat() {
     }
   }
 
+  async function playUrl(url: string) {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio(url);
+    audioRef.current = audio;
+    try {
+      await audio.play();
+    } catch (err) {
+      setError(err instanceof Error ? `Playback failed: ${err.message}` : 'Playback failed');
+    }
+  }
+
   async function replay(turn: ChatTurn) {
     if (turn.audioUrl) {
-      const audio = new Audio(turn.audioUrl);
-      void audio.play().catch(() => undefined);
+      await playUrl(turn.audioUrl);
       return;
     }
     try {
@@ -523,6 +582,11 @@ export function AfricanVoiceChat() {
                     {msg.via === 'voice' ? ' · voice' : ''}
                   </div>
                   <div className="vl-avc-bubble-body">{msg.content}</div>
+                  {msg.role === 'user' && msg.recordingUrl ? (
+                    <button type="button" className="vl-avc-speak-btn" onClick={() => void playUrl(msg.recordingUrl!)}>
+                      ▶ Play my recording{msg.recordingFormat ? ` (.${msg.recordingFormat})` : ''}
+                    </button>
+                  ) : null}
                   {msg.role === 'assistant' ? (
                     <button type="button" className="vl-avc-speak-btn" onClick={() => void replay(msg)}>
                       ▶ Speak reply
@@ -705,6 +769,14 @@ export function AfricanVoiceChat() {
               </button>
             </div>
             {error ? <p className="vl-avc-error">{error}</p> : null}
+            {lastCapture ? (
+              <p className="vl-avc-status" style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                Last mic capture: .{lastCapture.format} · {Math.round(lastCapture.bytes / 1024)} KB
+                <button type="button" className="vl-avc-speak-btn" onClick={() => void playUrl(lastCapture.url)}>
+                  ▶ Play last recording
+                </button>
+              </p>
+            ) : null}
             <p className="vl-avc-fineprint">
               VerbaLab can make mistakes. Check important info.{' '}
               <Link href="/products/trust-center">Trust</Link> · <Link href="/data">Policies</Link>

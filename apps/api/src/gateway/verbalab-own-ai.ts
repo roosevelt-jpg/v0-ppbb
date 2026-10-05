@@ -67,23 +67,32 @@ function notConfigured(modality: string): never {
 }
 
 function tinyWav(seed: string): Buffer {
-  const dataSize = 64;
+  // ~0.35s mono PCM16 @ 16kHz — long enough for browsers to decode/play.
+  const sampleRate = 16_000;
+  const samples = Math.floor(sampleRate * 0.35);
+  const dataSize = samples * 2;
   const buffer = Buffer.alloc(44 + dataSize);
   buffer.write('RIFF', 0);
   buffer.writeUInt32LE(36 + dataSize, 4);
   buffer.write('WAVE', 8);
   buffer.write('fmt ', 12);
   buffer.writeUInt32LE(16, 16);
-  buffer.writeUInt16LE(1, 20);
-  buffer.writeUInt16LE(1, 22);
-  buffer.writeUInt32LE(8000, 24);
-  buffer.writeUInt32LE(8000, 28);
-  buffer.writeUInt16LE(1, 32);
-  buffer.writeUInt16LE(8, 34);
+  buffer.writeUInt16LE(1, 20); // PCM
+  buffer.writeUInt16LE(1, 22); // mono
+  buffer.writeUInt32LE(sampleRate, 24);
+  buffer.writeUInt32LE(sampleRate * 2, 28);
+  buffer.writeUInt16LE(2, 32);
+  buffer.writeUInt16LE(16, 34);
   buffer.write('data', 36);
   buffer.writeUInt32LE(dataSize, 40);
-  for (let i = 0; i < dataSize; i++) {
-    buffer[44 + i] = (seed.charCodeAt(i % seed.length) + i) % 256;
+  let acc = 0;
+  for (let i = 0; i < seed.length; i++) acc = (acc + seed.charCodeAt(i) * (i + 1)) % 997;
+  const freq = 220 + (acc % 280);
+  for (let i = 0; i < samples; i++) {
+    const t = i / sampleRate;
+    const envelope = Math.min(1, i / 800) * Math.min(1, (samples - i) / 1200);
+    const sample = Math.sin(2 * Math.PI * freq * t) * 0.35 * envelope;
+    buffer.writeInt16LE(Math.max(-32767, Math.min(32767, Math.floor(sample * 32767))), 44 + i * 2);
   }
   return buffer;
 }
@@ -165,20 +174,25 @@ export class FixtureVerbalabSttAdapter implements SttProvider {
   async transcribe(input: SttInput): Promise<SttOutput> {
     const started = Date.now();
     const lang = input.language ?? 'sw';
+    // Honest local/CI stub — never pretends the filename is a real transcript.
+    // Chat UI rejects this marker so users are guided to configure real STT.
+    const text =
+      `[vl-stt-fixture:${lang}] Local STT is in demo mode. ` +
+      `Set VERBALAB_STT_URL (Own AI speech pods) or VERBALAB_ALLOW_VENDOR_FALLBACK=1 with OPENAI_API_KEY for real transcription.`;
     return {
-      text: `[vl-stt:${lang}] transcribed ${input.filename}`,
+      text,
       language: lang,
       durationSeconds: Math.max(1, Math.ceil(input.buffer.length / 16_000)),
       provider: this.name,
       latencyMs: Date.now() - started,
-      confidence: 0.91,
+      confidence: 0,
       segments: [
         {
           id: 0,
           start: 0,
           end: 1,
-          text: `[vl-stt:${lang}] transcribed ${input.filename}`,
-          confidence: 0.91,
+          text,
+          confidence: 0,
         },
       ],
     };
@@ -259,11 +273,12 @@ export class FixtureVerbalabTtsAdapter implements TtsProvider {
 
   async synthesize(input: TtsInput): Promise<TtsOutput> {
     const started = Date.now();
-    const format = input.format === 'mp3' ? 'mp3' : 'wav';
+    // Fixture audio is always a real WAV. Never claim mp3 — browsers reject WAV bytes
+    // served as audio/mpeg, which broke African Voice "Speak reply".
     return {
       audio: tinyWav(`${input.voice}:${input.text}`),
-      mimeType: format === 'mp3' ? 'audio/mpeg' : 'audio/wav',
-      format: format === 'mp3' ? 'mp3' : 'wav',
+      mimeType: 'audio/wav',
+      format: 'wav',
       voice: input.voice,
       characters: [...input.text].length,
       provider: this.name,
@@ -362,14 +377,25 @@ export class FixtureVerbalabChatAdapter implements ChatProvider {
   async complete(input: ChatInput): Promise<ChatOutput> {
     const started = Date.now();
     const last = [...input.messages].reverse().find((m) => m.role === 'user');
-    const reply = `[vl-atlas] ${last?.content ?? ''}`.slice(0, 4000);
+    const userText = (last?.content ?? '').trim();
+    let reply: string;
+    if (/^\[vl-stt/i.test(userText)) {
+      reply =
+        'I could not hear real speech yet — speech-to-text is still in local demo mode. Type your message, or configure VERBALAB_STT_URL / Whisper to talk with your voice.';
+    } else if (!userText) {
+      reply = 'Karibu — I am VerbaLab African Voice. Speak or type in your language.';
+    } else {
+      reply =
+        `Asante — I heard you. (Local Atlas demo.) You said: “${userText.slice(0, 500)}”. ` +
+        `Ask me to translate, explain, or reply in another African language.`;
+    }
     return {
       message: { role: 'assistant', content: reply },
       model: process.env.VERBALAB_CHAT_MODEL ?? 'atlas',
       provider: this.name,
-      promptTokens: Math.ceil((last?.content.length ?? 0) / 4),
+      promptTokens: Math.ceil(userText.length / 4),
       completionTokens: Math.ceil(reply.length / 4),
-      totalTokens: Math.ceil(((last?.content.length ?? 0) + reply.length) / 4),
+      totalTokens: Math.ceil((userText.length + reply.length) / 4),
       latencyMs: Date.now() - started,
     };
   }
