@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsageService } from '../usage/usage.service';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { ownAiStackSummary } from '../gateway/verbalab-own-ai';
+import { developOwnModelEngine } from '../own-models/own-models.catalog';
 import { fusionCapabilities, fusionCatalog, fusionHonesty } from './fusion.catalog';
 
 @Injectable()
@@ -9,7 +10,7 @@ export class FusionService {
   constructor(private readonly usage: UsageService) {}
 
   engine() {
-    return {
+    return developOwnModelEngine('fusion', {
       ...fusionCatalog(),
       capabilities: fusionCapabilities(),
       ownAi: ownAiStackSummary(),
@@ -19,7 +20,7 @@ export class FusionService {
         note:
           'Fusion is a VerbaLab-owned foundation model product. Inference uses VerbaLab model endpoints (credentials configured separately). Repo does not embed weight binaries.',
       },
-    };
+    });
   }
 
   capabilities() {

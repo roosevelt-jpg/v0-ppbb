@@ -5,7 +5,7 @@ export function reasonfmCatalog() {
     phase: 98,
     vl: 'Shipped.',
     modality: 'chat',
-    blurb: 'VerbaLab reasoning specialist',
+    blurb: 'Reasoning specialist — use only when Baobab is not enough.',
     honesty: {
       ownedModels: true,
       vendorRentalDefault: false,

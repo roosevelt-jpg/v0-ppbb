@@ -4,7 +4,7 @@ export type ReleaseStage = 'data' | 'train' | 'eval' | 'serve' | 'announce' | 'g
 
 export type ModelSku = {
   id: string;
-  family: 'stt' | 'tts' | 'mt' | 'chat' | 'voice-auth';
+  family: 'stt' | 'tts' | 'mt' | 'chat' | 'voice-auth' | 'ocr' | 'embed';
   language: string | 'multi';
   version: string;
   displayName: string;
@@ -140,6 +140,36 @@ export function seedModelSkus(now = new Date().toISOString()): ModelSku[] {
       lastEvalAt: now,
     },
     marketingLine: 'African Voice LLM — speak or type in your language',
+  });
+  skus.push({
+    id: 'vl-ocr-af-v1',
+    family: 'ocr',
+    language: 'multi',
+    version: 'v1',
+    displayName: 'VerbaLab Vision FM OCR (Africa)',
+    status: 'eval',
+    qualityCard: {
+      suite: 'african-ocr-smoke',
+      metrics: { pages: 0 },
+      honesty: 'OCR quality needs labeled African script pages before GA.',
+      lastEvalAt: null,
+    },
+    marketingLine: 'Document OCR for African scripts — meter by page',
+  });
+  skus.push({
+    id: 'vl-embed-af-v1',
+    family: 'embed',
+    language: 'multi',
+    version: 'v1',
+    displayName: 'VerbaLab Vector FM Embeddings (Africa)',
+    status: 'eval',
+    qualityCard: {
+      suite: 'african-embed-smoke',
+      metrics: { dims: null },
+      honesty: 'Retrieval quality needs African parallel query suites.',
+      lastEvalAt: null,
+    },
+    marketingLine: 'Frugal African embeddings — RAG without frontier token burn',
   });
   skus.push({
     id: 'vl-law-voice-auth-v1',

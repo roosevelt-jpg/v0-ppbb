@@ -10,6 +10,7 @@ import {
   createVerbalabTts,
   ownAiStackSummary,
 } from '../gateway/verbalab-own-ai';
+import { developOwnModelEngine } from '../own-models/own-models.catalog';
 import { engineManifest, listPacks, translateAfrican } from './african-linguistic-engine';
 import { runAfricanQualityEval } from './african-quality-eval';
 import {
@@ -26,7 +27,7 @@ import { probeWeightsDeploy } from './weights-deploy';
 export class ModelRuntimeService {
   async engine() {
     const weights = await probeWeightsDeploy();
-    return {
+    return developOwnModelEngine('model-runtime', {
       ...modelRuntimeCatalog(),
       ownAi: ownAiStackSummary(),
       local: localRuntimeStatus(),
@@ -39,7 +40,7 @@ export class ModelRuntimeService {
         note:
           'Honest claim: multimodal local Own AI runtime + African eval harness + enterprise unlock gates ship in-product. Neural weight binaries remain deploy artifacts.',
       },
-    };
+    });
   }
 
   async deploy() {

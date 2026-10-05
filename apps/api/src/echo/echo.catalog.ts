@@ -5,7 +5,7 @@ export function echoCatalog() {
     phase: 94,
     vl: 'Shipped.',
     modality: 'stt',
-    blurb: 'VerbaLab speech recognition FM',
+    blurb: 'Speech recognition FM — African dialects, telephony-aware, batch-first cost.',
     honesty: {
       ownedModels: true,
       vendorRentalDefault: false,

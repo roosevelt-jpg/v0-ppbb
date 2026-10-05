@@ -5,7 +5,7 @@ export function baobabCatalog() {
     phase: 93,
     vl: 'Shipped.',
     modality: 'chat',
-    blurb: 'African language specialist LLM',
+    blurb: 'African language specialist LLM — cultural fluency without frontier token burn.',
     honesty: {
       ownedModels: true,
       vendorRentalDefault: false,

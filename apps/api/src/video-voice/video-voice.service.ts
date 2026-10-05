@@ -9,6 +9,7 @@ import { UsageService } from '../usage/usage.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreditProduct, creditsFor } from '../billing/credits';
 import { ownAiStackSummary } from '../gateway/verbalab-own-ai';
+import { developOwnModelEngine } from '../own-models/own-models.catalog';
 import { videoVoiceCatalog } from './video-voice.catalog';
 
 export type DubMode =
@@ -43,7 +44,7 @@ export class VideoVoiceService {
   ) {}
 
   engine() {
-    return {
+    return developOwnModelEngine('video-voice', {
       ...videoVoiceCatalog(),
       ownAi: ownAiStackSummary(),
       pipeline: [
@@ -62,7 +63,7 @@ export class VideoVoiceService {
         translate: '/v1/translate',
         voiceFm: '/v1/voice-fm/engine',
       },
-    };
+    });
   }
 
   overview(session: SessionContext) {

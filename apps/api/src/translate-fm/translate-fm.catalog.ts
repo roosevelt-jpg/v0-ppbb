@@ -5,7 +5,7 @@ export function translatefmCatalog() {
     phase: 101,
     vl: 'Shipped.',
     modality: 'mt',
-    blurb: 'VerbaLab African MT foundation model',
+    blurb: 'African MT foundation — glossary + TM beat generic LLM translate.',
     honesty: {
       ownedModels: true,
       vendorRentalDefault: false,

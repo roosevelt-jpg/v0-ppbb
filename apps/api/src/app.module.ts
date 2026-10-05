@@ -315,6 +315,7 @@ import { VoiceEnhancementModule } from './voice-enhancement/voice-enhancement.mo
 import { VoiceBiometricsModule } from './voice-biometrics/voice-biometrics.module';
 import { VoiceLawAuthenticityModule } from './voice-law-authenticity/voice-law-authenticity.module';
 import { ModelReleaseModule } from './model-release/model-release.module';
+import { OwnModelsModule } from './own-models/own-models.module';
 import { VoiceMarketplaceModule } from './voice-marketplace/voice-marketplace.module';
 import { VoiceAnalyticsModule } from './voice-analytics/voice-analytics.module';
 import { SpeechRecognitionModule } from './speech-recognition/speech-recognition.module';
@@ -603,6 +604,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     VoiceBiometricsModule,
     VoiceLawAuthenticityModule,
     ModelReleaseModule,
+    OwnModelsModule,
     VoiceMarketplaceModule,
     VoiceAnalyticsModule,
     SpeechRecognitionModule,

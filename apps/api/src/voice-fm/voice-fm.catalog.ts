@@ -5,7 +5,7 @@ export function voicefmCatalog() {
     phase: 95,
     vl: 'Shipped.',
     modality: 'tts',
-    blurb: 'VerbaLab neural TTS + cloning FM',
+    blurb: 'Neural TTS + cloning FM — flash path for cost, multilingual for quality.',
     honesty: {
       ownedModels: true,
       vendorRentalDefault: false,
