@@ -81,6 +81,8 @@ export function OwnModelsHubClient() {
   return (
     <AppShell>
       <p style={{ color: 'var(--muted)', margin: '0 0 0.5rem' }}>
+        <Link href="/model-lab">Model Lab</Link>
+        {' · '}
         <Link href="/foundation-model-cloud">Foundation Model Cloud</Link>
         {' · '}
         <Link href="/model-release">Model Release</Link>
@@ -102,7 +104,8 @@ export function OwnModelsHubClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.25rem', maxWidth: '46rem' }}>
         {engine?.blurb ??
-          'Sharp specialists, cost-aware routing — use Echo for STT, Voice FM for TTS, Translate FM for MT, Baobab for African chat.'}
+          'Sharp specialists, cost-aware routing — use Echo for STT, Voice FM for TTS, Translate FM for MT, Baobab for African chat.'}{' '}
+        New here? Start in the <Link href="/model-lab">Model Lab</Link> — describe a project and live-compare before you commit.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}

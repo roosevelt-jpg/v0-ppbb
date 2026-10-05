@@ -54,6 +54,11 @@ export const CONSOLE_NAV: NavGroup[] = [
         label: 'Own Models Hub',
         keywords: ['route', 'cost', 'baobab', 'echo', 'specialist', 'sku'],
       },
+      {
+        href: '/model-lab',
+        label: 'Model Lab',
+        keywords: ['try', 'compare', 'recommend', 'live test', 'which model', 'recipe'],
+      },
       { href: '/baobab', label: 'Baobab' },
       { href: '/echo', label: 'Echo' },
       { href: '/voice-fm', label: 'Voice FM' },

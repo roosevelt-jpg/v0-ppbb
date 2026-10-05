@@ -36,6 +36,17 @@ export class OwnModelsController {
     return this.service.compare(list);
   }
 
+  @Get('lab/recipes')
+  labRecipes() {
+    return this.service.labRecipes();
+  }
+
+  @Get('lab/preferences')
+  @UseGuards(ClerkAuthGuard)
+  labPreferences(@CurrentSession() session: SessionContext) {
+    return this.service.labPreferences(session.organizationId);
+  }
+
   @Get('overview')
   @UseGuards(ClerkAuthGuard)
   overview(@CurrentSession() session: SessionContext) {
@@ -52,5 +63,32 @@ export class OwnModelsController {
   @HttpCode(HttpStatus.OK)
   estimate(@Body() body: Record<string, unknown>) {
     return this.service.estimate(body ?? {});
+  }
+
+  @Post('lab/recommend')
+  @HttpCode(HttpStatus.OK)
+  labRecommend(@Body() body: Record<string, unknown>) {
+    return this.service.labRecommend(body ?? {});
+  }
+
+  @Post('lab/try')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ClerkAuthGuard)
+  labTry(@Body() body: Record<string, unknown>) {
+    return this.service.labTry(body ?? {});
+  }
+
+  @Post('lab/compare')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ClerkAuthGuard)
+  labCompare(@Body() body: Record<string, unknown>) {
+    return this.service.labCompare(body ?? {});
+  }
+
+  @Post('lab/prefer')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ClerkAuthGuard)
+  labPrefer(@CurrentSession() session: SessionContext, @Body() body: Record<string, unknown>) {
+    return this.service.labPrefer(session, body ?? {});
   }
 }
