@@ -10,13 +10,30 @@ export type StyleProfileId =
   | 'technical'
   | 'medical'
   | 'legal'
-  | 'government';
+  | 'government'
+  | 'african_public_sector'
+  | 'african_plain'
+  | 'east_african_formal'
+  | 'west_african_business'
+  | 'sea_formal'
+  | 'india_plain'
+  | 'latam_business'
+  | 'caribbean_creole';
 
 export type StyleProfile = {
   id: StyleProfileId;
   name: string;
   description: string;
-  domain?: 'general' | 'medical' | 'legal' | 'government' | 'marketing' | 'technical' | 'business';
+  domain?:
+    | 'general'
+    | 'medical'
+    | 'legal'
+    | 'government'
+    | 'marketing'
+    | 'technical'
+    | 'business'
+    | 'african'
+    | 'global';
   disclaimer?: string;
 };
 
@@ -100,6 +117,56 @@ export const STYLE_PROFILES: StyleProfile[] = [
     domain: 'government',
     disclaimer:
       'Tone assistance only — not policy approval, compliance certification, or official government publication standards.',
+  },
+  {
+    id: 'african_public_sector',
+    name: 'African public sector',
+    description: 'Plain formal citizen-services tone for African public-sector copy.',
+    domain: 'african',
+    disclaimer:
+      'Tone assistance only — not official publication standards or policy certification for any African government.',
+  },
+  {
+    id: 'african_plain',
+    name: 'African plain language',
+    description: 'Simpler wording for multilingual African product UI and SMS-adjacent copy.',
+    domain: 'african',
+  },
+  {
+    id: 'east_african_formal',
+    name: 'East African formal',
+    description: 'Respectful formal register cues for East African bilingual contexts.',
+    domain: 'african',
+  },
+  {
+    id: 'west_african_business',
+    name: 'West African business',
+    description: 'Clear business tone for West African English/French bridge contexts.',
+    domain: 'african',
+  },
+  {
+    id: 'sea_formal',
+    name: 'Southeast Asia formal',
+    description: 'Polite formal tone for Thai/Vietnamese/Malay/Tagalog public-sector and product copy.',
+    domain: 'global',
+  },
+  {
+    id: 'india_plain',
+    name: 'India plain language',
+    description: 'Clear plain language for multilingual Indian product UI and citizen services.',
+    domain: 'global',
+  },
+  {
+    id: 'latam_business',
+    name: 'LatAm business',
+    description: 'Clear business Spanish/Portuguese tone for Latin American operators.',
+    domain: 'global',
+  },
+  {
+    id: 'caribbean_creole',
+    name: 'Caribbean creole-aware',
+    description: 'Accessible tone that respects English/Creole continua in Caribbean UX.',
+    domain: 'global',
   },
 ];
 
@@ -300,7 +367,7 @@ export function detectTone(text: string): ToneDetectResult {
     scores,
     signals: signals.slice(0, 24),
     suggestedProfile: detectedTone,
-    note: 'Heuristic cue scoring (VL-143) — not a trained tone classifier or author-style model.',
+    note: 'Heuristic cue scoring — not a trained tone classifier or author-style model.',
   };
 }
 
@@ -323,14 +390,20 @@ export function applyStyleRules(
     profile === 'technical' ||
     profile === 'medical' ||
     profile === 'legal' ||
-    profile === 'government';
+    profile === 'government' ||
+    profile === 'african_public_sector' ||
+    profile === 'african_plain' ||
+    profile === 'east_african_formal' ||
+    profile === 'west_african_business';
 
   if (
     profile === 'concise' ||
     profile === 'plain' ||
     profile === 'government' ||
     profile === 'business' ||
-    profile === 'technical'
+    profile === 'technical' ||
+    profile === 'african_plain' ||
+    profile === 'african_public_sector'
   ) {
     rewritten = rewritten.replace(FILLERS, (match) => {
       changes.push({
@@ -362,7 +435,10 @@ export function applyStyleRules(
     profile === 'technical' ||
     profile === 'medical' ||
     profile === 'legal' ||
-    profile === 'government'
+    profile === 'government' ||
+    profile === 'african_public_sector' ||
+    profile === 'east_african_formal' ||
+    profile === 'west_african_business'
   ) {
     rewritten = applyPairs(
       rewritten,
@@ -373,7 +449,7 @@ export function applyStyleRules(
     );
   }
 
-  if (profile === 'business') {
+  if (profile === 'business' || profile === 'west_african_business') {
     rewritten = applyPairs(rewritten, BUSINESS_SWAPS, 'domain', 'Business wording preference.', changes);
   }
   if (profile === 'marketing') {
@@ -401,7 +477,7 @@ export function applyStyleRules(
   if (profile === 'legal') {
     rewritten = applyPairs(rewritten, LEGAL_SWAPS, 'domain', 'Legal-tone wording preference.', changes);
   }
-  if (profile === 'government') {
+  if (profile === 'government' || profile === 'african_public_sector' || profile === 'east_african_formal') {
     rewritten = applyPairs(
       rewritten,
       GOVERNMENT_SWAPS,

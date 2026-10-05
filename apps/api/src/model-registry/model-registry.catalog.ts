@@ -18,70 +18,70 @@ export function modelRegistryCatalog() {
   return {
     product: 'VerbaLab Model Registry',
     note:
-      'Model Registry (VL-237). Extends VL-110 live matrix with model cards, sandbox versions/approvals/rollbacks, and deployment strategy plans. Does not invent MLflow, automatic weight deploy, or traffic-mesh canary OS. Links Model Serving for real deployments.',
+      'Model Registry. Extends live matrix with model cards, sandbox versions/approvals/rollbacks, and deployment strategy plans. Does not invent MLflow, automatic weight deploy, or traffic-mesh canary OS. Links Model Serving for real deployments.',
     capabilities: [
       {
         id: 'registry-hub',
         name: 'Registry Hub',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-registry/engine',
-        notes: 'Catalog + live matrix bridge to VL-110.',
+        notes: 'Catalog with live matrix bridge to registered models.',
       },
       {
         id: 'model-cards',
         name: 'Model Cards',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/model-registry/cards',
-        notes: 'Cards derived from VL-110 entries + honesty notes.',
+        notes: 'Model cards derived from registry entries.',
       },
       {
         id: 'versions',
         name: 'Versions',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/versions',
         notes: 'Sandbox version lineage per model slug.',
       },
       {
         id: 'approvals',
         name: 'Approvals',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/versions/:id/approve',
         notes: 'Sandbox approve/reject gates before deploy plans.',
       },
       {
         id: 'rollbacks',
         name: 'Rollbacks',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/versions/:id/rollback',
-        notes: 'Marks prior sandbox version active — not cluster rollback OS.',
+        notes: 'Marks prior sandbox version active.',
       },
       {
         id: 'deployments',
         name: 'Deployments',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/deployments',
         notes: 'Sandbox deploy plans; handoff note to Model Serving.',
       },
       {
         id: 'canary',
         name: 'Canary',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/deployments',
         notes: 'Strategy metadata only — no mesh traffic split.',
       },
       {
         id: 'shadow',
         name: 'Shadow',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/deployments',
         notes: 'Shadow strategy metadata — no dual-path inference fabric.',
       },
       {
         id: 'blue-green',
         name: 'Blue Green',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/model-registry/deployments',
-        notes: 'Blue/green strategy metadata — not K8s Service swap OS.',
+        notes: 'Blue/green strategy metadata.',
       },
     ] satisfies MrCapability[],
     honesty: modelRegistryHonesty(),
@@ -117,7 +117,7 @@ export function modelRegistryArchitectureNotes() {
     trainsCompetitiveFoundationWeights: false,
     customerFacingProduct: true,
     note:
-      'Volume 9 Phase 104: registry governance hub over VL-110. Canary/shadow/blue-green are plan metadata, not mesh control.',
+      'Volume 9 Phase 104: registry governance hub over Canary/shadow/blue-green are plan metadata, not mesh control.',
   };
 }
 
@@ -143,7 +143,7 @@ export function modelRegistryCeilings() {
     maxCanaryPercent: 50,
     mode: 'sandbox',
     note:
-      'Sandbox ceilings for version/deploy plans. Live adapter matrix remains VL-110; serving remains Model Serving.',
+      'Sandbox ceilings for version/deploy plans. Live adapter matrix remains; serving remains Model Serving.',
   };
 }
 

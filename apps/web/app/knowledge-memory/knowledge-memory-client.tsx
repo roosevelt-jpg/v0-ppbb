@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -37,7 +39,7 @@ export function KnowledgeMemoryClient() {
   const [created, setCreated] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/knowledge-memory/engine', { token }),
@@ -55,7 +57,7 @@ export function KnowledgeMemoryClient() {
   const create = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ id: string; version: number; scope: string }>(
         '/v1/knowledge-memory/memories',
@@ -136,7 +138,7 @@ export function KnowledgeMemoryClient() {
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
               </li>
             ))}

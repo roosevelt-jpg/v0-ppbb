@@ -13,7 +13,7 @@ This guide points at the **existing** production paths. Voice Cloud ships inside
 2. Ensure Postgres is reachable; Redis (`REDIS_URL`) for rate limits/jobs — do not use `JOBS_INLINE=1` in production.
 3. Configure Clerk + `CORS_ORIGIN`.
 4. Configure TTS keys (`OPENAI_API_KEY` and/or `OWN_TTS_URL`).
-5. Optional: ElevenLabs for clones; Stripe for billing entitlements / marketplace commercial flows.
+5. Optional: external vendor for clones; Stripe for billing entitlements / marketplace commercial flows.
 6. Optional: biometrics encryption key env as documented in `VOICE_BIOMETRICS.md`.
 
 ## Post-deploy smoke

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -41,13 +43,13 @@ export function SpeechRecognitionClient() {
   const [loading, setLoading] = useState(false);
 
   const authHeaders = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     return { Authorization: `Bearer ${token}` };
   }, [getToken]);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, packRes, vocab, usage] = await Promise.all([
       apiFetch<Engine>('/v1/speech/engine', { token }),
@@ -150,7 +152,7 @@ export function SpeechRecognitionClient() {
 
   async function onAddPhrase(e: FormEvent) {
     e.preventDefault();
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token || !phrase.trim()) return;
     await apiFetch('/v1/speech/vocabulary', {
       token,
@@ -317,7 +319,7 @@ export function SpeechRecognitionClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.5rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

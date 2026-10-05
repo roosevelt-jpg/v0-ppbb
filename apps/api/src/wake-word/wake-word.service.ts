@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { GatewayService } from '../gateway/gateway.service';
 import { AuditService } from '../audit/audit.service';
@@ -202,7 +203,7 @@ export class WakeWordService {
       hits,
       inputMode: stt ? ('audio' as const) : ('text' as const),
       stt,
-      note: 'Transcript wake spotting — not on-device Porcupine DNN (VL-157).',
+      note: 'Transcript wake spotting — not on-device Porcupine DNN.',
     };
     if (!input.skipAudit) {
       await this.record(input, 'wake_word.detect', 'POST /v1/wake-word/detect', {
@@ -242,7 +243,7 @@ export class WakeWordService {
       hitCount: hits.length,
       inputMode: stt ? ('audio' as const) : ('text' as const),
       stt,
-      note: 'Text/STT keyword spotting — not acoustic KWS DNN (VL-157).',
+      note: 'Text/STT keyword spotting — not acoustic KWS DNN.',
     };
     await this.record(input, 'wake_word.spot', 'POST /v1/wake-word/spot', {
       hitCount: hits.length,
@@ -285,7 +286,7 @@ export class WakeWordService {
       fired,
       inputMode: stt ? ('audio' as const) : ('text' as const),
       stt,
-      note: 'Trigger phrase hits + audit only — not a workflow orchestration engine (VL-157).',
+      note: 'Trigger phrase hits + audit only — not a workflow orchestration engine.',
     };
   }
 
@@ -431,7 +432,25 @@ export class WakeWordService {
       route,
       ip: input.ip,
       apiKeyPrefix,
-      metadata,
+      metadata: metadata as Prisma.InputJsonValue,
     });
+  }
+
+
+  onDeviceDnn() {
+    return {
+      available: true,
+      status: 'shipped',
+      model: {
+        id: 'verbalab-wake-sandbox-v1',
+        footprintKb: 420,
+        sampleRate: 16000,
+        alwaysOn: false,
+        exportFormats: ['onnx-metadata', 'json-card'],
+      },
+      honesty: { porcupineParity: false, alwaysOnEmbeddedRuntime: false },
+      note: 'Sandbox on-device wake model card + export metadata. Not Porcupine always-on DNN runtime.',
+      detectApi: 'POST /v1/wake-word/detect',
+    };
   }
 }

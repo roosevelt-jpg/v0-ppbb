@@ -140,4 +140,20 @@ export class IntelligenceAnalyticsController {
       to,
     });
   }
+
+
+  @Get('enterprise-reports')
+  @UseGuards(TranslateAuthGuard)
+  enterpriseReports(
+    @Req() req: Request & { translateAuth: TranslateAuthContext },
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.analytics.enterpriseReports({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      from,
+      to,
+    });
+  }
 }

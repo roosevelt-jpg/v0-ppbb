@@ -59,6 +59,21 @@ jobs:
           --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL_EU }}
           --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
 
+      - name: Deploy API (US island)
+        if: steps.fly.outputs.configured == 'true' && vars.FLY_DEPLOY_US == 'true'
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy -c infra/fly/api.us.toml --dockerfile apps/api/Dockerfile --remote-only
+
+      - name: Deploy Web (US island)
+        if: steps.fly.outputs.configured == 'true' && vars.FLY_DEPLOY_US == 'true'
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: >
+          flyctl deploy -c infra/fly/web.us.toml --dockerfile apps/web/Dockerfile --remote-only
+          --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL_US }}
+          --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
       - name: Skip notice
         if: steps.fly.outputs.configured != 'true'
         run: echo "Deploy skipped — add FLY_API_TOKEN to enable."

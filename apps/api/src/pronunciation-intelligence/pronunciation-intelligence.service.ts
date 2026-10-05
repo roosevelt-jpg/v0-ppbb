@@ -129,7 +129,7 @@ export class PronunciationIntelligenceService {
       scores: full.scores,
       coaching: full.coaching,
       language: full.language,
-      note: 'Rule/tip coaching from mismatches — not acoustic accent models (VL-156).',
+      note: 'Rule/tip coaching from mismatches — not acoustic accent models.',
     };
   }
 
@@ -143,7 +143,7 @@ export class PronunciationIntelligenceService {
     return {
       language,
       words,
-      note: 'Dictionary + grapheme→phoneme heuristics — not forced-alignment phoneme ASR (VL-156).',
+      note: 'Dictionary + grapheme→phoneme heuristics — not forced-alignment phoneme ASR.',
     };
   }
 
@@ -206,7 +206,7 @@ export class PronunciationIntelligenceService {
       speechRatio: analysis.speechRatio,
       durationSeconds: analysis.durationSeconds,
       transcript,
-      note: 'Fluency from speaking rate + silence proxies — not prosody ML (VL-156).',
+      note: 'Fluency from speaking rate + silence proxies — not prosody ML.',
     };
   }
 
@@ -388,7 +388,7 @@ export class PronunciationIntelligenceService {
         durationSeconds: Number(duration.toFixed(3)),
       },
       coaching,
-      note: 'Word alignment + fluency/stress heuristics — not ELSA/SpeechAce or forced-alignment phonemes (VL-156).',
+      note: 'Word alignment + fluency/stress heuristics — not ELSA/SpeechAce or forced-alignment phonemes.',
     };
   }
 
@@ -417,5 +417,47 @@ export class PronunciationIntelligenceService {
       apiKeyPrefix,
       metadata,
     });
+  }
+
+
+  align(input: { text?: string; language?: string; durationSeconds?: number }) {
+    const text = (input.text ?? '').trim();
+    if (!text) {
+      throw new ApiException('validation_error', 'text is required', HttpStatus.BAD_REQUEST);
+    }
+    const language = (input.language ?? 'en').trim() || 'en';
+    const words = analyzePhonemes(text, language);
+    const duration =
+      typeof input.durationSeconds === 'number' && input.durationSeconds > 0
+        ? input.durationSeconds
+        : Math.max(0.8, words.length * 0.35);
+    let t = 0;
+    const totalPh = Math.max(
+      1,
+      words.reduce((s, w) => s + w.phonemes.length, 0),
+    );
+    const step = duration / totalPh;
+    const timeline = words.map((w) => {
+      const start = t;
+      const phones = w.phonemes.map((p) => {
+        const phoneStart = t;
+        t += step;
+        return { phoneme: p, start: Number(phoneStart.toFixed(3)), end: Number(t.toFixed(3)) };
+      });
+      return {
+        word: w.word,
+        start: Number(start.toFixed(3)),
+        end: Number(t.toFixed(3)),
+        phonemes: phones,
+        source: w.source,
+      };
+    });
+    return {
+      language,
+      durationSeconds: Number(duration.toFixed(3)),
+      words: timeline,
+      honesty: { whisperXForcedAlignment: false, graphemeTimingSandbox: true },
+      note: 'Sandbox grapheme/phoneme timing alignment. Not WhisperX-class forced alignment.',
+    };
   }
 }

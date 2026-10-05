@@ -13,7 +13,7 @@ export function enterpriseSearchCatalog() {
   return {
     product: 'VerbaLab Enterprise Search',
     note:
-      'Workspace-scoped search over Knowledge Base chunks (VL-195). Keyword + semantic (pgvector) + light hybrid RRF. Extends VL-062 / Vector Cloud. Not Elastic/OpenSearch OS; image/voice/BM25-parity deferred.',
+      'Workspace-scoped search over Knowledge Base chunks. Keyword + semantic (pgvector) + light hybrid RRF. Extends / Vector Cloud. Not Elastic/OpenSearch OS; image/voice/BM25-parity deferred.',
     capabilities: [
       {
         id: 'full-text-keyword',
@@ -27,12 +27,12 @@ export function enterpriseSearchCatalog() {
         name: 'Semantic / vector search',
         status: 'shipped',
         api: 'POST /v1/enterprise-search/search',
-        notes: 'mode=semantic — wraps VL-182 / VL-062 pgvector nearest neighbor.',
+        notes: 'mode=semantic — wraps / pgvector nearest neighbor.',
       },
       {
         id: 'hybrid-search',
         name: 'Hybrid search',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/enterprise-search/search',
         notes: 'mode=hybrid — light RRF of keyword + semantic. Not BM25/Elastic hybrid OS.',
       },
@@ -60,37 +60,37 @@ export function enterpriseSearchCatalog() {
       {
         id: 'ranking',
         name: 'Ranking',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/enterprise-search/search',
         notes: 'Cosine score / keyword rank / RRF. Learned rankers deferred.',
       },
       {
         id: 'suggestions',
         name: 'Suggestions',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/enterprise-search/suggest',
         notes: 'Filename + tag prefix suggestions. Autocomplete OS deferred.',
       },
       {
         id: 'translation-search',
         name: 'Translation search',
-        status: 'deferred',
-        api: null,
-        notes: 'Cross-lingual retrieval deferred — use Language Cloud + RAG later.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=translation — cross-lingual query via translated query text then hybrid search.',
       },
       {
         id: 'image-search',
         name: 'Image search',
-        status: 'deferred',
-        api: null,
-        notes: 'Multimodal image search deferred.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=image — caption/OCR text path over knowledge chunks (contentKind=image). Not multimodal encoder OS.',
       },
       {
         id: 'voice-search',
         name: 'Voice search',
-        status: 'deferred',
-        api: null,
-        notes: 'Speech-to-query deferred — use Speech Cloud STT + search later.',
+        status: 'shipped',
+        api: 'POST /v1/enterprise-search/search',
+        notes: 'mode=voice — speech transcript query path (paste STT text). Not live mic search OS.',
       },
       {
         id: 'analytics',
@@ -118,7 +118,7 @@ export function enterpriseSearchCatalog() {
       extendsVl062: true,
       extendsVectorCloud: true,
     },
-    modes: ['keyword', 'semantic', 'hybrid'] as const,
+    modes: ['keyword', 'semantic', 'hybrid', 'image', 'voice', 'translation'] as const,
     links: {
       hub: '/knowledge-cloud',
       console: '/enterprise-search',
@@ -132,4 +132,4 @@ export function enterpriseSearchCatalog() {
   };
 }
 
-export type EnterpriseSearchMode = 'keyword' | 'semantic' | 'hybrid';
+export type EnterpriseSearchMode = 'keyword' | 'semantic' | 'hybrid' | 'image' | 'voice' | 'translation';

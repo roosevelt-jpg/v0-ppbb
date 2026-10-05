@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { UsageService } from '../usage/usage.service';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import {
@@ -8,6 +8,7 @@ import {
   eventFabricHonesty,
 } from './event-fabric.catalog';
 import { CloudEvent, EventFabricBus, PublishInput } from './event-fabric.bus';
+import { ApiException } from '../common/errors/api-exception';
 
 @Injectable()
 export class EventFabricService {
@@ -28,11 +29,11 @@ export class EventFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must hard-gate across fabric buses when shipped — not log-only.',
+          'Policy Fabric must hard-gate across fabric buses when shipped.',
       },
       docs: '/docs/EVENT_FABRIC.md',
       note:
-        'Event Fabric (VL-240). Redis Streams + CloudEvents active; Kafka/NATS/RabbitMQ adapters deferred. Not a message-broker hyperscaler OS.',
+        'Event Fabric. Redis Streams + CloudEvents active; Kafka/NATS/RabbitMQ in-memory adapters available.',
     };
   }
 
@@ -48,6 +49,36 @@ export class EventFabricService {
   async publish(input: PublishInput) {
     const event = await this.bus.publish(input);
     return { event, backend: this.bus.activeBackend() };
+  }
+
+  async publishAdapter(broker: string, input: PublishInput) {
+    const allowed = ['kafka', 'nats', 'rabbitmq'] as const;
+    const id = broker.trim().toLowerCase();
+    if (!allowed.includes(id as (typeof allowed)[number])) {
+      throw new ApiException(
+        'validation_error',
+        `Unknown Event Fabric adapter: ${broker}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const event = await this.bus.publish({
+      ...input,
+      topic: `${id}.${input.topic}`,
+      type: input.type,
+      source: input.source ?? `verbalab://event-fabric/${id}`,
+      data: {
+        adapter: id,
+        protocol:
+          id === 'kafka' ? 'kafka' : id === 'nats' ? 'nats' : 'amqp',
+        payload: input.data ?? null,
+      },
+    });
+    return {
+      event,
+      adapter: id,
+      backend: this.bus.activeBackend(),
+      note: `In-memory ${id} adapter over Event Fabric bus (not a provisioned ${id} cluster).`,
+    };
   }
 
   async poll(params: { topic: string; count?: number; eventVersion?: string }) {
@@ -85,7 +116,7 @@ export class EventFabricService {
     return {
       snapshots: this.bus.listSnapshots(),
       backend: this.bus.activeBackend(),
-      note: 'Consumer-group cursor snapshots — not full cluster backup OS.',
+      note: 'Consumer-group cursor snapshots.',
     };
   }
 
@@ -106,7 +137,7 @@ export class EventFabricService {
       })),
       honesty: eventFabricHonesty(),
       note:
-        'Event Fabric monitoring (VL-240). Redis Streams path active when REDIS_URL reachable; memory fallback otherwise.',
+        'Event Fabric monitoring. Redis Streams path active when REDIS_URL reachable; memory fallback otherwise.',
     };
   }
 
@@ -133,12 +164,12 @@ export class EventFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
-        kafkaAdapter: true,
-        natsAdapter: true,
-        rabbitmqAdapter: true,
+        kafkaAdapter: false,
+        natsAdapter: false,
+        rabbitmqAdapter: false,
         contextFabric: false,
         knowledgeFabric: false,
         promptFabric: false,
@@ -160,7 +191,7 @@ export class EventFabricService {
       },
       docs: '/docs/EVENT_FABRIC.md',
       note:
-        'Event Fabric (VL-240). CloudEvents over Redis Streams with DLQ/retries/replay/snapshots. Kafka/NATS/Rabbit deferred.',
+        'Event Fabric. CloudEvents over Redis Streams with DLQ/retries/replay/snapshots. Kafka/NATS/Rabbit in-memory adapters shipped.',
     };
   }
 }

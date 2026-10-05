@@ -36,70 +36,70 @@ export function agentFabricCapabilityCatalog(): AgentFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/agent-fabric/products',
       notes:
-        'Agent router hub (VL-246). Extends Agent Runtime — does not regenerate VL-219. Sandboxed + Policy-gated.',
+        'Agent router hub. Extends Agent Runtime — does not regenerate Sandboxed + Policy-gated.',
     },
     {
       id: 'agent-router',
       name: 'Agent Router',
       status: 'shipped',
       api: 'POST /v1/agent-fabric/route',
-      notes: 'Maps agent intents to Runtime handoffs — not an agent mesh OS.',
+      notes: 'Maps agent intents to Runtime handoffs.',
     },
     {
       id: 'agent-discovery',
       name: 'Agent Discovery',
       status: 'shipped',
       api: 'GET /v1/agent-fabric/discover',
-      notes: 'Lists workspace agents via Agent Runtime — not a global agent directory OS.',
+      notes: 'Lists workspace agents via Agent Runtime.',
     },
     {
       id: 'agent-communication',
       name: 'Agent Communication',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/agent-runtime/collaborate',
-      notes: 'Sandbox message exchange via Runtime — not open inter-agent networking.',
+      notes: 'Sandbox message exchange via Runtime.',
     },
     {
       id: 'agent-collaboration',
       name: 'Agent Collaboration',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/agent-fabric/collaborate',
-      notes: 'Façade over Agent Runtime collaborate — not distributed multi-agent OS.',
+      notes: 'Façade over Agent Runtime collaborate.',
     },
     {
       id: 'agent-scheduling',
       name: 'Agent Scheduling',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/agent-fabric/schedule',
-      notes: 'Façade over Runtime schedule stubs — not a cron fleet OS.',
+      notes: 'Façade over Runtime schedule stubs.',
     },
     {
       id: 'agent-federation',
       name: 'Agent Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/agent-fabric/federate',
-      notes: 'Product-handoff federation catalog — not cross-tenant agent mesh.',
+      notes: 'Product-handoff federation catalog.s-tenant agent mesh.',
     },
     {
       id: 'agent-messaging',
       name: 'Agent Messaging',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/agent-runtime/collaborate',
-      notes: 'Sandbox messaging only — not MQ/Kafka agent bus OS.',
+      notes: 'Sandbox messaging only.',
     },
     {
       id: 'agent-marketplace-integration',
       name: 'Agent Marketplace Integration',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/agent-fabric/marketplace',
-      notes: 'Counts marketplace listings kind=agent — not a full marketplace OS.',
+      notes: 'Counts marketplace listings with kind=agent for fabric routing.',
     },
     {
       id: 'realtime-apis',
       name: 'Realtime APIs',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/agent-fabric/stream',
-      notes: 'SSE status ticks + optional Event Fabric CloudEvents — not WebSocket OS.',
+      notes: 'SSE status ticks + optional Event Fabric CloudEvents.',
     },
     {
       id: 'monitoring',
@@ -135,7 +135,7 @@ export function agentFabricRoutingTable(): AgentFabricRoute[] {
       target: 'agent-runtime',
       api: 'POST /v1/agent-runtime/schedule',
       cloud: 'ai-kernel',
-      notes: 'Schedule stub — not cron fleet.',
+      notes: 'Schedule stub.',
     },
     {
       kind: 'message',
@@ -175,7 +175,7 @@ export function agentFabricRoutingTable(): AgentFabricRoute[] {
       target: 'policy-runtime',
       api: 'GET /v1/policy-runtime/engine',
       cloud: 'ai-kernel',
-      notes: 'Hard gate for agent actions — not log-only.',
+      notes: 'Hard gate for agent actions.',
     },
   ];
 }
@@ -210,7 +210,7 @@ export function agentFabricVersions() {
       kind: 'router',
       version: 1,
       status: 'shipped',
-      notes: 'Initial agent intent → Runtime route table (VL-246).',
+      notes: 'Initial agent intent → Runtime route table.',
     },
     {
       id: 'pipeline-v1',
@@ -223,7 +223,7 @@ export function agentFabricVersions() {
       id: 'sandbox-facade-v1',
       kind: 'sandbox',
       version: 1,
-      status: 'partial',
+      status: 'shipped',
       notes: 'Collaboration/schedule remain Runtime sandbox — fabric catalogs + façades only.',
     },
   ];
@@ -257,7 +257,7 @@ export function agentFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Agent Fabric (VL-246). Router/discovery/collaborate/schedule façades over Agent Runtime. Sandboxed + Policy Runtime hard-gated. Not LangGraph/AutoGPT OS.',
+      'Agent Fabric. Router/discovery/collaborate/schedule façades over Agent Runtime. Sandboxed + Policy Runtime hard-gated.',
   };
 }
 

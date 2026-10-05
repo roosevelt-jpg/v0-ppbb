@@ -7,7 +7,9 @@ import { AuditCoreModule } from '../audit/audit-core.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AudioModule } from '../audio/audio.module';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { BillingModule } from '../billing/billing.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     ApiKeysModule,
     IdentityModule,
     AudioModule,
+    RateLimitModule,
+    BillingModule,
   ],
   controllers: [SpeechRecognitionController],
   providers: [SpeechRecognitionService, TranslateAuthGuard],

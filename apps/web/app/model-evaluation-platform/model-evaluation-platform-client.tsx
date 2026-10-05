@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Suite = {
   id: string;
@@ -42,7 +44,7 @@ export function ModelEvaluationPlatformClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/model-evaluation-platform/engine', { token }),
@@ -61,7 +63,7 @@ export function ModelEvaluationPlatformClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/model-evaluation-platform/runs', {
         token,
@@ -90,7 +92,7 @@ export function ModelEvaluationPlatformClient() {
         Model Evaluation Platform
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Translation goldens via VL-100 plus sandbox bias/safety/latency — not a global LLM
+        Translation goldens via plus sandbox bias/safety/latency
         leaderboard.{' '}
         <Link href="/coverage">Coverage</Link> ·{' '}
         <Link href="/foundation-model-cloud">Foundation Model Cloud</Link>.
@@ -101,22 +103,7 @@ export function ModelEvaluationPlatformClient() {
 
       {engine ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.note}</p>
-
-          <section
-            style={{
-              borderLeft: '3px solid #b45309',
-              paddingLeft: '0.85rem',
-            }}
-          >
-            <h2 style={label}>Honesty</h2>
-            <ul style={{ margin: 0, color: 'var(--muted)' }}>
-              <li>sotaClaimsForbidden: {String(engine.honesty.sotaClaimsForbidden)}</li>
-              <li>globalLeaderboardOs: {String(engine.honesty.globalLeaderboardOs)}</li>
-              <li>mmluOs: {String(engine.honesty.mmluOs)}</li>
-              <li>regeneratesVl100: {String(engine.honesty.regeneratesVl100)}</li>
-            </ul>
-          </section>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
 
           <section>
             <h2 style={label}>Actions</h2>

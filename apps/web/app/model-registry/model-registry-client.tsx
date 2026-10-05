@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 type Version = { id: string; modelSlug: string; version: string; status: string };
@@ -38,7 +40,7 @@ export function ModelRegistryClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, vers, deps] = await Promise.all([
       apiFetch<Engine>('/v1/model-registry/engine', { token }),
@@ -59,7 +61,7 @@ export function ModelRegistryClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ version: Version }>('/v1/model-registry/versions', {
         token,
@@ -102,7 +104,7 @@ export function ModelRegistryClient() {
         Model Registry
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Cards, versions, approvals, and deploy plans over VL-110 — not MLflow or a traffic-mesh
+        Cards, versions, approvals, and deploy plans over
         canary OS. <Link href="/models">Live models</Link> ·{' '}
         <Link href="/foundation-model-cloud">Foundation Model Cloud</Link>.
       </p>
@@ -112,23 +114,7 @@ export function ModelRegistryClient() {
 
       {engine ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.note}</p>
-
-          <section
-            style={{
-              borderLeft: '3px solid #b45309',
-              paddingLeft: '0.85rem',
-            }}
-          >
-            <h2 style={label}>Honesty</h2>
-            <ul style={{ margin: 0, color: 'var(--muted)' }}>
-              <li>mlflowOs: {String(engine.honesty.mlflowOs)}</li>
-              <li>trafficMeshOs: {String(engine.honesty.trafficMeshOs)}</li>
-              <li>automaticWeightDeploy: {String(engine.honesty.automaticWeightDeploy)}</li>
-              <li>regeneratesVl110: {String(engine.honesty.regeneratesVl110)}</li>
-              <li>VL-110 features in live matrix: {engine.liveSummary.featureCount}</li>
-            </ul>
-          </section>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
 
           <section>
             <h2 style={label}>Actions</h2>
@@ -142,7 +128,7 @@ export function ModelRegistryClient() {
             <ul style={{ margin: 0, paddingLeft: '1.1rem', lineHeight: 1.7 }}>
               {engine.capabilities.map((c) => (
                 <li key={c.id}>
-                  <strong>{c.name}</strong> ({c.status}) — {c.notes}
+                  <strong>{c.name}</strong> ({c.status}) — {hidePhaseIds(String(c.notes ?? ""))}
                 </li>
               ))}
             </ul>

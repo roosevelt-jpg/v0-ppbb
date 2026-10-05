@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
 import { TtsInput, TtsOutput, TtsProvider, TtsVoice } from './tts-provider';
 
-/** Catalog of African-focused voices served by a rented open-weight TTS endpoint (VL-121). */
+/** Catalog of Own TTS voices — Africa + strategic global underserved (VL-121/228). */
 export const OWN_TTS_VOICES: TtsVoice[] = [
   {
     id: 'own:sw-aisha',
@@ -32,6 +32,384 @@ export const OWN_TTS_VOICES: TtsVoice[] = [
     languages: ['en'],
     provider: 'own_tts',
   },
+  {
+    id: 'own:ha-amina',
+    name: 'Amina (Hausa)',
+    gender: 'female',
+    languages: ['ha', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:zu-thandi',
+    name: 'Thandi (Zulu)',
+    gender: 'female',
+    languages: ['zu', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ig-chidi',
+    name: 'Chidi (Igbo)',
+    gender: 'male',
+    languages: ['ig', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:rw-keza',
+    name: 'Keza (Kinyarwanda)',
+    gender: 'female',
+    languages: ['rw', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:xh-luvuyo',
+    name: 'Luvuyo (Xhosa)',
+    gender: 'male',
+    languages: ['xh', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:so-hodan',
+    name: 'Hodan (Somali)',
+    gender: 'female',
+    languages: ['so', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:fr-aida',
+    name: 'Aïda (FR-West Africa)',
+    gender: 'female',
+    languages: ['fr', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ar-nour',
+    name: 'Nour (Arabic-Africa)',
+    gender: 'female',
+    languages: ['ar', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ti-senait',
+    name: 'Senait (Tigrinya)',
+    gender: 'female',
+    languages: ['ti', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:om-lema',
+    name: 'Lema (Oromo)',
+    gender: 'female',
+    languages: ['om', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:th-mali',
+    name: 'Mali (Thai)',
+    gender: 'female',
+    languages: ['th', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:vi-lan',
+    name: 'Lan (Vietnamese)',
+    gender: 'female',
+    languages: ['vi', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:tl-maya',
+    name: 'Maya (Tagalog)',
+    gender: 'female',
+    languages: ['tl', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ms-siti',
+    name: 'Siti (Malay)',
+    gender: 'female',
+    languages: ['ms', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:bn-riya',
+    name: 'Riya (Bengali)',
+    gender: 'female',
+    languages: ['bn', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ta-priya',
+    name: 'Priya (Tamil)',
+    gender: 'female',
+    languages: ['ta', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:te-arjun',
+    name: 'Arjun (Telugu)',
+    gender: 'male',
+    languages: ['te', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:hi-ananya',
+    name: 'Ananya (Hindi)',
+    gender: 'female',
+    languages: ['hi', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ur-zara',
+    name: 'Zara (Urdu)',
+    gender: 'female',
+    languages: ['ur', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:ht-marlene',
+    name: 'Marlene (Haitian Creole)',
+    gender: 'female',
+    languages: ['ht', 'fr', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:jam-devon',
+    name: 'Devon (Jamaican)',
+    gender: 'male',
+    languages: ['jam', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:qu-suma',
+    name: 'Suma (Quechua)',
+    gender: 'female',
+    languages: ['qu', 'es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:gn-kerai',
+    name: 'Kerai (Guarani)',
+    gender: 'female',
+    languages: ['gn', 'es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:es-lucia',
+    name: 'Lucia (ES-LatAm)',
+    gender: 'female',
+    languages: ['es', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:pt-bia',
+    name: 'Bia (PT-BR)',
+    gender: 'female',
+    languages: ['pt', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:en-arjun',
+    name: 'Arjun (EN-India)',
+    gender: 'male',
+    languages: ['en', 'hi'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:en-kei',
+    name: 'Kei (EN-Philippines)',
+    gender: 'female',
+    languages: ['en', 'tl'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:jv-sari',
+    name: 'Sari (Javanese)',
+    gender: 'female',
+    languages: ['jv', 'id', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:my-thiri',
+    name: 'Thiri (Burmese)',
+    gender: 'female',
+    languages: ['my', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:km-sophea',
+    name: 'Sophea (Khmer)',
+    gender: 'female',
+    languages: ['km', 'en'],
+    provider: 'own_tts',
+  },
+  {
+    id: 'own:pa-simran',
+    name: 'Simran (Punjabi)',
+    gender: 'female',
+    languages: ['pa', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:lo-dao',
+    name: 'Dao (Lao)',
+    gender: 'female',
+    languages: ['lo', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:yue-mei',
+    name: 'Mei (Cantonese)',
+    gender: 'female',
+    languages: ['yue', 'zh', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:mr-isha',
+    name: 'Isha (Marathi)',
+    gender: 'female',
+    languages: ['mr', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:gu-kira',
+    name: 'Kira (Gujarati)',
+    gender: 'female',
+    languages: ['gu', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:kn-ravi',
+    name: 'Ravi (Kannada)',
+    gender: 'male',
+    languages: ['kn', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ml-nisha',
+    name: 'Nisha (Malayalam)',
+    gender: 'female',
+    languages: ['ml', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ne-asmi',
+    name: 'Asmi (Nepali)',
+    gender: 'female',
+    languages: ['ne', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:si-nimal',
+    name: 'Nimal (Sinhala)',
+    gender: 'male',
+    languages: ['si', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ay-lari',
+    name: 'Lari (Aymara)',
+    gender: 'female',
+    languages: ['ay', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:pap-rina',
+    name: 'Rina (Papiamento)',
+    gender: 'female',
+    languages: ['pap', 'nl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:gcf-lya',
+    name: 'Lya (Guadeloupean Creole)',
+    gender: 'female',
+    languages: ['gcf', 'fr', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:ceb-jon',
+    name: 'Jon (Cebuano)',
+    gender: 'male',
+    languages: ['ceb', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:as-pori',
+    name: 'Pori (Assamese)',
+    gender: 'female',
+    languages: ['as', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:or-mina',
+    name: 'Mina (Odia)',
+    gender: 'female',
+    languages: ['or', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:bho-raju',
+    name: 'Raju (Bhojpuri)',
+    gender: 'male',
+    languages: ['bho', 'hi', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:nhe-xitl',
+    name: 'Xitlali (Nahuatl)',
+    gender: 'female',
+    languages: ['nhe', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:yua-itzel',
+    name: 'Itzel (Yucatec Maya)',
+    gender: 'female',
+    languages: ['yua', 'es', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:war-lena',
+    name: 'Lena (Waray)',
+    gender: 'female',
+    languages: ['war', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:hil-gina',
+    name: 'Gina (Hiligaynon)',
+    gender: 'female',
+    languages: ['hil', 'tl', 'en'],
+    provider: 'own_tts',
+  },
+
+  {
+    id: 'own:su-dewi',
+    name: 'Dewi (Sundanese)',
+    gender: 'female',
+    languages: ['su', 'id', 'en'],
+    provider: 'own_tts',
+  },
 ];
 
 const MIME: Record<string, string> = {
@@ -47,7 +425,13 @@ export function isOwnTtsVoice(voice: string): boolean {
 }
 
 export function ownTtsConfigured(): boolean {
-  return Boolean(process.env.OWN_TTS_URL?.trim()) || process.env.OWN_TTS_FIXTURE === '1';
+  return (
+    Boolean(process.env.OWN_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_TTS_URL?.trim()) ||
+    Boolean(process.env.VERBALAB_MODEL_BASE_URL?.trim()) ||
+    process.env.OWN_TTS_FIXTURE === '1' ||
+    process.env.VERBALAB_OWN_AI_FIXTURE === '1'
+  );
 }
 
 /** Minimal RIFF/WAV for fixture playback without claiming a real GPU run. */
@@ -104,7 +488,7 @@ export class FixtureOwnTtsAdapter implements TtsProvider {
 }
 
 /**
- * HTTP client for a rented GPU TTS endpoint (Modal/vLLM/XTTS/etc.).
+ * HTTP client for VerbaLab-owned Voice FM TTS endpoint.
  * Contract: POST JSON { text, voice, language?, format? } → audio bytes or { audioBase64, mimeType? }.
  */
 export class HttpOwnTtsAdapter implements TtsProvider {
@@ -231,12 +615,20 @@ export class UnconfiguredOwnTtsAdapter implements TtsProvider {
 }
 
 export function createOwnTtsAdapter(): TtsProvider {
-  if (process.env.OWN_TTS_FIXTURE === '1') {
+  if (process.env.OWN_TTS_FIXTURE === '1' || process.env.VERBALAB_OWN_AI_FIXTURE === '1') {
     return new FixtureOwnTtsAdapter();
   }
-  const url = process.env.OWN_TTS_URL?.trim() ?? '';
+  const url =
+    process.env.OWN_TTS_URL?.trim() ||
+    process.env.VERBALAB_TTS_URL?.trim() ||
+    (process.env.VERBALAB_MODEL_BASE_URL?.trim()
+      ? `${process.env.VERBALAB_MODEL_BASE_URL.replace(/\/$/, '')}/audio/speech`
+      : '');
   if (url) {
-    return new HttpOwnTtsAdapter(url, process.env.OWN_TTS_API_KEY?.trim() || undefined);
+    return new HttpOwnTtsAdapter(
+      url,
+      process.env.OWN_TTS_API_KEY?.trim() || process.env.VERBALAB_MODEL_API_KEY?.trim() || undefined,
+    );
   }
   return new UnconfiguredOwnTtsAdapter();
 }

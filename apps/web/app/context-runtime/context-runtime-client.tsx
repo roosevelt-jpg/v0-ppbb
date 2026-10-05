@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -35,7 +38,7 @@ export function ContextRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/context-runtime/engine', { token }),
@@ -53,7 +56,7 @@ export function ContextRuntimeClient() {
   const assemble = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         included: string[];
@@ -141,18 +144,12 @@ export function ContextRuntimeClient() {
 
       {engine ? (
         <>
-          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{engine.note}</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-            Mode: {engine.mode} · infiniteContextWindow=
-            {String(engine.honesty.infiniteContextWindow)} · llmSummarization=
-            {String(engine.honesty.llmSummarization)} · extendsContextEngine=
-            {String(engine.honesty.extendsContextEngine)}
-          </p>
+          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
-                <strong>{c.name}</strong> · {c.status}
-                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
+                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{hidePhaseIds(String(c.notes ?? ""))}</div>
               </li>
             ))}
           </ul>

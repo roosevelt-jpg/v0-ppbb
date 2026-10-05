@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -40,7 +42,7 @@ export function MemoryCloudClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, an, list] = await Promise.all([
       apiFetch<Engine>('/v1/memory-cloud/engine', { token }),
@@ -62,7 +64,7 @@ export function MemoryCloudClient() {
     setError(null);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<Memory>('/v1/memory-cloud/memories', {
         token,
@@ -82,7 +84,7 @@ export function MemoryCloudClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<{ count: number; exportedAt: string; note: string }>(
         '/v1/memory-cloud/export',
@@ -102,7 +104,7 @@ export function MemoryCloudClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<{ erased: boolean; count: number; note: string }>(
         '/v1/memory-cloud/erase',
@@ -112,6 +114,25 @@ export function MemoryCloudClient() {
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erase failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function sweepExpired() {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      const body = await apiFetch<{ deleted: number; sweptAt: string; note: string }>(
+        '/v1/memory-cloud/sweep',
+        { token, method: 'POST', body: {} },
+      );
+      setResult(JSON.stringify(body, null, 2));
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sweep failed');
     } finally {
       setLoading(false);
     }
@@ -131,8 +152,9 @@ export function MemoryCloudClient() {
         Memory Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Persistent AI interaction memory with GDPR export and erase. Not infinite personalization.{' '}
-        <Link href="/intelligence-cloud">Intelligence Cloud</Link> · <Link href="/data">Data / GDPR</Link>.
+        Persistent AI interaction memory with GDPR export/erase and retention sweeper. Not infinite
+        personalization. <Link href="/intelligence-cloud">Intelligence Cloud</Link> ·{' '}
+        <Link href="/data">Data / GDPR</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -187,6 +209,9 @@ export function MemoryCloudClient() {
             <button type="button" disabled={loading} style={secondary} onClick={() => void exportMemories()}>
               Export (GDPR)
             </button>
+            <button type="button" disabled={loading} style={secondary} onClick={() => void sweepExpired()}>
+              Sweep expired
+            </button>
             <button type="button" disabled={loading} style={danger} onClick={() => void eraseAll()}>
               Erase all
             </button>
@@ -223,7 +248,7 @@ export function MemoryCloudClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.4rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

@@ -84,11 +84,11 @@ export class AgentFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Agent actions stay sandboxed. Policy Runtime hard-gates Agent Runtime today; Policy Fabric (VL-247) must hard-gate fabric-wide when shipped — not log-only.',
+          'Agent actions stay sandboxed. Policy Runtime hard-gates Agent Runtime today; Policy Fabric must hard-gate fabric-wide when shipped.',
       },
       docs: '/docs/AGENT_FABRIC.md',
       note:
-        'Agent Fabric (VL-246). Cross-cloud agent router over Agent Runtime. Sandboxed + Policy-gated. Not LangGraph/AutoGPT OS.',
+        'Agent Fabric. Cross-cloud agent router over Agent Runtime. Sandboxed + Policy-gated.',
     };
   }
 
@@ -162,7 +162,7 @@ export class AgentFabricService {
       })),
       missing: plan.missing,
       honesty: agentFabricHonesty(),
-      note: 'Federation is a product-handoff catalog — not cross-tenant agent mesh.',
+      note: 'Federation is a product-handoff catalog.s-tenant agent mesh.',
     };
   }
 
@@ -194,7 +194,7 @@ export class AgentFabricService {
       ...(await this.agentRuntime.schedule(auth)),
       honesty: agentFabricHonesty(),
       docs: '/docs/AGENT_FABRIC.md',
-      note: 'Schedule façade over Agent Runtime stubs — not cron fleet OS.',
+      note: 'Schedule façade over Agent Runtime stubs.',
     };
   }
 
@@ -288,7 +288,7 @@ export class AgentFabricService {
       },
       routes: agentFabricRoutingTable().length,
       honesty: agentFabricHonesty(),
-      note: 'SSE realtime tick — not WebSocket OS.',
+      note: 'SSE realtime tick.',
     };
   }
 
@@ -320,7 +320,7 @@ export class AgentFabricService {
         status: p.status,
       })),
       honesty: agentFabricHonesty(),
-      note: 'Agent Fabric monitoring (VL-246).',
+      note: 'Agent Fabric monitoring.',
     };
   }
 
@@ -361,7 +361,7 @@ export class AgentFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
         policyFabric: false,
@@ -383,7 +383,7 @@ export class AgentFabricService {
       },
       docs: '/docs/AGENT_FABRIC.md',
       note:
-        'Agent Fabric (VL-246). Router + discovery/collaborate/schedule over Agent Runtime; sandboxed + Policy-gated.',
+        'Agent Fabric. Router + discovery/collaborate/schedule over Agent Runtime; sandboxed + Policy-gated.',
     };
   }
 }

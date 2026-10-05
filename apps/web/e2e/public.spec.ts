@@ -11,6 +11,52 @@ test.describe('Public console surfaces', () => {
     await page.goto('/docs');
     await expect(page.getByRole('heading', { name: 'API documentation' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'POST /v1/translate' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Open explorer' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'SDKs for every platform' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'iOS (Swift)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Android (Kotlin)' })).toBeVisible();
+    await expect(page.getByText('ADR-0030')).toHaveCount(0);
+  });
+
+  test('OpenAPI explorer renders structured JSON controls', async ({ page }) => {
+    await page.route('**/v1/openapi.json', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          openapi: '3.1.0',
+          info: { title: 'VerbaLab API', version: '0.0.0', description: 'e2e fixture' },
+          paths: {
+            '/v1/translate': {
+              post: {
+                summary: 'Translate text',
+                operationId: 'translate',
+                tags: ['translate'],
+                parameters: [],
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object' },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'OK' } },
+              },
+            },
+          },
+        }),
+      });
+    });
+
+    await page.goto('/docs/openapi');
+    await expect(page.getByRole('heading', { name: 'OpenAPI explorer' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Download raw JSON' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Endpoints \(1\)/i })).toBeVisible();
+    await expect(page.getByText('/v1/translate').first()).toBeVisible();
+    await expect(page.getByText('JSON explorer').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Copy full JSON' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Copy path' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Hide value' }).first()).toBeVisible();
   });
 
   test('coverage page is reachable', async ({ page }) => {

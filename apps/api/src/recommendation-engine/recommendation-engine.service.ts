@@ -52,21 +52,14 @@ export class RecommendationEngineService {
   kinds() {
     return {
       kinds: RECOMMEND_KINDS.map((id) => ({ id })),
-      deferred: ['enterprise'],
-      note: 'Recommendable kinds for VL-187 light rankers.',
+      deferred: [],
+      note: 'Recommendable kinds for light rankers (includes sandbox enterprise).',
     };
   }
 
   private assertKind(raw: string | undefined): RecommendKind {
     const kind = (raw?.trim() || 'language') as RecommendKind;
     if (!(RECOMMEND_KINDS as readonly string[]).includes(kind)) {
-      if (kind === ('enterprise' as RecommendKind)) {
-        throw new ApiException(
-          'validation_error',
-          'kind=enterprise is deferred — not a retail recommender OS (VL-187)',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
       throw new ApiException(
         'validation_error',
         `kind must be one of: ${RECOMMEND_KINDS.join(', ')}`,
@@ -343,6 +336,22 @@ export class RecommendationEngineService {
       case 'workflow':
         items = this.recommendWorkflows({ query: input.query, k });
         break;
+      case 'enterprise': {
+        const [langs, voices, content] = await Promise.all([
+          this.recommendLanguages({ ...input, k: Math.min(k, 5) }),
+          this.recommendVoices({ ...input, k: Math.min(k, 5) }),
+          this.recommendContent({ ...input, k: Math.min(k, 5), useVectors }),
+        ]);
+        items = [...langs, ...voices, ...content]
+          .map((it) => ({
+            ...it,
+            kind: 'enterprise',
+            reason: `enterprise surface: ${it.kind} — ${it.reason}`,
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, k);
+        break;
+      }
     }
 
     await this.audit.record({
@@ -359,19 +368,23 @@ export class RecommendationEngineService {
       query: input.query?.trim() || null,
       items,
       sources: {
-        languages: kind === 'language' || kind === 'translation',
-        voices: kind === 'voice',
-        vectorCloud: kind === 'content' || kind === 'knowledge',
+        languages: kind === 'language' || kind === 'translation' || kind === 'enterprise',
+        voices: kind === 'voice' || kind === 'enterprise',
+        vectorCloud: kind === 'content' || kind === 'knowledge' || kind === 'enterprise',
         memory: Boolean(input.query),
         embeddingModels: kind === 'model',
         workflows: kind === 'workflow',
+        enterprise: kind === 'enterprise',
       },
       honesty: {
         retailRecommenderOs: false,
         collaborativeFiltering: false,
         trainsRankingModels: false,
       },
-      note: 'Light rankers over existing catalogs (VL-187). Not a retail recommender OS.',
+      note:
+        kind === 'enterprise'
+          ? 'Sandbox enterprise cross-surface ranker (org-scoped). Not retail CF / personalization OS.'
+          : 'Light rankers over existing catalogs. Not a retail recommender OS.',
     };
   }
 
@@ -390,7 +403,7 @@ export class RecommendationEngineService {
       periodStart: start.toISOString(),
       requests,
       workspaceId,
-      note: 'Recommendation Engine analytics (VL-187).',
+      note: 'Recommendation Engine analytics.',
     };
   }
 
@@ -404,8 +417,8 @@ export class RecommendationEngineService {
       periodStart: analytics.periodStart,
       requests: analytics.requests,
       retailRecommenderOs: engine.honesty.retailRecommenderOs,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
-      note: 'Recommendation Engine monitoring snapshot (VL-187).',
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
+      note: 'Recommendation Engine monitoring snapshot.',
     };
   }
 }

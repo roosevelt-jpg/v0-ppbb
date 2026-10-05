@@ -12,7 +12,7 @@ Library Phase 5 asks for OpenAI, Claude, Gemini, DeepSeek, Qwen, Llama, Mistral,
 ## Decision
 
 1. **Map, don’t clone:** Document library terms → modules in `docs/AI_GATEWAY_CLOUD.md`.
-2. **Shipped providers stay primary:** Google + OpenAI + own TTS + ElevenLabs clones + finetune routes.
+2. **Shipped providers stay primary:** Google + OpenAI + own TTS + external vendor clones + finetune routes.
 3. **Optional chat fallback:** OpenAI-compatible OpenRouter adapter when `OPENROUTER_API_KEY` is set — one cheap/fast buy path, not a multi-LLM product.
 4. **Gateway hub:** `/gateway` + `GET /v1/gateway/overview` + `GET /v1/gateway/providers` composing configured flags, live registry, fallbacks, and deferred catalog.
 5. **Defer:** Claude/Gemini/DeepSeek/Qwen/Llama/Mistral/NeMo first-class adapters, response caching, streaming-for-all, cost-optimizer product, regenerating the gateway.

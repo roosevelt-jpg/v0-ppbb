@@ -16,7 +16,7 @@ export function knowledgeIntelligenceCatalog() {
   return {
     product: 'VerbaLab Knowledge Intelligence',
     note:
-      'Combined knowledge analysis and insight for Knowledge Cloud (VL-200): discovery, linking, recommendations, validation, duplicates, evolution, confidence. Heuristic over EKB / Search / Ontology / Taxonomy / Knowledge Memory / VL-062. Not a BI dashboard OS, Palantir-style knowledge OS, or Intelligence Analytics (VL-191) regenerate.',
+      'Combined knowledge analysis and insight for Knowledge Cloud: discovery, linking, recommendations, validation, duplicates, evolution, confidence. Heuristic over EKB / Search / Ontology / Taxonomy / Knowledge Memory / Not a BI dashboard OS, Palantir-style knowledge OS, or Intelligence Analytics regenerate.',
     capabilities: [
       {
         id: 'knowledge-discovery',
@@ -35,7 +35,7 @@ export function knowledgeIntelligenceCatalog() {
       {
         id: 'knowledge-recommendations',
         name: 'Knowledge Recommendations',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/knowledge-intelligence/recommend',
         notes: 'Light rank of ready docs. Not collaborative-filtering / retail recommender OS.',
       },
@@ -49,7 +49,7 @@ export function knowledgeIntelligenceCatalog() {
       {
         id: 'duplicate-detection',
         name: 'Duplicate Detection',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/knowledge-intelligence/duplicates',
         notes: 'Filename + first-chunk prefix overlap. Near-dupe ML deferred.',
       },
@@ -63,7 +63,7 @@ export function knowledgeIntelligenceCatalog() {
       {
         id: 'knowledge-confidence',
         name: 'Knowledge Confidence',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/knowledge-intelligence/confidence',
         notes: 'Heuristic score from status/chunks/tags — not calibrated probabilistic model.',
       },
@@ -79,7 +79,7 @@ export function knowledgeIntelligenceCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/knowledge-intelligence/analytics',
-        notes: 'Audit + inventory counts (≠ VL-202 Knowledge Analytics pack).',
+        notes: 'Audit + inventory counts (≠ Knowledge Analytics pack).',
       },
       {
         id: 'monitoring',
@@ -91,8 +91,8 @@ export function knowledgeIntelligenceCatalog() {
       {
         id: 'bi-os',
         name: 'BI / knowledge OS',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/knowledge-intelligence/engine',
         notes: 'Enterprise BI / Palantir-style OS deferred.',
       },
     ] satisfies KnowledgeIntelCapability[],

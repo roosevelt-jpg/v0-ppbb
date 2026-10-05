@@ -3,6 +3,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { EmailProvider, SendEmailInput, SendEmailResult } from './email-provider';
 import { ResendAdapter } from './resend.adapter';
+import {
+  EMAIL_TEMPLATE_CATALOG,
+  EmailBrandOptions,
+  EmailTemplateId,
+  defaultCopyrightText,
+  emailAssetBaseUrl,
+  previewEmailTemplate,
+  renderJobCompleteEmail,
+  renderMemberAddedEmail,
+  renderWelcomeEmail,
+  renderSecureAlertEmail,
+  renderUsageThresholdEmail,
+  renderWorkflowMessageEmail,
+} from './email-templates';
+import { WebhookService } from '../jobs/webhook.service';
 
 @Injectable()
 export class NotificationsService {
@@ -12,6 +27,7 @@ export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly webhooks: WebhookService,
   ) {
     this.provider = new ResendAdapter(
       process.env.RESEND_API_KEY ?? '',
@@ -32,6 +48,85 @@ export class NotificationsService {
     return process.env.NOTIFICATIONS_DISABLED === '1';
   }
 
+  private consoleBase() {
+    return (process.env.WEB_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.verbalab.ai').replace(
+      /\/$/,
+      '',
+    );
+  }
+
+  private absoluteAssetUrl(pathOrUrl: string | null | undefined): string | undefined {
+    const value = (pathOrUrl ?? '').trim();
+    if (!value) return undefined;
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    const base = emailAssetBaseUrl();
+    return `${base}${value.startsWith('/') ? value : `/${value}`}`;
+  }
+
+  /** Brand assets from CMS site settings (falls back to defaults). */
+  async emailBrand(): Promise<EmailBrandOptions> {
+    try {
+      const settings = await this.prisma.cmsSiteSettings.findUnique({ where: { id: 'default' } });
+      const brandName = settings?.brandName?.trim() || 'VerbaLab';
+      return {
+        brandName,
+        logoUrl:
+          this.absoluteAssetUrl(settings?.emailLogoUrl) ??
+          this.absoluteAssetUrl(settings?.headerLogoUrl) ??
+          `${emailAssetBaseUrl()}/email/verbalab-logo.png`,
+        copyrightText: settings?.copyrightText?.trim() || defaultCopyrightText(brandName),
+      };
+    } catch {
+      return {
+        brandName: 'VerbaLab',
+        logoUrl: `${emailAssetBaseUrl()}/email/verbalab-logo.png`,
+        copyrightText: defaultCopyrightText(),
+      };
+    }
+  }
+
+  engine() {
+    return {
+      id: 'notifications',
+      title: 'Notifications & email',
+      provider: 'resend',
+      configured: this.isConfigured(),
+      disabled: this.disabled(),
+      smsConfigured: this.isSmsConfigured(),
+      env: {
+        RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
+        EMAIL_FROM: Boolean(process.env.EMAIL_FROM),
+        NOTIFICATIONS_DISABLED: this.disabled(),
+        TWILIO: this.isSmsConfigured(),
+      },
+      templates: EMAIL_TEMPLATE_CATALOG,
+      triggers: [
+        'job.succeeded / job.failed → owners/admins',
+        'usage 80% / 100% quota → owners/admins',
+        'member added → member email',
+        'workflow/connector notify step → owners/admins',
+        'secure transcript alerts → trusted contact',
+      ],
+      jobs: {
+        queue: 'BullMQ (Redis) or JOBS_INLINE=1 in-process worker',
+        cronOs: false,
+        note: 'Async jobs are queue workers, not a Nest cron fleet. Global Scheduler catalogs schedules; it does not replace BullMQ.',
+      },
+      docs: '/docs/NOTIFICATIONS.md',
+    };
+  }
+
+  templates() {
+    return { templates: EMAIL_TEMPLATE_CATALOG, count: EMAIL_TEMPLATE_CATALOG.length };
+  }
+
+  async previewTemplate(id: string) {
+    const known = EMAIL_TEMPLATE_CATALOG.some((t) => t.id === id);
+    const templateId = (known ? id : 'workflow_message') as EmailTemplateId;
+    const brand = await this.emailBrand();
+    return { template: previewEmailTemplate(templateId, brand) };
+  }
+
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult | null> {
     if (this.disabled()) return null;
     if (!this.isConfigured() && this.provider.name === 'resend') {
@@ -39,6 +134,185 @@ export class NotificationsService {
       return null;
     }
     return this.provider.send(input);
+  }
+
+  isSmsConfigured(): boolean {
+    return Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER);
+  }
+
+  /**
+   * Secure alert delivery for transcript/security protocols.
+   * Email via Resend when configured; SMS via Twilio when configured.
+   * Always returns a delivery receipt (queued/sent/skipped) for auditability.
+   */
+  async notifySecureAlert(input: {
+    organizationId: string;
+    channel: 'email' | 'sms';
+    to: string;
+    subject: string;
+    message: string;
+    consentToken?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{
+    channel: 'email' | 'sms';
+    status: 'sent' | 'queued' | 'skipped';
+    provider: string;
+    deliveryId: string;
+    note?: string;
+  }> {
+    if (this.disabled()) {
+      return {
+        channel: input.channel,
+        status: 'skipped',
+        provider: 'disabled',
+        deliveryId: `skip_${Date.now()}`,
+        note: 'NOTIFICATIONS_DISABLED=1',
+      };
+    }
+    if (!input.consentToken?.trim()) {
+      return {
+        channel: input.channel,
+        status: 'skipped',
+        provider: 'policy',
+        deliveryId: `noconsent_${Date.now()}`,
+        note: 'consentToken required for secure alerts (human safety protocol)',
+      };
+    }
+
+    if (input.channel === 'email') {
+      try {
+        const meta = input.metadata ?? {};
+        const brand = await this.emailBrand();
+        const rendered = renderSecureAlertEmail({
+          protocol: String(meta.protocol ?? 'trusted-contact'),
+          trustedName: meta.trustedName ? String(meta.trustedName) : undefined,
+          language: meta.language ? String(meta.language) : undefined,
+          receiptToken: String(meta.receiptToken ?? meta.alertId ?? 'pending'),
+          summary: input.message.includes('Transcript summary:')
+            ? input.message.split('Transcript summary:\n').slice(1).join('\n').trim() || input.message
+            : input.message,
+          consoleUrl: `${this.consoleBase()}/secure-transcript-alerts`,
+          brand,
+        });
+        const result = await this.sendEmail({
+          to: input.to,
+          subject: input.subject || rendered.subject,
+          text: rendered.text,
+          html: rendered.html,
+        });
+        const deliveryId = result?.id ?? `email_queued_${Date.now()}`;
+        const status = result ? ('sent' as const) : ('queued' as const);
+        await this.audit.record({
+          organizationId: input.organizationId,
+          action: 'notification.secure_alert_email',
+          route: 'notifications.secure_alert',
+          metadata: {
+            to: input.to,
+            status,
+            deliveryId,
+            template: 'secure_alert',
+            ...(input.metadata ?? {}),
+          } as never,
+        });
+        return {
+          channel: 'email',
+          status,
+          provider: result?.provider ?? 'resend',
+          deliveryId,
+          note: result ? undefined : 'Email provider not configured — receipt queued for deploy Resend credentials',
+        };
+      } catch (error) {
+        this.logger.warn(`Secure email alert failed: ${error instanceof Error ? error.message : error}`);
+        return {
+          channel: 'email',
+          status: 'queued',
+          provider: 'resend',
+          deliveryId: `email_err_${Date.now()}`,
+          note: error instanceof Error ? error.message : 'send failed',
+        };
+      }
+    }
+
+    // SMS
+    const to = input.to.trim();
+    if (!to) {
+      return {
+        channel: 'sms',
+        status: 'skipped',
+        provider: 'twilio',
+        deliveryId: `sms_bad_${Date.now()}`,
+        note: 'destination phone required',
+      };
+    }
+    if (!this.isSmsConfigured()) {
+      const deliveryId = `sms_queued_${Date.now()}`;
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.secure_alert_sms_queued',
+        route: 'notifications.secure_alert',
+        metadata: {
+          to,
+          status: 'queued',
+          deliveryId,
+          preview: input.message.slice(0, 140),
+          ...(input.metadata ?? {}),
+        } as never,
+      });
+      return {
+        channel: 'sms',
+        status: 'queued',
+        provider: 'twilio',
+        deliveryId,
+        note: 'Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER to send live SMS',
+      };
+    }
+
+    try {
+      const sid = process.env.TWILIO_ACCOUNT_SID!;
+      const token = process.env.TWILIO_AUTH_TOKEN!;
+      const from = process.env.TWILIO_FROM_NUMBER!;
+      const auth = Buffer.from(`${sid}:${token}`).toString('base64');
+      const body = new URLSearchParams({ To: to, From: from, Body: input.message.slice(0, 1500) });
+      const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body,
+      });
+      const json = (await res.json().catch(() => ({}))) as { sid?: string; message?: string };
+      const deliveryId = json.sid ?? `sms_${Date.now()}`;
+      const status = res.ok ? ('sent' as const) : ('queued' as const);
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.secure_alert_sms',
+        route: 'notifications.secure_alert',
+        metadata: {
+          to,
+          status,
+          deliveryId,
+          httpStatus: res.status,
+          ...(input.metadata ?? {}),
+        } as never,
+      });
+      return {
+        channel: 'sms',
+        status,
+        provider: 'twilio',
+        deliveryId,
+        note: res.ok ? undefined : json.message ?? `Twilio HTTP ${res.status}`,
+      };
+    } catch (error) {
+      this.logger.warn(`Secure SMS alert failed: ${error instanceof Error ? error.message : error}`);
+      return {
+        channel: 'sms',
+        status: 'queued',
+        provider: 'twilio',
+        deliveryId: `sms_err_${Date.now()}`,
+        note: error instanceof Error ? error.message : 'sms failed',
+      };
+    }
   }
 
   async notifyJobComplete(input: {
@@ -52,23 +326,35 @@ export class NotificationsService {
     const recipients = await this.ownerAdminEmails(input.organizationId);
     if (recipients.length === 0) return;
 
-    const subject =
-      input.status === 'succeeded'
-        ? `VerbaLab job succeeded (${input.type})`
-        : `VerbaLab job failed (${input.type})`;
-    const text =
-      input.status === 'succeeded'
-        ? `Job ${input.jobId} (${input.type}) completed successfully.`
-        : `Job ${input.jobId} (${input.type}) failed: ${input.error ?? 'unknown error'}`;
+    const brand = await this.emailBrand();
+    const rendered = renderJobCompleteEmail({
+      jobId: input.jobId,
+      type: input.type,
+      status: input.status,
+      error: input.error,
+      consoleUrl: `${this.consoleBase()}/jobs`,
+      brand,
+    });
 
     try {
-      const result = await this.sendEmail({ to: recipients, subject, text });
+      const result = await this.sendEmail({
+        to: recipients,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+      });
       if (!result) return;
       await this.audit.record({
         organizationId: input.organizationId,
         action: 'notification.job_complete_sent',
         route: 'jobs.worker',
-        metadata: { jobId: input.jobId, status: input.status, provider: result.provider, emailId: result.id },
+        metadata: {
+          jobId: input.jobId,
+          status: input.status,
+          provider: result.provider,
+          emailId: result.id,
+          template: rendered.id,
+        },
       });
     } catch (error) {
       this.logger.warn(
@@ -128,14 +414,36 @@ export class NotificationsService {
             route: 'notifications.usage',
             metadata: { characters, quota: org.characterQuota, emailed: false },
           });
+          void this.webhooks
+            .deliverPartnerEvent({
+              organizationId,
+              event: 'credits.low',
+              data: {
+                thresholdPct: threshold.pct,
+                charactersUsed: characters,
+                quota: org.characterQuota,
+                remaining: Math.max(org.characterQuota - characters, 0),
+              },
+            })
+            .catch(() => undefined);
           continue;
         }
 
         try {
+          const brand = await this.emailBrand();
+          const rendered = renderUsageThresholdEmail({
+            organizationName: org.name,
+            characters,
+            quota: org.characterQuota,
+            pct: threshold.pct,
+            consoleUrl: `${this.consoleBase()}/usage`,
+            brand,
+          });
           const result = await this.sendEmail({
             to: recipients,
-            subject: `VerbaLab usage at ${threshold.pct}% — ${org.name}`,
-            text: `Your organization "${org.name}" has used ${characters.toLocaleString()} of ${org.characterQuota.toLocaleString()} monthly characters (${threshold.pct}% threshold).`,
+            subject: rendered.subject,
+            text: rendered.text,
+            html: rendered.html,
           });
 
           await this.audit.record({
@@ -147,15 +455,29 @@ export class NotificationsService {
               quota: org.characterQuota,
               emailed: Boolean(result),
               emailId: result?.id,
+              template: rendered.id,
             },
           });
+
+          void this.webhooks
+            .deliverPartnerEvent({
+              organizationId,
+              event: 'credits.low',
+              data: {
+                thresholdPct: threshold.pct,
+                charactersUsed: characters,
+                quota: org.characterQuota,
+                remaining: Math.max(org.characterQuota - characters, 0),
+              },
+            })
+            .catch(() => undefined);
 
           if (result) {
             await this.audit.record({
               organizationId,
               action: 'notification.usage_threshold_sent',
               route: 'notifications.usage',
-              metadata: { threshold: threshold.pct, emailId: result.id },
+              metadata: { threshold: threshold.pct, emailId: result.id, template: rendered.id },
             });
           }
         } catch (error) {
@@ -172,6 +494,53 @@ export class NotificationsService {
     }
   }
 
+  async notifyWelcome(input: {
+    organizationId: string;
+    organizationName: string;
+    email: string;
+    name?: string;
+    apiKeyPrefix?: string;
+    apiKeySecret?: string;
+    monthlyCredits: number;
+  }) {
+    if (this.disabled() || !input.email) return;
+    try {
+      const brand = await this.emailBrand();
+      const rendered = renderWelcomeEmail({
+        organizationName: input.organizationName,
+        name: input.name,
+        monthlyCredits: input.monthlyCredits,
+        apiKeyPrefix: input.apiKeyPrefix,
+        apiKeySecret: input.apiKeySecret,
+        consoleUrl: this.consoleBase(),
+        docsUrl: `${this.consoleBase()}/docs/quickstart`,
+        brand,
+      });
+      const result = await this.sendEmail({
+        to: input.email,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+      });
+      if (!result) return;
+      await this.audit.record({
+        organizationId: input.organizationId,
+        action: 'notification.welcome_sent',
+        route: 'org.bootstrap',
+        metadata: {
+          email: input.email,
+          emailId: result.id,
+          template: rendered.id,
+          apiKeyPrefix: input.apiKeyPrefix ?? null,
+        },
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Welcome notification failed: ${error instanceof Error ? error.message : error}`,
+      );
+    }
+  }
+
   async notifyMemberAdded(input: {
     organizationId: string;
     organizationName: string;
@@ -181,17 +550,30 @@ export class NotificationsService {
     if (this.disabled() || !input.email) return;
 
     try {
+      const brand = await this.emailBrand();
+      const rendered = renderMemberAddedEmail({
+        organizationName: input.organizationName,
+        role: input.role,
+        consoleUrl: this.consoleBase(),
+        brand,
+      });
       const result = await this.sendEmail({
         to: input.email,
-        subject: `You've been added to ${input.organizationName} on VerbaLab`,
-        text: `You now have ${input.role} access to "${input.organizationName}" on VerbaLab. Sign in with the same email to open the console. (Invites are managed in Clerk; this message confirms membership sync.)`,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       });
       if (!result) return;
       await this.audit.record({
         organizationId: input.organizationId,
         action: 'notification.member_added_sent',
         route: 'identity.ensureSession',
-        metadata: { email: input.email, role: input.role, emailId: result.id },
+        metadata: {
+          email: input.email,
+          role: input.role,
+          emailId: result.id,
+          template: rendered.id,
+        },
       });
     } catch (error) {
       this.logger.warn(
@@ -213,10 +595,19 @@ export class NotificationsService {
     if (recipients.length === 0) return null;
 
     try {
+      const brand = await this.emailBrand();
+      const rendered = renderWorkflowMessageEmail({
+        subject: input.subject,
+        message: input.message,
+        jobId: input.jobId,
+        consoleUrl: `${this.consoleBase()}/workflows`,
+        brand,
+      });
       const result = await this.sendEmail({
         to: recipients,
-        subject: input.subject,
-        text: input.message,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       });
       if (!result) return null;
       await this.audit.record({
@@ -228,6 +619,7 @@ export class NotificationsService {
           stepId: input.stepId,
           provider: result.provider,
           emailId: result.id,
+          template: rendered.id,
         },
       });
       return result;
@@ -237,6 +629,45 @@ export class NotificationsService {
       );
       throw error;
     }
+  }
+
+  async sendTestEmail(input: {
+    organizationId: string;
+    to: string;
+    templateId?: string;
+    userId?: string;
+  }) {
+    if (!this.isConfigured() && this.provider.name === 'resend') {
+      return {
+        sent: false,
+        note: 'Set RESEND_API_KEY and EMAIL_FROM first',
+        engine: this.engine(),
+      };
+    }
+    const preview = (await this.previewTemplate(input.templateId ?? 'member_added')).template;
+    const result = await this.sendEmail({
+      to: input.to,
+      subject: `[TEST] ${preview.subject}`,
+      text: preview.text,
+      html: preview.html,
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'notification.test_sent',
+      route: 'POST /v1/notifications/test',
+      metadata: {
+        to: input.to,
+        template: preview.id,
+        emailId: result?.id ?? null,
+      } as never,
+    });
+    return {
+      sent: Boolean(result),
+      emailId: result?.id ?? null,
+      provider: result?.provider ?? 'resend',
+      template: preview.id,
+    };
   }
 
   private async ownerAdminEmails(organizationId: string): Promise<string[]> {

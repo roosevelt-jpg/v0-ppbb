@@ -27,23 +27,36 @@ fly auth login
 fly apps create verbalab-api
 fly apps create verbalab-web
 
-# Attach or set secrets (examples — use your real values)
+# Preferred: export secrets then run the helper (validates pk_live_/sk_live_)
+export DATABASE_URL=… REDIS_URL=… CLERK_SECRET_KEY=sk_live_… \
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_… CORS_ORIGIN=… NEXT_PUBLIC_API_URL=…
+# optional: CLERK_WEBHOOK_SIGNING_SECRET NEXT_PUBLIC_CLERK_DOMAIN VERBALAB_WEIGHTS_URL …
+./scripts/fly-production-secrets.sh
+```
+
+Or set secrets manually:
+
+```bash
 fly secrets set -a verbalab-api \
   DATABASE_URL='postgresql://...' \
   REDIS_URL='redis://...' \
   CORS_ORIGIN='https://verbalab-web.fly.dev' \
-  CLERK_SECRET_KEY='...' \
-  GOOGLE_TRANSLATE_API_KEY='...' \
-  OPENAI_API_KEY='...' \
+  CLERK_SECRET_KEY='sk_live_...' \
+  CLERK_WEBHOOK_SIGNING_SECRET='whsec_...' \
+  VERBALAB_WEIGHTS_URL='https://…/manifest.json' \
   STRIPE_SECRET_KEY='...' \
   STRIPE_WEBHOOK_SECRET='...' \
   STRIPE_PRICE_ID_PRO='...' \
   BILLING_SUCCESS_URL='https://verbalab-web.fly.dev/billing?checkout=success' \
   BILLING_CANCEL_URL='https://verbalab-web.fly.dev/billing?checkout=cancel' \
-  BILLING_PORTAL_RETURN_URL='https://verbalab-web.fly.dev/billing'
+  BILLING_PORTAL_RETURN_URL='https://verbalab-web.fly.dev/billing' \
+  RATE_LIMIT_DISABLED=0 \
+  JOBS_INLINE=0
 
 # Web build args are set at deploy time; also set runtime Clerk secret if used server-side:
-fly secrets set -a verbalab-web CLERK_SECRET_KEY='...'
+fly secrets set -a verbalab-web \
+  CLERK_SECRET_KEY='sk_live_...' \
+  NEXT_PUBLIC_CLERK_DOMAIN='accounts.yourdomain.com'
 ```
 
 Deploy (from repo root):
@@ -52,8 +65,11 @@ Deploy (from repo root):
 fly deploy -c infra/fly/api.toml --dockerfile apps/api/Dockerfile
 fly deploy -c infra/fly/web.toml --dockerfile apps/web/Dockerfile \
   --build-arg NEXT_PUBLIC_API_URL=https://verbalab-api.fly.dev \
-  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_... \
+  --build-arg NEXT_PUBLIC_CLERK_DOMAIN=accounts.yourdomain.com
 ```
+
+Production checklist after deploy: Clerk webhook → org bootstrap, Redis rate limits on, partner webhooks (`docs/PARTNER_WEBHOOKS.md`), 60s SDK path (`docs/QUICKSTART.md` / `/docs/quickstart`).
 
 API **release_command** runs `pnpm db:migrate` (`prisma migrate deploy`) before each new release replaces machines.
 
@@ -109,21 +125,26 @@ Deferred. Ship one production pair first; add Fly preview apps later if needed.
 ## Multi-region residency (VL-075)
 
 Each region is a **separate deploy + database** (residency island), not a mesh.
+**Primary cloud residency is Africa** (`jnb` / Johannesburg).
 
 | Island | Fly configs | `VERBALAB_REGION` | Fly `primary_region` |
 | --- | --- | --- | --- |
-| US (default) | `infra/fly/api.toml`, `web.toml` | `us` | `iad` |
+| Africa (default) | `infra/fly/api.toml`, `web.toml` | `af` | `jnb` |
 | EU | `infra/fly/api.eu.toml`, `web.eu.toml` | `eu` | `ams` |
+| US | `infra/fly/api.us.toml`, `web.us.toml` | `us` | `iad` |
 
 ```bash
+# Primary Africa island (default)
+fly deploy -c infra/fly/api.toml --dockerfile apps/api/Dockerfile
+fly deploy -c infra/fly/web.toml --dockerfile apps/web/Dockerfile \
+  --build-arg NEXT_PUBLIC_API_URL=https://verbalab-api.fly.dev \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+
+# Optional EU island
 fly apps create verbalab-api-eu
 fly apps create verbalab-web-eu
-# Attach a *separate* EU Postgres + Redis, then:
 fly secrets set -a verbalab-api-eu DATABASE_URL='...' REDIS_URL='...' VERBALAB_REGION=eu ...
 fly deploy -c infra/fly/api.eu.toml --dockerfile apps/api/Dockerfile
-fly deploy -c infra/fly/web.eu.toml --dockerfile apps/web/Dockerfile \
-  --build-arg NEXT_PUBLIC_API_URL=https://verbalab-api-eu.fly.dev \
-  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
 ```
 
-Orgs may pin `dataRegion` via `PATCH /v1/organization/residency`. A pin to `eu` rejects API calls on the US island (`residency_mismatch`). **Pinning does not migrate data.**
+New organizations default to `dataRegion=af`. Orgs may pin via `PATCH /v1/organization/residency`. A pin that mismatches the deploy island rejects authenticated calls (`residency_mismatch`). **Pinning does not migrate data.**

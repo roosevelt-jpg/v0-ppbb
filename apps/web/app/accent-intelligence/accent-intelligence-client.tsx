@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -38,7 +40,7 @@ export function AccentIntelligenceClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, stats] = await Promise.all([
       apiFetch<Engine>('/v1/accents/engine', { token }),
@@ -58,7 +60,7 @@ export function AccentIntelligenceClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<Classification>('/v1/accents/classify', {
         token,
@@ -90,7 +92,8 @@ export function AccentIntelligenceClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Cue-based accent detection and classification with confidence and analytics. Dialects live in{' '}
         <Link href="/dialects">Language Cloud</Link>. Registry at <Link href="/accents">/accents</Link>.
-        Not acoustic regional models.
+        Regional model cards at GET /v1/accents/regional-models (catalog cue packs — not trained
+        acoustic phonetics ID).
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -152,7 +155,7 @@ export function AccentIntelligenceClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

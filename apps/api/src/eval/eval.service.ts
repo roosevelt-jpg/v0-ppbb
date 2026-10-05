@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { GatewayService } from '../gateway/gateway.service';
 import { LanguagesService } from '../languages/languages.service';
+import { CountryPacksService } from '../country-packs/country-packs.service';
 import { GOLDEN_PAIRS, pairKey, type GoldenPair } from './goldens';
 import { scorePair, type PairScoreSummary } from './metrics';
 
@@ -45,6 +46,7 @@ export class EvalService {
   constructor(
     private readonly gateway: GatewayService,
     private readonly languages: LanguagesService,
+    private readonly countryPacks: CountryPacksService,
   ) {
     this.lastSnapshot = this.readCommittedSnapshot();
   }
@@ -160,6 +162,8 @@ export class EvalService {
     });
 
     const strategic = langs.filter((l) => l.tier === 'strategic_african');
+    const strategicGlobal = langs.filter((l) => l.tier === 'strategic_global');
+    const packs = await this.countryPacks.list();
 
     return {
       disclaimer: DISCLAIMER,
@@ -169,6 +173,7 @@ export class EvalService {
       languages: {
         total: langs.length,
         strategicAfrican: strategic.length,
+        strategicGlobal: strategicGlobal.length,
         codes: langs.map((l) => ({
           code: l.code,
           name: l.nameEn,
@@ -176,8 +181,27 @@ export class EvalService {
           script: l.script,
         })),
       },
+      countryPacks: {
+        total: packs.data.length,
+        note: packs.note,
+        packs: packs.data.map((p) => ({
+          code: p.code,
+          name: p.nameEn,
+          region: p.region,
+          currencyCode: p.currencyCode,
+          primaryLanguages: p.primaryLanguages,
+          api: `GET /v1/country-packs/${p.code}`,
+        })),
+      },
+      links: {
+        countryPacks: '/v1/country-packs',
+        languages: '/v1/languages',
+        coverage: '/v1/coverage',
+        worldLanguageRegistry: '/v1/world-language-registry/engine',
+        africanLanguageRegistry: '/v1/african-language-registry/engine',
+      },
       note:
-        'Translate is available for registry languages via the vendor gateway. Only focusPairs currently have golden sets and scored runs.',
+        'Translate is available for registry languages via the vendor gateway. Country packs cover African markets plus SEA / India / LatAm / Caribbean. Only focusPairs currently have golden sets and scored runs.',
     };
   }
 }

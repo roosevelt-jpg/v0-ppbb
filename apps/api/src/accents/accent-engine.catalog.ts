@@ -20,7 +20,7 @@ export function accentEngineCatalog() {
         name: 'Accent Detection',
         status: 'shipped',
         api: 'POST /v1/accents/detect',
-        notes: 'Text and/or audio→STT cue scoring (VL-132). Not acoustic phonetics ID.',
+        notes: 'Text and/or audio→STT cue scoring. Not acoustic phonetics ID.',
       },
       {
         id: 'accent-classification',
@@ -41,14 +41,14 @@ export function accentEngineCatalog() {
         name: 'Dialect Detection',
         status: 'shipped',
         api: 'POST /v1/dialects/detect',
-        notes: 'Language Cloud (VL-131) — linked here, not reimplemented under Speech Cloud.',
+        notes: 'Language Cloud — linked here, not reimplemented under Speech Cloud.',
       },
       {
         id: 'regional-models',
         name: 'Regional Accent Models',
-        status: 'deferred',
-        api: null,
-        notes: 'Acoustic / phonetics regional models — buy path / later depth. Not claimed.',
+        status: 'shipped',
+        api: 'GET /v1/accents/regional-models',
+        notes: 'Regional accent model cards (catalog + cue packs). Acoustic phonetics ID remains buy-path depth.',
       },
       {
         id: 'accent-analytics',

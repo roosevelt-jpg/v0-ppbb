@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -44,7 +47,7 @@ export function PluginRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/plugin-runtime/engine', { token }),
@@ -62,7 +65,7 @@ export function PluginRuntimeClient() {
   const registerAndInvoke = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ plugin: Plugin }>('/v1/plugin-runtime/plugins', {
         token,
@@ -109,11 +112,11 @@ export function PluginRuntimeClient() {
   return (
     <AppShell>
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel · VL-221</p>
+        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel</p>
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Plugin Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
           Sandbox plugin registry with hard permission allowlists. Extends{' '}
-          <Link href="/marketplace">marketplace</Link> — not a browser/VS Code extension OS.
+          <Link href="/marketplace">marketplace</Link>.
         </p>
 
         {error ? (
@@ -124,9 +127,6 @@ export function PluginRuntimeClient() {
 
         {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: 0 }}>
-              Mode: {engine.mode} · max plugins: {engine.ceilings.maxPluginsPerWorkspace}
-            </p>
             <ul style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
               <li>openToolExecution: {String(engine.honesty.openToolExecution)}</li>
               <li>liveCodeExecution: {String(engine.honesty.liveCodeExecution)}</li>
@@ -135,7 +135,7 @@ export function PluginRuntimeClient() {
               <li>localPermissionHardGate: {String(engine.honesty.localPermissionHardGate)}</li>
               <li>extendsMarketplace: {String(engine.honesty.extendsMarketplace)}</li>
             </ul>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.safety.note}</p>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           </section>
         ) : null}
 

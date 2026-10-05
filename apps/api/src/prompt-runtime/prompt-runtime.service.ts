@@ -51,7 +51,7 @@ export class PromptRuntimeService {
     return {
       keys: PROMPT_KEYS.map((id) => ({ id })),
       layer: 'kernel',
-      note: 'Prompt Runtime keys map onto VL-086 managed prompts.',
+      note: 'Prompt Runtime keys map onto managed prompts.',
       honesty: promptRuntimeCatalog().honesty,
     };
   }
@@ -61,7 +61,7 @@ export class PromptRuntimeService {
     const reg = await this.promptIntel.registry(input.organizationId, input.workspaceId);
     return {
       ...reg,
-      note: 'Prompt Runtime registry façade over VL-188 / VL-086.',
+      note: 'Prompt Runtime registry façade over /.',
     };
   }
 
@@ -114,7 +114,7 @@ export class PromptRuntimeService {
       matched: true,
       notes: hit.notes,
       honesty: { promptMeshOs: false },
-      note: 'Sandbox feature→key map — not a prompt mesh OS.',
+      note: 'Sandbox feature→key map.',
     };
   }
 
@@ -161,7 +161,7 @@ export class PromptRuntimeService {
       variablesApplied: Object.keys(variables),
       missingVariables: missing,
       chars: [...rendered].length,
-      note: '{{name}} substitution only — not a templating OS.',
+      note: '{{name}} substitution only.',
     };
   }
 
@@ -209,7 +209,7 @@ export class PromptRuntimeService {
       findings,
       chars: rendered.chars,
       ceilings,
-      note: 'Heuristic validation — not a formal prompt schema OS.',
+      note: 'Heuristic validation.',
     };
   }
 
@@ -228,7 +228,7 @@ export class PromptRuntimeService {
     });
     return {
       ...scan,
-      note: 'Delegates to Prompt Intelligence pattern scan — not a red-team harness OS.',
+      note: 'Delegates to Prompt Intelligence pattern scan.',
     };
   }
 
@@ -280,7 +280,7 @@ export class PromptRuntimeService {
         evolutionaryOptimizer: false,
         heuristicOnly: true,
       },
-      note: 'Heuristic optimize stub — not an auto-prompt research lab.',
+      note: 'Heuristic optimize stub.',
     };
   }
 
@@ -476,7 +476,7 @@ export class PromptRuntimeService {
       events: counts.reduce((s, c) => s + c.count, 0),
       byAction: Object.fromEntries(counts.map((c) => [c.action, c.count])),
       honesty: promptRuntimeCatalog().honesty,
-      note: 'Prompt Runtime analytics (VL-216).',
+      note: 'Prompt Runtime analytics.',
     };
   }
 
@@ -494,7 +494,7 @@ export class PromptRuntimeService {
       honesty: engine.honesty,
       safety: {
         agentActionBoundariesRequired: true,
-        note: 'Prompt Runtime prepares text only; Agent/Workflow action gates remain VL-219–222.',
+        note: 'Prompt Runtime prepares text only; Agent/Workflow action gates remain.',
       },
     };
   }

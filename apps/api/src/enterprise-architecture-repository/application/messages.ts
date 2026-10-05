@@ -1,0 +1,3 @@
+export class GetEnterpriseArchitectureRepositoryEngineQuery {}
+
+export class ListEnterpriseArchitectureRepositoryProductsQuery {}

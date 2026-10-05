@@ -1,20 +1,20 @@
 # ADR-0041: Foundation model program deferred
 
-- Status: Accepted (training program still deferred; platform hub reopened in ADR-0135)
+- Status: Superseded for product routing by ADR-0298 (Own AI primary); SOTA-claim honesty retained
 - Date: 2026-09-07
 - Updated: 2026-10-03
 - Phase: VL-112
 
 ## Context
 
-Roadmap VL-112 asks for named foundation models (Atlas, Baobab, Echo, …) as products on trained weights. Buy-vs-build says **Do not start** without a research org and capital. M10–M11 already deliver vendor MT, coverage eval, datasets, fine-tunes for failed pairs, a model registry, and rented-GPU training jobs.
+Roadmap VL-112 asks for named foundation models (Atlas, Baobab, Echo, …). VerbaLab’s company posture is **own models** (VerbaLab Own AI), not renting peer platforms as the product default.
 
 ## Decision
 
-1. **Do not start VL-112 as a trained-weights program.** No claiming competitive foundation models without data, compute, and eval evidence.
-2. **Use instead:** bought providers (Google/OpenAI/etc.), open weights only via VL-104/VL-111 fine-tunes when coverage fails, and VL-110 registry for what is live.
-3. **Status:** training/research track remains `Blocked` on hires + budget.
-4. **2026-10-03 exception (ADR-0135):** Volume 9 may ship an **honest Foundation Model Cloud hub** and MLOps scaffolds (VL-224+) that explicitly do **not** claim trained Atlas/Baobab/etc. weights. Empty fake-completeness remains forbidden.
+1. **2026-10-03 (ADR-0298):** VL-112 / FM hubs are **active** as VerbaLab-owned model products. Gateway primary path is VerbaLab Own AI endpoints (`VERBALAB_*`). Weight binaries deploy as VerbaLab model services — not rented third-party AI vendors defaults.
+2. **Honesty retained:** do not claim competitive SOTA without eval evidence against live VerbaLab endpoints.
+3. **Historical note:** Earlier “do not start / buy vendors” posture applied before the own-model program was authorized.
+4. Platform hubs (ADR-0135+) remain valid under owned-model serving.
 
 ## Consequences
 

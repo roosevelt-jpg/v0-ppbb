@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -31,7 +32,7 @@ export function DecisionEngineClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, an] = await Promise.all([
       apiFetch<Engine>('/v1/decision-engine/engine', { token }),
@@ -50,7 +51,7 @@ export function DecisionEngineClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<DecideResult>('/v1/decision-engine/decide', {
         token,
@@ -84,7 +85,8 @@ export function DecisionEngineClient() {
         AI Decision Engine
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Bounded policy/routing helpers — not an enterprise BRMS.{' '}
+        Bounded policy/routing helpers plus sandbox kind=enterprise_brms rule tables — not
+        Drools/Pega parity.{' '}
         <Link href="/intelligence-cloud">Intelligence Cloud</Link> ·{' '}
         <Link href="/enterprise">Enterprise</Link>.
       </p>

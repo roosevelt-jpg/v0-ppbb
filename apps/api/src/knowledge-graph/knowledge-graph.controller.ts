@@ -36,6 +36,11 @@ export class KnowledgeGraphController {
     return this.knowledgeGraph.domains();
   }
 
+  @Get('domains/:id')
+  domain(@Param('id') id: string) {
+    return this.knowledgeGraph.domainDetail(id);
+  }
+
   @Get('analytics')
   @UseGuards(TranslateAuthGuard)
   analytics(@Req() req: AuthedReq) {

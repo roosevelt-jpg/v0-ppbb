@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { canOpenProductConsole } from '@/lib/product-status';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Product = {
@@ -44,7 +47,7 @@ export function VoiceCloudClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/voice-cloud/overview', { token }));
   }, [getToken]);
@@ -68,8 +71,8 @@ export function VoiceCloudClient() {
         Voice Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Parent hub for neural TTS, consent-gated cloning, Voice Studio, and deferred emotion /
-        biometrics / marketplace products. Extends existing audio APIs — does not regenerate Speech
+        Parent hub for neural TTS, consent-gated cloning, Voice Studio, emotion voice, conversion,
+        biometrics, and marketplace products. Extends existing audio APIs — does not regenerate Speech
         or Language Cloud.
       </p>
 
@@ -97,16 +100,14 @@ export function VoiceCloudClient() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontWeight: 600 }}>
-                        {p.name}{' '}
-                        <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.85rem' }}>
-                          · {p.status}
-                        </span>
+                        {p.name}
+                        <StatusSuffix status={p.status} />
                       </div>
                       <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
                         {p.notes}
                       </div>
                     </div>
-                    {p.console && (p.status === 'shipped' || p.status === 'partial') ? (
+                    {p.console && canOpenProductConsole(p.status, p.console) ? (
                       <Link href={p.console} style={{ color: 'var(--accent)', fontWeight: 550, fontSize: '0.9rem' }}>
                         Open →
                       </Link>
@@ -172,7 +173,7 @@ export function VoiceCloudClient() {
             <h2 style={label}>Architecture honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Batch {data.architecture.batch ? 'yes' : 'no'} · Streaming TTS{' '}
-              {data.architecture.streaming ? 'yes' : 'deferred'} · GraphQL{' '}
+              {data.architecture.streaming ? 'yes' : 'sandbox'} · GraphQL{' '}
               {data.architecture.graphql ? 'yes' : 'no'} · CQRS{' '}
               {data.architecture.cqrs ? 'yes (Voice Cloud hub)' : 'no'} · Billing{' '}
               {data.architecture.billing ? 'yes (TTS metering)' : 'no'} · Consent/audit{' '}
@@ -182,8 +183,8 @@ export function VoiceCloudClient() {
               {data.architecture.kubernetes ? 'yes (EKS af-south-1)' : 'no'}
             </p>
             <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-              Deferred: true streaming TTS, celebrity voice SKUs, cross-tenant clone synthesis,
-              NIST-certified biometrics/PAD, LUFS mastering, spectral ML denoise.
+              Honesty: not a NIST-certified biometrics/PAD lab, LUFS mastering OS, or spectral ML denoise
+              vendor. Celebrity-tagged listings and streaming TTS are available as sandbox surfaces.
             </p>
           </section>
         </div>

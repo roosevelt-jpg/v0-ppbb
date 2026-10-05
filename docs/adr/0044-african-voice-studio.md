@@ -6,7 +6,7 @@
 
 ## Context
 
-VerbaLab aims at an African ElevenLabs-like product surface. VL-042/VL-064 already ship stock TTS and consent-gated ElevenLabs Instant Voice Cloning. The `/audio` console was a thin operator panel, not a studio.
+VerbaLab aims at an African external vendor-like product surface. VL-042/VL-064 already ship stock TTS and consent-gated Instant Voice Cloning (external vendor). The `/audio` console was a thin operator panel, not a studio.
 
 ## Decision
 
@@ -14,7 +14,7 @@ VerbaLab aims at an African ElevenLabs-like product surface. VL-042/VL-064 alrea
 2. **African presets:** Language chips `en` / `sw` / `yo` / `am` / `fr` with curated sample scripts; preview via existing `POST /v1/audio/speech`.
 3. **Clone lifecycle in UI:** Multi-sample upload (≤5), status badges, Approve / Reject / Disable wired to existing `/v1/voice-clones*` APIs.
 4. **Auth:** Prefer Clerk session for STT/TTS; optional `vl_live_` key fallback.
-5. **Vendors unchanged:** OpenAI stock voices; ElevenLabs for clones (`clone:{id}` + watermark). Own TTS is VL-121.
+5. **Vendors unchanged:** OpenAI stock voices; external vendor for clones (`clone:{id}` + watermark). Own TTS is VL-121.
 
 ## Consequences
 

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -45,7 +47,7 @@ export function EnterpriseRagClient() {
   const [answer, setAnswer] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/enterprise-rag/engine', { token }),
@@ -64,7 +66,7 @@ export function EnterpriseRagClient() {
     setError(null);
     setAnswer(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<RetrieveResult>('/v1/enterprise-rag/retrieve', {
         token,
@@ -81,7 +83,7 @@ export function EnterpriseRagClient() {
   const ask = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         answer: string;
@@ -120,8 +122,8 @@ export function EnterpriseRagClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Grounded answers over the{' '}
         <Link href="/knowledge-base">Knowledge Base</Link> with citations and hybrid retrieval.
-        Extends VL-062. Not a LangChain / agentic RAG OS — hand-check retrieved context on real
-        docs.
+        Includes sandbox multi-hop agentic retrieve and LangChain adapter metadata — not
+        LangChain/LlamaIndex OS parity. Hand-check retrieved context on real docs.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -208,7 +210,7 @@ export function EnterpriseRagClient() {
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
               </li>
             ))}
@@ -221,7 +223,7 @@ export function EnterpriseRagClient() {
         {' · '}
         <Link href="/enterprise-search">Enterprise Search</Link>
         {' · '}
-        <Link href="/knowledge">VL-062 Knowledge</Link>
+        <Link href="/knowledge">Knowledge</Link>
       </p>
     </AppShell>
   );

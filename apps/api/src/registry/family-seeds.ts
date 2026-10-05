@@ -43,4 +43,59 @@ export const FAMILY_SEEDS: FamilySeed[] = [
     code: 'austronesian',
     nameEn: 'Austronesian',
   },
+  {
+    code: 'nilo_saharan',
+    nameEn: 'Nilo-Saharan',
+    notes: 'Luo, Kanuri and related East/Central African registry languages.',
+  },
+  {
+    code: 'khoisan',
+    nameEn: 'Khoisan',
+    notes: 'Click-language cluster representatives (e.g. Nama); not an exhaustive genetic claim.',
+  },
+  {
+    code: 'dravidian',
+    nameEn: 'Dravidian',
+    notes: 'Tamil, Telugu, Kannada, Malayalam and related South Asian languages.',
+  },
+  {
+    code: 'austroasiatic',
+    nameEn: 'Austroasiatic',
+    notes: 'Vietnamese, Khmer and related Mainland Southeast Asian languages.',
+  },
+  {
+    code: 'tai_kadai',
+    nameEn: 'Tai–Kadai',
+    notes: 'Thai, Lao and related languages.',
+  },
+  {
+    code: 'tupian',
+    nameEn: 'Tupian',
+    notes: 'Guaraní and related South American languages.',
+  },
+  {
+    code: 'aymaran',
+    nameEn: 'Aymaran',
+    notes: 'Aymara and related Andean languages.',
+  },
+  {
+    code: 'quechuan',
+    nameEn: 'Quechuan',
+    notes: 'Quechua varieties across the Andes.',
+  },
+  {
+    code: 'uto_aztecan',
+    nameEn: 'Uto-Aztecan',
+    notes: 'Nahuatl and related Mesoamerican languages.',
+  },
+  {
+    code: 'mayan',
+    nameEn: 'Mayan',
+    notes: 'Yucatec Maya and related Mesoamerican languages.',
+  },
+  {
+    code: 'creole',
+    nameEn: 'Creole / Contact',
+    notes: 'Atlantic and Indian Ocean creoles; contact varieties catalogued for voice coverage.',
+  },
 ];

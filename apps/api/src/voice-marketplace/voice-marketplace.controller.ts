@@ -35,6 +35,12 @@ export class VoiceMarketplaceController {
     return this.marketplace.engine();
   }
 
+  @Get('access')
+  @UseGuards(TranslateAuthGuard)
+  access(@Req() req: AuthedReq) {
+    return this.marketplace.access(req.translateAuth.organizationId);
+  }
+
   @Get('language-packs')
   languagePacks() {
     return this.marketplace.languagePacks();
@@ -46,11 +52,12 @@ export class VoiceMarketplaceController {
     @Req() req: AuthedReq,
     @Query('mine') mine?: string,
     @Query('kind') kind?: string,
+    @Query('tag') tag?: string,
   ) {
     if (mine === '1' || mine === 'true') {
       return this.marketplace.listMine(req.translateAuth.organizationId);
     }
-    return this.marketplace.listPublished(req.translateAuth.organizationId, kind);
+    return this.marketplace.listPublished(req.translateAuth.organizationId, kind, tag);
   }
 
   @Get('installs')

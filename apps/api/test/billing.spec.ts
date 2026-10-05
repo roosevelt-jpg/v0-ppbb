@@ -72,12 +72,15 @@ describe('Billing (VL-031)', () => {
     await app.close();
   });
 
-  it('defaults new orgs to free plan quota', async () => {
+  it('defaults new orgs to free plan credit quota (Free = 10k)', async () => {
     const org = await seedOrg(prisma, 'freeDefault');
     const summary = await billing.getSummary(org.id);
     expect(summary.plan).toBe('free');
     expect(summary.characterQuota).toBe(PLANS.free.characterQuota);
+    expect(summary.monthlyCredits).toBe(PLANS.free.monthlyCredits);
+    expect(summary.creditsUsed).toBe(0);
     expect(summary.charactersUsed).toBe(0);
+    expect(summary.pricingModel).toBe('verbalab-shared-credits');
   });
 
   it('rejects translate when monthly quota is exceeded', async () => {
@@ -127,6 +130,8 @@ describe('Billing (VL-031)', () => {
 
     const summary = await billing.getSummary(org.id);
     expect(summary.charactersUsed).toBe(2);
+    expect(summary.creditsUsed).toBe(2);
+    expect(summary.creditsRemaining).toBe(98);
     expect(summary.charactersRemaining).toBe(98);
   });
 

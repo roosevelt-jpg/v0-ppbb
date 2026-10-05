@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -44,7 +46,7 @@ export function WorkflowRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/workflow-runtime/engine', { token }),
@@ -62,7 +64,7 @@ export function WorkflowRuntimeClient() {
   const createAndRun = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ workflow: Workflow }>('/v1/workflow-runtime/workflows', {
         token,
@@ -104,11 +106,11 @@ export function WorkflowRuntimeClient() {
   return (
     <AppShell>
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel · VL-220</p>
+        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel</p>
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Workflow Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
           Sandbox multi-step workflows with hard permission allowlists. Extends product{' '}
-          <Link href="/workflows">/workflows</Link> — not Temporal/Airflow OS.
+          <Link href="/workflows">/workflows</Link>.
         </p>
 
         {error ? (
@@ -119,9 +121,6 @@ export function WorkflowRuntimeClient() {
 
         {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: 0 }}>
-              Mode: {engine.mode} · max workflows: {engine.ceilings.maxWorkflowsPerWorkspace}
-            </p>
             <ul style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
               <li>openToolExecution: {String(engine.honesty.openToolExecution)}</li>
               <li>liveStepExecution: {String(engine.honesty.liveStepExecution)}</li>
@@ -130,7 +129,7 @@ export function WorkflowRuntimeClient() {
               <li>localPermissionHardGate: {String(engine.honesty.localPermissionHardGate)}</li>
               <li>extendsWorkflowsProduct: {String(engine.honesty.extendsWorkflowsProduct)}</li>
             </ul>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.safety.note}</p>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           </section>
         ) : null}
 

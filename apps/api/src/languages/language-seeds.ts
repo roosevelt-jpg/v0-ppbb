@@ -1,3 +1,5 @@
+import { GLOBAL_LANGUAGE_SEEDS } from './global-language-seeds';
+
 export type LanguageSeed = {
   code: string;
   nameEn: string;
@@ -5,11 +7,12 @@ export type LanguageSeed = {
   script?: string;
   familyCode?: string;
   rtl?: boolean;
-  tier: 'vendor' | 'strategic_african';
+  tier: 'vendor' | 'strategic_african' | 'strategic_global';
 };
 
-/** ISO 639-1 / BCP-47 subset + curated African set (VL-020 / VL-139). */
+/** Vendor + strategic African + strategic global underserved (VL-020 / VL-139). */
 export const LANGUAGE_SEEDS: LanguageSeed[] = [
+  // —— Vendor baseline ——
   { code: 'en', nameEn: 'English', nameNative: 'English', script: 'Latn', familyCode: 'indo_european', tier: 'vendor' },
   { code: 'fr', nameEn: 'French', nameNative: 'Français', script: 'Latn', familyCode: 'indo_european', tier: 'vendor' },
   { code: 'es', nameEn: 'Spanish', nameNative: 'Español', script: 'Latn', familyCode: 'indo_european', tier: 'vendor' },
@@ -24,6 +27,8 @@ export const LANGUAGE_SEEDS: LanguageSeed[] = [
   { code: 'hi', nameEn: 'Hindi', nameNative: 'हिन्दी', script: 'Deva', familyCode: 'indo_european', tier: 'vendor' },
   { code: 'tr', nameEn: 'Turkish', nameNative: 'Türkçe', script: 'Latn', familyCode: 'turkic', tier: 'vendor' },
   { code: 'id', nameEn: 'Indonesian', nameNative: 'Bahasa Indonesia', script: 'Latn', familyCode: 'austronesian', tier: 'vendor' },
+
+  // —— Strategic African (core retained) ——
   { code: 'ar', nameEn: 'Arabic', nameNative: 'العربية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
   { code: 'sw', nameEn: 'Swahili', nameNative: 'Kiswahili', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
   { code: 'yo', nameEn: 'Yoruba', nameNative: 'Yorùbá', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
@@ -39,4 +44,167 @@ export const LANGUAGE_SEEDS: LanguageSeed[] = [
   { code: 'tn', nameEn: 'Tswana', nameNative: 'Setswana', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
   { code: 'st', nameEn: 'Southern Sotho', nameNative: 'Sesotho', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
   { code: 'af', nameEn: 'Afrikaans', nameNative: 'Afrikaans', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'ak', nameEn: 'Akan', nameNative: 'Akan', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'tw', nameEn: 'Twi', nameNative: 'Twi', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ee', nameEn: 'Ewe', nameNative: 'Eʋegbe', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ff', nameEn: 'Fulah', nameNative: 'Fulfulde', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'wo', nameEn: 'Wolof', nameNative: 'Wolof', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bm', nameEn: 'Bambara', nameNative: 'Bamanankan', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ln', nameEn: 'Lingala', nameNative: 'Lingála', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kg', nameEn: 'Kongo', nameNative: 'Kikongo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'lu', nameEn: 'Luba-Katanga', nameNative: 'Tshiluba', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'sg', nameEn: 'Sango', nameNative: 'Sängö', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ny', nameEn: 'Chichewa', nameNative: 'Chichewa', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'mg', nameEn: 'Malagasy', nameNative: 'Malagasy', script: 'Latn', familyCode: 'austronesian', tier: 'strategic_african' },
+  { code: 'ti', nameEn: 'Tigrinya', nameNative: 'ትግርኛ', script: 'Ethi', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'om', nameEn: 'Oromo', nameNative: 'Afaan Oromoo', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'swc', nameEn: 'Congo Swahili', nameNative: 'Kiswahili ya Kongo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ber', nameEn: 'Berber (Tamazight)', nameNative: 'Tamaziɣt', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'kab', nameEn: 'Kabyle', nameNative: 'Taqbaylit', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'rn', nameEn: 'Kirundi', nameNative: 'Ikirundi', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'lg', nameEn: 'Ganda', nameNative: 'Luganda', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'guz', nameEn: 'Gusii', nameNative: 'Ekegusii', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kam', nameEn: 'Kamba', nameNative: 'Kikamba', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ki', nameEn: 'Kikuyu', nameNative: 'Gĩkũyũ', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'luo', nameEn: 'Luo', nameNative: 'Dholuo', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'mer', nameEn: 'Meru', nameNative: 'Kĩmĩĩrũ', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'nd', nameEn: 'Northern Ndebele', nameNative: 'isiNdebele', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'nr', nameEn: 'Southern Ndebele', nameNative: 'isiNdebele', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ss', nameEn: 'Swati', nameNative: 'siSwati', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ts', nameEn: 'Tsonga', nameNative: 'Xitsonga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 've', nameEn: 'Venda', nameNative: 'Tshivenḓa', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kr', nameEn: 'Kanuri', nameNative: 'Kanuri', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'mos', nameEn: 'Mossi', nameNative: 'Mooré', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dyu', nameEn: 'Dyula', nameNative: 'Julakan', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— Ghana / Volta ——
+  { code: 'gaa', nameEn: 'Ga', nameNative: 'Gã', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dag', nameEn: 'Dagbani', nameNative: 'Dagbani', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ada', nameEn: 'Dangme', nameNative: 'Adangme', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'nzi', nameEn: 'Nzema', nameNative: 'Nzema', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'gjn', nameEn: 'Gonja', nameNative: 'Ngbanyito', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'xsm', nameEn: 'Kasem', nameNative: 'Kasem', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'fat', nameEn: 'Fante', nameNative: 'Mfantse', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'gur', nameEn: 'Farefare', nameNative: 'Farefare', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dga', nameEn: 'Southern Dagaare', nameNative: 'Dagaare', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— North Africa Amazigh ——
+  { code: 'tzm', nameEn: 'Central Atlas Tamazight', nameNative: 'Tamaziɣt', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'shi', nameEn: 'Tachelhit', nameNative: 'Taclḥit', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'zgh', nameEn: 'Standard Moroccan Tamazight', nameNative: 'Tamaziɣt', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'rif', nameEn: 'Tarifit', nameNative: 'Tarifit', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'tmh', nameEn: 'Tamasheq', nameNative: 'Tamasheq', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+
+  // —— North Africa Arabic varieties (ISO 639-3) ——
+  { code: 'mey', nameEn: 'Hassaniya Arabic', nameNative: 'حسانية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'ary', nameEn: 'Moroccan Arabic', nameNative: 'الدارجة المغربية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'arq', nameEn: 'Algerian Arabic', nameNative: 'الدارجة الجزائرية', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'aeb', nameEn: 'Tunisian Arabic', nameNative: 'تونسي', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'ayl', nameEn: 'Libyan Arabic', nameNative: 'ليبي', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+  { code: 'apd', nameEn: 'Sudanese Arabic', nameNative: 'عربي سوداني', script: 'Arab', familyCode: 'afro_asiatic', rtl: true, tier: 'strategic_african' },
+
+  // —— Horn of Africa ——
+  { code: 'aa', nameEn: 'Afar', nameNative: 'Qafar', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'tig', nameEn: 'Tigre', nameNative: 'ትግረ', script: 'Ethi', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'sid', nameEn: 'Sidamo', nameNative: 'Sidaamu Afoo', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'wal', nameEn: 'Wolaytta', nameNative: 'Wolaytta', script: 'Latn', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+  { code: 'gez', nameEn: 'Geʽez', nameNative: 'ግዕዝ', script: 'Ethi', familyCode: 'afro_asiatic', tier: 'strategic_african' },
+
+  // —— East Africa ——
+  { code: 'ach', nameEn: 'Acholi', nameNative: 'Lwo', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'teo', nameEn: 'Ateso', nameNative: 'Ateso', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'nyn', nameEn: 'Nyankole', nameNative: 'Runyankore', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'myx', nameEn: 'Masaaba', nameNative: 'Lumasaba', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'lgg', nameEn: 'Lugbara', nameNative: 'Lugbara', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'cgg', nameEn: 'Chiga', nameNative: 'Rukiga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'xog', nameEn: 'Soga', nameNative: 'Lusoga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'nyo', nameEn: 'Nyoro', nameNative: 'Runyoro', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ttj', nameEn: 'Tooro', nameNative: 'Rutooro', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'mas', nameEn: 'Maasai', nameNative: 'Maa', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'kln', nameEn: 'Kalenjin', nameNative: 'Kalenjin', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'luy', nameEn: 'Luyia', nameNative: 'Luyia', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'suk', nameEn: 'Sukuma', nameNative: 'Kisukuma', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'hay', nameEn: 'Haya', nameNative: 'Oruhaya', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'nym', nameEn: 'Nyamwezi', nameNative: 'Kinyamwezi', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bez', nameEn: 'Bena', nameNative: 'Hibena', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'gog', nameEn: 'Gogo', nameNative: 'Cigogo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'heh', nameEn: 'Hehe', nameNative: 'Kihehe', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— West Africa ——
+  { code: 'fon', nameEn: 'Fon', nameNative: 'Fon gbè', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kbp', nameEn: 'Kabiyè', nameNative: 'Kabɩyɛ', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'mnk', nameEn: 'Mandinka', nameNative: 'Mandinka', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'snk', nameEn: 'Soninke', nameNative: 'Soninkanxanne', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dje', nameEn: 'Zarma', nameNative: 'Zarmaciine', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'ses', nameEn: 'Koyraboro Senni', nameNative: 'Koyraboro Senni', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'pcm', nameEn: 'Nigerian Pidgin', nameNative: 'Naijá', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'tiv', nameEn: 'Tiv', nameNative: 'Tiv', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ibb', nameEn: 'Ibibio', nameNative: 'Ibibio', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'efi', nameEn: 'Efik', nameNative: 'Efik', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bin', nameEn: 'Edo', nameNative: 'Ẹ̀dó', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'urh', nameEn: 'Urhobo', nameNative: 'Urhobo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ijc', nameEn: 'Izon', nameNative: 'Izon', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kri', nameEn: 'Krio', nameNative: 'Krio', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'tem', nameEn: 'Temne', nameNative: 'Temne', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'men', nameEn: 'Mende', nameNative: 'Mɛnde', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'sus', nameEn: 'Susu', nameNative: 'Sosoxui', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kpe', nameEn: 'Kpelle', nameNative: 'Kpɛlɛɛ', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'vai', nameEn: 'Vai', nameNative: 'Vai', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bba', nameEn: 'Baatonum', nameNative: 'Baatɔnum', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bci', nameEn: 'Baoulé', nameNative: 'Baoulé', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'sef', nameEn: 'Cebaara Senoufo', nameNative: 'Senoufo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dnj', nameEn: 'Dan', nameNative: 'Dan', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'any', nameEn: 'Anyin', nameNative: 'Anyin', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'man', nameEn: 'Mandingo', nameNative: 'Mandingo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'fuv', nameEn: 'Nigerian Fulfulde', nameNative: 'Fulfulde', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'fuc', nameEn: 'Pulaar', nameNative: 'Pulaar', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ffm', nameEn: 'Maasina Fulfulde', nameNative: 'Maasina Fulfulde', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— Central Africa ——
+  { code: 'fan', nameEn: 'Fang', nameNative: 'Fang', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'dua', nameEn: 'Duala', nameNative: 'Duala', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ewo', nameEn: 'Ewondo', nameNative: 'Ewondo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bas', nameEn: 'Basaa', nameNative: 'Basaa', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'bum', nameEn: 'Bulu', nameNative: 'Bulu', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'lua', nameEn: 'Luba-Lulua', nameNative: 'Cilubà', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'lol', nameEn: 'Mongo', nameNative: 'Lomongo', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'tll', nameEn: 'Tetela', nameNative: 'Otetela', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— Southern Africa ——
+  { code: 'bem', nameEn: 'Bemba', nameNative: 'Ichibemba', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'toi', nameEn: 'Tonga (Zambia)', nameNative: 'Chitonga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'loz', nameEn: 'Lozi', nameNative: 'Silozi', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'tum', nameEn: 'Tumbuka', nameNative: 'chiTumbuka', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'yao', nameEn: 'Yao', nameNative: 'chiYao', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'umb', nameEn: 'Umbundu', nameNative: 'Úmbúndú', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kmb', nameEn: 'Kimbundu', nameNative: 'Kimbundu', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kj', nameEn: 'Kuanyama', nameNative: 'Oshikwanyama', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ng', nameEn: 'Ndonga', nameNative: 'Oshindonga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'her', nameEn: 'Herero', nameNative: 'Otjiherero', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'naq', nameEn: 'Nama', nameNative: 'Khoekhoegowab', script: 'Latn', familyCode: 'khoisan', tier: 'strategic_african' },
+  { code: 'vmw', nameEn: 'Makhuwa', nameNative: 'Emakhuwa', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ngl', nameEn: 'Lomwe', nameNative: 'Elomwe', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'seh', nameEn: 'Sena', nameNative: 'cisena', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'ndc', nameEn: 'Ndau', nameNative: 'chiNdau', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'kck', nameEn: 'Kalanga', nameNative: 'Ikalanga', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  // —— Sahel / Sudan ——
+  { code: 'din', nameEn: 'Dinka', nameNative: 'Thuɔŋjäŋ', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'nus', nameEn: 'Nuer', nameNative: 'Thok Nath', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'shk', nameEn: 'Shilluk', nameNative: 'Dhøg Cøllø', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'fvr', nameEn: 'Fur', nameNative: 'bèle fòòr', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'zag', nameEn: 'Zaghawa', nameNative: 'Beria', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'mls', nameEn: 'Masalit', nameNative: 'Masalit', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+  { code: 'anu', nameEn: 'Anuak', nameNative: 'Anywa', script: 'Latn', familyCode: 'nilo_saharan', tier: 'strategic_african' },
+
+  // —— Island / Creole ——
+  { code: 'mfe', nameEn: 'Morisyen', nameNative: 'Morisien', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'crs', nameEn: 'Seselwa Creole French', nameNative: 'Seselwa', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'kea', nameEn: 'Kabuverdianu', nameNative: 'Kriolu', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'cri', nameEn: 'Sãotomense', nameNative: 'Forro', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'pov', nameEn: 'Guinea-Bissau Creole', nameNative: 'Kriol', script: 'Latn', familyCode: 'indo_european', tier: 'strategic_african' },
+  { code: 'zdj', nameEn: 'Ngazidja Comorian', nameNative: 'Shingazidja', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+  { code: 'wni', nameEn: 'Ndzwani Comorian', nameNative: 'Shindzwani', script: 'Latn', familyCode: 'niger_congo', tier: 'strategic_african' },
+
+  ...GLOBAL_LANGUAGE_SEEDS,
 ];

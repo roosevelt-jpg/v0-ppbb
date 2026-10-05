@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = {
@@ -48,7 +50,7 @@ export function NeuralTtsClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, voiceRes, stats] = await Promise.all([
       apiFetch<Engine>('/v1/tts/engine', { token }),
@@ -73,7 +75,7 @@ export function NeuralTtsClient() {
     setError(null);
     setStreamNote(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       if (mode === 'batch') {
         const res = await fetch(`${API_URL}/v1/tts/synthesize`, {
@@ -211,7 +213,7 @@ export function NeuralTtsClient() {
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
                 <strong>
-                  {c.name} · {c.status}
+                  {c.name}<StatusSuffix status={c.status} />
                 </strong>
                 <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
               </li>

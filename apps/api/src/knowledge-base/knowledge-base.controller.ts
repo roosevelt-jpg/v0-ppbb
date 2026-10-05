@@ -35,6 +35,11 @@ export class KnowledgeBaseController {
     return this.knowledgeBase.contentKinds();
   }
 
+  @Get('permissions')
+  permissions() {
+    return this.knowledgeBase.permissions();
+  }
+
   @Get('collections')
   @UseGuards(TranslateAuthGuard)
   collections(@Req() req: AuthedReq) {
@@ -105,6 +110,26 @@ export class KnowledgeBaseController {
       collection: body.collection,
       tags: body.tags,
       contentKind: body.contentKind,
+    });
+  }
+
+  @Post('documents/:id/approve')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  approve(
+    @Req() req: AuthedReq,
+    @Param('id') id: string,
+    @Body() body: { status?: 'approved' | 'rejected' | 'pending'; note?: string },
+  ) {
+    const status = body.status ?? 'approved';
+    return this.knowledgeBase.setApproval({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      id,
+      status,
+      note: body.note,
     });
   }
 }

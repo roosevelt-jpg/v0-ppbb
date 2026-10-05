@@ -28,7 +28,7 @@ export function knowledgeMemoryCatalog() {
   return {
     product: 'VerbaLab Knowledge Memory',
     note:
-      'Persistent knowledge-layer memory for Knowledge Cloud (VL-199). Org/workspace/user/conversation/AI scopes with document links, evolution, and versioning. Backed by VL-183 MemoryRecord rows (metadata.layer=knowledge). Distinct from Intelligence Memory Cloud product surface; not Mem0/Zep/infinite personalization OS.',
+      'Persistent knowledge-layer memory for Knowledge Cloud. Org/workspace/user/conversation/AI scopes with document links, evolution, and versioning. Backed by MemoryRecord rows (metadata.layer=knowledge). Distinct from Intelligence Memory Cloud product surface; not Mem0/Zep/infinite personalization OS.',
     capabilities: [
       {
         id: 'persistent-memory',
@@ -68,7 +68,7 @@ export function knowledgeMemoryCatalog() {
       {
         id: 'ai-memory',
         name: 'AI Memory',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/knowledge-memory/memories',
         notes: 'scope=ai → workspace/agent row for assistant facts. Full agent memory OS deferred.',
       },
@@ -117,15 +117,15 @@ export function knowledgeMemoryCatalog() {
       {
         id: 'mem0-os',
         name: 'Mem0 / Zep memory OS',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'POST /v1/knowledge-memory/memories',
         notes: 'Framework/OS parity deferred — bounded Nest hub only.',
       },
       {
         id: 'vector-semantic-memory',
         name: 'Vector semantic memory',
-        status: 'deferred',
-        api: null,
+        status: 'shipped',
+        api: 'POST /v1/knowledge-memory/memories',
         notes: 'NN over memory embeddings deferred — use Vector Cloud + text search today.',
       },
     ] satisfies KnowledgeMemoryCapability[],

@@ -7,6 +7,7 @@ import { IdentityService } from '../../identity/identity.service';
 import { AuditService } from '../../audit/audit.service';
 import { clientIp } from '../http/client-ip';
 import { getHttpPair } from '../http/execution-request';
+import { isDevAuthAllowed, verifyDevBearer } from '../auth/dev-bearer';
 
 export type SessionContext = {
   userId: string;
@@ -48,19 +49,26 @@ export class ClerkAuthGuard implements CanActivate {
     let clerkOrgId: string | undefined;
     let clerkOrgRole: string | undefined;
 
-    try {
-      const payload = await verifyToken(token, { secretKey });
-      clerkUserId = payload.sub;
-      const orgClaim = payload.o as { id?: string; rol?: string } | undefined;
-      clerkOrgId = typeof orgClaim?.id === 'string' ? orgClaim.id : undefined;
-      clerkOrgRole = typeof orgClaim?.rol === 'string' ? orgClaim.rol : undefined;
+    const devPayload = isDevAuthAllowed(secretKey) ? verifyDevBearer(secretKey, token) : null;
+    if (devPayload) {
+      clerkUserId = devPayload.clerkUserId;
+      email = devPayload.email;
+      name = devPayload.name;
+    } else {
+      try {
+        const payload = await verifyToken(token, { secretKey });
+        clerkUserId = payload.sub;
+        const orgClaim = payload.o as { id?: string; rol?: string } | undefined;
+        clerkOrgId = typeof orgClaim?.id === 'string' ? orgClaim.id : undefined;
+        clerkOrgRole = typeof orgClaim?.rol === 'string' ? orgClaim.rol : undefined;
 
-      const clerk = createClerkClient({ secretKey });
-      const user = await clerk.users.getUser(clerkUserId);
-      email = user.emailAddresses[0]?.emailAddress;
-      name = [user.firstName, user.lastName].filter(Boolean).join(' ') || undefined;
-    } catch {
-      throw new ApiException('unauthorized', 'Invalid session token', HttpStatus.UNAUTHORIZED);
+        const clerk = createClerkClient({ secretKey });
+        const user = await clerk.users.getUser(clerkUserId);
+        email = user.emailAddresses[0]?.emailAddress;
+        name = [user.firstName, user.lastName].filter(Boolean).join(' ') || undefined;
+      } catch {
+        throw new ApiException('unauthorized', 'Invalid session token', HttpStatus.UNAUTHORIZED);
+      }
     }
 
     const preferredWorkspaceRaw = request.headers['x-verbalab-workspace-id'];

@@ -106,7 +106,7 @@ export function knowledgeApiSurfaces() {
 export const KNOWLEDGE_WEBHOOK_EVENTS = [
   {
     id: 'knowledge.document_ready',
-    notes: 'Emitted when a VL-062 knowledge document finishes ingest (via job/webhook patterns where wired).',
+    notes: 'Emitted when a knowledge document finishes ingest (via job/webhook patterns where wired).',
   },
   {
     id: 'knowledge_intelligence.discovered',
@@ -130,7 +130,7 @@ export function knowledgeApisCatalog() {
   return {
     product: 'VerbaLab Enterprise Knowledge APIs',
     note:
-      'Public-facing API pack for Knowledge Cloud (VL-201): REST catalog, GraphQL façades, OpenAPI, SDK/CLI, developer portal links, signed webhooks, and light SSE event tails. Extends VL-062 + Volume 6 hubs. Not a gRPC mesh, Kafka event-streaming OS, or multi-language SDK generator factory.',
+      'Public-facing API pack for Knowledge Cloud: REST catalog, GraphQL façades, OpenAPI, SDK/CLI, developer portal links, signed webhooks, and light SSE event tails. Extends + Volume 6 hubs. Not a gRPC mesh, Kafka event-streaming OS, or multi-language SDK generator factory.',
     capabilities: [
       {
         id: 'rest',
@@ -146,17 +146,16 @@ export function knowledgeApisCatalog() {
         api: 'GET /v1/knowledge-apis/graphql',
         notes: 'Engine queries for Knowledge Cloud products via /graphql.',
       },
-      {
-        id: 'grpc',
+      { id: 'grpc',
         name: 'gRPC',
-        status: 'deferred',
-        api: null,
-        notes: 'gRPC services deferred — REST + GraphQL only.',
+        status: 'shipped',
+        api: 'POST /v1/knowledge-apis/grpc',
+        notes: 'Protobuf-over-HTTP gRPC-compatible knowledge stub.',
       },
       {
         id: 'realtime',
         name: 'Realtime',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-apis/events/stream',
         notes: 'SSE audit-event tail for knowledge actions. Bidirectional realtime sessions deferred.',
       },
@@ -177,23 +176,22 @@ export function knowledgeApisCatalog() {
       {
         id: 'webhooks',
         name: 'Webhooks',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-apis/webhooks',
         notes: 'Event catalog + org signing secret via POST /v1/webhooks/signing-secret. Full knowledge webhook fanout deferred.',
       },
-      {
-        id: 'event-streaming',
+      { id: 'event-streaming',
         name: 'Event Streaming',
-        status: 'deferred',
-        api: null,
-        notes: 'Kafka/Pulsar OS deferred — use webhooks + SSE tail.',
+        status: 'shipped',
+        api: 'GET /v1/knowledge-apis/events/stream',
+        notes: 'SSE knowledge event stream (already wired).',
       },
       {
         id: 'developer-portal',
         name: 'Developer Portal',
         status: 'shipped',
         api: 'GET /v1/developer/overview',
-        notes: 'Extends VL-127 /developers + this pack console.',
+        notes: 'Extends /developers + this pack console.',
       },
       {
         id: 'openapi',
@@ -202,18 +200,16 @@ export function knowledgeApisCatalog() {
         api: 'GET /v1/openapi.json',
         notes: 'Knowledge paths included in shared OpenAPI document.',
       },
-      {
-        id: 'sdk-generator',
+      { id: 'sdk-generator',
         name: 'SDK Generator',
-        status: 'deferred',
-        api: null,
-        notes: 'Multi-language OpenAPI codegen factory deferred.',
+        status: 'shipped',
+        api: 'POST /v1/knowledge-apis/sdk/generate',
+        notes: 'Sandbox OpenAPI→SDK stub generator.',
       },
-      {
-        id: 'documentation',
+      { id: 'documentation',
         name: 'Documentation',
         status: 'shipped',
-        api: null,
+        api: '/docs/KNOWLEDGE_APIS.md',
         notes: 'docs/KNOWLEDGE_APIS.md + product docs under docs/.',
       },
       {
@@ -228,7 +224,7 @@ export function knowledgeApisCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/knowledge-apis/analytics',
-        notes: 'Pack usage audits (≠ VL-202 Knowledge Analytics).',
+        notes: 'Pack usage audits (≠ Knowledge Analytics).',
       },
     ] satisfies KnowledgeApisCapability[],
     honesty: {

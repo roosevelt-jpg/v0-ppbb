@@ -54,7 +54,7 @@ export function workflowRuntimeCeilings() {
     ),
     mode: workflowRuntimeMode(),
     liveStepExecution: false,
-    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in VL-220.',
+    note: 'Sandbox workflow runtime. Live open step execution against real accounts is forbidden in.',
   };
 }
 
@@ -66,7 +66,7 @@ export function workflowRuntimeCatalog() {
   return {
     product: 'VerbaLab Workflow Runtime',
     note:
-      'Workflow Runtime (VL-220). Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime (VL-222) is wired as a hard gate via WorkflowPolicyGate.',
+      'Workflow Runtime. Multi-step sandbox workflows with hard permission allowlists, sequential/parallel step plans, retries, human-approval stubs, rollback markers, versioning, and replay. Extends existing /v1/workflows product — does not regenerate it or invent a Temporal/Airflow OS. Actions are sandboxed; Policy Runtime is wired as a hard gate via WorkflowPolicyGate.',
     capabilities: [
       {
         id: 'workflow-execution',
@@ -78,35 +78,35 @@ export function workflowRuntimeCatalog() {
       {
         id: 'workflow-scheduling',
         name: 'Workflow Scheduling',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/schedule',
-        notes: 'Record runAt — not a cron fleet OS.',
+        notes: 'Record runAt.',
       },
       {
         id: 'retries',
         name: 'Retries',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Bounded sandbox retries on simulated failures.',
       },
       {
         id: 'human-approval',
         name: 'Human Approval',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/approve',
-        notes: 'Approval gate stub — not an enterprise BPM OS.',
+        notes: 'Approval gate stub.',
       },
       {
         id: 'rollback',
         name: 'Rollback',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/rollback',
-        notes: 'Marks run rolled back — not distributed saga OS.',
+        notes: 'Marks run rolled back.',
       },
       {
         id: 'parallel-execution',
         name: 'Parallel Execution',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Sandbox parallel groups — in-process only.',
       },
@@ -120,9 +120,10 @@ export function workflowRuntimeCatalog() {
       {
         id: 'distributed-execution',
         name: 'Distributed Execution',
-        status: 'deferred',
-        api: null,
-        notes: 'Not a distributed workflow OS (Temporal/Airflow parity deferred).',
+        status: 'shipped',
+        api: 'POST /v1/workflow-runtime/run',
+        notes:
+          'mode=distributed — in-process worker-slot fan-out with worker ids on steps. Not Temporal/Airflow parity.',
       },
       {
         id: 'workflow-versioning',
@@ -164,7 +165,7 @@ export function workflowRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'workflowRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -183,7 +184,7 @@ export function workflowRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/workflow-runtime/run',
         notes: 'Ships with Nest API — sandbox by default.',
       },
@@ -196,6 +197,7 @@ export function workflowRuntimeCatalog() {
       temporalOs: false,
       airflowOs: false,
       distributedWorkflowOs: false,
+      inProcessDistributedWorkers: true,
       regeneratesVolumes1to7: false,
       regeneratesWorkflowsProduct: false,
       extendsWorkflowsProduct: true,

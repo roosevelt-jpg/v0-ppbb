@@ -198,6 +198,6 @@ export function analyzeCallTranscript(transcript: string): CallAnalysis {
         },
       ],
     },
-    note: 'Heuristic Call Intelligence analysis (VL-158) — not Gong/Chorus or certified compliance.',
+    note: 'Heuristic Call Intelligence analysis — not Gong/Chorus or certified compliance.',
   };
 }

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -23,7 +25,7 @@ export function AudioIntelligenceClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, stats] = await Promise.all([
       apiFetch<Engine>('/v1/audio-intelligence/engine', { token }),
@@ -39,7 +41,7 @@ export function AudioIntelligenceClient() {
   }, [isLoaded, refresh]);
 
   async function authHeaders() {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     return { Authorization: `Bearer ${token}` };
   }
@@ -80,8 +82,8 @@ export function AudioIntelligenceClient() {
         Audio Intelligence
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Noise/silence analysis, noise-gate enhancement, linear upscaling, and energy VAD voice
-        isolation. Echo cancellation is deferred. Not Krisp or Demucs.{' '}
+        Noise/silence analysis, noise-gate enhancement, linear upscaling, energy VAD voice
+        isolation, and in-process echo cancellation. Not Krisp or Demucs.{' '}
         <Link href="/speech">Speech Cloud</Link>.
       </p>
 
@@ -173,7 +175,7 @@ export function AudioIntelligenceClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { StatusSuffix } from '@/components/status-suffix';
+import { canOpenProductConsole } from '@/lib/product-status';
 
 type Product = {
   id: string;
@@ -36,7 +39,7 @@ export function LanguageClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/language/overview', { token }));
   }, [getToken]);
@@ -98,16 +101,14 @@ export function LanguageClient() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
                     <div>
                       <div style={{ fontWeight: 600 }}>
-                        {p.name}{' '}
-                        <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.85rem' }}>
-                          · {p.status}
-                        </span>
+                        {p.name}
+                        <StatusSuffix status={p.status} />
                       </div>
                       <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
                         {p.notes}
                       </div>
                     </div>
-                    {p.console && p.status === 'shipped' ? (
+                    {p.console && canOpenProductConsole(p.status, p.console) ? (
                       <Link href={p.console} style={{ color: 'var(--accent)', fontWeight: 550, fontSize: '0.9rem' }}>
                         Open →
                       </Link>

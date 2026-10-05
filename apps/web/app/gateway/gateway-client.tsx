@@ -1,32 +1,39 @@
 'use client';
 
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Provider = {
   id: string;
-  libraryName: string;
+  libraryName?: string;
+  name?: string;
   status: string;
-  features: string[];
-  configured: boolean;
+  features?: string[];
+  configured?: boolean;
   notes: string;
 };
 
-type Overview = {
-  health: { status: string; region: string };
-  configured: Record<string, boolean>;
+type ProvidersRes = {
   providers: Provider[];
-  capabilities: {
-    fallback: string[];
-    caching: { responseCache: boolean };
-    streaming: boolean;
-    costOptimization: boolean;
+  capabilities?: {
+    fallback?: string[];
+    caching?: { responseCache: boolean };
+    streaming?: boolean;
+    costOptimization?: boolean;
   };
-  volume: { closes: string; note: string };
-  links: Record<string, string>;
+  docs?: string;
+};
+
+type Overview = ProvidersRes & {
+  health?: { status: string; region: string };
+  configured?: Record<string, boolean>;
+  links?: Record<string, string>;
+  volume?: { closes: string; note: string };
 };
 
 export function GatewayClient() {
@@ -34,16 +41,53 @@ export function GatewayClient() {
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const token = await getToken();
-    if (!token) throw new Error('Not signed in');
-    setData(await apiFetch<Overview>('/v1/gateway/overview', { token }));
-  }, [getToken]);
+  useEffect(() => {
+    void apiFetch<ProvidersRes>('/v1/gateway/providers')
+      .then((providers) => setData(providers))
+      .catch((err: Error) => setError(err.message));
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
-    void load().catch((err: Error) => setError(err.message));
-  }, [isLoaded, load]);
+    void (async () => {
+      try {
+        const token = await resolveApiToken(getToken);
+        if (!token) return;
+        const overview = await apiFetch<Overview>('/v1/gateway/overview', { token });
+        setData(overview);
+      } catch {
+        /* providers already loaded */
+      }
+    })();
+  }, [isLoaded, getToken]);
+
+  const providerRows: CatalogRow[] = (data?.providers ?? []).map((p) => ({
+    id: p.id,
+    name: String(p.libraryName ?? p.name ?? p.id),
+    status: p.status,
+    notes: hidePhaseIds(
+      [p.notes, p.configured == null ? '' : p.configured ? 'Configured' : 'Not configured', ...(p.features ?? [])]
+        .filter(Boolean)
+        .join(' · '),
+    ),
+  }));
+
+  const linkRows: CatalogRow[] = Object.entries(data?.links ?? {}).map(([k, v]) => ({
+    id: k,
+    name: k,
+    console: typeof v === 'string' && v.startsWith('/') ? v : null,
+    notes: String(v ?? ''),
+  }));
+
+  const chips = [
+    data?.health ? { label: 'Health', value: `${data.health.status} · ${data.health.region}` } : null,
+    data?.capabilities?.streaming != null
+      ? { label: 'Streaming', value: String(data.capabilities.streaming) }
+      : null,
+    data?.capabilities?.costOptimization != null
+      ? { label: 'Cost optimization', value: String(data.capabilities.costOptimization) }
+      : null,
+  ].filter(Boolean) as Array<{ label: string; value: string }>;
 
   return (
     <AppShell>
@@ -60,112 +104,22 @@ export function GatewayClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
         Thin facade over bought models — Google MT, OpenAI, optional OpenRouter chat fallback, own TTS,
-        and fine-tune routes. Not an Inference Cloud.
+        and fine-tune routes.
       </p>
-
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
-
       {data ? (
-        <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <section>
-            <h2 style={label}>Health</h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>
-              {data.health.status} · region {data.health.region}
-            </p>
-          </section>
-
-          <section>
-            <h2 style={label}>Configured credentials</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-              {Object.entries(data.configured).map(([key, on]) => (
-                <li
-                  key={key}
-                  style={{
-                    fontSize: '0.8rem',
-                    padding: '0.25rem 0.55rem',
-                    border: '1px solid var(--line)',
-                    borderRadius: '0.35rem',
-                    background: on ? 'var(--bg-soft)' : 'transparent',
-                    color: on ? 'var(--ink)' : 'var(--muted)',
-                  }}
-                >
-                  {key}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 style={label}>Providers</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: '0.65rem' }}>
-              {data.providers.map((p) => (
-                <li key={p.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.65rem' }}>
-                  <div style={{ fontWeight: 600 }}>
-                    {p.libraryName}{' '}
-                    <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.85rem' }}>
-                      · {p.status}
-                      {p.status !== 'deferred' ? (p.configured ? ' · configured' : ' · not configured') : ''}
-                    </span>
-                  </div>
-                  <div style={{ color: 'var(--muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
-                    {p.features.join(', ')} — {p.notes}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 style={label}>Capabilities</h2>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
-              Fallbacks: {data.capabilities.fallback.join('; ')}. Response cache:{' '}
-              {data.capabilities.caching.responseCache ? 'yes' : 'no'}. Streaming:{' '}
-              {data.capabilities.streaming ? 'yes' : 'no'}. Cost optimizer:{' '}
-              {data.capabilities.costOptimization ? 'yes' : 'no'}.
-            </p>
-          </section>
-
-          <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <Link href={data.links.models} style={linkBtn}>
-              Models
-            </Link>
-            <Link href={data.links.finetunes} style={linkBtn}>
-              Fine-tunes
-            </Link>
-            <Link href={data.links.chat} style={linkBtn}>
-              Chat
-            </Link>
-            <Link href={data.links.audio} style={linkBtn}>
-              Voice Studio
-            </Link>
-          </section>
-
-          <section>
-            <h2 style={label}>Volume 1A</h2>
-            <p style={{ margin: 0, fontWeight: 600 }}>{data.volume.closes}</p>
-            <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>{data.volume.note}</p>
-          </section>
-        </div>
+        <CatalogConsole
+          note={data.volume?.note ? hidePhaseIds(data.volume.note) : undefined}
+          statusChips={chips}
+          sections={[
+            { title: 'Providers', rows: providerRows },
+            { title: 'Links', rows: linkRows },
+          ]}
+          backHref="/inference-cloud"
+          backLabel="Inference Cloud"
+        />
       ) : null}
     </AppShell>
   );
 }
-
-const label: React.CSSProperties = {
-  fontSize: '0.8rem',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  color: 'var(--muted)',
-  margin: '0 0 0.5rem',
-};
-
-const linkBtn: React.CSSProperties = {
-  textDecoration: 'none',
-  padding: '0.65rem 1.1rem',
-  border: '1px solid var(--line)',
-  borderRadius: '0.45rem',
-  fontWeight: 600,
-  fontSize: '0.9rem',
-  color: 'var(--ink)',
-};

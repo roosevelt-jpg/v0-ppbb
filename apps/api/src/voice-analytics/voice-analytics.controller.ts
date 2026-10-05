@@ -195,4 +195,19 @@ export class VoiceAnalyticsController {
       to,
     });
   }
+
+  @Get('bi')
+  @UseGuards(TranslateAuthGuard)
+  bi(
+    @Req() req: Request & { translateAuth: TranslateAuthContext },
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.analytics.biDashboard({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      from,
+      to,
+    });
+  }
 }

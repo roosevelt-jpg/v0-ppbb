@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -41,7 +43,7 @@ export function BatchRuntimeClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, kindsRes, runsRes] = await Promise.all([
       apiFetch<Engine>('/v1/batch-runtime/engine', { token }),
@@ -62,7 +64,7 @@ export function BatchRuntimeClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/batch-runtime/runs', {
         token,
@@ -111,13 +113,11 @@ export function BatchRuntimeClient() {
             maxWidth: '44rem',
           }}
         >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            maxItems={engine.ceilings.maxItemsPerRun} · maxRetries={engine.ceilings.maxRetries} ·
-            spark={String(engine.honesty.sparkOs)} · regeneratesJobs=
-            {String(engine.honesty.regeneratesJobsApi)} · extendsBullMQ=
-            {String(engine.honesty.extendsBullMqJobs)}
+          <h2 style={label}>Batch status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · maxItems={engine.ceilings.maxItemsPerRun} ·
+            maxRetries={engine.ceilings.maxRetries} · mode={engine.ceilings.mode}
           </p>
         </section>
       ) : null}

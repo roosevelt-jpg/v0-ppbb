@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UploadedFile, UseGuards, UseInterceptors, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Request } from 'express';
@@ -186,5 +175,18 @@ export class LocalizeController {
       values: body.values,
       locale: body.locale,
     });
+  }
+
+
+  @Post('localize/surfaces/:surface')
+  @HttpCode(HttpStatus.OK)
+  surface(
+    @Param('surface') surface: string,
+    @Body() body: { content?: unknown },
+  ) {
+    if (body.content === undefined) {
+      throw new ApiException('validation_error', 'content is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.platform.surface(surface, body.content);
   }
 }

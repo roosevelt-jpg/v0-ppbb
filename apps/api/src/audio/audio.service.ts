@@ -5,6 +5,8 @@ import { AuditService } from '../audit/audit.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiException } from '../common/errors/api-exception';
 import { VoiceClonesService, voiceCloneIdFromVoice } from '../voice-clones/voice-clones.service';
+import { BillingService } from '../billing/billing.service';
+import { creditsForSttSeconds, creditsForTtsCharacters } from '../billing/credits';
 import { audioMaxBytes } from './audio-limits';
 
 export { audioMaxBytes };
@@ -19,6 +21,7 @@ export class AudioService {
     private readonly audit: AuditService,
     private readonly prisma: PrismaService,
     private readonly voiceClones: VoiceClonesService,
+    private readonly billing: BillingService,
   ) {}
 
   assertAllowedAudio(file: { size: number; originalname: string; mimetype: string }) {
@@ -53,6 +56,9 @@ export class AudioService {
   }) {
     this.assertAllowedAudio(input.file);
 
+    // Pre-authorize ~1 minute of STT credits (exact debit after duration known).
+    await this.billing.assertWithinCredits(input.organizationId, creditsForSttSeconds(60));
+
     const result = await this.gateway.transcribe({
       buffer: input.file.buffer,
       filename: input.file.originalname,
@@ -61,6 +67,10 @@ export class AudioService {
     });
 
     const durationSeconds = Math.max(1, Math.ceil(result.durationSeconds));
+    await this.billing.assertWithinCredits(
+      input.organizationId,
+      creditsForSttSeconds(durationSeconds),
+    );
     await this.usage.recordStt({
       organizationId: input.organizationId,
       workspaceId: input.workspaceId,
@@ -115,7 +125,7 @@ export class AudioService {
     apiKeyId?: string;
     userId?: string;
     ip?: string;
-    /** Optional ElevenLabs expressive settings for clone:{id} only (VL-173). */
+    /** Optional external vendor expressive settings for clone:{id} only (VL-173). */
     expressiveSettings?: {
       stability: number;
       similarity_boost: number;
@@ -137,6 +147,12 @@ export class AudioService {
     if (!input.voice) {
       throw new ApiException('validation_error', 'voice is required', HttpStatus.BAD_REQUEST);
     }
+
+    const upcomingChars = [...text].length;
+    await this.billing.assertWithinCredits(
+      input.organizationId,
+      creditsForTtsCharacters(upcomingChars, false),
+    );
 
     let result;
     let watermarkApplied = false;

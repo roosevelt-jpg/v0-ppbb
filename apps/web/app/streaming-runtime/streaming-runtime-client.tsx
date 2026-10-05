@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -40,7 +42,7 @@ export function StreamingRuntimeClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, surf] = await Promise.all([
       apiFetch<Engine>('/v1/streaming-runtime/engine', { token }),
@@ -60,7 +62,7 @@ export function StreamingRuntimeClient() {
     setError(null);
     setChunks([]);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://127.0.0.1:3001';
       const res = await fetch(`${base}/v1/streaming-runtime/stream`, {
@@ -133,14 +135,12 @@ export function StreamingRuntimeClient() {
             maxWidth: '44rem',
           }}
         >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            transport={engine.honesty.primaryTransport} · ws=
-            {String(engine.honesty.websocketOs)} · grpc=
-            {String(engine.honesty.grpcStreamingOs)} · regenerates=
-            {String(engine.honesty.regeneratesExistingStreams)} · maxChunks=
-            {engine.ceilings.maxChunksPerStream}
+          <h2 style={label}>Streaming status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · transport=
+            {engine.honesty.primaryTransport} · maxChunks={engine.ceilings.maxChunksPerStream} ·
+            mode={engine.ceilings.mode}
           </p>
         </section>
       ) : null}

@@ -7,9 +7,10 @@ import { UsageModule } from '../usage/usage.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
-  imports: [AudioModule, AuditCoreModule, UsageModule, ApiKeysModule, IdentityModule],
+  imports: [AudioModule, AuditCoreModule, UsageModule, ApiKeysModule, IdentityModule, RateLimitModule],
   controllers: [EmotionVoiceController],
   providers: [EmotionVoiceService, TranslateAuthGuard],
   exports: [EmotionVoiceService],

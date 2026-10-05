@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -26,7 +28,7 @@ export function VoiceBiometricsClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, prof, ch] = await Promise.all([
       apiFetch<Engine>('/v1/voice-biometrics/engine', { token }),
@@ -52,7 +54,7 @@ export function VoiceBiometricsClient() {
     setError(null);
     setResult(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const form = new FormData();
       form.append('file', file);
@@ -168,7 +170,7 @@ export function VoiceBiometricsClient() {
           <ul style={{ margin: '0.75rem 0 0', paddingLeft: '1.1rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.35rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
               </li>
             ))}

@@ -8,6 +8,9 @@ import { TranslateService } from '../translate/translate.service';
 import { DocumentsService } from '../documents/documents.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WebhookService } from '../jobs/webhook.service';
+import { EmbeddingsService } from '../embeddings/embeddings.service';
+import { ChatService } from '../chat/chat.service';
+import { AiOrchestrationService } from '../ai-orchestration/ai-orchestration.service';
 import {
   WORKFLOW_MAX_STEPS,
   WORKFLOW_OPS,
@@ -28,6 +31,9 @@ export class WorkflowsService {
     private readonly documents: DocumentsService,
     private readonly notifications: NotificationsService,
     private readonly webhooks: WebhookService,
+    private readonly embeddings: EmbeddingsService,
+    private readonly chat: ChatService,
+    private readonly orchestration: AiOrchestrationService,
   ) {}
 
   async list(organizationId: string, workspaceId: string) {
@@ -184,7 +190,7 @@ export class WorkflowsService {
         );
       }
 
-      if (op === 'transcribe') {
+      if (op === 'transcribe' || op === 'stt') {
         const documentId = typeof step.documentId === 'string' ? step.documentId.trim() : '';
         if (!documentId) {
           throw new ApiException(
@@ -195,7 +201,7 @@ export class WorkflowsService {
         }
         steps.push({
           id,
-          op: 'transcribe',
+          op,
           documentId,
           language: typeof step.language === 'string' ? step.language : undefined,
         });
@@ -221,7 +227,7 @@ export class WorkflowsService {
           target: step.target,
           text: step.text,
         });
-      } else {
+      } else if (op === 'notify') {
         const channel = step.channel;
         if (channel !== 'email' && channel !== 'webhook') {
           throw new ApiException(
@@ -263,6 +269,117 @@ export class WorkflowsService {
             subject: typeof step.subject === 'string' ? step.subject : undefined,
           });
         }
+      } else if (op === 'embed') {
+        if (typeof step.text !== 'string' || !step.text.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].text is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        steps.push({
+          id,
+          op: 'embed',
+          text: step.text,
+          model: typeof step.model === 'string' ? step.model : undefined,
+        });
+      } else if (op === 'summarize') {
+        if (typeof step.text !== 'string' || !step.text.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].text is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const maxSentences =
+          typeof step.maxSentences === 'number' && step.maxSentences > 0
+            ? Math.min(8, Math.floor(step.maxSentences))
+            : 3;
+        steps.push({ id, op: 'summarize', text: step.text, maxSentences });
+      } else if (op === 'webhook') {
+        const webhookUrl = typeof step.webhookUrl === 'string' ? step.webhookUrl : '';
+        if (!/^https?:\/\//i.test(webhookUrl)) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].webhookUrl must be http(s)`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        steps.push({
+          id,
+          op: 'webhook',
+          webhookUrl,
+          event: typeof step.event === 'string' ? step.event : undefined,
+          message: typeof step.message === 'string' ? step.message : undefined,
+          data:
+            step.data && typeof step.data === 'object'
+              ? (step.data as Record<string, unknown>)
+              : undefined,
+        });
+      } else if (op === 'classify') {
+        if (typeof step.text !== 'string' || !step.text.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].text is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const labels = Array.isArray(step.labels)
+          ? step.labels.filter((l): l is string => typeof l === 'string' && l.trim().length > 0)
+          : [];
+        if (labels.length === 0) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].labels must be a non-empty string array`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        steps.push({ id, op: 'classify', text: step.text, labels });
+      } else if (op === 'agent_run') {
+        if (typeof step.goal !== 'string' || !step.goal.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].goal is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        steps.push({
+          id,
+          op: 'agent_run',
+          goal: step.goal,
+          pipeline: typeof step.pipeline === 'string' ? step.pipeline : undefined,
+        });
+      } else if (op === 'tts') {
+        if (typeof step.text !== 'string' || !step.text.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].text is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        if (typeof step.voice !== 'string' || !step.voice.trim()) {
+          throw new ApiException(
+            'validation_error',
+            `steps[${i}].voice is required`,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        const format =
+          step.format === 'wav' ||
+          step.format === 'opus' ||
+          step.format === 'aac' ||
+          step.format === 'flac' ||
+          step.format === 'mp3'
+            ? step.format
+            : 'mp3';
+        steps.push({
+          id,
+          op: 'tts',
+          text: step.text,
+          voice: step.voice,
+          language: typeof step.language === 'string' ? step.language : undefined,
+          format,
+        });
       }
     }
 
@@ -299,6 +416,45 @@ export class WorkflowsService {
     };
   }
 
+  private async runTranscribeLike(
+    step: Extract<WorkflowStep, { op: 'transcribe' | 'stt' }>,
+    ctx: {
+      organizationId: string;
+      workspaceId: string;
+      apiKeyId: string | null;
+    },
+  ): Promise<Record<string, unknown>> {
+    const { doc, buffer } = await this.documents.readOwnedBuffer(
+      ctx.organizationId,
+      step.documentId,
+    );
+    const transcribed = await this.audio.transcribe({
+      file: {
+        fieldname: 'file',
+        originalname: doc.filename,
+        encoding: '7bit',
+        mimetype: doc.mimeType,
+        size: buffer.length,
+        buffer,
+        destination: '',
+        filename: doc.filename,
+        path: '',
+        stream: undefined as never,
+      } as Express.Multer.File,
+      language: step.language,
+      organizationId: ctx.organizationId,
+      workspaceId: ctx.workspaceId,
+      apiKeyId: ctx.apiKeyId ?? undefined,
+    });
+    return {
+      text: transcribed.text,
+      language: transcribed.language,
+      durationSeconds: transcribed.durationSeconds,
+      provider: transcribed.provider,
+      documentId: doc.id,
+    };
+  }
+
   private async runStep(
     step: WorkflowStep,
     ctx: {
@@ -309,36 +465,8 @@ export class WorkflowsService {
       context: Map<string, Record<string, unknown>>;
     },
   ): Promise<Record<string, unknown>> {
-    if (step.op === 'transcribe') {
-      const { doc, buffer } = await this.documents.readOwnedBuffer(
-        ctx.organizationId,
-        step.documentId,
-      );
-      const transcribed = await this.audio.transcribe({
-        file: {
-          fieldname: 'file',
-          originalname: doc.filename,
-          encoding: '7bit',
-          mimetype: doc.mimeType,
-          size: buffer.length,
-          buffer,
-          destination: '',
-          filename: doc.filename,
-          path: '',
-          stream: undefined as never,
-        } as Express.Multer.File,
-        language: step.language,
-        organizationId: ctx.organizationId,
-        workspaceId: ctx.workspaceId,
-        apiKeyId: ctx.apiKeyId ?? undefined,
-      });
-      return {
-        text: transcribed.text,
-        language: transcribed.language,
-        durationSeconds: transcribed.durationSeconds,
-        provider: transcribed.provider,
-        documentId: doc.id,
-      };
+    if (step.op === 'transcribe' || step.op === 'stt') {
+      return this.runTranscribeLike(step, ctx);
     }
 
     if (step.op === 'translate') {
@@ -363,6 +491,135 @@ export class WorkflowsService {
       };
     }
 
+    if (step.op === 'embed') {
+      const text = this.interpolate(step.text, ctx.context).trim();
+      const embedded = await this.embeddings.create({
+        input: text,
+        model: step.model,
+        organizationId: ctx.organizationId,
+        workspaceId: ctx.workspaceId,
+        apiKeyId: ctx.apiKeyId ?? undefined,
+      });
+      const vector = embedded.data[0]?.embedding ?? [];
+      return {
+        text,
+        dimensions: vector.length,
+        embeddingPreview: vector.slice(0, 8),
+        model: embedded.model,
+        provider: embedded.provider,
+        tokens: embedded.usage.total_tokens,
+      };
+    }
+
+    if (step.op === 'summarize') {
+      const text = this.interpolate(step.text, ctx.context).trim();
+      const maxSentences = step.maxSentences ?? 3;
+      const completion = await this.chat.completions({
+        messages: [
+          {
+            role: 'user',
+            content: `Summarize the following text in at most ${maxSentences} sentences. Return only the summary.\n\n${text}`,
+          },
+        ],
+        organizationId: ctx.organizationId,
+        workspaceId: ctx.workspaceId,
+        apiKeyId: ctx.apiKeyId ?? undefined,
+      });
+      const summary =
+        (completion as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]
+          ?.message?.content ?? String((completion as { text?: string }).text ?? '');
+      return { text: summary, sourceText: text, maxSentences };
+    }
+
+    if (step.op === 'classify') {
+      const text = this.interpolate(step.text, ctx.context).trim();
+      const labels = step.labels;
+      const completion = await this.chat.completions({
+        messages: [
+          {
+            role: 'user',
+            content: `Classify the text into exactly one of these labels: ${labels.join(', ')}. Reply with only the label.\n\nText:\n${text}`,
+          },
+        ],
+        organizationId: ctx.organizationId,
+        workspaceId: ctx.workspaceId,
+        apiKeyId: ctx.apiKeyId ?? undefined,
+      });
+      const raw =
+        (completion as { choices?: Array<{ message?: { content?: string } }> }).choices?.[0]
+          ?.message?.content ?? '';
+      const normalized = raw.trim().toLowerCase();
+      const matched =
+        labels.find((l) => normalized === l.toLowerCase()) ??
+        labels.find((l) => normalized.includes(l.toLowerCase())) ??
+        labels[0]!;
+      return { label: matched, raw, labels, text };
+    }
+
+    if (step.op === 'webhook') {
+      const message = step.message ? this.interpolate(step.message, ctx.context) : undefined;
+      const delivery = await this.webhooks.deliver({
+        organizationId: ctx.organizationId,
+        webhookUrl: step.webhookUrl,
+        event: step.event ?? 'workflow.webhook',
+        data: {
+          jobId: ctx.jobId,
+          stepId: step.id,
+          message,
+          ...(step.data ?? {}),
+        },
+      });
+      return {
+        channel: 'webhook',
+        delivered: delivery.ok,
+        status: delivery.status ?? null,
+        error: delivery.error ?? null,
+        message: message ?? null,
+      };
+    }
+
+    if (step.op === 'agent_run') {
+      const goal = this.interpolate(step.goal, ctx.context).trim();
+      const result = await this.orchestration.run({
+        organizationId: ctx.organizationId,
+        workspaceId: ctx.workspaceId,
+        apiKeyId: ctx.apiKeyId ?? undefined,
+        pipeline: step.pipeline ?? 'detect_translate',
+        text: goal,
+      });
+      return {
+        goal,
+        pipeline: step.pipeline ?? 'detect_translate',
+        result,
+      };
+    }
+
+    if (step.op === 'tts') {
+      const text = this.interpolate(step.text, ctx.context).trim();
+      const spoken = await this.audio.speak({
+        text,
+        voice: step.voice,
+        language: step.language,
+        format: step.format ?? 'mp3',
+        organizationId: ctx.organizationId,
+        workspaceId: ctx.workspaceId,
+        apiKeyId: ctx.apiKeyId ?? undefined,
+      });
+      const audioBytes = spoken.audio?.length ?? 0;
+      const base64 = spoken.audio ? Buffer.from(spoken.audio).toString('base64') : '';
+      return {
+        text,
+        voice: spoken.voice ?? step.voice,
+        provider: spoken.provider ?? null,
+        format: spoken.format ?? step.format ?? 'mp3',
+        characters: spoken.characters ?? text.length,
+        audioBytes,
+        audioBase64Preview: base64 ? base64.slice(0, 256) : null,
+        truncatedPreview: base64.length > 256,
+      };
+    }
+
+    // notify
     const message = this.interpolate(step.message, ctx.context);
     const subject = step.subject
       ? this.interpolate(step.subject, ctx.context)
@@ -428,6 +685,7 @@ export class WorkflowsService {
       steps: row.steps,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      ops: WORKFLOW_OPS,
     };
   }
 }

@@ -13,7 +13,7 @@ export function recommendationEngineCatalog() {
   return {
     product: 'VerbaLab Recommendation Engine',
     note:
-      'Light rankers over languages, voices, knowledge/content, translation pairs, models, and workflow APIs (VL-187). Uses registry/TTS/Vector/Memory catalogs + optional memory text signals. Not a collaborative-filtering / retail recommender OS.',
+      'Light rankers over languages, voices, knowledge/content, translation pairs, models, and workflow APIs. Uses registry/TTS/Vector/Memory catalogs + optional memory text signals. Not a collaborative-filtering / retail recommender OS.',
     capabilities: [
       {
         id: 'content-recommendation',
@@ -46,14 +46,14 @@ export function recommendationEngineCatalog() {
       {
         id: 'model-recommendation',
         name: 'Model Recommendation',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/recommendation-engine/recommend',
         notes: 'kind=model — embedding model catalog rank. Chat model marketplace deferred.',
       },
       {
         id: 'workflow-recommendation',
         name: 'Workflow Recommendation',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/recommendation-engine/recommend',
         notes: 'kind=workflow — fixed API recipe catalog, not an automation OS.',
       },
@@ -67,9 +67,9 @@ export function recommendationEngineCatalog() {
       {
         id: 'enterprise-recommendation',
         name: 'Enterprise Recommendation',
-        status: 'deferred',
-        api: null,
-        notes: 'Cross-tenant / retail personalization OS deferred.',
+        status: 'shipped',
+        api: 'POST /v1/recommendation-engine/recommend',
+        notes: 'kind=enterprise — org-scoped cross-surface ranker (languages/voices/knowledge). Not retail CF OS.',
       },
       {
         id: 'analytics',
@@ -125,6 +125,7 @@ export const RECOMMEND_KINDS = [
   'translation',
   'model',
   'workflow',
+  'enterprise',
 ] as const;
 
 export type RecommendKind = (typeof RECOMMEND_KINDS)[number];

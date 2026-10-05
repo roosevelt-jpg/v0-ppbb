@@ -38,7 +38,7 @@ export class BatchRuntimeService {
       spendSafety: {
         hardSpendCeilingsRequired: true,
         note:
-          'Batch Runtime does not open-ended autoscale GPU workers. Translation delegates to existing BullMQ. Cost Optimization (VL-211) must enforce spend caps.',
+          'Batch Runtime does not open-ended autoscale GPU workers. Translation delegates to existing BullMQ. Cost Optimization must enforce spend caps.',
       },
     };
   }
@@ -87,13 +87,6 @@ export class BatchRuntimeService {
   ) {
     this.assertEnabled();
     const kind = this.normalizeKind(input.kind ?? 'translation');
-    if (kind === 'video') {
-      throw new ApiException(
-        'validation_error',
-        'Video batch jobs are deferred',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     if (kind === 'training') {
       throw new ApiException(
         'validation_error',
@@ -348,7 +341,7 @@ export class BatchRuntimeService {
     });
     return {
       run: this.serialize(updated),
-      note: 'Sandbox checkpoint cursor updated — not a distributed snapshot.',
+      note: 'Sandbox checkpoint cursor updated.',
     };
   }
 
@@ -403,7 +396,7 @@ export class BatchRuntimeService {
     return {
       run: this.serialize(updated),
       honesty: batchRuntimeCatalog().honesty,
-      note: 'Retry within hard budget — not open-ended.',
+      note: 'Retry within hard budget.',
     };
   }
 
@@ -455,7 +448,7 @@ export class BatchRuntimeService {
       failed,
       scheduled,
       auditsLast30d: audits,
-      note: 'Batch Runtime analytics (VL-209). ≠ VL-212 AI Runtime Analytics.',
+      note: 'Batch Runtime analytics. ≠ AI Runtime Analytics.',
     };
   }
 
@@ -471,9 +464,9 @@ export class BatchRuntimeService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
-      note: 'Batch Runtime monitoring snapshot (VL-209).',
+      note: 'Batch Runtime monitoring snapshot.',
     };
   }
 

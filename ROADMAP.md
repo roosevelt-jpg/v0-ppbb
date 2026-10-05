@@ -110,7 +110,7 @@ This roadmap is a **backlog and vision**, not a one-shot build script. v1 and v2
 | Translation models | **Buy** | Google Cloud Translation or Azure Translator (African coverage); DeepL as a high-quality European route | You have labeled data + eval that vendors fail |
 | LLM routing | **Buy models, build a thin gateway** | OpenAI, Anthropic, plus one cheap/fast (Groq/OpenRouter) | Never build the model |
 | STT | **Buy** | Deepgram, AssemblyAI, Google STT, or OpenAI Whisper API | Unique African-language ASR with data |
-| TTS / cloning | **Buy** | Azure TTS, ElevenLabs, Google TTS | Branded voice with consent pipeline |
+| TTS / cloning | **Buy** | Azure TTS, external vendor, Google TTS | Branded voice with consent pipeline |
 | OCR / documents | **Buy** | Google Document AI, Azure DI, or AWS Textract | Niche document types vendors miss |
 | Embeddings / vector | **Buy + Postgres** | OpenAI/Gemini embeddings + pgvector | Scale forces a dedicated vector DB |
 | Payments | **Buy** | Stripe Billing (subscriptions + metered) | Never build a card vault |
@@ -327,7 +327,7 @@ Dependencies are **hard**: do not start a phase until listed predecessors are Do
 - **Why it matters:** Interpreter and agents need it; also a clean demo.
 - **Complexity:** M
 - **Depends on:** VL-021, VL-024
-- **Buy vs build:** Azure TTS or ElevenLabs
+- **Buy vs build:** Azure TTS or external vendor
 - **Sources:** v1 Phase 7; v2 Phases 27–28
 - **Out of scope:** Voice cloning studio, emotion TTS engine, voice marketplace.
 
@@ -435,7 +435,7 @@ Dependencies are **hard**: do not start a phase until listed predecessors are Do
 
 #### VL-064 — Voice cloning (optional, vendor)
 
-- **Goal:** If ever sold: ElevenLabs (or equivalent) voice clone **with explicit consent, watermarking, and abuse review**. Otherwise skip.
+- **Goal:** If ever sold: external vendor (or equivalent) voice clone **with explicit consent, watermarking, and abuse review**. Otherwise skip.
 - **Why it matters:** Library wants a Voice Cloud; legally this is a loaded gun.
 - **Complexity:** L
 - **Depends on:** VL-042, VL-072
@@ -675,7 +675,7 @@ User override (2026-09-07): build tracks 1–5 from the library ambition as **bo
 
 #### VL-120 — African voice studio UX
 
-- **Goal:** Console Voice Studio (`/audio`) over existing OpenAI TTS + ElevenLabs clones: African language presets, clone lifecycle (multi-sample, review, disable), preview playback. No model training.
+- **Goal:** Console Voice Studio (`/audio`) over existing OpenAI TTS + external vendor clones: African language presets, clone lifecycle (multi-sample, review, disable), preview playback. No model training.
 - **Complexity:** M
 - **Depends on:** VL-042, VL-064
 - **Buy vs build:** Buy models; build studio UX
@@ -1248,7 +1248,7 @@ These are in the libraries. They are **not** executable phases for a small team.
 | v2 71–90 Inference Cloud + AI Kernel | Internal AWS for models | Scheduled as VL-204+ (Volume 7 Inference); OpenAI/Groq today — no GPU hyperscaler OS; AI Kernel remains later |
 | v2 91–105 Foundation Model Cloud | Frontier lab | VL-112 trained-weights still gated; VL-224+ honest platform/MLOps hub allowed (ADR-0135) |
 | v2 106–115 AI Fabric | Internal bus architecture | VL-239–248 closed (Policy hard gate + audit); Kafka/NATS/Rabbit adapters deferred — not Kafka hyperscaler OS |
-| v2 116–126 Ecosystem Cloud | Marketplace suite | VL-090+ |
+| v2 116–126 Ecosystem Cloud | Marketplace suite | VL-249 Foundation shipped (extends VL-090+/voice marketplace); VL-250–259 marketplaces/creator/audit remain — not payment-processor OS |
 | v2 127–137 African Intelligence as 10 products | Sector AI startups | VL-100–103 content |
 | v2 138–147 Research Cloud | Academic org | Notion + Git + eval harness |
 | v2 148–158 MLOps Cloud | Platform team | W&B + CI |

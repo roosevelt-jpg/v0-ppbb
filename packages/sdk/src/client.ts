@@ -927,6 +927,365 @@ export class VerbaLab {
     return this.requestJson<RegionsResponse>('/v1/regions', { method: 'GET' });
   }
 
+  async modelKeyGuide(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-keys/guide', { method: 'GET' });
+  }
+
+  async modelFamilies(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-keys/models', { method: 'GET' });
+  }
+
+  async meetingTranscriptionEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/engine', {
+      method: 'GET',
+    });
+  }
+
+  async meetingTranscriptionLanguages(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/languages', {
+      method: 'GET',
+    });
+  }
+
+  async createMeetingSession(input: {
+    title?: string;
+    language?: string;
+    translateTo?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async transcribeMeeting(input: {
+    file: UploadFile;
+    language?: string;
+    translateTo?: string;
+    sessionId?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.language) form.append('language', input.language);
+    if (input.translateTo) form.append('translateTo', input.translateTo);
+    if (input.sessionId) form.append('sessionId', input.sessionId);
+    return this.requestForm('/v1/meeting-transcription/transcribe', form);
+  }
+
+  async meetingRecap(input: {
+    text: string;
+    language?: string;
+    voice?: string;
+    speak?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/meeting-transcription/recap', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/engine', { method: 'GET' });
+  }
+
+  async createVerbaVoiceSession(input: {
+    language?: string;
+    voice?: string;
+    systemPrompt?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceTextTurn(input: {
+    sessionId: string;
+    text: string;
+    language?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/text-turns', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceTurn(input: {
+    sessionId: string;
+    file: UploadFile;
+    language?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    form.append('sessionId', input.sessionId);
+    if (input.language) form.append('language', input.language);
+    return this.requestForm('/v1/verba-voice/turns', form);
+  }
+
+  async verbaVoiceWebRtc(input: {
+    sessionId: string;
+    bargeIn?: boolean;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceWebRtcSignal(input: {
+    sessionId: string;
+    kind: string;
+    sdp?: string;
+    description?: Record<string, unknown>;
+    candidate?: Record<string, unknown>;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc/signal', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async verbaVoiceBargeIn(input: {
+    sessionId: string;
+    action: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/verba-voice/webrtc/barge-in', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async complianceAttestationsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/compliance-attestations/engine', {
+      method: 'GET',
+    });
+  }
+
+  async issueComplianceAttestation(input: {
+    industry?: string;
+    framework?: string;
+    region?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/compliance-attestations/issue', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voicePassportEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-passport/engine', { method: 'GET' });
+  }
+
+  async issueVoicePassport(input: {
+    holderName: string;
+    country?: string;
+    scopes?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-passport/issue', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async industryDropsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/industry-drops/engine', { method: 'GET' });
+  }
+
+  async installIndustryDrop(input: {
+    packId?: string;
+    workspaceName?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/industry-drops/install', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async edgeOfflineEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/edge-offline/engine', { method: 'GET' });
+  }
+
+  async buildEdgeOfflinePack(input: {
+    models?: string;
+    locales?: string;
+    deviceClass?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/edge-offline/build', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async developerGravityEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/developer-gravity/engine', {
+      method: 'GET',
+    });
+  }
+
+  async createDeveloperSandbox(input: {
+    name?: string;
+    tier?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/developer-gravity/sandbox', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async africaEvalMatrixEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-eval-matrix/engine', {
+      method: 'GET',
+    });
+  }
+
+  async scoreAfricaEval(input: {
+    language?: string;
+    domain?: string;
+    hypothesis: string;
+    reference: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-eval-matrix/score', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async sovereignFlywheelEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/sovereign-flywheel/engine', {
+      method: 'GET',
+    });
+  }
+
+  async ingestSovereignDataset(input: {
+    source?: string;
+    language?: string;
+    consentToken: string;
+    samples?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/sovereign-flywheel/ingest', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async modelEconomyEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/engine', { method: 'GET' });
+  }
+
+  async modelEconomyCatalog(useCase?: string): Promise<Record<string, unknown>> {
+    const q = useCase ? `?useCase=${encodeURIComponent(useCase)}` : '';
+    return this.requestJson<Record<string, unknown>>(`/v1/model-economy/catalog${q}`, {
+      method: 'GET',
+    });
+  }
+
+  async quoteModelEconomy(input: {
+    useCase: string;
+    tier: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/quote', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async estimateModelEconomy(input: {
+    useCase: string;
+    tier: string;
+    units: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/model-economy/estimate', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voiceRecorderPluginEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-recorder-plugin/engine', {
+      method: 'GET',
+    });
+  }
+
+  async voiceRecorderManifest(platform: 'ios' | 'android' = 'android'): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>(
+      `/v1/voice-recorder-plugin/manifest?platform=${encodeURIComponent(platform)}`,
+      { method: 'GET' },
+    );
+  }
+
+  async createVoiceRecorderSession(input: {
+    platform?: string;
+    language?: string;
+    tier?: string;
+    label?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/voice-recorder-plugin/sessions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voiceRecorderTranscribe(input: {
+    sessionId?: string;
+    file: UploadFile;
+    language?: string;
+    tier?: string;
+    title?: string;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.sessionId) form.append('sessionId', input.sessionId);
+    if (input.language) form.append('language', input.language);
+    if (input.tier) form.append('tier', input.tier);
+    if (input.title) form.append('title', input.title);
+    return this.requestForm('/v1/voice-recorder-plugin/transcribe', form);
+  }
+
+  async africaInstitutionsPillars(): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/africa-institutions/pillars', {
+      method: 'GET',
+    });
+  }
+
+  async protectSecureTranscript(input: {
+    text?: string;
+    channel: 'email' | 'sms';
+    to: string;
+    consentToken: string;
+    protocol?: string;
+    language?: string;
+    trustedName?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/secure-transcript-alerts/protect', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async justiceLanguageBrief(input: {
+    testimony: string;
+    speakerLanguage?: string;
+    courtLanguage?: string;
+    country?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/justice-language-access/brief', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async assessCivicTruth(input: {
+    claim: string;
+    speakerName?: string;
+    url?: string;
+    sealToken?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson<Record<string, unknown>>('/v1/civic-truth-guard/assess', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async locales(): Promise<LocalePack[]> {
     const res = await this.requestJson<{ data: LocalePack[] }>('/v1/locales', { method: 'GET' });
     return res.data;
@@ -1740,6 +2099,856 @@ export class VerbaLab {
     note: string;
   }> {
     return this.requestJson('/v1/policy-fabric/products', { method: 'GET' });
+  }
+
+  async ecosystemCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ecosystem-cloud/products', { method: 'GET' });
+  }
+
+  async pluginMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/plugin-marketplace/engine', { method: 'GET' });
+  }
+
+  async modelMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/model-marketplace/engine', { method: 'GET' });
+  }
+
+  async datasetMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/dataset-marketplace/engine', { method: 'GET' });
+  }
+
+  async promptMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/prompt-marketplace/engine', { method: 'GET' });
+  }
+
+  async agentMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/agent-marketplace/engine', { method: 'GET' });
+  }
+
+  async workflowMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/workflow-marketplace/engine', { method: 'GET' });
+  }
+
+  async connectorMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/connector-marketplace/engine', { method: 'GET' });
+  }
+
+  async partnerConnectorsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/engine', { method: 'GET' });
+  }
+
+  async partnerConnectorsPlatforms(kind?: string): Promise<Record<string, unknown>> {
+    const q = kind ? `?kind=${encodeURIComponent(kind)}` : '';
+    return this.requestJson(`/v1/partner-connectors/platforms${q}`, { method: 'GET' });
+  }
+
+  async partnerConnectorsTools(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/tools', { method: 'GET' });
+  }
+
+  async partnerInvoke(input: {
+    tool: string;
+    arguments?: Record<string, unknown>;
+    platformId?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/invoke', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async partnerMcp(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/mcp', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async partnerMcpManifest(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/partner-connectors/mcp/manifest', { method: 'GET' });
+  }
+
+  async voiceBridgesEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/voice-bridges/engine', { method: 'GET' });
+  }
+
+  async voiceBridgePlatform(id: string): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/voice-bridges/platforms/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    });
+  }
+
+  async vapiAssistantSnippet(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/voice-bridges/vapi/assistant-snippet', { method: 'GET' });
+  }
+
+  async sovereignVoiceOsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/engine', { method: 'GET' });
+  }
+
+  async sovereignVoiceOsIntegrations(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/integrations', { method: 'GET' });
+  }
+
+  async composeSovereignVoiceOs(input: {
+    countryCode: string;
+    sectors?: string;
+    corridors?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/sovereign-voice-os/compose', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async createNationalVoiceZone(input: {
+    countryCode: string;
+    ministry?: string;
+    region?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/national-voice-runtime/zones', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async appendCivicVoiceEvidence(input: {
+    utterance: string;
+    actor?: string;
+    consentId?: string;
+    watermarkTip?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/civic-voice-evidence/append', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async bridgeMutualIntelligibility(input: {
+    corridorId: string;
+    sourceLocale: string;
+    targetLocale: string;
+    text: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/mutual-intelligibility/bridge', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async institutionalVoiceSpeak(input: {
+    agencyId: string;
+    question: string;
+    speak?: boolean | string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/institutional-voice/speak', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async syncOfflineMeshVoice(input: { nodeId: string }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/offline-mesh-voice/sync', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async voiceLanguageMarketplaceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/voice-language-marketplace/engine', { method: 'GET' });
+  }
+
+
+  async africanIntelligenceCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/african-intelligence-cloud/products', { method: 'GET' });
+  }
+
+  async africanLanguageRegistryEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/african-language-registry/engine', { method: 'GET' });
+  }
+
+  async worldLanguageRegistryEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/world-language-registry/engine', { method: 'GET' });
+  }
+
+  async culturalIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/cultural-intelligence/engine', { method: 'GET' });
+  }
+
+  async africanKnowledgeGraphEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/african-knowledge-graph/engine', { method: 'GET' });
+  }
+
+  async governmentIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/government-intelligence/engine', { method: 'GET' });
+  }
+
+  async healthcareIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/healthcare-intelligence/engine', { method: 'GET' });
+  }
+
+  async financialIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/financial-intelligence/engine', { method: 'GET' });
+  }
+
+  async educationIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/education-intelligence/engine', { method: 'GET' });
+  }
+
+  async agriculturalIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agricultural-intelligence/engine', { method: 'GET' });
+  }
+
+
+
+  async mlopsLlmopsCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/mlops-llmops-cloud/products', { method: 'GET' });
+  }
+
+  async datasetPipelineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/dataset-pipeline/engine', { method: 'GET' });
+  }
+
+  async trainingPipelineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/training-pipeline/engine', { method: 'GET' });
+  }
+
+  async continuousEvaluationEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/continuous-evaluation/engine', { method: 'GET' });
+  }
+
+  async promptopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/promptops-platform/engine', { method: 'GET' });
+  }
+
+  async ragopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ragops-platform/engine', { method: 'GET' });
+  }
+
+  async agentopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agentops-platform/engine', { method: 'GET' });
+  }
+
+  async aiDriftDetectionEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-drift-detection/engine', { method: 'GET' });
+  }
+
+  async continuousLearningEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/continuous-learning/engine', { method: 'GET' });
+  }
+
+  async aiOperationsDashboardEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-operations-dashboard/engine', { method: 'GET' });
+  }
+
+  async trustCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/trust-cloud/products', { method: 'GET' });
+  }
+
+  async aiSafetyPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-safety-platform/engine', { method: 'GET' });
+  }
+
+  async aiGovernancePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-governance-platform/engine', { method: 'GET' });
+  }
+
+  async explainabilityPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/explainability-platform/engine', { method: 'GET' });
+  }
+
+  async privacyPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/privacy-platform/engine', { method: 'GET' });
+  }
+
+  async compliancePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/compliance-platform/engine', { method: 'GET' });
+  }
+
+  async riskIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/risk-intelligence/engine', { method: 'GET' });
+  }
+
+  async identityFederationEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/identity-federation/engine', { method: 'GET' });
+  }
+
+  async trustAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/trust-analytics/engine', { method: 'GET' });
+  }
+
+  async platformEngineeringCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/platform-engineering-cloud/products', { method: 'GET' });
+  }
+
+  async internalDeveloperPortalEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/internal-developer-portal/engine', { method: 'GET' });
+  }
+
+  async serviceCatalogEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/service-catalog/engine', { method: 'GET' });
+  }
+
+  async goldenPathPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/golden-path-platform/engine', { method: 'GET' });
+  }
+
+  async gitopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/gitops-platform/engine', { method: 'GET' });
+  }
+
+  async releaseEngineeringEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/release-engineering/engine', { method: 'GET' });
+  }
+
+  async reliabilityEngineeringEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/reliability-engineering/engine', { method: 'GET' });
+  }
+
+  async finopsPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/finops-platform/engine', { method: 'GET' });
+  }
+
+  async supplyChainSecurityEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/supply-chain-security/engine', { method: 'GET' });
+  }
+
+  async developerExperiencePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/developer-experience-platform/engine', { method: 'GET' });
+  }
+
+  async platformEngineeringAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/platform-engineering-analytics/engine', { method: 'GET' });
+  }
+
+  async researchCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/research-cloud/products', { method: 'GET' });
+  }
+
+  async experimentPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/experiment-platform/engine', { method: 'GET' });
+  }
+
+  async syntheticDataPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/synthetic-data-platform/engine', { method: 'GET' });
+  }
+
+  async benchmarkPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/benchmark-platform/engine', { method: 'GET' });
+  }
+
+  async evaluationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/evaluation-platform/engine', { method: 'GET' });
+  }
+
+  async aiPublicationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-publication-platform/engine', { method: 'GET' });
+  }
+
+  async patentInnovationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/patent-innovation-platform/engine', { method: 'GET' });
+  }
+
+  async openSciencePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/open-science-platform/engine', { method: 'GET' });
+  }
+
+  async researchAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/research-analytics/engine', { method: 'GET' });
+  }
+
+  async tourismHeritageIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/tourism-heritage-intelligence/engine', { method: 'GET' });
+  }
+
+  async creatorEconomyEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+  }> {
+    return this.requestJson('/v1/creator-economy/engine', { method: 'GET' });
   }
 
   async policyFabricRoute(body?: { kinds?: string[] }): Promise<{
@@ -4200,6 +5409,638 @@ export class VerbaLab {
       body: form,
     });
     return this.parseJsonResponse<T>(response);
+  }
+
+
+  async controlPlaneCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/control-plane-cloud/products', { method: 'GET' });
+  }
+
+  async organizationControlEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/organization-control/engine', { method: 'GET' });
+  }
+
+  async globalConfigurationPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-configuration-platform/engine', { method: 'GET' });
+  }
+
+  async globalPolicyEngineEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-policy-engine/engine', { method: 'GET' });
+  }
+
+  async globalDeploymentControllerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-deployment-controller/engine', { method: 'GET' });
+  }
+
+  async globalRoutingControllerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-routing-controller/engine', { method: 'GET' });
+  }
+
+  async secretsCertificatePlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/secrets-certificate-platform/engine', { method: 'GET' });
+  }
+
+  async globalSchedulerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/global-scheduler/engine', { method: 'GET' });
+  }
+
+  async controlPlaneAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/control-plane-analytics/engine', { method: 'GET' });
+  }
+
+
+  async dataPlaneCloudProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/data-plane-cloud/products', { method: 'GET' });
+  }
+
+  async translationRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/translation-runtime/engine', { method: 'GET' });
+  }
+
+  async speechRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/speech-runtime/engine', { method: 'GET' });
+  }
+
+  async voiceRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/voice-runtime/engine', { method: 'GET' });
+  }
+
+  async visionRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/vision-runtime/engine', { method: 'GET' });
+  }
+
+  async knowledgeRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/knowledge-runtime/engine', { method: 'GET' });
+  }
+
+  async embeddingRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/embedding-runtime/engine', { method: 'GET' });
+  }
+
+  async dataPlaneStreamingEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/data-plane-streaming/engine', { method: 'GET' });
+  }
+
+  async gpuRuntimeEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/gpu-runtime/engine', { method: 'GET' });
+  }
+
+
+  async vaiosProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/vaios/products', { method: 'GET' });
+  }
+
+  async aiSchedulerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-scheduler/engine', { method: 'GET' });
+  }
+
+  async runtimeManagerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/runtime-manager/engine', { method: 'GET' });
+  }
+
+  async resourceManagerEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/resource-manager/engine', { method: 'GET' });
+  }
+
+  async workflowOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/workflow-operating-system/engine', { method: 'GET' });
+  }
+
+  async agentOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/agent-operating-system/engine', { method: 'GET' });
+  }
+
+  async aiMemoryOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/ai-memory-operating-system/engine', { method: 'GET' });
+  }
+
+  async knowledgeOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/knowledge-operating-system/engine', { method: 'GET' });
+  }
+
+  async pluginOperatingSystemEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+  }> {
+    return this.requestJson('/v1/plugin-operating-system/engine', { method: 'GET' });
+  }
+
+
+  async enterpriseEngineeringSystemProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/enterprise-engineering-system/products', { method: 'GET' });
+  }
+
+  async engineeringGovernanceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/engineering-governance/engine', { method: 'GET' });
+  }
+
+  async architectureGovernanceEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/architecture-governance/engine', { method: 'GET' });
+  }
+
+  async repositoryStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/repository-standards/engine', { method: 'GET' });
+  }
+
+  async engineeringQualityPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/engineering-quality-platform/engine', { method: 'GET' });
+  }
+
+  async aiEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/ai-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async apiEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/api-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async databaseEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/database-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async infrastructureEngineeringStandardsEngine(): Promise<{
+    product: string;
+    note: string;
+    honesty: Record<string, unknown>;
+    routesTo?: Array<{ module: string; path: string; role: string }>;
+    safety?: Record<string, unknown>;
+    docs?: string;
+    retroactiveChecks?: Array<Record<string, unknown>>;
+  }> {
+    return this.requestJson('/v1/infrastructure-engineering-standards/engine', { method: 'GET' });
+  }
+
+  async aiEngineeringStandardsChecks(): Promise<{
+    product: string;
+    retroactiveChecks: Array<Record<string, unknown>>;
+    checkedAgainstStandards: boolean;
+    fakeComplianceCertification: boolean;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ai-engineering-standards/check/list', { method: 'GET' });
+  }
+
+
+  async corporateOperatingSystemProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-operating-system/products', { method: 'GET' });
+  }
+
+  async corporateGovernancePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-governance-platform/engine', { method: 'GET' });
+  }
+
+  async strategicPlanningPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/strategic-planning-platform/engine', { method: 'GET' });
+  }
+
+  async enterprisePortfolioManagementEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-portfolio-management/engine', { method: 'GET' });
+  }
+
+  async businessArchitectureEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/business-architecture/engine', { method: 'GET' });
+  }
+
+  async enterpriseArchitectureRepositoryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-architecture-repository/engine', { method: 'GET' });
+  }
+
+  async corporateKnowledgeSystemEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-knowledge-system/engine', { method: 'GET' });
+  }
+
+  async executiveIntelligencePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/executive-intelligence-platform/engine', { method: 'GET' });
+  }
+
+  async corporateRiskPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-risk-platform/engine', { method: 'GET' });
+  }
+
+  async corporateOperatingSystemConstitution(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/corporate-operating-system/constitution', { method: 'GET' });
+  }
+
+
+  async globalAiStandardsProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-standards/products', { method: 'GET' });
+  }
+
+  async globalAiStandardsIsoProcess(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-standards/iso-process', { method: 'GET' });
+  }
+
+  async aiCertificationPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-certification-platform/engine', { method: 'GET' });
+  }
+
+  async aiCertificationPlatformScheme(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-certification-platform/scheme', { method: 'GET' });
+  }
+
+  async aiComplianceFrameworkEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-compliance-framework/engine', { method: 'GET' });
+  }
+
+  async referenceArchitecturesEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/reference-architectures/engine', { method: 'GET' });
+  }
+
+  async bestPracticesLibraryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/best-practices-library/engine', { method: 'GET' });
+  }
+
+  async enterpriseAssessmentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-assessment-platform/engine', { method: 'GET' });
+  }
+
+  async standardsRepositoryEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/standards-repository/engine', { method: 'GET' });
+  }
+
+  async globalPartnerProgramEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-partner-program/engine', { method: 'GET' });
+  }
+
+  async standardsAnalyticsEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/standards-analytics/engine', { method: 'GET' });
+  }
+
+  async globalAiStandardsVerify(code: string): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/global-ai-standards/verify/${code}`, { method: 'GET' });
+  }
+
+
+  async aiEconomyProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-economy/products', { method: 'GET' });
+  }
+
+  async aiCommercePlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-commerce-platform/engine', { method: 'GET' });
+  }
+
+  async aiLicensingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-licensing-platform/engine', { method: 'GET' });
+  }
+
+  async revenueSharingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/revenue-sharing-platform/engine', { method: 'GET' });
+  }
+
+  async aiTalentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-talent-platform/engine', { method: 'GET' });
+  }
+
+  async researchFundingPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/research-funding-platform/engine', { method: 'GET' });
+  }
+
+  async globalCommunityPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-community-platform/engine', { method: 'GET' });
+  }
+
+  async aiInvestmentPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-investment-platform/engine', { method: 'GET' });
+  }
+
+  async economicIntelligenceEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/economic-intelligence/engine', { method: 'GET' });
+  }
+
+  async aiEconomyGuards(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/ai-economy/guards', { method: 'GET' });
+  }
+
+
+  async digitalCivilizationProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/digital-civilization/products', { method: 'GET' });
+  }
+
+  async nationalAiPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/national-ai-platform/engine', { method: 'GET' });
+  }
+
+  async smartCityPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/smart-city-platform/engine', { method: 'GET' });
+  }
+
+  async enterpriseNationPlatformEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/enterprise-nation-platform/engine', { method: 'GET' });
+  }
+
+  async globalLanguagePreservationEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-language-preservation/engine', { method: 'GET' });
+  }
+
+  async universalTranslationGridEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/universal-translation-grid/engine', { method: 'GET' });
+  }
+
+  async globalKnowledgeNetworkEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-knowledge-network/engine', { method: 'GET' });
+  }
+
+  async globalAiFederationEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/global-ai-federation/engine', { method: 'GET' });
+  }
+
+  async civilizationIntelligenceDashboardEngine(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/civilization-intelligence-dashboard/engine', { method: 'GET' });
+  }
+
+  async digitalCivilizationGuards(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/digital-civilization/guards', { method: 'GET' });
+  }
+
+
+  async libraryReferenceProducts(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/products', { method: 'GET' });
+  }
+
+  async libraryReferenceIndex(volume?: number): Promise<Record<string, unknown>> {
+    const q = volume == null ? '' : `?volume=${volume}`;
+    return this.requestJson(`/v1/library-reference/index${q}`, { method: 'GET' });
+  }
+
+  async libraryReferenceRisks(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/risks', { method: 'GET' });
+  }
+
+  async libraryReferenceVision(): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/library-reference/vision', { method: 'GET' });
   }
 
   private async parseJsonResponse<T>(response: Response): Promise<T> {

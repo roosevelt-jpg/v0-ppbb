@@ -1,0 +1,25 @@
+{
+  "name": "@verbalab/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VerbaLab Partner Connectors MCP stdio bridge for Claude, Cursor, and agents",
+  "type": "module",
+  "bin": {
+    "verbalab-mcp": "./dist/stdio.js"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "start": "node dist/stdio.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@verbalab/typescript-config": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

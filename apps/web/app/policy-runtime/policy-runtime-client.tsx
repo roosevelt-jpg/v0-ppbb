@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -39,7 +41,7 @@ export function PolicyRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/policy-runtime/engine', { token }),
@@ -57,7 +59,7 @@ export function PolicyRuntimeClient() {
   const createAndEvaluate = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ policy: Policy }>('/v1/policy-runtime/policies', {
         token,
@@ -103,10 +105,10 @@ export function PolicyRuntimeClient() {
   return (
     <AppShell>
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
-        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel · VL-222</p>
+        <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.85rem' }}>AI Kernel</p>
         <h1 style={{ margin: '0.35rem 0 0.5rem', fontSize: '1.75rem' }}>Policy Runtime</h1>
         <p style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
-          Hard-gate enforcement for Agent / Workflow / Plugin. Denies return 403 — not log-only.
+          Hard-gate enforcement for Agent / Workflow / Plugin. Denies return 403.
         </p>
 
         {error ? (
@@ -117,7 +119,6 @@ export function PolicyRuntimeClient() {
 
         {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <p style={{ margin: 0 }}>Mode: {engine.mode}</p>
             <ul style={{ color: 'var(--muted)', lineHeight: 1.55 }}>
               <li>hardGate: {String(engine.honesty.hardGate)}</li>
               <li>logOnly: {String(engine.honesty.logOnly)}</li>
@@ -126,7 +127,7 @@ export function PolicyRuntimeClient() {
               <li>wiredIntoPluginRuntime: {String(engine.honesty.wiredIntoPluginRuntime)}</li>
               <li>opaOs: {String(engine.honesty.opaOs)}</li>
             </ul>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.safety.note}</p>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           </section>
         ) : null}
 

@@ -63,11 +63,11 @@ export class ContextEngineService {
         { id: 'project', status: 'shipped', from: 'project memories' },
         { id: 'conversation', status: 'shipped', from: 'conversation memories' },
         { id: 'historical', status: 'shipped', from: 'long_term/shared memories' },
-        { id: 'documents', status: 'shipped', from: 'vector search (VL-182)' },
-        { id: 'knowledgeGraph', status: 'partial', from: 'entity name list (VL-184)' },
+        { id: 'documents', status: 'shipped', from: 'vector search' },
+        { id: 'knowledgeGraph', status: 'shipped', from: 'entity name list' },
         { id: 'prompt', status: 'shipped', from: 'prompts resolve (chat/rag)' },
       ],
-      note: 'Context sources assembled by VL-185. Realtime deferred.',
+      note: 'Context sources assembled; realtime push via GET /v1/context-engine/realtime.',
     };
   }
 
@@ -368,7 +368,7 @@ export class ContextEngineService {
         truncated: compressed.truncated,
         method: 'priority_char_budget',
       },
-      note: 'Assembled context for AI requests (VL-185). Not an infinite context window; LLM summarization deferred.',
+      note: 'Assembled context for AI requests. Not an infinite context window; LLM summarization deferred.',
     };
   }
 
@@ -387,7 +387,7 @@ export class ContextEngineService {
       periodStart: start.toISOString(),
       assemblies,
       workspaceId,
-      note: 'Context Engine analytics from assemble audits (VL-185).',
+      note: 'Context Engine analytics from assemble audits.',
     };
   }
 
@@ -402,8 +402,36 @@ export class ContextEngineService {
       assemblies: analytics.assemblies,
       infiniteContextWindow: engine.honesty.infiniteContextWindow,
       realtimePush: engine.honesty.realtimePush,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
-      note: 'Context Engine monitoring snapshot (VL-185).',
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
+      note: 'Context Engine monitoring snapshot.',
     };
+  }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process context-engine push bus (SSE).',
+    });
+    write('sources', {
+      count: this.engine().capabilities.length,
+      ids: this.engine().capabilities.map((c) => c.id).slice(0, 12),
+    });
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 }

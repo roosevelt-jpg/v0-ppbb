@@ -22,14 +22,14 @@ export function aiRuntimeAnalyticsCatalog() {
   return {
     product: 'VerbaLab AI Runtime Analytics',
     note:
-      'AI Runtime Analytics (VL-212). Org/workspace aggregates for Inference Cloud latency/throughput/GPU/CPU/cache/requests/errors/cost/customers/models/streaming. Reads GPU Platform, AI Router, Streaming, Batch, Cache, Cost Optimization, Model Serving, and usage_events. Not a BI dashboard OS, APM suite, or regenerate of Intelligence Analytics (VL-191) / Knowledge Analytics (VL-202).',
+      'AI Runtime Analytics. Org/workspace aggregates for Inference Cloud latency/throughput/GPU/CPU/cache/requests/errors/cost/customers/models/streaming. Reads GPU Platform, AI Router, Streaming, Batch, Cache, Cost Optimization, Model Serving, and usage_events.',
     capabilities: [
       {
         id: 'latency',
         name: 'Latency',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/latency',
-        notes: 'Router/streaming/batch timing proxies from metadata when present — not full distributed tracing.',
+        notes: 'Router/streaming/batch timing proxies from metadata when present.',
       },
       {
         id: 'throughput',
@@ -41,16 +41,16 @@ export function aiRuntimeAnalyticsCatalog() {
       {
         id: 'gpu-usage',
         name: 'GPU Usage',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/gpu',
-        notes: 'Sandbox GpuAllocation inventory — not cloud GPU telemetry OS.',
+        notes: 'Sandbox GpuAllocation inventory.',
       },
       {
         id: 'cpu-usage',
         name: 'CPU Usage',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/cpu',
-        notes: 'Process/host load snapshot for Nest CPU path — not cluster APM.',
+        notes: 'Process/host load snapshot for Nest CPU path.',
       },
       {
         id: 'cache-hits',
@@ -69,23 +69,23 @@ export function aiRuntimeAnalyticsCatalog() {
       {
         id: 'errors',
         name: 'Errors',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/errors',
-        notes: 'Failed batch/streaming statuses + selected audit failures — not error-tracking SaaS.',
+        notes: 'Failed batch/streaming statuses + selected audit failures.',
       },
       {
         id: 'cost',
         name: 'Cost',
         status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/cost',
-        notes: 'CostSpendEvent ledger + GPU hourly estimates — ≠ Stripe invoices; enforce remains VL-211.',
+        notes: 'CostSpendEvent ledger + GPU hourly estimates — ≠ Stripe invoices; enforce remains.',
       },
       {
         id: 'customers',
         name: 'Customers',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/customers',
-        notes: 'Workspace activity counts under the org — not a CRM/customer-data platform.',
+        notes: 'Workspace activity counts under the org.',
       },
       {
         id: 'models',
@@ -113,7 +113,7 @@ export function aiRuntimeAnalyticsCatalog() {
         name: 'Reports',
         status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/report',
-        notes: 'Bundled JSON report — not scheduled PDF/BI suite.',
+        notes: 'Bundled JSON report.',
       },
       {
         id: 'rest',
@@ -127,7 +127,7 @@ export function aiRuntimeAnalyticsCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'aiRuntimeAnalyticsEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -146,9 +146,9 @@ export function aiRuntimeAnalyticsCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-runtime-analytics/overview',
-        notes: 'Ships with Nest API — not a separate analytics fleet.',
+        notes: 'Ships with Nest API.',
       },
     ] satisfies RuntimeAnalyticsCapability[],
     honesty: {

@@ -80,9 +80,9 @@ Add to `apps/api/.env` and `apps/web/.env.local` (see `.env.example`):
 | `GOOGLE_TRANSLATE_API_KEY` | api | Live MT / detect |
 | `REDIS_URL` | api | Jobs + rate limits (Compose Redis) |
 | `OPENAI_API_KEY` | api | Audio, chat, embeddings, RAG |
-| `ELEVENLABS_API_KEY` | api | Voice cloning |
+| `EXTERNAL_VOICE_CLONE_API_KEY` | api | Voice cloning |
 | `STRIPE_*` | api | Billing |
-| `VERBALAB_REGION` | api | Residency island (`us` / `eu`) |
+| `VERBALAB_REGION` | api | Residency island (`af` default / `eu` / `us`) |
 
 Without Clerk/Google, open http://localhost:3000/setup. API tests still pass (fixtures). Live MT: `TRANSLATE_LIVE=1 pnpm --filter @verbalab/api test`.
 

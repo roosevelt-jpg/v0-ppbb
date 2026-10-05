@@ -29,7 +29,7 @@ export function promptFabricCapabilityCatalog(): PromptFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/prompt-fabric/products',
       notes:
-        'Prompt platform hub (VL-243). Extends Prompt Runtime — does not regenerate VL-216 / VL-086 / VL-188.',
+        'Prompt platform hub. Extends Prompt Runtime — does not regenerate / /.',
     },
     {
       id: 'prompt-platform',
@@ -43,21 +43,21 @@ export function promptFabricCapabilityCatalog(): PromptFabricCapability[] {
       name: 'Prompt Routing',
       status: 'shipped',
       api: 'POST /v1/prompt-fabric/route',
-      notes: 'Feature→key via Prompt Runtime + cloud handoff routes — not prompt mesh OS.',
+      notes: 'Feature→key via Prompt Runtime + cloud handoff routes.',
     },
     {
       id: 'prompt-versioning',
       name: 'Prompt Versioning',
       status: 'shipped',
       api: 'GET /v1/prompt-fabric/versions',
-      notes: 'Façade over Prompt Runtime / VL-086 PromptVersion rows.',
+      notes: 'Façade over Prompt Runtime / PromptVersion rows.',
     },
     {
       id: 'prompt-synchronization',
       name: 'Prompt Synchronization',
       status: 'shipped',
       api: 'POST /v1/prompt-fabric/sync',
-      notes: 'Same-org workspace sync cursors for prompt keys — not CRDT cluster OS.',
+      notes: 'Same-org workspace sync cursors for prompt keys.',
     },
     {
       id: 'prompt-distribution',
@@ -76,10 +76,10 @@ export function promptFabricCapabilityCatalog(): PromptFabricCapability[] {
     {
       id: 'prompt-policies',
       name: 'Prompt Policies',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/policy-runtime/engine',
       notes:
-        'Discovery handoff to Policy Runtime today; fabric-wide hard gate is Policy Fabric (VL-247).',
+        'Discovery handoff to Policy Runtime today; fabric-wide hard gate is Policy Fabric.',
     },
     {
       id: 'monitoring',
@@ -123,7 +123,7 @@ export function promptFabricRoutingTable(): PromptFabricRoute[] {
       target: 'prompt-runtime',
       api: 'POST /v1/prompt-runtime/route',
       cloud: 'language',
-      notes: 'Sandbox feature→chat map — not dedicated MT prompt OS.',
+      notes: 'Sandbox feature→chat map.',
     },
     {
       kind: 'templates',
@@ -139,7 +139,7 @@ export function promptFabricRoutingTable(): PromptFabricRoute[] {
       target: 'prompt-runtime',
       api: 'GET /v1/prompt-runtime/versions',
       cloud: 'ai-kernel',
-      notes: 'Version list over VL-086.',
+      notes: 'Version list over.',
     },
     {
       kind: 'intelligence',
@@ -147,7 +147,7 @@ export function promptFabricRoutingTable(): PromptFabricRoute[] {
       target: 'prompt-intelligence',
       api: 'GET /v1/prompt-intelligence/engine',
       cloud: 'intelligence',
-      notes: 'Discovery handoff — not regenerated.',
+      notes: 'Discovery handoff.',
     },
     {
       kind: 'policy',
@@ -155,7 +155,7 @@ export function promptFabricRoutingTable(): PromptFabricRoute[] {
       target: 'policy-runtime',
       api: 'GET /v1/policy-runtime/engine',
       cloud: 'ai-kernel',
-      notes: 'Policy Runtime until Policy Fabric (VL-247).',
+      notes: 'Policy Runtime until Policy Fabric.',
     },
     {
       kind: 'context',
@@ -193,7 +193,7 @@ export function promptFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Prompt Fabric (VL-243). Router/versioning/sync/distribution/validation over Prompt Runtime. Prompt policies via Policy Runtime until Policy Fabric. Not a prompt mesh or research lab OS.',
+      'Prompt Fabric. Router/versioning/sync/distribution/validation over Prompt Runtime. Prompt policies via Policy Runtime until Policy Fabric.',
   };
 }
 

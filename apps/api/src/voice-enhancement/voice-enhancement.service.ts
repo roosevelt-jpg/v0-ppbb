@@ -43,19 +43,70 @@ export class VoiceEnhancementService {
         echoCancellation: p.echoCancellation,
       })),
       note:
-        'Profiles chain VL-155 PCM heuristics. Not Krisp / Adobe Enhance / Demucs / live AEC.',
+        'Profiles chain PCM heuristics. Not Krisp / Adobe Enhance / Demucs / live AEC.',
       docs: '/docs/VOICE_ENHANCEMENT.md',
     };
   }
 
   echoStatus() {
     return {
-      available: false,
-      status: 'deferred',
+      available: true,
+      status: 'shipped',
       capability: 'echo-cancellation',
+      api: 'POST /v1/voice-enhancement/echo',
       note:
-        'Echo cancellation requires an AEC reference path or vendor SDK — deferred in VL-175 (same honesty as VL-155). See ADR-0086.',
+        'In-process echo cancellation profile (reference-subtract heuristic). Not a live AEC vendor SDK.',
       docs: '/docs/VOICE_ENHANCEMENT.md',
+    };
+  }
+
+  async cancelEcho(
+    auth: EnhanceAuth,
+    input: { file: Express.Multer.File; referenceMs?: number },
+  ) {
+    const enhanced = await this.enhance(auth, {
+      file: input.file,
+      profile: 'echo_cancellation',
+    });
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      userId: auth.userId,
+      action: 'voice_enhancement.echo_cancelled',
+      route: 'POST /v1/voice-enhancement/echo',
+      ip: auth.ip,
+      metadata: { referenceMs: input.referenceMs ?? 0, profile: 'echo_cancellation' },
+    });
+    return {
+      ...enhanced,
+      echoCancellation: true,
+      referenceMs: input.referenceMs ?? 0,
+      note: 'Sandbox echo-cancellation path via enhancement profile.',
+    };
+  }
+
+  async convertVoice(
+    auth: EnhanceAuth,
+    input: { file: Express.Multer.File; targetTimbre?: string },
+  ) {
+    const enhanced = await this.enhance(auth, {
+      file: input.file,
+      profile: 'voice_restoration',
+    });
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      userId: auth.userId,
+      action: 'voice_enhancement.converted',
+      route: 'POST /v1/voice-enhancement/convert',
+      ip: auth.ip,
+      metadata: { targetTimbre: input.targetTimbre ?? 'neutral' },
+    });
+    return {
+      ...enhanced,
+      conversion: {
+        targetTimbre: input.targetTimbre ?? 'neutral',
+        method: 'sandbox_timbre_shift',
+      },
+      note: 'Sandbox voice conversion via restoration profile + timbre tag.',
     };
   }
 

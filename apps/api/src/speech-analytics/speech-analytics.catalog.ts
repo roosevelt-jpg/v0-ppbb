@@ -25,7 +25,7 @@ export function speechAnalyticsCatalog() {
       {
         id: 'recognition-accuracy',
         name: 'Recognition Accuracy',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech-analytics/accuracy',
         notes: 'Whisper confidence + call QA / pronunciation proxies — not golden-set WER.',
       },
@@ -46,14 +46,14 @@ export function speechAnalyticsCatalog() {
       {
         id: 'latency',
         name: 'Latency',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech-analytics/latency',
         notes: 'STT audio-duration aggregates — not full request p95 pipeline.',
       },
       {
         id: 'errors',
         name: 'Errors',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech-analytics/errors',
         notes: 'Speech-related failed jobs + error audit actions when present.',
       },
@@ -67,14 +67,14 @@ export function speechAnalyticsCatalog() {
       {
         id: 'customers',
         name: 'Customers',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech-analytics/customers',
         notes: 'API key prefixes with speech activity — not CRM customer 360.',
       },
       {
         id: 'industries',
         name: 'Industries',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/speech-analytics/industries',
         notes: 'Industry vocabulary pack usage from STT audits.',
       },
@@ -95,9 +95,9 @@ export function speechAnalyticsCatalog() {
       {
         id: 'wer-lab',
         name: 'WER Evaluation Lab',
-        status: 'deferred',
-        api: null,
-        notes: 'Golden-set WER / human eval harness deferred.',
+        status: 'shipped',
+        api: 'POST /v1/speech-analytics/wer-lab',
+        notes: 'Sandbox golden-set WER harness — reference vs hypothesis word error rate. Not a human eval lab OS.',
       },
     ] satisfies SpeechAnalyticsCapability[],
     links: {

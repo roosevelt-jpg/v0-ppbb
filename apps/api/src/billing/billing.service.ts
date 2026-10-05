@@ -4,7 +4,17 @@ import { ModuleRef } from '@nestjs/core';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiException } from '../common/errors/api-exception';
-import { planFromId, type PlanId } from './plans';
+import {
+  isPaidPlan,
+  planCatalog,
+  planFromId,
+  planIdFromStripePrice,
+  planMeets,
+  stripePriceIdForPlan,
+  type PlanId,
+} from './plans';
+import { creditRateCatalog } from './credits';
+import { BILLING_FRAUD, isBillingBlocked } from './billing-fraud';
 import { UsageService } from '../usage/usage.service';
 import { AuditService } from '../audit/audit.service';
 
@@ -25,13 +35,47 @@ export class BillingService {
   }
 
   isConfigured(): boolean {
+    const anyPrice = Boolean(
+      process.env.STRIPE_PRICE_ID_PRO ||
+        process.env.STRIPE_PRICE_ID_STARTER ||
+        process.env.STRIPE_PRICE_ID_CREATOR ||
+        process.env.STRIPE_PRICE_ID_SCALE ||
+        process.env.STRIPE_PRICE_ID_BUSINESS,
+    );
     return Boolean(
       this.stripe &&
-        process.env.STRIPE_PRICE_ID_PRO &&
+        anyPrice &&
         process.env.STRIPE_WEBHOOK_SECRET &&
         process.env.BILLING_SUCCESS_URL &&
         process.env.BILLING_CANCEL_URL,
     );
+  }
+
+  /** Public plan + credit-rate catalog (VerbaLab shared-credits). */
+  catalog() {
+    return {
+      model: 'verbalab-shared-credits',
+      currency: 'USD',
+      note: 'Shared monthly credits across TTS, STT, music, SFX, dubbing, and translate — one shared VerbaLab Creative Platform credit pool.',
+      plans: planCatalog().map((p) => ({
+        id: p.id,
+        name: p.name,
+        monthlyCredits: p.monthlyCredits,
+        priceUsdMonthly: p.priceUsdMonthly,
+        priceUsdAnnualEffective: p.priceUsdAnnualEffective,
+        seats: p.seats,
+        concurrency: p.concurrency,
+        commercialLicense: p.commercialLicense,
+        instantVoiceCloning: p.instantVoiceCloning,
+        professionalVoiceCloning: p.professionalVoiceCloning,
+        professionalVoiceSlots: p.professionalVoiceSlots,
+        customVoiceSlots: p.customVoiceSlots,
+        blurb: p.blurb,
+        highlights: p.highlights,
+        stripeConfigured: Boolean(p.stripePriceEnv && process.env[p.stripePriceEnv]),
+      })),
+      credits: creditRateCatalog(),
+    };
   }
 
   /** Live marketplace Checkout (destination charge + application fee). */
@@ -79,51 +123,213 @@ export class BillingService {
     });
     const usage = await this.usage.summary(organizationId);
     const plan = planFromId(org.plan);
+    const hasDefaultPaymentMethod = Boolean(org.stripeDefaultPaymentMethodId);
 
+    // Refresh card fingerprint from Stripe when configured (best-effort).
+    if (this.stripe && org.stripeCustomerId && hasDefaultPaymentMethod) {
+      void this.syncDefaultPaymentMethod(organizationId).catch(() => undefined);
+    }
+
+    const creditsUsed = usage.creditsUsed ?? usage.characters;
     return {
       plan: org.plan,
       planName: plan.name,
       billingStatus: org.billingStatus,
+      /** @deprecated prefer monthlyCredits — kept for older clients */
       characterQuota: org.characterQuota,
       charactersUsed: usage.characters,
-      charactersRemaining: Math.max(org.characterQuota - usage.characters, 0),
+      charactersRemaining: Math.max(org.characterQuota - creditsUsed, 0),
+      monthlyCredits: org.characterQuota,
+      creditsUsed,
+      creditsRemaining: Math.max(org.characterQuota - creditsUsed, 0),
+      creditsBreakdown: usage.creditsBreakdown,
+      priceUsdMonthly: plan.priceUsdMonthly,
+      seats: plan.seats,
+      concurrency: plan.concurrency,
+      commercialLicense: plan.commercialLicense,
+      instantVoiceCloning: plan.instantVoiceCloning,
+      professionalVoiceCloning: plan.professionalVoiceCloning,
       periodStart: usage.periodStart,
       requests: usage.requests,
+      usage,
       stripeConfigured: this.isConfigured(),
       hasCustomer: Boolean(org.stripeCustomerId),
+      hasDefaultPaymentMethod,
+      autoDebitEnabled: hasDefaultPaymentMethod && org.billingStatus === 'active',
+      cardBrand: org.cardBrand,
+      cardLast4: org.cardLast4,
+      paymentFailureCount: org.paymentFailureCount,
+      fraudHold: org.billingStatus === 'fraud_hold' || Boolean(org.fraudHoldAt),
       connectAccountId: org.stripeConnectAccountId,
       connectChargesEnabled: org.stripeConnectChargesEnabled,
       marketplacePaymentsConfigured: this.isMarketplacePaymentsConfigured(),
       platformFeeBps: this.platformFeeBps(),
+      pricingModel: 'verbalab-shared-credits',
     };
   }
 
-  async assertWithinQuota(organizationId: string, upcomingCharacters: number) {
+  async assertBillingHealthy(organizationId: string) {
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    if (isBillingBlocked(org.billingStatus) || org.fraudHoldAt) {
+      throw new ApiException(
+        'billing_fraud_hold',
+        'Billing is locked due to fraudulent or unpaid activity. Contact support or clear the hold in Stripe after a valid card is on file.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+    if (org.billingStatus === 'past_due') {
+      throw new ApiException(
+        'billing_past_due',
+        'Your card was declined. Update the payment method — auto-debit retries use the card on file.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+  }
+
+  /**
+   * Enforce shared monthly credits (shared-credit).
+   * `upcomingCredits` may be characters for TTS/translate (1:1) or precomputed credits.
+   */
+  async assertWithinQuota(organizationId: string, upcomingCredits: number) {
+    await this.assertBillingHealthy(organizationId);
     const org = await this.prisma.organization.findUniqueOrThrow({
       where: { id: organizationId },
     });
     const usage = await this.usage.summary(organizationId);
-    if (usage.characters + upcomingCharacters > org.characterQuota) {
+    const used = usage.creditsUsed ?? usage.characters;
+    if (used + upcomingCredits > org.characterQuota) {
       throw new ApiException(
         'quota_exceeded',
-        `Monthly character quota exceeded (${usage.characters}/${org.characterQuota}). Upgrade to Pro.`,
+        `Monthly credit quota exceeded (${used}/${org.characterQuota} credits). Upgrade under Billing — upgrade under Billing (Free → Business).`,
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
   }
 
-  /** Feature gate for Pro-only surfaces (marketplace publish/install). */
-  async assertPro(organizationId: string) {
+  /** Alias for credit-aware callers. */
+  assertWithinCredits(organizationId: string, upcomingCredits: number) {
+    return this.assertWithinQuota(organizationId, upcomingCredits);
+  }
+
+  private async assertCheckoutNotAbusive(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
     const org = await this.prisma.organization.findUniqueOrThrow({
       where: { id: organizationId },
     });
-    if (org.plan !== 'pro') {
+    const now = Date.now();
+    const windowStart = now - BILLING_FRAUD.checkoutWindowMs;
+    const last = org.lastCheckoutAt?.getTime() ?? 0;
+    let attempts = org.checkoutAttemptCount;
+    if (last < windowStart) attempts = 0;
+    if (attempts >= BILLING_FRAUD.maxCheckoutAttempts) {
+      await this.prisma.organization.update({
+        where: { id: organizationId },
+        data: {
+          billingStatus: 'fraud_hold',
+          fraudHoldAt: new Date(),
+        },
+      });
+      await this.audit.record({
+        organizationId,
+        action: 'billing.fraud_hold',
+        route: 'billing.checkout_rate_limit',
+        metadata: { attempts, windowMs: BILLING_FRAUD.checkoutWindowMs },
+      });
+      throw new ApiException(
+        'billing_fraud_hold',
+        'Too many checkout attempts. Billing temporarily locked to block fraud.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    await this.prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        checkoutAttemptCount: attempts + 1,
+        lastCheckoutAt: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Feature gate for commercial / marketplace surfaces.
+   * external vendor: Instant cloning + commercial from Starter — we require Starter+ (paid).
+   */
+  async assertPro(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    if (!isPaidPlan(org.plan)) {
       throw new ApiException(
         'plan_required',
-        'Marketplace requires a Pro plan. Upgrade under Billing.',
+        'This feature requires a paid plan (Starter or higher). Upgrade under Billing.',
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
+  }
+
+  /** Gate for Professional Voice Cloning / Creator+ features. */
+  async assertCreator(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    if (!planMeets(org.plan, 'creator')) {
+      throw new ApiException(
+        'plan_required',
+        'Professional Voice Cloning requires Creator or higher.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+  }
+
+  /** Commercial-license gate (Starter+) for paid creative / agent exports. */
+  async assertCommercial(organizationId: string) {
+    await this.assertBillingHealthy(organizationId);
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    const plan = planFromId(org.plan);
+    if (!plan.commercialLicense) {
+      throw new ApiException(
+        'plan_required',
+        'Commercial use requires Starter or higher. Upgrade under Billing.',
+        HttpStatus.PAYMENT_REQUIRED,
+      );
+    }
+  }
+
+  /** Entitlements unlocked by the org's current plan (what charging buys). */
+  async entitlements(organizationId: string) {
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    const plan = planFromId(org.plan);
+    const usage = await this.usage.summary(organizationId);
+    const creditsUsed = usage.creditsUsed ?? usage.characters;
+    return {
+      plan: plan.id,
+      planName: plan.name,
+      monthlyCredits: plan.monthlyCredits,
+      creditsUsed,
+      creditsRemaining: Math.max(plan.monthlyCredits - creditsUsed, 0),
+      commercialLicense: plan.commercialLicense,
+      instantVoiceCloning: plan.instantVoiceCloning,
+      professionalVoiceCloning: plan.professionalVoiceCloning,
+      professionalVoiceSlots: plan.professionalVoiceSlots,
+      customVoiceSlots: plan.customVoiceSlots,
+      seats: plan.seats,
+      concurrency: plan.concurrency,
+      canUseApi: true,
+      canUseCreative: true,
+      canUseAgents: true,
+      canCloneInstant: plan.instantVoiceCloning,
+      canCloneProfessional: plan.professionalVoiceCloning,
+      canCommercialPublish: plan.commercialLicense,
+      pricingModel: 'verbalab-shared-credits',
+    };
   }
 
   async ensureCustomer(organizationId: string, email?: string) {
@@ -353,6 +559,7 @@ export class BillingService {
     userId: string;
     email?: string;
     ip?: string;
+    planId?: string;
   }) {
     if (!this.isConfigured()) {
       throw new ApiException(
@@ -362,8 +569,30 @@ export class BillingService {
       );
     }
 
+    const requested = (input.planId ?? 'pro') as PlanId;
+    const plan = planFromId(requested);
+    if (plan.id === 'free' || plan.id === 'enterprise') {
+      throw new ApiException(
+        'validation_error',
+        plan.id === 'enterprise'
+          ? 'Enterprise is custom — contact sales.'
+          : 'Cannot checkout the Free plan.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const priceId = stripePriceIdForPlan(plan.id) ?? process.env.STRIPE_PRICE_ID_PRO;
+    if (!priceId) {
+      throw new ApiException(
+        'billing_not_configured',
+        `Stripe price missing for plan ${plan.id}. Set ${plan.stripePriceEnv ?? 'STRIPE_PRICE_ID_PRO'}.`,
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    await this.assertCheckoutNotAbusive(input.organizationId);
+
     const stripe = this.requireStripe();
-    const priceId = process.env.STRIPE_PRICE_ID_PRO!;
     const customerId = await this.ensureCustomer(input.organizationId, input.email);
 
     const session = await stripe.checkout.sessions.create({
@@ -373,11 +602,24 @@ export class BillingService {
       success_url: process.env.BILLING_SUCCESS_URL!,
       cancel_url: process.env.BILLING_CANCEL_URL!,
       client_reference_id: input.organizationId,
-      metadata: { organizationId: input.organizationId },
-      subscription_data: {
-        metadata: { organizationId: input.organizationId },
+      metadata: {
+        organizationId: input.organizationId,
+        purpose: 'plan_upgrade',
+        planId: plan.id,
       },
-    });
+      payment_method_types: ['card'],
+      payment_method_collection: 'always',
+      billing_address_collection: 'required',
+      customer_update: { address: 'auto', name: 'auto' },
+      // Card stays on file and is used for every renewal / auto-debit.
+      subscription_data: {
+        metadata: { organizationId: input.organizationId, planId: plan.id },
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+          payment_method_types: ['card'],
+        },
+      },
+    } as Stripe.Checkout.SessionCreateParams);
 
     await this.audit.record({
       organizationId: input.organizationId,
@@ -385,10 +627,165 @@ export class BillingService {
       action: 'billing.checkout_started',
       route: 'POST /v1/billing/checkout',
       ip: input.ip,
+      metadata: { sessionId: session.id, autoDebit: true, planId: plan.id },
+    });
+
+    return { url: session.url, autoDebit: true, planId: plan.id };
+  }
+
+  /** Checkout in setup mode — add/update card for always-on auto-debit without changing plan. */
+  async createSetupCardSession(input: {
+    organizationId: string;
+    userId: string;
+    email?: string;
+    ip?: string;
+  }) {
+    if (!this.isConfigured()) {
+      throw new ApiException(
+        'billing_not_configured',
+        'Stripe billing is not fully configured.',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    await this.assertCheckoutNotAbusive(input.organizationId);
+
+    const stripe = this.requireStripe();
+    const customerId = await this.ensureCustomer(input.organizationId, input.email);
+    const success =
+      process.env.BILLING_PORTAL_RETURN_URL ??
+      process.env.BILLING_SUCCESS_URL ??
+      'http://localhost:3000/billing?card=saved';
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'setup',
+      customer: customerId,
+      success_url: `${success}${success.includes('?') ? '&' : '?'}card=saved`,
+      cancel_url: process.env.BILLING_CANCEL_URL!,
+      client_reference_id: input.organizationId,
+      metadata: { organizationId: input.organizationId, purpose: 'save_card_auto_debit' },
+      payment_method_types: ['card'],
+      billing_address_collection: 'required',
+      customer_update: { address: 'auto', name: 'auto' },
+    });
+
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'billing.setup_card_started',
+      route: 'POST /v1/billing/setup-card',
+      ip: input.ip,
       metadata: { sessionId: session.id },
     });
 
-    return { url: session.url };
+    return { url: session.url, autoDebit: true };
+  }
+
+  async syncDefaultPaymentMethod(organizationId: string) {
+    const stripe = this.requireStripe();
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    if (!org.stripeCustomerId) return null;
+
+    const customer = await stripe.customers.retrieve(org.stripeCustomerId);
+    if (customer.deleted) return null;
+
+    let pmId =
+      typeof customer.invoice_settings?.default_payment_method === 'string'
+        ? customer.invoice_settings.default_payment_method
+        : customer.invoice_settings?.default_payment_method?.id;
+
+    if (!pmId && org.stripeSubscriptionId) {
+      const sub = await stripe.subscriptions.retrieve(org.stripeSubscriptionId);
+      pmId =
+        typeof sub.default_payment_method === 'string'
+          ? sub.default_payment_method
+          : sub.default_payment_method?.id ?? undefined;
+    }
+
+    if (!pmId) {
+      const methods = await stripe.paymentMethods.list({
+        customer: org.stripeCustomerId,
+        type: 'card',
+        limit: 1,
+      });
+      pmId = methods.data[0]?.id;
+      if (pmId) {
+        await stripe.customers.update(org.stripeCustomerId, {
+          invoice_settings: { default_payment_method: pmId },
+        });
+      }
+    }
+
+    if (!pmId) {
+      await this.prisma.organization.update({
+        where: { id: organizationId },
+        data: {
+          stripeDefaultPaymentMethodId: null,
+          cardBrand: null,
+          cardLast4: null,
+        },
+      });
+      return null;
+    }
+
+    const pm = await stripe.paymentMethods.retrieve(pmId);
+    const brand = pm.card?.brand ?? null;
+    const last4 = pm.card?.last4 ?? null;
+
+    await this.prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        stripeDefaultPaymentMethodId: pmId,
+        cardBrand: brand,
+        cardLast4: last4,
+      },
+    });
+
+    return { paymentMethodId: pmId, brand, last4 };
+  }
+
+  private async recordPaymentFailure(organizationId: string, reason: string) {
+    const org = await this.prisma.organization.findUniqueOrThrow({
+      where: { id: organizationId },
+    });
+    const failures = org.paymentFailureCount + 1;
+    const fraudHold = failures >= BILLING_FRAUD.maxPaymentFailures;
+    await this.prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        paymentFailureCount: failures,
+        billingStatus: fraudHold ? 'fraud_hold' : 'past_due',
+        fraudHoldAt: fraudHold ? new Date() : org.fraudHoldAt,
+      },
+    });
+    await this.audit.record({
+      organizationId,
+      action: fraudHold ? 'billing.fraud_hold' : 'billing.payment_failed',
+      route: 'stripe.webhook',
+      metadata: { reason, failures },
+    });
+  }
+
+  private async clearPaymentFailures(organizationId: string) {
+    await this.prisma.organization.update({
+      where: { id: organizationId },
+      data: {
+        paymentFailureCount: 0,
+        fraudHoldAt: null,
+        billingStatus: 'active',
+      },
+    });
+  }
+
+  private async organizationIdFromCustomer(customerId: string | null | undefined) {
+    if (!customerId) return null;
+    const org = await this.prisma.organization.findFirst({
+      where: { stripeCustomerId: customerId },
+      select: { id: true },
+    });
+    return org?.id ?? null;
   }
 
   async createPortalSession(input: { organizationId: string; userId: string; ip?: string }) {
@@ -502,10 +899,13 @@ export class BillingService {
 
         const organizationId =
           session.metadata?.organizationId ?? session.client_reference_id ?? undefined;
-        if (organizationId && session.mode === 'subscription') {
+        if (!organizationId) break;
+
+        if (session.mode === 'subscription') {
+          const planFromMeta = (session.metadata?.planId as PlanId | undefined) ?? 'pro';
           await this.applyEntitlement({
             organizationId,
-            plan: 'pro',
+            plan: planFromId(planFromMeta).id,
             stripeCustomerId:
               typeof session.customer === 'string' ? session.customer : session.customer?.id,
             stripeSubscriptionId:
@@ -513,6 +913,47 @@ export class BillingService {
                 ? session.subscription
                 : session.subscription?.id,
             billingStatus: 'active',
+          });
+          await this.clearPaymentFailures(organizationId);
+          await this.syncDefaultPaymentMethod(organizationId);
+        }
+
+        if (session.mode === 'setup') {
+          const setupIntentId =
+            typeof session.setup_intent === 'string'
+              ? session.setup_intent
+              : session.setup_intent?.id;
+          if (setupIntentId && this.stripe) {
+            const setupIntent = await this.stripe.setupIntents.retrieve(setupIntentId);
+            const pmId =
+              typeof setupIntent.payment_method === 'string'
+                ? setupIntent.payment_method
+                : setupIntent.payment_method?.id;
+            const customerId =
+              typeof session.customer === 'string' ? session.customer : session.customer?.id;
+            if (pmId && customerId) {
+              await this.stripe.customers.update(customerId, {
+                invoice_settings: { default_payment_method: pmId },
+              });
+              if (session.metadata?.organizationId) {
+                const org = await this.prisma.organization.findUnique({
+                  where: { id: organizationId },
+                });
+                if (org?.stripeSubscriptionId) {
+                  await this.stripe.subscriptions.update(org.stripeSubscriptionId, {
+                    default_payment_method: pmId,
+                  });
+                }
+              }
+            }
+          }
+          await this.clearPaymentFailures(organizationId);
+          await this.syncDefaultPaymentMethod(organizationId);
+          await this.audit.record({
+            organizationId,
+            action: 'billing.card_saved_auto_debit',
+            route: 'stripe.webhook',
+            metadata: { sessionId: session.id },
           });
         }
         break;
@@ -534,12 +975,70 @@ export class BillingService {
           const status =
             subscription.status === 'active' || subscription.status === 'trialing'
               ? 'active'
-              : subscription.status;
+              : subscription.status === 'past_due' || subscription.status === 'unpaid'
+                ? subscription.status
+                : subscription.status;
+          const priceId = subscription.items?.data?.[0]?.price?.id;
+          const fromMeta = subscription.metadata?.planId
+            ? planFromId(subscription.metadata.planId).id
+            : null;
+          const resolvedPlan = fromMeta && fromMeta !== 'free' ? fromMeta : planIdFromStripePrice(priceId) ?? 'pro';
           await this.applyEntitlement({
             organizationId,
-            plan: 'pro',
+            plan: resolvedPlan,
             stripeSubscriptionId: subscription.id,
             billingStatus: status,
+          });
+          if (status === 'active' || status === 'trialing') {
+            await this.clearPaymentFailures(organizationId);
+          }
+          await this.syncDefaultPaymentMethod(organizationId);
+        }
+        break;
+      }
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId =
+          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
+        const organizationId = await this.organizationIdFromCustomer(customerId);
+        if (organizationId) {
+          await this.clearPaymentFailures(organizationId);
+          await this.syncDefaultPaymentMethod(organizationId);
+        }
+        break;
+      }
+      case 'invoice.payment_failed':
+      case 'payment_intent.payment_failed': {
+        const obj = event.data.object as Stripe.Invoice | Stripe.PaymentIntent;
+        const customerId =
+          typeof obj.customer === 'string' ? obj.customer : obj.customer?.id ?? null;
+        const organizationId = await this.organizationIdFromCustomer(customerId);
+        if (organizationId) {
+          await this.recordPaymentFailure(organizationId, event.type);
+        }
+        break;
+      }
+      case 'charge.dispute.created':
+      case 'radar.early_fraud_warning.created': {
+        const obj = event.data.object as { charge?: string | { customer?: string | null } } & {
+          customer?: string | null;
+        };
+        let customerId: string | null = typeof obj.customer === 'string' ? obj.customer : null;
+        if (!customerId && this.stripe && typeof obj.charge === 'string') {
+          const charge = await this.stripe.charges.retrieve(obj.charge);
+          customerId = typeof charge.customer === 'string' ? charge.customer : null;
+        }
+        const organizationId = await this.organizationIdFromCustomer(customerId);
+        if (organizationId) {
+          await this.prisma.organization.update({
+            where: { id: organizationId },
+            data: { billingStatus: 'fraud_hold', fraudHoldAt: new Date() },
+          });
+          await this.audit.record({
+            organizationId,
+            action: 'billing.fraud_hold',
+            route: 'stripe.webhook',
+            metadata: { event: event.type },
           });
         }
         break;

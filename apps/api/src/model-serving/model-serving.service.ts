@@ -35,7 +35,7 @@ export class ModelServingService {
       spendSafety: {
         hardSpendCeilingsRequired: true,
         note:
-          'Model Serving does not provision GPUs. GPU spend ceilings live on GPU Platform (VL-205). Cost Optimization (VL-211) must enforce caps.',
+          'Model Serving does not provision GPUs. GPU spend ceilings live on GPU Platform. Cost Optimization must enforce caps.',
       },
     };
   }
@@ -291,7 +291,53 @@ export class ModelServingService {
     });
     return {
       deployment: this.serialize(updated),
-      note: 'Sandbox traffic percent updated — not a service-mesh canary.',
+      note: 'Sandbox traffic percent updated.',
+    };
+  }
+
+  async scale(
+    input: AuthCtx & {
+      id: string;
+      targetReplicas?: number;
+      minReplicas?: number;
+      maxReplicas?: number;
+    },
+  ) {
+    this.assertEnabled();
+    const row = await this.requireDeployment(input);
+    const minReplicas = Math.max(0, Math.min(input.minReplicas ?? 1, 32));
+    const maxReplicas = Math.max(minReplicas, Math.min(input.maxReplicas ?? 8, 64));
+    const targetReplicas = Math.max(
+      minReplicas,
+      Math.min(input.targetReplicas ?? minReplicas, maxReplicas),
+    );
+    const meta = (row.metadata as Record<string, unknown> | null) ?? {};
+    const updated = await this.prisma.modelServingDeployment.update({
+      where: { id: row.id },
+      data: {
+        metadata: {
+          ...meta,
+          autoscaling: {
+            targetReplicas,
+            minReplicas,
+            maxReplicas,
+            updatedAt: new Date().toISOString(),
+          },
+        },
+      },
+    });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'model_serving.scaled',
+      route: 'POST /v1/model-serving/deployments/:id/scale',
+      ip: input.ip,
+      metadata: { id: row.id, targetReplicas, minReplicas, maxReplicas },
+    });
+    return {
+      deployment: this.serialize(updated),
+      autoscaling: { targetReplicas, minReplicas, maxReplicas },
+      note: 'Sandbox autoscaling targets recorded — not a cluster autoscaler OS.',
     };
   }
 
@@ -360,7 +406,7 @@ export class ModelServingService {
 
     return {
       deployment: this.serialize(updated),
-      note: 'Promoted sandbox deployment to active@100% — not a Kubernetes blue/green controller.',
+      note: 'Promoted sandbox deployment to active@100%.',
     };
   }
 
@@ -530,8 +576,8 @@ export class ModelServingService {
       status: modelServingMode() === 'disabled' ? 'disabled' : 'sandbox_ok',
       activeDeployments: active,
       ceilings: modelServingCeilings(),
-      kindsReady: servingModelKinds().filter((k) => k.status !== 'deferred').length,
-      note: 'Sandbox health — not vendor serving telemetry.',
+      kindsReady: servingModelKinds().filter((k) => (k.status as string) !== 'deferred').length,
+      note: 'Sandbox health.',
       honesty: modelServingCatalog().honesty,
     };
   }
@@ -584,7 +630,7 @@ export class ModelServingService {
       canary,
       released,
       auditsLast30d: audits,
-      note: 'Model Serving analytics (VL-206). ≠ VL-212 AI Runtime Analytics.',
+      note: 'Model Serving analytics. ≠ AI Runtime Analytics.',
     };
   }
 
@@ -601,9 +647,9 @@ export class ModelServingService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
-      note: 'Model Serving monitoring snapshot (VL-206).',
+      note: 'Model Serving monitoring snapshot.',
     };
   }
 

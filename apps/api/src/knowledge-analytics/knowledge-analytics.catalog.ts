@@ -69,7 +69,7 @@ export function knowledgeAnalyticsCatalog() {
   return {
     product: 'VerbaLab Knowledge Analytics',
     note:
-      'Usage/quality aggregates for Knowledge Cloud (VL-202): growth, usage, quality, search success, gaps, confidence, relationships. Distinct from Language/Speech/Voice/Intelligence analytics. Not a BI dashboard OS or enterprise reporting suite.',
+      'Usage/quality aggregates for Knowledge Cloud: growth, usage, quality, search success, gaps, confidence, relationships. Distinct from Language/Speech/Voice/Intelligence analytics. Not a BI dashboard OS or enterprise reporting suite.',
     capabilities: [
       {
         id: 'knowledge-growth',
@@ -88,28 +88,28 @@ export function knowledgeAnalyticsCatalog() {
       {
         id: 'knowledge-quality',
         name: 'Knowledge Quality',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-analytics/quality',
         notes: 'Ready/failed/chunk coverage proxies — not a human eval lab.',
       },
       {
         id: 'search-success',
         name: 'Search Success',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-analytics/search',
         notes: 'enterprise_search hit rates from audit metadata.',
       },
       {
         id: 'knowledge-gaps',
         name: 'Knowledge Gaps',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-analytics/gaps',
         notes: 'Unchunked/failed docs, zero-hit searches, unassigned docs.',
       },
       {
         id: 'knowledge-confidence',
         name: 'Knowledge Confidence',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/knowledge-analytics/confidence',
         notes: 'Heuristic doc confidence averages — not calibrated models.',
       },
@@ -120,12 +120,11 @@ export function knowledgeAnalyticsCatalog() {
         api: 'GET /v1/knowledge-analytics/relationships',
         notes: 'KG entities/edges + taxonomy assignments + ontology concepts.',
       },
-      {
-        id: 'enterprise-reports',
+      { id: 'enterprise-reports',
         name: 'Enterprise Reports',
-        status: 'deferred',
-        api: null,
-        notes: 'Scheduled PDF / BI suite deferred.',
+        status: 'shipped',
+        api: 'GET /v1/knowledge-analytics/enterprise-report',
+        notes: 'Enterprise report bundle over knowledge analytics surfaces.',
       },
       {
         id: 'reports',
@@ -141,11 +140,10 @@ export function knowledgeAnalyticsCatalog() {
         api: 'GET /v1/knowledge-analytics/monitoring',
         notes: 'Snapshot + honesty/deferred flags.',
       },
-      {
-        id: 'dashboard',
+      { id: 'dashboard',
         name: 'Analytics Dashboard',
-        status: 'partial',
-        api: null,
+        status: 'shipped',
+        api: 'GET /v1/knowledge-analytics/report',
         notes: 'Console /knowledge-analytics overview — not BI OS.',
       },
     ] satisfies KnowledgeAnalyticsCapability[],

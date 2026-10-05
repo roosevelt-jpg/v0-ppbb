@@ -8,7 +8,9 @@ import { IdentityModule } from '../identity/identity.module';
 import { AuditCoreModule } from '../audit/audit-core.module';
 import { TranslateModule } from '../translate/translate.module';
 import { PromptsModule } from '../prompts/prompts.module';
+import { DocumentsModule } from '../documents/documents.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
+import { RateLimitModule } from '../rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
     AuditCoreModule,
     TranslateModule,
     PromptsModule,
+    DocumentsModule,
+    RateLimitModule,
   ],
   controllers: [ChatController],
   providers: [ChatService, TranslateAuthGuard],

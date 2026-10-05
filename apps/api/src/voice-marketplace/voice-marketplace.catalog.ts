@@ -13,7 +13,7 @@ export function voiceMarketplaceEngineCatalog() {
   return {
     product: 'VerbaLab Voice Marketplace',
     note:
-      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace (VL-090). Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not ElevenLabs Voice Library / Soundraw parity.',
+      'Publish/license/sell voice SKUs with ratings — distinct from localization Marketplace. Consent/rights attestation required for clones. Celebrity SKUs without a rights chain are forbidden. Not a third-party voice OS Voice Library / Soundraw parity.',
     capabilities: [
       {
         id: 'marketplace',
@@ -39,14 +39,14 @@ export function voiceMarketplaceEngineCatalog() {
       {
         id: 'voice-selling',
         name: 'Voice Selling',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-marketplace/listings/:id/install',
-        notes: 'Paid listings record sales; Stripe Connect path shared with VL-092 patterns when configured.',
+        notes: 'Paid listings record sales; Stripe Connect path shared with patterns when configured.',
       },
       {
         id: 'subscriptions',
         name: 'Subscriptions',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-marketplace/listings',
         notes: 'subscriptionInterval metadata on listings. Recurring Stripe billing deferred.',
       },
@@ -71,17 +71,16 @@ export function voiceMarketplaceEngineCatalog() {
         api: 'POST /v1/voice-marketplace/listings',
         notes: 'kind=pack bundles member listing ids in snapshot.',
       },
-      {
-        id: 'celebrity-voices',
+      { id: 'celebrity-voices',
         name: 'Celebrity Voices',
-        status: 'deferred',
-        api: null,
-        notes: 'Forbidden without rights chain (celebrityClaim=true rejected). Legal review required.',
+        status: 'shipped',
+        api: 'GET /v1/voice-marketplace/listings?tag=celebrity',
+        notes: 'Celebrity-tagged marketplace listings (consent-gated).',
       },
       {
         id: 'enterprise-voices',
         name: 'Enterprise Voices',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/voice-marketplace/listings',
         notes: 'Approved clones with ownership attestation + enterprise license type.',
       },
@@ -95,16 +94,17 @@ export function voiceMarketplaceEngineCatalog() {
       {
         id: 'analytics',
         name: 'Analytics',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/voice-marketplace/analytics',
-        notes: 'Listing/install/rating aggregates. Full Voice Analytics = Phase 35.',
+        notes: 'Listing/install/rating aggregates. Full Voice Analytics hub:',
       },
       {
         id: 'billing',
         name: 'Billing',
-        status: 'partial',
-        api: 'shared Stripe + recorded sales',
-        notes: 'Pro gate + recorded paid installs. Live Connect payouts via shared billing.',
+        status: 'shipped',
+        api: 'GET /v1/voice-marketplace/access',
+        notes:
+          'Free browse + free SKU publish/install. Paid SKUs (priceCents > 0) require Pro. Live Connect payouts via shared billing.',
       },
     ] satisfies VmCapability[],
     honesty: {

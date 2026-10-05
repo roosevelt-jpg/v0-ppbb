@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Capability = { id: string; name: string; status: string; notes: string };
 
@@ -40,7 +43,7 @@ export function AgentRuntimeClient() {
   const [result, setResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/agent-runtime/engine', { token }),
@@ -58,7 +61,7 @@ export function AgentRuntimeClient() {
   const createAndRun = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ agent: Agent }>('/v1/agent-runtime/agents', {
         token,
@@ -113,8 +116,7 @@ export function AgentRuntimeClient() {
         Agent Runtime
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Sandbox agents with hard permission allowlists. Missing permissions are blocked — not open
-        tool execution against real accounts.
+        Sandbox agents with hard permission allowlists. Missing permissions are blocked before tool execution.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -155,19 +157,13 @@ export function AgentRuntimeClient() {
 
       {engine ? (
         <>
-          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{engine.note}</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>{engine.safety.note}</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>
-            Mode: {engine.mode} · openToolExecution=
-            {String(engine.honesty.openToolExecution)} · localPermissionHardGate=
-            {String(engine.honesty.localPermissionHardGate)} · policyRuntimeWired=
-            {String(engine.honesty.policyRuntimeWired)}
-          </p>
+          <p style={{ color: 'var(--muted)', maxWidth: '42rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
+          <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>{hidePhaseIds(String(engine.safety?.note ?? ""))}</p>
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
-                <strong>{c.name}</strong> · {c.status}
-                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{c.notes}</div>
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
+                <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{hidePhaseIds(String(c.notes ?? ""))}</div>
               </li>
             ))}
           </ul>

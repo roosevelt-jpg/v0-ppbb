@@ -44,7 +44,7 @@ export default function SetupPage() {
             <code className="vl-code">OPENAI_API_KEY</code> — STT/TTS/chat/embeddings/RAG
           </li>
           <li>
-            <code className="vl-code">ELEVENLABS_API_KEY</code> — voice cloning
+            <code className="vl-code">EXTERNAL_VOICE_CLONE_API_KEY</code> — voice cloning
           </li>
           <li>
             <code className="vl-code">STRIPE_*</code> — billing checkout / Connect

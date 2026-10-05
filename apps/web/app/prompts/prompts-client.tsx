@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type PromptSummary = {
@@ -33,13 +34,13 @@ export function PromptsClient() {
   const [busy, setBusy] = useState(false);
 
   const loadList = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setRows(await apiFetch<PromptSummary[]>('/v1/prompts', { token }));
   }, [getToken]);
 
   const loadVersions = useCallback(async (key: string) => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const data = await apiFetch<{ versions: VersionRow[]; activeVersion: number | null }>(
       `/v1/prompts/${key}/versions`,
@@ -68,7 +69,7 @@ export function PromptsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/prompts/${selected}/versions`, {
         method: 'POST',
@@ -91,7 +92,7 @@ export function PromptsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/prompts/${selected}/activate`, {
         method: 'POST',
@@ -113,7 +114,7 @@ export function PromptsClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/prompts/${selected}/fallback`, { method: 'POST', token, body: '{}' });
       setMessage(`Restored code fallback for ${selected}.`);

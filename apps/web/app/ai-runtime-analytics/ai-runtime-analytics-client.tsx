@@ -1,130 +1,66 @@
 'use client';
 
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { AppShell } from '@/components/app-shell';
-
-type Engine = {
-  product: string;
-  note: string;
-  honesty: {
-    biDashboardOs: boolean;
-    apmOs: boolean;
-    regeneratesIntelligenceAnalytics: boolean;
-    aggregatesOnly: boolean;
-  };
-  mode: string;
-};
+import { CatalogConsole, type CatalogRow } from '@/components/catalog-console';
 
 type Overview = {
-  requests: { total: number };
-  cache: { hits: number; misses: number; hitRate: number | null };
-  cost: { ledgerUsd: number; gpuHourlyUsd: number };
-  throughput: { routerDecisions: number; usageEvents: number };
-  gpu: { activeInstances: number; hourlyUsd: number };
-  errors: { total: number };
+  product?: string;
+  note?: string;
+  honesty?: Record<string, unknown>;
+  safety?: { note?: string } & Record<string, unknown>;
+  architecture?: { note?: string } & Record<string, unknown>;
+  products?: CatalogRow[];
+  capabilities?: CatalogRow[];
+  buses?: CatalogRow[];
+  portfolio?: CatalogRow[];
+  links?: Record<string, string>;
 };
 
 export function AiRuntimeAnalyticsClient() {
-  const { getToken, isLoaded } = useAuth();
-  const [engine, setEngine] = useState<Engine | null>(null);
-  const [overview, setOverview] = useState<Overview | null>(null);
+  const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  const refresh = useCallback(async () => {
-    const token = await getToken();
-    if (!token) throw new Error('Not signed in');
-    const [eng, ov] = await Promise.all([
-      apiFetch<Engine>('/v1/ai-runtime-analytics/engine', { token }),
-      apiFetch<Overview>('/v1/ai-runtime-analytics/overview', { token }),
-    ]);
-    setEngine(eng);
-    setOverview(ov);
-  }, [getToken]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    void refresh().catch((err: Error) => setError(err.message));
-  }, [isLoaded, refresh]);
+    void apiFetch<Overview>('/v1/ai-runtime-analytics/engine')
+      .then(setData)
+      .catch((err: Error) => setError(err.message));
+  }, []);
 
-  const loadReport = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const token = await getToken();
-      if (!token) throw new Error('Not signed in');
-      await apiFetch('/v1/ai-runtime-analytics/report', { token });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Report failed');
-    } finally {
-      setBusy(false);
-    }
-  };
+  const linkRows: CatalogRow[] = Object.entries(data?.links ?? {}).map(([k, v]) => ({
+    id: k,
+    name: k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase()),
+    console: typeof v === 'string' && v.startsWith('/') ? v : null,
+    notes: String(v ?? ''),
+  }));
 
   return (
     <AppShell>
-      <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.25rem 4rem' }}>
-        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.85rem' }}>
-          <Link href="/inference-cloud">Inference Cloud</Link> · AI Runtime Analytics
-        </p>
-        <h1 style={{ fontSize: '1.75rem', margin: '0.5rem 0 0.75rem' }}>
-          {engine?.product ?? 'AI Runtime Analytics'}
-        </h1>
-        <p style={{ lineHeight: 1.5, opacity: 0.85 }}>{engine?.note}</p>
-
-        {engine && (
-          <section style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ fontSize: '1rem' }}>Honesty</h2>
-            <ul style={{ lineHeight: 1.6 }}>
-              <li>aggregatesOnly: {String(engine.honesty.aggregatesOnly)}</li>
-              <li>biDashboardOs: {String(engine.honesty.biDashboardOs)}</li>
-              <li>apmOs: {String(engine.honesty.apmOs)}</li>
-              <li>
-                regeneratesIntelligenceAnalytics:{' '}
-                {String(engine.honesty.regeneratesIntelligenceAnalytics)}
-              </li>
-            </ul>
-          </section>
-        )}
-
-        {overview && (
-          <section style={{ marginTop: '1.25rem' }}>
-            <h2 style={{ fontSize: '1rem' }}>Overview</h2>
-            <p style={{ opacity: 0.85, lineHeight: 1.6 }}>
-              Requests {overview.requests.total} · Router {overview.throughput.routerDecisions} ·
-              Cache hits {overview.cache.hits}/{overview.cache.misses} · GPU instances{' '}
-              {overview.gpu.activeInstances} · Ledger ${overview.cost.ledgerUsd} · Errors{' '}
-              {overview.errors.total}
-            </p>
-          </section>
-        )}
-
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void loadReport()}
-          style={{
-            marginTop: '1.25rem',
-            padding: '0.65rem 1rem',
-            border: '1px solid #222',
-            background: '#111',
-            color: '#fff',
-            cursor: busy ? 'wait' : 'pointer',
-          }}
-        >
-          {busy ? 'Loading…' : 'Refresh report'}
-        </button>
-
-        {error && (
-          <p style={{ marginTop: '1rem', color: '#b00020' }} role="alert">
-            {error}
-          </p>
-        )}
-      </main>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.85rem', fontWeight: 720, letterSpacing: '-0.03em', margin: '0 0 0.35rem' }}>
+        Runtime Analytics
+      </h1>
+      <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
+        Runtime analytics for latency, cost, errors, and utilization across inference surfaces.
+      </p>
+      {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
+      {!data && !error ? <p style={{ color: 'var(--muted)' }}>Loading…</p> : null}
+      {data ? (
+        <CatalogConsole
+          note={data.note}
+          safetyNote={data.safety?.note ? String(data.safety.note) : data.architecture?.note ? String(data.architecture.note) : undefined}
+          honesty={data.honesty}
+          sections={[
+            { title: 'Products', rows: data.products ?? [] },
+            { title: 'Capabilities', rows: data.capabilities ?? [] },
+            { title: 'Buses', rows: data.buses ?? [] },
+            { title: 'Portfolio', rows: data.portfolio ?? [] },
+            { title: 'Links', rows: linkRows },
+          ]}
+          backHref="/inference-cloud"
+          backLabel="Inference Cloud"
+        />
+      ) : null}
     </AppShell>
   );
 }

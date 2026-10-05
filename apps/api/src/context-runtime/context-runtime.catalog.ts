@@ -53,7 +53,7 @@ export function contextRuntimeCatalog() {
   return {
     product: 'VerbaLab Context Runtime',
     note:
-      'Context Runtime (VL-217). Kernel assembly over VL-185 Context Engine (conversation/workspace/org/project/language/user/knowledge/model blocks, prioritization, char-budget compression, retrieval). Optional Intelligent Cache namespace=context. Not an infinite context window, not LLM summarization OS, not realtime push. Does not regenerate Context Engine.',
+      'Context Runtime. Kernel assembly over Context Engine (conversation/workspace/org/project/language/user/knowledge/model blocks, prioritization, char-budget compression, retrieval). Optional Intelligent Cache namespace=context. Does not regenerate Context Engine.',
     capabilities: [
       {
         id: 'conversation-context',
@@ -100,9 +100,9 @@ export function contextRuntimeCatalog() {
       {
         id: 'model-context',
         name: 'Model Context',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/context-runtime/assemble',
-        notes: 'Sandbox model/provider hint block — not a model-router OS.',
+        notes: 'Sandbox model/provider hint block.',
       },
       {
         id: 'user-context',
@@ -121,9 +121,9 @@ export function contextRuntimeCatalog() {
       {
         id: 'context-compression',
         name: 'Context Compression',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/context-runtime/compress',
-        notes: 'Char-budget truncation — not LLM summarization OS.',
+        notes: 'Char-budget truncation.',
       },
       {
         id: 'context-retrieval',
@@ -135,9 +135,9 @@ export function contextRuntimeCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Streaming context push deferred.',
+        status: 'shipped',
+        api: 'GET /v1/context-runtime/realtime',
+        notes: 'In-process SSE context push bus. Not a dedicated realtime mesh.',
       },
       {
         id: 'rest',
@@ -158,7 +158,7 @@ export function contextRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'contextRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -177,15 +177,15 @@ export function contextRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/context-runtime/assemble',
-        notes: 'Ships with Nest API — not a separate context cluster.',
+        notes: 'Ships with Nest API.',
       },
     ] satisfies ContextRuntimeCapability[],
     honesty: {
       infiniteContextWindow: false,
       llmSummarization: false,
-      realtimePush: false,
+      realtimePush: true,
       regeneratesContextEngine: false,
       extendsContextEngine: true,
       orgWorkspaceScoped: true,

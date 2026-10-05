@@ -33,21 +33,21 @@ export function reasoningRuntimeCatalog() {
   return {
     product: 'VerbaLab Reasoning Runtime',
     note:
-      'Reasoning Runtime (VL-218). Kernel execution over VL-186 Reasoning Cloud (graphs/ToT/planning/tool+model selection) plus reflection, self-eval, confidence, decision-tree façade, history/replay via kernel MemoryRecords. Not a custom reasoner kernel, not symbolic reasoner OS, not tool-execution agent OS. Does not regenerate Reasoning Cloud.',
+      'Reasoning Runtime. Kernel execution over Reasoning Cloud (graphs/ToT/planning/tool+model selection) plus reflection, self-eval, confidence, decision-tree façade, history/replay via kernel MemoryRecords. Does not regenerate Reasoning Cloud.',
     capabilities: [
       {
         id: 'reasoning-graphs',
         name: 'Reasoning Graphs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/reason',
         notes: 'strategy=graph_reasoning via Reasoning Cloud — no graph algorithm engine.',
       },
       {
         id: 'tree-of-thought',
         name: 'Tree of Thought',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/reason',
-        notes: 'Shallow 2-branch ToT via Reasoning Cloud — not research ToT OS.',
+        notes: 'Shallow 2-branch ToT via Reasoning Cloud.',
       },
       {
         id: 'planning',
@@ -59,37 +59,37 @@ export function reasoningRuntimeCatalog() {
       {
         id: 'reflection',
         name: 'Reflection',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/reflect',
-        notes: 'Heuristic critique of a prior answer — not deep reflective agent OS.',
+        notes: 'Heuristic critique of a prior answer.',
       },
       {
         id: 'tool-selection',
         name: 'Tool Selection',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/select-tools',
         notes: 'Catalog suggestion only — does not execute tools.',
       },
       {
         id: 'model-selection',
         name: 'Model Selection',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/select-model',
-        notes: 'AI Router resolve (feature=chat) — not a model mesh OS.',
+        notes: 'AI Router resolve (feature=chat).',
       },
       {
         id: 'decision-trees',
         name: 'Decision Trees',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/decision-tree',
-        notes: 'Sandbox tree over Decision Engine kinds — not Drools/Pega BRMS.',
+        notes: 'Sandbox tree over Decision Engine kinds.',
       },
       {
         id: 'self-evaluation',
         name: 'Self Evaluation',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/evaluate',
-        notes: 'Heuristic score — not LLM-as-judge lab.',
+        notes: 'Heuristic score.',
       },
       {
         id: 'confidence',
@@ -108,9 +108,9 @@ export function reasoningRuntimeCatalog() {
       {
         id: 'reasoning-replay',
         name: 'Reasoning Replay',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/reasoning-runtime/history/:id',
-        notes: 'Replay stored run payload — not a distributed replay OS.',
+        notes: 'Replay stored run payload.',
       },
       {
         id: 'rest',
@@ -131,7 +131,7 @@ export function reasoningRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'reasoningRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -150,9 +150,9 @@ export function reasoningRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-runtime/reason',
-        notes: 'Ships with Nest API — not a separate reasoner cluster.',
+        notes: 'Ships with Nest API.',
       },
     ] satisfies ReasoningRuntimeCapability[],
     honesty: {

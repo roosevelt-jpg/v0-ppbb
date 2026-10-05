@@ -38,7 +38,7 @@ export class MemoryRuntimeService {
       safety: {
         agentActionBoundariesRequired: true,
         note:
-          'Kernel memory is org/workspace-scoped. Agent memory writes require agentId; Agent Runtime VL-219 writes via /v1/agent-runtime/memory.',
+          'Kernel memory is org/workspace-scoped. Agent memory writes require agentId; Agent Runtime writes via /v1/agent-runtime/memory.',
       },
     };
   }
@@ -48,7 +48,7 @@ export class MemoryRuntimeService {
       scopes: KERNEL_MEMORY_SCOPES.map((id) => ({ id })),
       kinds: KERNEL_MEMORY_KINDS.map((id) => ({ id })),
       layer: KERNEL_MEMORY_LAYER,
-      note: 'Memory Runtime scopes map onto VL-183 Memory Cloud storage.',
+      note: 'Memory Runtime scopes map onto Memory Cloud storage.',
       honesty: memoryRuntimeCatalog().honesty,
     };
   }
@@ -175,7 +175,7 @@ export class MemoryRuntimeService {
       query: q,
       results: rows.map((r) => this.serialize(r)),
       honesty: { vectorSemanticOs: false },
-      note: 'Text contains search — not embedding ANN semantic OS.',
+      note: 'Text contains search.',
     };
   }
 
@@ -236,7 +236,7 @@ export class MemoryRuntimeService {
       memory: revised,
       beforeChars: raw.length,
       afterChars: compressed.length,
-      note: 'Heuristic truncation — not ML context-compression OS.',
+      note: 'Heuristic truncation.',
     };
   }
 
@@ -281,7 +281,7 @@ export class MemoryRuntimeService {
       purgedExpired: purged,
       deletedForCeiling,
       ceilings,
-      note: 'Eviction applied (TTL + ceiling). Not a distributed cache OS.',
+      note: 'Eviction applied (TTL + ceiling).',
     };
   }
 
@@ -307,7 +307,7 @@ export class MemoryRuntimeService {
       synced: updated,
       stamp,
       honesty: { replicationOs: false },
-      note: 'Sandbox sync stamp — not multi-region replication OS.',
+      note: 'Sandbox sync stamp.',
     };
   }
 
@@ -342,7 +342,7 @@ export class MemoryRuntimeService {
     });
     return {
       snapshot: { id: created.id, label: payload.label, count: payload.count },
-      note: 'Sandbox snapshot stored as kernel MemoryRecord — not backup appliance OS.',
+      note: 'Sandbox snapshot stored as kernel MemoryRecord.',
     };
   }
 
@@ -548,6 +548,58 @@ export class MemoryRuntimeService {
         HttpStatus.PAYMENT_REQUIRED,
       );
     }
+  }
+
+
+  async replicate(input: AuthCtx & { targetRegion?: string }) {
+    this.assertEnabled();
+    const target = (input.targetRegion ?? 'af-south-1').slice(0, 32);
+    const rows = await this.prisma.memoryRecord.count({
+      where: this.kernelWhere(input),
+    });
+    return {
+      sourceRegion: 'af-south-1',
+      targetRegion: target,
+      plannedRecords: rows,
+      mode: 'sandbox_plan',
+      honesty: { replicationOs: false },
+      note: 'Sandbox multi-region replication plan metadata. Not a multi-region memory OS.',
+    };
+  }
+
+  async writeRealtime(input: AuthCtx, res: import('express').Response) {
+    this.assertEnabled();
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process memory realtime bus (SSE).',
+    });
+    const rows = await this.prisma.memoryRecord.findMany({
+      where: this.kernelWhere(input),
+      orderBy: { updatedAt: 'desc' },
+      take: 10,
+    });
+    for (const row of rows) {
+      write('memory', {
+        id: row.id,
+        key: row.key,
+        kind: row.kind,
+        scope: row.scope,
+        at: row.updatedAt.toISOString(),
+      });
+    }
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 }
 

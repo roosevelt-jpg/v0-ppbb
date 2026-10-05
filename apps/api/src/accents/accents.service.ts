@@ -70,7 +70,7 @@ export class AccentsService implements OnModuleInit {
     });
     return {
       data: rows.map((r) => this.toDto(r)),
-      note: 'Curated spoken accent profiles — not acoustic phonetics ID (VL-132 / ADR-0053).',
+      note: 'Curated spoken accent profiles — not acoustic phonetics ID (/ ADR-0053).',
     };
   }
 
@@ -166,8 +166,8 @@ export class AccentsService implements OnModuleInit {
       product: 'Accent Intelligence',
       note:
         band === 'none'
-          ? 'No accent classified above threshold — cue scoring only (VL-153). Not acoustic classification.'
-          : `Accent classified with ${band} confidence via cue scoring (VL-153). Not acoustic regional models.`,
+          ? 'No accent classified above threshold — cue scoring only. Not acoustic classification.'
+          : `Accent classified with ${band} confidence via cue scoring. Not acoustic regional models.`,
     };
 
     await this.recordAudit(
@@ -456,5 +456,24 @@ export class AccentsService implements OnModuleInit {
         inputMode: result.inputMode,
       },
     });
+  }
+
+
+  async regionalModels() {
+    const listed = await this.list();
+    const cards = listed.data.slice(0, 40).map((a) => ({
+      id: `regional-${a.code}`,
+      accent: a.code,
+      name: a.nameEn,
+      language: a.languageCode,
+      cues: a.cueTerms.length ? a.cueTerms.slice(0, 6) : ['vowel_shift', 'rhoticity', 'tempo'],
+      status: 'catalog' as const,
+    }));
+    return {
+      models: cards,
+      count: cards.length,
+      honesty: { acousticPhoneticsId: false, catalogCuePacks: true },
+      note: 'Regional accent model cards (catalog + cue packs). Not trained acoustic phonetics ID.',
+    };
   }
 }

@@ -9,6 +9,9 @@ import { JobsModule } from '../jobs/jobs.module';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { IdentityModule } from '../identity/identity.module';
 import { AuditCoreModule } from '../audit/audit-core.module';
+import { EmbeddingsModule } from '../embeddings/embeddings.module';
+import { ChatModule } from '../chat/chat.module';
+import { AiOrchestrationModule } from '../ai-orchestration/ai-orchestration.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { AuditCoreModule } from '../audit/audit-core.module';
     ApiKeysModule,
     IdentityModule,
     AuditCoreModule,
+    EmbeddingsModule,
+    ChatModule,
+    AiOrchestrationModule,
   ],
   controllers: [WorkflowsController],
   providers: [WorkflowsService],

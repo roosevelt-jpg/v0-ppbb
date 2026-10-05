@@ -16,6 +16,7 @@ import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/trans
 import { SessionContext } from '../common/guards/clerk-auth.guard';
 import { ApiException } from '../common/errors/api-exception';
 import { clientIp } from '../common/http/client-ip';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 
 @Controller('v1/tts')
 export class NeuralTtsController {
@@ -47,6 +48,7 @@ export class NeuralTtsController {
     @Query('accent') accent?: string,
     @Query('category') category?: string,
     @Query('ageGroup') ageGroup?: string,
+    @Query('age') age?: string,
     @Query('enterprise') enterprise?: string,
   ) {
     return this.tts.listVoices({
@@ -56,7 +58,7 @@ export class NeuralTtsController {
       dialect,
       accent,
       category,
-      ageGroup,
+      ageGroup: ageGroup || (age === 'child' ? 'child' : age === 'adult' ? 'adult' : age),
       enterprise,
     });
   }
@@ -87,7 +89,7 @@ export class NeuralTtsController {
   }
 
   @Post('synthesize')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   async synthesize(
     @Req()
     req: Request & {
@@ -136,7 +138,7 @@ export class NeuralTtsController {
   }
 
   @Post('stream')
-  @UseGuards(TranslateAuthGuard)
+  @UseGuards(TranslateAuthGuard, RateLimitGuard)
   async stream(
     @Req()
     req: Request & {

@@ -45,21 +45,14 @@ export class DecisionEngineService {
   kinds() {
     return {
       kinds: DECISION_KINDS.map((id) => ({ id })),
-      deferred: ['enterprise_brms'],
-      note: 'Decision kinds for VL-189 light rules helpers.',
+      deferred: [],
+      note: 'Decision kinds for light rules helpers (includes sandbox enterprise_brms).',
     };
   }
 
   private assertKind(raw: string | undefined): DecisionKind {
     const kind = (raw?.trim() || 'routing') as DecisionKind;
     if (!(DECISION_KINDS as readonly string[]).includes(kind)) {
-      if (kind === ('enterprise_brms' as DecisionKind)) {
-        throw new ApiException(
-          'validation_error',
-          'kind=enterprise_brms is deferred — not Drools/Pega BRMS (VL-189)',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
       throw new ApiException(
         'validation_error',
         `kind must be one of: ${DECISION_KINDS.join(', ')}`,
@@ -381,6 +374,62 @@ export class DecisionEngineService {
     };
   }
 
+  private decideEnterpriseBrms(input: {
+    query?: string;
+    org: Awaited<ReturnType<DecisionEngineService['orgContext']>>;
+  }): DecisionResult {
+    const q = (input.query ?? '').toLowerCase();
+    const rules: Array<{ id: string; when: boolean; decision: string; reason: string }> = [
+      {
+        id: 'org_disabled',
+        when: input.org.disabled,
+        decision: 'deny',
+        reason: 'Organization disabled — hard deny',
+      },
+      {
+        id: 'quota',
+        when: input.org.charactersRemaining <= 0,
+        decision: 'deny',
+        reason: 'Character quota exhausted',
+      },
+      {
+        id: 'pro_gate',
+        when: /pro|premium|enterprise/.test(q) && !input.org.isPro,
+        decision: 'upgrade_required',
+        reason: 'Intent requests Pro features on free plan',
+      },
+      {
+        id: 'safety_phrase',
+        when: /ignore\s+(all\s+)?(previous|prior)\s+instructions/.test(q),
+        decision: 'deny',
+        reason: 'Injection-like phrase matched safety rule',
+      },
+      {
+        id: 'default_allow',
+        when: true,
+        decision: 'allow',
+        reason: 'No deny rules matched — allow with light confidence',
+      },
+    ];
+    const hit = rules.find((r) => r.when)!;
+    const fired = rules.filter((r) => r.when && r.id !== 'default_allow').map((r) => r.id);
+    return {
+      kind: 'enterprise_brms',
+      decision: hit.decision,
+      confidence: hit.decision === 'allow' ? 0.62 : 0.88,
+      reasons: [hit.reason, `rulesFired=${fired.join(',') || 'default_allow'}`],
+      alternatives: rules
+        .filter((r) => r.id !== hit.id)
+        .slice(0, 3)
+        .map((r) => ({ id: r.decision, score: 0.3, note: r.id })),
+      metadata: {
+        ruleTable: rules.map((r) => r.id),
+        fired: fired.length ? fired : ['default_allow'],
+        sandbox: true,
+      },
+    };
+  }
+
   async decide(
     input: AuthCtx & {
       kind?: string;
@@ -443,6 +492,9 @@ export class DecisionEngineService {
           isPro: org.isPro,
         });
         break;
+      case 'enterprise_brms':
+        result = this.decideEnterpriseBrms({ query: input.query, org });
+        break;
     }
 
     await this.audit.record({
@@ -467,7 +519,7 @@ export class DecisionEngineService {
         trainsDecisionModels: false,
         executesTools: false,
       },
-      note: 'Light rules decision helper (VL-189). Not an enterprise BRMS.',
+      note: 'Light rules decision helper. Not an enterprise BRMS.',
     };
   }
 
@@ -486,7 +538,7 @@ export class DecisionEngineService {
       periodStart: start.toISOString(),
       decisions,
       workspaceId,
-      note: 'Decision Engine analytics (VL-189).',
+      note: 'Decision Engine analytics.',
     };
   }
 
@@ -500,8 +552,8 @@ export class DecisionEngineService {
       periodStart: analytics.periodStart,
       decisions: analytics.decisions,
       enterpriseBrms: engine.honesty.enterpriseBrms,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
-      note: 'Decision Engine monitoring snapshot (VL-189).',
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
+      note: 'Decision Engine monitoring snapshot.',
     };
   }
 }

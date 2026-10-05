@@ -138,5 +138,8 @@ describe('Developer Cloud Foundation (VL-127)', () => {
     expect(overview.sandbox.separateCluster).toBe(false);
     expect(overview.oauthClients.supported).toBe(false);
     expect(overview.sdk.cli.name).toBe('@verbalab/cli');
+    expect(overview.sdk.typescript.name).toBe('@verbalab/sdk');
+    expect(overview.sdk.ios.name).toBe('VerbaLab (Swift)');
+    expect(overview.sdk.android.name).toBe('ai.verbalab:sdk');
   });
 });

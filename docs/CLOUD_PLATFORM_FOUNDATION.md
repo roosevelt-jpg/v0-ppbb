@@ -19,7 +19,7 @@ This is the foundation **every product surface** (translate, voice, marketplace,
 | Identity | Clerk + API keys |
 | Permissions | `MembershipRole` owner/admin/member + platform admin allowlist |
 | Billing Accounts | Organization Stripe customer/subscription |
-| Regions | Residency islands `us`/`eu` (`/v1/regions`, org pin) |
+| Regions | Residency islands `af` (primary) / `eu` / `us` (`/v1/regions`, org pin) |
 | Availability Zones | **Not applicable** — Fly `primary_region` per island |
 | Global Settings | Deploy env + org governance (`/data`) |
 | Workspace Settings | PATCH workspace name + default langs |

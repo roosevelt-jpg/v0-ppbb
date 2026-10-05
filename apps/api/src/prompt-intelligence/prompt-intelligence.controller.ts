@@ -113,4 +113,24 @@ export class PromptIntelligenceController {
       version: body.version,
     });
   }
+
+
+  @Post('optimize')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  optimize(
+    @Req() req: AuthedReq,
+    @Body() body: { key?: string; body?: string; version?: number },
+  ) {
+    return this.promptIntel.optimize({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      key: body.key,
+      body: body.body,
+      version: body.version,
+    });
+  }
 }

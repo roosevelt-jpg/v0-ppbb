@@ -4,7 +4,17 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  QuotaMeter,
+  SegmentedBar,
+  StatsCard,
+  formatCompact,
+  toneForPct,
+  clampPct,
+} from '@/components/analytics';
 
 type Overview = {
   organization: { name: string; plan: string };
@@ -17,7 +27,9 @@ type Overview = {
   };
   usage: { characters: number; requests: number };
   sdk: {
-    typescript: { name: string; version: string; install: string };
+    typescript: { name: string; version: string; install: string; note?: string };
+    ios?: { name: string; version: string; install: string; path?: string; note?: string };
+    android?: { name: string; version: string; install: string; path?: string; note?: string };
     cli: { name: string; bin: string; install: string; commands: string[] };
   };
   applications: { mappedTo: string; data: { id: string; name: string; isCurrent: boolean }[] };
@@ -32,7 +44,7 @@ export function DevelopersClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/developer/overview', { token }));
   }, [getToken]);
@@ -56,7 +68,7 @@ export function DevelopersClient() {
         Developers
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '40rem' }}>
-        Integrate VerbaLab with API keys, the TypeScript SDK, CLI, OpenAPI, and the playground. Soft{' '}
+        Integrate VerbaLab with API keys, TypeScript / iOS / Android SDKs, CLI, OpenAPI, and the playground. Soft{' '}
         <code className="vl-code">vl_test_</code> keys share this cluster and quota — not a separate sandbox plane.
       </p>
 
@@ -65,14 +77,49 @@ export function DevelopersClient() {
 
       {data ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <section>
-            <h2 style={sectionLabel}>Organization</h2>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem' }}>{data.organization.name}</p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Plan {data.billing.planName} · {data.billing.charactersUsed.toLocaleString()} /{' '}
-              {data.billing.characterQuota.toLocaleString()} characters · {data.usage.requests} translate requests
-            </p>
+          <section className="vl-stat-grid">
+            <StatsCard
+              label="Organization"
+              value={data.organization.name}
+              hint={`Plan ${data.billing.planName}`}
+              tone="brand"
+            />
+            <StatsCard
+              label="API keys"
+              value={formatCompact(data.apiKeys.active)}
+              hint={`${data.apiKeys.live} live · ${data.apiKeys.test} test`}
+            />
+            <StatsCard
+              label="Translate requests"
+              value={formatCompact(data.usage.requests)}
+              hint={`${formatCompact(data.usage.characters)} characters`}
+            />
           </section>
+
+          <AnalyticsSection title="Quota & key mix" subtitle="Character limits and live vs test key distribution.">
+            <div className="vl-chart-grid">
+              <div className="vl-analytics-panel">
+                <QuotaMeter
+                  label="Character quota"
+                  used={data.billing.charactersUsed}
+                  quota={data.billing.characterQuota}
+                  remaining={data.billing.charactersRemaining}
+                  unit="characters"
+                  detail={`Tone: ${toneForPct(clampPct(data.billing.charactersUsed, data.billing.characterQuota))}`}
+                />
+              </div>
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={[
+                    { label: 'Live keys', value: data.apiKeys.live },
+                    { label: 'Test keys', value: data.apiKeys.test },
+                  ]}
+                  totalLabel="Active keys"
+                  emptyLabel="No API keys yet — create one on /keys."
+                />
+              </div>
+            </div>
+          </AnalyticsSection>
 
           <section>
             <h2 style={sectionLabel}>API keys</h2>
@@ -99,7 +146,7 @@ export function DevelopersClient() {
           </section>
 
           <section>
-            <h2 style={sectionLabel}>SDK & CLI</h2>
+            <h2 style={sectionLabel}>SDKs & CLI</h2>
             <pre
               className="vl-code"
               style={{
@@ -110,14 +157,27 @@ export function DevelopersClient() {
                 overflow: 'auto',
                 whiteSpace: 'pre-wrap',
               }}
-            >{`${data.sdk.typescript.install}
-${data.sdk.cli.install}
+            >{`# TypeScript
+${data.sdk.typescript.install}
 
+# iOS (Swift Package)
+${data.sdk.ios?.install ?? 'Xcode → Add Package → packages/sdk-ios'}
+
+# Android (Kotlin)
+${data.sdk.android?.install ?? 'implementation("ai.verbalab:sdk:0.1.0")'}
+
+# CLI
+${data.sdk.cli.install}
 # ${data.sdk.cli.bin} ${data.sdk.cli.commands.join(' | ')}
+
 export VERBALAB_API_KEY=vl_live_...
 export VERBALAB_API_URL=${API_URL}`}</pre>
-            <p style={{ margin: '0.65rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              {data.sdk.typescript.name}@{data.sdk.typescript.version} · {data.sdk.cli.name}
+            <p style={{ margin: '0.65rem 0 0', color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
+              {data.sdk.typescript.name}@{data.sdk.typescript.version}
+              {data.sdk.ios ? ` · ${data.sdk.ios.name}@${data.sdk.ios.version}` : ''}
+              {data.sdk.android ? ` · ${data.sdk.android.name}@${data.sdk.android.version}` : ''}
+              {' · '}
+              {data.sdk.cli.name}. Full API coverage on every platform — see <Link href="/docs">/docs</Link>.
             </p>
           </section>
 
@@ -128,8 +188,11 @@ export VERBALAB_API_URL=${API_URL}`}</pre>
             <Link href="/playground" style={secondaryLink}>
               Playground
             </Link>
-            <a href={`${API_URL}/v1/openapi.json`} style={secondaryLink}>
-              OpenAPI
+            <Link href="/docs/openapi" style={secondaryLink}>
+              OpenAPI explorer
+            </Link>
+            <a href={`${API_URL}/v1/openapi.json`} style={secondaryLink} download>
+              Raw openapi.json
             </a>
             <Link href="/usage" style={secondaryLink}>
               Usage

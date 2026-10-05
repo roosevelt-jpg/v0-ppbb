@@ -6,7 +6,7 @@
 
 ## Context
 
-VL-120 shipped Voice Studio over OpenAI stock voices + ElevenLabs clones. Track 2 asks for an **own TTS path** without training a foundation model in-house.
+VL-120 shipped Voice Studio over OpenAI stock voices + external vendor clones. Track 2 asks for an **own TTS path** without training a foundation model in-house.
 
 ## Decision
 

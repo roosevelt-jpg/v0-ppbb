@@ -60,14 +60,23 @@ describe('Multi-region residency (VL-075)', () => {
     await app.close();
   });
 
-  it('ships separate EU Fly configs (not a mesh)', () => {
+  it('ships Africa primary + EU/US Fly configs (not a mesh)', () => {
+    const af = readFileSync(join(root, 'infra/fly/api.toml'), 'utf8');
+    expect(af).toContain("app = 'verbalab-api'");
+    expect(af).toContain("primary_region = 'jnb'");
+    expect(af).toContain("VERBALAB_REGION = 'af'");
     expect(existsSync(join(root, 'infra/fly/api.eu.toml'))).toBe(true);
     expect(existsSync(join(root, 'infra/fly/web.eu.toml'))).toBe(true);
+    expect(existsSync(join(root, 'infra/fly/api.us.toml'))).toBe(true);
+    expect(existsSync(join(root, 'infra/fly/web.us.toml'))).toBe(true);
     const eu = readFileSync(join(root, 'infra/fly/api.eu.toml'), 'utf8');
     expect(eu).toContain("app = 'verbalab-api-eu'");
     expect(eu).toContain("primary_region = 'ams'");
     expect(eu).toContain("VERBALAB_REGION = 'eu'");
     expect(eu).toContain('prisma migrate deploy');
+    const us = readFileSync(join(root, 'infra/fly/api.us.toml'), 'utf8');
+    expect(us).toContain("VERBALAB_REGION = 'us'");
+    expect(us).toContain("primary_region = 'iad'");
   });
 
   it('GET /v1/regions is public and health reports region', async () => {
@@ -75,6 +84,7 @@ describe('Multi-region residency (VL-075)', () => {
     expect(regionsRes.body.currentRegion).toBe('us');
     expect(regionsRes.body.regions).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({ code: 'af', flyRegion: 'jnb' }),
         expect.objectContaining({ code: 'us' }),
         expect.objectContaining({ code: 'eu', flyRegion: 'ams' }),
       ]),

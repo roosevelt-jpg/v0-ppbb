@@ -224,4 +224,35 @@ export class LocalizationPlatformService {
       note: 'Localization QA for software strings — not screenshot/visual QA.',
     };
   }
+
+
+  surface(surface: string, content: unknown) {
+    const allowed = ['websites', 'mobile_apps', 'desktop_apps', 'games'] as const;
+    if (!(allowed as readonly string[]).includes(surface)) {
+      throw new ApiException(
+        'validation_error',
+        `surface must be one of: ${allowed.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const inventory = this.catalog(content);
+    return {
+      surface,
+      ...inventory,
+      packaging:
+        surface === 'mobile_apps'
+          ? 'android_ios_resource_json'
+          : surface === 'games'
+            ? 'dialogue_string_pack'
+            : surface === 'desktop_apps'
+              ? 'desktop_resource_json'
+              : 'website_string_pack',
+      honesty: {
+        tmsOs: false,
+        xcodeProjectPackaging: false,
+        gameAssetPipelineOs: false,
+      },
+      note: `${surface} string-pack localization over JSON/YAML catalog path.`,
+    };
+  }
 }

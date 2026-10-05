@@ -17,7 +17,7 @@
 | Developer Dashboard | `/developers` + `GET /v1/developer/overview` |
 | API Explorer | `/playground` + `GET /v1/openapi.json` |
 | CLI | `@verbalab/cli` (thin SDK wrapper) |
-| SDK Management | `@verbalab/sdk` + `GET /v1/developer/sdk` |
+| SDK Management | `@verbalab/sdk` + iOS (`packages/sdk-ios`) + Android (`packages/sdk-android`) + `GET /v1/developer/sdk` |
 | Sandbox / Production | Soft key `environment` on **same** cluster (not a second plane) |
 | Developer Billing | Org Stripe billing (`/billing`) |
 | Documentation | `/docs` + OpenAPI |

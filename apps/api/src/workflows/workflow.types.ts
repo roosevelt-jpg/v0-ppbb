@@ -1,7 +1,18 @@
-export const WORKFLOW_OPS = ['transcribe', 'translate', 'notify'] as const;
+export const WORKFLOW_OPS = [
+  'transcribe',
+  'translate',
+  'notify',
+  'embed',
+  'summarize',
+  'webhook',
+  'classify',
+  'agent_run',
+  'tts',
+  'stt',
+] as const;
 export type WorkflowOp = (typeof WORKFLOW_OPS)[number];
 
-export const WORKFLOW_MAX_STEPS = 10;
+export const WORKFLOW_MAX_STEPS = 12;
 
 export type WorkflowStepBase = {
   id: string;
@@ -31,7 +42,63 @@ export type NotifyStep = WorkflowStepBase & {
   webhookUrl?: string;
 };
 
-export type WorkflowStep = TranscribeStep | TranslateStep | NotifyStep;
+export type EmbedStep = WorkflowStepBase & {
+  op: 'embed';
+  text: string;
+  model?: string;
+};
+
+export type SummarizeStep = WorkflowStepBase & {
+  op: 'summarize';
+  text: string;
+  maxSentences?: number;
+};
+
+export type WebhookStep = WorkflowStepBase & {
+  op: 'webhook';
+  webhookUrl: string;
+  event?: string;
+  message?: string;
+  data?: Record<string, unknown>;
+};
+
+export type ClassifyStep = WorkflowStepBase & {
+  op: 'classify';
+  text: string;
+  labels: string[];
+};
+
+export type AgentRunStep = WorkflowStepBase & {
+  op: 'agent_run';
+  goal: string;
+  pipeline?: string;
+};
+
+export type TtsStep = WorkflowStepBase & {
+  op: 'tts';
+  text: string;
+  voice: string;
+  language?: string;
+  format?: 'mp3' | 'wav' | 'opus' | 'aac' | 'flac';
+};
+
+export type SttStep = WorkflowStepBase & {
+  op: 'stt';
+  documentId: string;
+  language?: string;
+};
+
+export type WorkflowStep =
+  | TranscribeStep
+  | TranslateStep
+  | NotifyStep
+  | EmbedStep
+  | SummarizeStep
+  | WebhookStep
+  | ClassifyStep
+  | AgentRunStep
+  | TtsStep
+  | SttStep;
 
 export type WorkflowInput = {
   workflowId?: string;

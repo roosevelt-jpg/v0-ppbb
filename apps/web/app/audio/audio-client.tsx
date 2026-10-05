@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { API_URL, apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Transcript = {
@@ -96,7 +97,7 @@ export function AudioClient() {
   );
 
   async function authHeader(): Promise<string> {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (token) return `Bearer ${token}`;
     if (apiKey.startsWith('vl_live_')) return `Bearer ${apiKey}`;
     throw new Error('Sign in with Clerk, or paste a vl_live_ API key');
@@ -119,7 +120,7 @@ export function AudioClient() {
     if (!isLoaded) return;
     void (async () => {
       try {
-        const token = await getToken();
+        const token = await resolveApiToken(getToken);
         if (token) await refreshClones(token);
       } catch {
         // optional when signed out
@@ -235,7 +236,7 @@ export function AudioClient() {
     }
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const form = new FormData();
       form.append('name', cloneName);
@@ -268,7 +269,7 @@ export function AudioClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/voice-clones/${id}/review`, {
         method: 'POST',
@@ -286,7 +287,7 @@ export function AudioClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/voice-clones/${id}/disable`, {
         method: 'POST',
@@ -500,7 +501,7 @@ export function AudioClient() {
             </label>
             {samplePreviewUrls.length > 0 ? (
               <div style={{ display: 'grid', gap: '0.5rem' }}>
-                {samplePreviewUrls.map((url, i) => (
+                {samplePreviewUrls.map((url) => (
                   <audio key={url} controls src={url} style={{ width: '100%' }} />
                 ))}
               </div>

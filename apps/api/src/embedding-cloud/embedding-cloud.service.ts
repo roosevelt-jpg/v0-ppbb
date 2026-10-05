@@ -106,7 +106,8 @@ export class EmbeddingCloudService {
     const byProvider: Record<string, number> = {};
     for (const e of events) {
       tokens += e.units;
-      byProvider[e.provider] = (byProvider[e.provider] ?? 0) + e.units;
+      const provider = e.provider ?? 'unknown';
+      byProvider[provider] = (byProvider[provider] ?? 0) + e.units;
     }
 
     const byModality: Record<string, number> = {};
@@ -134,7 +135,7 @@ export class EmbeddingCloudService {
       averageLatencyMs: latencySamples
         ? Number((latencySum / latencySamples).toFixed(1))
         : null,
-      note: 'Embedding Cloud analytics from usage_events + audits (VL-181).',
+      note: 'Embedding Cloud analytics from usage_events + audits.',
     };
   }
 
@@ -147,8 +148,8 @@ export class EmbeddingCloudService {
       requests: analytics.requests,
       tokens: analytics.tokens,
       averageLatencyMs: analytics.averageLatencyMs,
-      deferredModalities: engine.modalities.filter((m) => m.status === 'deferred').map((m) => m.id),
-      note: 'Embedding Cloud monitoring snapshot (VL-181).',
+      deferredModalities: engine.modalities.filter((m) => (m.status as string) === 'deferred').map((m) => m.id),
+      note: 'Embedding Cloud monitoring snapshot.',
     };
   }
 
@@ -157,24 +158,13 @@ export class EmbeddingCloudService {
     if (typeof raw !== 'string') {
       throw new ApiException('validation_error', 'modality must be a string', HttpStatus.BAD_REQUEST);
     }
-    const modality = raw.trim().toLowerCase();
+    const modality = raw.trim().toLowerCase().replace('-', '_');
     if ((SUPPORTED_EMBED_MODALITIES as readonly string[]).includes(modality)) {
       return modality as SupportedEmbedModality;
     }
-    if (
-      ['speech', 'voice', 'image', 'video', 'cross_modal', 'cross-modal', 'hybrid'].includes(
-        modality,
-      )
-    ) {
-      throw new ApiException(
-        'validation_error',
-        `modality '${modality}' is deferred — Embedding Cloud ships text/document/code only (VL-181)`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     throw new ApiException(
       'validation_error',
-      `unsupported modality '${modality}' — use text, document, or code`,
+      `unsupported modality '${modality}' — use ${SUPPORTED_EMBED_MODALITIES.join(', ')}`,
       HttpStatus.BAD_REQUEST,
     );
   }

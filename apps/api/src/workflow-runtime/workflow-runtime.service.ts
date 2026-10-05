@@ -29,7 +29,7 @@ type WorkflowDef = {
   version: number;
   status: 'draft' | 'active' | 'paused' | 'archived';
   permissions: string[];
-  mode: 'sequential' | 'parallel';
+  mode: 'sequential' | 'parallel' | 'distributed';
   steps: Array<{ action: string; input?: Record<string, unknown> }>;
   requiresApproval: boolean;
   createdAt: string;
@@ -42,6 +42,7 @@ type RunStep = {
   simulated: boolean;
   attempt: number;
   parallelGroup?: number;
+  workerId?: string;
   result?: unknown;
   error?: string;
   at: string;
@@ -73,7 +74,7 @@ export class WorkflowRuntimeService {
         liveStepExecutionForbidden: true,
         policyMustHardGate: true,
         note:
-          'Every workflow step passes WorkflowPolicyGate (local hard allowlist). Policy Runtime (VL-222) will harden further. Extends /v1/workflows — not Temporal/Airflow.',
+          'Every workflow step passes WorkflowPolicyGate (local hard allowlist). Policy Runtime will harden further. Extends /v1/workflows.',
       },
     };
   }
@@ -110,7 +111,12 @@ export class WorkflowRuntimeService {
       );
     }
 
-    const mode = input.mode === 'parallel' ? 'parallel' : 'sequential';
+    const mode =
+      input.mode === 'parallel'
+        ? 'parallel'
+        : input.mode === 'distributed'
+          ? 'distributed'
+          : 'sequential';
     const steps = Array.isArray(input.steps) ? input.steps.slice(0, ceilings.maxStepsPerRun) : [];
     const now = new Date().toISOString();
     const workflow: WorkflowDef = {
@@ -265,11 +271,25 @@ export class WorkflowRuntimeService {
     const runId = `wrun_${randomUUID().replace(/-/g, '').slice(0, 16)}`;
     const steps: RunStep[] = [];
 
-    if (workflow.mode === 'parallel') {
+    if (workflow.mode === 'parallel' || workflow.mode === 'distributed') {
+      const workerCount = workflow.mode === 'distributed' ? Math.min(4, Math.max(1, requested.length)) : 1;
       const results = await Promise.all(
-        requested.map((step, idx) =>
-          this.runStep(input, workflow, step, idx, input.forceFailAction),
-        ),
+        requested.map(async (step, idx) => {
+          const runStep = await this.runStep(
+            input,
+            workflow,
+            step,
+            idx,
+            input.forceFailAction,
+          );
+          if (workflow.mode === 'distributed') {
+            return {
+              ...runStep,
+              workerId: `worker-${(idx % workerCount) + 1}`,
+            };
+          }
+          return runStep;
+        }),
       );
       steps.push(...results);
     } else {
@@ -358,7 +378,7 @@ export class WorkflowRuntimeService {
     return {
       approval,
       honesty: { bpmOs: false },
-      note: 'Sandbox approval recorded — not an enterprise BPM OS. Pass approved:true on /run.',
+      note: 'Sandbox approval recorded. Pass approved:true on /run.',
     };
   }
 
@@ -395,7 +415,7 @@ export class WorkflowRuntimeService {
     return {
       schedule: row,
       honesty: { cronFleetOs: false },
-      note: 'Schedule recorded — not an autonomous cron fleet OS. Execute later via /run.',
+      note: 'Schedule recorded. Execute later via /run.',
     };
   }
 
@@ -448,7 +468,7 @@ export class WorkflowRuntimeService {
     return {
       run: rolled,
       honesty: { distributedSagaOs: false },
-      note: 'Sandbox rollback marker — not a distributed saga/compensation OS.',
+      note: 'Sandbox rollback marker.',
     };
   }
 
@@ -493,7 +513,7 @@ export class WorkflowRuntimeService {
     return {
       replay,
       honesty: { eventSourcingOs: false },
-      note: 'Sandbox replay of recorded steps — not an event-sourcing OS.',
+      note: 'Sandbox replay of recorded steps.',
     };
   }
 
@@ -673,7 +693,7 @@ export class WorkflowRuntimeService {
       case 'workflow.approve':
         return this.approve({ ...input, workflowId: workflow.id, note: String(payload.note ?? '') });
       case 'workflow.rollback':
-        return { action: 'workflow.rollback', simulated: true, note: 'Use POST /rollback with runId' };
+        return { action: 'workflow.rollback', simulated: true, note: 'Use POST /rollback with runId.' };
       case 'workflow.notify':
         return {
           channel: String(payload.channel ?? 'sandbox'),

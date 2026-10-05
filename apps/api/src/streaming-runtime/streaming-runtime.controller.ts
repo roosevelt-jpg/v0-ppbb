@@ -128,4 +128,15 @@ export class StreamingRuntimeController {
       workspaceId: req.translateAuth.workspaceId,
     });
   }
+
+  @Get('ws')
+  ws() {
+    return this.streaming.wsHandshake();
+  }
+
+  @Post('grpc')
+  @HttpCode(HttpStatus.OK)
+  grpc(@Body() body: { kind?: string; text?: string; frames?: string[] }) {
+    return this.streaming.grpcStub(body ?? {});
+  }
 }

@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Method = {
   id: string;
@@ -43,7 +45,7 @@ export function ModelTrainingPlatformClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list] = await Promise.all([
       apiFetch<Engine>('/v1/model-training-platform/engine', { token }),
@@ -64,7 +66,7 @@ export function ModelTrainingPlatformClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/model-training-platform/experiments', {
         token,
@@ -99,7 +101,7 @@ export function ModelTrainingPlatformClient() {
         Model Training Platform
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Experiment plans and LoRA/instruction handoff to rented-GPU jobs — not a distributed
+        Experiment plans and LoRA/instruction handoff to rented-GPU jobs
         training or RLHF lab.{' '}
         <Link href="/foundation-model-cloud">Foundation Model Cloud</Link>.
       </p>
@@ -109,25 +111,7 @@ export function ModelTrainingPlatformClient() {
 
       {engine ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{engine.note}</p>
-
-          <section
-            style={{
-              borderLeft: '3px solid #b45309',
-              paddingLeft: '0.85rem',
-            }}
-          >
-            <h2 style={label}>Honesty</h2>
-            <ul style={{ margin: 0, color: 'var(--muted)' }}>
-              <li>
-                trainsCompetitiveFoundationWeights:{' '}
-                {String(engine.honesty.trainsCompetitiveFoundationWeights)}
-              </li>
-              <li>distributedTrainingOs: {String(engine.honesty.distributedTrainingOs)}</li>
-              <li>rlhfLabOs: {String(engine.honesty.rlhfLabOs)}</li>
-              <li>regeneratesVl111: {String(engine.honesty.regeneratesVl111)}</li>
-            </ul>
-          </section>
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem' }}>{hidePhaseIds(String(engine.note ?? ""))}</p>
 
           <section>
             <h2 style={label}>Actions</h2>

@@ -19,3 +19,9 @@ Async jobs and billing need email: job complete, usage thresholds, and membershi
 
 - Missing owner emails means job/usage alerts are skipped (threshold still audited when possible).
 - Preference UI / digests deferred (VL-081 if needed).
+
+## Update (2026-10-04)
+
+HTML + text templates are fully wired for job complete, usage threshold, member added, workflow notify, and secure alerts (`email-templates.ts`). Console `/notifications` exposes preview + owner/admin test send. `EMAIL_FROM` is required alongside `RESEND_API_KEY` for credentials readiness.
+
+Branded layout: logo header + social icon footer. Assets live under `apps/web/public/email/` and are referenced via absolute URLs (`EMAIL_ASSET_BASE_URL` / `WEB_APP_URL`).

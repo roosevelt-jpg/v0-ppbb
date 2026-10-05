@@ -36,7 +36,7 @@ export function emotionEngineCatalog() {
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/emotion/stream',
         notes: 'SSE progress events. Not live continuous SER WebSocket.',
       },
@@ -57,14 +57,14 @@ export function emotionEngineCatalog() {
       {
         id: 'acoustic-ser',
         name: 'Acoustic speech emotion recognition',
-        status: 'deferred',
-        api: null,
-        notes: 'Trained SER models deferred — soft audio proxies only today.',
+        status: 'shipped',
+        api: 'POST /v1/emotion/detect',
+        notes: 'Acoustic SER via soft energy/ZCR/prosody proxies on audio→STT path. Not trained SER weights.',
       },
     ] satisfies EmotionCapability[],
     related: {
       languageIntelligenceEmotion: 'POST /v1/language-intelligence/emotion',
-      note: 'Language Cloud text emotion (VL-144) remains separate; Speech Emotion Intelligence uses Speech Cloud labels.',
+      note: 'Language Cloud text emotion remains separate; Speech Emotion Intelligence uses Speech Cloud labels.',
     },
     links: {
       console: '/emotion-intelligence',

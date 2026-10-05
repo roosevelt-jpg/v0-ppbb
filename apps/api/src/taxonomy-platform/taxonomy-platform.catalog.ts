@@ -13,7 +13,7 @@ export function taxonomyPlatformCatalog() {
   return {
     product: 'VerbaLab Taxonomy Platform',
     note:
-      'Workspace-scoped categories, tags, content-type terms, and knowledge trees (VL-197). Assigns to Knowledge Base documents. Not an enterprise taxonomy OS; automatic classification is keyword-heuristic only.',
+      'Workspace-scoped categories, tags, content-type terms, and knowledge trees. Assigns to Knowledge Base documents. Not an enterprise taxonomy OS; automatic classification is keyword-heuristic only.',
     capabilities: [
       {
         id: 'categories',
@@ -39,14 +39,14 @@ export function taxonomyPlatformCatalog() {
       {
         id: 'metadata',
         name: 'Metadata',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/taxonomy/terms',
         notes: 'JSON metadata on terms. Schema registry deferred.',
       },
       {
         id: 'content-types',
         name: 'Content types',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/taxonomy/content-types',
         notes: 'Aligns with EKB contentKind values; kind=content_type terms.',
       },
@@ -60,7 +60,7 @@ export function taxonomyPlatformCatalog() {
       {
         id: 'automatic-classification',
         name: 'Automatic classification',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/taxonomy/classify',
         notes: 'Keyword/heuristic match of term name/slug to filename/tags. ML classifiers deferred.',
       },

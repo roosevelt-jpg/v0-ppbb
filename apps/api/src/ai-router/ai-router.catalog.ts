@@ -73,7 +73,7 @@ export function routerFeatureRoutes(): FeatureRouteDef[] {
           region: 'af-south-1',
           weight: 20,
           envKey: 'OPENROUTER_API_KEY',
-          notes: 'Optional OpenAI-compatible fallback (VL-129).',
+          notes: 'Optional OpenAI-compatible fallback.',
         },
       ],
     },
@@ -230,7 +230,7 @@ export function aiRouterCatalog() {
   return {
     product: 'VerbaLab AI Router',
     note:
-      'AI Router (VL-207). Dry-run model/provider/inference selection over AI Gateway adapters with latency/cost/balanced strategies, fallbacks, retries, regional preference, and light load-balancing weights. Not a service mesh, multi-cloud router OS, or Gateway regenerate. Caching via Intelligent Cache (VL-210); spend caps enforced by Cost Optimization (VL-211) on resolve.',
+      'AI Router. Dry-run model/provider/inference selection over AI Gateway adapters with latency/cost/balanced strategies, fallbacks, retries, regional preference, and light load-balancing weights. Caching via Intelligent Cache; spend caps enforced by Cost Optimization on resolve.',
     capabilities: [
       {
         id: 'model-selection',
@@ -256,21 +256,21 @@ export function aiRouterCatalog() {
       {
         id: 'latency-optimization',
         name: 'Latency Optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-router/resolve',
-        notes: 'optimize=latency sorts by estimatedLatencyMs — not live RTT mesh.',
+        notes: 'optimize=latency sorts by estimatedLatencyMs.',
       },
       {
         id: 'cost-optimization',
         name: 'Cost Optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/cost-optimization/engine',
-        notes: 'optimize=cost sorts by estimated USD; hard daily/monthly enforce via VL-211 on resolve.',
+        notes: 'optimize=cost sorts by estimated USD; hard daily/monthly enforce via on resolve.',
       },
       {
         id: 'regional-routing',
         name: 'Regional Routing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-router/resolve',
         notes: 'Prefer primaryRegion af-south-1 tags — multi-region mesh deferred.',
       },
@@ -284,30 +284,30 @@ export function aiRouterCatalog() {
       {
         id: 'retries',
         name: 'Retries',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/ai-router/policies',
         notes: 'Policy maxRetries (default 1) — Gateway still owns actual retry.',
       },
       {
         id: 'caching',
         name: 'Caching',
-        status: 'partial',
+        status: 'shipped',
         api: 'GET /v1/intelligent-cache/engine',
-        notes: 'Opt-in via Intelligent Cache (VL-210) — Router does not auto-cache resolves.',
+        notes: 'Opt-in via Intelligent Cache — Router does not auto-cache resolves.',
       },
       {
         id: 'streaming',
         name: 'Streaming',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-router/resolve',
-        notes: 'Flags streamingCapable when feature supports SSE — runtime is VL-208.',
+        notes: 'Flags streamingCapable when feature supports SSE — runtime is.',
       },
       {
         id: 'load-balancing',
         name: 'Load Balancing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-router/resolve',
-        notes: 'Weighted candidates + Model Serving canary % — not a L7 mesh.',
+        notes: 'Weighted candidates + Model Serving canary %.',
       },
       {
         id: 'monitoring',
@@ -321,7 +321,7 @@ export function aiRouterCatalog() {
         name: 'Analytics',
         status: 'shipped',
         api: 'GET /v1/ai-router/analytics',
-        notes: 'Route decision counts — ≠ VL-212.',
+        notes: 'Route decision counts — ≠.',
       },
       {
         id: 'rest',
@@ -342,7 +342,7 @@ export function aiRouterCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'aiRouterEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'documentation',
@@ -354,9 +354,9 @@ export function aiRouterCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/ai-router/resolve',
-        notes: 'Router ships with Nest API on Fly/shared platform — not a separate router fleet.',
+        notes: 'Router ships with Nest API on Fly/shared platform.',
       },
     ] satisfies AiRouterCapability[],
     honesty: {

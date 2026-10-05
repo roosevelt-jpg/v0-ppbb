@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -34,7 +36,7 @@ export function WakeWordClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, list, stats] = await Promise.all([
       apiFetch<Engine>('/v1/wake-word/engine', { token }),
@@ -56,7 +58,7 @@ export function WakeWordClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/wake-word/keywords', {
         token,
@@ -77,7 +79,7 @@ export function WakeWordClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch<DetectResult>('/v1/wake-word/detect', {
         token,
@@ -94,7 +96,7 @@ export function WakeWordClient() {
   }
 
   async function onDelete(id: string) {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     await apiFetch(`/v1/wake-word/keywords/${id}`, { token, method: 'DELETE' });
     await refresh();
@@ -115,7 +117,12 @@ export function WakeWordClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Detect wake phrases, spot keywords, and fire enterprise trigger phrases from text or
-        audio→STT. Not Porcupine on-device DNN. <Link href="/speech">Speech Cloud</Link>.
+        audio→STT. On-device wake model card at GET /v1/wake-word/on-device (sandbox — not Porcupine
+        always-on runtime). <Link href="/speech">Speech Cloud</Link>
+        {' · '}
+        <Link href="/call-intelligence">Call Intelligence</Link>
+        {' · '}
+        <Link href="/speech-analytics">Speech Analytics</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
@@ -214,7 +221,7 @@ export function WakeWordClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

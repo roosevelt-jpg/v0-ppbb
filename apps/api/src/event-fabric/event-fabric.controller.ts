@@ -33,6 +33,32 @@ export class EventFabricController {
     return this.fabric.brokers();
   }
 
+  @Post('adapters/:broker/events')
+  @HttpCode(HttpStatus.CREATED)
+  publishAdapter(
+    @Param('broker') broker: string,
+    @Body()
+    body: {
+      topic?: string;
+      type?: string;
+      source?: string;
+      data?: unknown;
+      eventVersion?: string;
+      dataschema?: string | null;
+      subject?: string | null;
+    },
+  ) {
+    return this.fabric.publishAdapter(broker, {
+      topic: body.topic ?? 'default',
+      type: body.type ?? `com.verbalab.${broker}.event`,
+      source: body.source ?? `verbalab://event-fabric/${broker}`,
+      data: body.data,
+      eventVersion: body.eventVersion,
+      dataschema: body.dataschema,
+      subject: body.subject,
+    });
+  }
+
   @Post('events')
   @HttpCode(HttpStatus.CREATED)
   publish(

@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  BarChart,
+  SegmentedBar,
+  StatsCard,
+  formatCompact,
+} from '@/components/analytics';
 
 type Engine = {
   product: string;
@@ -40,7 +49,7 @@ export function SpeechAnalyticsClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, over, mon] = await Promise.all([
       apiFetch<Engine>('/v1/speech-analytics/engine', { token }),
@@ -61,7 +70,7 @@ export function SpeechAnalyticsClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch('/v1/speech-analytics/report', { token });
       setReport(JSON.stringify(body, null, 2));
@@ -86,51 +95,89 @@ export function SpeechAnalyticsClient() {
         Speech Analytics
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
-        Track speech usage, languages, dialects, costs, and accuracy proxies. Not a BI cloud or WER
-        lab. Language Analytics stays at <Link href="/analytics">/analytics</Link>.{' '}
-        <Link href="/speech">Speech Cloud</Link>.
+        Track speech usage, languages, dialects, costs, and accuracy proxies. Sandbox WER lab at
+        POST /v1/speech-analytics/wer-lab. Language Analytics stays at{' '}
+        <Link href="/analytics">/analytics</Link>.{' '}
+        <Link href="/speech">Speech Cloud</Link>
+        {' · '}
+        <Link href="/voice-analytics">Voice Analytics</Link>
+        {' · '}
+        <Link href="/call-intelligence">Call Intelligence</Link>
+        {' · '}
+        <Link href="/wake-word">Wake Word</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {overview ? (
-        <p style={{ margin: '0 0 1.25rem', fontWeight: 600 }}>
-          STT {overview.usage.stt.requests} req / {overview.usage.stt.minutes} min · TTS{' '}
-          {overview.usage.tts.requests} req · est. ${overview.estimatedCostUsd.toFixed(4)}
-        </p>
+        <div style={{ marginBottom: '1.5rem', display: 'grid', gap: '1rem' }}>
+          <section className="vl-stat-grid-4">
+            <StatsCard
+              label="STT requests"
+              value={formatCompact(overview.usage.stt.requests)}
+              hint={`${formatCompact(overview.usage.stt.minutes)} min`}
+              tone="brand"
+            />
+            <StatsCard
+              label="TTS requests"
+              value={formatCompact(overview.usage.tts.requests)}
+              hint={`${formatCompact(overview.usage.tts.characters)} characters`}
+            />
+            <StatsCard label="Est. cost" value={`$${overview.estimatedCostUsd.toFixed(4)}`} hint="Speech pipeline" />
+            <StatsCard
+              label="Failed jobs"
+              value={formatCompact(monitoring?.failedJobsInPeriod ?? 0)}
+              hint={
+                monitoring?.averageSttConfidence != null
+                  ? `Avg confidence ${monitoring.averageSttConfidence}`
+                  : 'Period failures'
+              }
+              tone={(monitoring?.failedJobsInPeriod ?? 0) > 0 ? 'warn' : 'ok'}
+            />
+          </section>
+          <div className="vl-chart-grid">
+            <AnalyticsSection title="STT / TTS mix" subtitle="Speech activity this period.">
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={[
+                    { label: 'STT', value: overview.usage.stt.requests || overview.usage.stt.minutes },
+                    { label: 'TTS', value: overview.usage.tts.requests || overview.usage.tts.characters },
+                  ]}
+                  totalLabel="Speech activity"
+                />
+              </div>
+            </AnalyticsSection>
+            <AnalyticsSection title="Product activity" subtitle="Top speech actions.">
+              <div className="vl-analytics-panel">
+                <BarChart
+                  data={(overview.productActivity ?? []).map((a) => ({ label: a.action, value: a.count }))}
+                  emptyLabel="No product activity yet."
+                  maxBars={8}
+                />
+              </div>
+            </AnalyticsSection>
+          </div>
+        </div>
       ) : null}
 
       <div style={{ display: 'grid', gap: '1.75rem', maxWidth: '48rem' }}>
         {monitoring ? (
           <section>
             <h2 style={label}>Monitoring</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                Failed jobs (period): {monitoring.failedJobsInPeriod}
-              </li>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                STT audio duration p95: {monitoring.sttAudioDurationP95 ?? '—'}s
-              </li>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                Avg STT confidence: {monitoring.averageSttConfidence ?? '—'}
-              </li>
-            </ul>
+            <section className="vl-stat-grid" style={{ marginBottom: '0.75rem' }}>
+              <StatsCard label="Failed jobs" value={formatCompact(monitoring.failedJobsInPeriod)} />
+              <StatsCard
+                label="STT duration p95"
+                value={monitoring.sttAudioDurationP95 != null ? `${monitoring.sttAudioDurationP95}s` : '—'}
+              />
+              <StatsCard
+                label="Avg confidence"
+                value={monitoring.averageSttConfidence != null ? String(monitoring.averageSttConfidence) : '—'}
+              />
+            </section>
             <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
               {monitoring.note}
             </p>
-          </section>
-        ) : null}
-
-        {overview?.productActivity?.length ? (
-          <section>
-            <h2 style={label}>Product activity</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              {overview.productActivity.slice(0, 8).map((a) => (
-                <li key={a.action} style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                  {a.action} · {a.count}
-                </li>
-              ))}
-            </ul>
           </section>
         ) : null}
 
@@ -149,7 +196,7 @@ export function SpeechAnalyticsClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

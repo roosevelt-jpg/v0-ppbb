@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Listing = {
@@ -22,10 +24,19 @@ type Engine = {
   note: string;
   capabilities: Array<{ id: string; name: string; status: string; notes: string }>;
 };
+type Access = {
+  plan: string;
+  planName: string;
+  isPro: boolean;
+  freeListingsAllowed: boolean;
+  paidListingsRequirePro: boolean;
+  note: string;
+};
 
 export function VoiceMarketplaceClient() {
   const { getToken, isLoaded } = useAuth();
   const [engine, setEngine] = useState<Engine | null>(null);
+  const [access, setAccess] = useState<Access | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [title, setTitle] = useState('Nova Studio Stock');
   const [voiceId, setVoiceId] = useState('nova');
@@ -35,14 +46,16 @@ export function VoiceMarketplaceClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
-    const [eng, list] = await Promise.all([
+    const [eng, list, acc] = await Promise.all([
       apiFetch<Engine>('/v1/voice-marketplace/engine', { token }),
       apiFetch<{ listings: Listing[] }>('/v1/voice-marketplace/listings', { token }),
+      apiFetch<Access>('/v1/voice-marketplace/access', { token }),
     ]);
     setEngine(eng);
     setListings(list.listings);
+    setAccess(acc);
   }, [getToken]);
 
   useEffect(() => {
@@ -55,8 +68,11 @@ export function VoiceMarketplaceClient() {
     setError(null);
     setMessage(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
+      if (priceCents > 0 && access && !access.isPro) {
+        throw new Error('Paid SKUs require Pro — upgrade under Billing, or set price to 0.');
+      }
       await apiFetch('/v1/voice-marketplace/listings', {
         token,
         method: 'POST',
@@ -82,7 +98,7 @@ export function VoiceMarketplaceClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ note: string }>(`/v1/voice-marketplace/listings/${id}/install`, {
         token,
@@ -102,7 +118,7 @@ export function VoiceMarketplaceClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/voice-marketplace/listings/${id}/reviews`, {
         token,
@@ -131,10 +147,26 @@ export function VoiceMarketplaceClient() {
       >
         Voice Marketplace
       </h1>
-      <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
+      <p style={{ color: 'var(--muted)', margin: '0 0 1rem', maxWidth: '42rem' }}>
         Publish and license voice SKUs with ratings. Distinct from localization Marketplace. Celebrity
         SKUs without rights are blocked.
       </p>
+
+      {access ? (
+        <p style={{ margin: '0 0 1.25rem', fontWeight: 600 }}>
+          Plan {access.planName}
+          {access.isPro ? ' · paid SKUs unlocked' : ' · free SKUs only (price 0)'}
+          {' · '}
+          <Link href="/billing">Billing</Link>
+          {' · '}
+          <Link href="/voice-analytics">Voice Analytics</Link>
+        </p>
+      ) : null}
+      {access && !access.isPro ? (
+        <p style={{ color: 'var(--muted)', margin: '0 0 1.25rem', maxWidth: '42rem', fontSize: '0.9rem' }}>
+          {access.note} Paid listings still require Pro.
+        </p>
+      ) : null}
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
       {message ? <p style={{ color: 'var(--muted)' }}>{message}</p> : null}
@@ -190,7 +222,9 @@ export function VoiceMarketplaceClient() {
             </li>
           ))}
           {!listings.length ? (
-            <li style={{ color: 'var(--muted)' }}>No published voice listings yet (Pro plan required).</li>
+            <li style={{ color: 'var(--muted)' }}>
+              No published voice listings yet. Publish a free SKU above to populate the catalog.
+            </li>
           ) : null}
         </ul>
       </section>
@@ -202,7 +236,7 @@ export function VoiceMarketplaceClient() {
           <ul style={{ margin: '0.75rem 0 0', paddingLeft: '1.1rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.35rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
               </li>
             ))}
@@ -216,6 +250,10 @@ export function VoiceMarketplaceClient() {
         <Link href="/voice-cloning">Voice Cloning</Link>
         {' · '}
         <Link href="/voice-cloud">Voice Cloud</Link>
+        {' · '}
+        <Link href="/voice-analytics">Voice Analytics</Link>
+        {' · '}
+        <Link href="/speech-analytics">Speech Analytics</Link>
       </p>
     </AppShell>
   );

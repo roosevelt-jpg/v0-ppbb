@@ -132,4 +132,118 @@ export class KnowledgeController {
       ip: clientIp(req),
     });
   }
+
+  @Post('documents/office')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(TranslateAuthGuard)
+  office(
+    @Req()
+    req: Request & {
+      translateAuth: TranslateAuthContext;
+      sessionAuth?: SessionContext;
+    },
+    @Body()
+    body: {
+      title?: string;
+      text?: string;
+      format?: string;
+      collection?: string;
+      tags?: string;
+    },
+  ) {
+    return this.knowledge.ingestOfficeDocument({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      ...body,
+    });
+  }
+
+  @Post('documents/crawl')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(TranslateAuthGuard)
+  crawl(
+    @Req()
+    req: Request & {
+      translateAuth: TranslateAuthContext;
+      sessionAuth?: SessionContext;
+    },
+    @Body()
+    body: {
+      url?: string;
+      html?: string;
+      title?: string;
+      collection?: string;
+      tags?: string;
+    },
+  ) {
+    return this.knowledge.ingestCrawlDocument({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      ...body,
+    });
+  }
+
+  /** Own AI OCR → text document ingest (document intelligence caption path). */
+  @Post('documents/ocr-caption')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(TranslateAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: documentMaxBytes() },
+    }),
+  )
+  async ocrCaption(
+    @Req()
+    req: Request & {
+      translateAuth: TranslateAuthContext;
+      sessionAuth?: SessionContext;
+      body: { collection?: string; tags?: string; title?: string };
+    },
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    if (!file) {
+      throw new ApiException('validation_error', 'file is required', HttpStatus.BAD_REQUEST);
+    }
+    const { createVerbalabOcr } = await import('../gateway/verbalab-own-ai');
+    const ocr = await createVerbalabOcr().extract({
+      buffer: file.buffer,
+      filename: file.originalname || 'scan.png',
+      mimeType: file.mimetype || 'image/png',
+    });
+    const title = (req.body?.title?.trim() || file.originalname || 'ocr-document').slice(0, 120);
+    const text = `# ${title}\n\n${ocr.text}\n`;
+    const fakeFile = {
+      ...file,
+      buffer: Buffer.from(text, 'utf8'),
+      originalname: `${title.replace(/\.[^.]+$/, '') || 'ocr'}.md`,
+      mimetype: 'text/markdown',
+      size: Buffer.byteLength(text),
+    } as Express.Multer.File;
+    const tags = [req.body?.tags, 'ocr-caption', `ocr-provider:${ocr.provider}`]
+      .filter(Boolean)
+      .join(',');
+    const doc = await this.knowledge.upload({
+      file: fakeFile,
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      apiKeyId: req.translateAuth.apiKeyId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      collection: req.body?.collection ?? 'ocr',
+      tags,
+      contentKind: 'markdown',
+    });
+    return {
+      ...doc,
+      ocr: { provider: ocr.provider, pages: ocr.pages, confidence: ocr.confidence },
+      note: 'Own AI OCR caption→ingest. Layout/table doc-AI OS deferred.',
+    };
+  }
 }

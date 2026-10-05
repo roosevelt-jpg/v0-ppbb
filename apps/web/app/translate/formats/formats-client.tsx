@@ -4,6 +4,8 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Engine = {
@@ -43,7 +45,7 @@ export function TranslateFormatsClient() {
 
   async function runFormat() {
     setError(null);
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setResult(
       await apiFetch<FormatResult>('/v1/translate/formats', {
@@ -57,7 +59,7 @@ export function TranslateFormatsClient() {
   async function runStream() {
     setError(null);
     setStreamLog('');
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/v1/translate/stream`, {
       method: 'POST',
@@ -110,7 +112,7 @@ export function TranslateFormatsClient() {
             .slice(0, 12)
             .map((c) => (
               <li key={c.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.35rem', fontSize: '0.92rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 {c.api ? ` · ${c.api}` : ''}
               </li>
             ))}

@@ -183,5 +183,7 @@ describe('Notifications (VL-080)', () => {
     expect(mailbox.sent).toHaveLength(1);
     expect(mailbox.sent[0]!.to).toBe('newbie@example.com');
     expect(String(mailbox.sent[0]!.subject)).toContain('added');
+    expect(String(mailbox.sent[0]!.html ?? '')).toContain('<!doctype html>');
+    expect(String(mailbox.sent[0]!.html ?? '')).toContain('VerbaLab');
   });
 });

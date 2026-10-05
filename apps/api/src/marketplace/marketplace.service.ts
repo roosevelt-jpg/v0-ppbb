@@ -85,8 +85,8 @@ export class MarketplaceService {
     };
   }
 
-  async listPublished(organizationId: string, kind?: string) {
-    await this.billing.assertPro(organizationId);
+  async listPublished(_organizationId: string, kind?: string) {
+    // Catalog browse is free for all signed-in plans (shared-credit discovery).
     const filter = kind ? this.requireKind(kind) : undefined;
     const rows = await this.prisma.marketplaceListing.findMany({
       where: {
@@ -114,7 +114,7 @@ export class MarketplaceService {
   }
 
   async listInstalls(organizationId: string, workspaceId: string) {
-    await this.billing.assertPro(organizationId);
+    // Install history is visible on Free (free SKUs) and paid plans.
     const rows = await this.prisma.marketplaceInstall.findMany({
       where: { installerOrgId: organizationId, installerWorkspaceId: workspaceId },
       include: {
@@ -391,7 +391,6 @@ export class MarketplaceService {
     ip?: string;
   }) {
     this.assertOwnerOrAdmin(input.role);
-    await this.billing.assertPro(input.organizationId);
 
     const listing = await this.prisma.marketplaceListing.findUnique({
       where: { id: input.listingId },
@@ -409,6 +408,11 @@ export class MarketplaceService {
         `Unsupported listing kind: ${listing.kind}`,
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    // Free installs for all plans; paid listing commerce requires Starter+.
+    if (listing.priceCents > 0) {
+      await this.billing.assertPro(input.organizationId);
     }
 
     const existing = await this.prisma.marketplaceInstall.findUnique({

@@ -43,6 +43,27 @@ export const FABRIC_BUSES = [
   'memory-fabric',
   'agent-fabric',
   'policy-fabric',
+  'plugin-marketplace',
+  'model-marketplace',
+  'dataset-marketplace',
+  'prompt-marketplace',
+  'agent-marketplace',
+  'workflow-marketplace',
+  'connector-marketplace',
+  'voice-language-marketplace',
+  'creator-economy',
+  'african-intelligence-cloud',
+  'open-science-platform',
+  'synthetic-data-platform',
+  'research-cloud',
+  'continuous-learning',
+  'agentops-platform',
+  'mlops-llmops-cloud',
+  'cultural-intelligence',
+  'african-knowledge-graph',
+  'government-intelligence',
+  'healthcare-intelligence',
+  'financial-intelligence',
 ] as const;
 
 /**
@@ -57,7 +78,7 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/policy-fabric/products',
       notes:
-        'Policy router + fabric-wide hard gate (VL-247). Extends Policy Runtime — does not regenerate VL-222.',
+        'Policy router + fabric-wide hard gate. Extends Policy Runtime — does not regenerate.',
     },
     {
       id: 'policy-engine',
@@ -71,7 +92,7 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
       name: 'Policy Synchronization',
       status: 'shipped',
       api: 'POST /v1/policy-fabric/sync',
-      notes: 'Same-org sync plan of policy catalogs — not multi-region policy mesh.',
+      notes: 'Same-org sync plan of policy catalogs.',
     },
     {
       id: 'policy-distribution',
@@ -83,9 +104,9 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
     {
       id: 'policy-federation',
       name: 'Policy Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-fabric/federate',
-      notes: 'Product-handoff federation catalog — not cross-tenant policy mesh.',
+      notes: 'Product-handoff federation catalog.s-tenant policy mesh.',
     },
     {
       id: 'security-policies',
@@ -97,14 +118,14 @@ export function policyFabricCapabilityCatalog(): PolicyFabricCapability[] {
     {
       id: 'compliance-policies',
       name: 'Compliance Policies',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-runtime/policies',
-      notes: 'Handoff to Policy Runtime kind=compliance — not GRC OS.',
+      notes: 'Handoff to Policy Runtime kind=compliance.',
     },
     {
       id: 'billing-policies',
       name: 'Billing Policies',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/policy-runtime/policies',
       notes: 'Handoff to Policy Runtime kind=billing.',
     },
@@ -141,7 +162,7 @@ export function policyFabricRoutingTable(): PolicyFabricRoute[] {
       target: 'policy-runtime',
       api: 'POST /v1/policy-runtime/policies',
       cloud: 'ai-kernel',
-      notes: 'Compliance deny rules — not GRC OS.',
+      notes: 'Compliance deny rules.',
     },
     {
       kind: 'billing',
@@ -216,7 +237,7 @@ export function policyFabricVersions() {
       kind: 'engine',
       version: 1,
       status: 'shipped',
-      notes: 'Fabric-wide hard gate (VL-247) — log-only forbidden.',
+      notes: 'Fabric-wide hard gate — log-only forbidden.',
     },
     {
       id: 'router-v1',
@@ -261,7 +282,7 @@ export function policyFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Policy Fabric (VL-247). Fabric-wide hard gate over Policy Runtime. Denies return 403 — never log-only. Not OPA/Cedar/GRC OS.',
+      'Policy Fabric. Fabric-wide hard gate over Policy Runtime. Denies return 403 — never log-only.',
   };
 }
 

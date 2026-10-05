@@ -88,7 +88,7 @@ export class EnterpriseRagService {
         preview: content.slice(0, 160),
         content,
       })),
-      note: 'Same overlapping character windows as VL-062 ingest. Preview only — not stored.',
+      note: 'Same overlapping character windows as ingest. Preview only — not stored.',
     };
   }
 
@@ -248,7 +248,7 @@ export class EnterpriseRagService {
         totalChars: optimized.passages.reduce((s, p) => s + p.content.length, 0),
       },
       honesty: this.engine().honesty,
-      note: 'Retrieval + citation + context optimization for Enterprise RAG (VL-198). Not LangChain OS.',
+      note: 'Retrieval + citation + context optimization for Enterprise RAG. Not LangChain OS.',
     };
   }
 
@@ -378,7 +378,7 @@ export class EnterpriseRagService {
         total_tokens: chat.totalTokens,
       },
       honesty: this.engine().honesty,
-      note: 'Grounded answer from retrieved workspace passages only (VL-198). Extends VL-062; not agentic RAG OS.',
+      note: 'Grounded answer from retrieved workspace passages only. Extends; not agentic RAG OS.',
     };
   }
 
@@ -408,7 +408,7 @@ export class EnterpriseRagService {
       chunks,
       retrievesLast30d: retrieves,
       queriesLast30d: queries,
-      note: 'Workspace-scoped Enterprise RAG analytics (VL-198).',
+      note: 'Workspace-scoped Enterprise RAG analytics.',
     };
   }
 
@@ -419,9 +419,67 @@ export class EnterpriseRagService {
       ...analytics,
       honesty: engine.honesty,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
       links: engine.links,
+    };
+  }
+
+
+  async agentic(input: {
+    question: string;
+    mode?: string;
+    k?: number;
+    maxChars?: number;
+    collection?: string;
+    tag?: string;
+    contentKind?: string;
+    documentId?: string;
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId?: string;
+    userId?: string;
+    ip?: string;
+  }) {
+    const question = input.question?.trim();
+    if (!question) {
+      throw new ApiException('validation_error', 'question is required', HttpStatus.BAD_REQUEST);
+    }
+    const hop1 = await this.retrieve({ ...input, query: question, k: input.k ?? 4 });
+    const followUp = hop1.passages[0]?.content
+      ? `${question} — focus: ${hop1.passages[0].content.slice(0, 120)}`
+      : question;
+    const hop2 = await this.retrieve({ ...input, query: followUp, k: input.k ?? 4 });
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'enterprise_rag.agentic',
+      route: 'POST /v1/enterprise-rag/agentic',
+      ip: input.ip,
+      metadata: { hops: 2, hop1: hop1.passages.length, hop2: hop2.passages.length },
+    });
+    return {
+      question,
+      hops: [
+        { hop: 1, query: question, passages: hop1.passages, citations: hop1.citations },
+        { hop: 2, query: followUp, passages: hop2.passages, citations: hop2.citations },
+      ],
+      honesty: { agenticRagOs: false, maxHops: 2 },
+      note: 'Sandbox multi-hop retrieve loop (2 hops). Not tool-calling agentic RAG OS.',
+    };
+  }
+
+  langchainAdapter() {
+    return {
+      adapter: 'langchain-compatible-metadata',
+      status: 'shipped',
+      surfaces: {
+        retrieve: 'POST /v1/enterprise-rag/retrieve',
+        query: 'POST /v1/enterprise-rag/query',
+        agentic: 'POST /v1/enterprise-rag/agentic',
+      },
+      honesty: { langchainOs: false, llamaIndexOs: false },
+      note: 'LangChain-compatible adapter metadata over Nest RAG hub. Not framework OS parity.',
     };
   }
 }

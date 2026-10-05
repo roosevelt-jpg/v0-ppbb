@@ -214,4 +214,10 @@ export class WakeWordController {
     }
     res.end();
   }
+
+
+  @Get('on-device')
+  onDevice() {
+    return this.wake.onDeviceDnn();
+  }
 }

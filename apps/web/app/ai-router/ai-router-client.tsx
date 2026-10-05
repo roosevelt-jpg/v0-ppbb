@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -45,7 +47,7 @@ export function AiRouterClient() {
   const [optimize, setOptimize] = useState('balanced');
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setEngine(await apiFetch<Engine>('/v1/ai-router/engine', { token }));
   }, [getToken]);
@@ -59,7 +61,7 @@ export function AiRouterClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<ResolveResult>('/v1/ai-router/resolve', {
         token,
@@ -103,13 +105,10 @@ export function AiRouterClient() {
             maxWidth: '44rem',
           }}
         >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            mode={engine.mode} · mesh={String(engine.honesty.serviceMeshOs)} · dryRun=
-            {String(engine.honesty.dryRunResolveOnly)} · enforcesSpend=
-            {String(engine.honesty.enforcesSpendCaps)} · extendsGateway=
-            {String(engine.honesty.extendsAiGateway)}
+          <h2 style={label}>Router status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · mode={engine.mode}
           </p>
         </section>
       ) : null}

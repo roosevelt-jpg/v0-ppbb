@@ -44,4 +44,4 @@ Clouds follow the **12-layer VerbaLab Cloud Blueprint** (ADR-0080).
 
 ## Explicit non-claims
 
-VerbaLab Voice Cloud is **not** a replacement for ElevenLabs + Resemble + Krisp + Soundraw + NIST biometrics + commercial DAW suites combined.
+VerbaLab Voice Cloud is **not** a replacement for external vendor + Resemble + Krisp + Soundraw + NIST biometrics + commercial DAW suites combined.

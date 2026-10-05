@@ -216,4 +216,20 @@ export class MemoryCloudController {
       hard: body.hard,
     });
   }
+
+  @Post('sweep')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  sweep(@Req() req: AuthedReq) {
+    return this.memoryCloud.sweepExpired(
+      req.translateAuth.organizationId,
+      req.translateAuth.workspaceId,
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+        userId: req.sessionAuth?.userId,
+        ip: clientIp(req),
+      },
+    );
+  }
 }

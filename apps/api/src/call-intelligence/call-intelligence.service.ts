@@ -113,7 +113,7 @@ export class CallIntelligenceService {
       complianceFlagCount: complianceFlags,
       averageQaScore: qaCount ? Number((qaSum / qaCount).toFixed(1)) : null,
       recent: rows.slice(0, 10).map((r) => this.serialize(r)),
-      note: 'Workspace Call Intelligence report (VL-158) — heuristic aggregates.',
+      note: 'Workspace Call Intelligence report — heuristic aggregates.',
     };
   }
 
@@ -338,7 +338,7 @@ export class CallIntelligenceService {
       if (sentiment) yield { event: 'sentiment', label: sentiment };
       yield {
         event: 'done',
-        note: 'Call Intelligence stream complete (VL-158).',
+        note: 'Call Intelligence stream complete.',
       };
     } catch (err) {
       yield {
@@ -410,6 +410,46 @@ export class CallIntelligenceService {
       apiKeyPrefix,
       metadata,
     });
+  }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process call agent-assist bus (SSE). Not live dialer/CCaaS.',
+    });
+    const recent = await this.prisma.auditEvent.findMany({
+      where: {
+        organizationId: input.organizationId,
+        action: { startsWith: 'call_intelligence.' },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { id: true, action: true, createdAt: true },
+    });
+    for (const row of recent) {
+      write('event', {
+        id: row.id,
+        action: row.action,
+        at: row.createdAt.toISOString(),
+      });
+    }
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 }
 

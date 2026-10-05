@@ -27,8 +27,7 @@ export function GraphqlClient() {
         GraphQL
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '42rem' }}>
-        Bounded Language Cloud façade over CQRS command/query buses (ports → Nest adapters). REST remains primary. Not
-        federation, not platform-wide hexagonal.
+        Bounded Language Cloud façade over CQRS command and query buses. REST remains the primary API surface.
       </p>
 
       <section style={{ marginBottom: '1.5rem' }}>

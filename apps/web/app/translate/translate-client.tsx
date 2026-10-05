@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { FormEvent, useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Language = { code: string; name: string; tier: string };
@@ -18,6 +20,7 @@ export function TranslateClient() {
   const [detectedSource, setDetectedSource] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [prefillNote, setPrefillNote] = useState<string | null>(null);
 
   useEffect(() => {
     void apiFetch<{ data: Language[] }>('/v1/languages')
@@ -25,12 +28,27 @@ export function TranslateClient() {
       .catch((err: Error) => setError(err.message));
   }, []);
 
+  useEffect(() => {
+    void apiFetch<{
+      prefill: { text?: string; source?: string; target?: string; note?: string };
+    }>('/v1/cms/prefills/translate')
+      .then((res) => {
+        if (res.prefill.text) setText(res.prefill.text);
+        if (res.prefill.source) setSource(res.prefill.source);
+        if (res.prefill.target) setTarget(res.prefill.target);
+        setPrefillNote(res.prefill.note ?? 'CMS prefill loaded for review.');
+      })
+      .catch(() => {
+        /* keep empty defaults if CMS unavailable */
+      });
+  }, []);
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{
         text: string;
@@ -62,10 +80,28 @@ export function TranslateClient() {
 
   return (
     <AppShell>
-      <h1 style={titleStyle}>Translate</h1>
-      <p style={ledeStyle}>Paste text, pick a pair, get a metered translation.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+        <div>
+          <p style={{ margin: 0, color: 'var(--brand)', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em' }}>
+            PRODUCT
+          </p>
+          <h1 style={titleStyle}>Translate</h1>
+          <p style={ledeStyle}>Paste text, pick a pair, get a metered translation.</p>
+          {prefillNote ? (
+            <p style={{ margin: '0.55rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>{prefillNote}</p>
+          ) : null}
+        </div>
+        <div style={{ display: 'flex', gap: '0.55rem' }}>
+          <Link href="/glossary" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>
+            Glossary
+          </Link>
+          <Link href="/tm" className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none' }}>
+            TM
+          </Link>
+        </div>
+      </div>
 
-      <form onSubmit={onSubmit} className="vl-panel" style={{ display: 'grid', gap: '1rem', padding: '1.35rem', marginTop: '1.5rem' }}>
+      <form onSubmit={onSubmit} className="vl-panel" style={{ display: 'grid', gap: '1rem', padding: '1.35rem', marginTop: '1.25rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <label className="vl-label">
             Source

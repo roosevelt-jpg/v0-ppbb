@@ -14,6 +14,8 @@ describe('Production deploy config (VL-074)', () => {
   it('configures Fly API release migrate and health check', () => {
     const toml = readFileSync(join(root, 'infra/fly/api.toml'), 'utf8');
     expect(toml).toContain("app = 'verbalab-api'");
+    expect(toml).toContain("primary_region = 'jnb'");
+    expect(toml).toContain("VERBALAB_REGION = 'af'");
     expect(toml).toContain('prisma migrate deploy');
     expect(toml).toContain("path = '/health'");
   });
@@ -25,15 +27,21 @@ describe('Production deploy config (VL-074)', () => {
     expect(yml).toContain('infra/fly/api.toml');
   });
 
-  it('ships EU residency island configs (VL-075)', () => {
+  it('ships EU and US residency island configs (VL-075)', () => {
     const eu = readFileSync(join(root, 'infra/fly/api.eu.toml'), 'utf8');
     expect(eu).toContain("app = 'verbalab-api-eu'");
     expect(eu).toContain("primary_region = 'ams'");
     expect(eu).toContain("VERBALAB_REGION = 'eu'");
     expect(existsSync(join(root, 'infra/fly/web.eu.toml'))).toBe(true);
+    const us = readFileSync(join(root, 'infra/fly/api.us.toml'), 'utf8');
+    expect(us).toContain("app = 'verbalab-api-us'");
+    expect(us).toContain("VERBALAB_REGION = 'us'");
+    expect(existsSync(join(root, 'infra/fly/web.us.toml'))).toBe(true);
     const yml = readFileSync(join(root, '.github/workflows/deploy.yml'), 'utf8');
     expect(yml).toContain('FLY_DEPLOY_EU');
     expect(yml).toContain('infra/fly/api.eu.toml');
+    expect(yml).toContain('FLY_DEPLOY_US');
+    expect(yml).toContain('infra/fly/api.us.toml');
   });
 
   it('configures web Fly health checks and smoke script', () => {

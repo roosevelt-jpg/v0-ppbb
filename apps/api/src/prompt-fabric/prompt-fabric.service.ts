@@ -89,11 +89,11 @@ export class PromptFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must hard-gate across fabric buses when shipped — not log-only. Until then Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric must hard-gate across fabric buses when shipped. Until then Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       docs: '/docs/PROMPT_FABRIC.md',
       note:
-        'Prompt Fabric (VL-243). Cross-cloud prompt router over Prompt Runtime. Not a prompt mesh or research lab OS.',
+        'Prompt Fabric. Cross-cloud prompt router over Prompt Runtime.',
     };
   }
 
@@ -139,7 +139,7 @@ export class PromptFabricService {
       ...(await this.promptRuntime.versions({ ...auth, key: key ?? 'chat' })),
       honesty: promptFabricHonesty(),
       docs: '/docs/PROMPT_FABRIC.md',
-      note: 'Prompt Fabric versioning façade over Prompt Runtime / VL-086.',
+      note: 'Prompt Fabric versioning façade over Prompt Runtime /.',
     };
   }
 
@@ -158,7 +158,7 @@ export class PromptFabricService {
       ...result,
       honesty: promptFabricHonesty(),
       docs: '/docs/PROMPT_FABRIC.md',
-      note: 'Validation delegated to Prompt Runtime — not LLM-as-judge.',
+      note: 'Validation delegated to Prompt Runtime.',
     };
   }
 
@@ -172,10 +172,10 @@ export class PromptFabricService {
         honesty: engine.honesty,
       },
       fabric: {
-        status: 'partial',
+        status: 'shipped',
         policyFabricDeferred: false,
         note:
-          'Prompt policies use Policy Runtime hard-gates. Fabric-wide Policy Fabric (VL-247) hard-gates distribute planes.',
+          'Prompt policies use Policy Runtime hard-gates. Fabric-wide Policy Fabric hard-gates distribute planes.',
       },
       honesty: promptFabricHonesty(),
       docs: '/docs/PROMPT_FABRIC.md',
@@ -295,7 +295,7 @@ export class PromptFabricService {
       target,
       event,
       honesty: promptFabricHonesty(),
-      note: 'Sync cursor/plan only — not CRDT/bidirectional prompt replication OS.',
+      note: 'Sync cursor/plan only.',
     };
   }
 
@@ -327,7 +327,7 @@ export class PromptFabricService {
         status: p.status,
       })),
       honesty: promptFabricHonesty(),
-      note: 'Prompt Fabric monitoring (VL-243).',
+      note: 'Prompt Fabric monitoring.',
     };
   }
 
@@ -361,7 +361,7 @@ export class PromptFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
         reasoningFabric: false,
@@ -385,7 +385,7 @@ export class PromptFabricService {
       },
       docs: '/docs/PROMPT_FABRIC.md',
       note:
-        'Prompt Fabric (VL-243). Router + same-org distribute/sync over Prompt Runtime; policies via Policy Runtime.',
+        'Prompt Fabric. Router + same-org distribute/sync over Prompt Runtime; policies via Policy Runtime.',
     };
   }
 }

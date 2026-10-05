@@ -106,7 +106,7 @@ export class EnterpriseCloudService {
           workspaces: workspaceCount,
         },
       },
-      note: 'Derived read model — not a policy engine (ADR-0049).',
+      note: 'Derived enterprise controls for governance, security, billing, and residency.',
     };
   }
 

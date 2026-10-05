@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { SiteFooter } from '@/components/marketing/site-footer';
 
 export default function DocsPage() {
   const [specUrl, setSpecUrl] = useState(`${API_URL}/v1/openapi.json`);
@@ -21,6 +22,7 @@ export default function DocsPage() {
   }, []);
 
   return (
+    <>
     <div className="vl-fade-up" style={{ maxWidth: '56rem', margin: '0 auto', padding: '2.25rem 1.5rem 4rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
         <Link href="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 760, textDecoration: 'none', fontSize: '1.15rem' }}>
@@ -33,8 +35,20 @@ export default function DocsPage() {
           <Link href="/coverage" style={{ color: 'var(--muted)', textDecoration: 'none' }}>
             Coverage
           </Link>
-          <a href={specUrl} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}>
-            openapi.json
+          <Link
+            href="/docs/openapi"
+            className="vl-btn vl-btn-secondary"
+            style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}
+          >
+            OpenAPI explorer
+          </Link>
+          <a
+            href={specUrl}
+            className="vl-btn vl-btn-secondary"
+            style={{ textDecoration: 'none', padding: '0.45rem 0.9rem' }}
+            download
+          >
+            Raw JSON
           </a>
         </div>
       </div>
@@ -43,10 +57,38 @@ export default function DocsPage() {
         API documentation
       </h1>
       <p style={{ color: 'var(--muted)', lineHeight: 1.65, maxWidth: '38rem' }}>
-        Machine-readable OpenAPI for the VerbaLab API (translate, media, jobs, knowledge, and more). Authenticate
-        product calls with <code className="vl-code">Authorization: Bearer vl_live_...</code> or soft-sandbox{' '}
-        <code className="vl-code">vl_test_...</code>. Hub: <Link href="/developers">/developers</Link>.
+        Machine-readable OpenAPI for the VerbaLab API (translate, media, jobs, knowledge, and more). Browse every field
+        in the <Link href="/docs/openapi">OpenAPI explorer</Link> (copy paths/values, show/hide). Authenticate product
+        calls with <code className="vl-code">Authorization: Bearer vl_live_...</code> or soft-sandbox{' '}
+        <code className="vl-code">vl_test_...</code>. Start here:{' '}
+        <Link href="/docs/quickstart">60-second quickstart</Link>. Hub: <Link href="/developers">/developers</Link>.
       </p>
+
+      <div className="vl-panel" style={{ marginTop: '1.25rem', padding: '1.2rem 1.25rem', background: 'var(--bg-soft)', border: 'none' }}>
+        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>60-second quickstart</h2>
+        <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Free / test API key → first translate + TTS in under a minute (cURL, TypeScript SDK, Python).
+        </p>
+        <Link href="/docs/quickstart" className="vl-btn vl-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }}>
+          Open quickstart
+        </Link>
+      </div>
+
+      <div className="vl-panel" style={{ marginTop: '1.25rem', padding: '1.2rem 1.25rem', background: 'var(--bg-soft)', border: 'none' }}>
+        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.15rem' }}>Developer OpenAPI explorer</h2>
+        <p style={{ margin: '0 0 0.85rem', color: 'var(--muted)', lineHeight: 1.55 }}>
+          Structured JSON for every endpoint — expand nodes, copy field paths or values, and hide values when sharing
+          your screen. Raw download stays available for codegen and CI.
+        </p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+          <Link href="/docs/openapi" className="vl-btn vl-btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }}>
+            Open explorer
+          </Link>
+          <a href={specUrl} className="vl-btn vl-btn-secondary" style={{ textDecoration: 'none', padding: '0.5rem 1rem' }} download>
+            Download openapi.json
+          </a>
+        </div>
+      </div>
 
       <div className="vl-panel" style={{ marginTop: '1.5rem', padding: '1.35rem', background: 'var(--bg-soft)', border: 'none' }}>
         <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>POST /v1/translate</h2>
@@ -64,54 +106,54 @@ export default function DocsPage() {
       <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
         <Endpoint
           title="Prompt management"
-          body="Versioned chat/RAG/voice_faq system prompts with rollback (ADR-0030). Console /prompts."
+          body="Versioned chat/RAG/voice_faq system prompts with rollback. Console /prompts."
         />
         <Endpoint title="GET/POST /v1/prompts…" body="List keys; create/activate versions; restore code fallback (Clerk)." />
         <Endpoint
           title="Analytics"
-          body="Org overview: volume by feature/language pair, estimated cost, job error rate (ADR-0029)."
+          body="Org overview: volume by feature/language pair, estimated cost, job error rate."
         />
         <Endpoint title="GET /v1/analytics/overview" body="SQL aggregates for the current org (Clerk or API key; ?from=&to=)." />
         <Endpoint
           title="Voice FAQ agent"
-          body="Twilio inbound/outbound + STT → FAQ LLM → TTS. Simulate without Twilio (ADR-0028)."
+          body="Twilio inbound/outbound + STT → FAQ LLM → TTS. Simulate without Twilio."
         />
         <Endpoint title="POST /v1/voice/simulate" body="Text or audio FAQ turn (API key or Clerk)." />
         <Endpoint title="POST /v1/voice/twilio/inbound|turn" body="Signed Twilio webhooks → TwiML." />
         <Endpoint
           title="Voice Studio / clones"
-          body="African Voice Studio console (/audio): stock TTS, language presets, consent-gated clones with review + disable (ADR-0044). Vendors only."
+          body="African Voice Studio console (/audio): stock TTS, language presets, consent-gated clones with review + disable. Vendors only."
         />
         <Endpoint title="GET/POST /v1/voice-clones" body="List / create clones (Clerk; Pro + consent for create)." />
         <Endpoint title="GET /v1/voice-clones/{id}" body="Get clone profile." />
-        <Endpoint title="POST /v1/voice-clones/{id}/review" body="Approve/reject pending_review (approve → ElevenLabs or fixture)." />
+        <Endpoint title="POST /v1/voice-clones/{id}/review" body="Approve/reject pending_review (approve → external vendor or fixture)." />
         <Endpoint title="POST /v1/voice-clones/{id}/disable" body="Disable clone for abuse/policy." />
-        <Endpoint title="POST /v1/audio/speech" body="TTS; stock OpenAI, own:* rented open-weight (VL-121), or voice=clone:{id} (watermark)." />
+        <Endpoint title="POST /v1/audio/speech" body="TTS; stock OpenAI, own:* rented open-weight, or voice=clone:{id} (watermark)." />
         <Endpoint
           title="Workflows"
-          body="JSON steps (transcribe → translate → notify) via job runner. Console /workflows (ADR-0027)."
+          body="JSON steps (transcribe → translate → notify) via job runner. Console /workflows."
         />
         <Endpoint title="GET/POST /v1/workflows" body="List/create saved workflow definitions (Clerk)." />
         <Endpoint title="POST /v1/workflows/{id}/run" body="Enqueue workflow job from saved definition (API key)." />
         <Endpoint
           title="Slack connector"
-          body="Slash /verbalab <lang> <text> → translate into Slack. Link Team ID on /connectors (ADR-0026)."
+          body="Slash /verbalab <lang> <text> → translate into Slack. Link Team ID on /connectors."
         />
         <Endpoint title="POST /v1/connectors/slack/commands" body="Slack slash command (signed)." />
         <Endpoint title="POST /v1/connectors/slack/events" body="Slack Events url_verification." />
         <Endpoint
           title="Admin + customer portal"
-          body="Members on /billing; platform admin /admin (ADMIN_EMAILS). Disable org + revoke keys (ADR-0025)."
+          body="Members on /billing; platform admin /admin (ADMIN_EMAILS). Disable org + revoke keys."
         />
         <Endpoint title="GET /v1/organization/members" body="List org members (Clerk session)." />
         <Endpoint title="GET /v1/admin/organizations" body="Search orgs (platform admin allowlist)." />
         <Endpoint
           title="Notifications"
-          body="Resend email: job complete, usage 80%/100%, member-added. Clerk hosts invites (ADR-0024)."
+          body="Resend email: job complete, usage 80%/100%, member-added. Clerk hosts invites."
         />
         <Endpoint
           title="Production deploy"
-          body="Fly.io one-region (ADR-0023). See infra/DEPLOY.md — Docker + release migrate; CI deploy when FLY_API_TOKEN set."
+          body="Fly.io one-region. See infra/DEPLOY.md — Docker + release migrate; CI deploy when FLY_API_TOKEN set."
         />
         <Endpoint
           title="Data governance"
@@ -147,15 +189,26 @@ export default function DocsPage() {
         <Endpoint title="POST /v1/jobs" body="Enqueue batch_translate, document_translate, or workflow (API key)." />
         <Endpoint title="GET /v1/jobs/{id}" body="Poll job status and result." />
         <Endpoint title="GET /v1/audit-events" body="Org audit trail (Clerk session; owners/admins)." />
-        <Endpoint title="GET /v1/openapi.json" body="This OpenAPI 3.1 document." />
+        <Endpoint
+          title="GET /v1/openapi.json"
+          body="OpenAPI 3.1 document. Browse it in /docs/openapi (copy + show/hide), or download the raw JSON."
+        />
         <Endpoint title="POST /v1/api-keys" body="Create a key (Clerk session). Secret returned once." />
         <Endpoint title="GET /v1/usage/summary" body="Month-to-date characters and request counts." />
       </div>
 
       <div className="vl-panel" style={{ marginTop: '1.5rem', padding: '1.35rem' }}>
-        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>TypeScript SDK</h2>
+        <h2 style={{ marginTop: 0, fontFamily: 'var(--font-display)', fontSize: '1.2rem' }}>SDKs for every platform</h2>
+        <p style={{ color: 'var(--muted)', lineHeight: 1.55, marginTop: 0 }}>
+          Full clients for web and mobile — TypeScript, iOS (Swift), and Android (Kotlin). Each mirrors the complete
+          VerbaLab API surface so you can ship translate, speech, chat, and every product endpoint from day one.
+        </p>
+
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', margin: '1rem 0 0.5rem' }}>TypeScript</h3>
         <pre className="vl-code" style={{ margin: 0, background: 'var(--bg-soft)', padding: '1rem', borderRadius: 12, overflow: 'auto' }}>
-{`import { VerbaLab } from '@verbalab/sdk';
+{`pnpm add @verbalab/sdk
+
+import { VerbaLab } from '@verbalab/sdk';
 
 const client = new VerbaLab({
   apiKey: process.env.VERBALAB_API_KEY!,
@@ -163,6 +216,29 @@ const client = new VerbaLab({
 });
 
 await client.translate({ text: 'Hello', source: 'en', target: 'sw' });`}
+        </pre>
+
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', margin: '1.25rem 0 0.5rem' }}>iOS (Swift)</h3>
+        <pre className="vl-code" style={{ margin: 0, background: 'var(--bg-soft)', padding: '1rem', borderRadius: 12, overflow: 'auto' }}>
+{`// Xcode → File → Add Package Dependencies → packages/sdk-ios
+import VerbaLab
+
+let client = VerbaLabClient(apiKey: "vl_live_...", baseURL: "${API_URL}")
+let result = try await client.translate(
+  TranslateRequest(text: "Hello", source: "en", target: "sw")
+)
+let audio = try await client.speech(body: ["text": "Habari", "voice": "alloy"])`}
+        </pre>
+
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', margin: '1.25rem 0 0.5rem' }}>Android (Kotlin)</h3>
+        <pre className="vl-code" style={{ margin: 0, background: 'var(--bg-soft)', padding: '1rem', borderRadius: 12, overflow: 'auto' }}>
+{`// implementation("ai.verbalab:sdk:0.1.0")  or project(":verbalab")
+import ai.verbalab.sdk.VerbaLabClient
+import ai.verbalab.sdk.TranslateRequest
+
+val client = VerbaLabClient(apiKey = "vl_live_...", baseUrl = "${API_URL}")
+val result = client.translate(TranslateRequest(text = "Hello", source = "en", target = "sw"))
+val audio = client.speech(mapOf("text" to "Habari", "voice" to "alloy"))`}
         </pre>
       </div>
 
@@ -187,6 +263,8 @@ VERBALAB_BASE_URL=${API_URL}`}
         )}
       </div>
     </div>
+    <SiteFooter />
+    </>
   );
 }
 

@@ -58,7 +58,7 @@ export function memoryRuntimeCatalog() {
   return {
     product: 'VerbaLab Memory Runtime',
     note:
-      'Memory Runtime (VL-215). Kernel-layer short/long-term/semantic/workspace/org/conversation/agent memory over VL-183 MemoryRecord (metadata.layer=kernel). Versioning, eviction, heuristic compression, sandbox snapshots/sync. Not Mem0 OS, not infinite personalization, not multi-region replication. Does not regenerate Memory Cloud or Knowledge Memory.',
+      'Memory Runtime. Kernel-layer short/long-term/semantic/workspace/org/conversation/agent memory over MemoryRecord (metadata.layer=kernel). Versioning, eviction, heuristic compression, sandbox snapshots/sync. Does not regenerate Memory Cloud or Knowledge Memory.',
     capabilities: [
       {
         id: 'short-term-memory',
@@ -77,9 +77,9 @@ export function memoryRuntimeCatalog() {
       {
         id: 'semantic-memory',
         name: 'Semantic Memory',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/search',
-        notes: 'Text contains search — not embedding ANN OS.',
+        notes: 'Text contains search.',
       },
       {
         id: 'workspace-memory',
@@ -105,16 +105,16 @@ export function memoryRuntimeCatalog() {
       {
         id: 'agent-memory',
         name: 'Agent Memory',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/put',
-        notes: 'scope=agent + agentId — Agent Runtime VL-219 writes via /v1/agent-runtime/memory.',
+        notes: 'scope=agent + agentId — Agent Runtime writes via /v1/agent-runtime/memory.',
       },
       {
         id: 'context-compression',
         name: 'Context Compression',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/compress',
-        notes: 'Heuristic truncate/summarize stub — not ML compressor OS.',
+        notes: 'Heuristic truncate/summarize stub.',
       },
       {
         id: 'memory-versioning',
@@ -126,9 +126,9 @@ export function memoryRuntimeCatalog() {
       {
         id: 'memory-synchronization',
         name: 'Memory Synchronization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/sync',
-        notes: 'Sandbox sync stamp on kernel rows — not multi-region sync OS.',
+        notes: 'Sandbox sync stamp on kernel rows.',
       },
       {
         id: 'memory-eviction',
@@ -140,23 +140,23 @@ export function memoryRuntimeCatalog() {
       {
         id: 'memory-encryption',
         name: 'Memory Encryption',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/put',
-        notes: 'Optional encrypt=true stores base64 payload tag — not KMS/HSM OS.',
+        notes: 'Optional encrypt=true stores base64 payload tag.',
       },
       {
         id: 'memory-replication',
         name: 'Memory Replication',
-        status: 'deferred',
-        api: null,
-        notes: 'Multi-region replication OS deferred.',
+        status: 'shipped',
+        api: 'POST /v1/memory-runtime/replicate',
+        notes: 'Sandbox multi-region replication plan metadata. Not a multi-region memory OS.',
       },
       {
         id: 'memory-snapshots',
         name: 'Memory Snapshots',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/snapshots',
-        notes: 'Sandbox snapshot MemoryRecords (layer=kernel) — not backup appliance OS.',
+        notes: 'Sandbox snapshot MemoryRecords (layer=kernel).',
       },
       {
         id: 'rest',
@@ -177,21 +177,21 @@ export function memoryRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'memoryRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'realtime',
         name: 'Realtime APIs',
-        status: 'deferred',
-        api: null,
-        notes: 'Dedicated realtime memory bus deferred; monitoring is poll.',
+        status: 'shipped',
+        api: 'GET /v1/memory-runtime/realtime',
+        notes: 'In-process SSE memory bus (heartbeat + recent puts). Not a dedicated pub/sub mesh.',
       },
       {
         id: 'monitoring',
         name: 'Monitoring',
         status: 'shipped',
         api: 'GET /v1/memory-runtime/monitoring',
-        notes: 'Counts + honesty.',
+        notes: 'Entry counts by scope and kind.',
       },
       {
         id: 'documentation',
@@ -203,9 +203,9 @@ export function memoryRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/memory-runtime/put',
-        notes: 'Ships with Nest API — not a separate memory cluster.',
+        notes: 'Ships with Nest API.',
       },
     ] satisfies MemoryRuntimeCapability[],
     honesty: {

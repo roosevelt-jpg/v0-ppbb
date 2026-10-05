@@ -1,15 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import type { Request } from 'express';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards, Res } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { MemoryRuntimeService } from './memory-runtime.service';
 import { TranslateAuthGuard, TranslateAuthContext } from '../common/guards/translate-auth.guard';
 import { SessionContext } from '../common/guards/clerk-auth.guard';
@@ -187,5 +177,36 @@ export class MemoryRuntimeController {
       organizationId: req.translateAuth.organizationId,
       workspaceId: req.translateAuth.workspaceId,
     });
+  }
+
+
+  @Post('replicate')
+  @UseGuards(TranslateAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  replicate(
+    @Req() req: AuthedReq,
+    @Body() body: { targetRegion?: string },
+  ) {
+    return this.runtime.replicate({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      userId: req.sessionAuth?.userId,
+      ip: clientIp(req),
+      targetRegion: body.targetRegion,
+    });
+  }
+
+  @Get('realtime')
+  @UseGuards(TranslateAuthGuard)
+  realtime(@Req() req: AuthedReq, @Res() res: Response) {
+    return this.runtime.writeRealtime(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+        userId: req.sessionAuth?.userId,
+        ip: clientIp(req),
+      },
+      res,
+    );
   }
 }

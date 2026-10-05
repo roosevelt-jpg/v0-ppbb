@@ -54,7 +54,7 @@ export class CostOptimizationService {
         enforcesSpendCaps: true,
         reportOnly: false,
         note:
-          'Hard daily/monthly caps enforced on record/check and AI Router resolve. Do not connect to a production cloud billing account without these caps. GPU instance ceilings remain on VL-205.',
+          'Hard daily/monthly caps enforced on record/check and AI Router resolve. Do not connect to a production cloud billing account without these caps. GPU instance ceilings remain on.',
       },
     };
   }
@@ -426,7 +426,7 @@ export class CostOptimizationService {
       withinGpuSpendCeiling: hourlyUsd <= ceilings.maxSpendUsd,
       scaleAdvice: nearCap
         ? 'Near workspace spend caps — scale down or stop new GPU allocations (never open-ended autoscale).'
-        : 'Within workspace spend caps; GPU allocate/scale still hard-clamped by VL-205 ceilings.',
+        : 'Within workspace spend caps; GPU allocate/scale still hard-clamped by ceilings.',
       preferSpot: summary.budget.preferSpot,
       reservedCapacityUnits: summary.budget.reservedCapacityUnits,
       spend: summary,
@@ -461,13 +461,13 @@ export class CostOptimizationService {
       },
       reservedPlan: {
         units: budget.reservedCapacityUnits,
-        note: 'Sandbox reservedCapacityUnits on budget — not a reserved-instance marketplace.',
+        note: 'Sandbox reservedCapacityUnits on budget.',
       },
       recommendation: projectedMonthEnd > budget.monthlyCapUsd
         ? 'Projected to exceed monthly cap — reduce provider/GPU spend or raise caps deliberately.'
         : 'Projection within monthly cap under linear extrapolation.',
       honesty: costOptimizationCatalog().honesty,
-      note: 'Linear extrapolation from ledger — not ML forecasting OS.',
+      note: 'Linear extrapolation from ledger.',
     };
   }
 
@@ -492,7 +492,7 @@ export class CostOptimizationService {
         label: e.label,
         createdAt: e.createdAt.toISOString(),
       })),
-      note: 'Ledger-backed spend report — not a BI/FinOps OS.',
+      note: 'Ledger-backed spend report.',
       honesty: costOptimizationCatalog().honesty,
     };
   }

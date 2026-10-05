@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -47,7 +49,7 @@ export function ModelServingClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, kindsRes, depRes] = await Promise.all([
       apiFetch<Engine>('/v1/model-serving/engine', { token }),
@@ -68,7 +70,7 @@ export function ModelServingClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/model-serving/deployments', {
         token,
@@ -119,13 +121,11 @@ export function ModelServingClient() {
             maxWidth: '44rem',
           }}
         >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            maxActive={engine.ceilings.maxActiveDeployments} · mode={engine.ceilings.mode} ·
-            vllmOs={String(engine.honesty.vllmOs)} · extendsGateway=
-            {String(engine.honesty.extendsAiGateway)} · sandbox=
-            {String(engine.honesty.sandboxDeploymentsOnly)}
+          <h2 style={label}>Serving status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · maxActive=
+            {engine.ceilings.maxActiveDeployments} · mode={engine.ceilings.mode}
           </p>
         </section>
       ) : null}

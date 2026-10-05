@@ -76,7 +76,7 @@ export class PromptIntelligenceService {
   keys() {
     return {
       keys: PROMPT_KEYS.map((id) => ({ id })),
-      note: 'Managed prompt keys for VL-188 (extends VL-086).',
+      note: 'Managed prompt keys for (extends ).',
     };
   }
 
@@ -84,7 +84,7 @@ export class PromptIntelligenceService {
     const items = await this.prompts.list(organizationId, workspaceId);
     return {
       items,
-      note: 'Prompt registry over workspace versioned prompts (VL-188).',
+      note: 'Prompt registry over workspace versioned prompts.',
     };
   }
 
@@ -152,7 +152,7 @@ export class PromptIntelligenceService {
         callsLlm: false,
         autoPromptResearchLab: false,
       },
-      note: 'Preview only — does not call an LLM (VL-188).',
+      note: 'Preview only — does not call an LLM.',
     };
   }
 
@@ -233,7 +233,7 @@ export class PromptIntelligenceService {
         autoPromptResearchLab: false,
         heuristicOnly: true,
       },
-      note: 'Heuristic evaluation only — not an LLM-as-judge lab (VL-188).',
+      note: 'Heuristic evaluation only — not an LLM-as-judge lab.',
     };
   }
 
@@ -265,7 +265,7 @@ export class PromptIntelligenceService {
         redTeamHarnessOs: false,
         patternScanOnly: true,
       },
-      note: 'Pattern security scan only — not a red-team harness OS (VL-188).',
+      note: 'Pattern security scan only — not a red-team harness OS.',
     };
   }
 
@@ -282,7 +282,7 @@ export class PromptIntelligenceService {
       published,
       api: 'GET /v1/marketplace?kind=prompt',
       console: '/marketplace',
-      note: 'Prompt marketplace via existing listings (VL-091 / VL-188).',
+      note: 'Prompt marketplace via existing listings (/ ).',
     };
   }
 
@@ -313,7 +313,7 @@ export class PromptIntelligenceService {
       workspaceId,
       events,
       byAction,
-      note: 'Prompt Intelligence analytics (VL-188).',
+      note: 'Prompt Intelligence analytics.',
     };
   }
 
@@ -330,12 +330,57 @@ export class PromptIntelligenceService {
       registryKeys: registry.items.length,
       usingFallback: registry.items.filter((i) => i.usingFallback).length,
       autoPromptResearchLab: engine.honesty.autoPromptResearchLab,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
       fallbackBodies: PROMPT_KEYS.map((key) => ({
         key,
         preview: defaultPromptBody(key).slice(0, 80),
       })),
-      note: 'Prompt Intelligence monitoring snapshot (VL-188).',
+      note: 'Prompt Intelligence monitoring snapshot.',
+    };
+  }
+
+
+  async optimize(
+    input: AuthCtx & { key?: string; body?: string; version?: number },
+  ) {
+    const key = this.requireKey(input.key);
+    const resolved = await this.resolveBody({ ...input, key });
+    const body = resolved.body;
+    const suggestions: string[] = [];
+    let optimized = body.trim();
+    if (body !== body.trim()) {
+      suggestions.push('Trim leading/trailing whitespace');
+    }
+    if (!/^you are|^act as|^system:/i.test(optimized)) {
+      optimized = `You are a helpful assistant.\n\n${optimized}`;
+      suggestions.push('Prefixed with a clear system role line');
+    }
+    if (![...optimized].length || [...optimized].length < 40) {
+      suggestions.push('Expand instructions with constraints and output format');
+      optimized = `${optimized}\n\nRespond clearly. Prefer short bullet answers when listing.`;
+    }
+    if (/ignore (all )?(previous|prior) instructions/i.test(optimized)) {
+      suggestions.push('Removed injection-like phrase');
+      optimized = optimized.replace(/ignore (all )?(previous|prior) instructions/gi, '[redacted]');
+    }
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'prompt_intelligence.optimized',
+      route: 'POST /v1/prompt-intelligence/optimize',
+      ip: input.ip,
+      metadata: { key, suggestionCount: suggestions.length },
+    });
+    return {
+      key,
+      source: resolved.source,
+      version: resolved.version,
+      originalChars: [...body].length,
+      optimizedChars: [...optimized].length,
+      optimized,
+      suggestions,
+      honesty: { autoPromptResearchLab: false, heuristicOnly: true },
+      note: 'Sandbox heuristic prompt rewrite. Not an evolutionary auto-prompt research lab.',
     };
   }
 }

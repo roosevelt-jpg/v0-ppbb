@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f2f26"/>
+      <stop offset="55%" stop-color="#1a6b52"/>
+      <stop offset="100%" stop-color="#6fcf9c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <text x="72" y="140" fill="#eafff5" font-family="Arial, sans-serif" font-size="34" letter-spacing="4">VERBALAB</text>
+  <text x="72" y="280" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="700">Africa's voice</text>
+  <text x="72" y="360" fill="#ffffff" font-family="Arial, sans-serif" font-size="72" font-weight="700">intelligence platform</text>
+  <text x="72" y="520" fill="#eafff5" font-family="Arial, sans-serif" font-size="28" opacity="0.9">Speak · Translate · Clone · Reason</text>
+</svg>

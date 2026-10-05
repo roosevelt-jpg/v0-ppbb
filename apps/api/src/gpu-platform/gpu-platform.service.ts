@@ -53,7 +53,7 @@ export class GpuPlatformService {
       : all;
     return {
       pools: filtered,
-      note: 'Sandbox pool catalog — not live cloud inventory.',
+      note: 'Sandbox pool catalog.',
       honesty: { callsCloudGpuApis: false },
     };
   }
@@ -101,6 +101,9 @@ export class GpuPlatformService {
       instances?: number;
       purpose?: string;
       reservationHours?: number;
+      share?: boolean;
+      gpuCount?: number;
+      mode?: string;
     },
   ) {
     const mode = gpuProvisionMode();
@@ -164,6 +167,16 @@ export class GpuPlatformService {
           sandboxLogicalOnly: true,
           callsCloudGpuApis: false,
           accelerator: pool.accelerator,
+          share: Boolean(input.share),
+          gpuCount: Math.max(1, Math.min(input.gpuCount ?? input.instances ?? 1, 8)),
+          allocationMode:
+            input.mode === 'distributed'
+              ? 'distributed'
+              : (input.gpuCount ?? 0) > 1
+                ? 'multi_gpu'
+                : input.share
+                  ? 'shared'
+                  : 'exclusive',
         },
       },
     });
@@ -318,7 +331,7 @@ export class GpuPlatformService {
       estimatedHourlyUsd: Number(inv.hourlyUsd.toFixed(4)),
       ceilings,
       poolsHealthy: gpuPools().filter((p) => p.status === 'sandbox_available').length,
-      note: 'Sandbox health — not vendor GPU telemetry.',
+      note: 'Sandbox health.',
       honesty: { callsCloudGpuApis: false },
     };
   }
@@ -333,7 +346,7 @@ export class GpuPlatformService {
       maxSpendUsd: ceilings.maxSpendUsd,
       withinSpendCeiling: inv.hourlyUsd <= ceilings.maxSpendUsd,
       currency: 'USD' as const,
-      note: 'Estimated from sandbox hourly rates — not cloud invoices.',
+      note: 'Estimated from sandbox hourly rates.',
       honesty: { callsCloudGpuApis: false },
     };
   }
@@ -380,7 +393,7 @@ export class GpuPlatformService {
       released,
       auditsLast30d: audits,
       costs,
-      note: 'GPU Platform analytics (VL-205). ≠ VL-212 AI Runtime Analytics.',
+      note: 'GPU Platform analytics. ≠ AI Runtime Analytics.',
     };
   }
 
@@ -397,9 +410,9 @@ export class GpuPlatformService {
       honesty: engine.honesty,
       spendSafety: engine.spendSafety,
       deferred: engine.capabilities
-        .filter((c) => c.status === 'deferred')
+        .filter((c) => (c.status as string) === 'deferred')
         .map((c) => c.id),
-      note: 'GPU Platform monitoring snapshot (VL-205).',
+      note: 'GPU Platform monitoring snapshot.',
     };
   }
 

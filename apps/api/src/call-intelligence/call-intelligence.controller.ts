@@ -1,18 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Query,
-  Req,
-  Res,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import type { Request, Response } from 'express';
@@ -165,5 +151,21 @@ export class CallIntelligenceController {
       if (chunk.event === 'error' || chunk.event === 'done') break;
     }
     res.end();
+  }
+
+
+  @Get('realtime')
+  @UseGuards(TranslateAuthGuard)
+  realtime(
+    @Req() req: Request & { translateAuth: TranslateAuthContext },
+    @Res() res: Response,
+  ) {
+    return this.calls.writeRealtime(
+      {
+        organizationId: req.translateAuth.organizationId,
+        workspaceId: req.translateAuth.workspaceId,
+      },
+      res,
+    );
   }
 }

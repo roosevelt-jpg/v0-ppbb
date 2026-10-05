@@ -3,6 +3,7 @@
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type DataSettings = {
@@ -40,7 +41,7 @@ export function DataClient() {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [data, res, regions] = await Promise.all([
       apiFetch<DataSettings>('/v1/organization/data-settings', { token }),
@@ -64,7 +65,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<Residency>('/v1/organization/residency', {
         method: 'PATCH',
@@ -90,7 +91,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<DataSettings>('/v1/organization/data-settings', {
         method: 'PATCH',
@@ -112,7 +113,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const data = await apiFetch<Record<string, unknown>>('/v1/organization/export', {
         method: 'POST',
@@ -138,7 +139,7 @@ export function DataClient() {
     setMessage(null);
     setBusy(true);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/organization', {
         method: 'DELETE',
@@ -160,7 +161,8 @@ export function DataClient() {
         Data
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
-        Retention, residency, export, and deletion. See the DPA data map in the repo docs.
+        Retention, residency, export, and deletion. Primary cloud residency is Africa (Johannesburg);
+        new organizations default to the Africa island. See the DPA data map in the repo docs.
       </p>
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
@@ -171,8 +173,8 @@ export function DataClient() {
           <section className="vl-panel" style={{ padding: '1.25rem' }}>
             <h2 style={{ margin: 0, fontSize: '1.1rem' }}>Data residency</h2>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem', margin: '0.4rem 0 1rem' }}>
-              Each region is a separate deploy and database — not a global mesh. Pinning does not migrate existing
-              data. Owners only.
+              Africa (`af` / Johannesburg) is the primary residency island. EU and US are optional separate
+              deploys — not a global mesh. Pinning does not migrate existing data. Owners only.
             </p>
             {residency ? (
               <>

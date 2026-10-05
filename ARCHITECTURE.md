@@ -240,7 +240,7 @@ Passkeys, MFA enrollment UX, and SAML stay in Clerk?s product. We do not reimple
 
 **Done does not mean:** a `TODO` adapter that returns `"hello"` in French.
 
-If `GOOGLE_TRANSLATE_API_KEY` (or Azure equivalent) is missing, **stop** and ask ? do not ship a fake translator.
+If VerbaLab model endpoints (`VERBALAB_MODEL_BASE_URL` / modality URLs) are missing, **stop** and configure deploy credentials — do not silently rent a third-party translator as the product default (ADR-0298).
 
 ---
 
@@ -318,10 +318,10 @@ That is a company. It is not Translation Cloud + Speech Cloud + Voice Cloud + OC
 ## Open decisions (resolve before or during Phase 1, not in Phase 0)
 
 1. **IdP:** Clerk ? chosen. Live sign-in blocked until keys are in `.env`.
-2. **MT vendor:** Google Cloud Translation (ADR-0002). Live MT blocked until `GOOGLE_TRANSLATE_API_KEY` is set.
+2. **MT primary:** VerbaLab Translate FM via `VERBALAB_MT_URL` / `VERBALAB_MODEL_BASE_URL` (ADR-0298). Legacy Google MT only if `VERBALAB_ALLOW_VENDOR_FALLBACK=1`.
 3. **PaaS:** Fly.io (ADR-0023) — two apps + Docker; managed Postgres with pgvector; Redis required.
 
-## Frontend (ElevenLabs-inspired)
+## Frontend (console)
 
 Light monochrome product UI (not dark): white canvas, black primary CTAs, soft gray panels, generous space.
 Typography: **Syne** (display) + **DM Sans** (body). Brand accent green `#1a6b52` sparingly.
@@ -344,10 +344,10 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Fine-tunes (VL-104): coverage candidates → Pro jobs + thin `model_registry`; gateway prefers ready `finetune` artifacts (`phrase_map` / `http_endpoint`) with vendor fallback (`/finetunes`, ADR-0038). GPU launch stays manual/Modal-gated.
 - Model registry (VL-110): extended `model_registry` seeds bought providers per feature; public `/v1/models/live` + `/models`; optional W&B `externalUrl` (ADR-0039). Not MLflow.
 - Training jobs (VL-111): `/v1/training-jobs` launchers (manual/Modal/Vertex/fixture); callback token for rented GPUs; optional dataset link; no fake GPU success (ADR-0040).
-- Foundation models (VL-112): **deferred** — no named FM program without research org/capital; keep vendors + narrow fine-tunes (ADR-0041).
-- Voice cloning (VL-064): ElevenLabs Instant Voice Cloning with consent attestation, abuse review, required watermark header; speak via `clone:{id}` (ADR-0042).
-- Voice Studio (VL-120): `/audio` African studio UX — language presets, clone lifecycle UI, Clerk-first TTS; vendors only (ADR-0044).
-- Own TTS (VL-121): `own:*` voices via `OWN_TTS_URL` rented endpoint (or fixture); OpenAI remains stock default (ADR-0045).
+- Foundation models (VL-112): **active own-model program** — Atlas/Baobab/Echo/Voice/Vision/Vector/Reason/Edge/Fusion/Translate FM; VerbaLab endpoints (ADR-0298). Weights deploy separately from this monorepo.
+- Voice cloning (VL-064): VerbaLab Voice FM cloning primary (video dubbing); consent + abuse review + watermark; legacy external vendor only with vendor fallback flag (ADR-0298).
+- Voice Studio (VL-120): `/audio` African studio UX — language presets, clone lifecycle UI; VerbaLab Voice FM primary.
+- Own TTS (VL-121): `own:*` voices via VerbaLab Voice FM (`VERBALAB_TTS_URL` / `OWN_TTS_URL`); own catalog is product default (ADR-0298).
 - Cloud Platform Foundation (VL-125): library Phase 1 mapped onto org/workspace/Clerk/Stripe/residency — not a control plane. Workspaces API + `X-VerbaLab-Workspace-Id`, thin feature flags, `/dashboard` + `GET /v1/cloud/overview`. See [`docs/CLOUD_PLATFORM_FOUNDATION.md`](docs/CLOUD_PLATFORM_FOUNDATION.md) + ADR-0046. No AZs / service discovery.
 - Identity Cloud (VL-126): library Phase 2 mapped — Clerk human IdP; VerbaLab RBAC membership writes + Clerk role sync; API keys as machine identity (`lastUsedAt`); `/identity` + `GET /v1/identity/overview`. See [`docs/IDENTITY_CLOUD.md`](docs/IDENTITY_CLOUD.md) + ADR-0047. No first-party SAML/SCIM/ABAC/Teams.
 - Developer Cloud (VL-127): library Phase 3 mapped — `/developers` hub, soft `vl_test_` keys (same cluster), `@verbalab/cli`, playground detect/languages, `GET /v1/developer/*`. See [`docs/DEVELOPER_CLOUD.md`](docs/DEVELOPER_CLOUD.md) + ADR-0048. No OAuth AS / sandbox island.

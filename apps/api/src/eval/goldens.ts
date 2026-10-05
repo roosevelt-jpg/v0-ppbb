@@ -1,5 +1,5 @@
 /**
- * Hand-authored EN→African golden segments for VL-100.
+ * Hand-authored EN→African + strategic-global golden segments for VL-100.
  * Short everyday / public-sector phrases — not a licensed FLORES dump.
  * Expand with licensed datasets under VL-101.
  */
@@ -69,6 +69,86 @@ export const GOLDEN_PAIRS: GoldenPair[] = [
       { id: 'en-am-10', source: 'Water is available', reference: 'ውሃ አለ', domain: 'public' },
       { id: 'en-am-11', source: 'School starts tomorrow', reference: 'ትምህርት ቤት ነገ ይጀምራል', domain: 'education' },
       { id: 'en-am-12', source: 'The meeting is at noon', reference: 'ስብሰባው እኩለ ቀን ነው', domain: 'business' },
+    ],
+  },
+  {
+    sourceLang: 'en',
+    targetLang: 'th',
+    segments: [
+      { id: 'en-th-01', source: 'Hello', reference: 'sawasdee', domain: 'greetings' },
+      { id: 'en-th-02', source: 'Thank you', reference: 'khob khun', domain: 'greetings' },
+      { id: 'en-th-03', source: 'How are you?', reference: 'sabaidee mai?', domain: 'greetings' },
+      { id: 'en-th-04', source: 'Where is the clinic?', reference: 'klinik yu tee nai?', domain: 'health' },
+      { id: 'en-th-05', source: 'Please wait here', reference: 'prode wait tee nee', domain: 'public' },
+      { id: 'en-th-06', source: 'I need help', reference: 'chan tong kan chuay', domain: 'public' },
+      { id: 'en-th-07', source: 'Send money', reference: 'song ngern', domain: 'banking' },
+      { id: 'en-th-08', source: 'Government services', reference: 'borikan rat', domain: 'government' },
+      { id: 'en-th-09', source: 'No worries', reference: 'mai pen rai', domain: 'slang' },
+      { id: 'en-th-10', source: 'Open an account', reference: 'poed banchi', domain: 'banking' },
+    ],
+  },
+  {
+    sourceLang: 'en',
+    targetLang: 'vi',
+    segments: [
+      { id: 'en-vi-01', source: 'Hello', reference: 'xin chao', domain: 'greetings' },
+      { id: 'en-vi-02', source: 'Thank you', reference: 'cam on', domain: 'greetings' },
+      { id: 'en-vi-03', source: 'How are you?', reference: 'ban khoe khong?', domain: 'greetings' },
+      { id: 'en-vi-04', source: 'Where is the clinic?', reference: 'phong kham o dau?', domain: 'health' },
+      { id: 'en-vi-05', source: 'Please wait here', reference: 'vui long doi o day', domain: 'public' },
+      { id: 'en-vi-06', source: 'I need help', reference: 'toi can giup do', domain: 'public' },
+      { id: 'en-vi-07', source: 'Send money', reference: 'chuyen tien', domain: 'banking' },
+      { id: 'en-vi-08', source: 'Government services', reference: 'dich vu cong', domain: 'government' },
+      { id: 'en-vi-09', source: 'The office is closed', reference: 'van phong da dong', domain: 'public' },
+      { id: 'en-vi-10', source: 'Good morning', reference: 'chao buoi sang', domain: 'greetings' },
+    ],
+  },
+  {
+    sourceLang: 'en',
+    targetLang: 'ht',
+    segments: [
+      { id: 'en-ht-01', source: 'Hello', reference: 'bonjou', domain: 'greetings' },
+      { id: 'en-ht-02', source: 'Thank you', reference: 'mesi', domain: 'greetings' },
+      { id: 'en-ht-03', source: 'How are you?', reference: 'kijan ou ye?', domain: 'greetings' },
+      { id: 'en-ht-04', source: 'Where is the clinic?', reference: 'kote klinik la ye?', domain: 'health' },
+      { id: 'en-ht-05', source: 'Please wait here', reference: 'tanpri tann isit la', domain: 'public' },
+      { id: 'en-ht-06', source: 'I need help', reference: 'mwen bezwen ed', domain: 'public' },
+      { id: 'en-ht-07', source: 'Send money', reference: 'voye lajan', domain: 'banking' },
+      { id: 'en-ht-08', source: 'Government services', reference: 'sevès gouvènman', domain: 'government' },
+      { id: 'en-ht-09', source: 'The office is closed', reference: 'biwo a fèmen', domain: 'public' },
+      { id: 'en-ht-10', source: 'Good morning', reference: 'bonjou', domain: 'greetings' },
+    ],
+  },
+  {
+    sourceLang: 'en',
+    targetLang: 'qu',
+    segments: [
+      { id: 'en-qu-01', source: 'Hello', reference: 'allillanchu', domain: 'greetings' },
+      { id: 'en-qu-02', source: 'Thank you', reference: 'sulpayki', domain: 'greetings' },
+      { id: 'en-qu-03', source: 'How are you?', reference: 'imaynalla kashanki?', domain: 'greetings' },
+      { id: 'en-qu-04', source: 'Where is the clinic?', reference: 'maypitaq clinica?', domain: 'health' },
+      { id: 'en-qu-05', source: 'Please wait here', reference: 'ama hina kaypi suyay', domain: 'public' },
+      { id: 'en-qu-06', source: 'I need help', reference: 'yanapayta necesitani', domain: 'public' },
+      { id: 'en-qu-07', source: 'Send money', reference: 'qullqita apachiy', domain: 'banking' },
+      { id: 'en-qu-08', source: 'Government services', reference: 'gobierno servicio', domain: 'government' },
+      { id: 'en-qu-09', source: 'The office is closed', reference: 'oficina wisqasqa', domain: 'public' },
+      { id: 'en-qu-10', source: 'Good morning', reference: "allin p'unchay", domain: 'greetings' },
+    ],
+  },
+  {
+    sourceLang: 'en',
+    targetLang: 'hi',
+    segments: [
+      { id: 'en-hi-01', source: 'Hello', reference: 'namaste', domain: 'greetings' },
+      { id: 'en-hi-02', source: 'Thank you', reference: 'dhanyavaad', domain: 'greetings' },
+      { id: 'en-hi-03', source: 'How are you?', reference: 'aap kaise hain?', domain: 'greetings' },
+      { id: 'en-hi-04', source: 'Where is the clinic?', reference: 'clinic kahan hai?', domain: 'health' },
+      { id: 'en-hi-05', source: 'Please wait here', reference: 'kripya yahan prateeksha karein', domain: 'public' },
+      { id: 'en-hi-06', source: 'I need help', reference: 'mujhe madad chahiye', domain: 'public' },
+      { id: 'en-hi-07', source: 'Send money', reference: 'paise bhejo', domain: 'banking' },
+      { id: 'en-hi-08', source: 'Government services', reference: 'sarkari sevaayein', domain: 'government' },
+      { id: 'en-hi-09', source: 'The office is closed', reference: 'karyalay band hai', domain: 'public' },
+      { id: 'en-hi-10', source: 'Good morning', reference: 'suprabhat', domain: 'greetings' },
     ],
   },
 ];

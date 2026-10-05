@@ -898,7 +898,12 @@ export type LocalizeResponse = {
   glossaryApplied: number;
 };
 
-export type JobType = 'batch_translate' | 'document_translate' | 'workflow';
+export type JobType =
+  | 'batch_translate'
+  | 'document_translate'
+  | 'workflow'
+  | 'dub'
+  | 'clone';
 
 export type CreateJobRequest = {
   type: JobType;

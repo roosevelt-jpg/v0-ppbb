@@ -21,6 +21,8 @@ enum ApiKeyEnvironment {
 enum LanguageTier {
   vendor
   strategic_african
+  /// Underserved global coverage (SEA, India, LatAm, Caribbean, etc.)
+  strategic_global
 }
 
 model Organization {
@@ -28,14 +30,24 @@ model Organization {
   clerkOrgId           String?  @unique @map("clerk_org_id")
   name                 String
   plan                 String   @default("free")
-  characterQuota       Int      @default(50000) @map("character_quota")
+  /// Monthly shared credit pool (shared-credit). Column name kept for compatibility.
+  characterQuota       Int      @default(10000) @map("character_quota")
   dataRegion           String?  @map("data_region")
   stripeCustomerId     String?  @unique @map("stripe_customer_id")
   stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
+  stripeDefaultPaymentMethodId String? @map("stripe_default_payment_method_id")
   stripeConnectAccountId String? @unique @map("stripe_connect_account_id")
   stripeConnectChargesEnabled Boolean @default(false) @map("stripe_connect_charges_enabled")
   billingStatus        String   @default("active") @map("billing_status")
+  cardBrand            String?  @map("card_brand")
+  cardLast4            String?  @map("card_last4")
+  paymentFailureCount  Int      @default(0) @map("payment_failure_count")
+  fraudHoldAt          DateTime? @map("fraud_hold_at")
+  lastCheckoutAt       DateTime? @map("last_checkout_at")
+  checkoutAttemptCount Int      @default(0) @map("checkout_attempt_count")
   webhookSigningSecret String?  @map("webhook_signing_secret")
+  /// Org-level partner webhook for credits.low / api_key.revoked / bootstrap events
+  partnerWebhookUrl    String?  @map("partner_webhook_url")
   retentionDays        Int?     @map("retention_days")
   persistSourceText    Boolean  @default(true) @map("persist_source_text")
   allowVendorTraining  Boolean  @default(false) @map("allow_vendor_training")
@@ -47,10 +59,12 @@ model Organization {
   memberships         Membership[]
   workspaces          Workspace[]
   apiKeys             ApiKey[]
+  modelApiKeys        ModelApiKey[]
   translationRequests TranslationRequest[]
   usageEvents         UsageEvent[]
   auditEvents         AuditEvent[]
   jobs                Job[]
+  idempotencyRecords  IdempotencyRecord[]
   documents           Document[]
   glossaryTerms       GlossaryTerm[]
   tmEntries           TranslationMemoryEntry[]
@@ -199,6 +213,7 @@ model Job {
   error          String?
   webhookUrl     String?   @map("webhook_url")
   webhookStatus  String?   @map("webhook_status")
+  idempotencyKey String?   @map("idempotency_key")
   attempts       Int       @default(0)
   createdAt      DateTime  @default(now()) @map("created_at")
   startedAt      DateTime? @map("started_at")
@@ -211,6 +226,7 @@ model Job {
 
   @@index([organizationId, createdAt])
   @@index([status])
+  @@unique([organizationId, idempotencyKey])
   @@map("jobs")
 }
 
@@ -1098,7 +1114,7 @@ model VoiceStudioProfile {
 }
 
 /**
- * Vendor voice clone (ElevenLabs) with consent + abuse review (VL-064).
+ * Vendor voice clone (external vendor) with consent + abuse review (VL-064).
  * Do not train cloning models in-house.
  */
 model VoiceClone {
@@ -1107,7 +1123,7 @@ model VoiceClone {
   workspaceId        String    @map("workspace_id")
   name               String
   status             String    @default("pending_review")
-  /// instant = ElevenLabs IVC (VL-064/171); professional = stricter enrollment (same vendor path today)
+  /// instant = external vendor IVC (VL-064/171); professional = stricter enrollment (same vendor path today)
   cloneMode          String    @default("instant") @map("clone_mode")
   consentAttested    Boolean   @map("consent_attested")
   consentNotes       String    @map("consent_notes")
@@ -1127,7 +1143,7 @@ model VoiceClone {
   watermarkRequired  Boolean   @default(true) @map("watermark_required")
   sampleStorageKeys  Json      @map("sample_storage_keys")
   sampleCount        Int       @default(0) @map("sample_count")
-  provider           String    @default("elevenlabs")
+  provider           String    @default("compatible-tts")
   providerVoiceId    String?   @map("provider_voice_id")
   reviewNotes        String?   @map("review_notes")
   reviewedBy         String?   @map("reviewed_by")
@@ -1629,4 +1645,226 @@ model CostSpendEvent {
   @@map("cost_spend_events")
 }
 
+/// Marketing / product-site CMS settings (theme defaults, brand, design scope).
+model CmsSiteSettings {
+  id                 String   @id @default("default")
+  brandName          String   @default("VerbaLab") @map("brand_name")
+  tagline            String   @default("")
+  defaultTheme       String   @default("system") @map("default_theme")
+  primaryColor       String   @default("#1a6b52") @map("primary_color")
+  accentColor        String   @default("#6fcf9c") @map("accent_color")
+  headerLogoUrl      String   @default("/email/verbalab-logo.png") @map("header_logo_url")
+  footerLogoUrl      String   @default("/email/verbalab-mark.png") @map("footer_logo_url")
+  faviconUrl         String   @default("/email/verbalab-mark.png") @map("favicon_url")
+  emailLogoUrl       String   @default("/email/verbalab-logo.png") @map("email_logo_url")
+  copyrightText      String   @default("") @map("copyright_text")
+  designScope        Json     @default("{}") @map("design_scope")
+  socialLinks        Json     @default("{}") @map("social_links")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
+  @@map("cms_site_settings")
+}
+
+/// CMS page (marketing or product marketing surfaces).
+model CmsPage {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @default("")
+  status      String   @default("published")
+  seo         Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  blocks CmsBlock[]
+  assets CmsAsset[]
+
+  @@map("cms_pages")
+}
+
+/// Ordered content blocks for a CMS page (hero, products, logos, etc.).
+model CmsBlock {
+  id        String   @id @default(cuid())
+  pageId    String   @map("page_id")
+  type      String
+  sortOrder Int      @default(0) @map("sort_order")
+  content   Json     @default("{}")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  page CmsPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
+  @@map("cms_blocks")
+}
+
+/// CMS media assets referenced by blocks.
+model CmsAsset {
+  id        String   @id @default(cuid())
+  pageId    String?  @map("page_id")
+  key       String
+  url       String
+  alt       String   @default("")
+  kind      String   @default("image")
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  page CmsPage? @relation(fields: [pageId], references: [id], onDelete: SetNull)
+
+  @@unique([key])
+  @@index([pageId])
+  @@map("cms_assets")
+}
+
+/// Volume 21 VCOS — internal corporate operating records (governance, strategy, portfolio, …).
+/// Tooling only: does not constitute real corporate governance or legal counsel.
+model VcosRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("vcos_records")
+}
+
+/// Volume 22 VGAS records (standards/certification/assessment/partner).
+/// Not evidence of external industry-standard adoption or third-party accreditation.
+model VgasRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  verifyCode     String?  @unique @map("verify_code")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("vgas_records")
+}
+
+/// Volume 23 AI Economy records (marketplace/commerce/ledger/dashboard).
+/// Not evidence of world-largest economy status, funding-portal operation, or autonomous payouts.
+model AieRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("aie_records")
+}
+
+/// Volume 24 Digital Civilization records (public-sector/city/enterprise demos).
+/// Not evidence that VerbaLab operates national infrastructure or production gov systems.
+model DcivRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("dciv_records")
+}
+
+/// VerbaLab-owned model API keys (`vmod_live_` / `vmod_test_` / `vmod_root_`).
+/// Authenticates calls to VerbaLab model services — not third-party vendor keys.
+model ModelApiKey {
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  workspaceId    String?           @map("workspace_id")
+  createdById    String?           @map("created_by_id")
+  name           String
+  prefix         String
+  secretHash     String            @map("secret_hash")
+  /// live | test | root
+  kind           String            @default("live")
+  /// modalities this key may call: mt,stt,tts,chat,embed,ocr,clone,* 
+  scopes         String[]          @default(["*"])
+  revokedAt      DateTime?         @map("revoked_at")
+  lastUsedAt     DateTime?         @map("last_used_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([prefix])
+  @@index([organizationId])
+  @@index([secretHash])
+  @@map("model_api_keys")
+}
+
+/// Volume 25 AI Internet records (DNS/discovery/federation/trust/payments).
+/// Not evidence that VerbaLab operates a global AI Internet or Global OS.
+model AiInternetRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  domain         String
+  kind           String
+  title          String
+  status         String   @default("active")
+  summary        String   @default("")
+  content        Json     @default("{}")
+  ownerLabel     String?  @map("owner_label")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([organizationId, domain])
+  @@index([organizationId, kind])
+  @@index([organizationId, status])
+  @@map("ai_internet_records")
+}
+
+/// HTTP Idempotency-Key replay cache for mutating API calls.
+model IdempotencyRecord {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  key            String
+  method         String
+  path           String
+  statusCode     Int      @map("status_code")
+  responseBody   Json     @map("response_body")
+  createdAt      DateTime @default(now()) @map("created_at")
+  expiresAt      DateTime @map("expires_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@index([expiresAt])
+  @@map("idempotency_records")
+}

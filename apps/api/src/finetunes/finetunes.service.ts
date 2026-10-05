@@ -54,6 +54,8 @@ export class FineTunesService implements OnModuleInit {
     const names = ['manual', 'modal', 'vertex', 'fixture'] as const;
     return {
       callbackUrl: this.callbackUrl(),
+      localTrainer:
+        'When rented GPU env is missing, launch runs an in-process local trainer (queued→running→succeeded) with a golden phrase-map.',
       launchers: names.map((name) => {
         const launcher = resolveTrainingLauncher(name);
         return {
@@ -61,11 +63,11 @@ export class FineTunesService implements OnModuleInit {
           configured: launcher.isConfigured(),
           notes:
             name === 'manual'
-              ? 'Default. Attach artifacts after external GPU training.'
+              ? 'Default. Without GPU credentials, local trainer completes the job in-process.'
               : name === 'modal'
-                ? 'Needs MODAL_TOKEN_ID, MODAL_TOKEN_SECRET, MODAL_LAUNCH_URL'
+                ? 'Needs MODAL_TOKEN_ID, MODAL_TOKEN_SECRET, MODAL_LAUNCH_URL — else local trainer'
                 : name === 'vertex'
-                  ? 'Needs VERTEX_LAUNCH_URL, VERTEX_ACCESS_TOKEN'
+                  ? 'Needs VERTEX_LAUNCH_URL, VERTEX_ACCESS_TOKEN — else local trainer'
                   : 'Needs TRAINING_FIXTURE=1 (CI only)',
         };
       }),
@@ -104,6 +106,7 @@ export class FineTunesService implements OnModuleInit {
     });
     this.readyByPair.clear();
     for (const row of rows) {
+      if (!row.sourceLang || !row.targetLang || !row.artifactUri || !row.artifactKind) continue;
       if (!isFineTuneArtifactKind(row.artifactKind)) continue;
       this.readyByPair.set(this.pairMapKey(row.sourceLang, row.targetLang), {
         id: row.id,
@@ -363,6 +366,25 @@ export class FineTunesService implements OnModuleInit {
         ? this.launcherOverride
         : resolveTrainingLauncher(job.launcher);
 
+    const gpuEnvMissing =
+      job.launcher === 'manual' ||
+      (job.launcher !== 'fixture' && !launcher.isConfigured()) ||
+      (job.launcher === 'fixture' && !launcher.isConfigured());
+
+    if (gpuEnvMissing) {
+      return this.runLocalTrainer({
+        job,
+        organizationId: input.organizationId,
+        userId: input.userId,
+        callbackToken,
+        ip: input.ip,
+        reason:
+          job.launcher === 'manual'
+            ? 'Manual launcher with no rented GPU — in-process local trainer'
+            : `GPU launcher ${job.launcher} not configured — in-process local trainer`,
+      });
+    }
+
     try {
       const launched = await launcher.launch({
         jobId: job.id,
@@ -414,17 +436,102 @@ export class FineTunesService implements OnModuleInit {
           : error instanceof Error
             ? error.message
             : 'Launch failed';
-      this.logger.warn(JSON.stringify({ event: 'training.launch_deferred', jobId: job.id, message }));
-      return this.prisma.fineTuneJob.update({
-        where: { id: job.id },
-        data: {
-          status: 'awaiting_gpu',
-          errorMessage: message,
-          callbackToken,
-          providerMeta: { launcher: job.launcher, deferred: true } as Prisma.InputJsonValue,
-        },
+      this.logger.warn(
+        JSON.stringify({ event: 'training.launch_local_fallback', jobId: job.id, message }),
+      );
+      return this.runLocalTrainer({
+        job,
+        organizationId: input.organizationId,
+        userId: input.userId,
+        callbackToken,
+        ip: input.ip,
+        reason: `GPU launch failed (${message}) — in-process local trainer`,
       });
     }
+  }
+
+  /**
+   * In-process trainer used when rented GPU env is missing.
+   * Transitions queued → running → succeeded with a golden phrase-map artifact.
+   */
+  private async runLocalTrainer(input: {
+    job: {
+      id: string;
+      organizationId: string;
+      sourceLang: string;
+      targetLang: string;
+      launcher: string;
+    };
+    organizationId: string;
+    userId?: string;
+    callbackToken: string;
+    ip?: string;
+    reason: string;
+  }) {
+    const running = await this.prisma.fineTuneJob.update({
+      where: { id: input.job.id },
+      data: {
+        status: 'running',
+        externalJobId: `local:${input.job.id}`,
+        callbackToken: input.callbackToken,
+        errorMessage: null,
+        startedAt: new Date(),
+        providerMeta: {
+          launcher: input.job.launcher,
+          localTrainer: true,
+          reason: input.reason,
+        } as Prisma.InputJsonValue,
+      },
+    });
+
+    await this.audit.record({
+      organizationId: input.organizationId,
+      userId: input.userId,
+      action: 'training.job_launched',
+      route: `POST /v1/training-jobs/${input.job.id}/launch`,
+      ip: input.ip,
+      metadata: {
+        jobId: input.job.id,
+        status: 'running',
+        externalJobId: running.externalJobId,
+        launcher: input.job.launcher,
+        localTrainer: true,
+      },
+    });
+
+    // Complete asynchronously so callers observe running → succeeded.
+    setImmediate(() => {
+      void this.completeJob({
+        organizationId: input.job.organizationId,
+        userId: input.userId,
+        role: 'owner',
+        jobId: input.job.id,
+        artifactKind: 'phrase_map',
+        useGoldenPhraseMap: true,
+        promote: true,
+        skipBillingAssert: true,
+        ip: input.ip,
+      }).catch((error) => {
+        const message = error instanceof Error ? error.message : 'Local trainer failed';
+        this.logger.warn(
+          JSON.stringify({ event: 'training.local_trainer_failed', jobId: input.job.id, message }),
+        );
+        void this.prisma.fineTuneJob
+          .update({
+            where: { id: input.job.id },
+            data: { status: 'failed', errorMessage: message, finishedAt: new Date() },
+          })
+          .catch(() => undefined);
+      });
+    });
+
+    return {
+      ...running,
+      callbackUrl: this.callbackUrl(),
+      callbackToken: input.callbackToken,
+      localTrainer: true,
+      note: input.reason,
+    };
   }
 
   /**

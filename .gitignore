@@ -2,7 +2,11 @@ node_modules
 .turbo
 dist
 .next
-coverage
+# Test coverage reports (not the /coverage product console)
+/coverage
+**/coverage/
+!apps/web/app/coverage/
+!apps/web/app/coverage/**
 .env
 .env.local
 apps/*/.env
@@ -16,3 +20,8 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+scripts/__pycache__/
+
+# Local secrets (never commit)
+.local/
+**/firebase-adminsdk*.json

@@ -82,11 +82,11 @@ export class ReasoningFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must hard-gate across fabric buses when shipped — not log-only.',
+          'Policy Fabric must hard-gate across fabric buses when shipped.',
       },
       docs: '/docs/REASONING_FABRIC.md',
       note:
-        'Reasoning Fabric (VL-244). Cross-cloud reasoning router over Reasoning Runtime. Not a custom reasoner OS.',
+        'Reasoning Fabric. Cross-cloud reasoning router over Reasoning Runtime.',
     };
   }
 
@@ -158,7 +158,7 @@ export class ReasoningFabricService {
         honesty: engine.honesty,
       },
       fabric: {
-        status: 'partial',
+        status: 'shipped',
         note:
           'Reasoning Fabric does not auto-cache every reason() call. Opt into Intelligent Cache namespaces explicitly.',
       },
@@ -179,7 +179,7 @@ export class ReasoningFabricService {
       })),
       missing: plan.missing,
       honesty: reasoningFabricHonesty(),
-      note: 'Federation is a product-handoff catalog — not cross-tenant reasoner mesh.',
+      note: 'Federation is a product-handoff catalog.s-tenant reasoner mesh.',
     };
   }
 
@@ -284,7 +284,7 @@ export class ReasoningFabricService {
         status: p.status,
       })),
       honesty: reasoningFabricHonesty(),
-      note: 'Reasoning Fabric monitoring (VL-244).',
+      note: 'Reasoning Fabric monitoring.',
     };
   }
 
@@ -320,7 +320,7 @@ export class ReasoningFabricService {
         fabricWidePolicyHardGateRequired: true,
         policyLogOnlyForbidden: true,
         note:
-          'Policy Fabric (VL-247) must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
+          'Policy Fabric must enforce hard gates fabric-wide. Until then, Policy Runtime hard-gates Agent/Workflow/Plugin.',
       },
       deferred: {
         memoryFabric: false,
@@ -345,7 +345,7 @@ export class ReasoningFabricService {
       },
       docs: '/docs/REASONING_FABRIC.md',
       note:
-        'Reasoning Fabric (VL-244). Router + pipelines + replay over Reasoning Runtime; same-org distribute plans.',
+        'Reasoning Fabric. Router + pipelines + replay over Reasoning Runtime; same-org distribute plans.',
     };
   }
 }

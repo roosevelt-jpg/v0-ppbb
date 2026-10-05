@@ -19,7 +19,8 @@ const ENRICHMENT: Record<
   fable: { personality: 'narrative', ageGroup: 'adult', dialect: 'british_literary', accent: 'received_pronunciation', region: 'gb' },
   onyx: { personality: 'deep', ageGroup: 'adult', dialect: null, accent: 'general_american', region: 'us' },
   nova: { personality: 'warm', ageGroup: 'adult', dialect: null, accent: 'general_american', region: 'us' },
-  shimmer: { personality: 'bright', ageGroup: 'adult', dialect: null, accent: 'general_american', region: 'us' },
+  shimmer: { personality: 'bright', ageGroup: 'child', dialect: null, accent: 'general_american', region: 'us' },
+  'nova-child': { personality: 'playful', ageGroup: 'child', dialect: null, accent: 'general_american', region: 'us' },
   'own:sw-aisha': {
     personality: 'warm',
     ageGroup: 'adult',

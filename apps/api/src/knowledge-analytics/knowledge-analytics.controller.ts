@@ -135,6 +135,21 @@ export class KnowledgeAnalyticsController {
     });
   }
 
+  @Get('enterprise-report')
+  @UseGuards(TranslateAuthGuard)
+  enterpriseReport(
+    @Req() req: Request & { translateAuth: TranslateAuthContext },
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.analytics.enterpriseReport({
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      from,
+      to,
+    });
+  }
+
   @Get('monitoring')
   @UseGuards(TranslateAuthGuard)
   monitoring(

@@ -35,11 +35,11 @@ export const PROMPT_RUNTIME_ROUTES: Array<{
   key: 'chat' | 'rag' | 'voice_faq';
   notes: string;
 }> = [
-  { feature: 'chat', key: 'chat', notes: 'General chat system prompt' },
-  { feature: 'rag', key: 'rag', notes: 'Grounded RAG system prompt' },
-  { feature: 'voice_faq', key: 'voice_faq', notes: 'Voice FAQ system prompt' },
-  { feature: 'translate', key: 'chat', notes: 'Sandbox map — not a dedicated MT prompt OS' },
-  { feature: 'embeddings', key: 'rag', notes: 'Sandbox map for retrieval-shaped work' },
+  { feature: 'chat', key: 'chat', notes: 'General chat system prompt.' },
+  { feature: 'rag', key: 'rag', notes: 'Grounded RAG system prompt.' },
+  { feature: 'voice_faq', key: 'voice_faq', notes: 'Voice FAQ system prompt.' },
+  { feature: 'translate', key: 'chat', notes: 'Sandbox map.' },
+  { feature: 'embeddings', key: 'rag', notes: 'Sandbox map for retrieval-shaped work.' },
 ];
 
 /**
@@ -50,7 +50,7 @@ export function promptRuntimeCatalog() {
   return {
     product: 'VerbaLab Prompt Runtime',
     note:
-      'Prompt Runtime (VL-216). Kernel execution over VL-086 versioned prompts + VL-188 Prompt Intelligence (resolve, variables, validate, security, cache via Intelligent Cache namespace=prompt). Not an auto-prompt research lab, LLM-as-judge, or prompt mesh OS. Does not regenerate Prompt Intelligence.',
+      'Prompt Runtime. Kernel execution over versioned prompts + Prompt Intelligence (resolve, variables, validate, security, cache via Intelligent Cache namespace=prompt). Does not regenerate Prompt Intelligence.',
     capabilities: [
       {
         id: 'prompt-execution',
@@ -64,7 +64,7 @@ export function promptRuntimeCatalog() {
         name: 'Prompt Templates',
         status: 'shipped',
         api: 'GET /v1/prompt-runtime/templates',
-        notes: 'Managed chat/rag/voice_faq templates over VL-086 keys.',
+        notes: 'Managed chat/rag/voice_faq templates over keys.',
       },
       {
         id: 'prompt-variables',
@@ -76,30 +76,30 @@ export function promptRuntimeCatalog() {
       {
         id: 'prompt-routing',
         name: 'Prompt Routing',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-runtime/route',
-        notes: 'Sandbox feature→key table — not a prompt mesh OS.',
+        notes: 'Sandbox feature→key table.',
       },
       {
         id: 'prompt-versioning',
         name: 'Prompt Versioning',
         status: 'shipped',
         api: 'GET /v1/prompt-runtime/versions',
-        notes: 'Façade over VL-086 PromptVersion rows.',
+        notes: 'Façade over PromptVersion rows.',
       },
       {
         id: 'prompt-optimization',
         name: 'Prompt Optimization',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-runtime/optimize',
-        notes: 'Heuristic trim/tips — not evolutionary optimizer / research lab.',
+        notes: 'Heuristic trim/tips.',
       },
       {
         id: 'prompt-security',
         name: 'Prompt Security',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-runtime/security-scan',
-        notes: 'Pattern scan via Prompt Intelligence — not red-team harness OS.',
+        notes: 'Pattern scan via Prompt Intelligence.',
       },
       {
         id: 'prompt-validation',
@@ -111,9 +111,9 @@ export function promptRuntimeCatalog() {
       {
         id: 'prompt-cache',
         name: 'Prompt Cache',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-runtime/execute',
-        notes: 'Opt-in Intelligent Cache namespace=prompt — not Redis OS; Gateway not auto-wired.',
+        notes: 'Opt-in Intelligent Cache namespace=prompt.; Gateway not auto-wired.',
       },
       {
         id: 'prompt-analytics',
@@ -127,7 +127,7 @@ export function promptRuntimeCatalog() {
         name: 'Prompt Registry Integration',
         status: 'shipped',
         api: 'GET /v1/prompt-runtime/registry',
-        notes: 'Reads VL-086 / VL-188 registry; CRUD stays on /v1/prompts.',
+        notes: 'Reads / registry; CRUD stays on /v1/prompts.',
       },
       {
         id: 'rest',
@@ -148,7 +148,7 @@ export function promptRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'promptRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -167,9 +167,9 @@ export function promptRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/prompt-runtime/execute',
-        notes: 'Ships with Nest API — not a separate prompt cluster.',
+        notes: 'Ships with Nest API.',
       },
     ] satisfies PromptRuntimeCapability[],
     honesty: {

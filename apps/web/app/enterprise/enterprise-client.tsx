@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
-
 type Overview = {
   session: { role: string };
   platformAdmin: boolean;
@@ -44,7 +44,7 @@ export function EnterpriseClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     setData(await apiFetch<Overview>('/v1/enterprise/overview', { token }));
   }, [getToken]);
@@ -71,7 +71,6 @@ export function EnterpriseClient() {
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '40rem' }}>
         Derived controls for this organization — governance, security, billing quotas, and residency.
-        Not a policy engine or Trust Center product.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}

@@ -11,7 +11,7 @@
 
 ## 1. System Context
 
-VerbaLab sits between **enterprise buyers / developers** and **vendor AI + identity + billing**. Customers never call Google/OpenAI/ElevenLabs/Stripe/Clerk directly for product workflows; they call VerbaLab’s `/v1` API or use the console.
+VerbaLab sits between **enterprise buyers / developers** and **vendor AI + identity + billing**. Customers never call Google/third-party AI vendors/Stripe/Clerk directly for product workflows; they call VerbaLab’s `/v1` API or use the console.
 
 ```mermaid
 C4Context
@@ -197,10 +197,11 @@ Library v2 names dozens of “Clouds.” VerbaLab maps them to **modules + vendo
 
 | Island | Fly region | Env |
 | --- | --- | --- |
-| US | `iad` | `VERBALAB_REGION=us` |
+| Africa (primary) | `jnb` | `VERBALAB_REGION=af` |
 | EU | `ams` | `VERBALAB_REGION=eu` |
+| US | `iad` | `VERBALAB_REGION=us` |
 
-Each island: own Fly apps + `DATABASE_URL` + Redis. Org `data_region` pin enforced.
+Each island: own Fly apps + `DATABASE_URL` + Redis. Org `data_region` pin enforced (new orgs default to `af`).
 
 ---
 

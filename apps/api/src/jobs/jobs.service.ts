@@ -10,7 +10,11 @@ import { WebhookService } from './webhook.service';
 import {
   BatchTranslateInput,
   BatchTranslateResult,
+  CloneJobInput,
+  CloneJobResult,
   DocumentTranslateResult,
+  DubJobInput,
+  DubJobResult,
   JOB_QUEUE_NAME,
   JobType,
 } from './job.types';
@@ -19,6 +23,8 @@ import { DocumentsService } from '../documents/documents.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { WorkflowsService } from '../workflows/workflows.service';
 import { WorkflowResult } from '../workflows/workflow.types';
+import { VideoVoiceService } from '../video-voice/video-voice.service';
+import { VoiceClonesService } from '../voice-clones/voice-clones.service';
 
 type QueueJobPayload = { jobId: string };
 
@@ -40,6 +46,8 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
     private readonly notifications: NotificationsService,
     @Inject(forwardRef(() => WorkflowsService))
     private readonly workflows: WorkflowsService,
+    private readonly videoVoice: VideoVoiceService,
+    private readonly voiceClones: VoiceClonesService,
   ) {}
 
   private redisEnabled() {
@@ -109,7 +117,18 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
     payload: unknown;
     webhookUrl?: string;
     route?: string;
+    idempotencyKey?: string;
   }) {
+    if (input.idempotencyKey) {
+      const existing = await this.prisma.job.findFirst({
+        where: {
+          organizationId: input.organizationId,
+          idempotencyKey: input.idempotencyKey,
+        },
+      });
+      if (existing) return this.toDto(existing);
+    }
+
     let storedInput: Prisma.InputJsonValue;
 
     if (input.type === 'batch_translate') {
@@ -129,6 +148,10 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
         payload: input.payload,
       });
       storedInput = workflow as unknown as Prisma.InputJsonValue;
+    } else if (input.type === 'dub') {
+      storedInput = this.parseDubInput(input.payload) as unknown as Prisma.InputJsonValue;
+    } else if (input.type === 'clone') {
+      storedInput = this.parseCloneInput(input.payload) as unknown as Prisma.InputJsonValue;
     } else {
       throw new ApiException('validation_error', `Unsupported job type: ${input.type}`, HttpStatus.BAD_REQUEST);
     }
@@ -147,6 +170,7 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
         input: storedInput,
         webhookUrl: input.webhookUrl,
         webhookStatus: input.webhookUrl ? 'pending' : null,
+        idempotencyKey: input.idempotencyKey,
       },
     });
 
@@ -215,13 +239,22 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
     });
 
     try {
-      let result: BatchTranslateResult | DocumentTranslateResult | WorkflowResult;
+      let result:
+        | BatchTranslateResult
+        | DocumentTranslateResult
+        | WorkflowResult
+        | DubJobResult
+        | CloneJobResult;
       if (job.type === 'batch_translate') {
         result = await this.runBatchTranslate(job);
       } else if (job.type === 'document_translate') {
         result = await this.documents.runDocumentTranslate(job);
       } else if (job.type === 'workflow') {
         result = await this.workflows.run(job);
+      } else if (job.type === 'dub') {
+        result = await this.runDub(job);
+      } else if (job.type === 'clone') {
+        result = await this.runClone(job);
       } else {
         throw new Error(`Unsupported job type: ${job.type}`);
       }
@@ -247,6 +280,14 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
           where: { id: jobId },
           data: { webhookStatus: delivery.ok ? 'delivered' : 'failed' },
         });
+      } else {
+        void this.webhooks
+          .deliverPartnerEvent({
+            organizationId: updated.organizationId,
+            event: 'job.succeeded',
+            data: this.toDto(updated),
+          })
+          .catch(() => undefined);
       }
 
       await this.audit.record({
@@ -284,6 +325,14 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
           where: { id: jobId },
           data: { webhookStatus: delivery.ok ? 'delivered' : 'failed' },
         });
+      } else {
+        void this.webhooks
+          .deliverPartnerEvent({
+            organizationId: updated.organizationId,
+            event: 'job.failed',
+            data: this.toDto(updated),
+          })
+          .catch(() => undefined);
       }
 
       await this.audit.record({
@@ -369,6 +418,125 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
       return { id, text };
     });
     return { source: body.source, target: body.target, items };
+  }
+
+  private parseDubInput(payload: unknown): DubJobInput {
+    if (!payload || typeof payload !== 'object') {
+      throw new ApiException('validation_error', 'Invalid dub payload', HttpStatus.BAD_REQUEST);
+    }
+    const body = payload as Record<string, unknown>;
+    const targetLanguage = typeof body.targetLanguage === 'string' ? body.targetLanguage.trim() : '';
+    if (!targetLanguage) {
+      throw new ApiException('validation_error', 'targetLanguage is required', HttpStatus.BAD_REQUEST);
+    }
+    const text = typeof body.text === 'string' ? body.text.trim() : '';
+    if (!text) {
+      throw new ApiException(
+        'validation_error',
+        'text is required for async dub jobs (upload audio via POST /v1/video-voice/dub for STT path)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return {
+      text,
+      sourceLanguage: typeof body.sourceLanguage === 'string' ? body.sourceLanguage : 'auto',
+      targetLanguage,
+      voice: typeof body.voice === 'string' ? body.voice : undefined,
+      mode: body.mode as DubJobInput['mode'],
+      format: body.format === 'wav' ? 'wav' : 'mp3',
+      commercial: Boolean(body.commercial),
+    };
+  }
+
+  private parseCloneInput(payload: unknown): CloneJobInput {
+    if (!payload || typeof payload !== 'object') {
+      throw new ApiException('validation_error', 'Invalid clone payload', HttpStatus.BAD_REQUEST);
+    }
+    const body = payload as Record<string, unknown>;
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    if (!name) {
+      throw new ApiException('validation_error', 'name is required', HttpStatus.BAD_REQUEST);
+    }
+    return {
+      name,
+      language: typeof body.language === 'string' ? body.language : undefined,
+      consentConfirmed: Boolean(body.consentConfirmed ?? body.consentAttested),
+      notes: typeof body.notes === 'string' ? body.notes : typeof body.consentNotes === 'string' ? body.consentNotes : undefined,
+    };
+  }
+
+  private async runDub(job: {
+    organizationId: string;
+    workspaceId: string;
+    apiKeyId: string | null;
+    input: Prisma.JsonValue;
+  }): Promise<DubJobResult> {
+    const input = this.parseDubInput(job.input);
+    const dubbed = await this.videoVoice.dub(
+      {
+        text: input.text,
+        sourceLanguage: input.sourceLanguage,
+        targetLanguage: input.targetLanguage,
+        voice: input.voice,
+        mode: input.mode,
+        format: input.format,
+        commercial: input.commercial,
+      },
+      {
+        organizationId: job.organizationId,
+        workspaceId: job.workspaceId,
+        apiKeyId: job.apiKeyId ?? undefined,
+      },
+    );
+    return {
+      targetLanguage: input.targetLanguage,
+      characters: [...(dubbed.dubbedText ?? input.text ?? '')].length,
+      provider: dubbed.providers?.tts ?? 'verbalab',
+      mode: dubbed.mode,
+      mimeType: dubbed.mimeType,
+      audioBase64: dubbed.audioBase64,
+      honesty:
+        'Async dub job completed text→translate→TTS path. Binary STT uploads remain on POST /v1/video-voice/dub.',
+    };
+  }
+
+  private async runClone(job: {
+    organizationId: string;
+    workspaceId: string;
+    input: Prisma.JsonValue;
+  }): Promise<CloneJobResult> {
+    const input = this.parseCloneInput(job.input);
+    if (!input.consentConfirmed) {
+      throw new ApiException(
+        'validation_error',
+        'consentConfirmed must be true for clone jobs',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const notes = (input.notes ?? '').trim();
+    if (notes.length < 8) {
+      throw new ApiException(
+        'validation_error',
+        'notes/consentNotes must describe consent basis (min 8 chars)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    // Voice clone enrollment still requires sample audio via the multipart API.
+    // Job path reserves the name and returns next-step honesty for partners.
+    const reserved = await this.voiceClones.reserveAsyncJob({
+      organizationId: job.organizationId,
+      workspaceId: job.workspaceId,
+      name: input.name,
+      language: input.language,
+      consentNotes: notes,
+    });
+    return {
+      cloneId: reserved.id,
+      name: reserved.name,
+      status: reserved.status,
+      honesty:
+        'Clone job reserved. Upload sample audio with POST /v1/voice-clones (consentAttested) to finish enrollment.',
+    };
   }
 
   private toDto(job: {

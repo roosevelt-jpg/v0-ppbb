@@ -1,7 +1,7 @@
-# Fly.io — API (Nest). Create with: fly apps create verbalab-api
+# Fly.io — API Africa residency island (primary). Create with: fly apps create verbalab-api
 # Deploy from repo root: fly deploy -c infra/fly/api.toml --dockerfile apps/api/Dockerfile
 app = 'verbalab-api'
-primary_region = 'iad'
+primary_region = 'jnb'
 
 [build]
   dockerfile = 'apps/api/Dockerfile'
@@ -13,7 +13,7 @@ primary_region = 'iad'
   NODE_ENV = 'production'
   API_PORT = '3001'
   PORT = '3001'
-  VERBALAB_REGION = 'us'
+  VERBALAB_REGION = 'af'
 
 [http_service]
   internal_port = 3001

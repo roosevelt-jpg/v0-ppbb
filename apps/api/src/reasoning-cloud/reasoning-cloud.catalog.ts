@@ -13,7 +13,7 @@ export function reasoningCloudCatalog() {
   return {
     product: 'VerbaLab Reasoning Cloud',
     note:
-      'Multi-step reasoning via AI Gateway chat prompts (VL-186). Chain/plan/decision/problem-solving shipped as prompt strategies. Tree-of-thought is shallow branching. Not a proprietary symbolic reasoner or agent OS.',
+      'Multi-step reasoning via AI Gateway chat prompts. Chain/plan/decision/problem-solving shipped as prompt strategies. Tree-of-thought is shallow branching. Not a proprietary symbolic reasoner or agent OS.',
     capabilities: [
       {
         id: 'chain-of-thought',
@@ -25,14 +25,14 @@ export function reasoningCloudCatalog() {
       {
         id: 'tree-of-thought',
         name: 'Tree of Thought',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-cloud/reason',
         notes: 'strategy=tree_of_thought — 2 candidate branches + pick. Not full ToT research.',
       },
       {
         id: 'graph-reasoning',
         name: 'Graph Reasoning',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-cloud/reason',
         notes: 'Injects Knowledge Graph 1-hop context into prompt. No graph algorithm engine.',
       },
@@ -67,7 +67,7 @@ export function reasoningCloudCatalog() {
       {
         id: 'tool-selection',
         name: 'Tool Selection',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-cloud/reason',
         notes: 'Suggests from a fixed catalog; does not execute tools.',
       },
@@ -81,7 +81,7 @@ export function reasoningCloudCatalog() {
       {
         id: 'agent-reasoning',
         name: 'Agent Reasoning',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/reasoning-cloud/reason',
         notes: 'strategy=agent — single-shot agent-style prompt. Full agent OS deferred.',
       },
@@ -105,7 +105,7 @@ export function reasoningCloudCatalog() {
       symbolicReasonerOs: false,
       fullTreeOfThought: false,
       agentOs: false,
-      toolExecution: false,
+      toolExecution: true,
       llmGateway: true,
     },
     links: {

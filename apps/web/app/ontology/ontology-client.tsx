@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
 type Capability = { id: string; name: string; status: string; notes: string };
@@ -37,7 +39,7 @@ export function OntologyClient() {
   const [created, setCreated] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ana] = await Promise.all([
       apiFetch<Engine>('/v1/ontology/engine', { token }),
@@ -55,7 +57,7 @@ export function OntologyClient() {
   const createConcept = useCallback(async () => {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const res = await apiFetch<{ id: string; name: string }>('/v1/ontology/concepts', {
         token,
@@ -119,7 +121,7 @@ export function OntologyClient() {
             <h2 style={label}>Honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Org/workspace scoped {engine.honesty.orgWorkspaceScoped ? 'yes' : 'no'} · Extends
-              VL-184 {engine.honesty.extendsVl184 ? 'yes' : 'no'} · OWL OS{' '}
+              {engine.honesty.extendsVl184 ? 'yes' : 'no'} · OWL OS{' '}
               {engine.honesty.owlOs ? 'yes' : 'no'} · Protegé parity{' '}
               {engine.honesty.protegeParity ? 'yes' : 'no'} · Certified verticals{' '}
               {engine.honesty.certifiedVerticalOntologies ? 'yes' : 'no'}
@@ -145,7 +147,7 @@ export function OntologyClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.55rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

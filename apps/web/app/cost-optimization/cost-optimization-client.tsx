@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -38,7 +40,7 @@ export function CostOptimizationClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, bud] = await Promise.all([
       apiFetch<Engine>('/v1/cost-optimization/engine', { token }),
@@ -57,7 +59,7 @@ export function CostOptimizationClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/cost-optimization/budgets', {
         token,
@@ -112,18 +114,18 @@ export function CostOptimizationClient() {
         </h1>
         <p style={{ lineHeight: 1.5, opacity: 0.85 }}>{engine?.note}</p>
 
-        {engine && (
+        {engine ? (
           <section style={{ marginTop: '1.5rem' }}>
-            <h2 style={{ fontSize: '1rem' }}>Honesty</h2>
-            <ul style={{ lineHeight: 1.6 }}>
-              <li>enforcesSpendCaps: {String(engine.honesty.enforcesSpendCaps)}</li>
-              <li>reportOnly: {String(engine.honesty.reportOnly)}</li>
-              <li>finOpsOs: {String(engine.honesty.finOpsOs)}</li>
-              <li>cloudSpotApis: {String(engine.honesty.cloudSpotApis)}</li>
-            </ul>
-            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>{engine.spendSafety.note}</p>
+            <h2 style={{ fontSize: '1rem' }}>Spend safety</h2>
+            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>
+              {hidePhaseIds(engine.spendSafety.note)}
+            </p>
+            <p style={{ opacity: 0.8, fontSize: '0.9rem' }}>
+              Default caps ${engine.ceilings.defaultDailyCapUsd}/day · $
+              {engine.ceilings.defaultMonthlyCapUsd}/month · mode={engine.ceilings.mode}
+            </p>
           </section>
-        )}
+        ) : null}
 
         {budget && (
           <section style={{ marginTop: '1.25rem' }}>

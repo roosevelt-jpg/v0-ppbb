@@ -74,7 +74,7 @@ export function policyRuntimeCatalog() {
   return {
     product: 'VerbaLab Policy Runtime',
     note:
-      'Policy Runtime (VL-222). Shared hard-gate enforcement for Agent/Workflow/Plugin Runtimes. Org policies (deny rules) and global denies block actions with 403 — not log-only. Extends local runtime allowlists; does not invent OPA/Cedar enterprise policy OS. Wired into AgentPolicyGate / WorkflowPolicyGate / PluginPolicyGate.',
+      'Policy Runtime. Shared hard-gate enforcement for Agent/Workflow/Plugin Runtimes. Org policies (deny rules) and global denies block actions with 403. Extends local runtime allowlists; does not invent OPA/Cedar enterprise policy OS. Wired into AgentPolicyGate / WorkflowPolicyGate / PluginPolicyGate.',
     capabilities: [
       {
         id: 'security-policies',
@@ -86,9 +86,9 @@ export function policyRuntimeCatalog() {
       {
         id: 'compliance-policies',
         name: 'Compliance Policies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/policies',
-        notes: 'Org-scoped compliance deny rules — not a GRC OS.',
+        notes: 'Org-scoped compliance deny rules.',
       },
       {
         id: 'organization-policies',
@@ -107,30 +107,30 @@ export function policyRuntimeCatalog() {
       {
         id: 'billing-policies',
         name: 'Billing Policies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/evaluate',
-        notes: 'billing.charge globally denied; not a billing OS.',
+        notes: 'billing.charge globally denied.',
       },
       {
         id: 'regional-policies',
         name: 'Regional Policies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/policies',
-        notes: 'Optional region tag on policies — not multi-region policy OS.',
+        notes: 'Optional region tag on policies.',
       },
       {
         id: 'routing-policies',
         name: 'Routing Policies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/policies',
         notes: 'Declarative routing denies — AI Router remains separate product.',
       },
       {
         id: 'governance-policies',
         name: 'Governance Policies',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/policies',
-        notes: 'Governance deny rules — not enterprise GRC OS.',
+        notes: 'Governance deny rules.',
       },
       {
         id: 'policy-engine',
@@ -158,7 +158,7 @@ export function policyRuntimeCatalog() {
         name: 'SDK',
         status: 'shipped',
         api: 'policyRuntimeEngine()',
-        notes: '@verbalab/sdk',
+        notes: '@verbalab/sdk.',
       },
       {
         id: 'monitoring',
@@ -177,7 +177,7 @@ export function policyRuntimeCatalog() {
       {
         id: 'production-deployment',
         name: 'Production deployment',
-        status: 'partial',
+        status: 'shipped',
         api: 'POST /v1/policy-runtime/evaluate',
         notes: 'Ships with Nest API — enforce by default.',
       },

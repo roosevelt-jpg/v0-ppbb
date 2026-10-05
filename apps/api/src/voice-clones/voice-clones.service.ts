@@ -7,10 +7,12 @@ import { AuditService } from '../audit/audit.service';
 import { BillingService } from '../billing/billing.service';
 import { LocalStorageService } from '../documents/local-storage.service';
 import {
-  ElevenLabsVoiceCloneAdapter,
+  LegacyVendorVoiceCloneAdapter,
   FixtureVoiceCloneAdapter,
   type VoiceCloneSample,
-} from './elevenlabs-voice-clone.adapter';
+} from './legacy-vendor-voice-clone.adapter';
+import { createVerbalabVoiceCloneAdapter } from './verbalab-voice-clone.adapter';
+import { allowVendorFallback } from '../gateway/verbalab-own-ai';
 
 export const VOICE_CLONE_PREFIX = 'clone:';
 
@@ -46,8 +48,16 @@ export class VoiceClonesService {
 
   private provider() {
     if (this.fixtureOverride) return this.fixtureOverride;
-    if (process.env.VOICE_CLONE_FIXTURE === '1') return new FixtureVoiceCloneAdapter();
-    return new ElevenLabsVoiceCloneAdapter(process.env.ELEVENLABS_API_KEY ?? '');
+    if (process.env.VOICE_CLONE_FIXTURE === '1' || process.env.VERBALAB_OWN_AI_FIXTURE === '1') {
+      return new FixtureVoiceCloneAdapter();
+    }
+    // Primary: VerbaLab-owned Voice FM clone endpoint (video dubbing / African voices).
+    const own = createVerbalabVoiceCloneAdapter();
+    if (own.isConfigured() || !allowVendorFallback()) {
+      return own;
+    }
+    // Legacy vendor only when explicitly allowed.
+    return new LegacyVendorVoiceCloneAdapter(process.env.EXTERNAL_VOICE_CLONE_API_KEY ?? '');
   }
 
   serialize(row: {
@@ -128,6 +138,49 @@ export class VoiceClonesService {
     return this.serialize(row);
   }
 
+  /**
+   * Reserve a clone enrollment row for async `POST /v1/jobs` type=clone.
+   * Sample audio must still be uploaded via multipart `POST /v1/voice-clones`.
+   */
+  async reserveAsyncJob(input: {
+    organizationId: string;
+    workspaceId: string;
+    name: string;
+    language?: string;
+    consentNotes: string;
+  }) {
+    const name = input.name.trim();
+    const notes = input.consentNotes.trim();
+    if (!name) {
+      throw new ApiException('validation_error', 'name is required', HttpStatus.BAD_REQUEST);
+    }
+    if (notes.length < 8) {
+      throw new ApiException(
+        'validation_error',
+        'consentNotes must describe the consent basis (min 8 chars)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const row = await this.prisma.voiceClone.create({
+      data: {
+        organizationId: input.organizationId,
+        workspaceId: input.workspaceId,
+        name,
+        status: 'awaiting_samples',
+        cloneMode: 'instant',
+        consentAttested: true,
+        consentNotes: notes,
+        consentAttestedAt: new Date(),
+        ownershipAttested: false,
+        ownershipNotes: input.language ? `language:${input.language}` : '',
+        sampleStorageKeys: [],
+        sampleCount: 0,
+        reviewNotes: 'Reserved by async clone job — upload samples to complete enrollment.',
+      },
+    });
+    return this.serialize(row);
+  }
+
   async create(input: {
     organizationId: string;
     workspaceId: string;
@@ -148,6 +201,9 @@ export class VoiceClonesService {
   }) {
     this.assertOwnerOrAdmin(input.role);
     await this.billing.assertPro(input.organizationId);
+    if (input.cloneMode === 'professional') {
+      await this.billing.assertCreator(input.organizationId);
+    }
 
     if (!input.consentAttested) {
       throw new ApiException(
@@ -228,7 +284,7 @@ export class VoiceClonesService {
         watermarkRequired: true,
         sampleStorageKeys: keys as Prisma.InputJsonValue,
         sampleCount: keys.length,
-        provider: 'elevenlabs',
+        provider: 'legacy_vendor_ivc',
         createdByUserId: input.userId,
       },
     });

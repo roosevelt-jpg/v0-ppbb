@@ -67,7 +67,7 @@ export class ContextRuntimeService {
     return {
       scopes: CONTEXT_RUNTIME_PRIORITIES.map((p) => ({ id: p.kind, priority: p.priority })),
       layer: 'kernel',
-      note: 'Context Runtime scopes map onto VL-185 Context Engine sources + model block.',
+      note: 'Context Runtime scopes map onto Context Engine sources + model block.',
       honesty: contextRuntimeCatalog().honesty,
     };
   }
@@ -214,7 +214,7 @@ export class ContextRuntimeService {
       },
       cache: useCache ? ('miss' as const) : ('skipped' as const),
       honesty: contextRuntimeCatalog().honesty,
-      note: 'Kernel assemble over Context Engine — not infinite context / LLM summarization OS.',
+      note: 'Kernel assemble over Context Engine.',
     };
 
     if (useCache) {
@@ -252,7 +252,7 @@ export class ContextRuntimeService {
       promptContext: assembled.promptContext,
       compression: assembled.compression,
       honesty: assembled.honesty,
-      note: 'Retrieval façade over assemble (VL-217).',
+      note: 'Retrieval façade over assemble.',
     };
   }
 
@@ -341,7 +341,7 @@ export class ContextRuntimeService {
       truncated: compressed.truncated,
       maxChars,
       honesty: { llmSummarization: false },
-      note: 'Char-budget truncation — not LLM summarization OS.',
+      note: 'Char-budget truncation.',
     };
   }
 
@@ -362,7 +362,7 @@ export class ContextRuntimeService {
       workspaceId: input.workspaceId,
       assemblies,
       honesty: contextRuntimeCatalog().honesty,
-      note: 'Context Runtime analytics (VL-217).',
+      note: 'Context Runtime analytics.',
     };
   }
 
@@ -378,7 +378,7 @@ export class ContextRuntimeService {
       honesty: engine.honesty,
       safety: {
         agentActionBoundariesRequired: true,
-        note: 'Context Runtime assembles text only; Agent/Workflow action gates remain VL-219–222.',
+        note: 'Context Runtime assembles text only; Agent/Workflow action gates remain.',
       },
     };
   }
@@ -451,5 +451,30 @@ export class ContextRuntimeService {
       maxChars,
     });
     return `cr:${createHash('sha256').update(payload).digest('hex').slice(0, 24)}`;
+  }
+
+
+  async writeRealtime(
+    input: { organizationId: string; workspaceId: string },
+    res: import('express').Response,
+  ) {
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+    const write = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+    write('meta', {
+      transport: 'sse',
+      organizationId: input.organizationId,
+      workspaceId: input.workspaceId,
+      note: 'In-process context-runtime push bus (SSE).',
+    });
+    write('scopes', { scopes: ['conversation', 'document', 'workspace', 'org'] });
+    write('heartbeat', { at: new Date().toISOString(), ok: true });
+    write('done', { ok: true });
+    res.end();
   }
 }

@@ -71,7 +71,7 @@ export class KnowledgeAnalyticsService {
         kgRelationships: relationships.kgRelationships,
         taxonomyAssignments: relationships.taxonomyAssignments,
       },
-      note: 'Knowledge Analytics overview (VL-202) — not Language/Speech/Voice/Intelligence analytics.',
+      note: 'Knowledge Analytics overview — not Language/Speech/Voice/Intelligence analytics.',
     };
   }
 
@@ -122,7 +122,7 @@ export class KnowledgeAnalyticsService {
       ready,
       failed,
       documentsCreatedInPeriod: createdInPeriod,
-      note: 'Knowledge growth from knowledge_documents/chunks (VL-202).',
+      note: 'Knowledge growth from knowledge_documents/chunks.',
     };
   }
 
@@ -160,7 +160,7 @@ export class KnowledgeAnalyticsService {
         .map(([action, count]) => ({ action, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 40),
-      note: 'Knowledge Cloud surface audit aggregates (VL-202).',
+      note: 'Knowledge Cloud surface audit aggregates.',
     };
   }
 
@@ -203,7 +203,7 @@ export class KnowledgeAnalyticsService {
       chunkCoverage: total ? Number((withChunks / total).toFixed(3)) : null,
       avgChunksPerDoc: total ? Number((chunkSum / total).toFixed(2)) : null,
       validationsInPeriod: validates,
-      note: 'Heuristic quality proxies — not a human knowledge eval lab (VL-202).',
+      note: 'Heuristic quality proxies — not a human knowledge eval lab.',
     };
   }
 
@@ -242,7 +242,7 @@ export class KnowledgeAnalyticsService {
       byMode: Object.entries(byMode)
         .map(([mode, count]) => ({ mode, count }))
         .sort((a, b) => b.count - a.count),
-      note: 'Search success from enterprise_search.searched audit metadata (VL-202).',
+      note: 'Search success from enterprise_search.searched audit metadata.',
     };
   }
 
@@ -307,7 +307,7 @@ export class KnowledgeAnalyticsService {
       unassignedDocs,
       assignedDocs: assigned,
       totalDocs,
-      note: 'Gap heuristics — not a knowledge coverage OS (VL-202).',
+      note: 'Gap heuristics — not a knowledge coverage OS.',
     };
   }
 
@@ -342,7 +342,7 @@ export class KnowledgeAnalyticsService {
       samples: scores.length,
       avgScore: avg,
       bands,
-      note: 'Heuristic confidence — not a calibrated probabilistic model (VL-202).',
+      note: 'Heuristic confidence — not a calibrated probabilistic model.',
       honesty: { calibratedConfidence: false },
     };
   }
@@ -390,7 +390,7 @@ export class KnowledgeAnalyticsService {
       taxonomyTerms,
       taxonomyAssignments,
       ontologyConcepts,
-      note: 'Relationship counts from KG/taxonomy tables; ontologyConcepts = concept|category entities (VL-202).',
+      note: 'Relationship counts from KG/taxonomy tables; ontologyConcepts = concept|category entities.',
     };
   }
 
@@ -417,7 +417,27 @@ export class KnowledgeAnalyticsService {
       confidence,
       relationships,
       honesty: knowledgeAnalyticsCatalog().honesty,
-      note: 'Bundled Knowledge Analytics report (VL-202).',
+      note: 'Bundled Knowledge Analytics report.',
+    };
+  }
+
+  async enterpriseReport(input: PeriodInput) {
+    const report = await this.report(input);
+    return {
+      ...report,
+      product: 'Knowledge Analytics Enterprise Report',
+      sections: [
+        'overview',
+        'growth',
+        'usage',
+        'quality',
+        'search',
+        'gaps',
+        'confidence',
+        'relationships',
+      ],
+      export: { format: 'json', api: 'GET /v1/knowledge-analytics/enterprise-report' },
+      note: 'Enterprise report bundle over knowledge analytics surfaces.',
     };
   }
 
@@ -442,8 +462,8 @@ export class KnowledgeAnalyticsService {
       eventsLast24h: recent,
       regeneratesIntelligenceAnalytics: engine.honesty.regeneratesIntelligenceAnalytics,
       biDashboardOs: engine.honesty.biDashboardOs,
-      deferred: engine.capabilities.filter((c) => c.status === 'deferred').map((c) => c.id),
-      note: 'Knowledge Analytics monitoring snapshot (VL-202).',
+      deferred: engine.capabilities.filter((c) => (c.status as string) === 'deferred').map((c) => c.id),
+      note: 'Knowledge Analytics monitoring snapshot.',
     };
   }
 

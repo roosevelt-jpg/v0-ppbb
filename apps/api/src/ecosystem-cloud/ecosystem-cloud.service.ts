@@ -1,0 +1,225 @@
+import { Injectable } from '@nestjs/common';
+import { UsageService } from '../usage/usage.service';
+import { SessionContext } from '../common/guards/clerk-auth.guard';
+import {
+  ecosystemArchitectureNotes,
+  ecosystemHonesty,
+  ecosystemProductCatalog,
+  ecosystemRoutingTable,
+} from './ecosystem-cloud.catalog';
+
+@Injectable()
+export class EcosystemCloudService {
+  constructor(private readonly usage: UsageService) {}
+
+  products() {
+    return {
+      product: 'VerbaLab Ecosystem Cloud',
+      products: ecosystemProductCatalog(),
+      architecture: ecosystemArchitectureNotes(),
+      honesty: ecosystemHonesty(),
+      safety: {
+        stripeOrEquivalentRequired: true,
+        storesRawCardData: false,
+        pluginAgentSandboxRequired: true,
+        realMoneyRiskCategory: true,
+        note:
+          'Real payments, licensing, and royalties require Stripe or equivalent. Do not store raw card data. Plugin and agent marketplaces enforce sandboxes and policy hard-gates before third-party code runs. Creator Economy payout math must be reviewed before live creators.',
+      },
+      docs: '/docs/ECOSYSTEM_CLOUD.md',
+      note:
+        'Ecosystem Foundation hub over content and voice marketplaces plus plugin, model, dataset, prompt, agent, workflow, and connector markets.',
+    };
+  }
+
+  routing() {
+    return {
+      routes: ecosystemRoutingTable(),
+      products: ecosystemProductCatalog().map((p) => ({
+        id: p.id,
+        status: p.status,
+        api: p.api,
+      })),
+      honesty: ecosystemHonesty(),
+      note:
+        'Static marketplace/monetization discovery catalog for Foundation.',
+      docs: '/docs/ECOSYSTEM_CLOUD.md',
+    };
+  }
+
+  async overview(session: SessionContext) {
+    const usageSummary = await this.usage.summary(session.organizationId);
+    return {
+      session: {
+        organizationId: session.organizationId,
+        workspaceId: session.workspaceId,
+        role: session.role,
+      },
+      usage: {
+        periodStart: usageSummary.periodStart,
+        chat: usageSummary.chat,
+        embeddings: usageSummary.embeddings,
+      },
+      products: ecosystemProductCatalog(),
+      architecture: ecosystemArchitectureNotes(),
+      honesty: ecosystemHonesty(),
+      safety: {
+        stripeOrEquivalentRequired: true,
+        storesRawCardData: false,
+        pluginAgentSandboxRequired: true,
+        realMoneyRiskCategory: true,
+        note:
+          'Real-money volume. Stripe Connect backs creator payouts. Tax, dispute, and 1099 flows remain documented gaps. Plugin and agent listings stay sandboxed.',
+      },
+      deferred: {
+        pluginMarketplace: false,
+        modelMarketplace: false,
+        datasetMarketplace: false,
+        promptMarketplace: false,
+        agentMarketplace: false,
+        workflowMarketplace: false,
+        connectorMarketplace: false,
+        voiceLanguageMarketplace: false,
+        creatorEconomyExpansion: false,
+        sdkMarketplace: false,
+        templateMarketplace: false,
+        extensionMarketplace: false,
+        taxHandlingComplete: false,
+        disputeChargebackComplete: false,
+        paymentProcessorOs: false,
+        regeneratesVolumes1to10: false,
+      },
+      links: {
+        ecosystemCloud: '/ecosystem-cloud',
+        contentMarketplace: '/marketplace',
+        voiceMarketplace: '/voice-marketplace',
+        pluginMarketplace: '/plugin-marketplace',
+        modelMarketplace: '/model-marketplace',
+        datasetMarketplace: '/dataset-marketplace',
+        promptMarketplace: '/prompt-marketplace',
+        agentMarketplace: '/agent-marketplace',
+        workflowMarketplace: '/workflow-marketplace',
+        connectorMarketplace: '/connector-marketplace',
+        voiceLanguageMarketplace: '/voice-language-marketplace',
+        creatorEconomy: '/creator-economy',
+        billing: '/creator-economy',
+        coverage: '/coverage',
+        pluginRuntime: '/plugin-runtime',
+        agentRuntime: '/agent-runtime',
+        agentFabric: '/agent-fabric',
+        policyFabric: '/policy-fabric',
+        modelRegistry: '/model-registry',
+        developerCloud: '/developers',
+        aiFabric: '/ai-fabric',
+      },
+      docs: '/docs/ECOSYSTEM_CLOUD.md',
+      note: 'Ecosystem Cloud discovery hub over marketplace and monetization surfaces.',
+    };
+  }
+
+  monitoring() {
+    const products = ecosystemProductCatalog();
+    return {
+      mode: 'foundation',
+      products: products.map((p) => ({ id: p.id, status: p.status })),
+      architecture: ecosystemArchitectureNotes(),
+      honesty: ecosystemHonesty(),
+      note:
+        'Ecosystem Cloud monitoring snapshot across marketplace and monetization surfaces.',
+    };
+  }
+
+  marketplace(kind: 'sdk' | 'templates' | 'extensions') {
+    const catalogs = {
+      sdk: [
+        {
+          id: 'sdk-js',
+          name: '@verbalab/sdk',
+          kind: 'sdk',
+          language: 'typescript',
+          status: 'shipped',
+          api: 'npm:@verbalab/sdk',
+          notes: 'Primary JS/TS client.',
+        },
+        {
+          id: 'sdk-cli',
+          name: '@verbalab/cli',
+          kind: 'sdk',
+          language: 'typescript',
+          status: 'shipped',
+          api: 'npm:@verbalab/cli',
+          notes: 'CLI companion.',
+        },
+        {
+          id: 'sdk-python',
+          name: 'verbalab-python',
+          kind: 'sdk',
+          language: 'python',
+          status: 'shipped',
+          api: 'pip:verbalab',
+          notes: 'Python helper stubs.',
+        },
+      ],
+      templates: [
+        {
+          id: 'tpl-detect-translate',
+          name: 'Detect → Translate pipeline',
+          kind: 'template',
+          status: 'shipped',
+          api: 'POST /v1/ai-orchestration/run',
+          notes: 'pipeline=detect_translate starter.',
+        },
+        {
+          id: 'tpl-rag-chat',
+          name: 'Knowledge RAG → Chat',
+          kind: 'template',
+          status: 'shipped',
+          api: 'POST /v1/knowledge/query',
+          notes: 'Enterprise RAG starter template.',
+        },
+        {
+          id: 'tpl-voice-faq',
+          name: 'Voice FAQ agent',
+          kind: 'template',
+          status: 'shipped',
+          api: 'GET /v1/voice/status',
+          notes: 'Voice agent FAQ scaffold.',
+        },
+      ],
+      extensions: [
+        {
+          id: 'ext-slack-translate',
+          name: 'Slack Translate Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'POST /v1/connectors/slack/commands',
+          notes: 'Maps to connector + plugin install path.',
+        },
+        {
+          id: 'ext-glossary-panel',
+          name: 'Glossary Console Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'GET /v1/glossary',
+          notes: 'Console panel extension stub.',
+        },
+        {
+          id: 'ext-coverage-badge',
+          name: 'Coverage Badge Extension',
+          kind: 'extension',
+          status: 'shipped',
+          api: 'GET /v1/coverage',
+          notes: 'Status badge for coverage snapshot.',
+        },
+      ],
+    } as const;
+    return {
+      marketplace: kind,
+      status: 'shipped',
+      listings: catalogs[kind],
+      honesty: ecosystemHonesty(),
+      note: `In-process ${kind} marketplace registry under Ecosystem Cloud.`,
+      docs: '/docs/ECOSYSTEM_CLOUD.md',
+    };
+  }
+}

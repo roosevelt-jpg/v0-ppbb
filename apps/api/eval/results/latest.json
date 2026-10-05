@@ -1,11 +1,16 @@
 {
-  "asOf": "2026-09-07T06:20:56.326Z",
+  "asOf": "2026-10-04T18:34:49.397Z",
   "mode": "fixture",
   "disclaimer": "Scores are automatic reference metrics on small golden sets (exact match + character similarity). They measure harness output against references — not market leadership or human quality.",
   "focusPairs": [
     "en-sw",
     "en-yo",
-    "en-am"
+    "en-am",
+    "en-th",
+    "en-vi",
+    "en-ht",
+    "en-qu",
+    "en-hi"
   ],
   "pairs": [
     {
@@ -28,6 +33,41 @@
       "segmentCount": 12,
       "exactMatchRate": 0,
       "meanCharSimilarity": 0.0612
+    },
+    {
+      "sourceLang": "en",
+      "targetLang": "th",
+      "segmentCount": 10,
+      "exactMatchRate": 0,
+      "meanCharSimilarity": 0.2103
+    },
+    {
+      "sourceLang": "en",
+      "targetLang": "vi",
+      "segmentCount": 10,
+      "exactMatchRate": 0,
+      "meanCharSimilarity": 0.2147
+    },
+    {
+      "sourceLang": "en",
+      "targetLang": "ht",
+      "segmentCount": 10,
+      "exactMatchRate": 0,
+      "meanCharSimilarity": 0.1418
+    },
+    {
+      "sourceLang": "en",
+      "targetLang": "qu",
+      "segmentCount": 10,
+      "exactMatchRate": 0,
+      "meanCharSimilarity": 0.22
+    },
+    {
+      "sourceLang": "en",
+      "targetLang": "hi",
+      "segmentCount": 10,
+      "exactMatchRate": 0,
+      "meanCharSimilarity": 0.1274
     }
   ]
 }

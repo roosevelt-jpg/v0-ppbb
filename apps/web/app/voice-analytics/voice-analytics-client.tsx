@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  BarChart,
+  SegmentedBar,
+  StatsCard,
+  formatCompact,
+} from '@/components/analytics';
 
 type Engine = {
   product: string;
@@ -43,7 +52,7 @@ export function VoiceAnalyticsClient() {
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, over, mon] = await Promise.all([
       apiFetch<Engine>('/v1/voice-analytics/engine', { token }),
@@ -64,7 +73,7 @@ export function VoiceAnalyticsClient() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const body = await apiFetch('/v1/voice-analytics/report', { token });
       setReport(JSON.stringify(body, null, 2));
@@ -91,50 +100,76 @@ export function VoiceAnalyticsClient() {
       <p style={{ color: 'var(--muted)', margin: '0 0 1.5rem', maxWidth: '44rem' }}>
         Track voice usage, voices, marketplace revenue, and quality proxies. Not a BI cloud. Speech
         Analytics stays at <Link href="/speech-analytics">/speech-analytics</Link>.{' '}
-        <Link href="/voice-cloud">Voice Cloud</Link>.
+        <Link href="/voice-cloud">Voice Cloud</Link>
+        {' · '}
+        <Link href="/voice-marketplace">Voice Marketplace</Link>.
       </p>
 
       {error ? <p style={{ color: '#b42318' }}>{error}</p> : null}
 
       {overview ? (
-        <p style={{ margin: '0 0 1.25rem', fontWeight: 600 }}>
-          TTS {overview.usage.tts.requests} req / {overview.usage.tts.characters} chars · revenue $
-          {(overview.revenueCents / 100).toFixed(2)} · est. $
-          {overview.estimatedCostUsd.toFixed(4)}
-        </p>
+        <div style={{ marginBottom: '1.5rem', display: 'grid', gap: '1rem' }}>
+          <section className="vl-stat-grid-4">
+            <StatsCard
+              label="TTS requests"
+              value={formatCompact(overview.usage.tts.requests)}
+              hint={`${formatCompact(overview.usage.tts.characters)} characters`}
+              tone="brand"
+            />
+            <StatsCard
+              label="Est. cost"
+              value={`$${overview.estimatedCostUsd.toFixed(4)}`}
+              hint="Voice pipeline"
+            />
+            <StatsCard
+              label="Marketplace revenue"
+              value={`$${(overview.revenueCents / 100).toFixed(2)}`}
+              hint="Settled cents"
+            />
+            <StatsCard
+              label="Voice audits"
+              value={formatCompact(overview.usage.voiceAudits.total)}
+              hint={monitoring ? `p95 ${monitoring.latencyMsP95 ?? '—'} ms` : undefined}
+            />
+          </section>
+          <div className="vl-chart-grid">
+            <AnalyticsSection title="Usage mix" subtitle="TTS volume vs audits.">
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={[
+                    { label: 'TTS requests', value: overview.usage.tts.requests },
+                    { label: 'Audits', value: overview.usage.voiceAudits.total },
+                    { label: 'Stream events', value: monitoring?.streamEvents ?? 0 },
+                  ]}
+                  totalLabel="Voice activity"
+                />
+              </div>
+            </AnalyticsSection>
+            <AnalyticsSection title="Top voices" subtitle="Most requested voices this period.">
+              <div className="vl-analytics-panel">
+                <BarChart
+                  data={(overview.topVoices ?? []).map((v) => ({ label: v.voice, value: v.count }))}
+                  emptyLabel="No voice samples yet."
+                  maxBars={8}
+                />
+              </div>
+            </AnalyticsSection>
+          </div>
+        </div>
       ) : null}
 
       <div style={{ display: 'grid', gap: '1.75rem', maxWidth: '48rem' }}>
         {monitoring ? (
           <section>
             <h2 style={label}>Monitoring</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                Stream events: {monitoring.streamEvents}
-              </li>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                Latency p95: {monitoring.latencyMsP95 ?? '—'} ms
-              </li>
-              <li style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                Watermark rate: {monitoring.watermarkRate ?? '—'}
-              </li>
-            </ul>
+            <section className="vl-stat-grid" style={{ marginBottom: '0.75rem' }}>
+              <StatsCard label="Stream events" value={formatCompact(monitoring.streamEvents)} />
+              <StatsCard label="Latency p95" value={monitoring.latencyMsP95 != null ? `${monitoring.latencyMsP95} ms` : '—'} />
+              <StatsCard label="Watermark rate" value={monitoring.watermarkRate != null ? String(monitoring.watermarkRate) : '—'} />
+            </section>
             <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
               {monitoring.note}
             </p>
-          </section>
-        ) : null}
-
-        {overview?.topVoices?.length ? (
-          <section>
-            <h2 style={label}>Top voices</h2>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              {overview.topVoices.slice(0, 8).map((v) => (
-                <li key={v.voice} style={{ borderTop: '1px solid var(--line)', padding: '0.35rem 0' }}>
-                  {v.voice} · {v.count}
-                </li>
-              ))}
-            </ul>
           </section>
         ) : null}
 
@@ -155,7 +190,7 @@ export function VoiceAnalyticsClient() {
               {engine.capabilities.map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {c.status}</span>
+                  <StatusSuffix status={c.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
                 </li>
               ))}

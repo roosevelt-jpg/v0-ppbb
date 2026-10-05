@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { hidePhaseIds } from '@/lib/ui-copy';
 
 type Engine = {
   product: string;
@@ -30,7 +32,7 @@ export function IntelligentCacheClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    const token = await getToken();
+    const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
     const [eng, ns] = await Promise.all([
       apiFetch<Engine>('/v1/intelligent-cache/engine', { token }),
@@ -49,7 +51,7 @@ export function IntelligentCacheClient() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch('/v1/intelligent-cache/put', {
         token,
@@ -106,14 +108,12 @@ export function IntelligentCacheClient() {
             maxWidth: '44rem',
           }}
         >
-          <h2 style={label}>Honesty</h2>
-          <p style={{ margin: 0, color: 'var(--muted)' }}>{engine.spendSafety.note}</p>
-          <p style={{ margin: '0.35rem 0 0' }}>
-            maxEntries={engine.ceilings.maxEntriesPerWorkspace} · ttl=
-            {engine.ceilings.defaultTtlSec}s · redisCluster=
-            {String(engine.honesty.redisClusterOs)} · vector=
-            {String(engine.honesty.vectorSemanticOs)} · autoWireGateway=
-            {String(engine.honesty.autoWiresGatewayResponses)}
+          <h2 style={label}>Cache status</h2>
+          <p style={{ margin: 0, color: 'var(--muted)' }}>{hidePhaseIds(engine.note)}</p>
+          <p style={{ margin: '0.35rem 0 0', color: 'var(--muted)' }}>
+            {hidePhaseIds(engine.spendSafety.note)} · maxEntries=
+            {engine.ceilings.maxEntriesPerWorkspace} · ttl={engine.ceilings.defaultTtlSec}s · mode=
+            {engine.ceilings.mode}
           </p>
         </section>
       ) : null}

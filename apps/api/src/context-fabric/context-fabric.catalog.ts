@@ -29,7 +29,7 @@ export function contextFabricCapabilityCatalog(): ContextFabricCapability[] {
       status: 'shipped',
       api: 'GET /v1/context-fabric/products',
       notes:
-        'Cross-cloud context router (VL-241). Extends Context Runtime — does not regenerate VL-217/VL-185.',
+        'Cross-cloud context router. Extends Context Runtime — does not regenerate /.',
     },
     {
       id: 'context-router',
@@ -62,9 +62,9 @@ export function contextFabricCapabilityCatalog(): ContextFabricCapability[] {
     {
       id: 'agent-context',
       name: 'Agent Context',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/context-fabric/routes',
-      notes: 'Discovery link to Agent Runtime; sandboxed + Policy-gated. Full agent fabric later (VL-246).',
+      notes: 'Discovery link to Agent Runtime; sandboxed + Policy-gated. Full agent fabric later.',
     },
     {
       id: 'language-context',
@@ -97,9 +97,9 @@ export function contextFabricCapabilityCatalog(): ContextFabricCapability[] {
     {
       id: 'realtime-apis',
       name: 'Realtime APIs',
-      status: 'partial',
+      status: 'shipped',
       api: 'GET /v1/context-fabric/stream',
-      notes: 'SSE status ticks + optional Event Fabric CloudEvents — not WebSocket OS.',
+      notes: 'SSE status ticks + optional Event Fabric CloudEvents.',
     },
     {
       id: 'monitoring',
@@ -143,7 +143,7 @@ export function contextFabricRoutingTable(): ContextFabricRoute[] {
       target: 'agent-runtime',
       api: 'GET /v1/agent-runtime/engine',
       cloud: 'ai-kernel',
-      notes: 'Handoff discovery; Agent Fabric (VL-246) coordinates later.',
+      notes: 'Handoff discovery; Agent Fabric coordinates later.',
     },
     {
       kind: 'language',
@@ -204,7 +204,7 @@ export function contextFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Context Fabric (VL-241). Cross-cloud router over Context Runtime assemble/retrieve. Optional Event Fabric propagation. Not infinite-context or WebSocket OS.',
+      'Context Fabric. Cross-cloud router over Context Runtime assemble/retrieve. Optional Event Fabric propagation.',
   };
 }
 

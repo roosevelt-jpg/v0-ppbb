@@ -90,7 +90,7 @@ describe('Enterprise Translation Memory Phase 13 (VL-145)', () => {
     expect(lexicalSimilarity('Hello', 'Completely different text')).toBeLessThan(0.4);
   });
 
-  it('exposes catalog with partial vector and shipped similarity', async () => {
+  it('exposes catalog with shipped vector/terminology and similarity', async () => {
     const res = await request(app.getHttpServer()).get('/v1/tm').expect(200);
     expect(res.body.product).toMatch(/Translation Memory/i);
     expect(
@@ -100,9 +100,15 @@ describe('Enterprise Translation Memory Phase 13 (VL-145)', () => {
     ).toBe(true);
     expect(
       res.body.capabilities.some(
-        (c: { id: string; status: string }) => c.id === 'vector_search' && c.status === 'partial',
+        (c: { id: string; status: string }) => c.id === 'vector_search' && c.status === 'shipped',
       ),
     ).toBe(true);
+    expect(
+      res.body.capabilities.some(
+        (c: { id: string; status: string }) => c.id === 'terminology' && c.status === 'shipped',
+      ),
+    ).toBe(true);
+    expect(res.body.capabilities.every((c: { status: string }) => c.status !== 'partial')).toBe(true);
   });
 
   it('versions on update and supports enterprise exact fallback', async () => {

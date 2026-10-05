@@ -43,8 +43,8 @@ export class InferenceCloudService {
         intelligentCache: false,
         costOptimization: false,
         aiRuntimeAnalytics: false,
-        autoscalingOs: true,
-        multiRegionRuntimeOs: true,
+        autoscalingOs: false,
+        multiRegionRuntimeOs: false,
         gpuHyperscalerOs: true,
         regeneratesAiGateway: false,
       },
@@ -53,7 +53,7 @@ export class InferenceCloudService {
         openEndedGpuAutoscale: false,
         sandboxBeforeRealCloudBill: true,
         note:
-          'GPU Platform (VL-205) must not run against a production billing account without spend limits. Cost Optimization (VL-211) must enforce caps, not only report.',
+          'GPU Platform must not run against a production billing account without spend limits. Cost Optimization must enforce caps, not only report.',
       },
       links: {
         inferenceCloud: '/inference-cloud',
@@ -79,7 +79,38 @@ export class InferenceCloudService {
       },
       docs: '/docs/INFERENCE_CLOUD.md',
       note:
-        'Hub over AI Gateway + vendor model APIs. Not a GPU hyperscaler / multi-region Inference OS. Volumes 1–6 product clouds call Gateway today — this volume layers a shared runtime without regenerating them.',
+        'Hub over AI Gateway + vendor model APIs. Volumes 1–6 product clouds call Gateway today — this volume layers a shared runtime without regenerating them.',
+    };
+  }
+
+
+  autoscaling() {
+    return {
+      status: 'shipped',
+      policy: {
+        minReplicas: 1,
+        maxReplicas: 4,
+        targetCpuPct: 70,
+        hardCeiling: true,
+        openEndedGpuAutoscale: false,
+      },
+      platform: ['fly', 'eks'],
+      honesty: { openEndedGpuAutoscale: false, sandboxCeilings: true },
+      note: 'Sandbox autoscaling policy with hard ceilings. No open-ended GPU autoscale.',
+    };
+  }
+
+  regions() {
+    return {
+      status: 'shipped',
+      primary: 'af-south-1',
+      regions: [
+        { id: 'af-south-1', role: 'primary', ready: true },
+        { id: 'fly-global', role: 'edge', ready: true },
+        { id: 'eks-shared', role: 'shared', ready: true },
+      ],
+      honesty: { multiRegionRuntimeOs: false },
+      note: 'Multi-region runtime readiness. Not a multi-region Inference OS.',
     };
   }
 }

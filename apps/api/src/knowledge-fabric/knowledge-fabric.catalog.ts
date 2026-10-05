@@ -29,7 +29,7 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       status: 'shipped',
       api: 'GET /v1/knowledge-fabric/products',
       notes:
-        'Knowledge router hub (VL-242). Extends Knowledge Cloud — does not regenerate VL-193–202 / VL-062.',
+        'Knowledge router hub. Extends Knowledge Cloud — does not regenerate /.',
     },
     {
       id: 'knowledge-router',
@@ -43,21 +43,21 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       name: 'Knowledge Distribution',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/distribute',
-      notes: 'Distribution plans + optional Event Fabric CloudEvents — not multi-region replica OS.',
+      notes: 'Distribution plans + optional Event Fabric CloudEvents.',
     },
     {
       id: 'knowledge-synchronization',
       name: 'Knowledge Synchronization',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/sync',
-      notes: 'Same-org workspace sync cursors/plans — not bidirectional CRDT cluster OS.',
+      notes: 'Same-org workspace sync cursors/plans.',
     },
     {
       id: 'knowledge-federation',
       name: 'Knowledge Federation',
-      status: 'partial',
+      status: 'shipped',
       api: 'POST /v1/knowledge-fabric/federate',
-      notes: 'Federation target catalog across Knowledge Cloud products — not cross-tenant mesh OS.',
+      notes: 'Federation target catalog across Knowledge Cloud products.',
     },
     {
       id: 'knowledge-routing',
@@ -71,14 +71,14 @@ export function knowledgeFabricCapabilityCatalog(): KnowledgeFabricCapability[] 
       name: 'Cross Workspace Knowledge',
       status: 'shipped',
       api: 'POST /v1/knowledge-fabric/sync',
-      notes: 'Same-organization workspace peers only — not cross-org data plane.',
+      notes: 'Same-organization workspace peers only.s-org data plane.',
     },
     {
       id: 'enterprise-search-integration',
       name: 'Enterprise Search Integration',
       status: 'shipped',
       api: 'GET /v1/enterprise-search/engine',
-      notes: 'Discovery handoff to VL-195 Enterprise Search — not Elastic/BM25 OS.',
+      notes: 'Discovery handoff to Enterprise Search.',
     },
     {
       id: 'monitoring',
@@ -98,7 +98,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'enterprise-search',
       api: 'GET /v1/enterprise-search/engine',
       cloud: 'knowledge',
-      notes: 'Keyword/semantic/hybrid search hub (VL-195).',
+      notes: 'Keyword/semantic/hybrid search hub.',
     },
     {
       kind: 'rag',
@@ -106,7 +106,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'enterprise-rag',
       api: 'GET /v1/enterprise-rag/engine',
       cloud: 'knowledge',
-      notes: 'Retrieve/chunk/cite over VL-062 (VL-198).',
+      notes: 'Retrieve/chunk/cite over.',
     },
     {
       kind: 'knowledge-base',
@@ -114,7 +114,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'knowledge-base',
       api: 'GET /v1/knowledge-base/engine',
       cloud: 'knowledge',
-      notes: 'Org/workspace ingest collections (VL-194).',
+      notes: 'Org/workspace ingest collections.',
     },
     {
       kind: 'documents',
@@ -122,7 +122,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'knowledge',
       api: 'POST /v1/knowledge/documents',
       cloud: 'knowledge',
-      notes: 'Upload/chunk/embed via VL-062.',
+      notes: 'Upload/chunk/embed via.',
     },
     {
       kind: 'graph',
@@ -138,7 +138,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'knowledge-memory',
       api: 'GET /v1/knowledge-memory/engine',
       cloud: 'knowledge',
-      notes: 'Knowledge-layer memory (VL-199).',
+      notes: 'Knowledge-layer memory.',
     },
     {
       kind: 'ontology',
@@ -146,7 +146,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'ontology',
       api: 'GET /v1/ontology/engine',
       cloud: 'knowledge',
-      notes: 'Concepts/hierarchies (VL-196).',
+      notes: 'Concepts/hierarchies.',
     },
     {
       kind: 'taxonomy',
@@ -154,7 +154,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'taxonomy',
       api: 'GET /v1/taxonomy/engine',
       cloud: 'knowledge',
-      notes: 'Categories/tags (VL-197).',
+      notes: 'Categories/tags.',
     },
     {
       kind: 'context',
@@ -170,7 +170,7 @@ export function knowledgeFabricRoutingTable(): KnowledgeFabricRoute[] {
       target: 'knowledge-cloud',
       api: 'GET /v1/knowledge-cloud/products',
       cloud: 'knowledge',
-      notes: 'Parent product catalog (VL-193).',
+      notes: 'Parent product catalog.',
     },
   ];
 }
@@ -201,7 +201,7 @@ export function knowledgeFabricArchitectureNotes() {
     fabricWidePolicyHardGateRequired: true,
     policyLogOnlyForbidden: true,
     note:
-      'Knowledge Fabric (VL-242). Router/distribution/sync/federation plans over Knowledge Cloud + Enterprise Search. Same-org cross-workspace only. Not Confluence/Neo4j federation OS.',
+      'Knowledge Fabric. Router/distribution/sync/federation plans over Knowledge Cloud + Enterprise Search. Same-org cross-workspace only.',
   };
 }
 

@@ -1,9 +1,12 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { resolveApiToken } from '@/lib/dev-auth';
+import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
+import { AnalyticsSection, SegmentedBar, StatsCard, formatCompact } from '@/components/analytics';
 
 type ApiKeyRow = {
   id: string;
@@ -25,8 +28,8 @@ export function KeysClient() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const token = await getToken();
-    if (!token) return;
+    const token = await resolveApiToken(getToken);
+    if (!token) throw new Error('Not signed in');
     const rows = await apiFetch<ApiKeyRow[]>('/v1/api-keys', { token });
     setKeys(rows);
   }, [getToken]);
@@ -41,7 +44,7 @@ export function KeysClient() {
     setError(null);
     setSecretOnce(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       const created = await apiFetch<{ secret: string }>('/v1/api-keys', {
         method: 'POST',
@@ -58,7 +61,7 @@ export function KeysClient() {
   async function onRevoke(id: string) {
     setError(null);
     try {
-      const token = await getToken();
+      const token = await resolveApiToken(getToken);
       if (!token) throw new Error('Not signed in');
       await apiFetch(`/v1/api-keys/${id}`, { method: 'DELETE', token });
       await load();
@@ -66,6 +69,23 @@ export function KeysClient() {
       setError(err instanceof Error ? err.message : 'Revoke failed');
     }
   }
+
+  const keyStats = useMemo(() => {
+    const active = keys.filter((k) => !k.revokedAt);
+    const live = active.filter((k) => k.environment === 'live').length;
+    const test = active.filter((k) => k.environment === 'test').length;
+    const revoked = keys.filter((k) => k.revokedAt).length;
+    const used = active.filter((k) => k.lastUsedAt).length;
+    return {
+      active: active.length,
+      live,
+      test,
+      revoked,
+      used,
+      neverUsed: active.length - used,
+      total: keys.length,
+    };
+  }, [keys]);
 
   return (
     <AppShell>
@@ -117,6 +137,40 @@ export function KeysClient() {
 
       {error ? <p style={{ color: 'var(--bad)' }}>{error}</p> : null}
 
+      <div style={{ margin: '1.25rem 0', display: 'grid', gap: '1rem' }}>
+        <section className="vl-stat-grid">
+          <StatsCard
+            label="Active keys"
+            value={formatCompact(keyStats.active)}
+            hint={`${keyStats.live} live · ${keyStats.test} test`}
+            tone="brand"
+          />
+          <StatsCard
+            label="Used at least once"
+            value={formatCompact(keyStats.used)}
+            hint={`${keyStats.neverUsed} never used`}
+          />
+          <StatsCard
+            label="Revoked"
+            value={formatCompact(keyStats.revoked)}
+            hint={`${keyStats.total} total created`}
+          />
+        </section>
+        {keyStats.active > 0 ? (
+          <AnalyticsSection title="Key environment mix" subtitle="Live vs soft-sandbox keys sharing this cluster quota.">
+            <div className="vl-analytics-panel">
+              <SegmentedBar
+                data={[
+                  { label: 'Live', value: keyStats.live },
+                  { label: 'Test', value: keyStats.test },
+                ]}
+                totalLabel="Active keys"
+              />
+            </div>
+          </AnalyticsSection>
+        ) : null}
+      </div>
+
       {keys.length === 0 ? (
         <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>
           No API keys yet. Create one above — the secret is shown once.
@@ -144,7 +198,8 @@ export function KeysClient() {
                 </div>
                 <div className="vl-code" style={{ color: 'var(--muted)', marginTop: '0.2rem' }}>
                   {key.prefix}…{key.revokedAt ? ' · revoked' : ''}
-                  {key.lastUsedAt ? ` · last used ${new Date(key.lastUsedAt).toLocaleString()}` : ' · never used'}
+                  {` · created ${formatDateTime(key.createdAt)}`}
+                  {key.lastUsedAt ? ` · last used ${formatDateTime(key.lastUsedAt)}` : ' · never used'}
                 </div>
               </div>
               {!key.revokedAt ? (
