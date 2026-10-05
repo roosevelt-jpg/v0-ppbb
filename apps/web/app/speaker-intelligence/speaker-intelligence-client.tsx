@@ -146,7 +146,6 @@ export function SpeakerIntelligenceClient() {
                   {p.displayName}
                 </button>{' '}
                 <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-                  · {p.status}
                   {p.enrolled ? ` · enrolled ×${p.enrollmentCount}` : ' · not enrolled'}
                 </span>
               </li>

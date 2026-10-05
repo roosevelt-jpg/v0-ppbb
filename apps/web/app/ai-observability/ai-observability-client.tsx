@@ -111,9 +111,7 @@ export function AiObservabilityClient() {
               {(data.engine.capabilities ?? []).map((c) => (
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.5rem 0' }}>
                   <strong>{c.name}</strong>{' '}
-                  <span style={{ color: c.status === 'shipped' ? 'var(--brand)' : 'var(--muted)', fontSize: '0.8rem', fontWeight: 650 }}>
-                    · {c.status}
-                  </span>
+                  <StatusSuffix status={c.status} />
                   {c.api ? (
                     <div>
                       <code style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{c.api}</code>

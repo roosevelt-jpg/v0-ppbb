@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
+import { StatusSuffix } from '@/components/status-suffix';
 
 type Capability = { id: string; name: string; status: string; api: string | null };
 type RouteTo = { module: string; path: string; api: string };
@@ -153,9 +154,7 @@ export function AgentIntelligenceClient() {
                 <li key={c.id} style={{ borderTop: '1px solid var(--line)', padding: '0.55rem 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <strong>{c.name}</strong>
-                    <span style={{ color: c.status === 'shipped' ? 'var(--brand)' : 'var(--muted)', fontWeight: 650, fontSize: '0.8rem' }}>
-                      {c.status}
-                    </span>
+                    <StatusSuffix status={c.status} />
                   </div>
                   {c.api ? (
                     <code style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{c.api}</code>

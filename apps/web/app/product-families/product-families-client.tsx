@@ -6,6 +6,7 @@ import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { productStatusLabel } from '@/lib/product-status';
 
 type ProductRow = {
   slug: string;
@@ -84,7 +85,7 @@ export function ProductFamiliesClient() {
                 {String(overview.entitlements.professionalVoiceCloning)}
               </p>
               <p style={{ margin: '0.4rem 0 0', color: 'var(--muted)' }}>
-                {overview.engine.score.byStatus.shipped_e2e}/{overview.engine.score.total} shipped E2E (
+                {overview.engine.score.byStatus.shipped_e2e}/{overview.engine.score.total} products ready (
                 {Math.round(overview.engine.score.shippedRatio * 100)}%) · {overview.unlocks.note}
               </p>
               <p style={{ margin: '0.4rem 0 0' }}>
@@ -111,7 +112,6 @@ export function ProductFamiliesClient() {
                 <thead>
                   <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border, #ddd)' }}>
                     <th style={{ padding: '0.5rem' }}>Product</th>
-                    <th style={{ padding: '0.5rem' }}>Status</th>
                     <th style={{ padding: '0.5rem' }}>Console</th>
                     <th style={{ padding: '0.5rem' }}>Unlocks</th>
                     <th style={{ padding: '0.5rem' }}>Honesty</th>
@@ -121,12 +121,19 @@ export function ProductFamiliesClient() {
                   {rows.map((p) => (
                     <tr key={p.slug} style={{ borderBottom: '1px solid var(--border, #eee)' }}>
                       <td style={{ padding: '0.55rem', verticalAlign: 'top' }}>
-                        <div style={{ fontWeight: 600 }}>{p.name}</div>
+                        <div style={{ fontWeight: 600 }}>
+                          {p.name}
+                          {productStatusLabel(p.status) ? (
+                            <span style={{ fontWeight: 500, color: 'var(--muted)', fontSize: '0.85rem' }}>
+                              {' '}
+                              · {productStatusLabel(p.status)}
+                            </span>
+                          ) : null}
+                        </div>
                         <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
                           {p.family} · {p.api ?? '—'}
                         </div>
                       </td>
-                      <td style={{ padding: '0.55rem', verticalAlign: 'top' }}>{p.status}</td>
                       <td style={{ padding: '0.55rem', verticalAlign: 'top' }}>
                         <Link href={p.consoleHref}>{p.consoleHref}</Link>
                       </td>

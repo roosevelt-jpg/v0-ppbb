@@ -222,16 +222,8 @@ export function EmbeddingCloudClient() {
             <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
               {engine.modalities.map((m) => (
                 <li key={m.id} style={{ borderTop: '1px solid var(--line)', padding: '0.4rem 0' }}>
-                  <strong>{m.name}</strong>{' '}
-                  <span
-                    style={{
-                      color: m.status === 'shipped' ? 'var(--brand)' : 'var(--muted)',
-                      fontSize: '0.85rem',
-                      fontWeight: 650,
-                    }}
-                  >
-                    · {m.status}
-                  </span>
+                  <strong>{m.name}</strong>
+                  <StatusSuffix status={m.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{m.notes}</div>
                 </li>
               ))}

@@ -47,7 +47,7 @@ export function AiOperationsDashboardClient() {
     ? [
         {
           label: 'products',
-          value: `${snap.products?.shipped ?? 0}/${snap.products?.total ?? 0} shipped`,
+          value: `${snap.products?.shipped ?? 0}/${snap.products?.total ?? 0} ready`,
         },
         { label: 'datasetRuns', value: String(snap.datasets?.runs ?? 0) },
         { label: 'trainingJobs', value: String(snap.training?.jobs ?? 0) },

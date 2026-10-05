@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { hidePhaseIds } from '@/lib/ui-copy';
+import { productStatusLabel, scrubShippedCopy } from '@/lib/product-status';
 
 export type CatalogRow = {
   id: string;
@@ -101,7 +102,7 @@ export function CatalogConsole({
                 padding: '0.25rem 0.55rem',
               }}
             >
-              {chip.label}: <strong style={{ color: 'var(--ink)' }}>{chip.value}</strong>
+              {chip.label}: <strong style={{ color: 'var(--ink)' }}>{scrubShippedCopy(chip.value)}</strong>
             </span>
           ))}
         </div>
@@ -124,6 +125,7 @@ export function CatalogConsole({
               {section.rows.map((row) => {
                 const href = typeof row.console === 'string' ? row.console : null;
                 const rowNotes = row.notes ? hidePhaseIds(String(row.notes)) : '';
+                const status = productStatusLabel(row.status ? String(row.status) : null);
                 return (
                   <li
                     key={row.id}
@@ -131,8 +133,8 @@ export function CatalogConsole({
                   >
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'baseline', flexWrap: 'wrap' }}>
                       {href ? <Link href={href}>{rowLabel(row)}</Link> : <span>{rowLabel(row)}</span>}
-                      {row.status ? (
-                        <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{String(row.status)}</span>
+                      {status ? (
+                        <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{status}</span>
                       ) : null}
                       {row.severity ? (
                         <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{String(row.severity)}</span>

@@ -113,8 +113,7 @@ export function VoiceBridgesClient() {
         </p>
         {engine?.score ? (
           <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
-            {engine.score.yes}/{engine.score.total} platforms verdict Yes · {engine.score.shipped}{' '}
-            shipped
+            {engine.score.yes}/{engine.score.total} platforms ready
           </p>
         ) : null}
         {error ? <p style={{ color: 'crimson' }}>{error}</p> : null}

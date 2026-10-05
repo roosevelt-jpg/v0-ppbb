@@ -198,7 +198,7 @@ export function ModelReleaseClient() {
       <section className="vl-stat-grid" style={{ marginBottom: '1.5rem' }}>
         <StatsCard label="SKUs" value={formatCompact(skus.length)} hint="Versioned product models" />
         <StatsCard label="In eval / canary" value={formatCompact(evalCount)} hint="Need African quality gates" tone="warn" />
-        <StatsCard label="GA" value={formatCompact(gaCount)} hint="Shipped with honesty cards" tone="ok" />
+        <StatsCard label="GA" value={formatCompact(gaCount)} hint="GA with honesty cards" tone="ok" />
         <StatsCard
           label="Credits used"
           value={formatCompact(priority?.creditsUsed ?? 0)}

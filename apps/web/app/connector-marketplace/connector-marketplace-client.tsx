@@ -59,7 +59,7 @@ export function ConnectorMarketplaceClient() {
             ...(registry.registry ?? []).map((r) => ({
               id: r.key,
               name: r.name,
-              status: String(r.status ?? 'shipped'),
+              status: String(r.status ?? 'ready'),
               notes: [r.api, r.notes].filter(Boolean).join(' · '),
             })),
           ],
