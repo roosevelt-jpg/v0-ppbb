@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -45,6 +46,16 @@ export class VoiceLawAuthenticityController {
     };
   }
 
+  private sessionFrom(req: AuthedReq): SessionContext {
+    return {
+      userId: req.sessionAuth?.userId ?? 'api',
+      organizationId: req.translateAuth.organizationId,
+      workspaceId: req.translateAuth.workspaceId,
+      clerkUserId: req.sessionAuth?.clerkUserId ?? 'api',
+      role: req.sessionAuth?.role ?? 'member',
+    };
+  }
+
   @Get('engine')
   engine() {
     return this.service.engine();
@@ -58,13 +69,7 @@ export class VoiceLawAuthenticityController {
   @Get('overview')
   @UseGuards(TranslateAuthGuard)
   overview(@Req() req: AuthedReq) {
-    return this.service.overview({
-      userId: req.sessionAuth?.userId ?? 'api',
-      organizationId: req.translateAuth.organizationId,
-      workspaceId: req.translateAuth.workspaceId,
-      clerkUserId: req.sessionAuth?.clerkUserId ?? 'api',
-      role: req.sessionAuth?.role ?? 'member',
-    });
+    return this.service.overview(this.sessionFrom(req));
   }
 
   @Get('reports')
@@ -77,6 +82,44 @@ export class VoiceLawAuthenticityController {
   @UseGuards(TranslateAuthGuard)
   get(@Req() req: AuthedReq, @Param('id') id: string) {
     return this.service.getReport(req.translateAuth.organizationId, id);
+  }
+
+  @Get('expert-reviews')
+  @UseGuards(TranslateAuthGuard)
+  expertReviews(@Req() req: AuthedReq, @Query('reportId') reportId?: string) {
+    return this.service.listExpertReviews(req.translateAuth.organizationId, reportId);
+  }
+
+  @Post('reports/:id/expert-review')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  requestExpertReview(
+    @Req() req: AuthedReq,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.service.requestExpertReview(
+      this.sessionFrom(req),
+      id,
+      body ?? {},
+      clientIp(req),
+    );
+  }
+
+  @Post('expert-reviews/:id')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(TranslateAuthGuard)
+  updateExpertReview(
+    @Req() req: AuthedReq,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>,
+  ) {
+    return this.service.updateExpertReview(
+      this.sessionFrom(req),
+      id,
+      body ?? {},
+      clientIp(req),
+    );
   }
 
   @Post('analyze')
@@ -99,6 +142,8 @@ export class VoiceLawAuthenticityController {
       sealToken?: string;
       appendEvidence?: string;
       threshold?: string;
+      africanLanguageHint?: string;
+      telephonyCodec?: string;
     },
   ) {
     if (!file) {
@@ -113,6 +158,8 @@ export class VoiceLawAuthenticityController {
       sealToken: body.sealToken?.trim() || undefined,
       appendEvidence: body.appendEvidence === 'true' || body.appendEvidence === '1',
       threshold: body.threshold ? Number(body.threshold) : undefined,
+      africanLanguageHint: body.africanLanguageHint?.trim() || undefined,
+      telephonyCodec: body.telephonyCodec?.trim() || undefined,
     });
   }
 }

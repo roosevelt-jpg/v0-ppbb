@@ -535,6 +535,11 @@ export const CONSOLE_NAV: NavGroup[] = [
       { href: '/model-training-platform', label: 'Training Platform' },
       { href: '/model-evaluation-platform', label: 'Evaluation Platform' },
       { href: '/model-registry', label: 'Model Registry' },
+      {
+        href: '/model-release',
+        label: 'Model Release',
+        keywords: ['sku', 'ga gate', 'african quality', 'stt', 'tts', 'weights', 'pipeline'],
+      },
       { href: '/atlas', label: 'Atlas' },
       { href: '/inference-cloud', label: 'Inference Cloud' },
       { href: '/ai-fabric', label: 'AI Fabric' },

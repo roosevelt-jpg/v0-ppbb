@@ -16,8 +16,10 @@ type Engine = {
     nistPadCertified: boolean;
     note: string;
   };
-  modelCard: { id: string; version?: string; task: string };
+  pad?: { active: string; upgradePath: string };
+  modelCard: { id: string; version?: string; task: string; padProvider?: string };
   capabilities: Array<{ id: string; name: string; api: string }>;
+  upgradePath?: string[];
 };
 
 type Report = {
@@ -29,11 +31,23 @@ type Report = {
     label: string;
     confidence: string;
   };
-  antiSpoof: { decision: string; riskScore: number; flags: string[]; note: string };
+  antiSpoof: { decision: string; riskScore: number; flags: string[]; note: string; provider?: string };
+  pad?: { provider: string; telephonyCodecHints?: string[]; africanLanguageHint?: string };
   file: { name: string; sha256: string; bytes: number };
   legal: { disclaimer: string; recommendedNextSteps: string[] };
   speakerMatch?: { matched: boolean; score: number | null; note: string } | null;
   seal?: Record<string, unknown> | null;
+  expertReviewIds?: string[];
+};
+
+type ExpertReview = {
+  id: string;
+  reportId: string;
+  status: string;
+  labName?: string;
+  notes: string;
+  findings?: string;
+  requestedAt: string;
 };
 
 export function VoiceLawAuthenticityClient() {
@@ -45,23 +59,31 @@ export function VoiceLawAuthenticityClient() {
   const [profileId, setProfileId] = useState('');
   const [sealToken, setSealToken] = useState('');
   const [appendEvidence, setAppendEvidence] = useState(true);
+  const [africanLanguageHint, setAfricanLanguageHint] = useState('');
+  const [telephonyCodec, setTelephonyCodec] = useState('');
+  const [labName, setLabName] = useState('');
   const [report, setReport] = useState<Report | null>(null);
   const [recent, setRecent] = useState<Array<{ id: string; label: string; riskScore: number; caseRef?: string }>>([]);
+  const [reviews, setReviews] = useState<ExpertReview[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in — use /dev-login');
-    const [eng, list] = await Promise.all([
+    const [eng, list, reviewList] = await Promise.all([
       apiFetch<Engine>('/v1/voice-law-authenticity/engine'),
       apiFetch<{ reports: Array<{ id: string; label: string; riskScore: number; caseRef?: string }> }>(
         '/v1/voice-law-authenticity/reports',
         { token },
       ).catch(() => ({ reports: [] })),
+      apiFetch<{ reviews: ExpertReview[] }>('/v1/voice-law-authenticity/expert-reviews', { token }).catch(() => ({
+        reviews: [],
+      })),
     ]);
     setEngine(eng);
     setRecent(list.reports.slice(0, 8));
+    setReviews(reviewList.reviews.slice(0, 8));
   }, [getToken]);
 
   useEffect(() => {
@@ -85,6 +107,8 @@ export function VoiceLawAuthenticityClient() {
       if (claimedSpeaker.trim()) form.append('claimedSpeaker', claimedSpeaker.trim());
       if (profileId.trim()) form.append('profileId', profileId.trim());
       if (sealToken.trim()) form.append('sealToken', sealToken.trim());
+      if (africanLanguageHint.trim()) form.append('africanLanguageHint', africanLanguageHint.trim());
+      if (telephonyCodec.trim()) form.append('telephonyCodec', telephonyCodec.trim());
       form.append('appendEvidence', appendEvidence ? 'true' : 'false');
       const res = await fetch(`${API_URL}/v1/voice-law-authenticity/analyze`, {
         method: 'POST',
@@ -97,6 +121,29 @@ export function VoiceLawAuthenticityClient() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analyze failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function requestExpertReview() {
+    if (!report) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await resolveApiToken(getToken);
+      if (!token) throw new Error('Not signed in');
+      await apiFetch(`/v1/voice-law-authenticity/reports/${report.id}/expert-review`, {
+        token,
+        method: 'POST',
+        body: JSON.stringify({
+          labName: labName.trim() || undefined,
+          notes: 'Console-requested forensic handoff — preserve original media.',
+        }),
+      });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Expert review request failed');
     } finally {
       setBusy(false);
     }
@@ -118,6 +165,8 @@ export function VoiceLawAuthenticityClient() {
         <Link href="/voice-biometrics">Biometrics</Link>
         {' · '}
         <Link href="/civic-voice-seal">Civic Seal</Link>
+        {' · '}
+        <Link href="/model-release">Model Release</Link>
         {' · '}
         <Link href="/justice-language-access">Justice Language</Link>
       </p>
@@ -151,9 +200,10 @@ export function VoiceLawAuthenticityClient() {
             lineHeight: 1.45,
           }}
         >
-          Model <code className="vl-code">{engine.modelCard.id}</code> · court sole evidence:{' '}
-          {String(engine.honesty.courtSoleEvidence)} · NIST PAD: {String(engine.honesty.nistPadCertified)}.
-          {engine.honesty.note}
+          Model <code className="vl-code">{engine.modelCard.id}</code> · PAD:{' '}
+          <code className="vl-code">{engine.pad?.active ?? engine.modelCard.padProvider ?? 'heuristic_v1'}</code> ·
+          court sole evidence: {String(engine.honesty.courtSoleEvidence)} · NIST PAD:{' '}
+          {String(engine.honesty.nistPadCertified)}. {engine.honesty.note}
         </p>
       ) : null}
 
@@ -184,6 +234,24 @@ export function VoiceLawAuthenticityClient() {
         <label style={{ display: 'grid', gap: '0.3rem' }}>
           <span style={label}>Civic seal token (optional)</span>
           <input className="vl-field" value={sealToken} onChange={(e) => setSealToken(e.target.value)} placeholder="seal_…" />
+        </label>
+        <label style={{ display: 'grid', gap: '0.3rem' }}>
+          <span style={label}>African language hint</span>
+          <input
+            className="vl-field"
+            value={africanLanguageHint}
+            onChange={(e) => setAfricanLanguageHint(e.target.value)}
+            placeholder="sw / yo / ha / am / zu"
+          />
+        </label>
+        <label style={{ display: 'grid', gap: '0.3rem' }}>
+          <span style={label}>Telephony codec (optional)</span>
+          <input
+            className="vl-field"
+            value={telephonyCodec}
+            onChange={(e) => setTelephonyCodec(e.target.value)}
+            placeholder="amr / g711 / wav-8k"
+          />
         </label>
         <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <input type="checkbox" checked={appendEvidence} onChange={(e) => setAppendEvidence(e.target.checked)} />
@@ -244,6 +312,20 @@ export function VoiceLawAuthenticityClient() {
                 <li key={s}>{s}</li>
               ))}
             </ul>
+            <div style={{ marginTop: '1rem', display: 'grid', gap: '0.55rem', maxWidth: '28rem' }}>
+              <label style={{ display: 'grid', gap: '0.3rem' }}>
+                <span style={label}>Accredited lab (expert review handoff)</span>
+                <input
+                  className="vl-field"
+                  value={labName}
+                  onChange={(e) => setLabName(e.target.value)}
+                  placeholder="Lab / examiner name"
+                />
+              </label>
+              <button type="button" className="vl-btn" disabled={busy} onClick={() => void requestExpertReview()}>
+                Request expert review
+              </button>
+            </div>
             <pre
               className="vl-code"
               style={{
@@ -260,6 +342,19 @@ export function VoiceLawAuthenticityClient() {
             </pre>
           </section>
         </div>
+      ) : null}
+
+      {reviews.length ? (
+        <AnalyticsSection title="Expert reviews" subtitle="Handoff to accredited labs — model never sole evidence.">
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {reviews.map((r) => (
+              <li key={r.id} style={{ borderTop: '1px solid var(--line)', padding: '0.45rem 0', fontSize: '0.9rem' }}>
+                {r.id} · {r.status} · report {r.reportId}
+                {r.labName ? ` · ${r.labName}` : ''}
+              </li>
+            ))}
+          </ul>
+        </AnalyticsSection>
       ) : null}
 
       {recent.length ? (
