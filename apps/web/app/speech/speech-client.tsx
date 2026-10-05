@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import { AnalyticsSection, BarChart, SegmentedBar, StatsCard, formatCompact } from '@/components/analytics';
 
 type Product = {
   id: string;
@@ -132,22 +133,49 @@ export function SpeechClient() {
       {data ? (
         <div style={{ display: 'grid', gap: '1.25rem' }}>
           <section className="vl-stat-grid">
-            <div className="vl-panel" style={{ padding: '1.1rem' }}>
-              <p style={kicker}>STT this period</p>
-              <p style={stat}>{data.usage.stt.requests} requests</p>
-              <p style={muted}>{data.usage.stt.minutes} min · {data.usage.stt.seconds}s</p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1.1rem' }}>
-              <p style={kicker}>TTS this period</p>
-              <p style={stat}>{data.usage.tts.requests} requests</p>
-              <p style={muted}>{data.usage.tts.characters.toLocaleString()} characters</p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1.1rem' }}>
-              <p style={kicker}>Workspace</p>
-              <p style={stat}>{data.workspace.voiceClones} clones</p>
-              <p style={muted}>Since {data.usage.periodStart.slice(0, 10)}</p>
-            </div>
+            <StatsCard
+              label="STT this period"
+              value={`${formatCompact(data.usage.stt.requests)} req`}
+              hint={`${formatCompact(data.usage.stt.minutes)} min · ${formatCompact(data.usage.stt.seconds)}s`}
+              tone="brand"
+            />
+            <StatsCard
+              label="TTS this period"
+              value={`${formatCompact(data.usage.tts.requests)} req`}
+              hint={`${formatCompact(data.usage.tts.characters)} characters`}
+            />
+            <StatsCard
+              label="Workspace clones"
+              value={formatCompact(data.workspace.voiceClones)}
+              hint={`Since ${data.usage.periodStart.slice(0, 10)}`}
+            />
           </section>
+
+          <AnalyticsSection title="Speech usage mix" subtitle="STT vs TTS activity for this billing period.">
+            <div className="vl-chart-grid">
+              <div className="vl-analytics-panel">
+                <BarChart
+                  data={[
+                    { label: 'STT requests', value: data.usage.stt.requests },
+                    { label: 'TTS requests', value: data.usage.tts.requests },
+                    { label: 'STT minutes', value: data.usage.stt.minutes },
+                    { label: 'TTS chars (k)', value: Math.round(data.usage.tts.characters / 1000) },
+                  ]}
+                  emptyLabel="No speech usage yet — try the TTS preview below."
+                />
+              </div>
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={[
+                    { label: 'STT', value: data.usage.stt.requests || data.usage.stt.seconds },
+                    { label: 'TTS', value: data.usage.tts.requests || data.usage.tts.characters },
+                  ]}
+                  totalLabel="Speech activity"
+                  emptyLabel="No speech activity yet."
+                />
+              </div>
+            </div>
+          </AnalyticsSection>
 
           <section className="vl-panel" style={{ padding: '1.25rem', display: 'grid', gap: '0.85rem' }}>
             <div>
@@ -212,24 +240,3 @@ export function SpeechClient() {
     </AppShell>
   );
 }
-
-const kicker: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.72rem',
-  letterSpacing: '0.07em',
-  textTransform: 'uppercase',
-  color: 'var(--muted)',
-  fontWeight: 700,
-};
-
-const stat: React.CSSProperties = {
-  margin: '0.45rem 0 0',
-  fontSize: '1.2rem',
-  fontWeight: 700,
-};
-
-const muted: React.CSSProperties = {
-  margin: '0.25rem 0 0',
-  color: 'var(--muted)',
-  fontSize: '0.88rem',
-};

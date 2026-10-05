@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { formatDateTime } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
+import { AnalyticsSection, SegmentedBar, StatsCard, formatCompact } from '@/components/analytics';
 
 type Surface = { id: string; api: string; console: string | null };
 type Capability = { id: string; name: string; status: string; api: string | null };
@@ -73,19 +74,35 @@ export function AiObservabilityClient() {
       {data ? (
         <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '52rem' }}>
           <section className="vl-stat-grid">
-            <div className="vl-panel" style={{ padding: '1rem 1.1rem' }}>
-              <p style={statLabel}>Audits ({data.dashboard.window})</p>
-              <p style={statValue}>{data.dashboard.audits24h}</p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1rem 1.1rem' }}>
-              <p style={statLabel}>Failure-like actions</p>
-              <p style={statValue}>{data.dashboard.errors24h}</p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1rem 1.1rem' }}>
-              <p style={statLabel}>Monitoring surfaces</p>
-              <p style={statValue}>{data.dashboard.surfaces.length}</p>
-            </div>
+            <StatsCard
+              label={`Audits (${data.dashboard.window})`}
+              value={formatCompact(data.dashboard.audits24h)}
+              tone="brand"
+            />
+            <StatsCard
+              label="Failure-like actions"
+              value={formatCompact(data.dashboard.errors24h)}
+              tone={data.dashboard.errors24h > 0 ? 'warn' : 'ok'}
+            />
+            <StatsCard
+              label="Monitoring surfaces"
+              value={formatCompact(data.dashboard.surfaces.length)}
+              hint={`${(data.engine.capabilities ?? []).length} capabilities`}
+            />
           </section>
+
+          <AnalyticsSection title="24h health mix" subtitle="Audits vs failure-like actions in the observability window.">
+            <div className="vl-analytics-panel">
+              <SegmentedBar
+                data={[
+                  { label: 'Audits', value: data.dashboard.audits24h },
+                  { label: 'Errors', value: data.dashboard.errors24h },
+                ]}
+                totalLabel="Events"
+                emptyLabel="No observability events in this window."
+              />
+            </div>
+          </AnalyticsSection>
 
           <section>
             <h2 style={label}>Capabilities</h2>
@@ -173,21 +190,6 @@ const label: React.CSSProperties = {
   letterSpacing: '0.06em',
   color: 'var(--muted)',
   margin: '0 0 0.55rem',
-};
-
-const statLabel: React.CSSProperties = {
-  margin: 0,
-  fontSize: '0.72rem',
-  letterSpacing: '0.07em',
-  textTransform: 'uppercase',
-  color: 'var(--muted)',
-  fontWeight: 700,
-};
-
-const statValue: React.CSSProperties = {
-  margin: '0.4rem 0 0',
-  fontSize: '1.35rem',
-  fontWeight: 700,
 };
 
 const pre: React.CSSProperties = {

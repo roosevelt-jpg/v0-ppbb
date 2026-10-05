@@ -6,6 +6,15 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiFetch, API_URL } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  QuotaMeter,
+  SegmentedBar,
+  StatsCard,
+  formatCompact,
+  toneForPct,
+  clampPct,
+} from '@/components/analytics';
 
 type Overview = {
   organization: { name: string; plan: string };
@@ -68,14 +77,49 @@ export function DevelopersClient() {
 
       {data ? (
         <div style={{ display: 'grid', gap: '1.75rem' }}>
-          <section>
-            <h2 style={sectionLabel}>Organization</h2>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '1.1rem' }}>{data.organization.name}</p>
-            <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.9rem' }}>
-              Plan {data.billing.planName} · {data.billing.charactersUsed.toLocaleString()} /{' '}
-              {data.billing.characterQuota.toLocaleString()} characters · {data.usage.requests} translate requests
-            </p>
+          <section className="vl-stat-grid">
+            <StatsCard
+              label="Organization"
+              value={data.organization.name}
+              hint={`Plan ${data.billing.planName}`}
+              tone="brand"
+            />
+            <StatsCard
+              label="API keys"
+              value={formatCompact(data.apiKeys.active)}
+              hint={`${data.apiKeys.live} live · ${data.apiKeys.test} test`}
+            />
+            <StatsCard
+              label="Translate requests"
+              value={formatCompact(data.usage.requests)}
+              hint={`${formatCompact(data.usage.characters)} characters`}
+            />
           </section>
+
+          <AnalyticsSection title="Quota & key mix" subtitle="Character limits and live vs test key distribution.">
+            <div className="vl-chart-grid">
+              <div className="vl-analytics-panel">
+                <QuotaMeter
+                  label="Character quota"
+                  used={data.billing.charactersUsed}
+                  quota={data.billing.characterQuota}
+                  remaining={data.billing.charactersRemaining}
+                  unit="characters"
+                  detail={`Tone: ${toneForPct(clampPct(data.billing.charactersUsed, data.billing.characterQuota))}`}
+                />
+              </div>
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={[
+                    { label: 'Live keys', value: data.apiKeys.live },
+                    { label: 'Test keys', value: data.apiKeys.test },
+                  ]}
+                  totalLabel="Active keys"
+                  emptyLabel="No API keys yet — create one on /keys."
+                />
+              </div>
+            </div>
+          </AnalyticsSection>
 
           <section>
             <h2 style={sectionLabel}>API keys</h2>

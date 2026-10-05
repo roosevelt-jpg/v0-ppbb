@@ -1,11 +1,20 @@
 'use client';
 
 import { useAuth } from '@clerk/nextjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { formatDateTime, formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  QuotaMeter,
+  SegmentedBar,
+  StatsCard,
+  formatCompact,
+  toneForPct,
+  clampPct,
+} from '@/components/analytics';
 
 type PlanCard = {
   id: string;
@@ -33,6 +42,7 @@ type BillingSummary = {
   monthlyCredits?: number;
   creditsUsed?: number;
   creditsRemaining?: number;
+  creditsBreakdown?: Record<string, number>;
   priceUsdMonthly?: number | null;
   commercialLicense?: boolean;
   periodStart: string;
@@ -46,6 +56,8 @@ type BillingSummary = {
   paymentFailureCount?: number;
   fraudHold?: boolean;
   pricingModel?: string;
+  concurrency?: number;
+  seats?: number;
 };
 
 type MemberRow = {
@@ -164,6 +176,17 @@ export function BillingClient() {
   const creditsUsed = summary?.creditsUsed ?? summary?.charactersUsed ?? 0;
   const creditsQuota = summary?.monthlyCredits ?? summary?.characterQuota ?? 0;
   const creditsRemaining = summary?.creditsRemaining ?? summary?.charactersRemaining ?? 0;
+  const creditsPct = clampPct(creditsUsed, creditsQuota);
+
+  const creditSegments = useMemo(() => {
+    if (!summary?.creditsBreakdown) return [];
+    return Object.entries(summary.creditsBreakdown)
+      .filter(([, v]) => (v ?? 0) > 0)
+      .map(([k, v]) => ({
+        label: k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        value: v,
+      }));
+  }, [summary]);
 
   const cardLabel =
     summary?.cardBrand && summary?.cardLast4
@@ -188,22 +211,50 @@ export function BillingClient() {
 
       {summary ? (
         <div style={{ marginTop: '1.5rem', display: 'grid', gap: '1rem' }}>
-          <div
-            className="vl-panel"
-            style={{
-              padding: '1.35rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: '1rem',
-              background: 'var(--bg-soft)',
-              border: 'none',
-            }}
+          <section className="vl-stat-grid-4">
+            <StatsCard label="Plan" value={summary.planName} hint={summary.billingStatus} tone="brand" />
+            <StatsCard
+              label="Credits used"
+              value={formatCompact(creditsUsed)}
+              hint={`${formatCompact(creditsRemaining)} remaining`}
+              tone={toneForPct(creditsPct)}
+            />
+            <StatsCard label="Credits / mo" value={formatCompact(creditsQuota)} hint="Shared pool" />
+            <StatsCard
+              label="Requests"
+              value={formatCompact(summary.requests)}
+              hint={
+                summary.seats != null
+                  ? `${summary.seats} seats · concurrency ${summary.concurrency ?? '—'}`
+                  : `Period ${formatUtc(summary.periodStart)}`
+              }
+            />
+          </section>
+
+          <AnalyticsSection
+            title="Credit limits"
+            subtitle="How much of your monthly pool is consumed across the Creative Platform."
           >
-            <Stat label="Plan" value={summary.planName} />
-            <Stat label="Credits used" value={creditsUsed.toLocaleString()} />
-            <Stat label="Credits / mo" value={creditsQuota.toLocaleString()} />
-            <Stat label="Requests" value={summary.requests.toLocaleString()} />
-          </div>
+            <div className="vl-chart-grid">
+              <div className="vl-analytics-panel">
+                <QuotaMeter
+                  label="Monthly credits"
+                  used={creditsUsed}
+                  quota={creditsQuota}
+                  remaining={creditsRemaining}
+                  unit="credits"
+                  detail={summary.pricingModel ?? 'verbalab-shared-credits'}
+                />
+              </div>
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={creditSegments}
+                  totalLabel="Credits by feature"
+                  emptyLabel="No credit breakdown yet for this period."
+                />
+              </div>
+            </div>
+          </AnalyticsSection>
 
           <div className="vl-panel" style={{ padding: '1.25rem' }}>
             <div style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
@@ -404,16 +455,5 @@ export function BillingClient() {
         <p style={{ color: 'var(--muted)' }}>Loading…</p>
       ) : null}
     </AppShell>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div style={{ background: 'var(--bg)', borderRadius: 14, padding: '1rem', border: '1px solid var(--line)' }}>
-      <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{label}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, marginTop: 4 }}>
-        {value}
-      </div>
-    </div>
   );
 }

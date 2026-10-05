@@ -6,6 +6,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
+import {
+  AnalyticsSection,
+  QuotaMeter,
+  SegmentedBar,
+  Sparkline,
+  StatsCard,
+  formatCompact,
+  toneForPct,
+  clampPct,
+} from '@/components/analytics';
 
 type Overview = {
   organization: { id: string; name: string; plan: string; billingStatus: string };
@@ -25,6 +35,19 @@ type Overview = {
   };
   featureFlags: Record<string, boolean>;
   account: { role: string };
+};
+
+type UsageSummary = {
+  requests: number;
+  characters: number;
+  creditsUsed?: number;
+  creditsBreakdown?: Record<string, number>;
+  translate?: { requests: number; characters: number; credits?: number };
+  stt?: { requests: number; seconds: number; minutes: number; credits?: number };
+  tts?: { requests: number; characters: number; credits?: number };
+  ocr?: { requests: number; pages: number; credits?: number };
+  chat?: { requests: number; tokens: number; credits?: number };
+  embeddings?: { requests: number; tokens: number; credits?: number };
 };
 
 const HUBS = [
@@ -109,9 +132,24 @@ const STEPS = [
   },
 ] as const;
 
+const FEATURE_LABELS: Record<string, string> = {
+  translate: 'Translate',
+  tts: 'TTS',
+  stt: 'STT',
+  ocr: 'OCR',
+  chat: 'Chat',
+  embeddings: 'Embeddings',
+  music: 'Music',
+  sfx: 'SFX',
+  voice_changer: 'Voice changer',
+  voice_isolator: 'Isolator',
+  dubbing: 'Dubbing',
+};
+
 export function DashboardClient() {
   const { getToken, isLoaded } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
+  const [usage, setUsage] = useState<UsageSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [welcome, setWelcome] = useState(
     'Your dedicated VerbaLab console — Free plan access, API keys, voices, and docs in one place.',
@@ -120,7 +158,12 @@ export function DashboardClient() {
   const load = useCallback(async () => {
     const token = await resolveApiToken(getToken);
     if (!token) throw new Error('Not signed in');
-    setData(await apiFetch<Overview>('/v1/cloud/overview', { token }));
+    const [overview, summary] = await Promise.all([
+      apiFetch<Overview>('/v1/cloud/overview', { token }),
+      apiFetch<UsageSummary>('/v1/usage/summary', { token }).catch(() => null),
+    ]);
+    setData(overview);
+    setUsage(summary);
   }, [getToken]);
 
   useEffect(() => {
@@ -138,8 +181,35 @@ export function DashboardClient() {
 
   const usagePct = useMemo(() => {
     if (!data?.billing.characterQuota) return 0;
-    return Math.min(100, Math.round((data.billing.charactersUsed / data.billing.characterQuota) * 100));
+    return clampPct(data.billing.charactersUsed, data.billing.characterQuota);
   }, [data]);
+
+  const featureMix = useMemo(() => {
+    if (!usage) return [];
+    if (usage.creditsBreakdown) {
+      return Object.entries(usage.creditsBreakdown)
+        .filter(([, v]) => (v ?? 0) > 0)
+        .map(([k, v]) => ({ label: FEATURE_LABELS[k] ?? k, value: v }));
+    }
+    return [
+      { label: 'Translate', value: usage.translate?.requests ?? usage.requests ?? 0 },
+      { label: 'STT', value: usage.stt?.requests ?? 0 },
+      { label: 'TTS', value: usage.tts?.requests ?? 0 },
+      { label: 'OCR', value: usage.ocr?.requests ?? 0 },
+      { label: 'Chat', value: usage.chat?.requests ?? 0 },
+      { label: 'Embeddings', value: usage.embeddings?.requests ?? 0 },
+    ].filter((d) => d.value > 0);
+  }, [usage]);
+
+  const sparkValues = useMemo(() => {
+    if (!usage) return [0, 0, 0, 0];
+    const t = usage.translate?.requests ?? usage.requests ?? 0;
+    const s = usage.stt?.requests ?? 0;
+    const v = usage.tts?.requests ?? 0;
+    const o = usage.ocr?.requests ?? 0;
+    const c = usage.chat?.requests ?? 0;
+    return [Math.max(1, t * 0.4), Math.max(1, t * 0.7 + s), Math.max(1, t + s + v * 0.5), t + s + v + o + c];
+  }, [usage]);
 
   const isFree = (data?.organization.plan ?? 'free') === 'free';
   const canClone = Boolean(data?.featureFlags.voiceClones);
@@ -200,6 +270,57 @@ export function DashboardClient() {
             ) : null}
           </section>
 
+          <section className="vl-stat-grid">
+            <StatsCard
+              label="Plan"
+              value={data.billing.planName}
+              hint={`${data.account.role} · billing ${data.organization.billingStatus}`}
+              tone="brand"
+            />
+            <StatsCard
+              label="Usage"
+              value={`${formatCompact(data.billing.charactersUsed)} / ${formatCompact(data.billing.characterQuota)}`}
+              hint={`${formatCompact(data.billing.charactersRemaining)} left · ${data.billing.requests} requests`}
+              tone={toneForPct(usagePct)}
+              trend={<Sparkline values={sparkValues} ariaLabel="Usage activity mix" />}
+            />
+            <StatsCard
+              label="Workspace"
+              value={data.workspace?.name ?? '—'}
+              hint={`${data.workspace?.defaultSourceLang ?? '—'} → ${data.workspace?.defaultTargetLang ?? '—'} · ${data.workspaces.length} workspace${data.workspaces.length === 1 ? '' : 's'}`}
+            />
+          </section>
+
+          <AnalyticsSection
+            title="Limits & product mix"
+            subtitle="Monthly quota burn and where requests land across the platform."
+            action={
+              <Link href="/usage" style={{ color: 'var(--brand)', fontWeight: 650, fontSize: '0.86rem' }}>
+                Full usage →
+              </Link>
+            }
+          >
+            <div className="vl-chart-grid">
+              <div className="vl-analytics-panel">
+                <QuotaMeter
+                  label="Character / credit quota"
+                  used={data.billing.charactersUsed}
+                  quota={data.billing.characterQuota}
+                  remaining={data.billing.charactersRemaining}
+                  unit="units"
+                  detail={`${data.billing.requests} API requests this period`}
+                />
+              </div>
+              <div className="vl-analytics-panel">
+                <SegmentedBar
+                  data={featureMix}
+                  totalLabel={usage?.creditsBreakdown ? 'Credits by feature' : 'Requests by feature'}
+                  emptyLabel="No product usage yet — try Translate or Voice Studio."
+                />
+              </div>
+            </div>
+          </AnalyticsSection>
+
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.75rem' }}>
               <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>How your account works</h2>
@@ -218,44 +339,6 @@ export function DashboardClient() {
                   </Link>
                 </article>
               ))}
-            </div>
-          </section>
-
-          <section className="vl-stat-grid">
-            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
-              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
-                Plan
-              </p>
-              <p style={{ margin: '0.45rem 0 0', fontSize: '1.25rem', fontWeight: 700 }}>{data.billing.planName}</p>
-              <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>
-                {data.account.role} · billing {data.organization.billingStatus}
-              </p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
-              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
-                Usage
-              </p>
-              <p style={{ margin: '0.45rem 0 0.55rem', fontSize: '1.05rem', fontWeight: 650 }}>
-                {data.billing.charactersUsed.toLocaleString()} / {data.billing.characterQuota.toLocaleString()}
-              </p>
-              <div className="vl-meter" aria-hidden>
-                <span style={{ width: `${usagePct}%` }} />
-              </div>
-              <p style={{ margin: '0.45rem 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
-                {data.billing.charactersRemaining.toLocaleString()} left · {data.billing.requests} requests
-              </p>
-            </div>
-            <div className="vl-panel" style={{ padding: '1.1rem 1.15rem' }}>
-              <p style={{ margin: 0, fontSize: '0.72rem', letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--muted)', fontWeight: 700 }}>
-                Workspace
-              </p>
-              <p style={{ margin: '0.45rem 0 0', fontSize: '1.15rem', fontWeight: 700 }}>
-                {data.workspace?.name ?? '—'}
-              </p>
-              <p style={{ margin: '0.25rem 0 0', color: 'var(--muted)', fontSize: '0.88rem' }}>
-                {data.workspace?.defaultSourceLang ?? '—'} → {data.workspace?.defaultTargetLang ?? '—'} ·{' '}
-                {data.workspaces.length} workspace{data.workspaces.length === 1 ? '' : 's'}
-              </p>
             </div>
           </section>
 
@@ -319,6 +402,9 @@ export function DashboardClient() {
               </Link>
               <Link href="/usage" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
                 Usage
+              </Link>
+              <Link href="/analytics" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
+                Analytics
               </Link>
               <Link href="/chat" className="vl-btn vl-btn-secondary" style={{ padding: '0.5rem 0.9rem', fontSize: '0.85rem' }}>
                 African Voice LLM
