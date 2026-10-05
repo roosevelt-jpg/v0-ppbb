@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { canOpenProductConsole } from '@/lib/product-status';
+import { StatusSuffix } from '@/components/status-suffix';
 import { hidePhaseIds } from '@/lib/ui-copy';
 import { AppShell } from '@/components/app-shell';
 

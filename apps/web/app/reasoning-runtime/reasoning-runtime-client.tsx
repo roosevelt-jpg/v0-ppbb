@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 import { hidePhaseIds } from '@/lib/ui-copy';
@@ -134,7 +135,7 @@ export function ReasoningRuntimeClient() {
           <ul style={{ paddingLeft: '1.2rem' }}>
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ marginBottom: '0.45rem' }}>
-                <strong>{c.name}</strong> · {c.status}
+                <strong>{c.name}</strong><StatusSuffix status={c.status} />
                 <div style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>{hidePhaseIds(String(c.notes ?? ""))}</div>
               </li>
             ))}

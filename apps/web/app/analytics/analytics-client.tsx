@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { formatUtc } from '@/lib/format-date';
 import { AppShell } from '@/components/app-shell';
@@ -188,7 +189,7 @@ export function AnalyticsClient() {
         <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0 0', display: 'grid', gap: '0.25rem' }}>
           {catalog.capabilities.map((c) => (
             <li key={c.id} style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
-              {c.name} · {c.status}
+              {c.name}<StatusSuffix status={c.status} />
               {c.api ? ` · ${c.api}` : ''}
             </li>
           ))}

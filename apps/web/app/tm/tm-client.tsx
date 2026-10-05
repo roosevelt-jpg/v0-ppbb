@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState, type CSSProperties } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -163,7 +164,7 @@ export function TmClient() {
         <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0 0', display: 'grid', gap: '0.25rem' }}>
           {overview.capabilities.slice(0, 6).map((c) => (
             <li key={c.id} style={{ fontSize: '0.9rem', color: 'var(--muted)' }}>
-              {c.name} · {c.status}
+              {c.name}<StatusSuffix status={c.status} />
             </li>
           ))}
         </ul>

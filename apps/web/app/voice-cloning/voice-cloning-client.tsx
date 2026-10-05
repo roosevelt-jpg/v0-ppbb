@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -145,7 +146,7 @@ export function VoiceCloningClient() {
             {library.map((c) => (
               <li key={c.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
                 <strong>
-                  {c.name} · {c.status} · {c.cloneMode}
+                  {c.name}<StatusSuffix status={c.status} /> · {c.cloneMode}
                 </strong>
                 <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
                   consent {c.consentAttested ? 'yes' : 'no'} · ownership{' '}
@@ -166,7 +167,7 @@ export function VoiceCloningClient() {
             {engine.capabilities.map((c) => (
               <li key={c.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.55rem' }}>
                 <strong>
-                  {c.name} · {c.status}
+                  {c.name}<StatusSuffix status={c.status} />
                 </strong>
                 <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{c.notes}</div>
               </li>

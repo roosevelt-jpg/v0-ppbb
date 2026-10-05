@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { canOpenProductConsole } from '@/lib/product-status';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -173,8 +175,8 @@ export function KnowledgeCloudClient() {
             <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
               {data.products.map((p) => (
                 <li key={p.id} style={{ borderTop: '1px solid var(--line)', padding: '0.55rem 0' }}>
-                  <strong>{p.name}</strong>{' '}
-                  <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>· {p.status}</span>
+                  <strong>{p.name}</strong>
+                  <StatusSuffix status={p.status} />
                   <div style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>{p.notes}</div>
                   {p.console ? (
                     <Link href={p.console} style={{ fontSize: '0.85rem' }}>

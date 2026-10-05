@@ -4,6 +4,7 @@ import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { apiFetch } from '@/lib/api';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 
@@ -101,7 +102,7 @@ export function StyleIntelligenceClient() {
         <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.5rem', display: 'grid', gap: '0.35rem' }}>
           {overview.capabilities.map((c) => (
             <li key={c.id} style={{ borderTop: '1px solid var(--line)', paddingTop: '0.35rem', fontSize: '0.92rem' }}>
-              <strong>{c.name}</strong> · {c.status}
+              <strong>{c.name}</strong><StatusSuffix status={c.status} />
               {c.api ? ` · ${c.api}` : ''}
             </li>
           ))}

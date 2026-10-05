@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useCallback, useEffect, useState } from 'react';
 import { API_URL, apiFetch } from '@/lib/api';
+import { canOpenProductConsole } from '@/lib/product-status';
+import { StatusSuffix } from '@/components/status-suffix';
 import { resolveApiToken } from '@/lib/dev-auth';
 import { AppShell } from '@/components/app-shell';
 import { AnalyticsSection, BarChart, SegmentedBar, StatsCard, formatCompact } from '@/components/analytics';
@@ -212,10 +214,10 @@ export function SpeechClient() {
                 <div key={p.id} className="vl-hub-card" style={{ cursor: 'default' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
                     <h3>{p.name}</h3>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 650 }}>{p.status}</span>
+                    <StatusSuffix status={p.status} />
                   </div>
                   <p>{p.notes}</p>
-                  {p.console && (p.status === 'shipped' || p.status === 'partial') ? (
+                  {canOpenProductConsole(p.status, p.console) ? (
                     <Link href={p.console} style={{ color: 'var(--brand)', fontWeight: 650, fontSize: '0.88rem' }}>
                       Open console →
                     </Link>
