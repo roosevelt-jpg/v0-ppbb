@@ -140,7 +140,7 @@ export function explainZohoSmtpError(err: unknown, config: Pick<ZohoSmtpConfig, 
   const raw = err instanceof Error ? err.message : String(err)
   if (isAuthError(err)) {
     return (
-      `Zoho rejected the SMTP login for ${config.email} (535 Authentication Failed) on every Zoho server tried. ` +
+      `Zoho rejected the SMTP login for ${config.email} (535 Authentication Failed). ` +
       'Generate a new Application-Specific Password in Zoho Accounts → Security → App Passwords, ' +
       'make sure SMTP/IMAP access is enabled for this mailbox in Zoho Mail Admin, use the mailbox primary address (not an alias), ' +
       'then save it again in Admin → Integrations → Zoho Mail SMTP.'
@@ -152,9 +152,17 @@ export function explainZohoSmtpError(err: unknown, config: Pick<ZohoSmtpConfig, 
   return raw
 }
 
+/** smtppro.<dc> ↔ smtp.<dc>: org vs personal host in the same data center. */
+function counterpartHost(host: ZohoSmtpHostPreset): ZohoSmtpHostPreset | null {
+  const swapped = host.startsWith('smtppro.')
+    ? host.replace(/^smtppro\./, 'smtp.')
+    : host.replace(/^smtp\./, 'smtppro.')
+  return ZOHO_SMTP_HOSTS.find((candidate) => candidate === swapped) ?? null
+}
+
 const workingTransport = new Map<string, { host: ZohoSmtpHostPreset; port: 465 | 587 }>()
 const recentFailure = new Map<string, { error: string; until: number }>()
-const FAILURE_COOLDOWN_MS = 2 * 60 * 1000
+const FAILURE_COOLDOWN_MS = 5 * 60 * 1000
 
 function credentialFingerprint(config: ZohoSmtpConfig): string {
   return createHash('sha256')
@@ -184,9 +192,9 @@ async function rememberWorkingHost(config: ZohoSmtpConfig): Promise<void> {
 
 /**
  * Return a transporter that has already logged in to Zoho. When the saved
- * host/port is rejected (wrong data center, personal vs org host, blocked
- * port) every other Zoho host is tried in parallel and the one that accepts
- * the login is remembered — in memory and back on the integration.
+ * host rejects the login, the org/personal counterpart host is tried; when it
+ * can't be reached, the other port is tried. A working combination is
+ * remembered — in memory and back on the integration.
  */
 export async function getWorkingZohoTransport(
   config: ZohoSmtpConfig
@@ -221,22 +229,27 @@ export async function getWorkingZohoTransport(
     }
   }
 
-  const alternates: ZohoSmtpConfig[] = [
-    ...(config.port === 465 ? [{ ...config, port: 587 as const }] : [{ ...config, port: 465 as const }]),
-    ...ZOHO_SMTP_HOSTS.filter((host) => host !== config.host).map((host) => ({
-      ...config,
-      host,
-      port: 465 as const,
-    })),
-  ]
+  // One or two quick, sequential retries only — a parallel sweep of every
+  // Zoho host stalls a small server (DNS + TLS burst) long enough to 504.
+  const alternates: ZohoSmtpConfig[] = []
+  if (isAuthError(primaryError)) {
+    const counterpart = counterpartHost(config.host)
+    if (counterpart) alternates.push({ ...config, host: counterpart })
+  } else {
+    alternates.push({ ...config, port: config.port === 465 ? 587 : 465 })
+  }
 
-  const winner = await Promise.any(
-    alternates.map(async (candidate) => {
+  let winner: { transporter: Transporter; config: ZohoSmtpConfig } | null = null
+  for (const candidate of alternates) {
+    try {
       const transporter = createZohoTransporter(candidate, { fast: true })
       await transporter.verify()
-      return { transporter, config: candidate }
-    })
-  ).catch(() => null)
+      winner = { transporter, config: candidate }
+      break
+    } catch {
+      /* try next */
+    }
+  }
 
   if (winner) {
     console.warn(

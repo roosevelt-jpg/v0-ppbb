@@ -330,7 +330,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       },
     ],
     docs: 'https://www.zoho.com/mail/help/zoho-smtp.html',
-    help: 'From Zoho Admin / Accounts: copy the mailbox email + generate an Application Specific Password. Use smtppro.zoho.com + 465 for paid org domains like passive-blessings.com. Enable SMTP access for that mailbox if Zoho requires it. If the saved host is rejected, the server tries every Zoho data center and saves the one that accepts the login.',
+    help: 'From Zoho Admin / Accounts: copy the mailbox email + generate an Application Specific Password. Use smtppro.zoho.com + 465 for paid org domains like passive-blessings.com. Enable SMTP access for that mailbox if Zoho requires it. If the saved host rejects the login, the server also tries the matching smtp/smtppro host and saves the one that works. Pick your data center (EU, India, Saudi Arabia, UAE…) here if your Zoho account is not on zoho.com.',
   },
   twilio: {
     id: 'twilio',
