@@ -121,6 +121,36 @@ export default function MembershipPage() {
     if (snap.exists()) setProfile(snap.data())
   }
 
+  const syncMembership = React.useCallback(async (): Promise<boolean> => {
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) return false
+      const res = await fetch('/api/membership/sync', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json().catch(() => ({}))
+      return Boolean(res.ok && json.active)
+    } catch {
+      return false
+    }
+  }, [])
+
+  const autoSyncTried = React.useRef(false)
+  useEffect(() => {
+    if (!profile || autoSyncTried.current) return
+    if (hasActiveMembership(profile)) return
+    if (!profile.stripeCustomerId && !profile.stripeSubscriptionId) return
+    autoSyncTried.current = true
+    const justPaid = new URLSearchParams(window.location.search).get('status') === 'success'
+    void (async () => {
+      for (let attempt = 0; attempt < (justPaid ? 6 : 1); attempt++) {
+        if (await syncMembership()) return
+        await new Promise((r) => setTimeout(r, 2000))
+      }
+    })()
+  }, [profile, syncMembership])
+
   const handleRedeemPromo = async () => {
     const code = promoCode.trim()
     if (!code || !user?.id) return
@@ -273,8 +303,10 @@ export default function MembershipPage() {
     membershipRenewDate: profile?.membershipRenewDate,
     membershipLifetimeForever: profile?.membershipLifetimeForever,
   }
-  const alreadyUsedPromo = Boolean(profile?.membershipPromoCodeId || profile?.promoCodeId)
   const memberActive = hasActiveMembership(memberRecord)
+  // A reserved promo that never activated is released server-side on the next redeem.
+  const alreadyUsedPromo =
+    Boolean(profile?.membershipPromoCodeId || profile?.promoCodeId) && memberActive
 
   const handleCardSuccess = () => {
     skipPromoReleaseRef.current = true
@@ -285,7 +317,17 @@ export default function MembershipPage() {
         ? 'Card saved. Your membership is active for the free period — billing starts when it ends.'
         : 'Payment confirmed. Your membership is updating.'
     )
-    void refreshProfile()
+    void (async () => {
+      // Stripe can take a few seconds to mark the subscription live after confirmation.
+      for (let attempt = 0; attempt < 6; attempt++) {
+        if (await syncMembership()) {
+          setStatusBanner('Payment confirmed. Your membership is active.')
+          break
+        }
+        await new Promise((r) => setTimeout(r, 2000))
+      }
+      await refreshProfile()
+    })()
   }
 
   const releasePromoReservation = () => {
@@ -346,7 +388,9 @@ export default function MembershipPage() {
 
       {statusBanner ? (
         <Card className="p-4 mb-6 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5 text-sm text-neutral-700 dark:text-neutral-200">
-          {statusBanner}
+          {memberActive && statusBanner.endsWith('Your membership is updating.')
+            ? 'Payment successful. Your membership is active.'
+            : statusBanner}
         </Card>
       ) : null}
 

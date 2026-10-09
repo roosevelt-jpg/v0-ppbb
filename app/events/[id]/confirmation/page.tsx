@@ -7,6 +7,7 @@ import { useSearchParams, useParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { TicketAmountDue } from '@/components/events/ticket-amount-due'
 import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import { CalendarPlus, CheckCircle, Clock, Download, ExternalLink, MessageCircle } from 'lucide-react'
@@ -41,6 +42,8 @@ function ConfirmationInner() {
     clientSecret: string
     publishableKey: string
     registrationId: string
+    amount?: number
+    currency?: string
   } | null>(null)
 
   React.useEffect(() => {
@@ -171,6 +174,9 @@ function ConfirmationInner() {
           clientSecret: json.clientSecret,
           publishableKey: json.publishableKey,
           registrationId: json.registrationId || registrationId,
+          amount:
+            typeof json.amount === 'number' ? json.amount : Number(reg?.ticketPrice) || undefined,
+          currency: json.currency || reg?.currency || 'AED',
         })
         return
       }
@@ -197,6 +203,7 @@ function ConfirmationInner() {
               Payment is required during registration. You are confirmed only after the card
               payment succeeds.
             </p>
+            <TicketAmountDue amount={stripeCheckout.amount} currency={stripeCheckout.currency} />
             <div className="mb-3">
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Coupon / unlock code

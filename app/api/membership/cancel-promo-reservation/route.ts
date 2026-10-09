@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { rollbackMembershipPromoReservation } from '@/lib/membership-promo'
+import { cancelAbandonedPromoSubscriptions } from '@/lib/payment-completion'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -54,6 +55,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    await cancelAbandonedPromoSubscriptions(uid).catch((err) =>
+      console.error('[membership/cancel-promo-reservation] stripe cleanup failed', err)
+    )
     await rollbackMembershipPromoReservation(promoId, uid)
 
     return NextResponse.json({ success: true, released: true })

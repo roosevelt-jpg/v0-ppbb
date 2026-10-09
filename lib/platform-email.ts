@@ -5,7 +5,7 @@
 
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getEmailBrandLogoUrl } from '@/lib/gmail-service'
-import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
+import { getWorkingZohoTransport, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
 import { DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 import {
@@ -141,7 +141,7 @@ async function sendViaZohoSmtp(
   if (!config) return { ok: false, error: 'Zoho Mail SMTP not configured' }
 
   try {
-    const transporter = createZohoTransporter(config)
+    const { transporter } = await getWorkingZohoTransport(config)
     await transporter.sendMail({
       from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`,
       replyTo: config.email,

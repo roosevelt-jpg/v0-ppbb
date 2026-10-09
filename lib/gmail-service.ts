@@ -6,7 +6,7 @@
 
 import type { SiteSettings } from './types'
 import { getSiteUrl } from '@/lib/site-metadata'
-import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
+import { getWorkingZohoTransport, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 
 function getPublicSiteUrl(): string {
@@ -230,7 +230,7 @@ export async function sendRawZohoEmail(opts: {
     )
   }
 
-  const transporter = createZohoTransporter(config)
+  const { transporter } = await getWorkingZohoTransport(config)
   await transporter.sendMail({
     from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`,
     replyTo: opts.replyTo || config.email,

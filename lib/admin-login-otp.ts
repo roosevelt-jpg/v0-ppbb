@@ -30,8 +30,13 @@ export async function createAndSendAdminLoginOtp(opts: {
   ok: boolean
   error?: string
   expiresAt?: string
-  /** True when no SMTP is configured — email OTP is skipped so admins can still sign in. */
+  /**
+   * True when the code could not be emailed (Zoho missing or rejecting the login).
+   * The password step already passed, so admins are let in rather than locked out
+   * of the very Integrations page needed to repair email.
+   */
   emailSkipped?: boolean
+  emailSkippedReason?: string
 }> {
   const email = String(opts.email || '')
     .trim()
@@ -43,11 +48,11 @@ export async function createAndSendAdminLoginOtp(opts: {
 
   const zoho = await getZohoSmtpConfig()
   if (!zoho) {
-    console.warn('[admin-login-otp] Zoho Mail SMTP not configured — refusing login without a code for', email)
+    console.warn('[admin-login-otp] Zoho Mail SMTP not configured — skipping email code for', email)
     return {
-      ok: false,
-      error:
-        'Login code could not be emailed. Zoho Mail SMTP is not configured, so sign-in stops here. An admin must fix Zoho under Integrations before anyone can enter the admin panel.',
+      ok: true,
+      emailSkipped: true,
+      emailSkippedReason: 'Zoho Mail SMTP is not configured',
     }
   }
 
@@ -89,12 +94,11 @@ export async function createAndSendAdminLoginOtp(opts: {
 
   if (!result.ok) {
     await db.collection(ADMIN_LOGIN_OTP_COLLECTION).doc(uid).delete().catch(() => undefined)
-    console.warn('[admin-login-otp] Email send failed — code was not issued for', email, result.error)
+    console.warn('[admin-login-otp] Email send failed — skipping email code for', email, result.error)
     return {
-      ok: false,
-      error: result.error
-        ? `Login code was not emailed (${result.error}). You are not signed in.`
-        : 'Login code was not emailed. You are not signed in.',
+      ok: true,
+      emailSkipped: true,
+      emailSkippedReason: result.error || 'Login code email could not be sent',
     }
   }
 

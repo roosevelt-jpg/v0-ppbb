@@ -12,6 +12,7 @@ import type { Event } from '@/lib/event-types'
 import type { User } from '@/lib/types'
 import { isCharityVolunteerEvent } from '@/lib/charity-event'
 import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { TicketAmountDue } from '@/components/events/ticket-amount-due'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -108,6 +109,8 @@ export default function MyEventsPage() {
     publishableKey: string
     registrationId: string
     eventId: string
+    amount?: number
+    currency?: string
   } | null>(null)
 
   const loadRegistered = React.useCallback(async () => {
@@ -226,6 +229,8 @@ export default function MyEventsPage() {
           publishableKey: json.publishableKey,
           registrationId: json.registrationId,
           eventId: event.id,
+          amount: typeof json.amount === 'number' ? json.amount : Number(event.price) || undefined,
+          currency: json.currency || event.currency || 'AED',
         })
         return
       }
@@ -313,6 +318,7 @@ export default function MyEventsPage() {
           <Card className="w-full max-w-md p-6 bg-white">
             <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
             <p className="text-sm text-neutral-600 mb-4">Pay with Apple Pay, Google Pay, or card to complete registration.</p>
+            <TicketAmountDue amount={stripeCheckout.amount} currency={stripeCheckout.currency} />
             <div className="mb-3">
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Coupon / unlock code

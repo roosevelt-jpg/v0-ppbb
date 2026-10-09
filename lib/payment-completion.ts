@@ -10,6 +10,7 @@ import {
 } from '@/lib/event-luma-server'
 
 import { getSiteUrl } from '@/lib/site-metadata'
+import { hasActiveMembership } from '@/lib/membership-access'
 import {
   clientSecretForIncompleteSubscription,
   ensureRecurringMembershipPrice,
@@ -170,6 +171,15 @@ export async function createStripeMembershipIntent(params: {
       })
       resumedWithoutCharge = true
     } else if (live && itemId && samePlan && !current.cancel_at_period_end && !params.couponId && !params.trialDays) {
+      if (subscriptionNeedsCard(current)) {
+        // A trial that was started but the card form was closed — hand back the
+        // same setup intent instead of pretending the plan is already paid.
+        const withIntent = await stripe.subscriptions.retrieve(existingSubId, {
+          expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+        })
+        const secret = await clientSecretForIncompleteSubscription(stripe, withIntent)
+        return { clientSecret: secret.clientSecret, mode: secret.mode, subscriptionId: withIntent.id }
+      }
       subscription = current
       resumedWithoutCharge = true
     } else if (live && itemId) {
@@ -227,6 +237,11 @@ export async function createStripeMembershipIntent(params: {
   )
 
   if (resumedWithoutCharge) {
+    // Stripe already has a paid/live subscription for this plan. Make sure the
+    // profile reflects it so members-only pages unlock without waiting for a webhook.
+    await syncMembershipFromStripe(params.userId).catch((err) =>
+      console.error('[payment-completion] membership sync after resume failed:', err)
+    )
     return {
       clientSecret: null,
       mode: 'payment',
@@ -699,4 +714,137 @@ export async function completeMembershipPayment(params: {
     .catch((err) => console.error('[payment-completion] membership email:', err))
 
   return { membershipUrl }
+}
+
+/** Trialing subscription whose card step was never finished (setup intent still pending). */
+export function subscriptionNeedsCard(subscription: Stripe.Subscription): boolean {
+  return (
+    subscription.status === 'trialing' &&
+    Boolean(subscription.pending_setup_intent) &&
+    !subscription.default_payment_method
+  )
+}
+
+function isMembershipSubscriptionFor(subscription: Stripe.Subscription, userId: string): boolean {
+  const meta = subscription.metadata || {}
+  if (meta.userId && meta.userId !== userId) return false
+  return meta.type === 'membership' || Boolean(meta.planId)
+}
+
+async function listMembershipSubscriptions(
+  stripe: Stripe,
+  userId: string,
+  userData: Record<string, unknown>
+): Promise<Stripe.Subscription[]> {
+  const customerId = String(userData.stripeCustomerId || '').trim()
+  const knownSubId = String(userData.stripeSubscriptionId || '').trim()
+  const subs: Stripe.Subscription[] = []
+  if (customerId) {
+    const listed = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 20 })
+    subs.push(...listed.data)
+  }
+  if (knownSubId.startsWith('sub_') && !subs.some((s) => s.id === knownSubId)) {
+    const known = await stripe.subscriptions.retrieve(knownSubId).catch(() => null)
+    if (known) subs.push(known)
+  }
+  return subs.filter((s) => isMembershipSubscriptionFor(s, userId))
+}
+
+/**
+ * Activate the member's plan straight from Stripe when their subscription is
+ * live but the profile never caught up (missed or unconfigured webhook).
+ * Idempotent: does nothing when the profile already matches.
+ */
+export async function syncMembershipFromStripe(
+  userId: string
+): Promise<{ synced: boolean; active: boolean; planId?: string }> {
+  const db = getAdminDb()
+  const userSnap = await db.collection('users').doc(userId).get()
+  const userData = (userSnap.data() || {}) as Record<string, unknown>
+  const activeNow = hasActiveMembership(userData)
+
+  if (!userData.stripeCustomerId && !userData.stripeSubscriptionId) {
+    return { synced: false, active: activeNow }
+  }
+
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
+  const subs = await listMembershipSubscriptions(stripe, userId, userData)
+  const live = subs
+    .filter((s) => ['active', 'trialing'].includes(s.status) && !subscriptionNeedsCard(s))
+    .sort((a, b) => b.created - a.created)[0]
+
+  const planId = String(live?.metadata?.planId || '').trim()
+  if (!live || !planId) return { synced: false, active: activeNow }
+
+  if (activeNow && String(userData.membershipPlanId || '').trim() === planId) {
+    return { synced: false, active: true, planId }
+  }
+
+  const periodEnd = subscriptionPeriodEndUnix(live)
+  await completeMembershipPayment({
+    userId,
+    planId,
+    gateway: 'stripe',
+    paymentReference: live.id,
+    amountCents:
+      live.status === 'trialing' ? 0 : live.items.data[0]?.price?.unit_amount ?? undefined,
+    currency: live.items.data[0]?.price?.currency,
+    promoCodeId: live.metadata?.promoCodeId || undefined,
+    promoCode: live.metadata?.promoCode || undefined,
+    renewDateOverride: periodEnd ? new Date(periodEnd * 1000) : undefined,
+  })
+
+  await db.collection('subscriptions').doc(live.id).set(
+    {
+      stripeSubscriptionId: live.id,
+      status: live.status,
+      cancelAtPeriodEnd: Boolean(live.cancel_at_period_end),
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  )
+  if (live.cancel_at_period_end) {
+    await db
+      .collection('users')
+      .doc(userId)
+      .set({ membershipAutoRenew: false, updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+  }
+
+  return { synced: true, active: true, planId }
+}
+
+/**
+ * Cancel promo subscriptions whose card step was abandoned (incomplete, or
+ * trialing with no card) so a released promo can't leave a ghost
+ * subscription that blocks the next checkout.
+ */
+export async function cancelAbandonedPromoSubscriptions(userId: string): Promise<number> {
+  const db = getAdminDb()
+  const userSnap = await db.collection('users').doc(userId).get()
+  const userData = (userSnap.data() || {}) as Record<string, unknown>
+  if (!userData.stripeCustomerId && !userData.stripeSubscriptionId) return 0
+
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
+  const subs = await listMembershipSubscriptions(stripe, userId, userData)
+  let cancelled = 0
+  for (const sub of subs) {
+    if (!sub.metadata?.promoCodeId) continue
+    const abandoned = sub.status === 'incomplete' || subscriptionNeedsCard(sub)
+    if (!abandoned) continue
+    await stripe.subscriptions.cancel(sub.id).catch(() => undefined)
+    await db.collection('subscriptions').doc(sub.id).set(
+      { status: 'cancelled', cancelledAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    )
+    if (String(userData.stripeSubscriptionId || '') === sub.id) {
+      await db
+        .collection('users')
+        .doc(userId)
+        .set({ stripeSubscriptionId: FieldValue.delete(), updatedAt: FieldValue.serverTimestamp() }, { merge: true })
+    }
+    cancelled += 1
+  }
+  return cancelled
 }

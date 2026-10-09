@@ -354,6 +354,51 @@ export async function rollbackMembershipPromoReservation(promoId: string, userId
 }
 
 /**
+ * A promo reservation that never turned into membership (card form closed,
+ * Stripe trial left without a card) must not lock the account out of every
+ * other code. Release it when the member has no active plan and no
+ * subscription was ever recorded for that promo.
+ */
+async function releaseStalePromoReservation(
+  userId: string,
+  userData: Record<string, unknown>
+): Promise<boolean> {
+  const { hasActiveMembership } = await import('@/lib/membership-access')
+  if (hasActiveMembership(userData)) return false
+
+  const promoId = String(userData.membershipPromoCodeId || userData.promoCodeId || '').trim()
+  if (!promoId) return true
+
+  const db = getAdminDb()
+  const subs = await db.collection('subscriptions').where('userId', '==', userId).limit(50).get()
+  const promoWasUsed = subs.docs.some((d) => {
+    const s = d.data()
+    return (
+      String(s.promoCodeId || '') === promoId &&
+      ['active', 'trialing', 'cancelled', 'canceled', 'expired'].includes(String(s.status || ''))
+    )
+  })
+  if (promoWasUsed) return false
+
+  const { cancelAbandonedPromoSubscriptions } = await import('@/lib/payment-completion')
+  await cancelAbandonedPromoSubscriptions(userId).catch((err) =>
+    console.error('[membership-promo] cancel abandoned promo subscriptions failed', err)
+  )
+  await rollbackMembershipPromoReservation(promoId, userId)
+  // The rollback skips the profile when the promo doc itself is gone.
+  await db.collection('users').doc(userId).set(
+    {
+      membershipPromoCodeId: FieldValue.delete(),
+      membershipPromoCode: FieldValue.delete(),
+      promoCodeId: FieldValue.delete(),
+      updatedAt: Timestamp.now(),
+    },
+    { merge: true }
+  )
+  return true
+}
+
+/**
  * Atomically redeem a membership promo for a signed-in user.
  *
  * Non-trial codes (the default): grant the plan directly, no billing behind
@@ -385,7 +430,10 @@ export async function redeemMembershipPromo(input: {
   }
 
   if (userData.membershipPromoCodeId || userData.promoCodeId) {
-    throw new Error('You have already redeemed a membership promo code')
+    const released = await releaseStalePromoReservation(input.userId, userData)
+    if (!released) {
+      throw new Error('You have already redeemed a membership promo code')
+    }
   }
 
   const codeSnap = await db

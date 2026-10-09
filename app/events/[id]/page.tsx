@@ -9,6 +9,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { EventDetailView } from '@/components/events/event-detail-view'
 import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { TicketAmountDue } from '@/components/events/ticket-amount-due'
 import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import type { Event } from '@/lib/event-types'
@@ -33,11 +34,31 @@ function EventDetailInner() {
     publishableKey: string
     registrationId: string
     eventId: string
+    amount?: number
+    currency?: string
   } | null>(null)
 
   React.useEffect(() => {
     loadEvent()
   }, [eventId])
+
+  const membershipSyncTried = React.useRef(false)
+  React.useEffect(() => {
+    if (!user || membershipSyncTried.current) return
+    const profile = user as unknown as Record<string, unknown>
+    if (hasActiveMembership(profile) || hasAdminAccess(user)) return
+    if (!profile.stripeCustomerId && !profile.stripeSubscriptionId) return
+    membershipSyncTried.current = true
+    void (async () => {
+      const token = await auth.currentUser?.getIdToken().catch(() => null)
+      if (!token) return
+      // The profile listener in auth-context picks up the activated plan.
+      await fetch('/api/membership/sync', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => undefined)
+    })()
+  }, [user])
 
   React.useEffect(() => {
     if (searchParams.get('cancelled') === '1') {
@@ -134,6 +155,8 @@ function EventDetailInner() {
             publishableKey: json.publishableKey,
             registrationId: json.registrationId,
             eventId,
+            amount: typeof json.amount === 'number' ? json.amount : price,
+            currency: json.currency || selected?.currency || event?.currency || 'AED',
           })
         } else if (json.externalPayment && json.hostPayment) {
           const hp = json.hostPayment as {
@@ -197,6 +220,7 @@ function EventDetailInner() {
             <p className="text-sm text-neutral-600 mb-4">
               Pay with Apple Pay, Google Pay, or card. You stay on Passive Blessings.
             </p>
+            <TicketAmountDue amount={stripeCheckout.amount} currency={stripeCheckout.currency} />
             <div className="mb-3">
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Coupon / unlock code

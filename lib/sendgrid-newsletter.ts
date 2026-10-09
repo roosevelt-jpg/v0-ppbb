@@ -3,7 +3,7 @@
  * (Filename kept for import stability; SendGrid is no longer used.)
  */
 
-import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
+import { getWorkingZohoTransport, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { renderNewsletterHtmlForSend, type NewsletterTemplateId } from '@/lib/newsletter-templates'
 import { buildUnsubscribeUrl } from '@/lib/newsletter-unsubscribe'
 import type { NewsletterRecipient } from '@/lib/newsletter-recipients'
@@ -75,8 +75,21 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
     .replace(/\s+/g, ' ')
     .trim()
 
-  const transporter = createZohoTransporter(config)
+  let transporter: Awaited<ReturnType<typeof getWorkingZohoTransport>>['transporter']
+  try {
+    transporter = (await getWorkingZohoTransport(config)).transporter
+  } catch (error) {
+    return {
+      success: false,
+      sentCount: 0,
+      failedCount: input.recipients.length,
+      totalRecipients: input.recipients.length,
+      status: 'failed',
+      errors: [error instanceof Error ? error.message : String(error)],
+    }
+  }
   const from = `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`
+  const replyTo = config.email
   const errors: string[] = []
   let sentCount = 0
 
@@ -86,7 +99,7 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
     try {
       await transporter.sendMail({
         from,
-        replyTo: config.email,
+        replyTo,
         to: r.name ? `"${r.name}" <${r.email}>` : r.email,
         subject: input.subject,
         html,
