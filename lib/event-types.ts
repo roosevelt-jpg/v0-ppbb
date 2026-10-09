@@ -251,6 +251,30 @@ export interface CalendarIntegration {
   expiresAt: Timestamp | Date
 }
 
+export function parseTicketPrice(value: unknown): number {
+  const n = typeof value === 'number' ? value : typeof value === 'string' ? parseFloat(value) : NaN
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
+/**
+ * Paid events saved with only 0-priced ticket types (the editor's placeholder
+ * ticket) must charge the event price, not register guests for free.
+ */
+export function withEffectiveTicketPrices<
+  T extends { ticketTypes?: unknown; price?: unknown; pricingType?: unknown },
+>(event: T): T {
+  const types = Array.isArray(event.ticketTypes) ? (event.ticketTypes as TicketType[]) : null
+  if (!types || types.length === 0) return event
+  const base = event.pricingType === 'free' ? 0 : parseTicketPrice(event.price)
+  const active = types.filter((t) => t.isActive !== false)
+  const fallback =
+    base > 0 && active.length > 0 && active.every((t) => parseTicketPrice(t.price) === 0) ? base : 0
+  return {
+    ...event,
+    ticketTypes: types.map((t) => ({ ...t, price: parseTicketPrice(t.price) || fallback })),
+  }
+}
+
 export function createDefaultTicketType(
   price = 0,
   currency = 'AED',

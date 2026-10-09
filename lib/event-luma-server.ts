@@ -8,6 +8,8 @@ import type {
   RegistrationStatus,
   TicketType,
 } from '@/lib/event-types'
+import { parseTicketPrice, withEffectiveTicketPrices } from '@/lib/event-types'
+import { isBusinessSelfCollectEvent, isPbHostedPaidEvent } from '@/lib/pb-payment-policy'
 
 export async function resolveCohostIds(emails: string[]): Promise<string[]> {
   if (!emails.length) return []
@@ -37,10 +39,11 @@ export function resolveTicketType(
   event: Record<string, unknown>,
   ticketTypeId?: string | null
 ): TicketType | null {
-  const types = Array.isArray(event.ticketTypes) ? (event.ticketTypes as TicketType[]) : []
+  const priced = withEffectiveTicketPrices(event)
+  const types = Array.isArray(priced.ticketTypes) ? (priced.ticketTypes as TicketType[]) : []
   const active = types.filter((t) => t.isActive !== false)
   if (active.length === 0) {
-    const price = typeof event.price === 'number' ? event.price : 0
+    const price = event.pricingType === 'free' ? 0 : parseTicketPrice(event.price)
     const currency = typeof event.currency === 'string' ? event.currency : 'AED'
     return {
       id: 'legacy',
@@ -85,6 +88,68 @@ export function applyCoupon(
   if (coupon.percentOff) next = Math.max(0, price * (1 - coupon.percentOff / 100))
   if (coupon.amountOff) next = Math.max(0, next - coupon.amountOff)
   return { price: Math.round(next * 100) / 100, coupon }
+}
+
+/**
+ * Ticket price still owed by a self-registered guest of a PB-collected paid
+ * event whose registration went through without payment. 0 when nothing is due.
+ */
+export function unpaidRegistrationAmount(
+  reg: Record<string, unknown>,
+  event: Record<string, unknown>
+): number {
+  const status = String(reg.status || '')
+  if (status !== 'confirmed' && status !== 'pending_payment') return 0
+  const pay = String(reg.paymentStatus || '')
+  if (pay === 'paid' || pay === 'pending_host' || pay === 'refunded') return 0
+  if (Number(reg.amountPaid) > 0) return 0
+  if ((reg.inviteStatus || 'self') !== 'self') return 0
+  if (isBusinessSelfCollectEvent(event as any) && !isPbHostedPaidEvent(event as any)) return 0
+
+  const ticket =
+    resolveTicketType(event, typeof reg.ticketTypeId === 'string' ? reg.ticketTypeId : null) ||
+    resolveTicketType(event)
+  if (!ticket || !(ticket.price > 0)) return 0
+  // The guest's own redemption already counts toward the coupon limit.
+  const coupons = (Array.isArray(event.coupons) ? (event.coupons as EventCoupon[]) : []).map((c) => ({
+    ...c,
+    maxRedemptions: null,
+  }))
+  const result = applyCoupon(
+    ticket.price,
+    typeof reg.couponCode === 'string' ? reg.couponCode : undefined,
+    coupons,
+    ticket.id
+  )
+  return result.error ? ticket.price : result.price
+}
+
+/**
+ * Moves an unpaid registration back to awaiting payment. Its seat was already
+ * counted at registration, so payment completion must not count it again.
+ */
+export async function flagRegistrationForPayment(
+  ref: FirebaseFirestore.DocumentReference,
+  reg: Record<string, unknown>,
+  event: Record<string, unknown>,
+  amount: number
+): Promise<Record<string, unknown>> {
+  const pbPercent = Number(event.pbCommissionPercent) || 10
+  const pbCut = (amount * pbPercent) / 100
+  const update: Record<string, unknown> = {
+    status: 'pending_payment',
+    paymentStatus: 'pending',
+    ticketPrice: amount,
+    pbCut,
+    businessCut: amount - pbCut,
+    checkInCode: null,
+    qrToken: null,
+    paymentRequestedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  }
+  if (reg.status === 'confirmed') update.attendeeCounted = true
+  await ref.update(update)
+  return { ...reg, ...update }
 }
 
 export function isEventFull(event: Record<string, unknown>, ticket?: TicketType | null): boolean {

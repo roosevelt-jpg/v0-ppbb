@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { withEffectiveTicketPrices } from '@/lib/event-types'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,10 +25,9 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 })
     }
 
-    const payload = serializeFirestoreDoc(snap.id, data as Record<string, unknown>) as Record<
-      string,
-      unknown
-    >
+    const payload = withEffectiveTicketPrices(
+      serializeFirestoreDoc(snap.id, data as Record<string, unknown>) as Record<string, unknown>
+    )
 
     // Backfill host branding when older events lack denormalized fields
     const needsHost =

@@ -339,20 +339,24 @@ export async function completeEventTicketPayment(params: {
   })
 
   if (reg.status !== 'pending') {
+    // Seat, ticket and coupon usage were already recorded when the guest first registered.
+    const seatAlreadyCounted = reg.attendeeCounted === true
     await db.collection('events').doc(params.eventId).update({
-      currentAttendees: FieldValue.increment(1),
+      ...(seatAlreadyCounted ? {} : { currentAttendees: FieldValue.increment(1) }),
       totalRevenue: FieldValue.increment(amount),
       pbRevenue: FieldValue.increment(reg.pbCut || 0),
       businessRevenue: FieldValue.increment(reg.businessCut || 0),
       updatedAt: Timestamp.now(),
     })
-    const ticketTypeId = params.ticketTypeId || (reg.ticketTypeId as string) || ''
-    if (ticketTypeId && ticketTypeId !== 'legacy') {
-      await incrementTicketSold(params.eventId, ticketTypeId)
-    }
-    const couponCode = params.couponCode || (reg.couponCode as string) || ''
-    if (couponCode) {
-      await incrementCouponUsed(params.eventId, couponCode)
+    if (!seatAlreadyCounted) {
+      const ticketTypeId = params.ticketTypeId || (reg.ticketTypeId as string) || ''
+      if (ticketTypeId && ticketTypeId !== 'legacy') {
+        await incrementTicketSold(params.eventId, ticketTypeId)
+      }
+      const couponCode = params.couponCode || (reg.couponCode as string) || ''
+      if (couponCode) {
+        await incrementCouponUsed(params.eventId, couponCode)
+      }
     }
   }
 

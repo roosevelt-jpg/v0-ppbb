@@ -109,6 +109,64 @@ export async function sendEventRegistrationEmail(opts: {
   }
 }
 
+/** Asks a registered guest whose ticket was never charged to complete payment. */
+export async function sendEventPaymentRequestEmail(opts: {
+  to: string
+  eventTitle: string
+  eventUrl: string
+  amount: number
+  currency: string
+  userId?: string | null
+}): Promise<boolean> {
+  const headline = 'Payment needed for your ticket'
+  const amountLabel = `${opts.currency} ${opts.amount.toFixed(2).replace(/\.00$/, '')}`
+
+  if (opts.userId) {
+    const path = (() => {
+      try {
+        const u = new URL(opts.eventUrl)
+        return `${u.pathname}${u.search}`
+      } catch {
+        return '/events'
+      }
+    })()
+    void addUserNotification(opts.userId, {
+      title: headline,
+      message: `${opts.eventTitle} · ${amountLabel}`,
+      href: path,
+      type: 'event_registration',
+    }).catch(() => undefined)
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      pushToUserSafe(
+        opts.userId!,
+        { title: headline, body: `${opts.eventTitle} · ${amountLabel}` },
+        { type: 'event_registration', click_action: path }
+      )
+    })
+  }
+
+  if (!opts.to) return false
+  try {
+    const result = await sendBrandedEmail({
+      to: opts.to,
+      subject: `Action needed: complete payment for ${opts.eventTitle}`,
+      purpose: 'Event ticket payment request',
+      department: 'events',
+      headline,
+      bodyHtml: paragraphs(
+        `Thank you for registering for "${opts.eventTitle}".`,
+        `This is a paid event, but your registration went through without the ticket being charged. Please complete your payment of ${amountLabel} to keep your spot.`,
+        'Your check-in QR code will be issued as soon as payment is done.'
+      ),
+      cta: { label: `Pay ${amountLabel}`, url: opts.eventUrl },
+    })
+    return result.ok
+  } catch (e) {
+    console.warn('[events] payment request email failed:', e)
+    return false
+  }
+}
+
 /** Sent after ticket payment succeeds — this is the confirmation (pay first). */
 export async function sendEventPaymentConfirmationEmail(opts: {
   to: string

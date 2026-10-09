@@ -21,6 +21,8 @@ type Guest = {
   ticketTypeName?: string
   paymentStatus?: string
   amountPaid?: number
+  unpaidAmount?: number
+  currency?: string
   checkInCode?: string
   checkedInAt?: string | null
   waitlistPosition?: number | null
@@ -88,7 +90,7 @@ export function EventGuestManager({
       body: JSON.stringify({ action, registrationId, userEmail: addEmail, userName: addName }),
     })
     if (json.success) {
-      setMessage('Updated')
+      setMessage(json.message || 'Updated')
       setAddEmail('')
       setAddName('')
       load()
@@ -96,6 +98,11 @@ export function EventGuestManager({
       setMessage(json.error || 'Action failed')
     }
   }
+
+  const unpaidGuests = guests.filter(
+    (g) =>
+      (g.unpaidAmount || 0) > 0 && g.status === 'confirmed' && g.paymentStatus !== 'pending'
+  )
 
   const handleCheckIn = async () => {
     const json = await authFetch(`/api/events/${eventId}/check-in`, {
@@ -176,6 +183,27 @@ export function EventGuestManager({
 
       {message && (
         <p className="text-sm bg-neutral-100 border rounded-lg px-3 py-2">{message}</p>
+      )}
+
+      {unpaidGuests.length > 0 && (
+        <div className="border border-amber-300 bg-amber-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="text-sm text-amber-900">
+            <p className="font-semibold">
+              {unpaidGuests.length} guest{unpaidGuests.length === 1 ? '' : 's'} registered without paying
+            </p>
+            <p className="mt-1">
+              Request payment to move them to “Awaiting payment”, email them a pay link and notify
+              them in the app. Their check-in QR is issued once they pay.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => runAction('request_payment')}
+            className={`${BTN} shrink-0`}
+          >
+            Request payment
+          </button>
+        </div>
       )}
 
       <div className="grid lg:grid-cols-2 gap-4">
@@ -292,6 +320,10 @@ export function EventGuestManager({
                       g.paymentStatus === 'pending_host' ||
                       g.status === 'pending_payment' ? (
                       <div className="text-xs text-amber-600">Awaiting payment</div>
+                    ) : (g.unpaidAmount || 0) > 0 ? (
+                      <div className="text-xs text-red-600">
+                        Not paid · {g.currency || 'AED'} {g.unpaidAmount}
+                      </div>
                     ) : null}
                   </td>
                   <td className="p-3">

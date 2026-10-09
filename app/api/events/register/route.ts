@@ -10,6 +10,7 @@ import {
   applyCoupon,
   buildRegistrationRecord,
   findExistingRegistration,
+  flagRegistrationForPayment,
   generateCheckInCode,
   generateQrToken,
   getAuthUidFromRequest,
@@ -19,16 +20,49 @@ import {
   isExplicitTrue,
   nextWaitlistPosition,
   resolveTicketType,
+  unpaidRegistrationAmount,
 } from '@/lib/event-luma-server'
 
 export async function GET(request: NextRequest) {
   try {
     const registrationId = request.nextUrl.searchParams.get('registrationId')
+    const forEventId = request.nextUrl.searchParams.get('eventId')
+    const uid = await getAuthUidFromRequest(request)
+    const db = getAdminDb()
+
+    if (!registrationId && forEventId) {
+      if (!uid) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+      }
+      const [existing, eventSnap] = await Promise.all([
+        findExistingRegistration(forEventId, uid),
+        db.collection('events').doc(forEventId).get(),
+      ])
+      if (!existing || !eventSnap.exists) {
+        return NextResponse.json({ success: true, registration: null })
+      }
+      const data = existing.data() || {}
+      const event = eventSnap.data() || {}
+      const awaiting =
+        (data.status === 'pending_payment' ||
+          (data.status === 'confirmed' && data.paymentStatus === 'pending')) &&
+        Number(data.ticketPrice) > 0
+      const amountDue = awaiting ? Number(data.ticketPrice) : unpaidRegistrationAmount(data, event)
+      return NextResponse.json({
+        success: true,
+        registration: {
+          id: existing.id,
+          status: data.status,
+          paymentStatus: data.paymentStatus || null,
+          amountDue,
+          currency: data.currency || event.currency || 'AED',
+        },
+      })
+    }
+
     if (!registrationId) {
       return NextResponse.json({ success: false, error: 'registrationId required' }, { status: 400 })
     }
-    const uid = await getAuthUidFromRequest(request)
-    const db = getAdminDb()
     const snap = await db.collection('eventRegistrations').doc(registrationId).get()
     if (!snap.exists) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
@@ -126,7 +160,11 @@ export async function POST(request: NextRequest) {
 
     const existing = await findExistingRegistration(eventId, userId)
     if (existing) {
-      const existingData = existing.data() || {}
+      let existingData: FirebaseFirestore.DocumentData = existing.data() || {}
+      const owed = unpaidRegistrationAmount(existingData, event)
+      if (owed > 0 && existingData.paymentStatus !== 'pending') {
+        existingData = await flagRegistrationForPayment(existing.ref, existingData, event, owed)
+      }
       const existingStatus = String(existingData.status || '')
       const existingPay = String(existingData.paymentStatus || '')
       // Allow resuming unpaid checkout — return a live payment payload.

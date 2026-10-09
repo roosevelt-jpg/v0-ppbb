@@ -4,6 +4,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import {
   buildRegistrationRecord,
   canManageEvent,
+  flagRegistrationForPayment,
   generateCheckInCode,
   generateQrToken,
   getAuthUidFromRequest,
@@ -11,6 +12,7 @@ import {
   promoteNextWaitlisted,
   registrationsToCsv,
   resolveTicketType,
+  unpaidRegistrationAmount,
 } from '@/lib/event-luma-server'
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -43,11 +45,13 @@ export async function GET(request: NextRequest, context: Ctx) {
   }
 
   const snap = await query.get()
+  const { event } = managed as { event: Record<string, unknown> }
   const guests = snap.docs.map((d) => {
     const data = d.data()
     return {
       id: d.id,
       ...data,
+      unpaidAmount: unpaidRegistrationAmount(data, event),
       registeredAt: data.registeredAt?.toDate?.()?.toISOString?.() || data.registeredAt,
       checkedInAt: data.checkedInAt?.toDate?.()?.toISOString?.() || data.checkedInAt || null,
     }
@@ -159,7 +163,7 @@ export async function POST(request: NextRequest, context: Ctx) {
           .collection('events')
           .doc(eventId)
           .update({
-            currentAttendees: FieldValue.increment(1),
+            ...(data.attendeeCounted === true ? {} : { currentAttendees: FieldValue.increment(1) }),
             totalRevenue: FieldValue.increment(amount),
             updatedAt: Timestamp.now(),
           })
@@ -267,7 +271,7 @@ export async function POST(request: NextRequest, context: Ctx) {
             await creditVolunteerHoursForEventAttendance({
               eventId,
               event: eventSnap.data() || {},
-              registrationId: id,
+              registrationId: regId,
               userId: guestUserId,
             })
           }
@@ -282,6 +286,44 @@ export async function POST(request: NextRequest, context: Ctx) {
       await ref.update({ checkedInAt: null, checkedInBy: null })
       return NextResponse.json({ success: true })
     }
+  }
+
+  if (action === 'request_payment') {
+    const snap = await getAdminDb()
+      .collection('eventRegistrations')
+      .where('eventId', '==', eventId)
+      .get()
+    const origin =
+      request.headers.get('origin') ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    const { sendEventPaymentRequestEmail } = await import('@/lib/event-confirmation-email')
+    let requested = 0
+    for (const doc of snap.docs) {
+      const data = doc.data()
+      const alreadyFlagged =
+        data.status === 'pending_payment' && data.paymentStatus === 'pending' && Number(data.ticketPrice) > 0
+      const amount = alreadyFlagged ? Number(data.ticketPrice) : unpaidRegistrationAmount(data, event)
+      if (!(amount > 0)) continue
+      if (!alreadyFlagged) await flagRegistrationForPayment(doc.ref, data, event, amount)
+      requested += 1
+      void sendEventPaymentRequestEmail({
+        to: String(data.userEmail || ''),
+        eventTitle: String(event.title || 'Event'),
+        eventUrl: `${origin}/events/${eventId}?pay=1`,
+        amount,
+        currency: String(data.currency || event.currency || 'AED'),
+        userId: typeof data.userId === 'string' ? data.userId : null,
+      })
+    }
+    return NextResponse.json({
+      success: true,
+      requested,
+      message: requested
+        ? `Payment requested from ${requested} guest(s). They were emailed and notified in the app.`
+        : 'No unpaid guests found for this event.',
+    })
   }
 
   if (action === 'promote_waitlist') {

@@ -6,7 +6,7 @@ import type {
   PricingType,
   TicketType,
 } from '@/lib/event-types'
-import { createDefaultTicketType } from '@/lib/event-types'
+import { createDefaultTicketType, withEffectiveTicketPrices } from '@/lib/event-types'
 
 export interface AdminEventFormInput {
   title: string
@@ -77,7 +77,7 @@ function normalizeTicketTypes(
   form: AdminEventFormInput
 ): TicketType[] {
   if (Array.isArray(form.ticketTypes) && form.ticketTypes.length > 0) {
-    return form.ticketTypes.map((t) => ({
+    const types = form.ticketTypes.map((t) => ({
       ...t,
       id: t.id || `tt_${Math.random().toString(36).slice(2, 9)}`,
       soldCount: typeof t.soldCount === 'number' ? t.soldCount : 0,
@@ -86,6 +86,11 @@ function normalizeTicketTypes(
       requireApproval: false,
       currency: t.currency || form.currency || 'AED',
     }))
+    return withEffectiveTicketPrices({
+      ticketTypes: types,
+      price: form.price,
+      pricingType: form.isPaid ? 'paid_by_pb' : 'free',
+    }).ticketTypes
   }
   return [
     createDefaultTicketType(

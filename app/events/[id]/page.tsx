@@ -38,9 +38,37 @@ function EventDetailInner() {
     currency?: string
   } | null>(null)
 
+  const [amountDue, setAmountDue] = React.useState<{ amount: number; currency: string } | null>(null)
+
   React.useEffect(() => {
     loadEvent()
   }, [eventId])
+
+  React.useEffect(() => {
+    if (!user) {
+      setAmountDue(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      const token = await auth.currentUser?.getIdToken().catch(() => null)
+      if (!token) return
+      const res = await fetch(`/api/events/register?eventId=${encodeURIComponent(eventId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => null)
+      const json = res ? await res.json().catch(() => null) : null
+      if (cancelled) return
+      const reg = json?.registration
+      setAmountDue(
+        reg && Number(reg.amountDue) > 0
+          ? { amount: Number(reg.amountDue), currency: String(reg.currency || 'AED') }
+          : null
+      )
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user, eventId])
 
   const membershipSyncTried = React.useRef(false)
   React.useEffect(() => {
@@ -188,6 +216,14 @@ function EventDetailInner() {
     }
   }
 
+  const autoPayOpened = React.useRef(false)
+  React.useEffect(() => {
+    if (autoPayOpened.current || !event || !amountDue || stripeCheckout) return
+    if (searchParams.get('pay') !== '1') return
+    autoPayOpened.current = true
+    void handleRegister()
+  }, [event, amountDue, stripeCheckout, searchParams])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -272,6 +308,27 @@ function EventDetailInner() {
               Cancel
             </button>
           </Card>
+        </div>
+      ) : null}
+      {amountDue ? (
+        <div className="max-w-5xl mx-auto px-4 pt-6">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="text-sm text-amber-900">
+              <p className="font-semibold">Payment required to keep your spot</p>
+              <p className="mt-1">
+                You&apos;re registered, but your ticket hasn&apos;t been paid yet. Your check-in QR
+                code is issued once payment is complete.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={registering}
+              onClick={() => void handleRegister()}
+              className="shrink-0 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50"
+            >
+              {registering ? 'Opening payment…' : `Pay ${amountDue.currency} ${amountDue.amount}`}
+            </button>
+          </div>
         </div>
       ) : null}
       <EventDetailView
