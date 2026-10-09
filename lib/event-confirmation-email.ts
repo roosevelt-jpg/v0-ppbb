@@ -117,8 +117,9 @@ export async function sendEventPaymentRequestEmail(opts: {
   amount: number
   currency: string
   userId?: string | null
+  isReminder?: boolean
 }): Promise<boolean> {
-  const headline = 'Payment needed for your ticket'
+  const headline = opts.isReminder ? 'Reminder: your ticket is not paid yet' : 'Payment needed for your ticket'
   const amountLabel = `${opts.currency} ${opts.amount.toFixed(2).replace(/\.00$/, '')}`
 
   if (opts.userId) {
@@ -149,7 +150,9 @@ export async function sendEventPaymentRequestEmail(opts: {
   try {
     const result = await sendBrandedEmail({
       to: opts.to,
-      subject: `Action needed: complete payment for ${opts.eventTitle}`,
+      subject: opts.isReminder
+        ? `Reminder: complete payment for ${opts.eventTitle}`
+        : `Action needed: complete payment for ${opts.eventTitle}`,
       purpose: 'Event ticket payment request',
       department: 'events',
       headline,

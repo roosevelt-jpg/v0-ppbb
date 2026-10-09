@@ -308,6 +308,13 @@ export async function POST(request: NextRequest, context: Ctx) {
       if (!(amount > 0)) continue
       if (!alreadyFlagged) await flagRegistrationForPayment(doc.ref, data, event, amount)
       requested += 1
+      await doc.ref.set(
+        {
+          lastPaymentReminderAt: Timestamp.now(),
+          paymentReminderCount: (Number(data.paymentReminderCount) || 0) + 1,
+        },
+        { merge: true }
+      )
       void sendEventPaymentRequestEmail({
         to: String(data.userEmail || ''),
         eventTitle: String(event.title || 'Event'),
@@ -315,13 +322,14 @@ export async function POST(request: NextRequest, context: Ctx) {
         amount,
         currency: String(data.currency || event.currency || 'AED'),
         userId: typeof data.userId === 'string' ? data.userId : null,
+        isReminder: Number(data.paymentReminderCount) > 0,
       })
     }
     return NextResponse.json({
       success: true,
       requested,
       message: requested
-        ? `Payment requested from ${requested} guest(s). They were emailed and notified in the app.`
+        ? `Payment requested from ${requested} guest(s). They were emailed and notified in the app, and will be reminded every hour until they pay.`
         : 'No unpaid guests found for this event.',
     })
   }

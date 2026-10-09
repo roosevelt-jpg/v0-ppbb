@@ -143,6 +143,8 @@ jobs:
           #   15 * * * *    event-reminders       — hourly: daily countdown
           #                                         (≤14 days, 09:00 Asia/Dubai),
           #                                         ~2 days before, ~6 hours before
+          #   45 * * * *    event-payment-reminders — hourly: unpaid guests of
+          #                                         paid events until they pay
           {
             CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
             if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi
@@ -158,6 +160,7 @@ jobs:
               echo "0 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-reminders >/dev/null 2>&1"
               echo "5 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-expire >/dev/null 2>&1"
               echo "15 * * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/event-reminders >/dev/null 2>&1"
+              echo "45 * * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/event-payment-reminders >/dev/null 2>&1"
               echo "$END_MARK"
             } >> /tmp/crontab.new
             crontab /tmp/crontab.new
