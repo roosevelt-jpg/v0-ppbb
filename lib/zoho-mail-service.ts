@@ -115,9 +115,9 @@ export function createZohoTransporter(config: ZohoSmtpConfig, opts: { fast?: boo
     },
     // Prefer IPv4. Some hosts hang on Zoho's IPv6 address and the login request times out.
     family: 4,
-    connectionTimeout: opts.fast ? 8_000 : 20_000,
-    greetingTimeout: opts.fast ? 8_000 : 20_000,
-    socketTimeout: opts.fast ? 12_000 : 30_000,
+    connectionTimeout: opts.fast ? 6_000 : 10_000,
+    greetingTimeout: opts.fast ? 6_000 : 10_000,
+    socketTimeout: opts.fast ? 10_000 : 20_000,
   })
 }
 

@@ -34,6 +34,7 @@ function AdminLoginForm() {
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
   const autoOtpRequested = React.useRef(false)
+  const passwordFlowActive = React.useRef(false)
 
   const returnUrl = searchParams.get('returnUrl') || '/admin'
   const safeReturnUrl = returnUrl.startsWith('/admin') ? returnUrl : '/admin'
@@ -50,6 +51,7 @@ function AdminLoginForm() {
       router.replace(safeReturnUrl)
       return
     }
+    if (passwordFlowActive.current) return
     // Already signed in as admin but MFA not done — jump to code step and resend once
     if (user && hasAdminAccess(user) && !hasValidAdminMfaSession(user.id) && step !== 3) {
       setEmail(user.email || '')
@@ -161,6 +163,10 @@ function AdminLoginForm() {
     setError('')
     setInfo('')
     setLoading(true)
+    // Signing in flips `user` in auth-context, which would otherwise fire a
+    // second request-otp from the effect above while this one is in flight.
+    autoOtpRequested.current = true
+    passwordFlowActive.current = true
 
     try {
       await setPersistence(auth, browserLocalPersistence)
@@ -251,6 +257,8 @@ function AdminLoginForm() {
       })
       setError(message)
       setLoading(false)
+    } finally {
+      passwordFlowActive.current = false
     }
   }
 

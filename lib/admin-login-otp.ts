@@ -13,6 +13,7 @@ export const ADMIN_LOGIN_OTP_COLLECTION = 'adminLoginOtps'
 export const ADMIN_MFA_SESSION_HOURS = 12
 export const ADMIN_OTP_TTL_MS = 10 * 60 * 1000
 export const ADMIN_OTP_MAX_ATTEMPTS = 5
+const ADMIN_OTP_EMAIL_TIMEOUT_MS = 20_000
 
 export function hashAdminOtp(code: string): string {
   return createHash('sha256').update(String(code).trim()).digest('hex')
@@ -75,7 +76,7 @@ export async function createAndSendAdminLoginOtp(opts: {
 
   const name = String(opts.adminName || '').trim()
   const greeting = name ? `Assalamu alaikum, ${name}.` : 'Assalamu alaikum,'
-  const result = await sendBrandedEmail({
+  const sending = sendBrandedEmail({
     to: email,
     subject: 'Your Passive Blessings admin login code',
     purpose: 'Admin login verification',
@@ -91,6 +92,17 @@ export async function createAndSendAdminLoginOtp(opts: {
       ),
     ].join(''),
   })
+  // The proxy in front of the app gives up at ~60s (HTTP 504). Never let a slow
+  // or unreachable mail server hold the sign-in request anywhere near that.
+  const result = await Promise.race([
+    sending,
+    new Promise<{ ok: false; error: string }>((resolve) =>
+      setTimeout(
+        () => resolve({ ok: false, error: `Zoho Mail did not respond within ${ADMIN_OTP_EMAIL_TIMEOUT_MS / 1000}s` }),
+        ADMIN_OTP_EMAIL_TIMEOUT_MS
+      )
+    ),
+  ])
 
   if (!result.ok) {
     await db.collection(ADMIN_LOGIN_OTP_COLLECTION).doc(uid).delete().catch(() => undefined)
