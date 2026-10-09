@@ -92,10 +92,6 @@ function AdminLoginForm() {
         setError(json.error || 'Failed to send login code. Please try again.')
         return
       }
-      if (json.emailSkipped && auth.currentUser) {
-        await finishWithoutEmailCode(auth.currentUser.uid, json.emailSkippedReason)
-        return
-      }
       if (json.email) setMaskedEmail(maskEmail(String(json.email)))
       setInfo('We sent a 6-digit code to your email.')
     } catch (err) {
@@ -119,31 +115,6 @@ function AdminLoginForm() {
       status: 'success',
       route: safeReturnUrl,
     })
-  }
-
-  async function finishWithoutEmailCode(uid: string, reason?: string, knownProfile?: User) {
-    setAdminMfaSession(uid)
-    let profile = knownProfile
-    if (!profile) {
-      const snap = await getDoc(doc(db, 'users', uid))
-      if (snap.exists()) profile = { id: snap.id, ...snap.data() } as User
-    }
-    if (profile) {
-      void recordAdminAudit({
-        adminId: profile.id,
-        adminEmail: profile.email || email,
-        adminName:
-          `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email || email,
-        adminRole: formatAdminRoleLabel(profile.role || 'admin'),
-        actionType: 'login',
-        action: 'Admin login successful (password only — login code email could not be sent)',
-        entityType: 'auth',
-        status: 'success',
-        failureReason: reason ? `Email code skipped: ${reason}` : 'Email code skipped',
-        route: safeReturnUrl,
-      })
-    }
-    router.replace(safeReturnUrl)
   }
 
   const handleEmailContinue = (e: React.FormEvent) => {
@@ -222,11 +193,6 @@ function AdminLoginForm() {
         setLoading(false)
         return
       }
-      if (otpJson.emailSkipped) {
-        await finishWithoutEmailCode(credential.user.uid, otpJson.emailSkippedReason, profile)
-        return
-      }
-
       setMaskedEmail(maskEmail(String(otpJson.email || email)))
       setInfo('We sent a 6-digit code to your email.')
       setOtpCode('')

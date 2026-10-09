@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken, isAdminUser, getAdminUserData } from '@/lib/admin-access-server'
 import { createAndSendAdminLoginOtp } from '@/lib/admin-login-otp'
-import { FirebaseAdminConfigError, getAdminDb } from '@/lib/firebase-admin'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FirebaseAdminConfigError } from '@/lib/firebase-admin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -71,32 +70,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (result.emailSkipped) {
-      await getAdminDb()
-        .collection('users')
-        .doc(uid)
-        .set(
-          {
-            adminMfaVerifiedAt: FieldValue.serverTimestamp(),
-            adminLoginEmailSkippedAt: FieldValue.serverTimestamp(),
-            adminLoginEmailSkippedReason: result.emailSkippedReason || null,
-          },
-          { merge: true }
-        )
-      return NextResponse.json({
-        success: true,
-        email,
-        emailSkipped: true,
-        emailSkippedReason: result.emailSkippedReason || null,
-        message: 'Signed in with password. The login code email could not be sent.',
-      })
-    }
-
     return NextResponse.json({
       success: true,
       email,
       expiresAt: result.expiresAt,
-      emailSkipped: false,
       message: 'Login code sent to your email',
     })
   } catch (error) {
