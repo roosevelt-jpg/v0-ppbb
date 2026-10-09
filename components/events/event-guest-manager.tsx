@@ -176,7 +176,11 @@ export function EventGuestManager({
             </ol>
           </div>
         </div>
-        <button type="button" onClick={exportCsv} className={`${BTN} inline-flex items-center gap-2`}>
+        <button
+          type="button"
+          onClick={exportCsv}
+          className={`${BTN} inline-flex items-center gap-2 whitespace-nowrap shrink-0 self-start`}
+        >
           <Download className="h-4 w-4 text-white" /> Export CSV
         </button>
       </div>
@@ -199,7 +203,7 @@ export function EventGuestManager({
           <button
             type="button"
             onClick={() => runAction('request_payment')}
-            className={`${BTN} shrink-0`}
+            className={`${BTN} shrink-0 whitespace-nowrap`}
           >
             Request payment
           </button>

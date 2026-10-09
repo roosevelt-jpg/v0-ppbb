@@ -11,6 +11,7 @@ import { SessionIdleTimeout } from '@/components/session-idle-timeout'
 import { PwaProvider } from '@/components/pwa-provider'
 import { SiteTranslator } from '@/components/site-translator'
 import { NewsletterPopup } from '@/components/newsletter-popup'
+import { RequiredContactGate } from '@/components/required-contact-gate'
 import { setGoogTransCookie } from '@/lib/site-translate'
 import {
   PREFERRED_LANGUAGE_KEY,
@@ -74,6 +75,7 @@ export function Providers({ children }: ProvidersProps) {
           <PwaProvider />
           <SiteTranslator />
           <NewsletterPopup />
+          <RequiredContactGate />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>
