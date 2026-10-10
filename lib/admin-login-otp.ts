@@ -9,6 +9,9 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
+/** Off while Zoho Mail SMTP is being repaired — admins sign in with email + password only. */
+export const ADMIN_LOGIN_OTP_ENABLED = false
+
 export const ADMIN_LOGIN_OTP_COLLECTION = 'adminLoginOtps'
 export const ADMIN_MFA_SESSION_HOURS = 12
 export const ADMIN_OTP_TTL_MS = 10 * 60 * 1000

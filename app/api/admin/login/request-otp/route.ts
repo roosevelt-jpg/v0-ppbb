@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken, isAdminUser, getAdminUserData } from '@/lib/admin-access-server'
-import { createAndSendAdminLoginOtp } from '@/lib/admin-login-otp'
+import { ADMIN_LOGIN_OTP_ENABLED, createAndSendAdminLoginOtp } from '@/lib/admin-login-otp'
 import { FirebaseAdminConfigError } from '@/lib/firebase-admin'
 
 export const runtime = 'nodejs'
@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
     }
     if (!isAdmin) {
       return NextResponse.json({ success: false, error: 'Not an admin account' }, { status: 403 })
+    }
+
+    if (!ADMIN_LOGIN_OTP_ENABLED) {
+      return NextResponse.json({ success: true, otpRequired: false })
     }
 
     const data = await getAdminUserData(uid)

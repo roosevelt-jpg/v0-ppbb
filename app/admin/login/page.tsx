@@ -92,6 +92,10 @@ function AdminLoginForm() {
         setError(json.error || 'Failed to send login code. Please try again.')
         return
       }
+      if (json.otpRequired === false && auth.currentUser) {
+        await finishPasswordOnlyLogin(auth.currentUser.uid)
+        return
+      }
       if (json.email) setMaskedEmail(maskEmail(String(json.email)))
       setInfo('We sent a 6-digit code to your email.')
     } catch (err) {
@@ -115,6 +119,30 @@ function AdminLoginForm() {
       status: 'success',
       route: safeReturnUrl,
     })
+  }
+
+  async function finishPasswordOnlyLogin(uid: string, knownProfile?: User) {
+    setAdminMfaSession(uid)
+    let profile = knownProfile
+    if (!profile) {
+      const snap = await getDoc(doc(db, 'users', uid))
+      if (snap.exists()) profile = { id: snap.id, ...snap.data() } as User
+    }
+    if (profile) {
+      void recordAdminAudit({
+        adminId: profile.id,
+        adminEmail: profile.email || email,
+        adminName:
+          `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email || email,
+        adminRole: formatAdminRoleLabel(profile.role || 'admin'),
+        actionType: 'login',
+        action: 'Admin login successful (password only — login code is turned off)',
+        entityType: 'auth',
+        status: 'success',
+        route: safeReturnUrl,
+      })
+    }
+    router.replace(safeReturnUrl)
   }
 
   const handleEmailContinue = (e: React.FormEvent) => {
@@ -191,6 +219,10 @@ function AdminLoginForm() {
         clearAdminMfaSession()
         setError(otpJson.error || 'Could not send login code. Please try again.')
         setLoading(false)
+        return
+      }
+      if (otpJson.otpRequired === false) {
+        await finishPasswordOnlyLogin(credential.user.uid, profile)
         return
       }
       setMaskedEmail(maskEmail(String(otpJson.email || email)))
