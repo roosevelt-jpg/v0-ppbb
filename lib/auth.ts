@@ -10,6 +10,7 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
@@ -259,23 +260,38 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
   }
 }
 
-export async function sendPasswordReset(email: string): Promise<{ success: boolean; error: string | null }> {
+export async function sendPasswordReset(
+  email: string,
+  continuePath = '/login'
+): Promise<{ success: boolean; error: string | null }> {
+  const trimmed = email.trim()
+  if (!trimmed) {
+    return { success: false, error: 'Please enter your email address.' }
+  }
   try {
-    const trimmed = email.trim()
-    if (!trimmed) {
-      return { success: false, error: 'Please enter your email address.' }
-    }
     const res = await fetch('/api/auth/send-password-reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: trimmed }),
+      signal: AbortSignal.timeout(25_000),
     })
     const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string }
-    if (!res.ok || data.success === false) {
-      return { success: false, error: data.error || 'Failed to send reset email. Please try again.' }
+    if (res.ok && data.success !== false) {
+      return { success: true, error: null }
     }
+  } catch {
+    /* fall through to Firebase's own mailer */
+  }
+  // The branded email goes through Zoho Mail; when that is down, Firebase can
+  // still deliver its default reset email so nobody is locked out.
+  try {
+    await sendPasswordResetEmail(auth, trimmed, {
+      url: `${window.location.origin}${continuePath}`,
+    })
     return { success: true, error: null }
   } catch (error: unknown) {
+    const code = (error as { code?: string })?.code || ''
+    if (code === 'auth/user-not-found') return { success: true, error: null }
     return { success: false, error: formatAuthError(error) }
   }
 }

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/logo-manager'
 import { useAuth } from '@/lib/auth-context'
-import { logoutUser } from '@/lib/auth'
+import { logoutUser, sendPasswordReset } from '@/lib/auth'
 import { hasAdminAccess } from '@/lib/roles'
 import { auth, db } from '@/lib/firebase'
 import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
@@ -21,6 +21,28 @@ import {
 
 type LoginStep = 1 | 2 | 3
 
+function adminSignInErrorMessage(code: string, err: unknown): string {
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/invalid-login-credentials':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+    case 'auth/invalid-email':
+      return 'Incorrect email or password. If your browser filled in a saved password, clear the field and type it yourself — or use “Forgot password?” below to set a new one.'
+    case 'auth/too-many-requests':
+      return 'Too many sign-in attempts, so this account is temporarily blocked. Wait a few minutes, or use “Forgot password?” below — setting a new password unblocks it straight away.'
+    case 'auth/user-disabled':
+      return 'This account has been disabled. Ask a super admin to re-enable it.'
+    case 'auth/network-request-failed':
+      return 'Could not reach the sign-in service. Check your internet connection and try again.'
+    case 'auth/password-does-not-meet-requirements':
+      return 'Your password no longer meets the password rules. Use “Forgot password?” below to set a new one.'
+    default:
+      if (err instanceof Error && err.message) return err.message
+      return 'An unexpected error occurred. Please try again.'
+  }
+}
+
 function AdminLoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,6 +55,7 @@ function AdminLoginForm() {
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetSending, setResetSending] = useState(false)
   const autoOtpRequested = React.useRef(false)
   const passwordFlowActive = React.useRef(false)
 
@@ -145,6 +168,25 @@ function AdminLoginForm() {
     router.replace(safeReturnUrl)
   }
 
+  const handleForgotPassword = async () => {
+    setError('')
+    setInfo('')
+    setResetSending(true)
+    try {
+      const result = await sendPasswordReset(email, '/admin/login')
+      if (!result.success) {
+        setError(result.error || 'Could not send the reset email. Please try again.')
+        return
+      }
+      setPassword('')
+      setInfo(
+        `If ${email} has an account, a password reset link is on its way. Check your inbox and spam folder, set a new password, then sign in here with it.`
+      )
+    } finally {
+      setResetSending(false)
+    }
+  }
+
   const handleEmailContinue = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -232,16 +274,9 @@ function AdminLoginForm() {
       setLoading(false)
     } catch (err) {
       console.error('[v0] Admin login error:', err)
-      const message =
-        err && typeof err === 'object' && 'code' in err
-          ? String((err as { code: string }).code).includes('credential') ||
-            String((err as { code: string }).code).includes('password') ||
-            String((err as { code: string }).code).includes('user-not-found')
-            ? 'Invalid email or password.'
-            : err instanceof Error
-              ? err.message
-              : 'An unexpected error occurred. Please try again.'
-          : 'An unexpected error occurred. Please try again.'
+      const code =
+        err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
+      const message = adminSignInErrorMessage(code, err)
       void recordAdminAudit({
         adminId: 'unauthenticated',
         adminEmail: email.trim().toLowerCase(),
@@ -251,7 +286,7 @@ function AdminLoginForm() {
         action: 'Admin login error',
         entityType: 'auth',
         status: 'failed',
-        failureReason: message,
+        failureReason: code ? `${code}: ${message}` : message,
       })
       setError(message)
       setLoading(false)
@@ -482,8 +517,38 @@ function AdminLoginForm() {
                   {error}
                 </div>
               )}
+              {info && !error && (
+                <div
+                  style={{
+                    padding: '12px',
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    color: 'var(--foreground)',
+                    fontSize: '14px',
+                  }}
+                >
+                  {info}
+                </div>
+              )}
               <button type="submit" disabled={loading} style={buttonStyle}>
                 {loading ? 'Checking…' : 'Continue'}
+              </button>
+              <button
+                type="button"
+                disabled={loading || resetSending}
+                onClick={() => void handleForgotPassword()}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--foreground)',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {resetSending ? 'Sending reset link…' : 'Forgot password?'}
               </button>
               <button
                 type="button"
