@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { auth } from '@/lib/firebase'
+import { MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
 
 /**
  * /join is the public "Join the community" entry.
@@ -20,6 +21,19 @@ function JoinRedirect() {
     if (plan) params.set('plan', plan)
 
     const go = () => {
+      const returnUrl = searchParams.get('returnUrl') || ''
+      const safeReturn = returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : ''
+      if (!MEMBERSHIP_PAYMENTS_ENABLED) {
+        if (safeReturn) params.set('returnUrl', safeReturn)
+        params.delete('plan')
+        if (auth.currentUser) {
+          router.replace(safeReturn || '/')
+          return
+        }
+        const qs = params.toString()
+        router.replace(qs ? `/signup?${qs}` : '/signup')
+        return
+      }
       if (auth.currentUser) {
         if (type === 'business') {
           router.replace('/dashboard/membership?upgrade=business')

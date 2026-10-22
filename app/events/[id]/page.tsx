@@ -14,13 +14,14 @@ import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import type { Event } from '@/lib/event-types'
 import { hasActiveMembership } from '@/lib/membership-access'
+import { MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
 import { hasAdminAccess } from '@/lib/roles'
 
 function EventDetailInner() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const eventId = params.id as string
 
   const [event, setEvent] = React.useState<Event | null>(null)
@@ -94,6 +95,32 @@ function EventDetailInner() {
     }
   }, [searchParams])
 
+  React.useEffect(() => {
+    if (searchParams.get('intent') !== 'checkin' || authLoading) return
+    const returnPath = `/events/${eventId}?intent=checkin`
+    if (!user) {
+      router.replace(`/login?returnUrl=${encodeURIComponent(returnPath)}`)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      const token = await auth.currentUser?.getIdToken().catch(() => null)
+      if (!token || cancelled) return
+      const res = await fetch(`/api/events/register?eventId=${encodeURIComponent(eventId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json().catch(() => ({}))
+      if (cancelled) return
+      const registrationId = json?.registration?.id
+      if (registrationId) {
+        router.replace(`/events/${eventId}/confirmation?registrationId=${registrationId}`)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [authLoading, user, eventId, router, searchParams])
+
   const loadEvent = async () => {
     try {
       const res = await fetch(`/api/events/${eventId}?publishedOnly=true`)
@@ -126,7 +153,7 @@ function EventDetailInner() {
       return
     }
 
-    const membersOnly = event?.allowNonMemberGuests !== true
+    const membersOnly = MEMBERSHIP_PAYMENTS_ENABLED && event?.allowNonMemberGuests !== true
     if (
       membersOnly &&
       !hasActiveMembership(user as unknown as Record<string, unknown>) &&
@@ -240,7 +267,7 @@ function EventDetailInner() {
     )
   }
 
-  const membersOnly = event.allowNonMemberGuests !== true
+  const membersOnly = MEMBERSHIP_PAYMENTS_ENABLED && event.allowNonMemberGuests !== true
   const canRegister =
     !user ||
     !membersOnly ||

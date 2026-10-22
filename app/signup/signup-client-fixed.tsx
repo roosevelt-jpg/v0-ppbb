@@ -19,7 +19,7 @@ import {
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { formatAuthError } from '@/lib/auth-errors'
 import { isValidPhone } from '@/lib/user-profile'
-import type { LocationData } from '@/lib/types'
+import type { LocationData, User } from '@/lib/types'
 import type { PricingPlan } from '@/lib/pricing-types'
 import {
   formatPlanPriceDetailed,
@@ -33,6 +33,8 @@ import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import { Dialog } from '@/components/dialog'
 import { StripeCardCheckout } from '@/components/stripe-card-checkout'
 import { DobTextInput } from '@/components/dob-text-input'
+import { freeMembershipFields, MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
+import { hasAdminAccess } from '@/lib/roles'
 
 const STEPS = [
   { id: 1, label: 'Choose membership' },
@@ -56,7 +58,7 @@ const NATIONALITY_OPTIONS = COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: 
 
 export default function SignupClient() {
   const searchParams = useSearchParams()
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(MEMBERSHIP_PAYMENTS_ENABLED ? 1 : 2)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -188,6 +190,7 @@ export default function SignupClient() {
   }, [])
 
   useEffect(() => {
+    if (!MEMBERSHIP_PAYMENTS_ENABLED) return
     const planId = formData.planId || searchParams.get('plan')
     if (!planId) {
       setPlanName('')
@@ -269,14 +272,16 @@ export default function SignupClient() {
   const validateStep = async (step: number): Promise<boolean> => {
     setError('')
 
-    if (plansLoading) {
-      setError('Membership packages are still loading. Please wait.')
-      return false
-    }
-    if (!hasSelectedPlan()) {
-      setError('Please choose a membership package to continue')
-      setCurrentStep(1)
-      return false
+    if (MEMBERSHIP_PAYMENTS_ENABLED) {
+      if (plansLoading) {
+        setError('Membership packages are still loading. Please wait.')
+        return false
+      }
+      if (!hasSelectedPlan()) {
+        setError('Please choose a membership package to continue')
+        setCurrentStep(1)
+        return false
+      }
     }
 
     if (step === 1) {
@@ -636,13 +641,25 @@ export default function SignupClient() {
       lng: formData.longitude || 0,
     }) as LocationData
 
-    if (!formData.planId || !plans.some((plan) => plan.id === formData.planId)) {
+    const paidPlan =
+      MEMBERSHIP_PAYMENTS_ENABLED &&
+      Boolean(formData.planId) &&
+      plans.some((plan) => plan.id === formData.planId)
+    if (MEMBERSHIP_PAYMENTS_ENABLED && !paidPlan) {
       throw new Error('Please choose a membership package to continue')
     }
     const chosenPlanName = planName || selectedPlan?.name || ''
-    if (!chosenPlanName) {
+    if (MEMBERSHIP_PAYMENTS_ENABLED && !chosenPlanName) {
       throw new Error('Please choose a membership package to continue')
     }
+    const membership = paidPlan
+      ? {
+          membershipStatus: 'pending_payment',
+          membershipTier: formData.planId,
+          membershipPlanId: formData.planId,
+          membershipPlanName: chosenPlanName,
+        }
+      : freeMembershipFields(formData.memberType)
 
     const userData: Record<string, unknown> = {
       uid,
@@ -674,10 +691,7 @@ export default function SignupClient() {
       profileComplete: true,
       status: 'active',
       active: true,
-      membershipStatus: 'pending_payment',
-      membershipTier: formData.planId,
-      membershipPlanId: formData.planId,
-      membershipPlanName: chosenPlanName,
+      ...membership,
       volunteeredHours: 0,
       volunteerHours: 0,
       totalDonated: 0,
@@ -748,6 +762,13 @@ export default function SignupClient() {
     )
   }
 
+  const finishRegistration = () => {
+    const returnUrl = searchParams.get('returnUrl') || ''
+    const dest =
+      returnUrl.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/'
+    window.location.assign(dest)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (currentStep === 5) {
@@ -781,6 +802,8 @@ export default function SignupClient() {
           await setDoc(userRef, sanitizeForFirestore(userData))
           await persistBusinessDirectory(existingUid, now)
         } else {
+          const existingData = existing.data() as Record<string, unknown>
+          const keepStaffRole = hasAdminAccess(existingData as { role?: User['role']; roles?: string[] })
           await setDoc(
             userRef,
             sanitizeForFirestore({
@@ -795,8 +818,15 @@ export default function SignupClient() {
               location: userData.location,
               gender: userData.gender,
               dateOfBirth: userData.dateOfBirth,
-              role: userData.role,
-              roles: userData.roles,
+              ...(keepStaffRole
+                ? {}
+                : {
+                    role: userData.role,
+                    roles: userData.roles,
+                  }),
+              membershipStatus: userData.membershipStatus,
+              membershipLifetimeForever: userData.membershipLifetimeForever,
+              membershipAutoRenew: userData.membershipAutoRenew,
               membershipTier: userData.membershipTier,
               membershipPlanId: userData.membershipPlanId,
               membershipPlanName: userData.membershipPlanName,
@@ -806,6 +836,10 @@ export default function SignupClient() {
           )
         }
         setCreatedUserId(existingUid)
+        if (!MEMBERSHIP_PAYMENTS_ENABLED) {
+          finishRegistration()
+          return
+        }
         if (formData.promoCode.trim()) {
           const redeemed = await tryRedeemPromo(existingUid)
           if (redeemed.ok) {
@@ -891,6 +925,11 @@ export default function SignupClient() {
       console.log('[v0] User account created successfully:', firebaseUser.uid)
       setCreatedUserId(firebaseUser.uid)
       setError('')
+
+      if (!MEMBERSHIP_PAYMENTS_ENABLED) {
+        finishRegistration()
+        return
+      }
 
       if (formData.promoCode.trim()) {
         const redeemed = await tryRedeemPromo(firebaseUser.uid)
@@ -996,13 +1035,23 @@ export default function SignupClient() {
           <div style={{ maxWidth: '550px', margin: '0 auto' }}>
             {/* Progress */}
             <div style={{ marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#666' }}>STEP {currentStep} OF {STEPS.length}</p>
-              <div style={{ display: 'flex', gap: '0.25rem' }}>
-                {STEPS.map(step => (
-                  <div key={step.id} style={{ flex: 1, height: '2.5px', backgroundColor: currentStep >= step.id ? '#111111' : '#e4e1da', borderRadius: '9999px' }} />
-                ))}
-              </div>
-              <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.25rem' }}>{STEPS[currentStep - 1].label}</p>
+              {(() => {
+                const visibleSteps = MEMBERSHIP_PAYMENTS_ENABLED
+                  ? STEPS
+                  : STEPS.filter((step) => step.id >= 2 && step.id <= 4)
+                const visibleIndex = Math.max(0, visibleSteps.findIndex((step) => step.id === currentStep))
+                return (
+                  <>
+                    <p style={{ fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#666' }}>STEP {visibleIndex + 1} OF {visibleSteps.length}</p>
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      {visibleSteps.map((step, index) => (
+                        <div key={step.id} style={{ flex: 1, height: '2.5px', backgroundColor: visibleIndex >= index ? '#111111' : '#e4e1da', borderRadius: '9999px' }} />
+                      ))}
+                    </div>
+                    <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.25rem' }}>{visibleSteps[visibleIndex]?.label}</p>
+                  </>
+                )
+              })()}
             </div>
 
             {/* Error Message */}
@@ -1015,7 +1064,7 @@ export default function SignupClient() {
             {/* Form */}
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '1rem' }}>
-                {currentStep === 1 && (
+                {MEMBERSHIP_PAYMENTS_ENABLED && currentStep === 1 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.25rem' }}>
                       Choose your membership
@@ -1132,8 +1181,13 @@ export default function SignupClient() {
                 {currentStep === 2 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Create your account</h2>
+                    {!MEMBERSHIP_PAYMENTS_ENABLED ? (
+                      <p style={{ fontSize: '0.8rem', color: '#666', marginTop: 0 }}>
+                        Register as an individual or a business. It is free, and we save your details. No card.
+                      </p>
+                    ) : null}
 
-                    {formData.planId && (
+                    {MEMBERSHIP_PAYMENTS_ENABLED && formData.planId && (
                       <div style={{ padding: '0.75rem 1rem', backgroundColor: '#f7f6f2', border: '1.5px solid #111111', borderRadius: '0.5rem', marginBottom: '0.25rem' }}>
                         <p style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', color: '#666', marginBottom: '0.25rem' }}>Selected package</p>
                         <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111111' }}>{planName || 'Membership plan'}</p>
@@ -1153,7 +1207,7 @@ export default function SignupClient() {
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Joining as</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                         {[
-                          { value: 'member', label: 'Member', desc: 'Join our community & participate in activities' },
+                          { value: 'member', label: 'Individual', desc: 'Join our community and register for events' },
                           { value: 'business', label: 'Business', desc: 'Company partnerships & corporate engagement' },
                         ].map(option => (
                           <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff' }}>
@@ -1552,7 +1606,7 @@ export default function SignupClient() {
                   </div>
                 )}
 
-                {currentStep === 5 && (
+                {MEMBERSHIP_PAYMENTS_ENABLED && currentStep === 5 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.25rem' }}>
                       Select your tier & subscribe
@@ -1690,12 +1744,12 @@ export default function SignupClient() {
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '2rem' }}>
                 <button
                   type="button"
-                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                  disabled={currentStep === 1 || currentStep === 5 || isLoading || checkingOut}
+                  onClick={() => setCurrentStep(Math.max(MEMBERSHIP_PAYMENTS_ENABLED ? 1 : 2, currentStep - 1))}
+                  disabled={(MEMBERSHIP_PAYMENTS_ENABLED ? currentStep === 1 : currentStep === 2) || currentStep === 5 || isLoading || checkingOut}
                   className="pb-form-nav-btn pb-outline-btn"
                   style={{
                     flex: 1,
-                    opacity: currentStep === 1 || currentStep === 5 || isLoading || checkingOut ? 0.5 : 1,
+                    opacity: (MEMBERSHIP_PAYMENTS_ENABLED ? currentStep === 1 : currentStep === 2) || currentStep === 5 || isLoading || checkingOut ? 0.5 : 1,
                   }}
                 >
                   Back
@@ -1705,11 +1759,11 @@ export default function SignupClient() {
                   <button
                     type="button"
                     onClick={() => handleStepChange(currentStep + 1)}
-                    disabled={isLoading || !hasSelectedPlan()}
+                    disabled={isLoading || (MEMBERSHIP_PAYMENTS_ENABLED && !hasSelectedPlan())}
                     className="pb-form-nav-btn"
                     style={{
                       flex: 1,
-                      opacity: isLoading || !hasSelectedPlan() ? 0.7 : 1,
+                      opacity: isLoading || (MEMBERSHIP_PAYMENTS_ENABLED && !hasSelectedPlan()) ? 0.7 : 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1722,7 +1776,7 @@ export default function SignupClient() {
                 ) : currentStep === 4 ? (
                   <button
                     type="submit"
-                    disabled={isLoading || !hasSelectedPlan()}
+                    disabled={isLoading || (MEMBERSHIP_PAYMENTS_ENABLED && !hasSelectedPlan())}
                     className="pb-form-nav-btn"
                     style={{
                       flex: 1,

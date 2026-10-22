@@ -33,6 +33,7 @@ import { DashboardTopBar } from '@/components/dashboard-top-bar'
 import { getMemberPageTitle, getWelcomeFirstName } from '@/lib/dashboard-page-titles'
 import { getUserDisplayName } from '@/lib/user-profile'
 import { useAuth } from '@/lib/auth-context'
+import { hasAdminAccess } from '@/lib/roles'
 
 /** Part 10A — ONLY these items for basic members. No admin/security/recordings. */
 const memberMenuItems = [
@@ -67,6 +68,7 @@ export function MemberSidebar({
   setOpen: (open: boolean) => void
 }) {
   const pathname = usePathname()
+  const { user } = useAuth()
 
   return (
     <>
@@ -83,7 +85,7 @@ export function MemberSidebar({
         }`}
       >
         <div className="px-4 py-4 border-b border-border flex flex-col items-center justify-center relative">
-          <SiteLogo background="light" variant="sidebar" href="/dashboard" />
+          <SiteLogo background="light" variant="sidebar" href="/" />
           <button
             type="button"
             data-dashboard-control
@@ -95,6 +97,22 @@ export function MemberSidebar({
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 min-h-[44px] rounded-lg text-neutral-900 bg-[#f7f6f2] border border-[#e4e1da] font-semibold"
+          >
+            <span className="text-sm">Main website</span>
+          </Link>
+          {hasAdminAccess(user) ? (
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 min-h-[44px] rounded-lg text-neutral-900 border border-[#e4e1da]"
+            >
+              <span className="text-sm font-medium">Admin console</span>
+            </Link>
+          ) : null}
           {memberMenuItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -152,6 +170,21 @@ export function MemberHeader({
       onLogout={handleLogout}
       logoutLabel="Sign out"
       trailing={
+        <>
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center min-h-[32px] px-2 text-sm font-semibold text-neutral-900"
+        >
+          Home
+        </Link>
+        {hasAdminAccess(user) ? (
+          <Link
+            href="/admin"
+            className="inline-flex items-center justify-center min-h-[32px] px-2 text-sm font-semibold text-neutral-900"
+          >
+            Admin
+          </Link>
+        ) : null}
         <button
           type="button"
           data-dashboard-control
@@ -161,6 +194,7 @@ export function MemberHeader({
         >
           <Menu className="h-5 w-5" />
         </button>
+        </>
       }
     />
   )

@@ -142,7 +142,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Members-only by default; hosts opt in with allowNonMemberGuests.
-    if (!isExplicitTrue(event.allowNonMemberGuests)) {
+    // While membership payments are paused, any signed-in person can register.
+    const { MEMBERSHIP_PAYMENTS_ENABLED } = await import('@/lib/membership-launch')
+    if (MEMBERSHIP_PAYMENTS_ENABLED && !isExplicitTrue(event.allowNonMemberGuests)) {
       const userSnap = await db.collection('users').doc(userId).get()
       const userData = (userSnap.exists ? userSnap.data() : {}) as Record<string, unknown>
       const { hasActiveMembership } = await import('@/lib/membership-access')

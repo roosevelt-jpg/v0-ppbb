@@ -240,6 +240,15 @@ export function AdminSidebar({
           <SiteLogo background="light" variant="sidebar" href="/admin" />
         </div>
 
+        <div className="px-3 pt-3 space-y-1">
+          <Link href="/" className="block px-3 py-2 rounded-lg text-sm font-semibold text-neutral-900 bg-[#f7f6f2] border border-[#e4e1da]">
+            Main website
+          </Link>
+          <Link href="/dashboard" className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-800 border border-[#e4e1da]">
+            Member dashboard
+          </Link>
+        </div>
+
         {/* Navigation with Groups */}
         <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
           {sortedGroups.map((group) => (
@@ -308,6 +317,15 @@ export function AdminSidebar({
             <div className="px-4 py-4 border-b border-border flex flex-col items-center justify-center">
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
                 <SiteLogo background="light" variant="sidebar" linked={false} />
+              </Link>
+            </div>
+
+            <div className="px-3 pt-3 space-y-1">
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-semibold text-neutral-900 bg-[#f7f6f2] border border-[#e4e1da]">
+                Main website
+              </Link>
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-sm font-medium text-neutral-800 border border-[#e4e1da]">
+                Member dashboard
               </Link>
             </div>
 

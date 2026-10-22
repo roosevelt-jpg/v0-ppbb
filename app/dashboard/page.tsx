@@ -10,6 +10,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X, Crown } from 'lucide-react'
+import { MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -177,6 +178,7 @@ export default function DashboardPage() {
 
   const member = user as User | null
   const quickLinks = [
+    { label: 'Main website', href: '/' },
     { label: 'Browse Jobs', href: '/dashboard/opportunities' },
     { label: 'Browse Marketplace', href: '/dashboard/marketplace' },
     { label: 'Volunteer', href: '/dashboard/volunteering' },
@@ -186,7 +188,7 @@ export default function DashboardPage() {
     { label: 'Membership Plans', href: '/dashboard/membership' },
     { label: 'My Communities', href: '/dashboard/communities' },
     { label: 'Settings', href: '/dashboard/settings' },
-  ]
+  ].filter((link) => MEMBERSHIP_PAYMENTS_ENABLED || link.href !== '/dashboard/membership')
 
   return (
     <DashboardPageShell

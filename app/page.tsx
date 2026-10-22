@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, limit } from 'firebase/firestore'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { HomeWeeklyDistribution } from '@/components/homepage/home-weekly-distribution'
 import { HomeHero } from '@/components/homepage/home-hero'
 import { HomeStatsBar } from '@/components/homepage/home-stats-bar'
 import { PartnersMarquee } from '@/components/homepage/partners-marquee'
@@ -120,6 +121,7 @@ export default function HomePage() {
     <div className="w-full bg-background text-foreground overflow-x-hidden">
       <Navbar />
 
+      <HomeWeeklyDistribution />
       <HomeHero />
       <HomeAdvertisingBanner />
       <HomeStatsBar />

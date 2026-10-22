@@ -121,7 +121,12 @@ function LoginPageContent() {
 
     if (loginError) {
       if (loginError === MEMBERSHIP_PLAN_REQUIRED) {
-        router.push('/signup')
+        const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || ''
+        router.push(
+          returnUrl.startsWith('/') && !returnUrl.startsWith('//')
+            ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}`
+            : '/signup'
+        )
         setLoading(false)
         return
       }
@@ -201,7 +206,12 @@ function LoginPageContent() {
 
     if (loginError) {
       if (loginError === MEMBERSHIP_PLAN_REQUIRED) {
-        router.push('/signup')
+        const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || ''
+        router.push(
+          returnUrl.startsWith('/') && !returnUrl.startsWith('//')
+            ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}`
+            : '/signup'
+        )
         setOauthLoading(null)
         return
       }
@@ -356,7 +366,15 @@ function LoginPageContent() {
 
           <div className="text-center mt-3">
             <span className="text-xs text-neutral-600">New here? </span>
-            <Link href="/join" className="text-xs font-semibold text-neutral-900 hover:underline">
+            <Link
+              href={(() => {
+                const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || ''
+                return returnUrl.startsWith('/') && !returnUrl.startsWith('//')
+                  ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}`
+                  : '/signup'
+              })()}
+              className="text-xs font-semibold text-neutral-900 hover:underline"
+            >
               Create account
             </Link>
           </div>

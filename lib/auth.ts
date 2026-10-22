@@ -81,7 +81,8 @@ export async function registerUser(
   options?: RegisterUserOptions & { planId?: string; planName?: string }
 ): Promise<{ user: User | null; error: string | null }> {
   try {
-    if (!options?.planId) {
+    const { MEMBERSHIP_PAYMENTS_ENABLED, freeMembershipFields } = await import('@/lib/membership-launch')
+    if (MEMBERSHIP_PAYMENTS_ENABLED && !options?.planId) {
       return { user: null, error: MEMBERSHIP_PLAN_REQUIRED }
     }
     // Set persistence to local
@@ -108,7 +109,7 @@ export async function registerUser(
       employer: options?.employer,
       volunteeredHours: 0,
       totalDonated: 0,
-      membershipTier: options.planId,
+      membershipTier: options?.planId || freeMembershipFields(role).membershipTier,
       memberSince: new Date(),
       active: true,
       createdAt: new Date(),
@@ -119,8 +120,13 @@ export async function registerUser(
       doc(db, 'users', firebaseUser.uid),
       sanitizeForFirestore({
         ...(userProfile as Record<string, unknown>),
-        membershipPlanId: options.planId,
-        membershipPlanName: options.planName || null,
+        ...(options?.planId
+          ? {
+              membershipPlanId: options.planId,
+              membershipPlanName: options.planName || null,
+              membershipStatus: 'pending_payment',
+            }
+          : freeMembershipFields(role)),
       })
     )
 

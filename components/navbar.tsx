@@ -88,10 +88,21 @@ export function Navbar() {
       </button>
       <div className="absolute end-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
         <Link
-          href={getDashboardHref(user as User | BusinessProfile)}
+          href="/"
           className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
         >
-          Open dashboard
+          Main website
+        </Link>
+        {hasAdminAccess(user as User) ? (
+          <Link href="/admin" className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800">
+            Admin console
+          </Link>
+        ) : null}
+        <Link
+          href={hasAdminAccess(user as User) ? '/dashboard' : getDashboardHref(user as User | BusinessProfile)}
+          className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
+        >
+          {hasAdminAccess(user as User) ? 'Member dashboard' : 'Open dashboard'}
         </Link>
         <button
           type="button"
@@ -276,11 +287,27 @@ export function Navbar() {
             {!authLoading && user ? (
               <>
                 <Link
-                  href={getDashboardHref(user as User | BusinessProfile)}
+                  href="/"
                   className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  {dashboardLabel}
+                  Main website
+                </Link>
+                {hasAdminAccess(user as User) ? (
+                  <Link
+                    href="/admin"
+                    className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin console
+                  </Link>
+                ) : null}
+                <Link
+                  href={hasAdminAccess(user as User) ? '/dashboard' : getDashboardHref(user as User | BusinessProfile)}
+                  className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {hasAdminAccess(user as User) ? 'Member dashboard' : dashboardLabel}
                 </Link>
                 <button
                   type="button"

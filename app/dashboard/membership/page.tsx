@@ -10,6 +10,7 @@ import { Check, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems, memberMatchesPlan, planTrialCopy, resolveActiveGateway } from '@/lib/pricing-utils'
 import { hasActiveMembership } from '@/lib/membership-access'
+import { MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import {
   DashboardPageShell,
@@ -399,6 +400,8 @@ export default function MembershipPage() {
         <MembershipSubscriptionOverview manageHref={manageHref} />
       </div>
 
+      {MEMBERSHIP_PAYMENTS_ENABLED ? (
+      <>
       <Card className="p-4 sm:p-6 mb-8 border border-neutral-200 dark:border-border">
         <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground mb-1">Have a promo code?</h3>
         <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
@@ -519,6 +522,12 @@ export default function MembershipPage() {
             )
           })}
         </div>
+      )}
+      </>
+      ) : (
+        <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-border text-sm text-neutral-700 dark:text-neutral-200">
+          Membership is free for now. Register as an individual or a business and we save your details. No card is asked for. Paid plans stay in admin and can be turned back on later.
+        </Card>
       )}
     </DashboardPageShell>
   )
