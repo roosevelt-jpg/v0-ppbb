@@ -59,6 +59,38 @@ async function notifyEventCreator(
   }
 }
 
+/** Hide or restore every date in a recurring series, not only the one that was clicked. */
+async function setSeriesEventStatus(
+  db: ReturnType<typeof getAdminDb>,
+  eventId: string,
+  existing: Record<string, unknown>,
+  status: string
+) {
+  const keys = new Set<string>([eventId])
+  const seriesId = String(existing.seriesId || '').trim()
+  if (seriesId) keys.add(seriesId)
+
+  const refs = new Map<string, ReturnType<ReturnType<typeof db.collection>['doc']>>()
+  for (const key of keys) {
+    const parent = await db.collection('events').doc(key).get()
+    if (parent.exists) refs.set(parent.id, parent.ref)
+    const children = await db.collection('events').where('seriesId', '==', key).get()
+    children.docs.forEach((docSnap) => refs.set(docSnap.id, docSnap.ref))
+  }
+  if (refs.size === 0) return
+
+  const patch: Record<string, unknown> = {
+    status,
+    updatedAt: Timestamp.now(),
+  }
+  if (status === 'unpublished') patch.unpublishedAt = Timestamp.now()
+  if (status === 'published') patch.publishedAt = Timestamp.now()
+
+  const batch = db.batch()
+  refs.forEach((ref) => batch.update(ref, patch))
+  await batch.commit()
+}
+
 export async function GET(request: NextRequest) {
   try {
     const status = request.nextUrl.searchParams.get('status')
@@ -437,6 +469,10 @@ export async function PUT(request: NextRequest) {
     } = rawUpdates as Record<string, unknown>
 
     const updates: Record<string, unknown> = { ...safeUpdates }
+    const unpublishSeries = updates.status === 'unpublished' && updates.unpublishSeries !== false
+    const publishSeries = updates.status === 'published' && updates.publishSeries === true
+    delete updates.unpublishSeries
+    delete updates.publishSeries
 
     if (updates.startDate && typeof updates.startDate === 'string') {
       updates.startDate = new Date(updates.startDate)
@@ -453,7 +489,7 @@ export async function PUT(request: NextRequest) {
       mergedRole === 'business' &&
       (mergedPricing === 'paid_by_business' ||
         (mergedPricing !== 'free' && mergedPricing !== 'member_only' && mergedPricing !== 'paid_by_pb'))
-    if (isBusinessPaidUpdate) {
+    if (isBusinessPaidUpdate && updates.status !== 'unpublished') {
       const link = String(
         updates.hostPaymentLink ?? existing.hostPaymentLink ?? updates.paymentLink ?? ''
       ).trim()
@@ -562,6 +598,10 @@ export async function PUT(request: NextRequest) {
     const sanitized = sanitizeForFirestore(updates)
     await db.collection('events').doc(id).update(sanitized)
 
+    if (unpublishSeries || publishSeries) {
+      await setSeriesEventStatus(db, id, existing, String(updates.status))
+    }
+
     if (applyFuture && seriesId) {
       const nowStart = updates.startDate
         ? new Date(updates.startDate as string | Date)
@@ -629,9 +669,14 @@ export async function PUT(request: NextRequest) {
         const { generateRecurringEvents } = await import('@/lib/event-luma-server')
         const recurrence = (updates.recurrence || existing.recurrence) as any
         if (recurrence?.frequency) {
-          void generateRecurringEvents(id, { ...existing, ...updates, id }, recurrence).catch(
-            console.error
-          )
+          const seriesKey = String(existing.seriesId || id)
+          const siblings = await db.collection('events').where('seriesId', '==', seriesKey).limit(5).get()
+          const alreadyHasDates = siblings.docs.some((docSnap) => docSnap.id !== id)
+          if (!alreadyHasDates) {
+            void generateRecurringEvents(id, { ...existing, ...updates, id }, recurrence).catch(
+              console.error
+            )
+          }
         }
       }
     }

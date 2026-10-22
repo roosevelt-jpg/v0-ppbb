@@ -71,6 +71,19 @@ export async function POST(req: NextRequest) {
           ? planGateway
           : 'stripe'
 
+    const priceCents = Number(plan.price) || 0
+    if (priceCents <= 0 && !planTrialDays(plan) && !promoCode) {
+      const intent = await createStripeMembershipIntent({ planId, userId })
+      return NextResponse.json({
+        clientSecret: intent.clientSecret,
+        mode: intent.mode,
+        subscriptionId: intent.subscriptionId,
+        alreadyComplete: Boolean(intent.alreadyComplete),
+        resumedWithoutCharge: Boolean(intent.resumedWithoutCharge),
+        gateway: 'stripe',
+      })
+    }
+
     if (planTrialDays(plan) && selected !== 'stripe') {
       return NextResponse.json(
         {

@@ -56,6 +56,7 @@ export function MembershipSubscriptionOverview({
   const [invoices, setInvoices] = useState<Array<Record<string, unknown>>>([])
   const [cancelling, setCancelling] = useState(false)
   const [cancelDone, setCancelDone] = useState(false)
+  const [resuming, setResuming] = useState(false)
 
   useEffect(() => {
     if (!user?.id) return
@@ -185,11 +186,40 @@ export function MembershipSubscriptionOverview({
   const isPromoSub = String(subscription?.gateway || '') === 'promo'
   const renewalStopped =
     cancelDone ||
+    profile?.membershipAutoRenew === false ||
     Boolean(subscription?.cancelAtPeriodEnd) ||
     String(subscription?.status || '') === 'cancel_at_period_end'
 
   const hasBillableSub =
     Boolean(subscription) || Boolean(String(profile?.stripeSubscriptionId || '').trim())
+
+  const handleResumeRenewal = async () => {
+    setResuming(true)
+    try {
+      const { auth } = await import('@/lib/firebase')
+      const token = await auth.currentUser?.getIdToken(true)
+      if (!token) throw new Error('Please sign in again.')
+      const res = await fetch('/api/subscriptions/resume', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const json = await res.json().catch(() => ({}))
+      if (json.needsCheckout) {
+        window.location.href = manageHref
+        return
+      }
+      if (!res.ok || json.error) throw new Error(json.error || 'Could not turn renewal back on')
+      setCancelDone(false)
+      if (typeof window !== 'undefined') window.location.reload()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not turn renewal back on')
+    } finally {
+      setResuming(false)
+    }
+  }
 
   const handleCancelRenewal = async () => {
     const stripeSubId =
@@ -301,6 +331,16 @@ export function MembershipSubscriptionOverview({
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            {renewalStopped && !isLifetime && !isPromoSub ? (
+              <button
+                type="button"
+                disabled={resuming}
+                onClick={() => void handleResumeRenewal()}
+                className="inline-flex items-center justify-center min-h-[44px] px-4 bg-black text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 disabled:opacity-60"
+              >
+                {resuming ? 'Turning renewal on…' : 'Join again'}
+              </button>
+            ) : null}
             <Link
               href={manageHref}
               className="inline-flex items-center justify-center min-h-[44px] px-4 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-900 bg-white hover:bg-neutral-50"

@@ -263,16 +263,17 @@ export default function MembershipPage() {
         throw new Error(data.error || `Checkout failed (${gateway})`)
       }
 
+      if (data.alreadyComplete) {
+        setStatusBanner(
+          data.resumedWithoutCharge
+            ? 'Automatic renewal is back on. You will not be charged again until the current access period ends.'
+            : 'Your membership is active.'
+        )
+        await refreshProfile()
+        return
+      }
+
       if (gateway === 'stripe') {
-        if (data.alreadyComplete) {
-          setStatusBanner(
-            data.resumedWithoutCharge
-              ? 'Automatic renewal is back on. You will not be charged again until the current access period ends.'
-              : 'Plan updated. Any price difference was applied to your card on file.'
-          )
-          await refreshProfile()
-          return
-        }
         if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
         setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
         return
@@ -457,6 +458,8 @@ export default function MembershipPage() {
             // plan, and without this check they'd see a disabled "Current
             // Plan" button instead of a working Subscribe button.
             const isCurrentPlan = memberMatchesPlan(memberRecord, plan) && memberActive
+            const renewalOff = profile?.membershipAutoRenew === false
+            const canResume = isCurrentPlan && renewalOff
             const isChangePlan = memberActive && !isCurrentPlan
             return (
               <Card key={plan.id} className="p-6 border-2 border-neutral-200 dark:border-border flex flex-col">
@@ -489,7 +492,7 @@ export default function MembershipPage() {
                 <button
                   type="button"
                   onClick={() => handleCheckout(plan)}
-                  disabled={checkingOut === plan.id || isCurrentPlan}
+                  disabled={checkingOut === plan.id || (isCurrentPlan && !canResume)}
                   className={`w-full py-2.5 rounded-lg text-sm font-semibold ${
                     isCurrentPlan
                       ? '!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border'
@@ -500,6 +503,8 @@ export default function MembershipPage() {
                     <span className="inline-flex items-center gap-2 justify-center">
                       <Loader2 className="w-4 h-4 animate-spin" /> Processing...
                     </span>
+                  ) : canResume ? (
+                    'Join again'
                   ) : isCurrentPlan ? (
                     'Current plan'
                   ) : isChangePlan ? (

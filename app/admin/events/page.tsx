@@ -20,13 +20,14 @@ import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
 import { toEventDate, getEventLocationLabel } from '@/lib/event-utils'
 import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
-type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
+type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'unpublished' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
 
 const TAB_OPTIONS: TabType[] = [
   'all',
   'pending_approval',
   'draft',
   'published',
+  'unpublished',
   'changes_requested',
   'rejected',
   'cancelled',
@@ -153,7 +154,8 @@ function EventsPageContent() {
   const updateEventStatus = async (
     id: string,
     status: EventStatus,
-    approvalNotes?: string
+    approvalNotes?: string,
+    series?: boolean
   ) => {
     try {
       const res = await fetch('/api/events', {
@@ -164,6 +166,8 @@ function EventsPageContent() {
           status,
           approvalNotes: approvalNotes || null,
           approvedBy: 'admin',
+          ...(status === 'unpublished' ? { unpublishSeries: true } : {}),
+          ...(status === 'published' && series ? { publishSeries: true } : {}),
         }),
       })
       const json = await res.json()
@@ -179,6 +183,22 @@ function EventsPageContent() {
   const handleApprove = async (id: string) => {
     if (!confirm('Approve and publish this event?')) return
     await updateEventStatus(id, 'published')
+  }
+
+  const handleUnpublish = async (id: string) => {
+    if (
+      !confirm(
+        'Unpublish this event? If it repeats, every date in the series is removed from the website. Nothing is deleted.'
+      )
+    ) {
+      return
+    }
+    await updateEventStatus(id, 'unpublished')
+  }
+
+  const handleRepublish = async (id: string) => {
+    if (!confirm('Publish this event again? A repeating series is published for every date.')) return
+    await updateEventStatus(id, 'published', undefined, true)
   }
 
   const handleReject = async (id: string) => {
@@ -253,11 +273,12 @@ function EventsPageContent() {
 
         {/* Status Tabs */}
         <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
-          {(['all', 'pending_approval', 'draft', 'published', 'changes_requested', 'rejected', 'cancelled', 'completed'] as const).map((tab) => {
+          {TAB_OPTIONS.map((tab) => {
             const count = tab === 'all' ? events.length : tab === 'pending_approval' ? pendingCount : getEventsByStatus(tab).length
             const label = tab === 'all' ? 'All Events' 
               : tab === 'pending_approval' ? 'Pending Approval'
               : tab === 'changes_requested' ? 'Changes Requested'
+              : tab === 'unpublished' ? 'Unpublished'
               : tab.charAt(0).toUpperCase() + tab.slice(1)
             
             return (
@@ -392,6 +413,16 @@ function EventsPageContent() {
                         Revenue
                       </Link>
                     )}
+                    {event.status === 'published' && (
+                      <button type="button" onClick={() => handleUnpublish(event.id!)} className={BUTTON_ROW_COMPACT}>
+                        Unpublish
+                      </button>
+                    )}
+                    {event.status === 'unpublished' && (
+                      <button type="button" onClick={() => handleRepublish(event.id!)} className={BUTTON_ROW_COMPACT}>
+                        Publish
+                      </button>
+                    )}
                     <button type="button" onClick={() => handleDelete(event.id!)} className={BUTTON_ROW_COMPACT}>
                       <Trash2 /> Delete
                     </button>
@@ -524,6 +555,24 @@ function EventsPageContent() {
                           >
                             Revenue
                           </Link>
+                        )}
+                        {event.status === 'published' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUnpublish(event.id!)}
+                            className={BUTTON_ROW_COMPACT}
+                          >
+                            Unpublish
+                          </button>
+                        )}
+                        {event.status === 'unpublished' && (
+                          <button
+                            type="button"
+                            onClick={() => handleRepublish(event.id!)}
+                            className={BUTTON_ROW_COMPACT}
+                          >
+                            Publish
+                          </button>
                         )}
                         <button
                           type="button"

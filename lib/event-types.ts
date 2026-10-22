@@ -6,6 +6,7 @@ export type EventStatus =
   | 'pending_approval'
   | 'changes_requested'
   | 'published'
+  | 'unpublished'
   | 'rejected'
   | 'cancelled'
   | 'completed'

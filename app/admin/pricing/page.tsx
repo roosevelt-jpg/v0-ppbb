@@ -6,11 +6,10 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { PricingEmojiPicker } from '@/components/pricing-emoji-picker'
 import { PricingColorPicker } from '@/components/pricing-color-picker'
 import { AdminSelect } from '@/components/admin-select'
-import { db } from '@/lib/firebase'
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { auth, db } from '@/lib/firebase'
+import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems, formatPlanPriceDetailed, planTrialCopy } from '@/lib/pricing-utils'
-import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X, Check } from 'lucide-react'
 import { BUTTON_PRIMARY, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
@@ -41,6 +40,7 @@ export default function PricingManagementPage() {
   const [formData, setFormData] = React.useState<Partial<PricingPlan>>({ ...EMPTY_FORM })
   const [newIncludedItem, setNewIncludedItem] = React.useState('')
   const [saveLoading, setSaveLoading] = React.useState(false)
+  const [saveMessage, setSaveMessage] = React.useState('')
 
   React.useEffect(() => {
     const q = query(collection(db, 'pricingPlans'), orderBy('order', 'asc'))
@@ -90,68 +90,66 @@ export default function PricingManagementPage() {
     }
 
     setSaveLoading(true)
+    setSaveMessage('')
+    const wasEditing = editingId
     try {
       const consolidatedFeatures = getPlanIncludedItems({
         features: formData.features || [],
         benefits: formData.benefits || [],
       })
-
-      const payload = sanitizeForFirestore({
-        name: formData.name,
-        description: formData.description || '',
-        price: formData.price,
-        currency: formData.currency || 'USD',
-        billingPeriod: formData.billingPeriod || 'monthly',
-        trialMonths:
-          formData.trialMonths === 1 || formData.trialMonths === 2 || formData.trialMonths === 3
-            ? formData.trialMonths
-            : 0,
-        features: consolidatedFeatures,
-        benefits: [],
-        icon: formData.icon || '🎯',
-        color: formData.color || '#111111',
-        active: formData.active ?? true,
-        order: formData.order ?? 0,
-        paymentGateway: (formData as PricingPlan).paymentGateway,
-        stripeProductId: formData.stripeProductId,
-        stripePriceId: formData.stripePriceId,
-        paypalPlanId: formData.paypalPlanId,
-        ziinaPlanId: formData.ziinaPlanId,
-        updatedAt: serverTimestamp(),
-      })
-
-      if (editingId) {
-        await updateDoc(doc(db, 'pricingPlans', editingId), payload)
-        audit({
-          actionType: 'update',
-          action: `Updated pricing plan: ${formData.name}`,
-          entityType: 'pricing',
-          entityId: editingId,
-          entityName: formData.name,
-          status: 'success',
-        })
-      } else {
-        const ref = await addDoc(collection(db, 'pricingPlans'), {
-          ...payload,
-          createdAt: serverTimestamp(),
-        })
-        audit({
-          actionType: 'create',
-          action: `Created pricing plan: ${formData.name}`,
-          entityType: 'pricing',
-          entityId: ref.id,
-          entityName: formData.name,
-          status: 'success',
-        })
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) {
+        setSaveMessage('Sign in again, then save the plan.')
+        return
       }
+
+      const response = await fetch('/api/admin/pricing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: editingId,
+          name: formData.name,
+          description: formData.description || '',
+          price: formData.price,
+          currency: formData.currency || 'USD',
+          billingPeriod: formData.billingPeriod || 'monthly',
+          trialMonths: formData.trialMonths,
+          features: consolidatedFeatures,
+          icon: formData.icon || '🎯',
+          color: formData.color || '#111111',
+          active: formData.active ?? true,
+          order: formData.order ?? 0,
+          paymentGateway: (formData as PricingPlan).paymentGateway,
+          stripeProductId: formData.stripeProductId,
+          stripePriceId: formData.stripePriceId,
+          paypalPlanId: formData.paypalPlanId,
+          ziinaPlanId: formData.ziinaPlanId,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save plan')
+      }
+
+      audit({
+        actionType: wasEditing ? 'update' : 'create',
+        action: `${wasEditing ? 'Updated' : 'Created'} pricing plan: ${formData.name}`,
+        entityType: 'pricing',
+        entityId: data.id || wasEditing || '',
+        entityName: formData.name,
+        status: 'success',
+      })
 
       setFormData({ ...EMPTY_FORM })
       setEditingId(null)
       setShowAddForm(false)
-      alert(editingId ? 'Plan updated successfully!' : 'Plan created successfully!')
+      setSaveMessage(wasEditing ? 'Plan saved.' : 'Plan created.')
     } catch (error) {
       console.error('[v0] Error saving plan:', error)
-      alert('Failed to save plan')
+      setSaveMessage(error instanceof Error ? error.message : 'Failed to save plan')
     } finally {
       setSaveLoading(false)
     }
@@ -222,6 +220,12 @@ export default function PricingManagementPage() {
             )}
           </div>
         </div>
+
+        {saveMessage ? (
+          <p className="text-sm text-neutral-800" role="status">
+            {saveMessage}
+          </p>
+        ) : null}
 
       {showAddForm && (
         <Card className="p-4 sm:p-6 border border-neutral-200 space-y-4">

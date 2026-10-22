@@ -38,6 +38,37 @@ export default function EventDetailPage() {
     }
   }
 
+  const setVisibility = async (status: 'unpublished' | 'published') => {
+    const message =
+      status === 'unpublished'
+        ? 'Unpublish this event? If it repeats, every date in the series is removed from the website. Nothing is deleted.'
+        : 'Publish this event again? A repeating series is published for every date.'
+    if (!confirm(message)) return
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/events', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: eventId,
+          status,
+          ...(status === 'unpublished' ? { unpublishSeries: true } : { publishSeries: true }),
+        }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        alert(json.error || 'Could not update this event')
+        return
+      }
+      loadEvent()
+    } catch (err) {
+      console.error('[v0] Error updating event visibility:', err)
+      alert('Could not update this event')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const handleApprove = async () => {
     setActionLoading(true)
     try {
@@ -354,6 +385,44 @@ export default function EventDetailPage() {
               >
                 Attendees & Check-in
               </button>
+              {event.status === 'published' && (
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => void setVisibility('unpublished')}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#fef3c7',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    color: '#92400e',
+                  }}
+                >
+                  Unpublish
+                </button>
+              )}
+              {event.status === 'unpublished' && (
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => void setVisibility('published')}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    backgroundColor: '#111111',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  Publish again
+                </button>
+              )}
               {event.status === 'published' && (
                 <button
                   onClick={() => router.push(`/admin/events/${eventId}/revenue`)}

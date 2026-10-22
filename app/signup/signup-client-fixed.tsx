@@ -589,13 +589,14 @@ export default function SignupClient() {
         )
       }
 
+      if (data.alreadyComplete) {
+        window.location.href = data.resumedWithoutCharge
+          ? '/dashboard/membership?status=resumed'
+          : '/dashboard/membership?status=success'
+        return
+      }
+
       if (gateway === 'stripe') {
-        if (data.alreadyComplete) {
-          window.location.href = data.resumedWithoutCharge
-            ? '/dashboard/membership?status=resumed'
-            : '/dashboard/membership?status=success'
-          return
-        }
         if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
         setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
         setCheckingOut(false)

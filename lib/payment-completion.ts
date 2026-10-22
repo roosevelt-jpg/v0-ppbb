@@ -84,13 +84,86 @@ export async function createStripeMembershipIntent(params: {
   /** Renewal was turned back on inside a period that is already paid. */
   resumedWithoutCharge?: boolean
 }> {
-  const { getStripeClient } = await import('@/lib/get-stripe-client')
-  const stripe = await getStripeClient()
   const db = getAdminDb()
 
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
   if (!planSnap.exists) throw new Error('Plan not found')
   const plan = planSnap.data() as Record<string, unknown>
+
+  // AED 0 plans must not wait on Stripe. A $0 recurring price often fails or
+  // hangs, which blocked Individual signup while a plan that already had a
+  // Stripe price could still complete.
+  const priceCents = Number(plan.price) || 0
+  if (priceCents <= 0 && !(params.trialDays && params.trialDays > 0) && !params.couponId) {
+    const userSnap = await db.collection('users').doc(params.userId).get()
+    const userData = userSnap.data() || {}
+    const samePlan =
+      String(userData.membershipPlanId || '') === params.planId ||
+      String(userData.membershipTier || '') === params.planId
+    const renewRaw = userData.membershipRenewDate
+    const renewDate =
+      renewRaw && typeof renewRaw === 'object' && 'toDate' in (renewRaw as object)
+        ? (renewRaw as { toDate: () => Date }).toDate()
+        : typeof renewRaw === 'string' || typeof renewRaw === 'number'
+          ? new Date(renewRaw)
+          : null
+    const stillIn =
+      renewDate != null && !Number.isNaN(renewDate.getTime()) && renewDate.getTime() > Date.now()
+    const status = String(userData.membershipStatus || '').toLowerCase()
+    const active = status === 'active' || status === 'trialing'
+    if (samePlan && active && stillIn) {
+      const stripeSubId = String(userData.stripeSubscriptionId || '').trim()
+      if (stripeSubId) {
+        try {
+          const { getStripeClient } = await import('@/lib/get-stripe-client')
+          const stripe = await getStripeClient()
+          const current = await stripe.subscriptions.retrieve(stripeSubId)
+          if (
+            current.cancel_at_period_end &&
+            ['active', 'trialing', 'past_due'].includes(String(current.status))
+          ) {
+            await stripe.subscriptions.update(stripeSubId, {
+              cancel_at_period_end: false,
+              proration_behavior: 'none',
+            })
+          }
+          await db.collection('subscriptions').doc(stripeSubId).set(
+            { cancelAtPeriodEnd: false, updatedAt: FieldValue.serverTimestamp() },
+            { merge: true }
+          )
+        } catch (err) {
+          console.error('[payment-completion] free-plan resume failed to update Stripe:', err)
+        }
+      }
+      await db.collection('users').doc(params.userId).set(
+        { membershipAutoRenew: true, updatedAt: FieldValue.serverTimestamp() },
+        { merge: true }
+      )
+      return {
+        clientSecret: null,
+        mode: 'payment' as const,
+        subscriptionId: String(userData.stripeSubscriptionId || `free-${params.planId}`),
+        alreadyComplete: true,
+        resumedWithoutCharge: true,
+      }
+    }
+    await completeMembershipPayment({
+      userId: params.userId,
+      planId: params.planId,
+      gateway: 'admin_grant',
+      paymentReference: `free-${params.planId}`,
+      amountCents: 0,
+    })
+    return {
+      clientSecret: null,
+      mode: 'payment' as const,
+      subscriptionId: `free-${params.planId}`,
+      alreadyComplete: true,
+    }
+  }
+
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
 
   const { priceId } = await ensureRecurringMembershipPrice(stripe, plan, params.planId, async (patch) => {
     await db.collection('pricingPlans').doc(params.planId).update(patch)
@@ -160,7 +233,15 @@ export async function createStripeMembershipIntent(params: {
     const stillInPeriod = periodEnd != null && periodEnd * 1000 > Date.now()
     const live = ['active', 'trialing', 'past_due'].includes(status)
 
-    if (live && itemId && samePlan && current.cancel_at_period_end && stillInPeriod && !params.trialDays) {
+    const renewOffInProfile = userData.membershipAutoRenew === false
+    if (
+      live &&
+      itemId &&
+      samePlan &&
+      stillInPeriod &&
+      !params.trialDays &&
+      (current.cancel_at_period_end || renewOffInProfile)
+    ) {
       // They already paid through the current period. Turning renewal back on
       // must not create another invoice until that period ends.
       subscription = await stripe.subscriptions.update(existingSubId, {
@@ -569,6 +650,7 @@ export async function completeMembershipPayment(params: {
       membershipPlanName: plan.name || params.planId,
       membershipTier: params.planId,
       membershipStatus: 'active',
+      membershipAutoRenew: true,
       membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
       membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
       membershipExpiredAt: FieldValue.delete(),
