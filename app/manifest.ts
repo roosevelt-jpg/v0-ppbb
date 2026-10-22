@@ -49,6 +49,18 @@ export default function manifest(): MetadataRoute.Manifest {
         description: 'Log in to your account',
       },
       {
+        name: 'Admin sign-in',
+        short_name: 'Admin',
+        url: '/admin/login',
+        description: 'Admin sign-in on your phone',
+      },
+      {
+        name: 'Scan QR',
+        short_name: 'Scan',
+        url: '/admin/scan',
+        description: 'Scan a guest QR code',
+      },
+      {
         name: 'Donate',
         short_name: 'Donate',
         url: '/donate',

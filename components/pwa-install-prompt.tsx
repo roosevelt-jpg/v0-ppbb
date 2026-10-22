@@ -220,7 +220,8 @@ export function PwaInstallPrompt() {
     }
   }
 
-  if (isDashboardRoute(pathname)) return null
+  const onAdmin = Boolean(pathname?.startsWith('/admin'))
+  if (isDashboardRoute(pathname) && !onAdmin) return null
   if (!open || readInstalled()) return null
 
   return (
@@ -245,10 +246,10 @@ export function PwaInstallPrompt() {
             className="min-w-0 flex-1 text-left !bg-transparent !shadow-none !min-h-0 !px-0 !rounded-none disabled:opacity-50"
           >
             <p className="text-xs font-semibold text-white leading-tight truncate">
-              {busy ? 'Opening install…' : 'Install app'}
+              {busy ? 'Opening install…' : 'Add to home screen'}
             </p>
             <p className="text-[10px] text-neutral-400 leading-tight truncate">
-              Tap to add Passive Blessings
+              {onAdmin ? 'Sign in on your phone and scan QR codes' : 'Tap to add Passive Blessings'}
             </p>
           </button>
 

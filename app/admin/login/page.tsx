@@ -64,7 +64,13 @@ function AdminLoginForm() {
 
   useEffect(() => {
     if (searchParams.get('reason') === 'idle') {
-      setInfo('You were signed out after 10 minutes of inactivity.')
+      setInfo('You were signed out. Sign in again — a saved login lasts 30 days.')
+    }
+    try {
+      const saved = localStorage.getItem('pb_remember_email')
+      if (saved && saved.includes('@')) setEmail((current) => current || saved)
+    } catch {
+      /* ignore */
     }
   }, [searchParams])
 
@@ -146,6 +152,11 @@ function AdminLoginForm() {
 
   async function finishPasswordOnlyLogin(uid: string, knownProfile?: User) {
     setAdminMfaSession(uid)
+    try {
+      if (email.trim()) localStorage.setItem('pb_remember_email', email.trim())
+    } catch {
+      /* ignore */
+    }
     let profile = knownProfile
     if (!profile) {
       const snap = await getDoc(doc(db, 'users', uid))
@@ -327,6 +338,11 @@ function AdminLoginForm() {
 
       const uid = auth.currentUser.uid
       setAdminMfaSession(uid)
+      try {
+        if (email.trim()) localStorage.setItem('pb_remember_email', email.trim())
+      } catch {
+        /* ignore */
+      }
 
       const snap = await getDoc(doc(db, 'users', uid))
       if (snap.exists()) {
@@ -435,10 +451,11 @@ function AdminLoginForm() {
                 </label>
                 <input
                   type="email"
+                  name="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                   placeholder="admin@example.com"
                   style={inputStyle}
                 />
@@ -496,7 +513,18 @@ function AdminLoginForm() {
                   Password
                 </label>
                 <input
+                  type="email"
+                  name="username"
+                  autoComplete="username"
+                  value={email}
+                  readOnly
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  style={{ position: 'absolute', left: '-9999px', height: 0, opacity: 0 }}
+                />
+                <input
                   type="password"
+                  name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

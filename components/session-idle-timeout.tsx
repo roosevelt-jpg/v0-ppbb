@@ -42,10 +42,12 @@ export function SessionIdleTimeout() {
       return
     }
 
-    // Expire Remember-me sessions after 30 days.
+    // A saved login lasts 30 days and is not ended by the idle timer.
+    let remembered = false
     try {
       const until = Number(localStorage.getItem('pb_remember_until') || 0)
-      if (until > 0 && Date.now() > until) {
+      if (until > Date.now()) remembered = true
+      else if (until > 0) {
         localStorage.removeItem('pb_remember_until')
         localStorage.removeItem('pb_remember_email')
         void logout().then(() => router.replace('/login?reason=session_expired'))
@@ -54,6 +56,7 @@ export function SessionIdleTimeout() {
     } catch {
       /* ignore */
     }
+    if (remembered) return
 
     lastActivityRef.current = Date.now()
     loggingOutRef.current = false
