@@ -62,7 +62,7 @@ export default function VolunteerMatchingPage() {
       </p>
 
       {/* Filters */}
-      <div style={{ marginBottom: '32px', padding: '16px', backgroundColor: 'var(--secondary)', borderRadius: '8px' }}>
+      <div style={{ marginBottom: '32px', padding: '16px', backgroundColor: 'var(--card)', color: 'var(--foreground)', borderRadius: '8px', border: '1px solid var(--border)' }}>
         <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--foreground)', marginRight: '16px' }}>
           Minimum Match Score: {filters.minScore}%
           <input
@@ -77,7 +77,7 @@ export default function VolunteerMatchingPage() {
       </div>
 
       {matches.length === 0 ? (
-        <div style={{ padding: '40px', backgroundColor: 'var(--secondary)', borderRadius: '8px', textAlign: 'center' }}>
+        <div style={{ padding: '40px', backgroundColor: 'var(--card)', color: 'var(--foreground)', borderRadius: '8px', border: '1px solid var(--border)', textAlign: 'center' }}>
           <p style={{ color: 'var(--muted-foreground)' }}>No matches found at this score level. Lower the minimum score to see more opportunities.</p>
         </div>
       ) : (

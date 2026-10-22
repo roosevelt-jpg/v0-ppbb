@@ -271,7 +271,7 @@ export default function CommunityReputationPage() {
       </div>
 
       {/* Info Box */}
-      <div style={{ marginTop: '32px', padding: '24px', backgroundColor: 'var(--secondary)', borderRadius: '8px', borderLeft: '4px solid #0066CC' }}>
+      <div style={{ marginTop: '32px', padding: '24px', backgroundColor: 'var(--card)', color: 'var(--foreground)', borderRadius: '8px', border: '1px solid var(--border)', borderLeft: '4px solid #0066CC' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '12px', margin: 0 }}>
           How Reputation Works
         </h3>

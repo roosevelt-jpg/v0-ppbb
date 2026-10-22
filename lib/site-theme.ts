@@ -283,8 +283,11 @@ export function themeToCssVariables(theme: SiteTheme): Record<string, string> {
     '--card-foreground': c.foreground,
     '--primary': c.primary,
     '--primary-foreground': c.buttonText,
-    '--secondary': c.secondary,
-    '--secondary-foreground': '#ffffff',
+    // Brand secondary is charcoal and stays on --pb-color-secondary.
+    // This token is a light surface. Using the brand color here paints
+    // dashboard cards black in light mode while the text stays dark.
+    '--secondary': c.background,
+    '--secondary-foreground': c.foreground,
     '--muted': c.background,
     '--muted-foreground': c.muted,
     '--accent': c.accent,
