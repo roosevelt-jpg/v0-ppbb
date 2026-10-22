@@ -6,7 +6,13 @@ import { SearchableSelect } from '@/components/searchable-select'
 import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
 import { GoogleMapPin } from '@/components/google-map-pin'
 import { COUNTRY_OPTIONS } from '@/lib/countries'
-import { UAE_EMIRATES, UAE_CITIES_BY_EMIRATE, isUaeCountry } from '@/lib/signup-locations'
+import {
+  UAE_EMIRATES,
+  citiesForEmirate,
+  defaultCityForEmirate,
+  isUaeCountry,
+  matchCityForEmirate,
+} from '@/lib/signup-locations'
 
 export type AddressLocationValue = {
   country: string
@@ -56,15 +62,6 @@ function matchEmirate(stateOrCity: string): string {
       (e) => hay.includes(e.toLowerCase()) || e.toLowerCase().includes(hay)
     ) || ''
   )
-}
-
-function matchCityForEmirate(emirate: string, cityHint: string): string {
-  const cities = UAE_CITIES_BY_EMIRATE[emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']
-  const hay = cityHint.trim().toLowerCase()
-  if (!hay) return cities[0] || 'Other'
-  const hit = cities.find((c) => c.toLowerCase() === hay || hay.includes(c.toLowerCase()))
-  if (hit) return hit
-  return cities.includes('Other') ? 'Other' : cities[0] || 'Other'
 }
 
 function friendlyMapsError(raw: string): string {
@@ -379,16 +376,18 @@ export function AddressLocationPicker({
       />
 
       {uae ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <div>
             <label className="block text-xs font-semibold text-neutral-800 mb-1">Emirate *</label>
             <select
               value={value.emirate}
               onChange={(e) => {
                 const emirate = e.target.value
-                const cities =
-                  UAE_CITIES_BY_EMIRATE[emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']
-                patch({ emirate, city: cities[0] || value.city })
+                patch({
+                  emirate,
+                  city: defaultCityForEmirate(emirate),
+                  customCity: '',
+                })
               }}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-white text-sm"
             >
@@ -402,7 +401,7 @@ export function AddressLocationPicker({
           <div>
             <label className="block text-xs font-semibold text-neutral-800 mb-1">City / Area *</label>
             <select
-              value={value.city}
+              value={citiesForEmirate(value.emirate).includes(value.city) ? value.city : ''}
               onChange={(e) => {
                 const city = e.target.value
                 patch({
@@ -412,9 +411,7 @@ export function AddressLocationPicker({
               }}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-white text-sm"
             >
-              {(UAE_CITIES_BY_EMIRATE[value.emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || [
-                'Other',
-              ]).map((city) => (
+              {citiesForEmirate(value.emirate).map((city) => (
                 <option key={city} value={city}>
                   {city}
                 </option>
