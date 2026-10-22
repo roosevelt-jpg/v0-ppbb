@@ -14,6 +14,14 @@ import { recordAdminAuditFromUser } from '@/lib/admin-audit'
 import { getUserDisplayName } from '@/lib/user-profile'
 import { clearAdminMfaSession, hasValidAdminMfaSession } from '@/lib/admin-mfa-session'
 
+/** Keep the guest QR token when an unsigned phone is sent to admin sign-in. */
+function adminReturnPath(pathname: string | null): string {
+  const path = pathname || '/admin'
+  if (typeof window === 'undefined') return path
+  const search = window.location.search || ''
+  return `${path}${search}`
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -35,7 +43,7 @@ export default function AdminLayout({
 
     if (!loading) {
       if (!firebaseUser) {
-        const returnUrl = encodeURIComponent(pathname || '/admin')
+        const returnUrl = encodeURIComponent(adminReturnPath(pathname))
         router.push(`/admin/login?returnUrl=${returnUrl}`)
         return
       }
@@ -50,7 +58,7 @@ export default function AdminLayout({
       }
 
       if (!hasValidAdminMfaSession(user.id)) {
-        const returnUrl = encodeURIComponent(pathname || '/admin')
+        const returnUrl = encodeURIComponent(adminReturnPath(pathname))
         router.push(`/admin/login?returnUrl=${returnUrl}`)
         return
       }

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { auth } from '@/lib/firebase'
+import { useAuth } from '@/lib/auth-context'
 import { parseDoorScanToken } from '@/lib/event-check-in-link'
 
 type ScanResult = {
@@ -14,6 +15,7 @@ type ScanResult = {
 }
 
 export default function AdminScanPage() {
+  const { firebaseUser, loading: authLoading } = useAuth()
   const [code, setCode] = React.useState('')
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState('')
@@ -61,10 +63,11 @@ export default function AdminScanPage() {
   }, [])
 
   React.useEffect(() => {
+    if (authLoading || !firebaseUser) return
     const params = new URLSearchParams(window.location.search)
     const token = params.get('t') || params.get('token')
     if (token) void submit(token)
-  }, [submit])
+  }, [authLoading, firebaseUser, submit])
 
   React.useEffect(() => {
     if (!cameraOn) return
