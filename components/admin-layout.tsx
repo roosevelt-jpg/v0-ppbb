@@ -57,6 +57,7 @@ import {
   Video,
   MapPin,
   PieChart,
+  QrCode,
   BookOpen,
   FolderOpen,
   Megaphone,
@@ -109,6 +110,7 @@ export const adminMenuItems = [
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
+  { label: 'Scan QR', href: '/admin/scan', icon: QrCode, group: 'Community' },
   { label: 'Event Suggestions', href: '/admin/event-suggestions', icon: Lightbulb, group: 'Community' },
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },

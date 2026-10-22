@@ -225,7 +225,7 @@ export function EventGuestManager({
             Check in guest
           </button>
           <Link href="/admin/scan" className={`${BTN} inline-flex items-center justify-center`}>
-            Scan with phone camera
+            Scan QR (opens camera)
           </Link>
         </div>
 

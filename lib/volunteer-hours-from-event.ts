@@ -87,7 +87,7 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
   event: Record<string, unknown>
   registrationId: string
   userId: string
-}): Promise<{ credited: boolean; hours: number; reason?: string; adjusted?: boolean }> {
+}): Promise<{ credited: boolean; hours: number; reason?: string; adjusted?: boolean; certificatesIssued?: string[] }> {
   const { eventId, event, registrationId, userId } = opts
   if (!userId) return { credited: false, hours: 0, reason: 'no_user' }
   if (!isCharityVolunteerEvent(event)) {
@@ -112,7 +112,8 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
     const prevHours = Number(doc.data().hours || 0)
     const delta = Math.round((hours - prevHours) * 4) / 4
     if (delta === 0) {
-      return { credited: false, hours: prevHours, reason: 'already_credited' }
+      const certificatesIssued = await issueCertificates(userId)
+      return { credited: false, hours: prevHours, reason: 'already_credited', certificatesIssued }
     }
 
     await doc.ref.update({
@@ -133,16 +134,8 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
       )
     }
 
-    try {
-      const { evaluateCertificateMilestonesForUser } = await import(
-        '@/lib/certificate-milestones-server'
-      )
-      await evaluateCertificateMilestonesForUser(userId)
-    } catch (err) {
-      console.error('[volunteer-hours] certificate milestones:', err)
-    }
-
-    return { credited: true, hours, reason: 'adjusted', adjusted: true }
+    const certificatesIssued = await issueCertificates(userId)
+    return { credited: true, hours, reason: 'adjusted', adjusted: true, certificatesIssued }
   }
 
   await db.collection('volunteerRecords').add({
@@ -168,16 +161,21 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
     { merge: true }
   )
 
+  const certificatesIssued = await issueCertificates(userId)
+  return { credited: true, hours, certificatesIssued }
+}
+
+async function issueCertificates(userId: string): Promise<string[]> {
   try {
     const { evaluateCertificateMilestonesForUser } = await import(
       '@/lib/certificate-milestones-server'
     )
-    await evaluateCertificateMilestonesForUser(userId)
+    const result = await evaluateCertificateMilestonesForUser(userId)
+    return result.issued
   } catch (err) {
     console.error('[volunteer-hours] certificate milestones:', err)
+    return []
   }
-
-  return { credited: true, hours }
 }
 
 /**

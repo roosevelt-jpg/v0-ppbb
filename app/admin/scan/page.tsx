@@ -18,7 +18,7 @@ export default function AdminScanPage() {
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState('')
   const [result, setResult] = React.useState<ScanResult | null>(null)
-  const [cameraOn, setCameraOn] = React.useState(false)
+  const [cameraOn, setCameraOn] = React.useState(true)
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const scanned = React.useRef(false)
 
@@ -94,7 +94,8 @@ export default function AdminScanPage() {
         }, 500)
       } catch (err) {
         console.error('[admin/scan] camera', err)
-        setError('Camera permission was blocked. You can still paste a code, or scan the QR with the phone camera app.')
+        setCameraOn(false)
+        setError('Camera permission was blocked. Allow the camera, then tap Open camera, or scan the QR with the phone’s camera app.')
       }
     })()
     return () => {

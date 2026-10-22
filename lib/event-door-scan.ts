@@ -97,6 +97,10 @@ export async function confirmDoorScan(opts: {
   const alreadyCheckedIn = Boolean(data.checkedInAt)
   if (!alreadyCheckedIn) {
     await ref.update({ checkedInAt: Timestamp.now(), checkedInBy: opts.adminUid })
+    await db.collection('events').doc(eventId).update({
+      checkedInCount: FieldValue.increment(1),
+      updatedAt: Timestamp.now(),
+    })
   }
 
   let volunteerHours: number | null = null
@@ -111,10 +115,14 @@ export async function confirmDoorScan(opts: {
     })
     if (credit.hours > 0) {
       volunteerHours = credit.hours
+      const certLine =
+        credit.certificatesIssued && credit.certificatesIssued.length > 0
+          ? ' A volunteer certificate was issued because they reached the hours required.'
+          : ''
       volunteerNote =
         credit.reason === 'already_credited'
-          ? `${credit.hours} volunteer hours were already counted.`
-          : `${credit.hours} volunteer hours started when this QR was scanned.`
+          ? `${credit.hours} volunteer hours were already counted for this day.${certLine}`
+          : `${credit.hours} volunteer hours recorded for attending today.${certLine}`
     } else if (credit.reason === 'no_duration') {
       volunteerNote =
         'Attendance confirmed. Add a start and end time on this event so volunteer hours can be counted.'
