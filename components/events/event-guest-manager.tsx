@@ -224,6 +224,9 @@ export function EventGuestManager({
           <button type="button" onClick={handleCheckIn} className={BTN}>
             Check in guest
           </button>
+          <Link href="/admin/scan" className={`${BTN} inline-flex items-center justify-center`}>
+            Scan with phone camera
+          </Link>
         </div>
 
         <div className="border rounded-xl p-4 bg-white space-y-3">

@@ -30,6 +30,21 @@ export function generateQrToken(): string {
   return randomUUID().replace(/-/g, '')
 }
 
+/** Guests need a QR as soon as they register, including before payment. */
+export async function ensureCheckInCodes(
+  ref: FirebaseFirestore.DocumentReference,
+  data: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const status = String(data.status || '')
+  if (status === 'waitlisted' || status === 'cancelled' || status === 'rejected') return data
+  if (data.qrToken && data.checkInCode) return data
+  const patch: Record<string, unknown> = { updatedAt: Timestamp.now() }
+  if (!data.checkInCode) patch.checkInCode = generateCheckInCode()
+  if (!data.qrToken) patch.qrToken = generateQrToken()
+  await ref.update(patch)
+  return { ...data, ...patch }
+}
+
 /** Strict truthy for Firestore flags (avoids Boolean("false") === true). */
 export function isExplicitTrue(value: unknown): boolean {
   return value === true || value === 1 || value === 'true' || value === '1'
@@ -142,12 +157,12 @@ export async function flagRegistrationForPayment(
     ticketPrice: amount,
     pbCut,
     businessCut: amount - pbCut,
-    checkInCode: null,
-    qrToken: null,
     paymentRequestedAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   }
   if (reg.status === 'confirmed') update.attendeeCounted = true
+  if (!reg.checkInCode) update.checkInCode = generateCheckInCode()
+  if (!reg.qrToken) update.qrToken = generateQrToken()
   await ref.update(update)
   return { ...reg, ...update }
 }
@@ -221,7 +236,7 @@ export function buildRegistrationRecord(input: {
   checkInCode?: string | null
   qrToken?: string | null
 }) {
-  const needsCodes = input.status === 'confirmed' && input.paymentStatus !== 'pending'
+  const needsCodes = input.status !== 'waitlisted'
   return {
     eventId: input.eventId,
     userId: input.userId,

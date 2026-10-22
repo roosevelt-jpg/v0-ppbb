@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { canManageEvent, getAuthUidFromRequest } from '@/lib/event-luma-server'
 
@@ -57,57 +56,27 @@ export async function POST(request: NextRequest, context: Ctx) {
   }
 
   const doc = snap.docs[0]
-  const data = doc.data()
-  if (data.status !== 'confirmed') {
-    return NextResponse.json(
-      { success: false, error: `Cannot check in guest with status: ${data.status}` },
-      { status: 400 }
-    )
-  }
-  const pay = String(data.paymentStatus || '')
-  if (pay === 'pending' || (pay && pay !== 'paid' && pay !== 'free')) {
-    return NextResponse.json(
-      { success: false, error: 'Cannot check in until payment is complete' },
-      { status: 400 }
-    )
-  }
-  if (data.checkedInAt) {
+  try {
+    const { confirmDoorScan } = await import('@/lib/event-door-scan')
+    const result = await confirmDoorScan({
+      registrationId: doc.id,
+      adminUid: uid,
+      expectedEventId: eventId,
+    })
     return NextResponse.json({
       success: true,
-      alreadyCheckedIn: true,
-      data: { id: doc.id, ...data },
+      alreadyCheckedIn: result.alreadyCheckedIn,
+      payment: result.payment,
+      volunteerHours: result.volunteerHours,
+      volunteerNote: result.volunteerNote,
+      data: {
+        id: doc.id,
+        userName: result.userName,
+        eventTitle: result.eventTitle,
+      },
     })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Check-in failed'
+    return NextResponse.json({ success: false, error: message }, { status: 400 })
   }
-
-  await doc.ref.update({ checkedInAt: Timestamp.now(), checkedInBy: uid })
-
-  // Charity / volunteer events: credit hours toward certificates on first check-in
-  try {
-    const event = eventDoc.data() || {}
-    const guestUserId = typeof data.userId === 'string' ? data.userId : ''
-    if (guestUserId) {
-      const { creditVolunteerHoursForEventAttendance } = await import(
-        '@/lib/volunteer-hours-from-event'
-      )
-      await creditVolunteerHoursForEventAttendance({
-        eventId,
-        event,
-        registrationId: doc.id,
-        userId: guestUserId,
-      })
-    }
-  } catch (err) {
-    console.error('[check-in] volunteer hours credit failed:', err)
-  }
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      id: doc.id,
-      userName: data.userName,
-      userEmail: data.userEmail,
-      ticketTypeName: data.ticketTypeName,
-      checkInCode: data.checkInCode,
-    },
-  })
 }

@@ -161,6 +161,18 @@ export async function sendPasswordResetBranded(opts: {
   }
 }
 
+function membershipNotice(userId: string, title: string, body: string) {
+  membershipPush(userId, title, body)
+  void import('@/lib/in-app-notifications').then(({ addUserNotification }) => {
+    addUserNotification(userId, {
+      title,
+      message: body,
+      href: '/dashboard/membership',
+      type: 'membership',
+    }).catch(() => undefined)
+  })
+}
+
 function membershipPush(userId: string, title: string, body: string) {
   void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
     pushToUserSafe(
@@ -179,9 +191,15 @@ export function notifyMembershipActivated(opts: {
   isLifetime?: boolean
   isUpgrade?: boolean
   previousPlanName?: string | null
+  amount?: number
+  currency?: string
 }): void {
   const planName = opts.planName
   const membershipUrl = membershipDashboardUrl()
+  const paidLine =
+    typeof opts.amount === 'number' && opts.amount > 0
+      ? `${opts.currency || 'AED'} ${opts.amount.toFixed(2)} paid for ${planName} membership.`
+      : `${planName} membership.`
 
   if (opts.isUpgrade) {
     sendBrandedEmailToUserSafe({
@@ -204,7 +222,7 @@ export function notifyMembershipActivated(opts: {
       ),
       cta: { label: 'View membership', url: membershipUrl },
     })
-    membershipPush(opts.userId, 'Membership upgraded', `Your plan is now ${planName}.`)
+    membershipNotice(opts.userId, 'Payment received', paidLine)
     return
   }
 
@@ -223,12 +241,12 @@ export function notifyMembershipActivated(opts: {
         ? `Your ${planName} membership is now active for free with no end date. Thank you for joining Passive Blessings.`
         : isPromo
           ? `Your ${planName} membership is now active via a promo code. Access continues until ${opts.renewDate?.toLocaleDateString() || 'your promo end date'}.`
-          : `Your ${planName} membership is now active. Thank you for joining Passive Blessings.`,
+          : `Your ${planName} membership is now active. ${typeof opts.amount === 'number' && opts.amount > 0 ? paidLine : 'Thank you for joining Passive Blessings.'}`,
       'You can manage your plan anytime from your member dashboard.'
     ),
     cta: { label: 'Open membership', url: membershipUrl },
   })
-  membershipPush(opts.userId, 'Membership activated', `${planName} is now active.`)
+  membershipNotice(opts.userId, 'Payment received', paidLine)
 }
 
 export function notifyMembershipRenewed(opts: {
@@ -262,7 +280,11 @@ export function notifyMembershipRenewed(opts: {
     ),
     cta: { label: 'Manage membership', url: membershipDashboardUrl() },
   })
-  membershipPush(opts.userId, 'Membership renewed', `${plan} renewed successfully.`)
+  const renewed =
+    typeof opts.amount === 'number' && opts.amount > 0
+      ? `${opts.currency || 'AED'} ${opts.amount.toFixed(2)} paid to renew ${plan}.`
+      : `${plan} membership renewed.`
+  membershipNotice(opts.userId, 'Payment received', renewed)
 }
 
 export function notifyMembershipExpiring(opts: {

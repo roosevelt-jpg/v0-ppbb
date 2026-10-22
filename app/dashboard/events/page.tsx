@@ -588,6 +588,14 @@ export default function MyEventsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 self-start">
+                    {event.registrationId && event.registrationStatus !== 'waitlisted' ? (
+                      <Link
+                        href={`/events/${event.id}/confirmation?registrationId=${event.registrationId}`}
+                        className="inline-flex items-center justify-center !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                      >
+                        Show QR code
+                      </Link>
+                    ) : null}
                     {isAwaitingPayment(event) && event.id ? (
                       <button
                         type="button"

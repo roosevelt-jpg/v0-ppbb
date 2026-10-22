@@ -259,27 +259,21 @@ export async function POST(request: NextRequest, context: Ctx) {
     }
 
     if (action === 'checkin') {
-      await ref.update({ checkedInAt: Timestamp.now(), checkedInBy: uid })
       try {
-        const guestUserId = typeof doc.data()?.userId === 'string' ? doc.data()!.userId : ''
-        if (guestUserId) {
-          const eventSnap = await getAdminDb().collection('events').doc(eventId).get()
-          if (eventSnap.exists) {
-            const { creditVolunteerHoursForEventAttendance } = await import(
-              '@/lib/volunteer-hours-from-event'
-            )
-            await creditVolunteerHoursForEventAttendance({
-              eventId,
-              event: eventSnap.data() || {},
-              registrationId: regId,
-              userId: guestUserId,
-            })
-          }
-        }
-      } catch (err) {
-        console.error('[guests] volunteer hours credit failed:', err)
+        const { confirmDoorScan } = await import('@/lib/event-door-scan')
+        const result = await confirmDoorScan({
+          registrationId: regId,
+          adminUid: uid,
+          expectedEventId: eventId,
+        })
+        return NextResponse.json({
+          ...result,
+          message: result.volunteerNote || (result.alreadyCheckedIn ? 'Already checked in' : 'Checked in'),
+        })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Check-in failed'
+        return NextResponse.json({ success: false, error: message }, { status: 400 })
       }
-      return NextResponse.json({ success: true })
     }
 
     if (action === 'uncheckin') {

@@ -713,6 +713,8 @@ export async function completeMembershipPayment(params: {
         previousPlanName: isUpgrade
           ? String(existingUser.membershipPlanName || prevPlanId || '')
           : null,
+        amount: amountCents > 0 ? amountCents / 100 : 0,
+        currency,
       })
     })
     .catch((err) => console.error('[payment-completion] membership email:', err))

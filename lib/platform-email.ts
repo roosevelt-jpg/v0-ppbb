@@ -7,6 +7,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { getEmailBrandLogoUrl } from '@/lib/gmail-service'
 import { getWorkingZohoTransport, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import { mergeGlobalSettings, type GlobalSocialLinks } from '@/lib/global-settings'
 import { DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 import {
   type EmailDepartmentKey,
@@ -70,6 +71,8 @@ export function renderBrandedEmailHtml(opts: {
   headline?: string
   bodyHtml: string
   cta?: BrandedEmailCta
+  socialLinks?: GlobalSocialLinks
+  whatsappLink?: string
 }): string {
   const bodyParts: string[] = []
   if (opts.headline?.trim()) {
@@ -88,6 +91,8 @@ export function renderBrandedEmailHtml(opts: {
     purpose: opts.purpose,
     signature,
     cta: opts.cta,
+    socialLinks: opts.socialLinks,
+    whatsappLink: opts.whatsappLink,
   })
 }
 
@@ -108,8 +113,18 @@ type PreparedMail = {
   text: string
 }
 
+async function loadEmailBrand(): Promise<{ socialLinks: GlobalSocialLinks; whatsappLink: string }> {
+  try {
+    const snap = await getAdminDb().collection('platformConfig').doc('globalSettings').get()
+    const settings = mergeGlobalSettings(snap.data() as Record<string, unknown> | undefined)
+    return { socialLinks: settings.socialLinks, whatsappLink: settings.whatsappLink }
+  } catch {
+    return { socialLinks: {}, whatsappLink: '' }
+  }
+}
+
 async function prepareMail(input: SendBrandedEmailInput): Promise<PreparedMail> {
-  const logoUrl = await resolveLogoUrl()
+  const [logoUrl, brand] = await Promise.all([resolveLogoUrl(), loadEmailBrand()])
   const signature = resolveSignature(input)
   const html = renderBrandedEmailHtml({
     logoUrl,
@@ -120,6 +135,8 @@ async function prepareMail(input: SendBrandedEmailInput): Promise<PreparedMail> 
     headline: input.headline,
     bodyHtml: input.bodyHtml,
     cta: input.cta,
+    socialLinks: brand.socialLinks,
+    whatsappLink: brand.whatsappLink,
   })
   const text = [
     input.greeting || '',

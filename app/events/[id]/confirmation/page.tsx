@@ -8,6 +8,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import { TicketAmountDue } from '@/components/events/ticket-amount-due'
+import { eventDoorScanUrl } from '@/lib/event-check-in-link'
 import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import { CalendarPlus, CheckCircle, Clock, Download, ExternalLink, MessageCircle } from 'lucide-react'
@@ -124,10 +125,10 @@ function ConfirmationInner() {
     status === 'confirmed' && (paymentStatus === 'paid' || paymentStatus === 'free' || !paymentStatus)
 
   const qrValue = reg?.qrToken || reg?.checkInCode || ''
-  const qrUrl =
-    qrValue && isConfirmed
-      ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`
-      : ''
+  const showQr = Boolean(qrValue) && !isWaitlisted && !isPendingApproval
+  const qrUrl = showQr
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(eventDoorScanUrl(qrValue))}`
+    : ''
 
   const whatsappHref = React.useMemo(() => {
     const digits = String(reg?.hostWhatsapp || '').replace(/[^\d]/g, '')
@@ -293,9 +294,9 @@ function ConfirmationInner() {
                   : isHostCollect
                     ? 'Passive Blessings does not collect this ticket fee. Pay the host, tell them on WhatsApp that you paid, then wait for them to confirm your attendance.'
                     : isPendingPbPayment
-                      ? 'Pay now during registration. Your check-in QR appears only after payment succeeds.'
+                      ? 'Show this QR at the door. An admin scan confirms your payment and attendance.'
                       : isConfirmed
-                        ? 'Show this QR code at the door for check-in.'
+                        ? 'Show this QR code at the door. An admin scans it with their phone camera.'
                         : 'We received your registration.'}
             </p>
 
@@ -306,6 +307,9 @@ function ConfirmationInner() {
                 {reg?.checkInCode ? (
                   <p className="mt-2 font-mono text-lg tracking-widest">{reg.checkInCode}</p>
                 ) : null}
+                <p className="mt-2 text-xs text-neutral-500">
+                  Keep this on your phone. At a volunteering session, the scan starts your hours.
+                </p>
               </div>
             ) : null}
 

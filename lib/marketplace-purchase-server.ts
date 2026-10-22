@@ -398,11 +398,24 @@ export async function completeMarketplacePurchase(
         headline: 'Order confirmed',
         bodyHtml: paragraphs(
           'Assalamu alaikum,',
-          `Your order for “${title}” from ${shopName} has been placed.`,
+          amount > 0
+            ? `You paid ${currency} ${amount.toFixed(2)} for “${title}” from ${shopName}.`
+            : `Your order for “${title}” from ${shopName} has been placed.`,
           payNote,
           `Preferred delivery partner: ${partnerLabel}.`
         ),
         cta: { label: 'View my orders', url: `${site}/dashboard/orders` },
+      })
+      void import('@/lib/in-app-notifications').then(({ addUserNotification }) => {
+        addUserNotification(params.buyerId, {
+          title: 'Payment received',
+          message:
+            amount > 0
+              ? `${currency} ${amount.toFixed(2)} paid for “${title}” from ${shopName}.`
+              : `Order placed for “${title}” from ${shopName}.`,
+          href: '/dashboard/orders',
+          type: 'marketplace_purchase',
+        }).catch(() => undefined)
       })
     }
   }

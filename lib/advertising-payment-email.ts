@@ -24,6 +24,26 @@ export function notifyAdvertisingPaymentConfirmed(opts: {
     'https://www.passive-blessings.com'
   ).replace(/\/$/, '')
 
+  const paidFor =
+    opts.amount > 0
+      ? `${currency} ${opts.amount.toFixed(2)} paid for homepage advertising${opts.businessName ? ` for ${opts.businessName}` : ''}.`
+      : `Payment received for homepage advertising${opts.businessName ? ` for ${opts.businessName}` : ''}.`
+
+  void import('@/lib/in-app-notifications').then(({ addUserNotification }) => {
+    addUserNotification(opts.businessId, {
+      title: 'Payment received',
+      message: paidFor,
+      href: '/business/advertise',
+      type: 'advertising_payment',
+    }).catch(() => undefined)
+  })
+  void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+    pushToUserSafe(opts.businessId, { title: 'Payment received', body: paidFor }, {
+      type: 'advertising_payment',
+      click_action: '/business/advertise',
+    })
+  })
+
   sendBrandedEmailToUserSafe({
     userId: opts.businessId,
     subject: 'Advertising payment confirmed',
@@ -32,9 +52,7 @@ export function notifyAdvertisingPaymentConfirmed(opts: {
     headline: 'Payment confirmed',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
-      opts.businessName
-        ? `Your homepage advertising request for ${opts.businessName} has been paid successfully.`
-        : 'Your homepage advertising request has been paid successfully.',
+      paidFor,
       amountLine,
       refLine,
       'Our team will review your banner and publish it once approved.'

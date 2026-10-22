@@ -3,6 +3,7 @@
  */
 
 import type { EmailSignature } from '@/lib/email-departments'
+import type { GlobalSocialLinks } from '@/lib/global-settings'
 import { MAIL_PHYSICAL_ADDRESS } from '@/lib/mail-identity'
 import { getSiteUrl } from '@/lib/site-metadata'
 
@@ -23,6 +24,29 @@ export type SimpleEmailCta = { label: string; url: string }
  * 3. Body
  * 4. Signature (department + optional named signer)
  */
+export function renderEmailSocialFooter(links: GlobalSocialLinks, whatsapp?: string): string {
+  const items: Array<[string, string | undefined]> = [
+    ['Facebook', links.facebook],
+    ['Instagram', links.instagram],
+    ['X', links.twitter],
+    ['LinkedIn', links.linkedin],
+    ['YouTube', links.youtube],
+    ['TikTok', links.tiktok],
+    ['Snapchat', links.snapchat],
+    ['Discord', links.discord],
+    ['WhatsApp', whatsapp],
+  ]
+  const cells = items
+    .filter((entry): entry is [string, string] => Boolean(entry[1]?.trim()))
+    .map(
+      ([label, url]) =>
+        `<td style="padding:4px;"><a href="${escapeEmailHtml(url)}" style="display:inline-block;padding:8px 12px;background:#111111;color:#ffffff;border-radius:999px;font-size:12px;font-weight:700;text-decoration:none;line-height:1;">${escapeEmailHtml(label)}</a></td>`
+    )
+    .join('')
+  if (!cells) return ''
+  return `<p style="margin:16px 0 4px 0;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#888;">Follow Passive Blessings</p><table align="center" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 8px auto;"><tr>${cells}</tr></table>`
+}
+
 export function renderSimpleEmailHtml(opts: {
   logoUrl: string
   greeting?: string
@@ -30,6 +54,8 @@ export function renderSimpleEmailHtml(opts: {
   purpose: string
   signature?: EmailSignature
   cta?: SimpleEmailCta
+  socialLinks?: GlobalSocialLinks
+  whatsappLink?: string
 }): string {
   const sig: EmailSignature = opts.signature || {
     purpose: opts.purpose,
@@ -74,6 +100,7 @@ export function renderSimpleEmailHtml(opts: {
         <p style="margin:4px 0 0 0;font-size:11px;color:#999;">
           <a href="${escapeEmailHtml(getSiteUrl())}" style="color:#888;text-decoration:underline;">${escapeEmailHtml(getSiteUrl().replace(/^https?:\/\//, ''))}</a>
         </p>
+        ${renderEmailSocialFooter(opts.socialLinks || {}, opts.whatsappLink)}
       </td>
     </tr>
   </table>

@@ -15,7 +15,7 @@ export type InvitePermissionId =
 export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
   full_access: ['/admin'],
   manage_members: ['/admin/members','/admin/membership','/admin/promo-codes','/admin/volunteers','/admin/moderation','/admin/businesses','/admin/vendor-applications','/admin/approvals','/admin/pricing','/admin/sponsors','/admin/partnerships'],
-  manage_events: ['/admin/events','/admin/event-suggestions','/admin/workshops','/admin/recordings','/admin/opportunities','/admin/marketplace','/admin/communities','/admin/finance/events','/admin/assets'],
+  manage_events: ['/admin/events','/admin/scan','/admin/event-suggestions','/admin/workshops','/admin/recordings','/admin/opportunities','/admin/marketplace','/admin/communities','/admin/finance/events','/admin/assets'],
   manage_admins: ['/admin/management','/admin/security-center','/admin/audit-logs'],
   manage_settings: ['/admin/cms/global-settings','/admin/settings','/admin/location-config','/admin/health'],
   view_reports: ['/admin/analytics','/admin/reporting','/admin/finance/referrals','/admin/referrals','/admin/integration-analytics','/admin/dashboard-enhanced'],

@@ -11,6 +11,7 @@ import {
   buildRegistrationRecord,
   findExistingRegistration,
   flagRegistrationForPayment,
+  ensureCheckInCodes,
   generateCheckInCode,
   generateQrToken,
   getAuthUidFromRequest,
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     if (!snap.exists) {
       return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
     }
-    const data = snap.data() || {}
+    const data = await ensureCheckInCodes(snap.ref, snap.data() || {})
     // Registrant or unauthenticated with matching id only returns limited public confirmation fields
     if (uid && data.userId && uid !== data.userId) {
       const { canManageEvent } = await import('@/lib/event-luma-server')

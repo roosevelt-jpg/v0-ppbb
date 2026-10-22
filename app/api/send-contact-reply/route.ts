@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sendRawZohoEmail } from '@/lib/gmail-service'
-import { getSiteUrl } from '@/lib/site-metadata'
+import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,35 +13,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const siteUrl = getSiteUrl()
-    const html = `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <div style="background-color: #f7f6f2; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                  <h2 style="color: #111111; margin: 0 0 10px 0;">Response to Your Inquiry</h2>
-                  <p style="color: #888888; margin: 0; font-size: 14px;">Subject: ${escapeHtml(subject)}</p>
-                </div>
-                <div style="padding: 20px; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 20px;">
-                  <p style="color: #333333; line-height: 1.6; white-space: pre-wrap; margin: 0;">
-                    ${escapeHtml(message)}
-                  </p>
-                </div>
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e5e5;">
-                  <p style="color: #888888; font-size: 12px; margin: 0;">
-                    <strong>Passive Blessings</strong><br/>
-                    Dubai, United Arab Emirates<br/>
-                    <a href="${escapeHtml(siteUrl)}" style="color: #111111; text-decoration: none;">Visit our website</a>
-                  </p>
-                </div>
-              </div>
-            `
-
+    const lines = String(message)
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
     try {
-      await sendRawZohoEmail({
+      const result = await sendBrandedEmail({
         to: toEmail,
         subject,
-        html,
-        text: message,
+        purpose: 'Contact reply',
+        greeting: toName ? `Hi ${toName},` : undefined,
+        headline: 'Response to your inquiry',
+        bodyHtml: paragraphs(...(lines.length ? lines : [String(message)])),
       })
+      if (!result.ok) throw new Error(result.error || 'Failed to send email')
     } catch (error) {
       console.error('[v0] Zoho contact reply failed:', error)
       return NextResponse.json(
@@ -70,15 +54,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-function escapeHtml(text: string): string {
-  const map: { [key: string]: string } = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
 }

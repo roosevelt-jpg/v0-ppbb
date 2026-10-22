@@ -213,16 +213,20 @@ export async function sendEventPaymentConfirmationEmail(opts: {
         return '/events'
       }
     })()
+    const paidFor =
+      opts.amount > 0
+        ? `${currency} ${opts.amount.toFixed(2)} paid for your “${opts.eventTitle}” ticket.`
+        : `Payment received for your “${opts.eventTitle}” ticket.`
     void addUserNotification(opts.userId, {
-      title: 'Payment confirmed',
-      message: opts.eventTitle,
+      title: 'Payment received',
+      message: paidFor,
       href: path,
       type: 'event_registration',
     }).catch(() => undefined)
     void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
       pushToUserSafe(
         opts.userId!,
-        { title: 'Payment confirmed', body: opts.eventTitle },
+        { title: 'Payment received', body: paidFor },
         {
           type: 'event_registration',
           click_action: path,

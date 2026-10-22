@@ -291,13 +291,19 @@ export async function POST(request: NextRequest) {
         verifiedAt: new Date(),
       })
 
+      const donated = Number(verifiedData.amount) || 0
+      const causeName = String(verifiedData.causeTitle || verifiedData.causeName || 'a Passive Blessings cause')
+      const donationLine =
+        donated > 0
+          ? `AED ${donated.toFixed(2)} paid as a donation for ${causeName}.`
+          : `Your donation for ${causeName} was verified.`
       await notifyDonor(
         db,
         userId,
-        'Donation verified',
+        'Payment received',
         receiptURL
-          ? 'Your donation was verified. Your receipt is ready on your donations dashboard.'
-          : 'Your donation was verified. Thank you for your support.',
+          ? `${donationLine} Your receipt is ready on your donations dashboard.`
+          : `${donationLine} Thank you for your support.`,
         submissionId,
         'donation_verified'
       )
