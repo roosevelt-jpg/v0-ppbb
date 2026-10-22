@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { Download, X, Share } from 'lucide-react'
+import { Download, Share } from 'lucide-react'
 import {
   armInstallPromptCapture,
   clearDeferredInstallPrompt,
@@ -137,16 +137,6 @@ export function PwaInstallPrompt() {
     }
   }, [maybeShow])
 
-  const hideForSession = useCallback(() => {
-    setOpen(false)
-    setHelpMode('none')
-    try {
-      sessionStorage.setItem(SESSION_HIDE_KEY, '1')
-    } catch {
-      /* ignore */
-    }
-  }, [])
-
   const handleInstall = async () => {
     setBusy(true)
     setHelpMode('none')
@@ -220,93 +210,40 @@ export function PwaInstallPrompt() {
     }
   }
 
-  const onAdmin = Boolean(pathname?.startsWith('/admin'))
-  if (isDashboardRoute(pathname) && !onAdmin) return null
+  if (isDashboardRoute(pathname) && !pathname?.startsWith('/admin')) return null
   if (!open || readInstalled()) return null
 
   return (
-    <div
-      className="fixed inset-x-3 bottom-4 z-[60] sm:inset-x-auto sm:right-5 sm:bottom-5 sm:max-w-sm"
-      role="status"
-      aria-label="Install Passive Blessings"
-    >
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-950 text-white shadow-lg overflow-hidden">
-        <div className="flex items-center gap-2 pl-2 pr-1.5 py-1.5">
-          <img
-            src="/api/pwa-icon?size=96"
-            alt=""
-            className="h-8 w-8 rounded-full bg-white object-contain p-0.5 shrink-0"
-          />
-
-          <button
-            type="button"
-            data-dashboard-control
-            disabled={busy}
-            onClick={() => void handleInstall()}
-            className="min-w-0 flex-1 text-left !bg-transparent !shadow-none !min-h-0 !px-0 !rounded-none disabled:opacity-50"
-          >
-            <p className="text-xs font-semibold text-white leading-tight truncate">
-              {busy ? 'Opening install…' : 'Add to home screen'}
-            </p>
-            <p className="text-[10px] text-neutral-400 leading-tight truncate">
-              {onAdmin ? 'Sign in on your phone and scan QR codes' : 'Tap to add Passive Blessings'}
-            </p>
-          </button>
-
-          <button
-            type="button"
-            data-dashboard-control
-            disabled={busy}
-            onClick={() => void handleInstall()}
-            className="inline-flex items-center gap-1 !rounded-full !bg-white !text-neutral-950 text-xs font-semibold !px-3 !py-1.5 !min-h-0 !shadow-none shrink-0 disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {busy ? '…' : 'Install'}
-          </button>
-
-          <button
-            type="button"
-            data-dashboard-control
-            onClick={hideForSession}
-            className="p-1.5 !rounded-full !bg-transparent !shadow-none !min-h-0 !px-1.5 text-neutral-400 hover:text-white hover:!bg-neutral-800 shrink-0"
-            aria-label="Dismiss"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
+    <div className="fixed bottom-4 right-4 z-[60] flex w-max flex-col items-end gap-2" role="status">
+      {helpMode === 'ios' ? (
+        <div className="w-56 rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-[11px] text-neutral-300 shadow-lg space-y-1">
+          <p className="font-semibold text-white inline-flex items-center gap-1">
+            <Share className="h-3 w-3" /> iPhone / iPad
+          </p>
+          <p>Share → <strong className="text-white">Add to Home Screen</strong> → Add.</p>
         </div>
-
-        {helpMode === 'ios' ? (
-          <div className="border-t border-neutral-800 px-3 py-2 text-[11px] text-neutral-300 space-y-1">
-            <p className="font-semibold text-white inline-flex items-center gap-1">
-              <Share className="h-3 w-3" /> iPhone / iPad
-            </p>
-            <p>Tap the Share button → <strong className="text-white">Add to Home Screen</strong> → Add.</p>
-            <p className="text-neutral-500">Safari only — Chrome on iOS cannot install PWAs.</p>
-          </div>
-        ) : null}
-
-        {helpMode === 'android' ? (
-          <div className="border-t border-neutral-800 px-3 py-2 text-[11px] text-neutral-300 space-y-1">
-            <p className="font-semibold text-white">Android</p>
-            <p>
-              Chrome menu (⋮) → <strong className="text-white">Install app</strong> or{' '}
-              <strong className="text-white">Add to Home screen</strong>.
-            </p>
-            <p className="text-neutral-500">Use Chrome (not incognito). Reload once if Install is missing.</p>
-          </div>
-        ) : null}
-
-        {helpMode === 'desktop' ? (
-          <div className="border-t border-neutral-800 px-3 py-2 text-[11px] text-neutral-300 space-y-1">
-            <p className="font-semibold text-white">Install from your browser</p>
-            <p>
-              Chrome / Edge: menu (⋮) → <strong className="text-white">Install Passive Blessings</strong>, or the
-              install icon in the address bar. Then tap Install here again.
-            </p>
-            <p>Use a normal window (not incognito). Reload the page once if the install dialog does not open.</p>
-          </div>
-        ) : null}
-      </div>
+      ) : null}
+      {helpMode === 'android' ? (
+        <div className="w-56 rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-[11px] text-neutral-300 shadow-lg">
+          <p>Chrome menu → <strong className="text-white">Install app</strong>.</p>
+        </div>
+      ) : null}
+      {helpMode === 'desktop' ? (
+        <div className="w-56 rounded-xl border border-neutral-800 bg-neutral-950 px-3 py-2 text-[11px] text-neutral-300 shadow-lg">
+          <p>Browser menu → <strong className="text-white">Install Passive Blessings</strong>.</p>
+        </div>
+      ) : null}
+      <button
+        type="button"
+        data-dashboard-control
+        disabled={busy}
+        onClick={() => void handleInstall()}
+        aria-label="Install"
+        className="inline-flex w-auto items-center gap-1 !rounded-full !bg-neutral-950 !text-white text-xs font-semibold !px-3 !py-1.5 !min-h-0 !shadow-lg shrink-0 disabled:opacity-50"
+      >
+        <Download className="h-3.5 w-3.5" />
+        {busy ? '…' : 'Install'}
+      </button>
     </div>
   )
 }
