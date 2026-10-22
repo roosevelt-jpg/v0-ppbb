@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { format } from 'date-fns'
+import { getEventLocationLabel, isMapsOrWebUrl } from '@/lib/event-utils'
 
 function toEventDate(value: unknown): Date | null {
   if (!value) return null
@@ -53,7 +54,16 @@ export function HomeWeeklyDistribution() {
             const data = docSnap.data() as Record<string, unknown>
             const date = toEventDate(data.startDate) || toEventDate(data.date)
             if (!date || date < today) return null
-            const location = String(data.locationName || data.location || data.locationAddress || '').trim()
+            const labeled = getEventLocationLabel({
+              locationName: typeof data.locationName === 'string' ? data.locationName : '',
+              locationAddress: typeof data.locationAddress === 'string' ? data.locationAddress : '',
+              location: typeof data.location === 'string' ? data.location : '',
+            })
+            const area = [data.locationCity, data.locationEmirate, data.locationCountry]
+              .map((part) => (typeof part === 'string' ? part.trim() : ''))
+              .filter((part) => part && !isMapsOrWebUrl(part))
+              .join(', ')
+            const location = labeled !== 'Location TBA' ? labeled : area
             return {
               id: docSnap.id,
               title: String(data.title || 'Weekly distribution'),
