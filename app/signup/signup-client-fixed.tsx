@@ -171,9 +171,21 @@ export default function SignupClient() {
     const planId = searchParams.get('plan') || ''
     if (planId) {
       setFormData((prev) => (prev.planId === planId ? prev : { ...prev, planId }))
-      setCurrentStep((s) => (s === 1 ? 2 : s))
     }
   }, [searchParams])
+
+  useEffect(() => {
+    const current = auth.currentUser
+    if (!current) return
+    const [first, ...rest] = (current.displayName || '').split(' ')
+    setFormData((prev) => ({
+      ...prev,
+      email: prev.email || current.email || '',
+      firstName: prev.firstName || first || '',
+      lastName: prev.lastName || rest.join(' '),
+    }))
+    setCreatedUserId((id) => id || current.uid)
+  }, [])
 
   useEffect(() => {
     const planId = formData.planId || searchParams.get('plan')
@@ -190,6 +202,9 @@ export default function SignupClient() {
           ? prev
           : { ...prev, planId, memberType: nextType }
       )
+      if (searchParams.get('plan') === planId) {
+        setCurrentStep((step) => (step === 1 ? 2 : step))
+      }
       return
     }
     getDoc(doc(db, 'pricingPlans', planId))
@@ -248,14 +263,23 @@ export default function SignupClient() {
     }))
   }
 
+  const hasSelectedPlan = () =>
+    Boolean(formData.planId) && plans.some((plan) => plan.id === formData.planId)
+
   const validateStep = async (step: number): Promise<boolean> => {
     setError('')
 
+    if (plansLoading) {
+      setError('Membership packages are still loading. Please wait.')
+      return false
+    }
+    if (!hasSelectedPlan()) {
+      setError('Please choose a membership package to continue')
+      setCurrentStep(1)
+      return false
+    }
+
     if (step === 1) {
-      if (!formData.planId) {
-        setError('Please choose a membership package to continue')
-        return false
-      }
       return true
     }
     
@@ -386,11 +410,10 @@ export default function SignupClient() {
       }
     }
 
-    if (step === 5) {
-      if (!formData.planId) {
-        setError('Please select a membership tier to subscribe')
-        return false
-      }
+    if (step === 5 && !hasSelectedPlan()) {
+      setError('Please choose a membership package to continue')
+      setCurrentStep(1)
+      return false
     }
 
     return true
@@ -612,6 +635,14 @@ export default function SignupClient() {
       lng: formData.longitude || 0,
     }) as LocationData
 
+    if (!formData.planId || !plans.some((plan) => plan.id === formData.planId)) {
+      throw new Error('Please choose a membership package to continue')
+    }
+    const chosenPlanName = planName || selectedPlan?.name || ''
+    if (!chosenPlanName) {
+      throw new Error('Please choose a membership package to continue')
+    }
+
     const userData: Record<string, unknown> = {
       uid,
       email: formData.email.toLowerCase(),
@@ -643,9 +674,9 @@ export default function SignupClient() {
       status: 'active',
       active: true,
       membershipStatus: 'pending_payment',
-      membershipTier: formData.planId || planName || 'standard',
-      membershipPlanId: formData.planId || null,
-      membershipPlanName: planName || null,
+      membershipTier: formData.planId,
+      membershipPlanId: formData.planId,
+      membershipPlanName: chosenPlanName,
       volunteeredHours: 0,
       volunteerHours: 0,
       totalDonated: 0,
@@ -763,6 +794,11 @@ export default function SignupClient() {
               location: userData.location,
               gender: userData.gender,
               dateOfBirth: userData.dateOfBirth,
+              role: userData.role,
+              roles: userData.roles,
+              membershipTier: userData.membershipTier,
+              membershipPlanId: userData.membershipPlanId,
+              membershipPlanName: userData.membershipPlanName,
               updatedAt: now,
             }),
             { merge: true }
@@ -1668,11 +1704,11 @@ export default function SignupClient() {
                   <button
                     type="button"
                     onClick={() => handleStepChange(currentStep + 1)}
-                    disabled={isLoading}
+                    disabled={isLoading || !hasSelectedPlan()}
                     className="pb-form-nav-btn"
                     style={{
                       flex: 1,
-                      opacity: isLoading ? 0.7 : 1,
+                      opacity: isLoading || !hasSelectedPlan() ? 0.7 : 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1685,7 +1721,7 @@ export default function SignupClient() {
                 ) : currentStep === 4 ? (
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !hasSelectedPlan()}
                     className="pb-form-nav-btn"
                     style={{
                       flex: 1,

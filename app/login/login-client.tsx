@@ -3,7 +3,7 @@
 import React, { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { loginUser, loginWithGoogle } from '@/lib/auth'
+import { loginUser, loginWithGoogle, MEMBERSHIP_PLAN_REQUIRED } from '@/lib/auth'
 import { formatAuthError } from '@/lib/auth-errors'
 import { auth } from '@/lib/firebase'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
@@ -120,6 +120,11 @@ function LoginPageContent() {
     const { user, error: loginError } = await loginUser(email, password, { rememberMe })
 
     if (loginError) {
+      if (loginError === MEMBERSHIP_PLAN_REQUIRED) {
+        router.push('/signup')
+        setLoading(false)
+        return
+      }
       let displayError = loginError
       try {
         const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email.trim())}`)
@@ -195,6 +200,11 @@ function LoginPageContent() {
     const { user, error: loginError } = await loginWithGoogle()
 
     if (loginError) {
+      if (loginError === MEMBERSHIP_PLAN_REQUIRED) {
+        router.push('/signup')
+        setOauthLoading(null)
+        return
+      }
       setError(typeof loginError === 'string' ? loginError : formatAuthError(loginError))
       setOauthLoading(null)
       return

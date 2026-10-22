@@ -58,6 +58,9 @@ async function buildLoginResult(
   return { user: profile, error: null }
 }
 
+/** Returned when sign-in exists but no membership plan was chosen. */
+export const MEMBERSHIP_PLAN_REQUIRED = 'Choose a membership plan to finish registration.'
+
 interface RegisterUserOptions {
   dateOfBirth?: string
   gender?: string
@@ -75,9 +78,12 @@ export async function registerUser(
   firstName: string,
   lastName: string,
   role: UserRole = 'member',
-  options?: RegisterUserOptions
+  options?: RegisterUserOptions & { planId?: string; planName?: string }
 ): Promise<{ user: User | null; error: string | null }> {
   try {
+    if (!options?.planId) {
+      return { user: null, error: MEMBERSHIP_PLAN_REQUIRED }
+    }
     // Set persistence to local
     await setPersistence(auth, browserLocalPersistence)
 
@@ -102,14 +108,21 @@ export async function registerUser(
       employer: options?.employer,
       volunteeredHours: 0,
       totalDonated: 0,
-      membershipTier: 'standard',
+      membershipTier: options.planId,
       memberSince: new Date(),
       active: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
+    await setDoc(
+      doc(db, 'users', firebaseUser.uid),
+      sanitizeForFirestore({
+        ...(userProfile as Record<string, unknown>),
+        membershipPlanId: options.planId,
+        membershipPlanName: options.planName || null,
+      })
+    )
 
     return { user: userProfile, error: null }
   } catch (error: any) {
@@ -141,29 +154,7 @@ export async function loginUser(
     const existing = await buildLoginResult(firebaseUser, userDocSnap)
     if (existing) return existing
 
-    // Auto-create user profile on first login if it doesn't exist
-    // This handles test members or users created via Firebase console
-    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
-    const lastName = lastNameParts.join(' ')
-
-    const userProfile: User = {
-      id: firebaseUser.uid,
-      email: firebaseUser.email || email,
-      firstName: firstName || email.split('@')[0],
-      lastName: lastName || '',
-      role: 'member',
-      volunteeredHours: 0,
-      totalDonated: 0,
-      membershipTier: 'standard',
-      memberSince: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
-
-    return { user: userProfile, error: null }
+    return { user: null, error: MEMBERSHIP_PLAN_REQUIRED }
   } catch (error: unknown) {
     return { user: null, error: formatAuthError(error) }
   }
@@ -187,29 +178,7 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     const existing = await buildLoginResult(firebaseUser, userDocSnap)
     if (existing) return existing
 
-    // Create new user profile for first-time Google sign-in
-    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
-    const lastName = lastNameParts.join(' ')
-
-    const userProfile: User = {
-      id: firebaseUser.uid,
-      email: firebaseUser.email || '',
-      firstName,
-      lastName,
-      avatar: firebaseUser.photoURL ? { url: firebaseUser.photoURL, name: 'google-avatar' } : undefined,
-      role: 'member',
-      volunteeredHours: 0,
-      totalDonated: 0,
-      membershipTier: 'standard',
-      memberSince: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
-
-    return { user: userProfile, error: null }
+    return { user: null, error: MEMBERSHIP_PLAN_REQUIRED }
   } catch (error: unknown) {
     return { user: null, error: formatAuthError(error) }
   }
@@ -232,29 +201,7 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     const existing = await buildLoginResult(firebaseUser, userDocSnap)
     if (existing) return existing
 
-    // Create new user profile for first-time Facebook sign-in
-    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
-    const lastName = lastNameParts.join(' ')
-
-    const userProfile: User = {
-      id: firebaseUser.uid,
-      email: firebaseUser.email || '',
-      firstName,
-      lastName,
-      avatar: firebaseUser.photoURL ? { url: firebaseUser.photoURL, name: 'facebook-avatar' } : undefined,
-      role: 'member',
-      volunteeredHours: 0,
-      totalDonated: 0,
-      membershipTier: 'standard',
-      memberSince: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
-    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
-
-    return { user: userProfile, error: null }
+    return { user: null, error: MEMBERSHIP_PLAN_REQUIRED }
   } catch (error: unknown) {
     return { user: null, error: formatAuthError(error) }
   }
