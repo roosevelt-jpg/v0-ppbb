@@ -74,33 +74,71 @@ export default function AdminScanPage() {
     let stream: MediaStream | null = null
     let timer = 0
     let stopped = false
+
+    const attach = async (next: MediaStream) => {
+      stream = next
+      if (stopped || !videoRef.current) {
+        next.getTracks().forEach((track) => track.stop())
+        return false
+      }
+      setError('')
+      videoRef.current.srcObject = next
+      await videoRef.current.play()
+      return true
+    }
+
     void (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        })
-        if (!videoRef.current || stopped) return
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-        const Detector = (window as unknown as { BarcodeDetector?: new (opts: { formats: string[] }) => { detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue?: string }>> } }).BarcodeDetector
-        if (!Detector) {
-          setError('This browser cannot scan inside the page. Point the phone camera at the guest QR instead — it opens this page.')
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setCameraOn(false)
+          setError('This browser cannot open the camera. Scan the QR with the phone’s camera app.')
           return
         }
+        // ideal, not exact: a laptop has no rear camera, and an exact rear-camera
+        // request fails before the browser can ask for permission.
+        let next: MediaStream
+        try {
+          next = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { facingMode: { ideal: 'environment' } },
+          })
+        } catch (err) {
+          const name = err instanceof DOMException ? err.name : ''
+          if (name !== 'OverconstrainedError' && name !== 'NotFoundError') throw err
+          next = await navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+        }
+        if (!(await attach(next)) || stopped) return
+
+        const Detector = (window as unknown as {
+          BarcodeDetector?: new (opts: { formats: string[] }) => {
+            detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue?: string }>>
+          }
+        }).BarcodeDetector
+        if (!Detector || !videoRef.current) return
         const detector = new Detector({ formats: ['qr_code'] })
         timer = window.setInterval(() => {
           if (!videoRef.current || scanned.current) return
-          void detector.detect(videoRef.current).then((codes) => {
-            const value = codes[0]?.rawValue
-            if (value) void submit(value)
-          }).catch(() => undefined)
+          void detector
+            .detect(videoRef.current)
+            .then((codes) => {
+              const value = codes[0]?.rawValue
+              if (value) void submit(value)
+            })
+            .catch(() => undefined)
         }, 500)
       } catch (err) {
+        if (stopped) return
         console.error('[admin/scan] camera', err)
+        const name = err instanceof DOMException ? err.name : ''
         setCameraOn(false)
-        setError('Camera permission was blocked. Allow the camera, then tap Open camera, or scan the QR with the phone’s camera app.')
+        if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+          setError('Camera permission was blocked. Allow the camera for this site, then tap Open camera.')
+          return
+        }
+        setError('The camera could not start. Tap Open camera and allow it when the browser asks.')
       }
     })()
+
     return () => {
       stopped = true
       window.clearInterval(timer)
@@ -150,7 +188,12 @@ export default function AdminScanPage() {
       ) : null}
 
       {cameraOn ? (
-        <video ref={videoRef} className="w-full rounded-xl bg-black" muted playsInline />
+        <div className="space-y-2">
+          <video ref={videoRef} className="min-h-64 w-full rounded-xl bg-black" muted playsInline />
+          <p className="text-sm text-neutral-600">
+            Allow the camera when the browser asks. The camera opens as soon as you allow it.
+          </p>
+        </div>
       ) : (
         <button
           type="button"
