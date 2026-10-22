@@ -78,6 +78,48 @@ function friendlyMapsError(raw: string): string {
   return msg || 'Could not resolve your location. Enter your address manually.'
 }
 
+type GooglePlaceBits = {
+  country?: string
+  countryCode?: string
+  state?: string
+  city?: string
+  formattedAddress?: string
+  lat?: number
+  lng?: number
+}
+
+/** Map a Google Geocoding / Place Details result onto the global country list. */
+function locationFromGoogle(
+  place: GooglePlaceBits,
+  prev: AddressLocationValue
+): Partial<AddressLocationValue> {
+  const code = (place.countryCode || '').trim().toUpperCase()
+  const byCode = code ? COUNTRY_OPTIONS.find((c) => c.code === code) : undefined
+  const byName =
+    !byCode && place.country
+      ? COUNTRY_OPTIONS.find((c) => c.name.toLowerCase() === place.country!.trim().toLowerCase())
+      : undefined
+  const country = byCode?.name || byName?.name || place.country || prev.country
+  const countryCode = byCode?.code || byName?.code || code || prev.countryCode
+  const nextUae = isUaeCountry(country)
+  const emirate = nextUae
+    ? matchEmirate(place.state || place.city || '') || prev.emirate || 'Dubai'
+    : ''
+  const cityHint = (place.city || (!nextUae ? '' : place.state) || '').trim()
+  const city = nextUae ? matchCityForEmirate(emirate, cityHint) : cityHint
+  const customCity = nextUae ? (city === 'Other' ? cityHint || prev.customCity : '') : cityHint
+  return {
+    country,
+    countryCode,
+    emirate,
+    city,
+    customCity,
+    ...(typeof place.lat === 'number' ? { lat: place.lat } : {}),
+    ...(typeof place.lng === 'number' ? { lng: place.lng } : {}),
+    ...(place.formattedAddress ? { address: place.formattedAddress } : {}),
+  }
+}
+
 export function AddressLocationPicker({
   value,
   onChange,
@@ -93,19 +135,21 @@ export function AddressLocationPicker({
   const [detecting, setDetecting] = useState(false)
   const [detectError, setDetectError] = useState<string | null>(null)
   const [autoDetectEnabled, setAutoDetectEnabled] = useState(true)
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const valueRef = React.useRef(value)
+  const onChangeRef = React.useRef(onChange)
+  const skipAutoRef = React.useRef(false)
+  valueRef.current = value
+  onChangeRef.current = onChange
 
-  const countryOptions = useMemo(
-    () => COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: c.name })),
-    []
-  )
+  const countryOptions = useMemo(() => {
+    const options = COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: c.name }))
+    if (value.country && !options.some((option) => option.value === value.country)) {
+      options.unshift({ value: value.country, label: value.country })
+    }
+    return options
+  }, [value.country])
 
   const uae = isUaeCountry(value.country)
-  const countryRestriction = value.countryCode
-    ? [value.countryCode.toLowerCase()]
-    : uae
-      ? ['ae']
-      : []
 
   const mapVisible =
     showMapPin ?? (variant === 'venue' ? true : value.lat !== 0 && value.lng !== 0)
@@ -116,6 +160,26 @@ export function AddressLocationPicker({
       : value.city
     : value.customCity || value.city
 
+  const publish = (partial: Partial<AddressLocationValue>) => {
+    onChangeRef.current({ ...valueRef.current, ...partial })
+  }
+
+  const applyGoogle = (place: GooglePlaceBits, keepAddress = false) => {
+    const prev = valueRef.current
+    const next = locationFromGoogle(place, prev)
+    if (keepAddress) delete next.address
+    onChangeRef.current({ ...prev, ...next })
+  }
+
+  const geocodeCoords = async (latitude: number, longitude: number) => {
+    const res = await fetch(`/api/places/geocode?lat=${latitude}&lng=${longitude}`)
+    const data = await res.json()
+    if (!data.success || !data.place) {
+      throw new Error(friendlyMapsError(data.error || 'Could not resolve your location'))
+    }
+    return data.place as GooglePlaceBits
+  }
+
   useEffect(() => {
     let cancelled = false
     fetch('/api/location/settings')
@@ -123,43 +187,42 @@ export function AddressLocationPicker({
       .then((json) => {
         if (cancelled) return
         const data = json?.data || {}
-        setAutoDetectEnabled(data.enableAutoDetect !== false)
-        if (!settingsLoaded) {
+        const enabled = data.enableAutoDetect !== false
+        setAutoDetectEnabled(enabled)
+        const current = valueRef.current
+        if (!current.placeId && !current.address.trim() && !skipAutoRef.current) {
           const code = typeof data.defaultCountry === 'string' ? data.defaultCountry : 'AE'
-          const match = COUNTRY_OPTIONS.find((c) => c.code === code)
-          if (
-            match &&
-            (!value.countryCode || value.countryCode === 'AE') &&
-            value.address === '' &&
-            value.placeId === ''
-          ) {
-            if (value.country === EMPTY_ADDRESS_LOCATION.country || !value.country) {
-              onChange({
-                ...value,
-                country: match.name,
-                countryCode: match.code,
-                emirate: match.code === 'AE' ? value.emirate || 'Dubai' : '',
-                city: match.code === 'AE' ? value.city || 'Dubai' : '',
-              })
-            }
+          const match = COUNTRY_OPTIONS.find((c) => c.code === code.toUpperCase())
+          if (match && (!current.country || current.country === EMPTY_ADDRESS_LOCATION.country)) {
+            onChangeRef.current({
+              ...current,
+              country: match.name,
+              countryCode: match.code,
+              emirate: match.code === 'AE' ? current.emirate || 'Dubai' : '',
+              city: match.code === 'AE' ? current.city || 'Dubai' : '',
+              customCity: match.code === 'AE' ? '' : current.customCity,
+            })
           }
         }
-        setSettingsLoaded(true)
+        if (enabled && showAutoDetect && variant === 'profile') {
+          void detectFromGoogle(true)
+        }
       })
-      .catch(() => {
-        if (!cancelled) setSettingsLoaded(true)
-      })
+      .catch(() => {})
     return () => {
       cancelled = true
     }
+    // Settings and the first GPS lookup run once per picker.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const patch = (partial: Partial<AddressLocationValue>) => {
-    onChange({ ...value, ...partial })
+    skipAutoRef.current = true
+    publish(partial)
   }
 
-  const handleDetect = async () => {
+  async function detectFromGoogle(automatic = false) {
+    if (automatic && (skipAutoRef.current || valueRef.current.placeId || valueRef.current.address.trim())) return
     setDetecting(true)
     setDetectError(null)
     try {
@@ -173,49 +236,33 @@ export function AddressLocationPicker({
           timeout: 12000,
         })
       })
+      if (automatic && (skipAutoRef.current || valueRef.current.placeId || valueRef.current.address.trim())) return
 
       const { latitude, longitude } = position.coords
-      const res = await fetch(`/api/places/geocode?lat=${latitude}&lng=${longitude}`)
-      const data = await res.json()
-      if (!data.success || !data.place) {
-        setDetectError(friendlyMapsError(data.error || 'Could not resolve your location'))
-        return
-      }
-
-      const place = data.place
-      const countryName =
-        COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name ||
-        place.country ||
-        value.country
-      const isUae = isUaeCountry(countryName)
-      const emirate = isUae ? matchEmirate(place.state || place.city || '') || 'Dubai' : ''
-      const city = isUae
-        ? matchCityForEmirate(emirate, place.city || place.state || '')
-        : place.city || ''
-
-      onChange({
-        ...value,
-        country: countryName,
-        countryCode: place.countryCode || value.countryCode,
-        emirate,
-        city: isUae ? city : value.city,
-        customCity: isUae
-          ? city === 'Other'
-            ? place.city || value.customCity
-            : ''
-          : city || value.customCity,
-        address: place.formattedAddress || value.address,
-        lat: place.lat ?? latitude,
-        lng: place.lng ?? longitude,
-        placeId: value.placeId,
-      })
-    } catch {
-      setDetectError(
-        'Location detection failed. Select country/city and type your street address below.'
+      const place = await geocodeCoords(latitude, longitude)
+      if (automatic && (skipAutoRef.current || valueRef.current.placeId || valueRef.current.address.trim())) return
+      applyGoogle(
+        {
+          ...place,
+          lat: place.lat ?? latitude,
+          lng: place.lng ?? longitude,
+        },
+        Boolean(valueRef.current.address.trim())
       )
+    } catch {
+      if (!automatic) {
+        setDetectError(
+          'Location detection failed. Search a place below, or choose the country yourself.'
+        )
+      }
     } finally {
       setDetecting(false)
     }
+  }
+
+  const handleDetect = () => {
+    skipAutoRef.current = false
+    void detectFromGoogle(false)
   }
 
   const applyPlaceSelection = (place: {
@@ -234,42 +281,37 @@ export function AddressLocationPicker({
     const isUrl = /^https?:\/\//i.test(label) || /maps\.(google|app\.goo)/i.test(label)
     if (isUrl) return
 
-    const placeCountry = place.countryCode
-      ? COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name || place.country || ''
-      : ''
-    const nextCountry = placeCountry || value.country
-    const nextUae = isUaeCountry(nextCountry)
-    const emirate = nextUae
-      ? matchEmirate(place.state || place.city || value.emirate) || value.emirate || 'Dubai'
-      : ''
-    const matchedCity = nextUae
-      ? matchCityForEmirate(emirate, place.city || '')
-      : place.city || value.customCity
-
+    const current = valueRef.current
+    const fromGoogle = place.countryCode || place.country
+      ? locationFromGoogle(
+          {
+            country: place.country,
+            countryCode: place.countryCode,
+            state: place.state,
+            city: place.city,
+            lat: place.lat || 0,
+            lng: place.lng || 0,
+          },
+          current
+        )
+      : {}
     const venueFromPlace =
       (place.name && place.name.trim()) ||
       (place.secondaryText ? place.mainText.split(',')[0]?.trim() : '') ||
       ''
 
-    onChange({
-      ...value,
+    skipAutoRef.current = true
+    onChangeRef.current({
+      ...current,
+      ...fromGoogle,
       address: label,
       placeId: place.placeId?.startsWith('manual-') ? '' : place.placeId || '',
-      lat: place.lat || 0,
-      lng: place.lng || 0,
-      country: nextCountry,
-      countryCode: place.countryCode || value.countryCode,
-      emirate,
-      city: nextUae ? matchedCity : value.city,
-      customCity: nextUae
-        ? matchedCity === 'Other'
-          ? place.city || value.customCity
-          : ''
-        : matchedCity || value.customCity,
+      lat: place.lat || fromGoogle.lat || 0,
+      lng: place.lng || fromGoogle.lng || 0,
       venueName:
         variant === 'venue'
-          ? value.venueName?.trim() || venueFromPlace || value.venueName
-          : value.venueName,
+          ? current.venueName?.trim() || venueFromPlace || current.venueName
+          : current.venueName,
     })
   }
 
@@ -283,30 +325,25 @@ export function AddressLocationPicker({
       </label>
       <GooglePlacesAutocomplete
         value={value.address}
-        countryRestrictions={countryRestriction}
         placeholder={
           addressPlaceholder ||
           (variant === 'venue'
             ? 'Start typing a place, mall, hotel, or street address…'
-            : resolvedCityLabel
-              ? `Search near ${resolvedCityLabel}…`
-              : 'Search address or place…')
+            : 'Search any place — country follows Google')
         }
         onTextChange={(text) => patch({ address: text })}
         onChange={applyPlaceSelection}
       />
-      {variant === 'venue' ? (
-        <p className="mt-1 text-[11px] text-neutral-500">
-          Pick a suggestion for an exact pin. The same address shows on the event card.
-        </p>
-      ) : null}
+      <p className="mt-1 text-[11px] text-neutral-500">
+        {variant === 'venue'
+          ? 'Pick a suggestion. Country, city, and the map pin follow that Google result.'
+          : 'Pick a suggestion and the country updates from Google. You can still change it.'}
+      </p>
     </div>
   )
 
   return (
     <div className={`space-y-3 ${className}`}>
-      {variant === 'venue' ? placesSearchBlock : null}
-
       {showAutoDetect && autoDetectEnabled ? (
         <button
           type="button"
@@ -319,6 +356,8 @@ export function AddressLocationPicker({
         </button>
       ) : null}
       {detectError ? <p className="text-xs text-amber-700">{detectError}</p> : null}
+
+      {placesSearchBlock}
 
       <SearchableSelect
         label="Country"
@@ -420,8 +459,6 @@ export function AddressLocationPicker({
         </div>
       ) : null}
 
-      {variant !== 'venue' ? placesSearchBlock : null}
-
       {value.address && !/^https?:\/\//i.test(value.address) ? (
         <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex gap-2">
           <MapPin size={16} className="text-neutral-700 shrink-0 mt-0.5" />
@@ -453,7 +490,12 @@ export function AddressLocationPicker({
           lat={value.lat}
           lng={value.lng}
           draggable={pinDraggable || variant === 'venue'}
-          onPinChange={(lat, lng) => patch({ lat, lng })}
+          onPinChange={(lat, lng) => {
+            publish({ lat, lng })
+            void geocodeCoords(lat, lng)
+              .then((place) => applyGoogle({ ...place, lat, lng }, true))
+              .catch(() => {})
+          }}
         />
       ) : variant === 'venue' ? (
         <p className="text-xs text-neutral-500 rounded-lg border border-dashed border-neutral-300 p-3">

@@ -1219,11 +1219,9 @@ export default function SignupClient() {
                           </label>
                         ))}
                       </div>
-                      <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.35rem' }}>
-                        Switch Member / Business anytime — useful when testing with a promo code
-                      </p>
                     </div>
 
+                    {MEMBERSHIP_PAYMENTS_ENABLED ? (
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.35rem', textTransform: 'uppercase', color: '#666' }}>
                         Promo / discount code (optional)
@@ -1255,6 +1253,7 @@ export default function SignupClient() {
                         Free-access codes skip payment (forever or 1–12 months, depending on the code).
                       </p>
                     </div>
+                    ) : null}
 
                     {/* Name Fields */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
@@ -1505,16 +1504,23 @@ export default function SignupClient() {
                 {currentStep === 4 && formData.memberType === 'member' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Almost there</h2>
-                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
-                      Create your account next, then choose your tier and subscribe to activate membership.
-                    </p>
-                    
-                    <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
-                      <p style={{ fontSize: '0.875rem', color: '#111', fontWeight: 600 }}>Selected: {planName || 'Membership'}</p>
-                      <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
-                        Payment happens on the next step after your account is created.
+                    {MEMBERSHIP_PAYMENTS_ENABLED ? (
+                      <>
+                        <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+                          Create your account next, then choose your tier and subscribe to activate membership.
+                        </p>
+                        <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
+                          <p style={{ fontSize: '0.875rem', color: '#111', fontWeight: 600 }}>Selected: {planName || 'Membership'}</p>
+                          <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
+                            Payment happens on the next step after your account is created.
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+                        Create your free account. We save your details. There is no card and no plan to choose.
                       </p>
-                    </div>
+                    )}
                   </div>
                 )}
 
@@ -1863,7 +1869,9 @@ export default function SignupClient() {
             </p>
           ) : (
             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.25rem' }}>
-              Choose a membership package to see what&apos;s included.
+              {MEMBERSHIP_PAYMENTS_ENABLED
+                ? "Choose a membership package to see what's included."
+                : 'Registration is free for now. Your details are saved, and events are open once you have an account.'}
             </p>
           )}
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

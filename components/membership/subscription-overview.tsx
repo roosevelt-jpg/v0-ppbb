@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase'
 import { Card } from '@/components/ui/card'
 import { getMemberAssignedPlan, getPlanIncludedItems } from '@/lib/pricing-utils'
 import type { PricingPlan } from '@/lib/pricing-types'
+import { MEMBERSHIP_PAYMENTS_ENABLED } from '@/lib/membership-launch'
 
 function toDate(value: unknown): Date | null {
   if (!value) return null
@@ -261,6 +262,27 @@ export function MembershipSubscriptionOverview({
   }
 
   if (!user) return null
+
+  if (!MEMBERSHIP_PAYMENTS_ENABLED) {
+    return (
+      <Card className={`p-5 border border-[#e4e1da] bg-white space-y-2 ${className}`}>
+        <div className="flex items-start gap-3">
+          <Crown className="w-7 h-7 text-neutral-900 shrink-0" />
+          <div>
+            <h3 className="font-semibold text-neutral-900">
+              {activePlanName ? `${activePlanName} plan` : 'Free membership'}
+            </h3>
+            <p className="text-sm text-neutral-600 mt-1">
+              Access: <span className="font-medium text-neutral-900">Lifetime (no renewal)</span>
+            </p>
+            <p className="text-sm text-neutral-500 mt-1">
+              Membership is free for now. No card, invoices, or plan change.
+            </p>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   if (!activePlanName && !subscription && invoices.length === 0) {
     return (

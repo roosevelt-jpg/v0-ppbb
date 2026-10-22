@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Save, AlertCircle, CheckCircle, MapPin } from 'lucide-react'
+import { COUNTRY_OPTIONS } from '@/lib/countries'
 
 export default function LocationConfigPage() {
   const [config, setConfig] = React.useState<any>(null)
@@ -240,18 +241,14 @@ export default function LocationConfigPage() {
               onChange={handleInputChange}
               className="w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
             >
-              <option value="AE">United Arab Emirates (AE)</option>
-              <option value="US">United States (US)</option>
-              <option value="GB">United Kingdom (GB)</option>
-              <option value="CA">Canada (CA)</option>
-              <option value="AU">Australia (AU)</option>
-              <option value="IN">India (IN)</option>
-              <option value="SG">Singapore (SG)</option>
-              <option value="SA">Saudi Arabia (SA)</option>
-              <option value="KSA">Saudi Arabia (KSA)</option>
+              {COUNTRY_OPTIONS.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name} ({country.code})
+                </option>
+              ))}
             </select>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-              Default country to pre-select in signup form
+              Fallback country before Google replies. A picked place or current location replaces this with the country Google returns.
             </p>
           </div>
         </div>
