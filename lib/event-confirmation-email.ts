@@ -5,6 +5,8 @@
 
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 import { addUserNotification } from '@/lib/in-app-notifications'
+import { escapeEmailHtml } from '@/lib/email-template'
+import { eventDoorScanUrl } from '@/lib/event-check-in-link'
 
 function siteOrigin(): string {
   return (
@@ -12,6 +14,19 @@ function siteOrigin(): string {
     process.env.NEXT_PUBLIC_APP_URL ||
     'https://www.passive-blessings.com'
   ).replace(/\/$/, '')
+}
+
+function checkInQrHtml(token: string, checkInCode?: string | null): string {
+  const scanUrl = eventDoorScanUrl(token)
+  const img = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=16&data=${encodeURIComponent(scanUrl)}`
+  const codeLine = checkInCode
+    ? `<p style="margin:12px 0 0 0;font-size:13px;color:#333333;">If the image does not load, give this code at the door: <strong style="letter-spacing:0.04em;">${escapeEmailHtml(checkInCode)}</strong></p>`
+    : ''
+  return `<div style="margin:16px 0;padding:16px;background:#f7f6f2;border:1px solid #e4e1da;border-radius:12px;text-align:center;">
+    <p style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#111111;">Your check-in QR code</p>
+    <img src="${img}" width="220" height="220" alt="Check-in QR code" style="display:inline-block;background:#ffffff;border-radius:8px;" />
+    ${codeLine}
+  </div>`
 }
 
 function suggestEventHtml(): string {
@@ -25,6 +40,7 @@ export async function sendEventRegistrationEmail(opts: {
   eventUrl: string
   status: string
   checkInCode?: string | null
+  qrToken?: string | null
   waitlistPosition?: number | null
   userId?: string | null
 }): Promise<boolean> {
@@ -62,9 +78,14 @@ export async function sendEventRegistrationEmail(opts: {
       `Your registration for "${opts.eventTitle}" has been received.`,
       'Complete payment to confirm your spot. A separate payment confirmation email will be sent once payment is processed.'
     )
-  } else if (opts.checkInCode) {
-    lines.push(`Your check-in code: ${opts.checkInCode}`)
   }
+
+  const qrValue = String(opts.qrToken || opts.checkInCode || '').trim()
+  const includeQr =
+    Boolean(qrValue) &&
+    opts.status !== 'waitlisted' &&
+    opts.status !== 'pending' &&
+    opts.status !== 'pending_payment'
 
   if (opts.userId) {
     const path = (() => {
@@ -99,7 +120,10 @@ export async function sendEventRegistrationEmail(opts: {
       purpose,
       department: 'events',
       headline,
-      bodyHtml: paragraphs(...lines) + suggestEventHtml(),
+      bodyHtml:
+        paragraphs(...lines) +
+        (includeQr ? checkInQrHtml(qrValue, opts.checkInCode) : '') +
+        suggestEventHtml(),
       cta: { label: 'View event', url: opts.eventUrl },
     })
     return result.ok
@@ -178,6 +202,7 @@ export async function sendEventPaymentConfirmationEmail(opts: {
   amount: number
   currency?: string
   checkInCode?: string | null
+  qrToken?: string | null
   paymentReference?: string | null
   userId?: string | null
   startDate?: Date | null
@@ -201,9 +226,7 @@ export async function sendEventPaymentConfirmationEmail(opts: {
     'Payment received — your spot is secured.',
   ].filter(Boolean)
 
-  if (opts.checkInCode) {
-    lines.push(`Your check-in code: ${opts.checkInCode}`)
-  }
+  const paidQr = String(opts.qrToken || opts.checkInCode || '').trim()
 
   if (opts.userId) {
     const path = (() => {
@@ -242,7 +265,10 @@ export async function sendEventPaymentConfirmationEmail(opts: {
       purpose: 'Event payment confirmation',
       department: 'events',
       headline: 'You’re confirmed',
-      bodyHtml: paragraphs(...lines) + suggestEventHtml(),
+      bodyHtml:
+        paragraphs(...lines) +
+        (paidQr ? checkInQrHtml(paidQr, opts.checkInCode) : '') +
+        suggestEventHtml(),
       cta: { label: 'View event details', url: opts.eventUrl },
     })
     return result.ok

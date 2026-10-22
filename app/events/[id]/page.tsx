@@ -232,6 +232,8 @@ function EventDetailInner() {
         } else {
           router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
         }
+      } else if (json.registrationId && /already registered/i.test(String(json.error || ''))) {
+        router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
       } else {
         setError(json.error || 'Registration failed')
       }
@@ -242,6 +244,22 @@ function EventDetailInner() {
       setRegistering(false)
     }
   }
+
+  const autoRegisterStarted = React.useRef(false)
+  React.useEffect(() => {
+    if (searchParams.get('intent') !== 'register' || authLoading || !event || registering) return
+    const returnPath = `/events/${eventId}?intent=register`
+    if (!user) {
+      router.replace(`/login?returnUrl=${encodeURIComponent(returnPath)}`)
+      return
+    }
+    const selectedTicket = event.ticketTypes?.find((t) => t.id === ticketTypeId) || event.ticketTypes?.[0]
+    const price = selectedTicket?.price ?? event.price ?? 0
+    if (price > 0 || event.requireApproval === true) return
+    if (autoRegisterStarted.current) return
+    autoRegisterStarted.current = true
+    void handleRegister()
+  }, [authLoading, user, event, eventId, ticketTypeId, searchParams, registering, router])
 
   const autoPayOpened = React.useRef(false)
   React.useEffect(() => {

@@ -596,14 +596,14 @@ html.dark textarea::placeholder {
   }
 
   select option {
-    background-color: #ffffff;
-    color: var(--pb-color-foreground, #111111);
+    background-color: #e7e4de;
+    color: #111111;
   }
 
   select option:checked,
   select option:hover {
-    background-color: var(--pb-color-primary, #111111);
-    color: var(--pb-color-button-text, #ffffff);
+    background-color: #d9d5cd;
+    color: #111111;
   }
 
   label {
@@ -1615,4 +1615,36 @@ label.pb-dropzone-label .pb-dropzone-cta svg {
 
 .youtube-marquee-track:hover {
   animation-play-state: paused;
+}
+
+/* Signup: grey fields on a white card so each input is easy to see on a phone. */
+[data-signup-page] input:not([type='checkbox']):not([type='radio']),
+[data-signup-page] textarea,
+[data-signup-page] select {
+  background-color: #e7e4de !important;
+  color: #111111 !important;
+  border: 1px solid #d4d0c8 !important;
+  border-radius: 12px !important;
+  min-height: 48px;
+  font-size: 16px !important;
+  padding: 0.75rem 0.875rem !important;
+  box-shadow: none !important;
+}
+
+[data-signup-page] select option {
+  background-color: #e7e4de;
+  color: #111111;
+}
+
+[data-signup-page] select option:checked,
+[data-signup-page] select option:hover {
+  background-color: #d9d5cd;
+  color: #111111;
+}
+
+[data-signup-page] button.pb-form-nav-btn {
+  height: 48px !important;
+  min-height: 48px !important;
+  font-size: 16px !important;
+  border-radius: 12px !important;
 }

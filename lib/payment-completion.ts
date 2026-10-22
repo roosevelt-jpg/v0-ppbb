@@ -478,6 +478,7 @@ export async function completeEventTicketPayment(params: {
       amount,
       currency,
       checkInCode: (updated?.checkInCode as string) || null,
+      qrToken: (updated?.qrToken as string) || null,
       paymentReference: params.paymentReference,
       userId: userId || null,
       startDate,

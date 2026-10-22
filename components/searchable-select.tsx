@@ -83,28 +83,39 @@ export function SearchableSelect({
           )
           if (exact) onChange(exact.value)
         }}
-        className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+        className="w-full px-3 bg-[#e7e4de] border border-[#d4d0c8] rounded-xl text-base text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+        style={{ minHeight: 48 }}
       />
       {open && filtered.length > 0 && (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-neutral-200 bg-white shadow-lg"
+          className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-[#d4d0c8] bg-[#e7e4de] shadow-lg"
         >
           {filtered.map((option) => (
             <li key={option.value} role="option" aria-selected={option.value === value}>
-              <button
-                type="button"
-                className="w-full px-3 py-2 text-left text-sm hover:bg-neutral-100 text-neutral-900"
+              <div
+                role="button"
+                tabIndex={0}
+                className="w-full px-3 text-left text-base text-neutral-900"
+                style={{ minHeight: 48, display: 'flex', alignItems: 'center', backgroundColor: option.value === value ? '#d9d5cd' : '#e7e4de' }}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onChange(option.value)
                   setQuery(option.label)
                   setOpen(false)
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onChange(option.value)
+                    setQuery(option.label)
+                    setOpen(false)
+                  }
+                }}
               >
                 {option.label}
-              </button>
+              </div>
             </li>
           ))}
         </ul>

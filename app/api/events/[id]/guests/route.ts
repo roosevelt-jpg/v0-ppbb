@@ -187,6 +187,7 @@ export async function POST(request: NextRequest, context: Ctx) {
           amount,
           currency: String(data.currency || event.currency || 'AED'),
           checkInCode: code,
+          qrToken: token,
           paymentReference: `host_marked_${regId}`,
           userId: typeof data.userId === 'string' ? data.userId : null,
           startDate,

@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
                 amount,
                 currency,
                 checkInCode: (updated?.checkInCode as string) || null,
+                qrToken: (updated?.qrToken as string) || null,
                 paymentReference: session.id,
                 userId: session.metadata.userId || (reg.userId as string) || null,
               })

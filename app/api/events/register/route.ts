@@ -376,6 +376,50 @@ export async function POST(request: NextRequest) {
           },
         })
       }
+      const confirmed =
+        existingStatus === 'confirmed' &&
+        (existingPay === 'free' || existingPay === 'paid' || existingPay === '')
+      if (confirmed) {
+        let checkInCode = String(existingData.checkInCode || '')
+        let qrToken = String(existingData.qrToken || '')
+        if (!checkInCode || !qrToken) {
+          checkInCode = checkInCode || generateCheckInCode()
+          qrToken = qrToken || generateQrToken()
+          await existing.ref.update({
+            checkInCode,
+            qrToken,
+            updatedAt: Timestamp.now(),
+          })
+        }
+        const email = String(existingData.userEmail || userEmail || '')
+        if (email && !existingData.confirmationEmailSentAt) {
+          const origin =
+            request.headers.get('origin') ||
+            process.env.NEXT_PUBLIC_SITE_URL ||
+            'https://www.passive-blessings.com'
+          const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+          void sendEventRegistrationEmail({
+            to: email,
+            eventTitle: String(event.title || 'Event'),
+            eventUrl: `${origin}/events/${eventId}/confirmation?registrationId=${existing.id}`,
+            status: 'confirmed',
+            checkInCode,
+            qrToken,
+            userId,
+          }).then((ok) => {
+            if (ok) void existing.ref.update({ confirmationEmailSentAt: Timestamp.now() })
+          })
+        }
+        return NextResponse.json({
+          success: true,
+          alreadyRegistered: true,
+          registrationId: existing.id,
+          status: 'confirmed',
+          checkInCode,
+          qrToken,
+          registration: { id: existing.id, ...existingData, checkInCode, qrToken, status: 'confirmed' },
+        })
+      }
       return NextResponse.json(
         { success: false, error: 'You are already registered for this event', registrationId: existing.id },
         { status: 409 }
@@ -742,7 +786,12 @@ export async function POST(request: NextRequest) {
         eventUrl: `${origin}/events/${eventId}/confirmation?registrationId=${regRef.id}`,
         status: String(registration.status),
         checkInCode: registration.checkInCode as string | null,
+        qrToken: registration.qrToken as string | null,
         userId,
+      }).then((ok) => {
+        if (ok && registration.status === 'confirmed') {
+          void regRef.update({ confirmationEmailSentAt: Timestamp.now() })
+        }
       })
     }
 

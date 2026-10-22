@@ -81,7 +81,7 @@ export function HomeWeeklyDistribution() {
     )
   }, [])
 
-  const registerHref = event ? `/events/${event.id}` : '/signup'
+  const registerHref = event ? `/events/${event.id}?intent=register` : '/signup'
   const checkInHref = event ? `/events/${event.id}?intent=checkin` : '/login?returnUrl=%2Fevents'
 
   return (
@@ -95,7 +95,7 @@ export function HomeWeeklyDistribution() {
         </h1>
         <p className="mt-2 text-sm sm:text-base text-neutral-300 max-w-2xl">
           {event
-            ? `${format(event.date, 'EEEE d MMMM yyyy')}${event.location ? ` · ${event.location}` : ''}. Create a free account, register, then open your check-in code at the door.`
+            ? `${format(event.date, 'EEEE d MMMM yyyy')}${event.location ? ` · ${event.location}` : ''}. Members who tap Register are signed up immediately and emailed a check-in QR code.`
             : 'Create a free individual or business account. No payment. Then register for the distribution and check in.'}
         </p>
         <div className="mt-5 flex flex-col sm:flex-row gap-3">

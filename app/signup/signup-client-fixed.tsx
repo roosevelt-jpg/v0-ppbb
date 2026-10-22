@@ -984,7 +984,7 @@ export default function SignupClient() {
   }
 
   return (
-    <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+    <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f3f1ec' }}>
       <Dialog
         open={Boolean(activeIntent)}
         onOpenChange={(open) => {
@@ -1019,12 +1019,12 @@ export default function SignupClient() {
       </Dialog>
 
       {/* Header */}
-      <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
+      <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da', backgroundColor: '#ffffff' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
           <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#111111', height: '44px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
             <SiteLogo background="light" variant="navbar" href="/" />
           </div>
-          <Link href="/login" style={{ fontSize: '0.75rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>Sign In</Link>
+          <Link href="/login" style={{ fontSize: '0.95rem', fontWeight: 600, color: '#111111', textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center' }}>Sign In</Link>
         </div>
       </div>
 
@@ -1062,7 +1062,7 @@ export default function SignupClient() {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '16px', padding: '1.25rem 1rem', boxShadow: '0 8px 24px rgba(17,17,17,0.05)' }}>
               <div style={{ marginBottom: '1rem' }}>
                 {MEMBERSHIP_PAYMENTS_ENABLED && currentStep === 1 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
@@ -1256,7 +1256,7 @@ export default function SignupClient() {
                     ) : null}
 
                     {/* Name Fields */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>First Name *</label>
                         <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} placeholder="John" style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
