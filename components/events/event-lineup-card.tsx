@@ -39,6 +39,7 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
     .recurringSeriesBadge
 
   const detailsHref = `/events/${event.id}`
+  const registerHref = `/dashboard/events?intent=register&eventId=${event.id}`
 
   return (
     <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full w-full shadow-sm hover:shadow-md transition">
@@ -131,8 +132,8 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
 
         <div className="mt-auto flex flex-col gap-2 pt-1.5 sm:flex-row sm:gap-1">
           <Link
-            href={detailsHref}
-            className="inline-flex min-h-[40px] sm:min-h-0 sm:h-7 items-center justify-center flex-1 px-2 bg-black !text-white rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-800"
+            href={registerHref}
+            className="inline-flex min-h-[44px] sm:min-h-0 sm:h-8 items-center justify-center flex-1 px-2 bg-black !text-white rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-800"
           >
             {pageConfig.registerButtonLabel}
           </Link>

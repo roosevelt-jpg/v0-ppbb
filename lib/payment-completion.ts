@@ -419,6 +419,18 @@ export async function completeEventTicketPayment(params: {
     amountPaid: amount,
   })
 
+  if (reg.status !== 'pending' && typeof reg.userId === 'string' && reg.userId) {
+    const eventSnap = await db.collection('events').doc(params.eventId).get()
+    const { creditVolunteerHoursForEventAttendance } = await import('@/lib/volunteer-hours-from-event')
+    void creditVolunteerHoursForEventAttendance({
+      eventId: params.eventId,
+      event: eventSnap.data() || {},
+      registrationId: params.registrationId,
+      userId: reg.userId,
+      source: 'registration',
+    }).catch((err) => console.error('[payments] volunteer hours:', err))
+  }
+
   if (reg.status !== 'pending') {
     // Seat, ticket and coupon usage were already recorded when the guest first registered.
     const seatAlreadyCounted = reg.attendeeCounted === true

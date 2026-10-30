@@ -296,7 +296,7 @@ function ConfirmationInner() {
                     : isPendingPbPayment
                       ? 'Show this QR at the door. An admin scan confirms your payment and attendance.'
                       : isConfirmed
-                        ? 'Show this QR code at the door. An admin scans it with their phone camera.'
+                        ? 'You’re registered and your volunteer hours are added. Show this QR code if staff ask to see it.'
                         : 'We received your registration.'}
             </p>
 
@@ -308,7 +308,7 @@ function ConfirmationInner() {
                   <p className="mt-2 font-mono text-lg tracking-widest">{reg.checkInCode}</p>
                 ) : null}
                 <p className="mt-2 text-xs text-neutral-500">
-                  Keep this on your phone. At a volunteering session, the scan starts your hours.
+                  Keep this on your phone. Your hours are already counted from this registration.
                 </p>
               </div>
             ) : null}

@@ -97,28 +97,12 @@ function EventDetailInner() {
 
   React.useEffect(() => {
     if (searchParams.get('intent') !== 'checkin' || authLoading) return
-    const returnPath = `/events/${eventId}?intent=checkin`
+    const dest = `/dashboard/events?intent=checkin&eventId=${encodeURIComponent(eventId)}`
     if (!user) {
-      router.replace(`/login?returnUrl=${encodeURIComponent(returnPath)}`)
+      router.replace(`/login?returnUrl=${encodeURIComponent(dest)}`)
       return
     }
-    let cancelled = false
-    void (async () => {
-      const token = await auth.currentUser?.getIdToken().catch(() => null)
-      if (!token || cancelled) return
-      const res = await fetch(`/api/events/register?eventId=${encodeURIComponent(eventId)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const json = await res.json().catch(() => ({}))
-      if (cancelled) return
-      const registrationId = json?.registration?.id
-      if (registrationId) {
-        router.replace(`/events/${eventId}/confirmation?registrationId=${registrationId}`)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
+    router.replace(dest)
   }, [authLoading, user, eventId, router, searchParams])
 
   const loadEvent = async () => {
@@ -230,10 +214,10 @@ function EventDetailInner() {
         } else if (json.checkoutUrl) {
           window.location.href = json.checkoutUrl
         } else {
-          router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
+          router.push(`/dashboard/events?tab=registered&eventId=${encodeURIComponent(eventId)}`)
         }
       } else if (json.registrationId && /already registered/i.test(String(json.error || ''))) {
-        router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
+        router.push(`/dashboard/events?tab=registered&eventId=${encodeURIComponent(eventId)}`)
       } else {
         setError(json.error || 'Registration failed')
       }

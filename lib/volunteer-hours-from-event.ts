@@ -77,24 +77,50 @@ export function computeVolunteerHoursFromEvent(event: Record<string, unknown>): 
   return Math.round(capped * 4) / 4
 }
 
+function resolveVolunteerHours(event: Record<string, unknown>): { hours: number; source: string } {
+  const computed = computeVolunteerHoursFromEvent(event)
+  if (computed > 0) return { hours: computed, source: 'event_duration' }
+  const explicit = Number(event.volunteerHours ?? event.volunteerHoursCredit)
+  if (Number.isFinite(explicit) && explicit > 0) {
+    return { hours: Math.min(Math.round(explicit * 4) / 4, 24), source: 'event_setting' }
+  }
+  // Thursday distributions are often saved with a start time and no end time.
+  // A session still counts so registration itself can add hours.
+  return { hours: 2, source: 'default_session' }
+}
+
+async function markRegistrationHours(registrationId: string, hours: number) {
+  await getAdminDb().collection('eventRegistrations').doc(registrationId).set(
+    {
+      volunteerHoursCredited: true,
+      volunteerHoursAmount: hours,
+      volunteerHoursCreditedAt: Timestamp.now(),
+    },
+    { merge: true }
+  )
+}
+
 /**
- * Credit volunteer hours toward certificates when a guest is checked in
- * (or self-confirms attendance) at a charity / volunteer event.
- * Idempotent per registrationId; corrects prior flat/wrong hour credits using event duration.
+ * Credit volunteer hours toward certificates when a member registers for a
+ * charity / Thursday distribution, or when staff scan them at the door.
+ * Idempotent per registrationId. Scanning does not add the hours a second time.
  */
 export async function creditVolunteerHoursForEventAttendance(opts: {
   eventId: string
   event: Record<string, unknown>
   registrationId: string
   userId: string
+  source?: 'registration' | 'event_check_in'
 }): Promise<{ credited: boolean; hours: number; reason?: string; adjusted?: boolean; certificatesIssued?: string[] }> {
   const { eventId, event, registrationId, userId } = opts
   if (!userId) return { credited: false, hours: 0, reason: 'no_user' }
   if (!isCharityVolunteerEvent(event)) {
+    await markRegistrationHours(registrationId, 0)
     return { credited: false, hours: 0, reason: 'not_charity_event' }
   }
 
-  const hours = computeVolunteerHoursFromEvent(event)
+  const resolved = resolveVolunteerHours(event)
+  const hours = resolved.hours
   if (hours <= 0) {
     return { credited: false, hours: 0, reason: 'no_duration' }
   }
@@ -112,13 +138,14 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
     const prevHours = Number(doc.data().hours || 0)
     const delta = Math.round((hours - prevHours) * 4) / 4
     if (delta === 0) {
+      await markRegistrationHours(registrationId, prevHours)
       const certificatesIssued = await issueCertificates(userId)
       return { credited: false, hours: prevHours, reason: 'already_credited', certificatesIssued }
     }
 
     await doc.ref.update({
       hours,
-      hoursSource: 'event_duration',
+      hoursSource: resolved.source,
       hoursCorrectedAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     })
@@ -134,21 +161,26 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
       )
     }
 
+    await markRegistrationHours(registrationId, hours)
     const certificatesIssued = await issueCertificates(userId)
     return { credited: true, hours, reason: 'adjusted', adjusted: true, certificatesIssued }
   }
 
+  const recordSource = opts.source === 'registration' ? 'registration' : 'event_check_in'
   await db.collection('volunteerRecords').add({
     userId,
     eventId,
     eventTitle: String(event.title || 'Charity event'),
     registrationId,
     hours,
-    hoursSource: 'event_duration',
+    hoursSource: resolved.source,
     date: Timestamp.now(),
-    description: `Attendance confirmed at ${String(event.title || 'event')}`,
+    description:
+      recordSource === 'registration'
+        ? `Registered for ${String(event.title || 'event')}`
+        : `Attendance confirmed at ${String(event.title || 'event')}`,
     verified: true,
-    source: 'event_check_in',
+    source: recordSource,
     createdAt: Timestamp.now(),
   })
 
@@ -161,8 +193,80 @@ export async function creditVolunteerHoursForEventAttendance(opts: {
     { merge: true }
   )
 
+  await markRegistrationHours(registrationId, hours)
   const certificatesIssued = await issueCertificates(userId)
   return { credited: true, hours, certificatesIssued }
+}
+
+/** Add hours for every confirmed registration this member already has. */
+export async function backfillVolunteerHoursForUser(userId: string): Promise<number> {
+  if (!userId) return 0
+  const db = getAdminDb()
+  const regs = await db.collection('eventRegistrations').where('userId', '==', userId).get()
+  let credited = 0
+  for (const doc of regs.docs) {
+    const data = doc.data()
+    if (String(data.status || '') !== 'confirmed') continue
+    if (data.volunteerHoursCredited === true) continue
+    const eventId = String(data.eventId || '')
+    if (!eventId) continue
+    const eventSnap = await db.collection('events').doc(eventId).get()
+    if (!eventSnap.exists) continue
+    const result = await creditVolunteerHoursForEventAttendance({
+      eventId,
+      event: eventSnap.data() || {},
+      registrationId: doc.id,
+      userId,
+      source: 'registration',
+    })
+    if (result.credited || result.reason === 'already_credited' || result.reason === 'not_charity_event') {
+      credited += result.hours > 0 ? 1 : 0
+    }
+  }
+  return credited
+}
+
+/** Walk confirmed registrations in pages so past members receive hours without opening the site. */
+export async function backfillVolunteerHoursBatch(limit = 40): Promise<number> {
+  const db = getAdminDb()
+  const { FieldPath } = await import('firebase-admin/firestore')
+  const stateRef = db.collection('platformState').doc('volunteerHoursBackfill')
+  const state = await stateRef.get()
+  const cursor = typeof state.data()?.lastId === 'string' ? state.data()?.lastId : ''
+  let query = db.collection('eventRegistrations').orderBy(FieldPath.documentId()).limit(limit)
+  if (cursor) query = query.startAfter(cursor)
+  const snap = await query.get()
+  let processed = 0
+  let lastId = cursor
+  for (const doc of snap.docs) {
+    lastId = doc.id
+    const data = doc.data()
+    if (String(data.status || '') !== 'confirmed') continue
+    if (data.volunteerHoursCredited === true) continue
+    const userId = String(data.userId || '')
+    const eventId = String(data.eventId || '')
+    if (!userId || !eventId) {
+      await markRegistrationHours(doc.id, 0)
+      continue
+    }
+    const eventSnap = await db.collection('events').doc(eventId).get()
+    await creditVolunteerHoursForEventAttendance({
+      eventId,
+      event: eventSnap.data() || {},
+      registrationId: doc.id,
+      userId,
+      source: 'registration',
+    })
+    processed += 1
+  }
+  await stateRef.set(
+    {
+      lastId: snap.size < limit ? '' : lastId,
+      updatedAt: Timestamp.now(),
+    },
+    { merge: true }
+  )
+  return processed
 }
 
 async function issueCertificates(userId: string): Promise<string[]> {

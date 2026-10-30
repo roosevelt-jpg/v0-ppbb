@@ -3,6 +3,7 @@
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
@@ -26,6 +27,7 @@ import {
 } from '@/lib/member-dashboard'
 import { dedupeUpcomingEventsBySeries, getEventLocationLabel } from '@/lib/event-utils'
 import { EventBannerThumb } from '@/components/events/event-banner-thumb'
+import { eventDoorScanUrl } from '@/lib/event-check-in-link'
 
 function parseEventDate(value: unknown): Date | null {
   return parseFirestoreDate(value)
@@ -42,16 +44,9 @@ type RegisteredEvent = Event & {
   paymentStatus?: string | null
   checkedInAt?: Date | string | null
   attendanceConfirmedByMember?: boolean
+  checkInCode?: string | null
+  qrToken?: string | null
 }
-
-const ATTENDANCE_CONFIRM_STATUSES = new Set([
-  'confirmed',
-  'registered',
-  'approved',
-  'attending',
-  'pending',
-  'waitlisted',
-])
 
 function isAwaitingPayment(event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>) {
   return (
@@ -66,32 +61,31 @@ function isFullyRegistered(event: Pick<RegisteredEvent, 'registrationStatus' | '
   return status === 'confirmed' || status === 'pending' || status === 'waitlisted'
 }
 
-function canConfirmAttendanceStatus(
-  event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>
-) {
-  if (isAwaitingPayment(event)) return false
-  const status = String(event.registrationStatus || '')
-  return ATTENDANCE_CONFIRM_STATUSES.has(status) || isFullyRegistered(event)
-}
-
-function attendanceConfirmDisabledReason(
-  event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus' | 'startDate'>
-): string | null {
-  if (!canConfirmAttendanceStatus(event)) {
-    return 'Registration must be confirmed before you can confirm attendance.'
+function CheckInQr({ event }: { event: RegisteredEvent }) {
+  const token = event.qrToken || event.checkInCode || ''
+  if (!token) {
+    return (
+      <p className="px-4 pb-4 text-sm text-neutral-600">
+        Your check-in code is on the way. Refresh this page in a moment.
+      </p>
+    )
   }
-  const start = parseEventDate(event.startDate)
-  if (start) {
-    const earliest = start.getTime() - 2 * 60 * 60 * 1000
-    if (Date.now() < earliest) {
-      return 'Attendance can be confirmed from 2 hours before the event starts.'
-    }
-  }
-  return null
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(eventDoorScanUrl(token))}`
+  return (
+    <div className="px-4 pb-5 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={qrUrl} alt="Check-in QR code" className="mx-auto h-[220px] w-[220px] rounded-lg border border-neutral-200 bg-white" />
+      {event.checkInCode ? (
+        <p className="mt-2 font-mono text-lg tracking-widest text-neutral-900">{event.checkInCode}</p>
+      ) : null}
+      <p className="mt-1 text-xs text-neutral-500">Show this at the distribution. Your volunteer hours are already added.</p>
+    </div>
+  )
 }
 
 export default function MyEventsPage() {
   const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [browseEvents, setBrowseEvents] = React.useState<BrowseEvent[]>([])
   const [registeredEvents, setRegisteredEvents] = React.useState<RegisteredEvent[]>([])
   const [registrationByEventId, setRegistrationByEventId] = React.useState<
@@ -101,8 +95,9 @@ export default function MyEventsPage() {
   const [loadingRegistered, setLoadingRegistered] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [registeringId, setRegisteringId] = React.useState<string | null>(null)
-  const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState<'browse' | 'registered'>('browse')
+  const [openQrEventId, setOpenQrEventId] = React.useState<string | null>(null)
+  const intentStarted = React.useRef(false)
   const [payCoupon, setPayCoupon] = React.useState('')
   const [stripeCheckout, setStripeCheckout] = React.useState<{
     clientSecret: string
@@ -248,6 +243,66 @@ export default function MyEventsPage() {
     }
   }
 
+  React.useEffect(() => {
+    if (authLoading) return
+    const params = new URLSearchParams(window.location.search)
+    const intent = params.get('intent')
+    const eventId = params.get('eventId')
+    if (params.get('tab') === 'registered') setActiveTab('registered')
+    if (!intent || !eventId) return
+    if (!user?.id) {
+      router.replace(
+        `/login?returnUrl=${encodeURIComponent(`/dashboard/events?${params.toString()}`)}`
+      )
+      return
+    }
+    if (intentStarted.current) return
+    intentStarted.current = true
+    setActiveTab('registered')
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        const res = await fetch('/api/events/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            eventId,
+            userId: user.id,
+            userName: `${(user as User).firstName ?? ''} ${(user as User).lastName ?? ''}`.trim(),
+            userEmail: (user as User).email,
+            userGender: (user as User).gender,
+            registrationType: 'free',
+          }),
+        })
+        const json = await res.json()
+        if (json.embedded && json.clientSecret && json.publishableKey) {
+          setStripeCheckout({
+            clientSecret: json.clientSecret,
+            publishableKey: json.publishableKey,
+            registrationId: json.registrationId,
+            eventId,
+            amount: typeof json.amount === 'number' ? json.amount : undefined,
+            currency: json.currency,
+          })
+        } else if (json.checkoutUrl) {
+          window.location.href = json.checkoutUrl
+          return
+        } else if (!json.success && !json.registrationId) {
+          setError(json.error || 'Registration failed')
+        }
+        await loadRegistered()
+        if (intent === 'checkin') setOpenQrEventId(eventId)
+        router.replace('/dashboard/events?tab=registered')
+      } catch (err) {
+        console.error('[v0] Intent register error:', err)
+        setError('Registration failed. Please try again.')
+      }
+    })()
+  }, [authLoading, user, loadRegistered, router])
+
   const handleCancel = async (eventId: string) => {
     if (!confirm('Cancel registration for this event?')) return
     try {
@@ -259,35 +314,6 @@ export default function MyEventsPage() {
       if (json.success) loadRegistered()
     } catch (err) {
       console.error('[v0] Error canceling event:', err)
-    }
-  }
-
-  const handleConfirmAttendance = async (eventId: string) => {
-    setConfirmingId(eventId)
-    try {
-      const token = await auth.currentUser?.getIdToken()
-      if (!token) {
-        alert('Sign in required')
-        return
-      }
-      const res = await fetch(`/api/events/${eventId}/confirm-attendance`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        alert(json.error || json.message || 'Could not confirm attendance')
-        return
-      }
-      alert(json.message || 'Attendance confirmed')
-      // Clear before reload so the button never stays stuck on "Confirming…"
-      setConfirmingId(null)
-      await loadRegistered()
-    } catch (err) {
-      console.error('[v0] Confirm attendance error:', err)
-      alert(err instanceof Error ? err.message : 'Could not confirm attendance')
-    } finally {
-      setConfirmingId(null)
     }
   }
 
@@ -588,13 +614,19 @@ export default function MyEventsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 self-start">
-                    {event.registrationId && event.registrationStatus !== 'waitlisted' ? (
-                      <Link
-                        href={`/events/${event.id}/confirmation?registrationId=${event.registrationId}`}
-                        className="inline-flex items-center justify-center !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                    {event.registrationId &&
+                    event.registrationStatus !== 'waitlisted' &&
+                    event.registrationStatus !== 'pending' &&
+                    !isAwaitingPayment(event) ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenQrEventId((current) => (current === event.id ? null : event.id || null))
+                        }
+                        className="inline-flex items-center justify-center min-h-[44px] !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
                       >
-                        Show QR code
-                      </Link>
+                        {openQrEventId === event.id ? 'Hide QR code' : 'Check in'}
+                      </button>
                     ) : null}
                     {isAwaitingPayment(event) && event.id ? (
                       <button
@@ -606,29 +638,10 @@ export default function MyEventsPage() {
                         {registeringId === event.id ? 'Opening…' : 'Complete payment'}
                       </button>
                     ) : null}
-                    {isCharity ? (
-                      attended ? (
-                        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 px-3 py-2">
-                          <CheckCircle2 size={16} /> Hours credited
-                        </span>
-                      ) : (
-                        (() => {
-                          const disabledReason = attendanceConfirmDisabledReason(event)
-                          const isDisabled =
-                            confirmingId === event.id || Boolean(disabledReason)
-                          return (
-                            <button
-                              type="button"
-                              disabled={isDisabled}
-                              title={disabledReason || undefined}
-                              onClick={() => event.id && void handleConfirmAttendance(event.id)}
-                              className="!bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-                            >
-                              {confirmingId === event.id ? 'Confirming…' : 'Confirm attendance'}
-                            </button>
-                          )
-                        })()
-                      )
+                    {isCharity && event.registrationStatus === 'confirmed' ? (
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 px-3 py-2">
+                        <CheckCircle2 size={16} /> Hours added
+                      </span>
                     ) : null}
                     {canCancel && event.id ? (
                       <button
@@ -644,6 +657,9 @@ export default function MyEventsPage() {
                   </div>
                   </div>
                 </div>
+                {openQrEventId === event.id ? (
+                  <CheckInQr event={event} />
+                ) : null}
               </Card>
             )
           })}

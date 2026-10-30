@@ -170,7 +170,7 @@ export default function CertificatesPage() {
           <div>
             <h2 className="font-semibold text-neutral-900 dark:text-foreground">Issue certificates</h2>
             <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
-              Claim milestone certificates yourself based on your logged volunteer hours
+              When your volunteer hours reach the number an admin set, your certificate appears here to download. You can also issue it yourself.
               {hoursDisplay != null ? (
                 <>
                   {' '}
@@ -191,11 +191,11 @@ export default function CertificatesPage() {
           </p>
         ) : null}
         <p className="text-xs text-neutral-500 dark:text-muted-foreground">
-          Hours come from charity events you attend — confirm attendance under{' '}
-          <Link href="/dashboard/volunteering" className="underline font-medium text-neutral-800 dark:text-foreground">
-            Volunteering
+          Hours are added when you register for a Thursday distribution or other charity event. Open{' '}
+          <Link href="/dashboard/events" className="underline font-medium text-neutral-800 dark:text-foreground">
+            My Events
           </Link>{' '}
-          or My Events, then issue here.
+          and tap Check in to show your QR code.
         </p>
       </Card>
 

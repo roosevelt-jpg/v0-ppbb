@@ -410,9 +410,19 @@ export async function POST(request: NextRequest) {
             if (ok) void existing.ref.update({ confirmationEmailSentAt: Timestamp.now() })
           })
         }
-        return NextResponse.json({
-          success: true,
-          alreadyRegistered: true,
+    if (userId) {
+      const { creditVolunteerHoursForEventAttendance } = await import('@/lib/volunteer-hours-from-event')
+      void creditVolunteerHoursForEventAttendance({
+        eventId,
+        event: event as Record<string, unknown>,
+        registrationId: existing.id,
+        userId,
+        source: 'registration',
+      }).catch((err) => console.error('[events/register] volunteer hours:', err))
+    }
+    return NextResponse.json({
+      success: true,
+      alreadyRegistered: true,
           registrationId: existing.id,
           status: 'confirmed',
           checkInCode,
@@ -793,6 +803,17 @@ export async function POST(request: NextRequest) {
           void regRef.update({ confirmationEmailSentAt: Timestamp.now() })
         }
       })
+    }
+
+    if (registration.status === 'confirmed' && userId) {
+      const { creditVolunteerHoursForEventAttendance } = await import('@/lib/volunteer-hours-from-event')
+      void creditVolunteerHoursForEventAttendance({
+        eventId,
+        event: event as Record<string, unknown>,
+        registrationId: regRef.id,
+        userId,
+        source: 'registration',
+      }).catch((err) => console.error('[events/register] volunteer hours:', err))
     }
 
     return NextResponse.json({

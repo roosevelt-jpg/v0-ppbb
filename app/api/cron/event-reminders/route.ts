@@ -142,6 +142,9 @@ export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  void import('@/lib/volunteer-hours-from-event')
+    .then(({ backfillVolunteerHoursBatch }) => backfillVolunteerHoursBatch(40))
+    .catch((err) => console.error('[cron/event-reminders] volunteer hours:', err))
 
   try {
     const db = getAdminDb()

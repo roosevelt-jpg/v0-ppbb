@@ -72,12 +72,15 @@ export default function DashboardPage() {
           await Promise.allSettled([
             fetch(`/api/user/events?userId=${encodeURIComponent(user.id)}`).then(async (res) => {
               const json = await res.json()
-              if (!json.success) return [] as Record<string, unknown>[]
+              if (!json.success) return { events: [] as Record<string, unknown>[], volunteerHours: 0 }
               const raw = json.data
-              return (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(Boolean) as Record<
-                string,
-                unknown
-              >[]
+              return {
+                events: (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(Boolean) as Record<
+                  string,
+                  unknown
+                >[],
+                volunteerHours: Number(json.volunteerHours) || 0,
+              }
             }),
             getMemberApplications(user.id),
             fetchMemberDonationTotal(user.id),
@@ -86,8 +89,11 @@ export default function DashboardPage() {
 
         if (cancelled) return
 
-        const registeredEvents =
-          registeredResult.status === 'fulfilled' ? registeredResult.value : []
+        const registeredPayload =
+          registeredResult.status === 'fulfilled'
+            ? registeredResult.value
+            : { events: [] as Record<string, unknown>[], volunteerHours: 0 }
+        const registeredEvents = registeredPayload.events
 
         const registeredUpcoming = registeredEvents
           .filter((e) => {
@@ -104,10 +110,12 @@ export default function DashboardPage() {
 
         const apps = appsResult.status === 'fulfilled' ? (appsResult.value ?? []).slice(0, 3) : []
 
-        const profileHours =
+        const profileHours = Math.max(
           profileResult.status === 'fulfilled' && profileResult.value?.exists()
             ? Number(profileResult.value.data()?.volunteeredHours) || 0
-            : Number(member.volunteeredHours) || 0
+            : Number(member.volunteeredHours) || 0,
+          registeredPayload.volunteerHours
+        )
 
         if (profileResult.status === 'fulfilled' && profileResult.value?.exists()) {
           const profileData = profileResult.value.data()

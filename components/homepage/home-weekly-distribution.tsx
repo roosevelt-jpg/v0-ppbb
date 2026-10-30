@@ -81,8 +81,12 @@ export function HomeWeeklyDistribution() {
     )
   }, [])
 
-  const registerHref = event ? `/events/${event.id}?intent=register` : '/signup'
-  const checkInHref = event ? `/events/${event.id}?intent=checkin` : '/login?returnUrl=%2Fevents'
+  const registerHref = event
+    ? `/dashboard/events?intent=register&eventId=${event.id}`
+    : '/signup'
+  const checkInHref = event
+    ? `/dashboard/events?intent=checkin&eventId=${event.id}`
+    : '/login?returnUrl=%2Fdashboard%2Fevents'
 
   return (
     <section className="w-full bg-[#111111] text-white">
@@ -95,7 +99,7 @@ export function HomeWeeklyDistribution() {
         </h1>
         <p className="mt-2 text-sm sm:text-base text-neutral-300 max-w-2xl">
           {event
-            ? `${format(event.date, 'EEEE d MMMM yyyy')}${event.location ? ` · ${event.location}` : ''}. Members who tap Register are signed up immediately and emailed a check-in QR code.`
+            ? `${format(event.date, 'EEEE d MMMM yyyy')}${event.location ? ` · ${event.location}` : ''}. Tap Register, then open Check in on your events list to show your QR code.`
             : 'Create a free individual or business account. No payment. Then register for the distribution and check in.'}
         </p>
         <div className="mt-5 flex flex-col sm:flex-row gap-3">

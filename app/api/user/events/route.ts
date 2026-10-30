@@ -11,6 +11,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all registrations for this user
+    let volunteerHours = 0
+    try {
+      const { backfillVolunteerHoursForUser } = await import('@/lib/volunteer-hours-from-event')
+      await backfillVolunteerHoursForUser(userId)
+      const userSnap = await db.collection('users').doc(userId).get()
+      volunteerHours = Number(userSnap.data()?.volunteeredHours ?? userSnap.data()?.volunteerHours ?? 0)
+    } catch (err) {
+      console.error('[user/events] volunteer hour backfill:', err)
+    }
+
     const regsSnapshot = await db.collection('eventRegistrations').where('userId', '==', userId).get()
 
     const registrations = regsSnapshot.docs.map((docSnap) => ({
@@ -31,6 +41,8 @@ export async function GET(request: NextRequest) {
         ticketName?: string
         checkedInAt?: Date | string | null
         attendanceConfirmedByMember?: boolean
+        checkInCode?: string | null
+        qrToken?: string | null
       }) => {
         if (reg.status === 'cancelled' || reg.status === 'rejected') return null
         const eventDoc = await db.collection('events').doc(reg.eventId).get()
@@ -47,6 +59,8 @@ export async function GET(request: NextRequest) {
             ticketName: reg.ticketName || null,
             checkedInAt: reg.checkedInAt,
             attendanceConfirmedByMember: Boolean(reg.attendanceConfirmedByMember),
+            checkInCode: reg.checkInCode || null,
+            qrToken: reg.qrToken || null,
           }
         }
         return null
@@ -56,6 +70,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: events.filter(Boolean),
+      volunteerHours,
     })
   } catch (error) {
     console.error('[v0] Error fetching user events:', error)

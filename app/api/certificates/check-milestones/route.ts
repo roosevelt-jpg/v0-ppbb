@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const { backfillVolunteerHoursForUser } = await import('@/lib/volunteer-hours-from-event')
+    await backfillVolunteerHoursForUser(requestedUserId)
     const result = await evaluateCertificateMilestonesForUser(requestedUserId)
     return NextResponse.json({ success: true, data: result })
   } catch (error) {

@@ -66,8 +66,6 @@ export default function VolunteeringPage() {
   const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
-  const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
-  const [attendanceMessage, setAttendanceMessage] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (authLoading) return
@@ -310,29 +308,6 @@ export default function VolunteeringPage() {
     }
   }
 
-  const confirmAttendance = async (eventId: string) => {
-    setConfirmingId(eventId)
-    setAttendanceMessage(null)
-    try {
-      const token = await auth.currentUser?.getIdToken()
-      if (!token) throw new Error('Sign in required')
-      const res = await fetch(`/api/events/${eventId}/confirm-attendance`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(json.error || 'Could not confirm attendance')
-      setAttendanceMessage(String(json.message || 'Attendance confirmed.'))
-      setRegisteredCharity((prev) =>
-        prev.map((e) => (e.id === eventId ? { ...e, checkedInAt: new Date().toISOString() } : e))
-      )
-    } catch (err) {
-      setAttendanceMessage(err instanceof Error ? err.message : 'Could not confirm attendance')
-    } finally {
-      setConfirmingId(null)
-    }
-  }
-
   if (authLoading || loading) return <DashboardSkeleton />
   if (error) return <DashboardErrorState message={error} />
 
@@ -340,10 +315,10 @@ export default function VolunteeringPage() {
     <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
       <Card className="p-4 mb-6 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5">
         <p className="text-sm text-neutral-700 dark:text-neutral-200">
-          Confirm attendance at charity events to add hours equal to each event’s start–end time
-          toward your certificates, then{' '}
+          Hours are added automatically when you register for a Thursday distribution or charity event.
+          Once you reach the hours an admin set, your certificate is ready to download under{' '}
           <Link href="/dashboard/certificates" className="underline font-medium text-neutral-900 dark:text-foreground">
-            issue your certificate
+            Certificates
           </Link>
           .
         </p>
@@ -376,18 +351,12 @@ export default function VolunteeringPage() {
           Available Opportunities
         </DashboardTabButton>
         <DashboardTabButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')}>
-          Confirm attendance
+          My check-in
         </DashboardTabButton>
         <DashboardTabButton active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
           My Volunteer History
         </DashboardTabButton>
       </div>
-
-      {attendanceMessage ? (
-        <p className="mb-4 text-sm text-neutral-700 dark:text-neutral-200 bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg px-3 py-2">
-          {attendanceMessage}
-        </p>
-      ) : null}
 
       {activeTab === 'opportunities' ? (
         opportunities.length === 0 && charityEvents.length === 0 ? (
@@ -510,7 +479,7 @@ export default function VolunteeringPage() {
           <DashboardEmptyState
             icon={<CheckCircle2 className="w-12 h-12" />}
             title="No charity events registered"
-            description="Register for a charity event, attend, then confirm attendance here to earn certificate hours."
+            description="Register for a Thursday distribution or charity event. Your hours are added as soon as you register."
             action={
               <button
                 type="button"
@@ -524,7 +493,6 @@ export default function VolunteeringPage() {
         ) : (
           <div className="space-y-3">
             {registeredCharity.map((evt) => {
-              const attended = Boolean(evt.checkedInAt)
               return (
                 <Card key={evt.id} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
                   <div className="flex flex-col sm:flex-row">
@@ -548,35 +516,28 @@ export default function VolunteeringPage() {
                         {formatDate(evt.startDate as string | Date | undefined)}
                       </p>
                     </div>
-                    {attended ? (
+                    {evt.registrationStatus === 'confirmed' ? (
                       <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 shrink-0">
-                        <CheckCircle2 className="w-4 h-4" /> Hours credited
+                        <CheckCircle2 className="w-4 h-4" /> Hours added
                       </span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={confirmingId === evt.id || evt.registrationStatus !== 'confirmed'}
-                        onClick={() => void confirmAttendance(evt.id)}
-                        className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-                      >
-                        {confirmingId === evt.id
-                          ? 'Confirming…'
-                          : evt.registrationStatus !== 'confirmed'
-                            ? 'Pending approval'
-                            : 'Confirm attendance'}
-                      </button>
-                    )}
+                    ) : null}
+                    <Link
+                      href={`/dashboard/events?intent=checkin&eventId=${evt.id}`}
+                      className="inline-flex items-center justify-center !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold shrink-0"
+                    >
+                      Check in
+                    </Link>
                   </div>
                   </div>
                 </Card>
               )
             })}
             <p className="text-xs text-neutral-500 dark:text-muted-foreground pt-2">
-              After hours are credited, go to{' '}
+              Your certificate appears under{' '}
               <Link href="/dashboard/certificates" className="underline font-medium text-neutral-800 dark:text-foreground">
                 Certificates
               </Link>{' '}
-              and tap Issue my certificates.
+              once your hours reach the number an admin set. You can download it there.
             </p>
           </div>
         )
