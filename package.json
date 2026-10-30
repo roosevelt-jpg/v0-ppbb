@@ -14,7 +14,7 @@
     "ops:members-index": "node --env-file=.env.local scripts/deploy-members-index.mjs",
     "seed:businesses": "node --env-file=.env.local scripts/seed-businesses.mjs",
     "seed:shop": "node --env-file=.env.local scripts/seed-shop-merch.mjs",
-    "postinstall": "node scripts/patch-next-themes-react19.mjs"
+    "postinstall": "node scripts/patch-next-themes-react19.mjs && node scripts/patch-next-font-loader.js"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.4",
