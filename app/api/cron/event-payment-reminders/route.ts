@@ -8,9 +8,10 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-/** Cron runs hourly; a little slack so a slow previous run never skips an hour. */
-const REMINDER_INTERVAL_MS = 55 * 60 * 1000
-const LOOKAHEAD_DAYS = 60
+/** At most one nudge in the final day (hourly cron may miss a tick). */
+const REMINDER_INTERVAL_MS = 20 * 60 * 60 * 1000
+/** Only remind when the event starts within the next day. */
+const LOOKAHEAD_MS = 24 * 60 * 60 * 1000
 
 function toDate(value: unknown): Date | null {
   if (!value) return null
@@ -48,8 +49,8 @@ function siteUrl(): string {
 
 /**
  * Hourly job (AWS host crontab via .github/workflows/deploy.yml).
- * Guests who were let into a paid event without paying are moved to
- * awaiting payment and reminded every hour until they pay or the event starts.
+ * One day before a paid event, guests who still owe for their ticket are
+ * flagged and reminded once (not every hour for weeks ahead).
  * Auth: Authorization Bearer CRON_SECRET.
  */
 export async function GET(request: NextRequest) {
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
   try {
     const db = getAdminDb()
     const now = new Date()
-    const windowEnd = new Date(now.getTime() + LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000)
+    const windowEnd = new Date(now.getTime() + LOOKAHEAD_MS)
 
     const eventsSnap = await db
       .collection('events')
@@ -88,6 +89,8 @@ export async function GET(request: NextRequest) {
         const reg = doc.data() || {}
         const amount = unpaidRegistrationAmount(reg, event)
         if (!(amount > 0)) continue
+        const last = toDate(reg.lastPaymentReminderAt)
+        if (last && now.getTime() - last.getTime() < REMINDER_INTERVAL_MS) continue
         const updated = await flagRegistrationForPayment(doc.ref, reg, event, amount)
         flagged++
         due.push({ ref: doc.ref, reg: updated, amount })

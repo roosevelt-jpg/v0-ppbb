@@ -143,8 +143,8 @@ jobs:
           #   15 * * * *    event-reminders       — hourly: daily countdown
           #                                         (≤14 days, 09:00 Asia/Dubai),
           #                                         ~2 days before, ~6 hours before
-          #   45 * * * *    event-payment-reminders — hourly: unpaid guests of
-          #                                         paid events until they pay
+          #   45 * * * *    event-payment-reminders — hourly check; unpaid
+          #                                         guests reminded 1 day before
           {
             CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
             if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi

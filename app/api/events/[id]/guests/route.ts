@@ -324,7 +324,7 @@ export async function POST(request: NextRequest, context: Ctx) {
       success: true,
       requested,
       message: requested
-        ? `Payment requested from ${requested} guest(s). They were emailed and notified in the app, and will be reminded every hour until they pay.`
+        ? `Payment requested from ${requested} guest(s). They were emailed and notified in the app. Automatic reminders only go out one day before the event.`
         : 'No unpaid guests found for this event.',
     })
   }
