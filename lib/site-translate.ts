@@ -98,14 +98,21 @@ function findGoogleCombo(): HTMLSelectElement | null {
   return document.querySelector('.goog-te-combo') as HTMLSelectElement | null
 }
 
-/** Force Google Translate combo to a language (empty string = original English). */
-export function triggerGoogleTranslate(locale: string): boolean {
+/**
+ * Force Google Translate combo to a language (empty string = original English).
+ * When the combo already matches, skip unless `force` — re-dispatching walks the
+ * whole DOM and is what made Arabic feel laggy.
+ */
+export function triggerGoogleTranslate(
+  locale: string,
+  opts?: { force?: boolean }
+): boolean {
   const combo = findGoogleCombo()
   if (!combo) return false
 
   const target = locale === 'en' ? '' : GOOGLE_TRANSLATE_LANG[locale] || locale
   if (combo.value === target) {
-    // Still dispatch so newly mounted DOM gets picked up after SPA navigations
+    if (!opts?.force) return true
     combo.dispatchEvent(new Event('change'))
     return true
   }
@@ -115,6 +122,7 @@ export function triggerGoogleTranslate(locale: string): boolean {
 }
 
 let scriptLoading: Promise<void> | null = null
+let applyInFlight: Promise<void> | null = null
 
 export function ensureGoogleTranslateScript(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve()
@@ -169,25 +177,36 @@ export function ensureGoogleTranslateScript(): Promise<void> {
 }
 
 /** Apply preferred language to the live page (assumes TranslateElement is ready). */
-export async function applySiteTranslation(locale?: string): Promise<void> {
-  const code = locale || getPreferredLocale()
-  persistPreferredLocale(code)
+export async function applySiteTranslation(
+  locale?: string,
+  opts?: { refresh?: boolean }
+): Promise<void> {
+  // Wait out any in-flight apply so a route refresh is not dropped.
+  while (applyInFlight) await applyInFlight
 
-  if (code === 'en') {
-    setGoogTransCookie('en')
-    // Clearing translation requires a clean document — combo '' often works mid-session
-    triggerGoogleTranslate('en')
-    return
-  }
+  applyInFlight = (async () => {
+    const code = locale || getPreferredLocale()
+    persistPreferredLocale(code)
 
-  await ensureGoogleTranslateScript()
+    if (code === 'en') {
+      setGoogTransCookie('en')
+      triggerGoogleTranslate('en', { force: Boolean(opts?.refresh) })
+      return
+    }
 
-  // Wait briefly for combo to appear after init
-  for (let i = 0; i < 40; i++) {
-    if (triggerGoogleTranslate(code)) return
-    await new Promise((r) => setTimeout(r, 100))
-  }
-  console.warn('[site-translate] Google Translate combo not ready')
+    await ensureGoogleTranslateScript()
+
+    // Wait briefly for combo to appear after init
+    for (let i = 0; i < 40; i++) {
+      if (triggerGoogleTranslate(code, { force: Boolean(opts?.refresh) })) return
+      await new Promise((r) => setTimeout(r, 100))
+    }
+    console.warn('[site-translate] Google Translate combo not ready')
+  })().finally(() => {
+    applyInFlight = null
+  })
+
+  return applyInFlight
 }
 
 /**
