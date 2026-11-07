@@ -68,7 +68,21 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          # EC2 DNS / SSH can flake briefly; retry before failing the deploy.
+          ok=0
+          for i in 1 2 3 4 5; do
+            if ssh-keyscan -T 15 -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/tmp/ssh-keyscan.err; then
+              ok=1
+              break
+            fi
+            echo "ssh-keyscan attempt $i failed; retrying..."
+            sleep $((i * 3))
+          done
+          if [ "$ok" != "1" ]; then
+            echo "ssh-keyscan could not reach EC2 host" >&2
+            cat /tmp/ssh-keyscan.err >&2 || true
+            exit 1
+          fi
 
       - name: Upload artifact to EC2
         run: |
