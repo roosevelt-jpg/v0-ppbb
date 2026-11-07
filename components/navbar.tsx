@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { LanguageSwitcherWithFlags } from './language-switcher-flags'
@@ -21,17 +22,23 @@ import {
 import { ensureMenuPagesSeeded, subscribeToMenuPages } from '@/lib/cms-menu-live'
 import { getCmsPageHref, getCmsPageLabel } from '@/lib/cms-page-routes'
 
+const NAV_HREF_KEYS: Record<string, string> = {
+  '/about': 'about',
+  '/events': 'events',
+  '/marketplace': 'marketplace',
+  '/opportunities': 'opportunities',
+  '/communities': 'community',
+  '/partners': 'partners',
+  '/contact': 'contact',
+  '/impact': 'impact',
+  '/transparency': 'transparency',
+}
+
 function getDashboardHref(user: User | BusinessProfile): string {
   if (hasAdminAccess(user)) return '/admin'
   if (hasBusinessAccess(user) && user.role === 'business') return '/business/dashboard'
   if (user.role === 'sponsor') return '/sponsor'
   return '/dashboard'
-}
-
-function getDashboardLabel(user: User | BusinessProfile): string {
-  const href = getDashboardHref(user)
-  if (href.startsWith('/business')) return 'Business Dashboard'
-  return 'Dashboard'
 }
 
 function headerChildrenForLink(pages: Page[], href: string): Page[] {
@@ -42,11 +49,25 @@ function headerChildrenForLink(pages: Page[], href: string): Page[] {
 
 export function Navbar() {
   const router = useRouter()
+  const locale = useLocale()
+  const tNav = useTranslations('navigation')
+  const tHeader = useTranslations('header')
   const { user, loading: authLoading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navConfig, setNavConfig] = useState<NavigationConfig>(DEFAULT_NAVIGATION)
   const [headerPages, setHeaderPages] = useState<Page[]>([])
   const [signingOut, setSigningOut] = useState(false)
+
+  const labelForHref = (href: string, fallback: string) => {
+    if (locale === 'en') return fallback
+    const key = NAV_HREF_KEYS[href.replace(/\/$/, '') || '/']
+    if (!key) return fallback
+    try {
+      return tNav(key)
+    } catch {
+      return fallback
+    }
+  }
 
   useEffect(() => {
     return subscribeToNavigation(setNavConfig)
@@ -74,9 +95,12 @@ export function Navbar() {
     }
   }
 
+  const dashHref = user ? getDashboardHref(user as User | BusinessProfile) : '/dashboard'
   const dashboardLabel = user
-    ? getDashboardLabel(user as User | BusinessProfile)
-    : 'Dashboard'
+    ? dashHref.startsWith('/business')
+      ? tHeader('businessDashboard')
+      : tNav('dashboard')
+    : tNav('dashboard')
 
   const authActions = authLoading ? null : user ? (
     <div className="relative group">
@@ -91,18 +115,18 @@ export function Navbar() {
           href="/"
           className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
         >
-          Main website
+          {tHeader('mainWebsite')}
         </Link>
         {hasAdminAccess(user as User) ? (
           <Link href="/admin" className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800">
-            Admin console
+            {tHeader('adminConsole')}
           </Link>
         ) : null}
         <Link
           href={hasAdminAccess(user as User) ? '/dashboard' : getDashboardHref(user as User | BusinessProfile)}
           className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
         >
-          {hasAdminAccess(user as User) ? 'Member dashboard' : 'Open dashboard'}
+          {hasAdminAccess(user as User) ? tHeader('memberDashboard') : tHeader('openDashboard')}
         </Link>
         <button
           type="button"
@@ -110,7 +134,7 @@ export function Navbar() {
           disabled={signingOut}
           className="pb-compact-btn w-full text-left px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 !bg-transparent shadow-none min-h-0"
         >
-          {signingOut ? 'Signing out…' : 'Sign out'}
+          {signingOut ? tHeader('signingOut') : tHeader('signOut')}
         </button>
       </div>
     </div>
@@ -119,13 +143,14 @@ export function Navbar() {
       href="/login"
       className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
     >
-      {navConfig.signInLabel}
+      {locale === 'en' ? navConfig.signInLabel : tHeader('signIn')}
     </Link>
   )
 
   const renderNavItem = (item: { label: string; href: string }, mobile = false) => {
     const children = headerChildrenForLink(headerPages, item.href)
     const hasChildren = children.length > 0
+    const label = labelForHref(item.href, item.label)
 
     if (!hasChildren) {
       return (
@@ -139,7 +164,7 @@ export function Navbar() {
           }
           onClick={() => mobile && setMobileMenuOpen(false)}
         >
-          {item.label}
+          {label}
         </Link>
       )
     }
@@ -152,7 +177,7 @@ export function Navbar() {
             className="block px-4 py-3 text-sm font-semibold text-white font-body"
             onClick={() => setMobileMenuOpen(false)}
           >
-            {item.label}
+            {label}
           </Link>
           {children.map((child) => (
             <Link
@@ -176,12 +201,12 @@ export function Navbar() {
           className="pb-compact-btn inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body !bg-transparent !text-neutral-300 hover:!text-white shadow-none min-h-0 p-0 h-auto"
           aria-haspopup="menu"
         >
-          {item.label}
+          {label}
           <ChevronDown className="w-3.5 h-3.5" aria-hidden />
         </Link>
         <div
           role="menu"
-          className="absolute left-0 top-full pt-2 z-[100] min-w-[12rem] opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto transition-opacity"
+          className="absolute end-0 top-full pt-2 z-[100] min-w-[12rem] opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto transition-opacity"
         >
           <div className="rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg py-1">
             <Link
@@ -189,7 +214,7 @@ export function Navbar() {
               role="menuitem"
               className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-white"
             >
-              {item.label}
+              {label}
             </Link>
             {children.map((child) => (
               <Link

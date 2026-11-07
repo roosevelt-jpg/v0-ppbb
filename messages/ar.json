@@ -4,8 +4,18 @@
     "impact": "التأثير",
     "events": "الفعاليات",
     "marketplace": "السوق",
+    "opportunities": "الفرص",
+    "community": "المجتمع",
+    "partners": "الشركاء",
     "contact": "اتصل بنا",
-    "signIn": "تسجيل الدخول"
+    "signIn": "تسجيل الدخول",
+    "mainWebsite": "الموقع الرئيسي",
+    "adminConsole": "لوحة الإدارة",
+    "memberDashboard": "لوحة العضو",
+    "openDashboard": "فتح لوحة التحكم",
+    "businessDashboard": "لوحة أعمال",
+    "signOut": "تسجيل الخروج",
+    "signingOut": "جاري تسجيل الخروج…"
   },
   "navigation": {
     "home": "الرئيسية",
@@ -14,6 +24,9 @@
     "transparency": "الشفافية",
     "events": "الفعاليات",
     "marketplace": "السوق",
+    "opportunities": "الفرص",
+    "community": "المجتمع",
+    "partners": "الشركاء",
     "contact": "اتصل بنا",
     "dashboard": "لوحة التحكم",
     "admin": "الإدارة"

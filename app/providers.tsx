@@ -17,6 +17,7 @@ import {
   PREFERRED_LANGUAGE_KEY,
   SUPPORTED_LOCALE_CODES,
   isRtlLocale,
+  usesNativeLocale,
 } from '@/lib/supported-languages'
 import enMessages from '@/messages/en.json'
 
@@ -57,6 +58,7 @@ export function Providers({ children }: ProvidersProps) {
     document.documentElement.setAttribute('lang', resolved)
     document.documentElement.classList.toggle('pb-rtl', isRtlLocale(resolved))
     document.documentElement.classList.toggle('pb-translated', resolved !== 'en')
+    document.documentElement.classList.toggle('pb-native-locale', usesNativeLocale(resolved))
     setGoogTransCookie(resolved)
 
     if (resolved !== 'en') {

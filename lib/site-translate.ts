@@ -1,6 +1,12 @@
-/** Site-wide page translation via Google Translate (covers UI + CMS + dynamic text). */
+/** Site-wide page translation via Google Translate (non-native locales only). */
 
-import { PREFERRED_LANGUAGE_KEY, SUPPORTED_LOCALE_CODES, isRtlLocale } from '@/lib/supported-languages'
+import {
+  PREFERRED_LANGUAGE_KEY,
+  SUPPORTED_LOCALE_CODES,
+  isRtlLocale,
+  usesGooglePageTranslate,
+  usesNativeLocale,
+} from '@/lib/supported-languages'
 
 /** Map our locale codes → Google Translate language codes */
 export const GOOGLE_TRANSLATE_LANG: Record<string, string> = {
@@ -25,7 +31,7 @@ export const GOOGLE_TRANSLATE_LANG: Record<string, string> = {
 }
 
 export const GOOGLE_TRANSLATE_INCLUDED = Object.values(GOOGLE_TRANSLATE_LANG)
-  .filter((c, i, arr) => arr.indexOf(c) === i && c !== 'en')
+  .filter((c, i, arr) => arr.indexOf(c) === i && c !== 'en' && c !== 'ar' && c !== 'ur')
   .join(',')
 
 declare global {
@@ -56,23 +62,42 @@ function cookieDomain(): string | null {
   return `.${parts.slice(-2).join('.')}`
 }
 
+/** Clear every googtrans cookie variant so GT cannot auto-start. */
+export function clearGoogTransCookie() {
+  if (typeof document === 'undefined') return
+  const expire = ';expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  const paths = ['/', '']
+  for (const path of paths) {
+    const pathPart = path ? `;path=${path}` : ''
+    document.cookie = `googtrans=${expire}${pathPart}`
+    document.cookie = `googtrans=${expire}${pathPart};SameSite=Lax`
+    const domain = cookieDomain()
+    if (domain) {
+      document.cookie = `googtrans=${expire}${pathPart};domain=${domain}`
+      document.cookie = `googtrans=${expire}${pathPart};domain=${domain};SameSite=Lax`
+    }
+  }
+}
+
 /** Read / write googtrans cookie Google Translate uses. */
 export function setGoogTransCookie(locale: string) {
   if (typeof document === 'undefined') return
+  // Native Arabic/Urdu must never leave a GT cookie behind — that alone
+  // restarts the laggy full-page rewriter on the next visit.
+  if (!usesGooglePageTranslate(locale)) {
+    clearGoogTransCookie()
+    return
+  }
+
   const gt = GOOGLE_TRANSLATE_LANG[locale] || locale
-  const value = !locale || locale === 'en' ? '' : `/en/${gt}`
+  const value = `/en/${gt}`
 
-  const expire = value
-    ? ''
-    : ';expires=Thu, 01 Jan 1970 00:00:00 GMT'
-
-  document.cookie = `googtrans=${value}${expire};path=/`
+  document.cookie = `googtrans=${value};path=/`
   const domain = cookieDomain()
   if (domain) {
-    document.cookie = `googtrans=${value}${expire};path=/;domain=${domain}`
+    document.cookie = `googtrans=${value};path=/;domain=${domain}`
   }
-  // Some browsers also use googtrans without path variants
-  document.cookie = `googtrans=${value}${expire};path=/;SameSite=Lax`
+  document.cookie = `googtrans=${value};path=/;SameSite=Lax`
 }
 
 export function getPreferredLocale(): string {
@@ -92,6 +117,7 @@ export function persistPreferredLocale(locale: string) {
   document.documentElement.setAttribute('lang', code)
   document.documentElement.classList.toggle('pb-rtl', isRtlLocale(code))
   document.documentElement.classList.toggle('pb-translated', code !== 'en')
+  document.documentElement.classList.toggle('pb-native-locale', usesNativeLocale(code))
 }
 
 function findGoogleCombo(): HTMLSelectElement | null {
@@ -101,12 +127,13 @@ function findGoogleCombo(): HTMLSelectElement | null {
 /**
  * Force Google Translate combo to a language (empty string = original English).
  * When the combo already matches, skip unless `force` — re-dispatching walks the
- * whole DOM and is what made Arabic feel laggy.
+ * whole DOM and is what made translated pages feel laggy.
  */
 export function triggerGoogleTranslate(
   locale: string,
   opts?: { force?: boolean }
 ): boolean {
+  if (!usesGooglePageTranslate(locale) && locale !== 'en') return true
   const combo = findGoogleCombo()
   if (!combo) return false
 
@@ -176,27 +203,25 @@ export function ensureGoogleTranslateScript(): Promise<void> {
   return scriptLoading
 }
 
-/** Apply preferred language to the live page (assumes TranslateElement is ready). */
+/** Apply preferred language to the live page. */
 export async function applySiteTranslation(
   locale?: string,
   opts?: { refresh?: boolean }
 ): Promise<void> {
-  // Wait out any in-flight apply so a route refresh is not dropped.
   while (applyInFlight) await applyInFlight
 
   applyInFlight = (async () => {
     const code = locale || getPreferredLocale()
     persistPreferredLocale(code)
 
-    if (code === 'en') {
-      setGoogTransCookie('en')
-      triggerGoogleTranslate('en', { force: Boolean(opts?.refresh) })
+    // Arabic / Urdu: native RTL only — never start Google Translate.
+    if (!usesGooglePageTranslate(code)) {
+      clearGoogTransCookie()
       return
     }
 
     await ensureGoogleTranslateScript()
 
-    // Wait briefly for combo to appear after init
     for (let i = 0; i < 40; i++) {
       if (triggerGoogleTranslate(code, { force: Boolean(opts?.refresh) })) return
       await new Promise((r) => setTimeout(r, 100))
@@ -211,10 +236,11 @@ export async function applySiteTranslation(
 
 /**
  * Switch language from the UI selector.
- * Sets cookies + preference, then reloads so Google Translate applies cleanly to the full DOM.
+ * Sets cookies + preference, then reloads so layout/dir and messages apply cleanly.
  */
 export function switchSiteLanguage(locale: string) {
   persistPreferredLocale(locale)
-  setGoogTransCookie(locale)
+  if (!usesGooglePageTranslate(locale)) clearGoogTransCookie()
+  else setGoogTransCookie(locale)
   window.location.reload()
 }

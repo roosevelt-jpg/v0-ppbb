@@ -2,17 +2,18 @@
 
 import React, { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { usesGooglePageTranslate } from '@/lib/supported-languages'
 import {
   applySiteTranslation,
+  clearGoogTransCookie,
   ensureGoogleTranslateScript,
   getPreferredLocale,
   setGoogTransCookie,
 } from '@/lib/site-translate'
 
 /**
- * Mounts a hidden Google Translate widget and keeps the preferred language
- * after client-side navigations. Does not watch the whole DOM — re-running
- * Google Translate on every mutation made Arabic (and other languages) lag.
+ * For French/Spanish/etc. mounts a hidden Google Translate widget.
+ * Arabic and Urdu intentionally skip it — GT rewrites the React DOM and lags.
  */
 export function SiteTranslator() {
   const pathname = usePathname()
@@ -26,7 +27,8 @@ export function SiteTranslator() {
       const locale = getPreferredLocale()
       setGoogTransCookie(locale)
 
-      if (locale === 'en') {
+      if (!usesGooglePageTranslate(locale)) {
+        clearGoogTransCookie()
         readyRef.current = true
         return
       }
@@ -47,7 +49,7 @@ export function SiteTranslator() {
     }
   }, [])
 
-  // After SPA route changes, re-trigger translation once the new page settles
+  // Re-apply only for machine-translated locales after SPA navigations
   useEffect(() => {
     if (lastPathRef.current === null) {
       lastPathRef.current = pathname
@@ -57,7 +59,7 @@ export function SiteTranslator() {
     lastPathRef.current = pathname
 
     const locale = getPreferredLocale()
-    if (locale === 'en' || !readyRef.current) return
+    if (!usesGooglePageTranslate(locale) || !readyRef.current) return
 
     const t = window.setTimeout(() => {
       void applySiteTranslation(locale, { refresh: true })

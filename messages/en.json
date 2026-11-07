@@ -4,9 +4,18 @@
     "impact": "Impact",
     "events": "Events",
     "marketplace": "Marketplace",
+    "opportunities": "Opportunities",
+    "community": "Community",
     "partners": "Partners",
     "contact": "Contact",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "mainWebsite": "Main website",
+    "adminConsole": "Admin console",
+    "memberDashboard": "Member dashboard",
+    "openDashboard": "Open dashboard",
+    "businessDashboard": "Business Dashboard",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…"
   },
   "navigation": {
     "home": "Home",
@@ -15,6 +24,8 @@
     "transparency": "Transparency",
     "events": "Events",
     "marketplace": "Marketplace",
+    "opportunities": "Opportunities",
+    "community": "Community",
     "partners": "Partners",
     "contact": "Contact",
     "dashboard": "Dashboard",

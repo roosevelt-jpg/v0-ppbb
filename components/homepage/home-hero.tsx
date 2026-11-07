@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
 import {
   subscribeToHomepage,
   DEFAULT_HOMEPAGE,
@@ -59,6 +60,8 @@ function HeroSkeleton() {
 }
 
 export function HomeHero() {
+  const locale = useLocale()
+  const tHero = useTranslations('homepage.hero')
   const [config, setConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE)
   const [ready, setReady] = useState(false)
 
@@ -73,6 +76,8 @@ export function HomeHero() {
   if (!ready) return <HeroSkeleton />
 
   const { hero } = config
+  const headline = locale === 'ar' ? tHero('title') : hero.headline
+  const body = locale === 'ar' ? tHero('subtitle') : hero.body
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10 bg-background overflow-x-hidden">
@@ -80,10 +85,10 @@ export function HomeHero() {
         <div className="order-2 lg:order-1 lg:col-span-5 min-w-0 flex flex-col lg:h-full">
           <p className="eyebrow text-muted-foreground mb-2 break-words">{hero.eyebrow}</p>
           <h1 className="font-headline text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[36rem]">
-            {hero.headline}
+            {headline}
           </h1>
           <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 w-full max-w-[36rem] break-words">
-            {hero.body}
+            {body}
           </p>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-auto">
             {hero.buttons.map((button, i) => (

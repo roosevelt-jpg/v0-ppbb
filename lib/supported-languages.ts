@@ -37,6 +37,19 @@ export function isRtlLocale(code: string): boolean {
   return SUPPORTED_LANGUAGES.some((l) => l.code === code && l.rtl)
 }
 
+/**
+ * Arabic/Urdu use native RTL + message files. Google Translate rewrites the
+ * whole React DOM and stays laggy no matter how we throttle it.
+ */
+export function usesNativeLocale(code: string): boolean {
+  return code === 'ar' || code === 'ur'
+}
+
+/** Machine page translate (Google) — never for native locales. */
+export function usesGooglePageTranslate(code: string): boolean {
+  return Boolean(code) && code !== 'en' && !usesNativeLocale(code)
+}
+
 export function filterLanguages(query: string, languages = SUPPORTED_LANGUAGES): SupportedLanguage[] {
   const q = query.trim().toLowerCase()
   if (!q) return languages
